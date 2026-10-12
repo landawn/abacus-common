@@ -258,7 +258,8 @@ public class MutableBooleanTypeTest extends TestBase {
 
         // Control-character padding keeps working: dropping it is what String.trim() did, and parseBoolean still does.
         Assertions.assertTrue(mutableBooleanType.valueOf(ctrl + "true" + ctrl).getValue());
-        Assertions.assertFalse(mutableBooleanType.valueOf(ctrl).getValue());
+        // Text that is nothing but control characters strips to "", which is not boolean text (code review 2026-10-05).
+        Assertions.assertThrows(IllegalArgumentException.class, () -> mutableBooleanType.valueOf(ctrl));
 
         // The plain Boolean handler reads the same text the same way.
         assertEquals(Boolean.TRUE, Type.of(Boolean.class).valueOf(wide + "true"));

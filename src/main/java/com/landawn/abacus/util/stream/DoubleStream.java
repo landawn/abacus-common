@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
@@ -57,6 +58,7 @@ import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FD;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IndexedDouble;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
@@ -1126,6 +1128,9 @@ public abstract class DoubleStream
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers the values emitted for one input element before exposing them downstream.
      *
@@ -3271,11 +3276,15 @@ public abstract class DoubleStream
      * Returns a DoubleStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
      * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
      * the supplier so the supplied stream can be closed.
      *
-     * <p>It is equivalent to {@code Stream.just(supplier).flatMapToDouble(it -> it.get())}.
+     * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
+     * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
+     * not detected (see {@link Stream#defer(Supplier)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3301,10 +3310,22 @@ public abstract class DoubleStream
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<DoubleStream> s = Fn.memoize(supplier);
-        return DoubleStream.of(DoubleIterator.defer(() -> {
+        // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
+        final Holder<DoubleStream> deferred = new Holder<>();
+
+        final DoubleStream result = DoubleStream.of(DoubleIterator.defer(() -> {
             final DoubleStream source = s.get();
+
+            if (source != null && source == deferred.value()) {
+                throw new IllegalStateException("Stream supplier returned the deferred stream itself");
+            }
+
             return source == null ? DoubleIterator.empty() : source.iteratorEx();
         })).onClose(newCloseHandler(s));
+
+        deferred.setValue(result);
+
+        return result;
     }
 
     /**
@@ -3858,6 +3879,25 @@ public abstract class DoubleStream
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextDouble() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
+            }
         };
 
         return of(iter);
@@ -3920,6 +3960,25 @@ public abstract class DoubleStream
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextDouble() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
             }
         };
     }
@@ -4008,6 +4067,25 @@ public abstract class DoubleStream
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextDouble() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public DoubleList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final double[] result = new double[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextDouble();
+                    }
+
+                    return DoubleList.of(result);
+                }
             };
 
         } else {
@@ -4038,6 +4116,25 @@ public abstract class DoubleStream
                     } else {
                         return a[rowNum][colNum++];
                     }
+                }
+
+                // The remaining size is known: fill an exactly sized list with the same nextDouble() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public DoubleList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final double[] result = new double[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextDouble();
+                    }
+
+                    return DoubleList.of(result);
                 }
             };
         }
@@ -4818,7 +4915,7 @@ public abstract class DoubleStream
         final List<? extends DoubleStream> sources = new ArrayList<>(streams);
 
         return new IteratorDoubleStream(new DoubleIteratorEx() { //NOSONAR
-            private final Iterator<? extends DoubleStream> iterators = sources.iterator();
+            private final ListIterator<? extends DoubleStream> iterators = sources.listIterator();
             private DoubleStream cur;
             private DoubleIterator iter;
 
@@ -4826,7 +4923,13 @@ public abstract class DoubleStream
             public boolean hasNext() {
                 while ((iter == null || !iter.hasNext()) && iterators.hasNext()) {
                     if (cur != null) {
+                        // The slot is taken before close(): a close handler that re-enters this iterator moves it on.
+                        final int index = iterators.previousIndex();
                         cur.close();
+                        // Drop the closed input from the private snapshot (the close handler skips a closed stream anyway):
+                        // otherwise it keeps whatever the exhausted input still references, such as the array of a
+                        // sorted() input, reachable until this stream itself is unreachable.
+                        sources.set(index, null);
                     }
 
                     cur = iterators.next();
@@ -4954,6 +5057,30 @@ public abstract class DoubleStream
 
                 return zipFunction.applyAsDouble(a[cursor], b[cursor++]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextDouble() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return DoubleList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
+            }
         });
     }
 
@@ -5005,6 +5132,30 @@ public abstract class DoubleStream
                 }
 
                 return zipFunction.applyAsDouble(a[cursor], b[cursor], c[cursor++]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextDouble() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return DoubleList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
             }
         });
     }
@@ -5249,6 +5400,30 @@ public abstract class DoubleStream
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextDouble() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return DoubleList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
+            }
         });
     }
 
@@ -5308,6 +5483,30 @@ public abstract class DoubleStream
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextDouble() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return DoubleList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
             }
         });
     }
@@ -5602,6 +5801,30 @@ public abstract class DoubleStream
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextDouble() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public DoubleList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final double[] result = new double[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return DoubleList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextDouble();
+                }
+
+                return DoubleList.of(result);
+            }
         });
     }
 
@@ -5688,7 +5911,8 @@ public abstract class DoubleStream
 
             @Override
             public boolean hasNext() {
-                return iterA.hasNext() || iterB.hasNext() || hasNextA || hasNextB;
+                // A buffered head already proves availability; probing its source can evaluate an unneeded tail.
+                return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
             @Override

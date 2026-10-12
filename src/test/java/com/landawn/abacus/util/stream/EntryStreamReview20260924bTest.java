@@ -93,8 +93,7 @@ public class EntryStreamReview20260924bTest extends TestBase {
         assertEquals(Map.of("b", 2), EntryStream.of("a", 1, "b", 2, "a", 3).groupBy(Fn.key(), Fn.value(), toNull).toMap());
 
         // A third "a" re-creates the key, after the keys already present in an insertion-ordered map.
-        assertEquals(Arrays.asList("b", "a"),
-                EntryStream.of("a", 1, "b", 2, "a", 3, "a", 4).groupBy(toNull, LinkedHashMap::new).keys().toList());
+        assertEquals(Arrays.asList("b", "a"), EntryStream.of("a", 1, "b", 2, "a", 3, "a", 4).groupBy(toNull, LinkedHashMap::new).keys().toList());
         assertEquals(Arrays.asList(new SimpleImmutableEntry<>("b", 2), new SimpleImmutableEntry<>("a", 4)),
                 EntryStream.of("a", 1, "b", 2, "a", 3, "a", 4).groupBy(Fn.key(), Fn.value(), toNull, Suppliers.ofLinkedHashMap()).toList());
     }
@@ -161,8 +160,7 @@ public class EntryStreamReview20260924bTest extends TestBase {
                 inverted().filterByKey(k -> true).sortedByKey(Comparator.naturalOrder()).map(EntryStreamReview20260924bTest::copy).toList());
         assertEquals(E2C, copy(inverted().filterByKey(k -> true).minByKey(Comparator.naturalOrder()).get())); // correct: 1=b
         assertEquals(E2C, copy(inverted().filterByValue(v -> true).max(Map.Entry.comparingByKey()).get())); // correct: 3=a
-        assertEquals(Arrays.asList(E2C, E2C, E2C),
-                inverted().filterByKey(k -> true).reversed().map(EntryStreamReview20260924bTest::copy).toList());
+        assertEquals(Arrays.asList(E2C, E2C, E2C), inverted().filterByKey(k -> true).reversed().map(EntryStreamReview20260924bTest::copy).toList());
         assertEquals(Arrays.asList(E2C, E2C, E2C), inverted().filterByKey(k -> true).toList().stream().map(EntryStreamReview20260924bTest::copy).toList());
         assertEquals(Arrays.asList(E2C, E2C, E2C), inverted().filter((k, v) -> true).toList().stream().map(EntryStreamReview20260924bTest::copy).toList());
         assertEquals(Arrays.asList(E2C, E2C, E2C), inverted().peek((k, v) -> {
@@ -289,8 +287,7 @@ public class EntryStreamReview20260924bTest extends TestBase {
         // The lambdas the notes recommend in place of Stream::of / Arrays::asList.
         assertEquals(expected, EntryStream.of(arrays).flatMapValue(v -> Stream.of(v)).toList());
         assertEquals(expected, EntryStream.of(arrays).flatmapValue(v -> Arrays.asList(v)).toList());
-        assertEquals(Arrays.asList(Arrays.asList("1", "2"), Arrays.asList("😀")),
-                EntryStream.of(arrays).mapValue(x -> Arrays.asList(x)).values().toList());
+        assertEquals(Arrays.asList(Arrays.asList("1", "2"), Arrays.asList("😀")), EntryStream.of(arrays).mapValue(x -> Arrays.asList(x)).values().toList());
 
         // References to methods without a two-argument form compile and bind to the Function overload.
         assertEquals(Arrays.asList(new SimpleImmutableEntry<>("a", 1)), EntryStream.of("a", 1).flatMapKey(Stream::ofNullable).toList());
@@ -409,10 +406,10 @@ public class EntryStreamReview20260924bTest extends TestBase {
         final List<Function<EntryStream<String, Integer>, Object>> terminals = Arrays.asList( //
                 s -> s.toCollection(() -> null), //
                 s -> s.toMultiset(() -> null), //
-                s -> s.toMap(() -> (Map<String, Integer>) null), //
-                s -> s.toMap((x, y) -> x, () -> (Map<String, Integer>) null), //
-                s -> s.toMultimap(() -> (ListMultimap<String, Integer>) null), //
-                s -> s.groupTo(() -> (Map<String, List<Integer>>) null));
+                s -> s.toMap(() -> null), //
+                s -> s.toMap((x, y) -> x, () -> null), //
+                s -> s.toMultimap(() -> null), //
+                s -> s.groupTo(() -> null));
 
         for (final boolean empty : new boolean[] { true, false }) {
             for (final boolean parallel : new boolean[] { false, true }) {

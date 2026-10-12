@@ -79,13 +79,21 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
      * Returns {@code null} for a {@code null}, empty, or blank input string.
      * Returns an empty array for the string {@code "[]"}.
      *
+     * <p>Every other element is read by the {@code Boolean} element type: {@code 1}, {@code y}, {@code Y} and
+     * {@code true} (any case) are {@code true}; {@code 0}, {@code -1}, {@code n}, {@code N} and {@code false} (any case)
+     * are {@code false}; any other element ({@code 2}, {@code 1.0}, {@code yes}) is rejected. An element enclosed in a
+     * matching pair of double or single quotes is read by its content, with its escape sequences decoded, as the JSON
+     * parser reads a string token, so {@code "[\"true\", '1', -1, null]"} yields {@code {true, true, false, null}}; an
+     * empty or blank quoted element is a {@code null} element, the default.</p>
+     *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}, empty, or blank
      * @return the parsed {@code Boolean[]}, or {@code null} if {@code str} is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, a quoted element holds a
+     *         malformed escape sequence, or an element is none of the accepted texts.
      * @see #valueOf(Object)
      * @see #stringOf(Boolean[])
      */
@@ -104,11 +112,11 @@ public final class BooleanArrayType extends ObjectArrayType<Boolean> {
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
-                    array[i] = null;
-                } else {
-                    array[i] = elementType.valueOf(elements[i]);
-                }
+                // split preserves an element's surrounding quotes: a JSON string token is read by its unescaped content, as
+                // boolean[] (PrimitiveBooleanArrayType) and the JSON parser read it. The shared jsonElementContent does the
+                // decoding (code review 2026-10-05): the unquoted literal null becomes null and an empty quoted element its
+                // empty content, both of which the element type reads as its default, a null element.
+                array[i] = elementType.valueOf(jsonElementContent(elements[i], true));
             }
         }
 

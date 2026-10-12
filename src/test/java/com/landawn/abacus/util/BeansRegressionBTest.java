@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.JsonXmlField;
 
 /**
@@ -208,6 +209,9 @@ public class BeansRegressionBTest extends TestBase {
 
     public static final AtomicInteger B2_READS = new AtomicInteger();
 
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static class B2Counting {
         private String a = "A";
         private String b = "B";

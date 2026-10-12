@@ -107,6 +107,12 @@ public final class DoubleArrayType extends ObjectArrayType<Double> {
             return N.EMPTY_DOUBLE_OBJ_ARRAY;
         }
 
+        final Double[] decimalArray = (Double[]) parseNumericArray(str, elementType, Double.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Double[] array = new Double[len];

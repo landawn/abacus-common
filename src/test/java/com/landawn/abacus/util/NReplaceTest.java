@@ -312,7 +312,6 @@ public class NReplaceTest extends NTestSupport {
         assertThrows(ArithmeticException.class, () -> N.replaceRange(huge, 0, 0, new byte[10]));
     }
 
-
     @Test
     public void testReplaceAll_floatDoubleSignedZeroAndNaN() {
         float[] floats = { 0.0f, -0.0f, Float.NaN, 1.0f };

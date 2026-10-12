@@ -508,7 +508,7 @@ public class EnumTypeTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> type.valueOf(""));
         assertNull(type.valueOf((String) null));
         assertNull(type.valueOf("null"));
-        assertEquals(JacksonValueOnly.A, type.valueOf((Object) JacksonValueOnly.A));
+        assertEquals(JacksonValueOnly.A, type.valueOf(JacksonValueOnly.A));
 
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> type.valueOf("zzz"));
         assertTrue(e.getMessage().contains("zzz"));
@@ -658,4 +658,32 @@ public class EnumTypeTest extends TestBase {
         // ... and so does a plain, unannotated enum.
         assertNull(Type.of(java.util.concurrent.TimeUnit.class).valueOf("null"));
     }
+
+    // ---- bug review 2026-09-30 G131 begin ----
+    private enum G131PrivateCodeEnum {
+        A(10), B(20);
+
+        private final int code;
+
+        G131PrivateCodeEnum(final int code) {
+            this.code = code;
+        }
+
+        public int code() {
+            return code;
+        }
+    }
+
+    // G131: CODE representation of a non-public enum - its public code() was invoked without setAccessible
+    // (IllegalAccessException at type construction).
+    @Test
+    public void testCodeRepresentation_nonPublicEnum() {
+        @SuppressWarnings("unchecked")
+        final EnumType<G131PrivateCodeEnum> type = (EnumType<G131PrivateCodeEnum>) createType(G131PrivateCodeEnum.class.getName() + "(CODE)");
+        assertEquals(com.landawn.abacus.util.EnumType.CODE, type.enumerated());
+        assertEquals(G131PrivateCodeEnum.A, type.valueOf(10));
+        assertEquals(G131PrivateCodeEnum.B, type.valueOf(20));
+    }
+    // ---- bug review 2026-09-30 G131 end ----
+
 }

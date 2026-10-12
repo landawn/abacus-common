@@ -350,6 +350,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * <p>The output consumer receives a mutable {@code Pair} object that should be populated
      * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
      *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
@@ -388,6 +392,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * <p>The output consumer receives a mutable {@code Pair} object that should be populated
      * with the next pair of values using {@code pair.set(a, b)} or {@code pair.setLeft(a)} and {@code pair.setRight(b)}.</p>
+     *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -564,6 +572,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * call re-invokes {@code output} for the same index. A generator that fails deterministically at some
      * index therefore keeps failing there rather than silently skipping that pair; guard against that in
      * the generator if a failure should be skipped instead of retried.</p>
+     *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1638,11 +1650,17 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             public boolean hasNext() {
                 if (!hasNextFlag) {
                     while (iter.hasNext()) {
-                        iter.next(setNext);
+                        try {
+                            iter.next(setNext);
 
-                        if (predicate.test(next.left(), next.right())) {
-                            hasNextFlag = true;
-                            break;
+                            if (predicate.test(next.left(), next.right())) {
+                                hasNextFlag = true;
+                                break;
+                            }
+                        } finally {
+                            if (!hasNextFlag) {
+                                next.set(null, null);
+                            }
                         }
                     }
                 }
@@ -1661,8 +1679,9 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 }
 
                 hasNextFlag = false;
-
-                return next.copy();
+                final Pair<A, B> result = next.copy();
+                next.set(null, null);
+                return result;
             }
 
             /**
@@ -1681,8 +1700,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 }
 
                 hasNextFlag = false;
-
-                action.accept(next.left(), next.right());
+                final A a = next.left();
+                final B b = next.right();
+                next.set(null, null);
+                action.accept(a, b);
             }
 
             /**
@@ -1694,8 +1715,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
-
-                    action.accept(next.left(), next.right());
+                    final A a = next.left();
+                    final B b = next.right();
+                    next.set(null, null);
+                    action.accept(a, b);
                 }
             }
 
@@ -1709,8 +1732,10 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
-
-                    action.accept(next.left(), next.right());
+                    final A a = next.left();
+                    final B b = next.right();
+                    next.set(null, null);
+                    action.accept(a, b);
                 }
             }
 
@@ -1764,9 +1789,16 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
              */
             @Override
             public R next() throws NoSuchElementException {
-                iter.next(setNext); // throws NoSuchElementException when exhausted
-
-                return mapper.apply(tmp.left(), tmp.right());
+                final A a;
+                final B b;
+                try {
+                    iter.next(setNext); // throws NoSuchElementException when exhausted
+                    a = tmp.left();
+                    b = tmp.right();
+                } finally {
+                    tmp.set(null, null);
+                }
+                return mapper.apply(a, b);
             }
         };
     }

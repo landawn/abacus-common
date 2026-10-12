@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,7 +22,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.parser.ParserFactory;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleValueGenericTypeTest extends TestBase {
     private static final List<BigDecimal> DECIMALS = Arrays.asList(new BigDecimal("1.2300"), new BigDecimal("12345678901234567890.123456789"),
@@ -454,7 +454,6 @@ public class SingleValueGenericTypeTest extends TestBase {
             return new NestedBoundBox<>(value);
         }
     }
-
 
     @Test
     public void boundViolationMessageRendersRebuiltTypeArgumentsReadably() {

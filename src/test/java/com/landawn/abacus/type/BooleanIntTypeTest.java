@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -60,8 +61,15 @@ public class BooleanIntTypeTest extends TestBase {
 
     @Test
     public void testValueOf_Other() {
-        Boolean result = type.valueOf("2");
-        assertEquals(Boolean.FALSE, result);
+        // Every accepted text is read, not only 1/0; text is never parsed as a number (code review 2026-10-05).
+        assertEquals(Boolean.TRUE, type.valueOf("Y"));
+        assertEquals(Boolean.TRUE, type.valueOf("true"));
+        assertEquals(Boolean.FALSE, type.valueOf("-1"));
+        assertEquals(Boolean.FALSE, type.valueOf("n"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("1.0"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("2"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("-2"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("abc"));
     }
 
     @Test
@@ -94,8 +102,11 @@ public class BooleanIntTypeTest extends TestBase {
     @Test
     public void testValueOf_CharArray_MultipleChars() {
         char[] chars = { '1', '0' };
-        Boolean result = type.valueOf(chars, 0, 2);
-        assertEquals(Boolean.FALSE, result);
+        // Text is never parsed as a number: "10" and "01" are rejected, "-1" is false, and other text is rejected.
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(chars, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(new char[] { '0', '1' }, 0, 2));
+        assertEquals(Boolean.FALSE, type.valueOf(new char[] { '-', '1' }, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(new char[] { 'a', 'b' }, 0, 2));
     }
 
     @Test

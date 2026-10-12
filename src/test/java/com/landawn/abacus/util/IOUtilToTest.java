@@ -233,4 +233,69 @@ public class IOUtilToTest extends IOUtilTestSupport {
 
         assertEquals(original.getCanonicalPath(), roundTripped.getCanonicalPath());
     }
+
+    // ---- bug review 2026-10-02 G045 begin ----
+
+    // G045-02: a bare or drive-relative Windows drive spelled with an escaped letter or colon is refused like its plain
+    // spelling; it used to decode to File("C:") / File("C:x"), the process's current directory on drive C:
+    @Test
+    public void testToFile_escapedBareOrDriveRelativeDriveIsRejected() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file:///C%3A", "file:///C%3a", "file:///%43:", "file:///C%3Ax", "file:///%63%3A", "file:C%3A",
+                "file:%43:x" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
+        }
+
+        // an escaped colon in an absolute path is still decoded, as before
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:///C%3A/x")));
+        assertEquals(new File("C:\\x y"), IOUtil.toFile(new URL("file:///%43:/x%20y")));
+    }
+
+    // ---- bug review 2026-10-02 G045 end ----
+
+    // ---- bug review 2026-10-02 verify G122 begin ----
+
+    // G045-02: the escaped bare / drive-relative drive is refused in the other URL forms that reach the decoded check too
+    // ("localhost" authority, one-slash form, lower-case escaped letter); a decoded colon that does not follow a lone drive
+    // letter stays part of a name, and absolute escaped forms and the UNC form decode as before
+    @Test
+    public void testToFile_escapedDriveIsRejectedInEveryFormAndOtherColonsAreKept() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file://localhost/C%3A", "file:/C%3A", "file:/C%3Ax", "file:///%7A:", "file:///C%3A%3A" }) {
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+        }
+
+        assertEquals(new File("\\xy:"), IOUtil.toFile(new URL("file:///xy%3A")));
+        assertEquals(new File("\\1:"), IOUtil.toFile(new URL("file:///%31:")));
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file://localhost/C%3A/x")));
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:/C%3A/x")));
+        assertEquals(new File("\\\\server\\C:"), IOUtil.toFile(new URL("file://server/C%3A")));
+    }
+
+    // ---- bug review 2026-10-02 verify G122 end ----
+
+    // ---- bug review 2026-10-02 final G131 begin ----
+
+    // G131-01: java.io.File drops EVERY leading separator before a drive letter, so a drive-relative path after four
+    // or more slashes - plain or escaped - is refused like "file:///C:x" (it became File("C:x\\y")); the same spellings
+    // of an absolute path, and a UNC host followed by such a name, are unchanged
+    @Test
+    public void testToFile_driveRelativePathAfterSeveralLeadingSlashesIsRejected() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file:////C:x/y", "file:////C%3Ax/y", "file:////%43:x/y", "file://///C:x/y" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
+        }
+
+        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C:/x")).getPath());
+        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C%3A/x")).getPath());
+        assertEquals("\\\\server\\share\\x", IOUtil.toFile(new URL("file:////server/share/x")).getPath());
+        assertEquals("\\\\server\\C:x", IOUtil.toFile(new URL("file:////server/C:x")).getPath());
+    }
+
+    // ---- bug review 2026-10-02 final G131 end ----
 }

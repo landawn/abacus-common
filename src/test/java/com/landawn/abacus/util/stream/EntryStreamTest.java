@@ -53,9 +53,9 @@ import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.MergeResult;
-import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
@@ -879,8 +879,9 @@ public class EntryStreamTest extends TestBase {
     public void testMapKeyPartial_BiFunction_Basic() {
         List<Map.Entry<String, Integer>> result = EntryStream.of("a", 1, "b", 2, "c", 3)
                 .mapKeyPartial((java.util.function.BiFunction<String, Integer, com.landawn.abacus.util.u.Optional<String>>) (k, v) -> {
-                    if (v > 1)
+                    if (v > 1) {
                         return com.landawn.abacus.util.u.Optional.of(k.toUpperCase());
+                    }
                     return com.landawn.abacus.util.u.Optional.empty();
                 })
                 .toList();
@@ -944,8 +945,9 @@ public class EntryStreamTest extends TestBase {
     public void testMapValuePartial_Function_Basic() {
         List<Map.Entry<String, Integer>> result = EntryStream.of("1", 1, "2", 2, "3", 3)
                 .mapValuePartial((java.util.function.Function<Integer, com.landawn.abacus.util.u.Optional<Integer>>) v -> {
-                    if (v % 2 == 0)
+                    if (v % 2 == 0) {
                         return com.landawn.abacus.util.u.Optional.of(v * 10);
+                    }
                     return com.landawn.abacus.util.u.Optional.empty();
                 })
                 .toList();
@@ -957,8 +959,9 @@ public class EntryStreamTest extends TestBase {
     public void testMapValuePartial_BiFunction_Basic() {
         List<Map.Entry<String, Integer>> result = EntryStream.of("a", 1, "b", 2, "c", 3)
                 .mapValuePartial((java.util.function.BiFunction<String, Integer, com.landawn.abacus.util.u.Optional<Integer>>) (k, v) -> {
-                    if ("b".equals(k))
+                    if ("b".equals(k)) {
                         return com.landawn.abacus.util.u.Optional.of(v * 100);
+                    }
                     return com.landawn.abacus.util.u.Optional.empty();
                 })
                 .toList();
@@ -6090,8 +6093,7 @@ public class EntryStreamTest extends TestBase {
 
         final Function<Integer, Collection<Integer>> valueMapper = v -> v == 0 ? null
                 : v == 1 ? new ArrayList<>() : v == 2 ? Collections.singleton(20) : new LinkedList<>(Arrays.asList(30, 30, null));
-        final List<Map.Entry<String, Integer>> expectedValues = Arrays.asList(g095Entry("s", 20), g095Entry("d", 30), g095Entry("d", 30),
-                g095Entry("d", null));
+        final List<Map.Entry<String, Integer>> expectedValues = Arrays.asList(g095Entry("s", 20), g095Entry("d", 30), g095Entry("d", 30), g095Entry("d", null));
 
         assertEquals(expectedValues, EntryStream.of(source).flatmapValue(valueMapper).toList());
         assertEquals(expectedValues, EntryStream.of(source).flatmapValue((k, v) -> valueMapper.apply(v)).toList());

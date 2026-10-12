@@ -19,6 +19,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -283,7 +284,8 @@ public final class Reflection<T> {
 
     /**
      * Returns the value of the specified field from the target instance.
-     * If ReflectASM is available, it will be used for better performance.
+     * If ReflectASM is available, it will be used for better performance for a public field whose owner and
+     * declaring class are public and exported to all modules at runtime; any other field uses standard reflection.
      * A field declared in a subclass takes precedence over a field with the same name in a superclass,
      * including when the subclass field is private.
      *
@@ -306,19 +308,19 @@ public final class Reflection<T> {
         try {
             final Field field = getField(fieldName);
 
-            if (reflectASM != null && !asmUnreachableFields.get(cls).contains(fieldName)) {
+            if (reflectASM != null && isAsmLinkable(field, false) && !asmUnreachableFields.get(cls).contains(fieldName)) {
                 try {
                     return reflectASM.get(field);
                 } catch (final IllegalArgumentException e) {
-                    // Use the resolved field even when ReflectASM only exposes a hidden superclass field.
-                    // ReflectASM rejects the field before any access, but building the rejection costs
-                    // microseconds (about 50x a plain reflective read), and it is the same for every later
-                    // access, so it is memoized silently.
+                    // isAsmLinkable already keeps non-public fields away; ReflectASM's table can still lack this
+                    // public field (a static one, or one hidden by a same-named field), and the resolved field is
+                    // then read below. The rejection happens before any access, but building it costs
+                    // microseconds (about 50x a plain reflective read) on every call, so it is memoized silently.
                     asmUnreachableFields.get(cls).add(fieldName);
                 } catch (final LinkageError e) {
-                    // The generated accessor failed to link (e.g. IllegalAccessError for a field whose
-                    // declaring class is not accessible to it); the read has no side effect, so retrying
-                    // it with standard reflection is safe. Memoized: re-raising the resolution failure
+                    // The generated accessor failed to link (e.g. an incomplete ReflectASM deployment; expected
+                    // access restrictions are filtered out by isAsmLinkable); the read has no side effect, so
+                    // retrying it with standard reflection is safe. Memoized: re-raising the resolution failure
                     // costs microseconds per call, which is far slower than the fallback itself.
                     disableAsmFieldFastPath(fieldName, e);
                 }
@@ -334,11 +336,13 @@ public final class Reflection<T> {
 
     /**
      * Sets the value of the specified field in the target instance.
-     * If ReflectASM is available, it will be used for better performance.
+     * If ReflectASM is available, it will be used for better performance for a public, non-final field of a
+     * public type on a public class, with the owner, declaring class and field type exported to all modules at
+     * runtime; any other field is written with standard reflection.
      * A field declared in a subclass takes precedence over a field with the same name in a superclass.
      * Primitive fields support the unboxing and widening conversions allowed by {@link Field#set(Object, Object)}.
      *
-     * <p>For a {@code final} <i>instance</i> field, the fast path falls back to standard reflection.
+     * <p>For a {@code final} <i>instance</i> field, standard reflection is used.
      * The write succeeds only when the JVM's access and field-modification rules permit it.
      * A {@code static final} field is writable by neither path and is reported through the
      * {@code RuntimeException} below. This differs from
@@ -368,23 +372,24 @@ public final class Reflection<T> {
             // A null for a primitive field goes straight to standard reflection, which rejects it with
             // IllegalArgumentException; the generated accessor would fail its unboxing with a
             // NullPointerException instead, so the exception type depended on the field's visibility.
-            if (reflectASM != null && !asmUnreachableFields.get(cls).contains(fieldName) && (value != null || !field.getType().isPrimitive())) {
+            if (reflectASM != null && isAsmLinkable(field, true) && !asmUnreachableFields.get(cls).contains(fieldName)
+                    && (value != null || !field.getType().isPrimitive())) {
                 try {
                     reflectASM.set(field, value);
                     return this;
                 } catch (final IllegalArgumentException e) {
-                    // Reflection also supports private fields. ReflectASM rejects such a field before any
-                    // store, but building the rejection costs microseconds, and it is the same for every
-                    // later access, so it is memoized silently.
+                    // isAsmLinkable already keeps non-public and final fields away; ReflectASM's table can still lack
+                    // this public field (a static one, or one hidden by a same-named field). The rejection happens
+                    // before any store, but building it costs microseconds on every call, so it is memoized silently.
                     asmUnreachableFields.get(cls).add(fieldName);
                 } catch (final ClassCastException e) {
                     // Reflection also supports unboxing followed by primitive widening. Not memoized: this
                     // failure depends on the value, not on the field.
                 } catch (final LinkageError e) {
-                    // The generated accessor failed to link (e.g. IllegalAccessError when assigning a
-                    // final field); the JVM rejects the write at resolution time, before any store, so
-                    // retrying it with standard reflection is safe. Memoized: re-raising the resolution
-                    // failure costs microseconds per call, which is far slower than the fallback itself.
+                    // The generated accessor failed to link (e.g. an incomplete ReflectASM deployment);
+                    // the JVM rejects the write at resolution time, before any store, so retrying it with
+                    // standard reflection is safe. Memoized: re-raising the resolution failure costs
+                    // microseconds per call, which is far slower than the fallback itself.
                     disableAsmFieldFastPath(fieldName, e);
                 }
             }
@@ -397,6 +402,25 @@ public final class Reflection<T> {
         }
 
         return this;
+    }
+
+    /**
+     * Whether a generated field accessor can reach {@code field} at all. The accessor is normally defined by a
+     * separate class loader, and so in a different runtime package than the reflected class: it can link only
+     * against a public field of a public class, and a write additionally needs a non-final field of a public type
+     * (the accessor casts the value to it). The owner, declaring class and cast type must also be exported to all
+     * modules at runtime. Any other field goes straight to standard reflection, so an expected
+     * access restriction is neither attempted nor reported as the linkage failure of a broken deployment.
+     *
+     * @param field the resolved field
+     * @param write {@code true} for {@link #set(String, Object)}, {@code false} for {@link #get(String)}
+     * @return {@code true} if the fast path may be tried
+     */
+    private boolean isAsmLinkable(final Field field, final boolean write) {
+        final int modifiers = field.getModifiers();
+
+        return ReflectASM.isAsmAccessibleType(cls) && ReflectASM.isAsmAccessibleType(field.getDeclaringClass()) && Modifier.isPublic(modifiers)
+                && (!write || !Modifier.isFinal(modifiers) && ReflectASM.isAsmAccessibleType(field.getType()));
     }
 
     /**
@@ -423,18 +447,19 @@ public final class Reflection<T> {
      * Invokes the specified method on the target instance with the given arguments and returns the result.
      * The method is selected based on its name and the types of the provided arguments.
      * If ReflectASM is available, it is used when its name-and-argument-count lookup selects a unique
-     * method compatible with the supplied arguments. Other lookups, including methods ReflectASM does
+     * public method on a public class compatible with the supplied arguments, no hidden or non-public
+     * method shares its name and arity, and its owner, declaring class and parameter types are accessible to
+     * generated code in a separate runtime package and module.
+     * Other lookups, including methods ReflectASM does
      * not expose (private methods, methods declared by {@code Object}, and interface default methods),
-     * fall back to standard reflection, which also searches superclasses.
+     * fall back to standard reflection, which also searches superclasses. An interface target, e.g. a
+     * static method called through {@code Reflection.on(Comparator.class)}, always uses standard reflection.
      *
-     * <p>After a method qualifies for the ReflectASM path, the fallback does <i>not</i> cover a generated
-     * accessor that is then refused access to that method: such a call propagates an
-     * {@link IllegalAccessError}. The accessor is normally defined by a separate class loader, and so in a
-     * different runtime package than the target, which makes this reachable for a non-public method or a
-     * method of a non-public class; whether the accessor can instead be defined in the target's own loader
-     * depends on the JVM's module opens, so the effect is deployment-dependent. Field access
-     * ({@link #get(String)} and {@link #set(String, Object)}) has no such gap - it falls back on any
-     * linkage failure.</p>
+     * <p>Non-public classes and methods, methods with a non-public parameter type, and types in packages
+     * not exported to all modules at runtime use standard reflection. This conservatively includes qualified
+     * exports, even to {@code ALL-UNNAMED}, because generated accessors may have their own class loader and module.
+     * The choice is made before invocation; exceptions thrown by the target method are propagated without
+     * retrying the method.</p>
      *
      * <p>Variable-arity (varargs) methods are matched on their <i>declared</i> arity only, as in plain
      * {@code java.lang.reflect}: the trailing array must be supplied explicitly and cast so it is not spread,
@@ -463,8 +488,11 @@ public final class Reflection<T> {
         // reflection for the members it cannot resolve. The check happens BEFORE the invocation:
         // catching the resolution exception around reflectASM.invoke(...) would be unsafe because
         // the invoked method itself may throw IllegalArgumentException after side effects.
-        if (reflectASM != null && reflectASM.canInvoke(methodName, arguments)) {
-            return reflectASM.invoke(methodName, arguments);
+        // The check yields the method's table index, so ReflectASM does not look the name up a second time.
+        final int asmMethodIndex = reflectASM == null ? -1 : reflectASM.invocableMethodIndex(methodName, arguments);
+
+        if (asmMethodIndex >= 0) {
+            return reflectASM.invokeMethodAt(asmMethodIndex, arguments);
         } else {
             try {
                 final Method method = getDeclaredMethod(cls, methodName, getTypes(arguments));
@@ -506,8 +534,10 @@ public final class Reflection<T> {
             throws IllegalArgumentException, RuntimeException, NullPointerException {
         N.checkArgNotNull(methodName, cs.methodName);
 
-        if (reflectASM != null && reflectASM.canInvoke(methodName, arguments)) {
-            reflectASM.call(methodName, arguments);
+        final int asmMethodIndex = reflectASM == null ? -1 : reflectASM.invocableMethodIndex(methodName, arguments);
+
+        if (asmMethodIndex >= 0) {
+            reflectASM.invokeMethodAt(asmMethodIndex, arguments);
         } else {
             // Falls back to standard reflection for private/inherited members (see invoke(String, Object...)).
             invoke(methodName, arguments);
@@ -518,12 +548,13 @@ public final class Reflection<T> {
 
     /**
      * Returns the field with the specified name, searching the reflected class first and then each
-     * superclass in turn, so inherited and private fields are found. Results are cached per class.
+     * superclass in turn, then public interface fields, so inherited and private fields are found.
+     * Results are cached per class.
      *
      * @param fieldName the name of the field to retrieve
      * @return the Field object corresponding to the field name; never {@code null}
      * @throws NoSuchFieldException if no field with the specified name is found anywhere in the
-     *         superclass chain
+     *         class hierarchy or public interfaces
      */
     private Field getField(final String fieldName) throws NoSuchFieldException {
         final Map<String, Field> fieldPool = clsFieldPool.get(cls);
@@ -543,7 +574,9 @@ public final class Reflection<T> {
             }
 
             if (field == null) {
-                throw new NoSuchFieldException(fieldName);
+                // Interface constants are inherited public fields, but getDeclaredField and
+                // getSuperclass cannot find them. Preserve class-field precedence before this fallback.
+                field = cls.getField(fieldName);
             }
 
             fieldPool.put(fieldName, field);

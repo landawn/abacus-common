@@ -650,11 +650,219 @@ public class IntFunctionsTest extends TestBase {
         assertTrue(IntFunctions.registerForCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class, size -> null));
         assertTrue(IntFunctions.registerForMap(org.apache.commons.collections4.map.HashedMap.class, size -> null));
 
-        assertEquals("The registered creator returned null",
-                assertThrows(NullPointerException.class, () -> IntFunctions.ofCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class).apply(3)).getMessage());
+        assertEquals("The registered creator returned null", assertThrows(NullPointerException.class,
+                () -> IntFunctions.ofCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class).apply(3)).getMessage());
         assertEquals("The registered creator returned null",
                 assertThrows(NullPointerException.class, () -> IntFunctions.ofMap(org.apache.commons.collections4.map.HashedMap.class).apply(3)).getMessage());
-        assertThrows(NullPointerException.class, () -> N.newCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class, 3));
-        assertThrows(NullPointerException.class, () -> N.newMap(org.apache.commons.collections4.map.HashedMap.class, 3));
+        assertThrows(NullPointerException.class, () -> CommonUtil.newCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class, 3));
+        assertThrows(NullPointerException.class, () -> CommonUtil.newMap(org.apache.commons.collections4.map.HashedMap.class, 3));
     }
+
+    // ---- bug review 2026-09-30 G142 begin ----
+    static java.util.Map<String, Integer> g142LruMap(final int cap) {
+        return new java.util.LinkedHashMap<>() {
+            @Override
+            protected boolean removeEldestEntry(final java.util.Map.Entry<String, Integer> eldest) {
+                return size() > cap;
+            }
+        };
+    }
+
+    // G142: the int constructor of an anonymous class takes a captured variable (here an LRU cap), not a capacity: ofMap used it,
+    // so N.newMap(cls, 0) built a map evicting everything while N.newMap(cls) rejected the class. Creating it now fails either way.
+    @Test
+    public void testOfMap_anonymousIntParameterIsNotACapacity() {
+        @SuppressWarnings("rawtypes")
+        final Class<? extends java.util.Map> cls = g142LruMap(1).getClass();
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(cls).apply(0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(cls, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(cls));
+    }
+    // ---- bug review 2026-09-30 G142 end ----
+
+    // ---- bug review 2026-09-30 G145 begin ----
+    static java.util.Map<String, Integer> g145LocalLruMap(final int cap) {
+        class LocalLru extends java.util.LinkedHashMap<String, Integer> {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected boolean removeEldestEntry(final java.util.Map.Entry<String, Integer> eldest) {
+                return size() > cap;
+            }
+        }
+
+        return new LocalLru();
+    }
+
+    static java.util.List<String> g145CappedList(final int cap) {
+        return new java.util.ArrayList<>() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean add(final String e) {
+                return size() < cap && super.add(e);
+            }
+        };
+    }
+
+    static Class<?> g145SizedLocalClass() {
+        class Sized extends java.util.ArrayList<String> {
+            private static final long serialVersionUID = 1L;
+
+            Sized(final int capacity) {
+                super(capacity);
+            }
+        }
+
+        return Sized.class;
+    }
+
+    // G145: the single int constructor of a local class that captures variables takes a captured value, not a capacity, as
+    // for an anonymous class (G142) - also in ofCollection. A local class declaring its own int constructor still gets it.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testIntConstructorOfCapturingLocalOrAnonymousClassIsNotACapacity() {
+        final Class<? extends java.util.Map> localLru = g145LocalLruMap(1).getClass();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(localLru).apply(5));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(localLru, 0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(localLru));
+
+        final Class<? extends java.util.Collection> cappedList = g145CappedList(1).getClass();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(cappedList).apply(0));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(cappedList, 0));
+
+        final Class<? extends java.util.Collection> sized = (Class<? extends java.util.Collection>) g145SizedLocalClass();
+        org.junit.jupiter.api.Assertions.assertSame(sized, IntFunctions.ofCollection(sized).apply(4).getClass());
+    }
+    // ---- bug review 2026-09-30 G145 end ----
+
+    // ---- bug review 2026-09-30 G146 begin ----
+    static java.util.List<String> g146LocalCappedList(final int cap) {
+        class Capped extends java.util.ArrayList<String> {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean add(final String e) {
+                return size() < cap && super.add(e);
+            }
+        }
+
+        return new Capped();
+    }
+
+    static java.util.List<String> g146LocalSubclassOfCapturingClass(final int cap) {
+        class Capped extends java.util.ArrayList<String> {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean add(final String e) {
+                return size() < cap && super.add(e);
+            }
+        }
+
+        class Sub extends Capped {
+            private static final long serialVersionUID = 1L;
+        }
+
+        return new Sub();
+    }
+
+    // G146: ofCollection also skips the int constructor of a capturing LOCAL class, and of a local subclass of one (it passes the
+    // captured value on). javac gives the subclass its own val$ field too; the walk to the superclass matters for classes built by
+    // the Eclipse compiler (as target/test-classes are in the IDE), which does not.
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void testIntConstructorOfCapturingLocalCollectionClassIsNotACapacity() {
+        for (final java.util.List<String> list : java.util.List.of(g146LocalCappedList(1), g146LocalSubclassOfCapturingClass(1))) {
+            final Class<? extends java.util.Collection> cls = list.getClass();
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(cls).apply(0), cls.getName());
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(cls, 0), cls.getName());
+        }
+    }
+    // ---- bug review 2026-09-30 G146 end ----
+
+    private static Class<? extends java.util.Map> staticAnonymousMapClass() {
+        return new java.util.HashMap<String, Integer>() {
+            private static final long serialVersionUID = 1L;
+        }.getClass();
+    }
+
+    private static Class<? extends java.util.Collection> staticAnonymousCollectionClass() {
+        return new java.util.ArrayList<String>() {
+            private static final long serialVersionUID = 1L;
+        }.getClass();
+    }
+
+    @Test
+    public void testAnonymousClassesWithoutCapturedArguments() throws NoSuchMethodException {
+        final Class<? extends java.util.Map> instanceMap = new java.util.HashMap<String, Integer>() {
+            private static final long serialVersionUID = 1L;
+            {
+                put("initialized", 1);
+            }
+        }.getClass();
+        final Class<? extends java.util.Collection> instanceCollection = new java.util.ArrayList<String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                add("initialized");
+            }
+        }.getClass();
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(instanceMap).apply(4));
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(instanceCollection).apply(4));
+
+        // The restriction applies in both contexts, even when a usable no-arg constructor exists.
+        final Class<? extends java.util.Map> staticMap = staticAnonymousMapClass();
+        final Class<? extends java.util.Collection> staticCollection = staticAnonymousCollectionClass();
+        assertEquals(0, staticMap.getDeclaredConstructor().getParameterCount());
+        assertEquals(0, staticCollection.getDeclaredConstructor().getParameterCount());
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(staticMap).apply(4));
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(staticCollection).apply(4));
+    }
+
+    private static final IllegalArgumentException CONSTRUCTOR_REJECTION = new IllegalArgumentException("rejected by constructor");
+
+    public static class ConstructorRejectsList extends ArrayList<String> {
+        private static final long serialVersionUID = 1L;
+
+        public ConstructorRejectsList() {
+            throw CONSTRUCTOR_REJECTION;
+        }
+    }
+
+    public static class ConstructorFailsList extends ArrayList<String> {
+        private static final long serialVersionUID = 1L;
+
+        public ConstructorFailsList() {
+            throw new IllegalStateException("constructor failure");
+        }
+    }
+
+    static class NoDefaultOuter {
+        NoDefaultOuter(final int ignored) {
+        }
+
+        class Member extends HashMap<String, Integer> {
+            private static final long serialVersionUID = 1L;
+        }
+    }
+
+    // apply(int) rethrows an IllegalArgumentException from N.newInstance unchanged, so its reason is the message; any other
+    // failure is still wrapped in the "Not able to create instance" IllegalArgumentException.
+    @Test
+    public void testApplyKeepsNewInstanceIllegalArgumentException() {
+        final String expected = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(NoDefaultOuter.Member.class)).getMessage();
+        final IllegalArgumentException missingConstructor = assertThrows(IllegalArgumentException.class,
+                () -> IntFunctions.ofMap(NoDefaultOuter.Member.class).apply(4));
+        assertEquals(expected, missingConstructor.getMessage());
+
+        // The constructor's own exception, not a wrapper with it as the cause.
+        assertSame(CONSTRUCTOR_REJECTION, assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(ConstructorRejectsList.class).apply(4)));
+
+        final IllegalArgumentException wrapped = assertThrows(IllegalArgumentException.class,
+                () -> IntFunctions.ofCollection(ConstructorFailsList.class).apply(4));
+        assertTrue(wrapped.getMessage().startsWith("Not able to create instance for collection: "), wrapped.getMessage());
+        assertTrue(wrapped.getCause() instanceof IllegalStateException, String.valueOf(wrapped.getCause()));
+    }
+
 }

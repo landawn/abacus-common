@@ -449,7 +449,8 @@ public class MapEntryTypeTest extends TestBase {
     @Test
     public void testSerializeTo_configSensitiveKeyUnderEachStringQuotation() throws IOException {
         final Type longKeyType = createType("Map.Entry<Long, String>");
-        assertEquals("{'5':'x'}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
+        assertEquals("{'5':'x'}",
+                serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
         assertEquals("{\"5\":\"x\"}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation('"').setWriteLongAsString(true)));
         assertEquals("{\"5\":x}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true)));
         assertEquals("{5:x}",
@@ -465,4 +466,158 @@ public class MapEntryTypeTest extends TestBase {
         assertEquals("'k'", ((Map.Entry<String, String>) stringKeyType.valueOf(json)).getKey());
     }
     // ---- bug review 2026-09-27 verify G117 end ----
+
+    // ---- bug review 2026-10-02 G114 begin ----
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String serializeRawEntryG114(final Type type, final Object key, final Object value, final JsonSerConfig config) throws IOException {
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, new AbstractMap.SimpleEntry<>(key, value), config);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    // G114-03: a key declared as Object (a raw Map.Entry property) was written by the value writer of its runtime handler, so the
+    // map-key quoting rule was skipped: {5:"x"} under the default config (invalid JSON), {a b:1} under a null config.
+    // It is now quoted by the rule of its runtime class, as the JSON map writer quotes the same key of a Map<Object, ..>.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testSerializeTo_objectKeyFollowsMapKeyQuoting() throws IOException {
+        final Type objectKeyType = createType("Map.Entry<Object, Object>");
+        final JsonSerConfig defaultConfig = JsonSerConfig.create();
+
+        assertEquals("{\"5\":\"x\"}", serializeRawEntryG114(objectKeyType, 5, "x", defaultConfig));
+        assertEquals("{\"true\":1}", serializeRawEntryG114(objectKeyType, true, 1, defaultConfig));
+        assertEquals("{\"2020-09-13T12:26:40Z\":\"y\"}", serializeRawEntryG114(objectKeyType, new Date(1600000000123L), "y", defaultConfig));
+        // the same text as a declared key type gives
+        assertEquals(serializeRawEntryG114(createType("Map.Entry<Integer, Object>"), 5, "x", defaultConfig),
+                serializeRawEntryG114(objectKeyType, 5, "x", defaultConfig));
+        // an entry held in an Object slot (list element) goes through the same handler
+        assertEquals("[{\"5\":\"x\"}]", com.landawn.abacus.util.N.toJson(List.of(new AbstractMap.SimpleEntry<>(5, "x"))));
+
+        // a String key stays quoted under a null config, so the text reads back
+        final String json = serializeRawEntryG114(objectKeyType, "a b", 1, null);
+        assertEquals("{\"a b\":1}", json);
+        assertEquals("a b", ((Map.Entry<Object, Object>) objectKeyType.valueOf(json)).getKey());
+
+        // quoteMapKey=false still leaves a number bare; a config-sensitive key keeps its configured text
+        assertEquals("{5:\"x\"}", serializeRawEntryG114(objectKeyType, 5, "x", JsonSerConfig.create().setQuoteMapKey(false)));
+        assertEquals("{\"5\":\"x\"}", serializeRawEntryG114(objectKeyType, 5L, "x", JsonSerConfig.create().setWriteLongAsString(true).setQuoteMapKey(false)));
+        // a null key and an enum key are unchanged
+        assertEquals("{\"null\":\"x\"}", serializeRawEntryG114(objectKeyType, null, "x", defaultConfig));
+        assertEquals("{\"MONDAY\":\"x\"}", serializeRawEntryG114(objectKeyType, java.time.DayOfWeek.MONDAY, "x", defaultConfig));
+    }
+
+    // ---- bug review 2026-10-02 G114 end ----
+
+    // ---- bug review 2026-10-02 verify G121 begin ----
+
+    public static class G121RawEntryBean {
+        @SuppressWarnings("rawtypes")
+        private Map.Entry entry;
+
+        @SuppressWarnings("rawtypes")
+        public Map.Entry getEntry() {
+            return entry;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public void setEntry(final Map.Entry entry) {
+            this.entry = entry;
+        }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String serializeEntryG121(final Type type, final Object entry, final JsonXmlSerConfig<?> config) throws IOException {
+        if (config instanceof com.landawn.abacus.parser.XmlSerConfig) {
+            final com.landawn.abacus.util.BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+
+            try {
+                type.serializeTo(writer, entry, config);
+                return writer.toString();
+            } finally {
+                Objectory.recycle(writer);
+            }
+        }
+
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, entry, config);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    // G114-03: an Object-typed scalar key is written exactly as the same key under its own declared key type, for every config
+    // (null, default, quoteMapKey=false, writeLongAsString, single quotes, XML); a collection key keeps its structural form.
+    @SuppressWarnings({ "rawtypes" })
+    @Test
+    public void testSerializeTo_objectKeyMatchesDeclaredKeyType() throws IOException {
+        final Type objectKeyType = createType("Map.Entry<Object, Object>");
+        final Object[] keys = { 5, 5L, 1.5d, true, 'c', "a b", new java.math.BigDecimal("1E+3"), java.time.LocalDate.of(2020, 1, 2) };
+        final List<JsonXmlSerConfig<?>> configs = java.util.Arrays.asList(null, JsonSerConfig.create(), JsonSerConfig.create().setQuoteMapKey(false),
+                JsonSerConfig.create().setWriteLongAsString(true), JsonSerConfig.create().setStringQuotation('\'').setCharQuotation('\''),
+                com.landawn.abacus.parser.XmlSerConfig.create());
+
+        for (final Object key : keys) {
+            final Type declaredKeyType = createType("Map.Entry<" + Type.of(key.getClass()).name() + ", Object>");
+
+            for (final JsonXmlSerConfig<?> config : configs) {
+                assertEquals(serializeEntryG121(declaredKeyType, new AbstractMap.SimpleEntry<>(key, "x"), config),
+                        serializeEntryG121(objectKeyType, new AbstractMap.SimpleEntry<>(key, "x"), config), key + " / " + config);
+            }
+        }
+
+        assertEquals("{\"5\":x}", serializeEntryG121(objectKeyType, new AbstractMap.SimpleEntry<>(5, "x"), com.landawn.abacus.parser.XmlSerConfig.create()));
+        // unchanged: a collection key is still written by the generic object handler
+        assertEquals("{[1, 2]:\"x\"}", serializeEntryG121(objectKeyType, new AbstractMap.SimpleEntry<>(List.of(1, 2), "x"), JsonSerConfig.create()));
+    }
+
+    // G114-03: the original failing input - a raw Map.Entry bean property was written as {"entry": {5:"x"}} (invalid JSON). The key now
+    // reads back as the String "5", as a Map<Object, ..> key does; text written by the old code is still read as before.
+    @Test
+    public void testToJson_rawEntryPropertyKeyIsQuoted() {
+        final G121RawEntryBean bean = new G121RawEntryBean();
+        bean.setEntry(new AbstractMap.SimpleEntry<>(5, "x"));
+
+        final String json = com.landawn.abacus.util.N.toJson(bean);
+        assertEquals("{\"entry\": {\"5\":\"x\"}}", json);
+        assertEquals("5", com.landawn.abacus.util.N.fromJson(json, G121RawEntryBean.class).getEntry().getKey());
+        assertEquals("{\"entry\": {5:\"x\"}}", com.landawn.abacus.util.N.toJson(bean, JsonSerConfig.create().setQuoteMapKey(false)));
+
+        assertEquals(5, com.landawn.abacus.util.N.fromJson("{\"entry\": {5:\"x\"}}", G121RawEntryBean.class).getEntry().getKey());
+    }
+
+    // ---- bug review 2026-10-02 verify G121 end ----
+
+    // ---- bug review 2026-10-02 final G128 begin ----
+
+    // G114-03 also covers a declared key type served by the generic object handler (Serializable, Comparable): its scalar key
+    // is quoted by the rule of its runtime class, exactly as an Object-typed key; a key type with its own handler is unchanged.
+    @SuppressWarnings({ "rawtypes" })
+    @Test
+    public void testSerializeTo_genericObjectHandlerKeyFollowsMapKeyQuoting() throws IOException {
+        final JsonSerConfig defaultConfig = JsonSerConfig.create();
+        final Type objectKeyType = createType("Map.Entry<Object, Object>");
+
+        for (final String keyTypeName : new String[] { "java.io.Serializable", "Comparable" }) {
+            final Type keyType = createType("Map.Entry<" + keyTypeName + ", Object>");
+
+            assertEquals("{\"5\":\"x\"}", serializeRawEntryG114(keyType, 5, "x", defaultConfig), keyTypeName);
+            assertEquals(serializeRawEntryG114(objectKeyType, true, 1, defaultConfig), serializeRawEntryG114(keyType, true, 1, defaultConfig), keyTypeName);
+            assertEquals("{5:\"x\"}", serializeRawEntryG114(keyType, 5, "x", JsonSerConfig.create().setQuoteMapKey(false)), keyTypeName);
+            assertEquals("{\"a b\":1}", serializeRawEntryG114(keyType, "a b", 1, null), keyTypeName);
+        }
+
+        // a declared Number key keeps its own handler (unchanged): the same quoted text as before
+        assertEquals("{\"5\":\"x\"}", serializeRawEntryG114(createType("Map.Entry<Number, Object>"), 5, "x", defaultConfig));
+    }
+
+    // ---- bug review 2026-10-02 final G128 end ----
 }

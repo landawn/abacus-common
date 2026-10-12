@@ -17,8 +17,11 @@ package com.landawn.abacus.util.stream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -26,15 +29,17 @@ import java.util.stream.Collector;
 
 import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.IntIterator;
+import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
-import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatBinaryOperator;
 import com.landawn.abacus.util.function.FloatConsumer;
 import com.landawn.abacus.util.function.FloatFunction;
@@ -45,7 +50,7 @@ import com.landawn.abacus.util.function.FloatToIntFunction;
 import com.landawn.abacus.util.function.FloatToLongFunction;
 import com.landawn.abacus.util.function.FloatUnaryOperator;
 import com.landawn.abacus.util.function.ObjFloatConsumer;
-import com.landawn.abacus.util.function.ToFloatFunction;
+import com.landawn.abacus.util.u.OptionalFloat;
 
 /**
  * A parallel implementation of FloatStream backed by an iterator that enables concurrent processing
@@ -159,9 +164,50 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
             return super.filter(predicate);
         }
 
-        final Stream<Float> stream = boxed().filter(predicate::test);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        while (true) {
+                            synchronized (source) {
+                                if (source.hasNext()) {
+                                    next = source.nextFloat();
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(next)) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -174,9 +220,50 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
             return super.takeWhile(predicate);
         }
 
-        final Stream<Float> stream = boxed().takeWhile(predicate::test);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
+        final AtomicBoolean hasMore = new AtomicBoolean(true);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext && hasMore.get()) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                hasNext = true;
+                            } else {
+                                hasMore.set(false);
+                            }
+                        }
+
+                        if (hasNext && !predicate.test(next)) {
+                            hasNext = false;
+                            hasMore.set(false);
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -189,73 +276,276 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
             return super.dropWhile(predicate);
         }
 
-        final Stream<Float> stream = boxed().dropWhile(predicate::test);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
+        final AtomicBoolean dropped = new AtomicBoolean(false);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        // Once the boundary element has been found ('dropped' is set), all threads switch to
+                        // pass-through mode and consume the remaining elements via the shared cursor.
+                        if (dropped.get()) {
+                            synchronized (source) {
+                                if (source.hasNext()) {
+                                    next = source.nextFloat();
+                                    hasNext = true;
+                                }
+                            }
+                        } else {
+                            while (!dropped.get()) {
+                                // Take the element AND decide about it under the same lock. Testing the predicate
+                                // outside it let a thread that had not yet observed `dropped` consume an element
+                                // belonging to the output and silently discard it - dropWhile must drop only the
+                                // LEADING prefix. The drop phase is inherently sequential; only it is serialized,
+                                // the pass-through phase above stays parallel.
+                                synchronized (source) {
+                                    if (dropped.get()) {
+                                        break;
+                                    }
+
+                                    if (!source.hasNext()) {
+                                        break;
+                                    }
+
+                                    next = source.nextFloat();
+
+                                    if (!predicate.test(next)) {
+                                        hasNext = true;
+                                        dropped.set(true);
+                                    }
+                                }
+
+                                if (hasNext) {
+                                    break;
+                                }
+                            }
+
+                            if (!hasNext && dropped.get()) {
+                                synchronized (source) {
+                                    if (source.hasNext()) {
+                                        next = source.nextFloat();
+                                        hasNext = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
     public FloatStream map(final FloatUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.map(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final FloatStream stream = boxed().mapToFloat(mapper::applyAsFloat);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public float nextFloat() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final float result = mapper.applyAsFloat(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
     public IntStream mapToInt(final FloatToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToInt(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final IntStream stream = boxed().mapToInt(mapper::applyAsInt);
+        final FloatIterator source = iteratorEx();
+        final List<IntIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new IntIterator() {
+                private float next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public int nextInt() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final int result = mapper.applyAsInt(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
     public LongStream mapToLong(final FloatToLongFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToLong(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final LongStream stream = boxed().mapToLong(mapper::applyAsLong);
+        final FloatIterator source = iteratorEx();
+        final List<LongIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorLongStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new LongIterator() {
+                private float next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public long nextLong() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final long result = mapper.applyAsLong(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorLongStream(ParallelPrimitiveBuffer.concatLong(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
     public DoubleStream mapToDouble(final FloatToDoubleFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToDouble(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final DoubleStream stream = boxed().mapToDouble(mapper::applyAsDouble);
+        final FloatIterator source = iteratorEx();
+        final List<DoubleIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorDoubleStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new DoubleIterator() {
+                private float next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public double nextDouble() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final double result = mapper.applyAsDouble(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorDoubleStream(ParallelPrimitiveBuffer.concatDouble(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -268,8 +558,43 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
             return super.mapToObj(mapper);
         }
 
-        //noinspection resource
-        return boxed().map(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<Iterator<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private float next;
+                private boolean ready;
+
+                @Override
+                public boolean hasNext() {
+                    if (!ready) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                                ready = true;
+                            }
+                        }
+                    }
+
+                    return ready;
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if (!ready && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final T result = mapper.apply(next);
+                    ready = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -284,10 +609,86 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final FloatStream stream = boxed().flatMapToFloat(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIteratorEx() {
+                private float next;
+                private boolean exhausted;
+                private FloatIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final FloatStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextFloat();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     @Override
@@ -302,10 +703,50 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final FloatStream stream = boxed().flatmap(mapper::apply).mapToFloat(ToFloatFunction.UNBOX);
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean exhausted;
+                private Iterator<? extends Float> cur = null;
+                private Collection<? extends Float> c = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        c = mapper.apply(next);
+                        cur = N.isEmpty(c) ? null : c.iterator();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final Float value = cur.next();
+                    return value == null ? (float) 0 : value;
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -320,10 +761,47 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     cancelUncompletedThreads, null);
         }
 
-        @SuppressWarnings("resource")
-        final FloatStream stream = boxed().flatMapToFloat(value -> FloatStream.of(mapper.apply(value)));
+        final FloatIterator source = iteratorEx();
+        final List<FloatIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new FloatIterator() {
+                private float next;
+                private boolean exhausted;
+                private FloatIterator cur = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        cur = FloatIterator.of(mapper.apply(next));
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public float nextFloat() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextFloat();
+                }
+            });
+        }
+
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -338,10 +816,86 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final IntStream stream = boxed().flatMapToInt(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<IntIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new IntIteratorEx() {
+                private float next;
+                private boolean exhausted;
+                private IntIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final IntStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public int nextInt() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextInt();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     @Override
@@ -356,10 +910,86 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     cancelUncompletedThreads, null);
         }
 
-        @SuppressWarnings("resource")
-        final LongStream stream = boxed().flatMapToLong(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<LongIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorLongStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new LongIteratorEx() {
+                private float next;
+                private boolean exhausted;
+                private LongIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final LongStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public long nextLong() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextLong();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorLongStream(ParallelPrimitiveBuffer.concatLong(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     @Override
@@ -374,10 +1004,86 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     cancelUncompletedThreads, null);
         }
 
-        @SuppressWarnings("resource")
-        final DoubleStream stream = boxed().flatMapToDouble(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<DoubleIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorDoubleStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new DoubleIteratorEx() {
+                private float next;
+                private boolean exhausted;
+                private DoubleIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final DoubleStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public double nextDouble() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextDouble();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorDoubleStream(ParallelPrimitiveBuffer.concatDouble(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     @Override
@@ -392,8 +1098,86 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     cancelUncompletedThreads, null);
         }
 
-        //noinspection resource
-        return boxed().flatMap(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<ObjIteratorEx<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private float next;
+                private boolean exhausted;
+                private Iterator<? extends T> cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final Stream<? extends T> mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.next();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     @Override
@@ -408,8 +1192,49 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                     cancelUncompletedThreads, null);
         }
 
-        //noinspection resource
-        return boxed().flatmap(mapper::apply);
+        final FloatIterator source = iteratorEx();
+        final List<ObjIteratorEx<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private float next;
+                private boolean exhausted;
+                private Iterator<? extends T> cur = null;
+                private Collection<? extends T> c = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextFloat();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        c = mapper.apply(next);
+                        cur = N.isEmpty(c) ? null : c.iterator();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.next();
+                }
+            });
+        }
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     @Override
@@ -422,10 +1247,10 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
             return super.onEach(action);
         }
 
-        @SuppressWarnings("resource")
-        final FloatStream stream = boxed().onEach(action::accept).sequential().mapToFloat(ToFloatFunction.UNBOX);
-
-        return new ParallelIteratorFloatStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return map(value -> {
+            action.accept(value);
+            return value;
+        });
     }
 
     @Override
@@ -976,6 +1801,9 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                 // Primitive locals: no boxed index/element per taken element (inside the lock); a Pair is created only on a match.
                 long nextIndex = 0;
                 float next = 0;
+                boolean found = false;
+                long lastMatchIndex = 0;
+                float lastMatch = 0;
 
                 try {
                     while (eHolder.value() == null) {
@@ -989,10 +1817,16 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                         }
 
                         if (predicate.test(next)) {
-                            synchronized (resultHolder) {
-                                if (resultHolder.value() == null || nextIndex > resultHolder.value().left()) {
-                                    resultHolder.setValue(Pair.of(nextIndex, next));
-                                }
+                            found = true;
+                            lastMatchIndex = nextIndex;
+                            lastMatch = next;
+                        }
+                    }
+
+                    if (found) {
+                        synchronized (resultHolder) {
+                            if (resultHolder.value() == null || lastMatchIndex > resultHolder.value().left()) {
+                                resultHolder.setValue(Pair.of(lastMatchIndex, lastMatch));
                             }
                         }
                     }

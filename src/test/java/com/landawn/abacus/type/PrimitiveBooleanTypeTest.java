@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -71,8 +72,9 @@ public class PrimitiveBooleanTypeTest extends TestBase {
         assertEquals(Boolean.TRUE, primitiveBooleanType.valueOf("TRUE"));
         assertEquals(Boolean.TRUE, primitiveBooleanType.valueOf("True"));
         assertEquals(Boolean.TRUE, primitiveBooleanType.valueOf("1"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("yes"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("YES"));
+        // "yes" is not boolean text (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("yes"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("YES"));
         assertEquals(Boolean.TRUE, primitiveBooleanType.valueOf("y"));
         assertEquals(Boolean.TRUE, primitiveBooleanType.valueOf("Y"));
     }
@@ -83,9 +85,12 @@ public class PrimitiveBooleanTypeTest extends TestBase {
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("FALSE"));
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("False"));
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("0"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("no"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("NO"));
+        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("-1"));
+        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("n"));
         assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("N"));
+        // "no" is not boolean text (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("no"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("NO"));
     }
 
     @Test
@@ -100,9 +105,13 @@ public class PrimitiveBooleanTypeTest extends TestBase {
 
     @Test
     public void testValueOfWithInvalidString() {
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("invalid"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("maybe"));
-        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("2"));
+        // Text that is none of the accepted texts is rejected, and text is never parsed as a number (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("invalid"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("maybe"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("1.0"));
+        assertEquals(Boolean.FALSE, primitiveBooleanType.valueOf("-1"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("2"));
+        assertThrows(IllegalArgumentException.class, () -> primitiveBooleanType.valueOf("-2"));
     }
 
     @Test

@@ -457,10 +457,11 @@ public class StreamImplReview20260924Test extends TestBase {
     @Test
     public void testC002_supplierSeesExactCounts() {
         final List<Integer> seen = new ArrayList<>();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5)), Stream.of(Arrays.asList(1, 2, 3, 4, 5).iterator()).split(2, n -> {
-            seen.add(n);
-            return new ArrayList<>(n);
-        }).toList());
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5)),
+                Stream.of(Arrays.asList(1, 2, 3, 4, 5).iterator()).split(2, n -> {
+                    seen.add(n);
+                    return new ArrayList<>(n);
+                }).toList());
         assertEquals(Arrays.asList(2, 2, 1), seen);
 
         seen.clear();
@@ -474,10 +475,7 @@ public class StreamImplReview20260924Test extends TestBase {
 
     @Test
     public void testC002_boundedCapacitySupplierStillWorks() {
-        final List<Integer> sizes = Stream.of(range(0, 100).iterator())
-                .split(40, IntFunctions.<Integer> ofArrayBlockingQueue())
-                .map(Collection::size)
-                .toList();
+        final List<Integer> sizes = Stream.of(range(0, 100).iterator()).split(40, IntFunctions.<Integer> ofArrayBlockingQueue()).map(Collection::size).toList();
         assertEquals(Arrays.asList(40, 40, 20), sizes);
 
         final List<Integer> windowSizes = Stream.of(range(0, 10).iterator())
@@ -521,9 +519,10 @@ public class StreamImplReview20260924Test extends TestBase {
         assertEquals(Arrays.asList(Pair.of("a", Arrays.asList("x")), Pair.of(null, Arrays.asList((String) null))),
                 Stream.of("a", null).groupJoin(right, StreamImplReview20260924Test::key).toList());
 
-        assertEquals(Arrays.asList(Pair.of("a", 1L), Pair.of(null, 1L)), Stream.of("a", null)
-                .groupJoin(right, StreamImplReview20260924Test::key, StreamImplReview20260924Test::key, java.util.stream.Collectors.counting())
-                .toList());
+        assertEquals(Arrays.asList(Pair.of("a", 1L), Pair.of(null, 1L)),
+                Stream.of("a", null)
+                        .groupJoin(right, StreamImplReview20260924Test::key, StreamImplReview20260924Test::key, java.util.stream.Collectors.counting())
+                        .toList());
 
         final AtomicInteger bClosed = new AtomicInteger();
         assertEquals(Arrays.asList("a=[x]", "null=[null]"),
@@ -536,8 +535,8 @@ public class StreamImplReview20260924Test extends TestBase {
         final AtomicInteger bClosed2 = new AtomicInteger();
         assertEquals(Arrays.asList("a=1", "null=1"),
                 Stream.of("a", null)
-                        .groupJoin(Stream.of(right).onClose(bClosed2::incrementAndGet), StreamImplReview20260924Test::key,
-                                StreamImplReview20260924Test::key, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r)
+                        .groupJoin(Stream.of(right).onClose(bClosed2::incrementAndGet), StreamImplReview20260924Test::key, StreamImplReview20260924Test::key,
+                                java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r)
                         .toList());
         assertEquals(1, bClosed2.get());
 
@@ -621,8 +620,7 @@ public class StreamImplReview20260924Test extends TestBase {
     public void testC063_mapPartialNullOptionalMessage() {
         // Cycle 2 (D5-07): the message names the optional type the mapper should have returned.
         final String msg = "mapper returned a null %1$s; return %1$s.empty() for no result";
-        assertEquals(String.format(msg, "Optional"),
-                assertThrows(NullPointerException.class, () -> Stream.of(1).mapPartial(x -> null).toList()).getMessage());
+        assertEquals(String.format(msg, "Optional"), assertThrows(NullPointerException.class, () -> Stream.of(1).mapPartial(x -> null).toList()).getMessage());
         assertEquals(String.format(msg, "OptionalInt"),
                 assertThrows(NullPointerException.class, () -> Stream.of(1).mapPartialToInt(x -> null).toArray()).getMessage());
         assertEquals(String.format(msg, "OptionalLong"),

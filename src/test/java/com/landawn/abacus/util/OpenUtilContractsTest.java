@@ -1,6 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -11,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -49,8 +53,9 @@ public class OpenUtilContractsTest extends TestBase {
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             Thread.interrupted();
-            if (interrupted)
+            if (interrupted) {
                 Thread.currentThread().interrupt();
+            }
         }
         final Pair<String, String> pair = Fnn.<String, String, Exception> pair().apply(null, "");
         pair.setLeft("甲🙂");
@@ -145,8 +150,9 @@ public class OpenUtilContractsTest extends TestBase {
                 final ClassLoader loader = new ClassLoader(JavaVersion.class.getClassLoader()) {
                     @Override
                     protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
-                        if (!requested.equals(name))
+                        if (!requested.equals(name)) {
                             return super.loadClass(requested, resolve);
+                        }
                         synchronized (getClassLoadingLock(requested)) {
                             Class<?> result = findLoadedClass(requested);
                             if (result == null) {
@@ -157,8 +163,9 @@ public class OpenUtilContractsTest extends TestBase {
                                     throw new ClassNotFoundException(requested, e);
                                 }
                             }
-                            if (resolve)
+                            if (resolve) {
                                 resolveClass(result);
+                            }
                             return result;
                         }
                     }
@@ -170,10 +177,11 @@ public class OpenUtilContractsTest extends TestBase {
                 assertEquals(value.equals("25") ? 25f : 99f, max.invoke(null));
             }
         } finally {
-            if (previous == null)
+            if (previous == null) {
                 System.clearProperty("java.specification.version");
-            else
+            } else {
                 System.setProperty("java.specification.version", previous);
+            }
         }
     }
 }

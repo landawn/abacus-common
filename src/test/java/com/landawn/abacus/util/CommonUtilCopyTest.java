@@ -177,12 +177,11 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         // Pins the class-javadoc "Index Conventions" bullet: the stepped copyOfRange overloads are the documented
         // exception to "fromIndex > toIndex is rejected" - a negative step copies in reverse and honours the
         // toIndex == -1 sentinel, a positive step yields an empty result.
-        assertArrayEquals(new int[] { 5, 4, 3 }, N.copyOfRange(new int[] { 1, 2, 3, 4, 5 }, 4, 1, -1));
-        assertArrayEquals(new int[] { 3, 2, 1 }, N.copyOfRange(new int[] { 1, 2, 3 }, 2, -1, -1));
-        assertArrayEquals(new int[] {}, N.copyOfRange(new int[] { 1, 2, 3, 4, 5 }, 4, 1, 2));
-        assertEquals("edc", N.copyOfRange("abcde", 4, 1, -1));
+        assertArrayEquals(new int[] { 5, 4, 3 }, CommonUtil.copyOfRange(new int[] { 1, 2, 3, 4, 5 }, 4, 1, -1));
+        assertArrayEquals(new int[] { 3, 2, 1 }, CommonUtil.copyOfRange(new int[] { 1, 2, 3 }, 2, -1, -1));
+        assertArrayEquals(new int[] {}, CommonUtil.copyOfRange(new int[] { 1, 2, 3, 4, 5 }, 4, 1, 2));
+        assertEquals("edc", CommonUtil.copyOfRange("abcde", 4, 1, -1));
     }
-
 
     @Test
     public void testCopyOfRangeStringWithStepReturnsEmptyForNullString() {

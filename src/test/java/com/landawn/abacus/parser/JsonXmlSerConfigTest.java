@@ -841,7 +841,6 @@ public class JsonXmlSerConfigTest extends TestBase {
         }
     }
 
-
     @Test
     public void testSetDateTimeFormatExampleRendersOneInstantAsIsoLongAndDefaultText() {
         final JsonParser jsonParser = ParserFactory.createJsonParser();

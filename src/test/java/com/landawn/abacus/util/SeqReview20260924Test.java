@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -84,8 +83,7 @@ public class SeqReview20260924Test extends TestBase {
     @Test
     public void testToCollection_supplierReturnsNull_nonEmpty() {
         final AtomicInteger closed = new AtomicInteger();
-        final NullPointerException e = assertThrows(NullPointerException.class,
-                () -> tracked(closed, "a", "b").toCollection(() -> (List<String>) null));
+        final NullPointerException e = assertThrows(NullPointerException.class, () -> tracked(closed, "a", "b").toCollection(() -> null));
         assertEquals("supplier returned null", e.getMessage());
         assertEquals(1, closed.get());
     }
@@ -93,14 +91,14 @@ public class SeqReview20260924Test extends TestBase {
     @Test
     public void testToCollection_supplierReturnsNull_empty() {
         final AtomicInteger closed = new AtomicInteger();
-        assertThrows(NullPointerException.class, () -> tracked(closed).toCollection(() -> (List<Object>) null));
+        assertThrows(NullPointerException.class, () -> tracked(closed).toCollection(() -> null));
         assertEquals(1, closed.get());
     }
 
     @Test
     public void testToCollectionThenApplyAndAccept_supplierReturnsNull() {
-        assertThrows(NullPointerException.class, () -> Seq.of("a").toCollectionThenApply(() -> (List<String>) null, c -> c));
-        assertThrows(NullPointerException.class, () -> Seq.of("a").toCollectionThenAccept(() -> (List<String>) null, c -> {
+        assertThrows(NullPointerException.class, () -> Seq.of("a").toCollectionThenApply(() -> null, c -> c));
+        assertThrows(NullPointerException.class, () -> Seq.of("a").toCollectionThenAccept(() -> null, c -> {
         }));
     }
 
@@ -111,8 +109,7 @@ public class SeqReview20260924Test extends TestBase {
         for (final boolean empty : new boolean[] { false, true }) {
             final AtomicInteger closed = new AtomicInteger();
             final Seq<String, Exception> seq = empty ? tracked(closed) : tracked(closed, "a", "b");
-            final NullPointerException e = assertThrows(NullPointerException.class,
-                    () -> seq.toMap(x -> x, x -> x, Fnn.throwingMerger(), nullFactory));
+            final NullPointerException e = assertThrows(NullPointerException.class, () -> seq.toMap(x -> x, x -> x, Fnn.throwingMerger(), nullFactory));
             assertEquals("mapFactory returned null", e.getMessage());
             assertEquals(1, closed.get());
         }
@@ -165,12 +162,11 @@ public class SeqReview20260924Test extends TestBase {
     @Test
     public void testSplitAndSliding_collectionSupplierReturnsNull() {
         final AtomicInteger closed = new AtomicInteger();
-        final NullPointerException e = assertThrows(NullPointerException.class,
-                () -> tracked(closed, 1, 2, 3).split(2, n -> (List<Integer>) null).toList());
+        final NullPointerException e = assertThrows(NullPointerException.class, () -> tracked(closed, 1, 2, 3).split(2, n -> (List<Integer>) null).toList());
         assertEquals("collectionSupplier returned null", e.getMessage());
         assertEquals(1, closed.get());
 
-        assertThrows(NullPointerException.class, () -> Seq.of(1, 2, 3).split(x -> x > 1, () -> (List<Integer>) null).toList());
+        assertThrows(NullPointerException.class, () -> Seq.of(1, 2, 3).split(x -> x > 1, () -> null).toList());
         assertThrows(NullPointerException.class, () -> Seq.of(1, 2, 3).sliding(2, 1, n -> (List<Integer>) null).toList());
         assertThrows(NullPointerException.class, () -> Seq.of(1, 2, 3).sliding(2, n -> (List<Integer>) null).toList());
     }
@@ -252,8 +248,8 @@ public class SeqReview20260924Test extends TestBase {
         // U10-03 (2026-09-25): the two three-way overloads (Iterable x3, Iterator x3) were not exercised
         final Seq<String, IOException> mergedIterables3 = Seq.merge(Arrays.asList("a"), Arrays.asList("c"), Arrays.asList("b"), selector);
         assertEquals(Arrays.asList("a", "b", "c"), mergedIterables3.toList());
-        final Seq<String, IOException> mergedIterators3 = Seq.merge(Arrays.asList("a").iterator(), Arrays.asList("c").iterator(),
-                Arrays.asList("b").iterator(), selector);
+        final Seq<String, IOException> mergedIterators3 = Seq.merge(Arrays.asList("a").iterator(), Arrays.asList("c").iterator(), Arrays.asList("b").iterator(),
+                selector);
         assertEquals(Arrays.asList("a", "b", "c"), mergedIterators3.toList());
 
         // A lambda selector still infers E from the target / its body, as before.
@@ -580,10 +576,8 @@ public class SeqReview20260924Test extends TestBase {
         assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).append((Seq<Integer, Exception>) null).toList());
         assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).prepend((Collection<Integer>) null).toList());
         assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).append((Collection<Integer>) null).toList());
-        assertEquals(Arrays.asList(1, 2),
-                Seq.of(1, 2).mergeWith((Collection<Integer>) null, (a, b) -> MergeResult.TAKE_FIRST).toList());
-        assertEquals(Arrays.asList(1, 2),
-                Seq.of(1, 2).mergeWith((Seq<Integer, Exception>) null, (a, b) -> MergeResult.TAKE_FIRST).toList());
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).mergeWith((Collection<Integer>) null, (a, b) -> MergeResult.TAKE_FIRST).toList());
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).mergeWith((Seq<Integer, Exception>) null, (a, b) -> MergeResult.TAKE_FIRST).toList());
         assertEquals(Arrays.asList(null, "a", "bb"), Seq.of(null, "a", "bb").sortedByInt(s -> s == null ? 0 : s.length()).toList());
     }
 

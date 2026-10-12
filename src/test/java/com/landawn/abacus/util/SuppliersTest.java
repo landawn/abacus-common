@@ -1621,15 +1621,13 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testOfMultisetNullValueMapTypeMessageNamesValueMapType() {
-        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Suppliers.ofMultiset((Class<? extends Map>) null));
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset((Class<? extends Map>) null));
         Assertions.assertEquals("'valueMapType' cannot be null", e.getMessage());
     }
 
     @Test
     public void testOfListMultimapNullMapTypeMessageNamesMapType() {
-        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
         Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
 
         e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null, ArrayList.class));
@@ -1641,8 +1639,7 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testOfSetMultimapNullMapTypeMessageNamesMapType() {
-        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));
         Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
 
         e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null, HashSet.class));
@@ -1704,9 +1701,11 @@ public class SuppliersTest extends TestBase {
         Assertions.assertEquals("'mapSupplier' returned null",
                 Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get())
                         .getMessage());
-        Assertions.assertEquals("'mapSupplier' returned null", Assertions
-                .assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get())
-                .getMessage());
+        Assertions.assertEquals("'mapSupplier' returned null",
+                Assertions
+                        .assertThrows(NullPointerException.class,
+                                () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get())
+                        .getMessage());
 
         final AtomicInteger valueCalls = new AtomicInteger();
         final ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, () -> {
@@ -1728,12 +1727,13 @@ public class SuppliersTest extends TestBase {
                     Assertions.assertThrows(NullPointerException.class, () -> listMultimap.put(key, 4)).getMessage());
         }
 
-        Assertions.assertEquals("'valueSupplier' returned null", Assertions
-                .assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(HashMap::new, () -> null).get().put("k", 1))
-                .getMessage());
         Assertions.assertEquals("'valueSupplier' returned null",
-                Assertions.assertThrows(NullPointerException.class,
-                        () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null).get().put("k", 1))
+                Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(HashMap::new, () -> null).get().put("k", 1))
+                        .getMessage());
+        Assertions.assertEquals("'valueSupplier' returned null",
+                Assertions
+                        .assertThrows(NullPointerException.class,
+                                () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null).get().put("k", 1))
                         .getMessage());
 
         final com.landawn.abacus.util.function.Supplier<Multiset<String>> multisetSupplier = Suppliers.ofMultiset(LinkedHashMap::new);
@@ -1745,4 +1745,54 @@ public class SuppliersTest extends TestBase {
         Assertions.assertEquals(0, second.count("x"));
     }
     // ---- perf review 2026-09-26 G076 end ----
+
+    // ---- bug review 2026-09-30 G144 begin ----
+    static final java.util.Map<String, Integer> G144_BACKING_MAP = new java.util.LinkedHashMap<>(java.util.Map.of("a", 1, "b", 2));
+
+    /** A named view over shared data: every instance reads and writes G144_BACKING_MAP. */
+    static class G144SharedView extends java.util.AbstractMap<String, Integer> {
+        @Override
+        public java.util.Set<java.util.Map.Entry<String, Integer>> entrySet() {
+            return G144_BACKING_MAP.entrySet();
+        }
+
+        @Override
+        public Integer put(final String key, final Integer value) {
+            return G144_BACKING_MAP.put(key, value);
+        }
+    }
+
+    static final java.util.Map<String, Integer> G144_ANONYMOUS_VIEW = new java.util.AbstractMap<>() {
+        @Override
+        public java.util.Set<java.util.Map.Entry<String, Integer>> entrySet() {
+            return G144_BACKING_MAP.entrySet();
+        }
+    };
+
+    static final java.util.Map<String, Integer> G144_ANONYMOUS_SUBCLASS_OF_NAMED_VIEW = new G144SharedView() {
+    };
+
+    // G144: after the rollback of the anonymous-class changes (owner decision), no factory, reader or Maps result writes into
+    // or empties the shared data of an anonymous view: the review found that clearing a "recreated" anonymous instance wiped
+    // the backing map of a view (including an anonymous subclass of a named, concrete view class).
+    @Test
+    public void testFactories_anonymousViewOverSharedDataIsNeverEmptied() {
+        for (final java.util.Map<String, Integer> view : java.util.List.of(G144_ANONYMOUS_VIEW, G144_ANONYMOUS_SUBCLASS_OF_NAMED_VIEW)) {
+            @SuppressWarnings("rawtypes")
+            final Class<? extends java.util.Map> viewClass = view.getClass();
+
+            final java.util.Map<String, Integer> filtered = Maps.filter(view, (k, v) -> "a".equals(k));
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.LinkedHashMap.class, filtered.getClass());
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.Map.of("a", 1), filtered);
+
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(viewClass));
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(viewClass, 4));
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(viewClass).get());
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.fromJson("{\"c\": 3}", viewClass));
+
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.Map.of("a", 1, "b", 2), G144_BACKING_MAP);
+        }
+    }
+    // ---- bug review 2026-09-30 G144 end ----
+
 }

@@ -298,11 +298,11 @@ public class DatesReviewFixes20260924bTest extends TestBase {
     @Test
     public void c122_malformedAutoDetectedTextGetsOneDiagnosticOnEveryLegacyTarget() {
         TimeZone.setDefault(UTC);
-        final java.util.List<org.junit.jupiter.api.function.ThrowingConsumer<String>> targets = java.util.List.of(Dates::parseToJUDate,
-                Dates::parseToTimestamp, Dates::parseToCalendar, Dates::parseToXMLGregorianCalendar, Dates::parseToDate, Dates::parseToGregorianCalendar);
+        final java.util.List<org.junit.jupiter.api.function.ThrowingConsumer<String>> targets = java.util.List.of(Dates::parseToJUDate, Dates::parseToTimestamp,
+                Dates::parseToCalendar, Dates::parseToXMLGregorianCalendar, Dates::parseToDate, Dates::parseToGregorianCalendar);
 
-        for (final String text : new String[] { "2025-01x15T10:30:45.123", "2025-01x15T10:30:45.5", "2025-01x15T10:30:45.123Z", "2025-01x15T10:30:45.123456789Z",
-                "2025-01-15T10:30x45.123", "2025-01-15T10:30x45.123Z" }) {
+        for (final String text : new String[] { "2025-01x15T10:30:45.123", "2025-01x15T10:30:45.5", "2025-01x15T10:30:45.123Z",
+                "2025-01x15T10:30:45.123456789Z", "2025-01-15T10:30x45.123", "2025-01-15T10:30x45.123Z" }) {
             for (final org.junit.jupiter.api.function.ThrowingConsumer<String> target : targets) {
                 final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> target.accept(text), text);
                 assertTrue(e.getMessage().contains("requires its exact canonical shape"), text + " -> " + e.getMessage());
@@ -332,7 +332,8 @@ public class DatesReviewFixes20260924bTest extends TestBase {
     @Test
     public void c123_fixedZoneConflictOnTheJavaTimeEntryPointsNamesTheCallersConstant() {
         final TimeZone kolkata = TimeZone.getTimeZone("Asia/Kolkata");
-        final String[][] cases = { { "2025-01-15T10:30:45Z", Dates.ISO_8601_DATE_TIME_FORMAT }, { "2025-01-15T10:30:45.123Z", Dates.ISO_8601_TIMESTAMP_FORMAT } };
+        final String[][] cases = { { "2025-01-15T10:30:45Z", Dates.ISO_8601_DATE_TIME_FORMAT },
+                { "2025-01-15T10:30:45.123Z", Dates.ISO_8601_TIMESTAMP_FORMAT } };
 
         for (final String[] c : cases) {
             final String legacy = assertThrows(IllegalArgumentException.class, () -> Dates.parseToJUDate(c[0], c[1], kolkata)).getMessage();
@@ -372,7 +373,8 @@ public class DatesReviewFixes20260924bTest extends TestBase {
     public void c124_carriedDayThirtyOneIntoTheFirstMonthOfTheRangeKeepsTheDay() {
         TimeZone.setDefault(UTC);
         final long may31 = java.time.LocalDateTime.of(-292275055, 5, 31, 12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
-        final java.util.Date july31 = new java.util.Date(java.time.LocalDateTime.of(-292275055, 7, 31, 12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
+        final java.util.Date july31 = new java.util.Date(
+                java.time.LocalDateTime.of(-292275055, 7, 31, 12, 0).toInstant(java.time.ZoneOffset.UTC).toEpochMilli());
 
         assertEquals(may31, Dates.setYears(at("2024-05-31 12:00:00", UTC), -292275055).getTime());
         assertEquals(may31, Dates.setMonths(july31, 4).getTime());
@@ -431,7 +433,8 @@ public class DatesReviewFixes20260924bTest extends TestBase {
         for (final String text : new String[] { "+300000000-01-01", "-292275056-01-01", "+292278995-01-01" }) {
             final java.util.List<org.junit.jupiter.api.function.Executable> calls = java.util.List.of(() -> DTF.LOCAL_DATE.parseToDate(text, UTC),
                     () -> DTF.LOCAL_DATE.parseToTime(text, UTC), () -> DTF.LOCAL_DATE.parseToCalendar(text, UTC), () -> DTF.LOCAL_DATE.parseToJUDate(text),
-                    () -> DTF.LOCAL_DATE.parseToJUDate(text, UTC), () -> DTF.LOCAL_DATE.parseToTimestamp(text), () -> DTF.LOCAL_DATE.parseToTimestamp(text, UTC));
+                    () -> DTF.LOCAL_DATE.parseToJUDate(text, UTC), () -> DTF.LOCAL_DATE.parseToTimestamp(text),
+                    () -> DTF.LOCAL_DATE.parseToTimestamp(text, UTC));
 
             for (final org.junit.jupiter.api.function.Executable call : calls) {
                 final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call, text);
@@ -444,7 +447,8 @@ public class DatesReviewFixes20260924bTest extends TestBase {
 
         // The civil and Instant targets hold such values.
         assertEquals(java.time.LocalDate.of(300_000_000, 1, 1), DTF.LOCAL_DATE.parseToLocalDate("+300000000-01-01"));
-        assertEquals(java.time.LocalDate.of(300_000_000, 1, 1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant(), DTF.LOCAL_DATE.parseToInstant("+300000000-01-01", UTC));
+        assertEquals(java.time.LocalDate.of(300_000_000, 1, 1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant(),
+                DTF.LOCAL_DATE.parseToInstant("+300000000-01-01", UTC));
 
         // The last and first representable milliseconds on every legacy target; the silent wrap window just above
         // Long.MAX_VALUE and the first 808 milliseconds above Long.MIN_VALUE that Timestamp.from mishandled.
@@ -521,8 +525,8 @@ public class DatesReviewFixes20260924bTest extends TestBase {
         TimeZone.setDefault(NY);
         final String[] texts = { "2025-13-15T10:30:45.5Z", "2025-13-15T10:30:45.123Z", "2025-02-30T10:30:45.5Z", "2025-13-15 10:30:45", "2025-13-15",
                 "2025-13-15T10:30:45", "2025-01-15T23:59:60Z", "2025-13-15T10:30:45+01:00", "2025-13-15T10:30:45.123" };
-        final java.util.List<org.junit.jupiter.api.function.ThrowingConsumer<String>> targets = java.util.List.of(Dates::parseToJUDate,
-                Dates::parseToTimestamp, Dates::parseToCalendar, Dates::parseToXMLGregorianCalendar, Dates::parseToInstant, Dates::parseToDate);
+        final java.util.List<org.junit.jupiter.api.function.ThrowingConsumer<String>> targets = java.util.List.of(Dates::parseToJUDate, Dates::parseToTimestamp,
+                Dates::parseToCalendar, Dates::parseToXMLGregorianCalendar, Dates::parseToInstant, Dates::parseToDate);
 
         for (final String text : texts) {
             for (final org.junit.jupiter.api.function.ThrowingConsumer<String> target : targets) {
@@ -568,7 +572,7 @@ public class DatesReviewFixes20260924bTest extends TestBase {
     }
 
     // ----------------------------------------------------------------------------------------------------
-    // C-118 (cycle 2): a fixed-offset default of any class under a registered ID is read as that offset
+    // C-118: only a plain fixed SimpleTimeZone is verifiable; other known-ID defaults use registered rules.
     // ----------------------------------------------------------------------------------------------------
 
     @SuppressWarnings("serial")
@@ -609,21 +613,30 @@ public class DatesReviewFixes20260924bTest extends TestBase {
     }
 
     @Test
-    public void c118_fixedOffsetDefaultOfAnyClassUnderARegionIdIsReadAsThatOffset() {
+    public void c118_unverifiedDefaultUsesKnownIdWhilePlainFixedZoneUsesItsOffset() {
         final java.util.Date a = new java.util.Date(Instant.parse("2025-01-15T23:30:00Z").toEpochMilli());
         final java.util.Date b = new java.util.Date(Instant.parse("2025-01-16T00:30:00Z").toEpochMilli());
 
         TimeZone.setDefault(fixedOffsetSubclass(0, "America/New_York"));
-        assertFalse(Dates.isSameDay(a, b));
-        assertFalse(Dates.isLastDayOfMonth(new java.util.Date(Instant.parse("2025-02-01T00:30:00Z").toEpochMilli())));
+        assertTrue(Dates.isSameDay(a, b));
+        assertTrue(Dates.isLastDayOfMonth(new java.util.Date(Instant.parse("2025-02-01T00:30:00Z").toEpochMilli())));
 
         TimeZone.setDefault(fixedOffsetSubclass(-5 * 3_600_000, "America/New_York"));
         assertTrue(Dates.isSameDay(a, b));
 
         TimeZone.setDefault(fixedOffsetSubclass(500, "America/New_York"));
-        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(a, b));
+        assertTrue(Dates.isSameDay(a, b));
 
         TimeZone.setDefault(fixedOffsetSubclass(0, "No/Such_Zone"));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(a, b));
+
+        // The old fixed-offset assertions still apply when the implementation proves the fixed rules.
+        TimeZone.setDefault(new SimpleTimeZone(0, "America/New_York"));
+        assertFalse(Dates.isSameDay(a, b));
+        assertFalse(Dates.isLastDayOfMonth(new java.util.Date(Instant.parse("2025-02-01T00:30:00Z").toEpochMilli())));
+        TimeZone.setDefault(new SimpleTimeZone(500, "America/New_York"));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(a, b));
+        TimeZone.setDefault(new SimpleTimeZone(0, "No/Such_Zone"));
         assertFalse(Dates.isSameDay(a, b));
 
         // A real region default and a customised known ID are unchanged.

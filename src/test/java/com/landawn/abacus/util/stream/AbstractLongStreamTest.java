@@ -50,13 +50,13 @@ public class AbstractLongStreamTest extends TestBase {
             return value;
         }).scan((left, right) -> {
             accumulatorCalls.incrementAndGet();
-            return (long) (left + right);
+            return left + right;
         })) {
             final com.landawn.abacus.util.LongIterator iter = stream.iterator();
             org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextLong));
-            org.junit.jupiter.api.Assertions.assertEquals((long) 2, iter.nextLong());
+            org.junit.jupiter.api.Assertions.assertEquals(2, iter.nextLong());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
-            org.junit.jupiter.api.Assertions.assertEquals((long) 5, iter.nextLong());
+            org.junit.jupiter.api.Assertions.assertEquals(5, iter.nextLong());
             org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
         }
@@ -837,22 +837,22 @@ public class AbstractLongStreamTest extends TestBase {
     @Test
     public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
         // reversed(): count() must consume all remaining elements
-        LongIteratorEx revIter = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        LongIteratorEx revIter = createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
         assertEquals(5L, revIter.count());
         assertFalse(revIter.hasNext());
 
         // rotated(): count() must consume all remaining elements
-        LongIteratorEx rotIter = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
+        LongIteratorEx rotIter = createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
         assertEquals(5L, rotIter.count());
         assertFalse(rotIter.hasNext());
 
         // reverseSorted(): count() must consume all remaining elements
-        LongIteratorEx rsIter = (LongIteratorEx) createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
+        LongIteratorEx rsIter = createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
         assertEquals(5L, rsIter.count());
         assertFalse(rsIter.hasNext());
 
         // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
-        LongIteratorEx revIter2 = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        LongIteratorEx revIter2 = createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
         revIter2.nextLong();
         revIter2.nextLong();
         assertEquals(3L, revIter2.count());
@@ -861,18 +861,18 @@ public class AbstractLongStreamTest extends TestBase {
 
     @Test
     public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
-        LongIteratorEx reversed = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
+        LongIteratorEx reversed = createLongStream(1L, 2L, 3L, 4L, 5L).reversed().iteratorEx();
         assertEquals(5, reversed.toArray().length);
         assertFalse(reversed.hasNext());
         assertEquals(0, reversed.toArray().length);
 
-        LongIteratorEx rotated = (LongIteratorEx) createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
+        LongIteratorEx rotated = createLongStream(1L, 2L, 3L, 4L, 5L).rotated(2).iteratorEx();
         rotated.nextLong();
         assertEquals(4, rotated.toArray().length);
         assertFalse(rotated.hasNext());
         assertEquals(0, rotated.toArray().length);
 
-        LongIteratorEx reverseSorted = (LongIteratorEx) createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
+        LongIteratorEx reverseSorted = createLongStream(3L, 1L, 4L, 1L, 5L).reverseSorted().iteratorEx();
         reverseSorted.nextLong();
         reverseSorted.nextLong();
         assertEquals(3, reverseSorted.toArray().length);
@@ -918,6 +918,7 @@ public class AbstractLongStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createLongStream(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+
     // ---- perf review 2026-09-26 G085 begin ----
     // G085-01: rotated() nextX()/toArray() replaced the per-element modulo with a conditional subtraction and two bulk copies.
     @Test
@@ -929,7 +930,7 @@ public class AbstractLongStreamTest extends TestBase {
             final long[] backing = new long[len + 5];
 
             for (int i = 0; i < backing.length; i++) {
-                backing[i] = (long) i * 10_000_000_000L - 7;
+                backing[i] = i * 10_000_000_000L - 7;
             }
 
             for (final int distance : distances) {
@@ -944,14 +945,13 @@ public class AbstractLongStreamTest extends TestBase {
                     final long[] copy = Arrays.copyOfRange(backing, from, from + len);
 
                     // full toArray()
-                    assertArrayEquals(expected, (source == 0 ? LongStream.of(backing, from, from + len) : LongStream.of(LongIterator.of(copy))).rotated(distance).toArray(),
-                            msg);
+                    assertArrayEquals(expected,
+                            (source == 0 ? LongStream.of(backing, from, from + len) : LongStream.of(LongIterator.of(copy))).rotated(distance).toArray(), msg);
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final LongIteratorEx byNext = (LongIteratorEx) (source == 0 ? LongStream.of(backing, from, from + len) : LongStream.of(LongIterator.of(copy)))
-                                .rotated(distance)
-                                .iteratorEx();
+                        final LongIteratorEx byNext = (source == 0 ? LongStream.of(backing, from, from + len)
+                                : LongStream.of(LongIterator.of(copy))).rotated(distance).iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextLong(), msg + ", k=" + k + ", j=" + j);
@@ -960,7 +960,7 @@ public class AbstractLongStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final LongIteratorEx byAdvance = (LongIteratorEx) (source == 0 ? LongStream.of(backing, from, from + len)
+                        final LongIteratorEx byAdvance = (source == 0 ? LongStream.of(backing, from, from + len)
                                 : LongStream.of(LongIterator.of(copy))).rotated(distance).iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);

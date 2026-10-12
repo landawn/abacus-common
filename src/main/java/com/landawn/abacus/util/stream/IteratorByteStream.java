@@ -32,7 +32,6 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
-import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -425,15 +424,35 @@ class IteratorByteStream extends AbstractByteStream {
 
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
-            private ByteStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextByte());
+                        final ByteStream s = mapper.apply(elements.nextByte());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -444,7 +463,7 @@ class IteratorByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -460,15 +479,15 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -587,15 +606,35 @@ class IteratorByteStream extends AbstractByteStream {
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextByte());
+                        final IntStream s = mapper.apply(elements.nextByte());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -606,7 +645,7 @@ class IteratorByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -622,15 +661,15 @@ class IteratorByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -655,17 +694,36 @@ class IteratorByteStream extends AbstractByteStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<T> iter = new SequentialFlatMapObjIterator<>() {
             private Iterator<? extends T> cur = null;
-            private Stream<? extends T> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextByte());
+                        final Stream<? extends T> s = mapper.apply(elements.nextByte());
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -676,7 +734,7 @@ class IteratorByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -690,17 +748,12 @@ class IteratorByteStream extends AbstractByteStream {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -1500,7 +1553,8 @@ class IteratorByteStream extends AbstractByteStream {
         checkArgPositive(k, cs.k);
 
         try {
-            if (isSorted()) {
+            // Above the histogram's payload size, even sorted input needs less storage in the fixed 256-bin path below.
+            if (isSorted() && k <= 256 * Long.BYTES) {
                 // For sorted ascending, kthLargest = (k-1)th from the end.
                 // Use a ring buffer of size k while draining the iterator.
                 byte[] window = null;
@@ -1960,7 +2014,7 @@ class IteratorByteStream extends AbstractByteStream {
 
         checkArgNotNull(supplier, cs.supplier);
 
-        final Holder<ByteStream> holder = new Holder<>();
+        final MappedStreamHolder holder = new MappedStreamHolder();
 
         return newStream(new ByteIteratorEx() { //NOSONAR
             private ByteIteratorEx iter;
@@ -2014,15 +2068,18 @@ class IteratorByteStream extends AbstractByteStream {
                         final ByteStream s = supplier.get();
                         try {
                             iter = s == null ? ByteIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = ByteIteratorEx.empty();
+                        }
                     }
                 }
             }
-        }, false).onClose(() -> close(holder));
+        }, false).onClose(holder::close);
     }
 
     /**

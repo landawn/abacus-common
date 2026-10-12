@@ -16,6 +16,7 @@ package com.landawn.abacus.type;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -253,7 +254,9 @@ public class MapType<K, V, T extends Map<K, V>> extends AbstractType<T> {
     public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NumberFormatException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
-        } else if ("{}".equals(str)) {
+        } else if ("{}".equals(str) && !(mapImplClass == EnumMap.class && parameterTypes.get(0).javaType().isEnum())) {
+            // An enum-keyed EnumMap is left to the parser below: N.newMap(EnumMap.class) returns a HashMap (EnumMap has no
+            // no-arg constructor), whereas the parser creates an EnumMap of the declared key enum, as for any other text.
             return (T) N.newMap(mapImplClass);
         } else {
             return (T) Utils.jsonParser.deserialize(str, jdc, mapImplClass);

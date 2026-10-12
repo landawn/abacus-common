@@ -1,7 +1,6 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1075,8 +1074,9 @@ public class DoubleStreamTest extends TestBase {
         Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1.0, 2.0), DoubleStream.of(10.0, 20.0), DoubleStream.of(100.0, 200.0));
         DoubleStream result = DoubleStream.zip(streams, doubles -> {
             double sum = 0.0;
-            for (Double d : doubles)
+            for (Double d : doubles) {
                 sum += d;
+            }
             return sum;
         });
         assertArrayEquals(new double[] { 111.0, 222.0 }, result.toArray(), 0.0001);
@@ -1088,8 +1088,9 @@ public class DoubleStreamTest extends TestBase {
         double[] defaults = new double[] { 0.0, 0.0 };
         DoubleStream result = DoubleStream.zip(streams, defaults, doubles -> {
             double sum = 0.0;
-            for (Double d : doubles)
+            for (Double d : doubles) {
                 sum += d;
+            }
             return sum;
         });
         assertEquals(2, result.count());
@@ -4215,6 +4216,7 @@ public class DoubleStreamTest extends TestBase {
         assertEquals(8.0 + 9.0 + 1.0, DoubleStream.concat(list).sum());
         assertArrayEquals(new double[] { 1, 8, 9 }, DoubleStream.concat(list).sorted().toArray());
     }
+
     // G094-01: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
     @Test
     public void testConcatListOfArrays_longSegmentsBulkPath() {
@@ -4253,6 +4255,7 @@ public class DoubleStreamTest extends TestBase {
         assertFalse(result2 == b);
         assertEquals(100.0, DoubleStream.concat(b, a).toArray()[0]);
     }
+
     // G094-02: pins the column-major order of flatten(double[][], true) for jagged input with null/empty/short rows
     @Test
     public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
@@ -4343,6 +4346,7 @@ public class DoubleStreamTest extends TestBase {
         assertArrayEquals(new double[0], DoubleStream.flatten(new double[][] { null, {}, null }, true).toArray());
         assertArrayEquals(new double[] { 1, 3, 2, 4 }, DoubleStream.flatten(new double[][] { { 1, 2 }, { 3, 4 } }, true).toArray());
     }
+
     // ---- perf review 2026-09-26 G094 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static double[] flattenVerticallyReferenceG114(final double[][] a) {
@@ -4415,7 +4419,7 @@ public class DoubleStreamTest extends TestBase {
                     a[i] = new double[len];
 
                     for (int j = 0; j < len; j++) {
-                        a[i][j] = (double) (i * 100 + j);
+                        a[i][j] = i * 100 + j;
                     }
                 }
             }
@@ -4444,7 +4448,7 @@ public class DoubleStreamTest extends TestBase {
         oneLongRow[999] = new double[5000];
 
         for (int j = 0; j < 5000; j++) {
-            oneLongRow[999][j] = (double) j;
+            oneLongRow[999][j] = j;
         }
 
         assertArrayEquals(oneLongRow[999], DoubleStream.flatten(oneLongRow, true).toArray());

@@ -93,6 +93,7 @@ import com.esotericsoftware.kryo.Registration;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BiMap;
@@ -242,6 +243,65 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     private static final List<Input> inputPool = new ArrayList<>(POOL_SIZE);
 
+    // Stream inputs own their bounded buffer; byte-array inputs borrow caller payloads and use
+    // the separate pool above so recycling must continue to detach those payloads.
+    private static final List<StreamingInput> streamingInputPool = new ArrayList<>(POOL_SIZE);
+
+    private static final class BorrowedInput extends Input {
+        BorrowedInput() {
+            // Every user of this pool immediately installs its own byte array.
+            super();
+        }
+
+        void releaseLargeScratchBuffer() {
+            if (chars != null && chars.length > BUFFER_SIZE) {
+                chars = new char[32];
+            }
+        }
+    }
+
+    private static final class StreamingInput extends Input {
+        private final byte[] ownedBuffer;
+        private IOException readFailure;
+
+        StreamingInput() {
+            super(BUFFER_SIZE);
+            ownedBuffer = getBuffer();
+        }
+
+        @Override
+        public void close() {
+            // Deserialization never closes the caller-owned source, even through a serializer.
+        }
+
+        private void releaseLargeScratchBuffer() {
+            // Kryo grows this separate character scratch array when decoding long strings.
+            // Bounded byte input alone must not admit an arbitrarily large char[] to the pool.
+            if (chars != null && chars.length > BUFFER_SIZE) {
+                chars = new char[32];
+            }
+        }
+
+        @Override
+        protected int fill(final byte[] bytes, final int offset, final int count) {
+            try {
+                final int read = inputStream.read(bytes, offset, count);
+                if (read != 0 || count == 0) {
+                    return read;
+                }
+                final int next = inputStream.read();
+                if (next < 0) {
+                    return -1;
+                }
+                bytes[offset] = (byte) next;
+                return 1;
+            } catch (final IOException e) {
+                readFailure = e;
+                throw new KryoException(e);
+            }
+        }
+    }
+
     private final Set<Class<?>> kryoClassSet = new HashSet<>();
     private final Map<Class<?>, Integer> kryoClassIdMap = new ConcurrentHashMap<>();
     private final Map<Class<?>, Serializer<?>> kryoClassSerializerMap = new ConcurrentHashMap<>();
@@ -296,7 +356,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         try {
             write(obj, config, os);
 
-            return Strings.base64Encode(os.toByteArray());
+            return BinaryParserSupport.encodeBase64(os);
         } finally {
             Objectory.recycle(os);
         }
@@ -408,7 +468,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         try {
             write(obj, config, os);
 
-            output.write(Strings.base64Encode(os.toByteArray()));
+            BinaryParserSupport.writeBase64(os, output);
 
             output.flush();
         } catch (final IOException e) {
@@ -601,8 +661,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
-     *         by Kryo
+     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file (source I/O failures are translated; an I/O cause from a custom serializer remains a {@code KryoException})
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -635,8 +694,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null, or {@code source} is a directory,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
-     *         by Kryo
+     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file (source I/O failures are translated; an I/O cause from a custom serializer remains a {@code KryoException})
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -678,7 +736,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
+     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails, while decoding or while the
+     *         remaining bytes are consumed after decoding; if decoding had already failed, that failure is attached as a
+     *         suppressed exception
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -712,7 +772,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
+     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails, while decoding or while the
+     *         remaining bytes are consumed after decoding; if decoding had already failed, that failure is attached as a
+     *         suppressed exception
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -808,21 +870,67 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class to deserialize to (may be {@code null} if class info is in stream)
      * @return the deserialized object
-     * @throws UncheckedIOException if reading all bytes from {@code source} fails
+     * @throws UncheckedIOException if reading from {@code source} fails, while decoding or while the remaining bytes are
+     *         consumed after decoding; if decoding had already failed, that failure is attached as a suppressed exception
      * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if the bytes are empty, truncated, incompatible with {@code targetClass}, or cannot be materialized by the configured
      *         Kryo serializers
      */
     private <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass)
             throws UncheckedIOException, IllegalArgumentException, KryoException {
-        final Input input = createInput();
+        final StreamingInput input;
+        synchronized (streamingInputPool) {
+            input = streamingInputPool.isEmpty() ? new StreamingInput() : streamingInputPool.remove(streamingInputPool.size() - 1);
+        }
 
         try {
-            input.setBuffer(IOUtil.readAllBytes(source));
-
-            return read(input, config, targetClass);
+            input.setInputStream(source);
+            // The failure already propagating out of decoding, if any. A drain failure thrown from the finally
+            // block below would otherwise discard it, along with the only explanation of why decoding stopped.
+            Throwable decodingFailure = null;
+            try {
+                final T result = read(input, config, targetClass);
+                if (input.readFailure != null) {
+                    throw new UncheckedIOException(input.readFailure);
+                }
+                return result;
+            } catch (final KryoException e) {
+                if (input.readFailure != null) {
+                    throw new UncheckedIOException(input.readFailure);
+                }
+                decodingFailure = e;
+                throw e;
+            } catch (final RuntimeException | Error e) {
+                decodingFailure = e;
+                throw e;
+            } finally {
+                // Preserve the InputStream overload's complete-consumption contract, including
+                // trailing bytes and malformed payloads, without closing the caller's stream.
+                if (input.readFailure == null) {
+                    try {
+                        while (IOUtil.read(source, input.ownedBuffer) != IOUtil.EOF) {
+                            // Drain using the same owned buffer after decoding has finished.
+                        }
+                    } catch (final IOException e) {
+                        // A source read failure stays an UncheckedIOException, as when the whole stream was read
+                        // before decoding; the decoding failure travels with it instead of being lost.
+                        final UncheckedIOException drainFailure = new UncheckedIOException(e);
+                        if (decodingFailure != null) {
+                            drainFailure.addSuppressed(decodingFailure);
+                        }
+                        throw drainFailure;
+                    }
+                }
+            }
         } finally {
-            recycle(input);
+            input.setInputStream(null);
+            input.readFailure = null;
+            synchronized (streamingInputPool) {
+                if (streamingInputPool.size() < POOL_SIZE && input.getBuffer() == input.ownedBuffer) {
+                    input.releaseLargeScratchBuffer();
+                    streamingInputPool.add(input);
+                }
+            }
         }
     }
 
@@ -1018,9 +1126,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     public byte[] encode(final Object source) throws IllegalArgumentException, KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
         final Output output = createOutput();
-        final Kryo kryo = createKryo();
+        Kryo kryo = null;
 
         try {
+            // Registration validation may fail before serialization starts; still return both borrowed buffers.
+            kryo = createKryo();
             output.setOutputStream(os);
             kryo.writeClassAndObject(output, source);
 
@@ -1057,9 +1167,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         N.checkArgNotNull(source, cs.source);
 
         final Input input = createInput();
-        final Kryo kryo = createKryo();
+        Kryo kryo = null;
 
         try {
+            kryo = createKryo();
             input.setBuffer(source);
 
             return (T) kryo.readClassAndObject(input);
@@ -1074,6 +1185,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Registration allows Kryo to serialize the class more efficiently.
      * If the class was registered previously through another overload, this call replaces that
      * registration; the most recent call is authoritative.
+     * A parser-local registration uses the default serializer even when the same class has a global
+     * custom serializer. A global or built-in registration ID is retained; otherwise Kryo assigns one automatically.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1516,9 +1629,22 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 final Kryo kryo = new Kryo();
 
                 kryo.setRegistrationRequired(false);
+                // Kryo's constructor registers String with StringSerializer but declares no default serializer for it, so
+                // re-registering String at an explicit ID, or its name-based fallback once ID 1 is reused, would get FieldSerializer,
+                // which reflects into String internals (needs --add-opens java.lang) and writes the JVM's own string layout.
+                kryo.addDefaultSerializer(String.class, DefaultSerializers.StringSerializer.class);
+
+                final Map<Class<?>, Serializer<?>> primitiveSerializers = new HashMap<>();
 
                 for (final Class<?> cls : builtInClassesToRegister) {
-                    kryo.register(cls);
+                    final Registration registration = kryo.register(cls);
+
+                    if (cls.isPrimitive()) {
+                        // Kryo registers these serializers directly, without default factories for primitives or wrappers.
+                        // Retain the originals before global registrations can replace their shared registration.
+                        primitiveSerializers.put(cls, registration.getSerializer());
+                        primitiveSerializers.put(ClassUtil.wrap(cls), registration.getSerializer());
+                    }
                 }
 
                 // Keep the registry lock until the fully configured instance is published/returned.
@@ -1551,7 +1677,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(kryoClassSet)) {
                     for (final Class<?> cls : kryoClassSet) {
-                        kryo.register(cls);
+                        // register(Class) leaves an existing global serializer unchanged. The serializer overload
+                        // makes this local default authoritative while retaining the registration's assigned ID.
+                        final Serializer<?> primitiveSerializer = primitiveSerializers.get(cls);
+                        kryo.register(cls, primitiveSerializer == null ? kryo.getDefaultSerializer(cls) : primitiveSerializer);
                     }
                 }
 
@@ -1590,12 +1719,16 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     private static void registerKryo(final Kryo kryo, final Class<?> type, final Serializer<?> serializer, final int id) {
         checkKryoRegistrationIdAvailable(kryo, type, id);
         final Registration displacedPrimitive = displacedPrimitiveRegistration(kryo, type, id);
+        final Registration previous = kryo.getClassResolver().getRegistration(type);
+        // Primitive and wrapper classes share one registration. Registering only the wrapper after
+        // removing that entry strands the primitive, for which Kryo cannot create a FieldSerializer.
+        final Class<?> registrationType = previous != null && previous.getType().isPrimitive() ? previous.getType() : type;
         unregisterKryoRegistrationAtDifferentId(kryo, type, id);
         // Kryo.register(Class, int) returns an existing name-based registration unchanged.
         // Use the serializer overload so an explicit ID can replace an earlier implicit
         // registration for the same class. Primitive and wrapper classes share Kryo's
         // primitive registration, whose specialized serializer must survive relocation.
-        kryo.register(type, serializer, id);
+        kryo.register(registrationType, serializer, id);
 
         if (displacedPrimitive != null) {
             // Kryo drops the displaced primitive together with its wrapper alias, and the wrapper then falls
@@ -1757,8 +1890,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Creates a new {@code Input} instance from the pool or creates a new one if the pool is empty.
      * This method uses object pooling to reduce allocation overhead and improve performance.
-     * A newly created {@code Input} has the default buffer size; a pooled one holds an empty buffer. Either way,
-     * install the data to read with {@code setBuffer} before use.
+     * No payload buffer is allocated by this method. Install the data to read with {@code setBuffer} before use.
      *
      * <p><b>Note:</b> This method is package-private and not part of the public API.</p>
      *
@@ -1780,7 +1912,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
             if (inputPool.size() > 0) {
                 return inputPool.remove(inputPool.size() - 1);
             }
-            return new Input(BUFFER_SIZE);
+            return new BorrowedInput();
         }
     }
 
@@ -1789,11 +1921,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * This method returns the {@code Input} to the object pool if it meets size constraints,
      * allowing it to be reused by future operations. The input's stream is set to {@code null} and its
      * buffer is replaced by an empty array before pooling, so the pool neither leaks a stream nor retains the last payload.
+     * Inputs created by {@link #createInput()} borrow their payload; its size does not prevent reuse. Their
+     * owned character scratch buffer is reduced after unusually large strings.
      *
      * <p>The input will not be recycled if:</p>
      * <ul>
      *   <li>The input is {@code null}</li>
-     *   <li>The input's buffer exceeds the default buffer size</li>
+     *   <li>An input not created by {@code createInput()} has a buffer larger than the default size</li>
      *   <li>The pool is already at maximum capacity</li>
      * </ul>
      *
@@ -1813,7 +1947,16 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param input the {@code Input} instance to recycle (may be {@code null})
      */
     static void recycle(final Input input) {
-        if ((input == null) || ((input.getBuffer() != null) && (input.getBuffer().length > BUFFER_SIZE))) {
+        if (input == null) {
+            return;
+        }
+
+        if (input instanceof BorrowedInput borrowed) {
+            // The payload belongs to the caller; its length does not describe pooled storage.
+            // Detach it even if the pool is full, and bound only the owned decoding scratch.
+            borrowed.setBuffer(N.EMPTY_BYTE_ARRAY);
+            borrowed.releaseLargeScratchBuffer();
+        } else if (input.getBuffer() != null && input.getBuffer().length > BUFFER_SIZE) {
             return;
         }
 

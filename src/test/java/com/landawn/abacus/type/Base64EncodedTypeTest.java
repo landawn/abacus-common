@@ -57,4 +57,22 @@ public class Base64EncodedTypeTest extends TestBase {
         // Basic set test - actual implementation will vary by type
         assertDoesNotThrow(() -> type.set(stmt, "param", null));
     }
+
+    // ---- bug review 2026-10-02 G114 begin ----
+
+    // G114-01: the inherited valueOf(Object) rendered a byte[] as its list text "[1, 2, 3]" and then Base64-decoded that
+    // text (IllegalArgumentException "Illegal base64 character 5b"); a byte[] is now returned as is, as BytesType does.
+    @Test
+    public void testValueOfObject_byteArrayReturnedAsIs() {
+        // called through Type<byte[]>, the erased signature the parsers and converters use
+        final Type<byte[]> byteArrayType = type;
+        final byte[] bytes = { 1, 2, 3 };
+        org.junit.jupiter.api.Assertions.assertSame(bytes, byteArrayType.valueOf(bytes));
+
+        // any other object still goes through its string form, and null still decodes to an empty array
+        org.junit.jupiter.api.Assertions.assertArrayEquals(bytes, byteArrayType.valueOf((Object) "AQID"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[0], byteArrayType.valueOf((Object) null));
+    }
+
+    // ---- bug review 2026-10-02 G114 end ----
 }

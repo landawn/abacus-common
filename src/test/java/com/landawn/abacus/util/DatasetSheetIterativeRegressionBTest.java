@@ -169,8 +169,7 @@ public class DatasetSheetIterativeRegressionBTest extends TestBase {
         Dataset before = data.copy();
         // a null result is a broken callback postcondition (NPE); a wrong-sized list is IAE
         final Class<? extends RuntimeException> expected = length < 0 ? NullPointerException.class : IllegalArgumentException.class;
-        assertThrows(expected,
-                () -> data.divideColumn("b", List.of("x", "y"), value -> length < 0 ? null : Arrays.asList(new Object[length])));
+        assertThrows(expected, () -> data.divideColumn("b", List.of("x", "y"), value -> length < 0 ? null : Arrays.asList(new Object[length])));
         assertEquals(before, data);
     }
 

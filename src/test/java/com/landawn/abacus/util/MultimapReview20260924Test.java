@@ -54,7 +54,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC351_toMapIntFunction_nullFactory_NPE_onEmptyAndNonEmpty() {
-        final ListMultimap<String, Integer> empty = N.newListMultimap();
+        final ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         final NullPointerException e1 = assertThrows(NullPointerException.class, () -> empty.toMap(n -> null));
         assertTrue(e1.getMessage().contains("returned null"), e1.getMessage());
 
@@ -65,7 +65,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC351_flatValues_nullFactory_NPE_onEmptyAndNonEmpty() {
-        final ListMultimap<String, Integer> empty = N.newListMultimap();
+        final ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         final NullPointerException e1 = assertThrows(NullPointerException.class, () -> empty.flatValues(n -> null));
         assertTrue(e1.getMessage().contains("returned null"), e1.getMessage());
 
@@ -76,13 +76,13 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC351_invert_nullFactory_NPE_onEmptyAndNonEmpty() {
-        final ListMultimap<String, Integer> empty = N.newListMultimap();
+        final ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         final NullPointerException e1 = assertThrows(NullPointerException.class, () -> empty.<List<String>, ListMultimap<Integer, String>> invert(n -> null));
         assertTrue(e1.getMessage().contains("multimapSupplier returned null"), e1.getMessage());
 
         final ListMultimap<String, Integer> one = listOf("a", 1);
         assertThrows(NullPointerException.class, () -> one.<List<String>, ListMultimap<Integer, String>> invert(n -> null));
-        assertEquals(List.of("a"), one.<List<String>, ListMultimap<Integer, String>> invert(n -> N.newListMultimap()).get(1));
+        assertEquals(List.of("a"), one.<List<String>, ListMultimap<Integer, String>> invert(n -> CommonUtil.newListMultimap()).get(1));
     }
 
     // ---------------------------------------------------------------- C-352
@@ -147,8 +147,8 @@ public class MultimapReview20260924Test extends TestBase {
         assertTrue(map.get("empty").isEmpty());
         assertEquals(2, map.size());
 
-        assertTrue(N.<String, Integer> newSetMultimap().toMap().isEmpty());
-        assertTrue(N.<String, Integer> newListMultimap().toMap(HashMap::new).isEmpty());
+        assertTrue(CommonUtil.<String, Integer> newSetMultimap().toMap().isEmpty());
+        assertTrue(CommonUtil.<String, Integer> newListMultimap().toMap(HashMap::new).isEmpty());
     }
 
     @Test
@@ -164,14 +164,14 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC353_replaceEntry_linkedSet_duplicateNewValue_keepsOrder() {
-        final SetMultimap<String, Integer> mm = N.newLinkedSetMultimap();
+        final SetMultimap<String, Integer> mm = CommonUtil.newLinkedSetMultimap();
         mm.putValues("k", List.of(1, 2, 3));
 
         final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> mm.replaceEntry("k", 1, 3));
         assertTrue(ex.getMessage().contains("Failed to add"), ex.getMessage());
         assertEquals(List.of(1, 2, 3), new ArrayList<>(mm.get("k")));
 
-        final Multimap<String, Integer, Set<Integer>> base = N.newMultimap(HashMap::new, LinkedHashSet::new);
+        final Multimap<String, Integer, Set<Integer>> base = CommonUtil.newMultimap(HashMap::new, LinkedHashSet::new);
         base.putValues("k", List.of(1, 2, 3));
         assertThrows(IllegalStateException.class, () -> base.replaceEntry("k", 2, 1));
         assertEquals(List.of(1, 2, 3), new ArrayList<>(base.get("k")));
@@ -183,7 +183,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC353_replaceEntry_linkedSet_nullValues() {
-        final SetMultimap<String, Integer> mm = N.newLinkedSetMultimap();
+        final SetMultimap<String, Integer> mm = CommonUtil.newLinkedSetMultimap();
         mm.putValues("k", Arrays.asList(null, 1, 2));
 
         assertThrows(IllegalStateException.class, () -> mm.replaceEntry("k", null, 2));
@@ -198,7 +198,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC353_replaceEntry_absentOldValue_presentNewValue_returnsFalse() {
-        final SetMultimap<String, Integer> mm = N.newLinkedSetMultimap();
+        final SetMultimap<String, Integer> mm = CommonUtil.newLinkedSetMultimap();
         mm.putValues("k", List.of(1, 2, 3));
 
         assertFalse(mm.replaceEntry("k", 7, 3));
@@ -208,13 +208,13 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC353_replaceEntry_sameValueAndComparatorEquivalentValue_stillSucceed() {
-        final SetMultimap<String, Integer> mm = N.newLinkedSetMultimap();
+        final SetMultimap<String, Integer> mm = CommonUtil.newLinkedSetMultimap();
         mm.putValues("k", List.of(1, 2));
         assertTrue(mm.replaceEntry("k", 1, 1));
         assertEquals(Set.of(1, 2), mm.get("k"));
 
         // "a" -> "A" under CASE_INSENSITIVE_ORDER: the new value is 'contained' only as the old value itself.
-        final Multimap<String, String, TreeSet<String>> ci = N.newMultimap(HashMap::new, () -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
+        final Multimap<String, String, TreeSet<String>> ci = CommonUtil.newMultimap(HashMap::new, () -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
         ci.putValues("k", List.of("a", "é"));
         assertTrue(ci.replaceEntry("k", "a", "A"));
         assertTrue(ci.replaceEntry("k", "é", "É"));
@@ -228,7 +228,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC353_replaceEntry_treeSetNullNewValue_stillWrapsNpe() {
-        final Multimap<String, Integer, TreeSet<Integer>> mm = N.newMultimap(HashMap::new, TreeSet::new);
+        final Multimap<String, Integer, TreeSet<Integer>> mm = CommonUtil.newMultimap(HashMap::new, TreeSet::new);
         mm.putValues("k", List.of(1, 2));
 
         final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> mm.replaceEntry("k", 1, null));
@@ -240,7 +240,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC354_replaceAll_laterFailure_keepsEarlierRemoval_inPlaceEmptied() {
-        final Multimap<String, Integer, TreeSet<Integer>> mm = N.newMultimap(LinkedHashMap::new, TreeSet::new);
+        final Multimap<String, Integer, TreeSet<Integer>> mm = CommonUtil.newMultimap(LinkedHashMap::new, TreeSet::new);
         mm.putValues("a", List.of(1, 2));
         mm.put("b", 3);
 
@@ -264,7 +264,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC354_replaceAll_laterFailure_keepsEarlierNullRemoval() {
-        final Multimap<String, Integer, TreeSet<Integer>> mm = N.newMultimap(LinkedHashMap::new, TreeSet::new);
+        final Multimap<String, Integer, TreeSet<Integer>> mm = CommonUtil.newMultimap(LinkedHashMap::new, TreeSet::new);
         mm.putValues("a", List.of(1, 2));
         mm.put("b", 3);
 
@@ -294,7 +294,7 @@ public class MultimapReview20260924Test extends TestBase {
         assertEquals(List.of(20, 21), mm.get("b"));
         assertEquals(List.of(3), mm.get("c"));
 
-        final ListMultimap<String, Integer> empty = N.newListMultimap();
+        final ListMultimap<String, Integer> empty = CommonUtil.newListMultimap();
         empty.replaceAll((k, v) -> null);
         assertTrue(empty.isEmpty());
 
@@ -324,7 +324,7 @@ public class MultimapReview20260924Test extends TestBase {
     public void testC355_baseCopy_nonEmptySupplierResult_IAE() {
         final AtomicInteger calls = new AtomicInteger();
         final Supplier<List<Integer>> supplier = () -> calls.incrementAndGet() == 1 ? new ArrayList<>() : new ArrayList<>(List.of(99));
-        final Multimap<String, Integer, List<Integer>> mm = N.newMultimap(LinkedHashMap::new, supplier);
+        final Multimap<String, Integer, List<Integer>> mm = CommonUtil.newMultimap(LinkedHashMap::new, supplier);
         mm.put("a", 1);
 
         final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, mm::copy);
@@ -355,7 +355,7 @@ public class MultimapReview20260924Test extends TestBase {
         assertTrue(copy.containsKey("b"));
         assertNotSame(mm.get("a"), copy.get("a"));
 
-        assertTrue(N.<String, Integer> newListMultimap().copy().isEmpty());
+        assertTrue(CommonUtil.<String, Integer> newListMultimap().copy().isEmpty());
     }
 
     // ---------------------------------------------------------------- C-356
@@ -390,7 +390,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC356_baseAndSetMultimap_nullValueSupplier_NPE() {
-        final Multimap<String, Integer, List<Integer>> base = N.newMultimap(HashMap::new, () -> null);
+        final Multimap<String, Integer, List<Integer>> base = CommonUtil.newMultimap(HashMap::new, () -> null);
         assertThrows(NullPointerException.class, () -> base.put("a", 1));
         assertTrue(base.isEmpty());
         assertTrue(base.copy().isEmpty(), "nothing to copy: the supplier is never called");
@@ -408,7 +408,7 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC357_documentedMergeDisambiguations() {
-        final ListMultimap<String, Object> mm = N.newListMultimap();
+        final ListMultimap<String, Object> mm = CommonUtil.newListMultimap();
         mm.put("k", 1);
         final List<Integer> list = List.of(2, 3);
 
@@ -431,13 +431,13 @@ public class MultimapReview20260924Test extends TestBase {
 
     @Test
     public void testC358_invert_hintIsKeyCount_notTotalValueCount() {
-        final ListMultimap<String, Integer> mm = N.newListMultimap();
+        final ListMultimap<String, Integer> mm = CommonUtil.newListMultimap();
         mm.putValues("k", Collections.nCopies(100_000, 7));
         final AtomicInteger hint = new AtomicInteger(-1);
 
         final ListMultimap<Integer, String> inv = mm.invert(n -> {
             hint.set(n);
-            return N.newListMultimap(n);
+            return CommonUtil.newListMultimap(n);
         });
 
         assertEquals(1, hint.get());
@@ -447,13 +447,13 @@ public class MultimapReview20260924Test extends TestBase {
         final ListMultimap<String, Integer> three = listOf("a", 1, "b", 1, "c", 2);
         three.invert(n -> {
             hint.set(n);
-            return N.newListMultimap(n);
+            return CommonUtil.newListMultimap(n);
         });
         assertEquals(3, hint.get());
 
-        N.<String, Integer> newListMultimap().invert(n -> {
+        CommonUtil.<String, Integer> newListMultimap().invert(n -> {
             hint.set(n);
-            return N.newListMultimap(n);
+            return CommonUtil.newListMultimap(n);
         });
         assertEquals(0, hint.get());
     }

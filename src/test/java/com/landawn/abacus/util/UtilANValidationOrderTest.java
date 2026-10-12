@@ -40,7 +40,7 @@ class UtilANValidationOrderTest extends TestBase {
         assertTrue(assertThrows(IllegalArgumentException.class, () -> Numbers.divide((BigInteger) null, null, null)).getMessage().contains("'p'"));
         assertTrue(assertThrows(IllegalArgumentException.class, () -> NoCachingNoUpdating.DisposableArray.create(null, -1)).getMessage()
                 .contains("componentType"));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.toArray(List.of("x"), -1, 1, (Class<String[]>) null));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toArray(List.of("x"), -1, 1, (Class<String[]>) null));
         assertThrows(IndexOutOfBoundsException.class, () -> Median.of(new Integer[] { 1 }, -1, 1, (Comparator<Integer>) null));
     }
 

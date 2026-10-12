@@ -422,11 +422,9 @@ public class IOUtilNullPathWriteTest extends TestBase {
         assertEquals("hello", IOUtil.readAllToString(real), "a rejected call leaves the file untouched");
     }
 
-
     @Test
     public void testCopyFileToOutputStreamNullSrcFileMessageNamesSrcFile() {
-        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> IOUtil.copyFile((File) null, new ByteArrayOutputStream()));
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile((File) null, new ByteArrayOutputStream()));
         assertTrue(e.getMessage().contains("sourceFile"), "expected the message to name 'sourceFile' but it was: " + e.getMessage());
     }
 }

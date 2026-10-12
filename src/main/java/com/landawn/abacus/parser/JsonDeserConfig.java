@@ -211,7 +211,9 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * accepted and resolved at deserialization time by {@link com.landawn.abacus.util.Suppliers#ofMap(Class)}
      * (e.g. {@code Map}/{@code AbstractMap} -> {@code HashMap}, {@code SortedMap} -> {@code TreeMap},
      * {@code EnumMap} -> {@code HashMap}); an unsupported abstract class fails when the first map is created,
-     * not in this setter. A concrete class must have a public no-argument constructor.</p>
+     * not in this setter. A named concrete class needs a registered supplier or a supported reflective construction path.
+     * An anonymous implementation is rejected when a map is created, even if a supplier is registered for it; use a named
+     * implementation instead. This setting does not recreate an existing output passed to {@code parseInto}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -261,7 +263,8 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * examples below do).</p>
      *
      * <p>The handler is looked up by the immediate property or map-key name under which the JSON
-     * array appears; dotted paths are not resolved.</p>
+     * array appears; for bean properties, the resolved Java property name is a fallback when the JSON name has
+     * no handler. Dotted paths are not resolved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -288,7 +291,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
         N.checkArgNotNull(handler, cs.handler);
 
         if (propHandlerMap == null) {
-            propHandlerMap = new HashMap<>();
+            propHandlerMap = newConfigMap();
         }
 
         propHandlerMap.put(propName, handler);
@@ -329,6 +332,15 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
     }
 
     /**
+     * Reports whether literal property names are needed to look up registered collection handlers.
+     *
+     * @return {@code true} when this configuration contains at least one property handler
+     */
+    boolean hasPropHandlers() {
+        return N.notEmpty(propHandlerMap);
+    }
+
+    /**
      * Calculates the hash code for this configuration object.
      *
      * <p>The hash code is computed based on all configuration settings including:</p>
@@ -355,7 +367,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
         h = 31 * h + N.hashCode(mapKeyType);
         h = 31 * h + N.hashCode(mapValueType);
         h = 31 * h + N.hashCode(valueTypeMap);
-        h = 31 * h + N.hashCode(beanInfoForValueTypes);
+        h = 31 * h + N.hashCode(beanTypeForValueTypes());
         h = 31 * h + N.hashCode(mapInstanceType);
         return 31 * h + N.hashCode(propHandlerMap);
     }
@@ -392,7 +404,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
             return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty) //NOSONAR
                     && N.equals(ignoreNullOrEmpty, other.ignoreNullOrEmpty) && N.equals(readNullToEmpty, other.readNullToEmpty)
                     && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
-                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes)
+                    && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanTypeForValueTypes(), other.beanTypeForValueTypes())
                     && N.equals(mapInstanceType, other.mapInstanceType) && N.equals(propHandlerMap, other.propHandlerMap);
         }
 
@@ -439,7 +451,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
         final JsonDeserConfig copy = super.copy();
 
         if (propHandlerMap != null) {
-            copy.propHandlerMap = new HashMap<>(propHandlerMap);
+            copy.propHandlerMap = copyConfigMap(propHandlerMap);
         }
 
         return copy;

@@ -1232,8 +1232,9 @@ public class ArrayStreamTest extends TestBase {
     public void testToCollection_largeSubsetAsList() {
         // When toIndex - fromIndex > 9 && result instanceof List, uses copyOfRange branch
         Integer[] arr = new Integer[15];
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 15; i++) {
             arr[i] = i;
+        }
         Stream<Integer> stream = Stream.of(arr).skip(2); // skip 2 so it's a subrange
         List<Integer> result = stream.toCollection(ArrayList::new);
         assertEquals(13, result.size());
@@ -2001,6 +2002,7 @@ public class ArrayStreamTest extends TestBase {
         final Object[] nestedB = { new String[] { "x" }, 1 };
         assertEquals(1, Stream.of(new Object[][] { nestedA, nestedB }).distinct().count());
     }
+
     // ---- perf review 2026-09-26 G112 begin ----
     // A List whose addAll(Collection) is the inherited AbstractList one: it iterates the argument instead of calling toArray().
     private static final class G112IteratingList<T> extends java.util.AbstractList<T> {

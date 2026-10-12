@@ -64,7 +64,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * @throws IllegalArgumentException if {@code is} is {@code null}.
      */
     public LZ4BlockInputStream(final InputStream is) throws IllegalArgumentException {
-        N.checkArgNotNull(is, cs.is); 
+        N.checkArgNotNull(is, cs.is);
         in = net.jpountz.lz4.LZ4BlockInputStream.newBuilder().build(is);
     }
 

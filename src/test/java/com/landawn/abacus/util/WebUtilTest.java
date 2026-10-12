@@ -1,6 +1,9 @@
 package com.landawn.abacus.util;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,9 +16,6 @@ import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.http.OkHttpRequest;
 import com.landawn.abacus.http.WebUtil;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 import com.sun.net.httpserver.HttpServer;
 
 public class WebUtilTest extends TestBase {

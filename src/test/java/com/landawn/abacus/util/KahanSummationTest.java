@@ -222,7 +222,6 @@ public class KahanSummationTest extends TestBase {
         Assertions.assertTrue(str.contains("average=1.500000"));
     }
 
-
     @Test
     public void testSumStaysInfiniteAfterIntermediateOverflowEvenWhenLaterValuesCancel() {
         final KahanSummation overflowFirst = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);

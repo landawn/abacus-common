@@ -1314,8 +1314,9 @@ public class LongStreamTest extends TestBase {
         long[] defaults = { 0L, 0L, 0L };
         LongStream result = LongStream.zip(streams, defaults, longs -> {
             long sum = 0;
-            for (Long l : longs)
+            for (Long l : longs) {
                 sum += l;
+            }
             return sum;
         });
         assertArrayEquals(new long[] { 111L, 202L, 3L }, result.toArray());
@@ -1576,8 +1577,9 @@ public class LongStreamTest extends TestBase {
         Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L), LongStream.of(10L, 20L), LongStream.of(100L, 200L));
         LongStream result = LongStream.zip(streams, longs -> {
             long sum = 0;
-            for (Long l : longs)
+            for (Long l : longs) {
                 sum += l;
+            }
             return sum;
         });
         assertArrayEquals(new long[] { 111L, 222L }, result.toArray());
@@ -4562,6 +4564,7 @@ public class LongStreamTest extends TestBase {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new long[0], LongStream.flatten(new long[][] { null, {}, null }, true).toArray());
     }
+
     // G100-06: concat(List<long[]>) bulk toArray/count/toLongList must equal the element-wise results
     @Test
     public void testConcatListOfArrays_toArrayCountToList_edgeCases() {
@@ -4672,6 +4675,7 @@ public class LongStreamTest extends TestBase {
         assertFalse(result2 == b);
         assertEquals(100L, LongStream.concat(b, a).toArray()[0]);
     }
+
     // ---- perf review 2026-09-26 G100 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static long[] flattenVerticallyReferenceG114(final long[][] a) {
@@ -4744,7 +4748,7 @@ public class LongStreamTest extends TestBase {
                     a[i] = new long[len];
 
                     for (int j = 0; j < len; j++) {
-                        a[i][j] = (long) (i * 100 + j);
+                        a[i][j] = i * 100 + j;
                     }
                 }
             }
@@ -4773,7 +4777,7 @@ public class LongStreamTest extends TestBase {
         oneLongRow[999] = new long[5000];
 
         for (int j = 0; j < 5000; j++) {
-            oneLongRow[999][j] = (long) j;
+            oneLongRow[999][j] = j;
         }
 
         assertArrayEquals(oneLongRow[999], LongStream.flatten(oneLongRow, true).toArray());

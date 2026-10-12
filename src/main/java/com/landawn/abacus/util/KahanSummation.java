@@ -340,6 +340,21 @@ public final class KahanSummation { // NOSONAR
         }
     }
 
+    /** The finite-overflow-aware result used by N's sum family; the public sum retains its IEEE behavior. */
+    double sumWithFiniteOverflow() {
+        final double result = sum();
+
+        if (Double.isFinite(result) || !finiteValuesOnly) {
+            return result;
+        } else if (overflowSafeSum != null) {
+            return overflowSafeSum.doubleValue();
+        } else {
+            // Compensation can overflow even when ordinary additions stay finite, for example
+            // MAX_VALUE followed by two 2^969 values. No exact overflow state exists in that case.
+            return Double.isFinite(simpleSum) ? simpleSum : result;
+        }
+    }
+
     /**
      * Calculates and returns the average of all added values.
      *

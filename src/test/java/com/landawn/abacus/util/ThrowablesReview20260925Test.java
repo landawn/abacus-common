@@ -107,11 +107,11 @@ public class ThrowablesReview20260925Test extends TestBase {
         assertEquals("java.base", validator.getModule().getName());
 
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> ExceptionUtil.registerRuntimeExceptionMapper(validator, t -> new RuntimeException((Throwable) t)));
+                () -> ExceptionUtil.registerRuntimeExceptionMapper(validator, t -> new RuntimeException(t)));
         assertTrue(e.getMessage().contains("built-in"), e.getMessage());
 
         e = assertThrows(IllegalArgumentException.class,
-                () -> ExceptionUtil.registerRuntimeExceptionMapper(validator, t -> new RuntimeException((Throwable) t), true));
+                () -> ExceptionUtil.registerRuntimeExceptionMapper(validator, t -> new RuntimeException(t), true));
         assertTrue(e.getMessage().contains("built-in"), e.getMessage());
 
         // the package rule is unchanged

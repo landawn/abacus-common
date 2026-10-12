@@ -114,14 +114,14 @@ public class RowIdTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
         final RowId value = mock(RowId.class);
 
-        assertSame(value, rowIdType.valueOf((Object) value));
+        assertSame(value, rowIdType.valueOf(value));
         assertNull(rowIdType.valueOf((Object) null));
     }
 
     @Test
     public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
         assertThrows(UnsupportedOperationException.class, () -> rowIdType.valueOf((Object) "x"));
-        assertThrows(UnsupportedOperationException.class, () -> rowIdType.valueOf((Object) 42));
+        assertThrows(UnsupportedOperationException.class, () -> rowIdType.valueOf(42));
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> rowIdType.valueOf("x"));
     }

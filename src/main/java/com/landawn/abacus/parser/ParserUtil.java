@@ -162,7 +162,7 @@ public final class ParserUtil {
     private static final Map<java.lang.reflect.Type, BeanInfo> beanInfoPool = new ConcurrentCacheMap<>(POOL_SIZE);
 
     /**
-     * The point past which a {@link BeanInfo}'s lookup-time caches ({@code propInfoMap} fuzzy hits, the
+     * The point past which a {@link BeanInfo}'s lookup-time caches ({@code fuzzyPropInfoMap} hits, the
      * negative cache of unknown names and {@code propInfoQueueMap}) stop accepting new entries.
      *
      * <p>Those caches are keyed by caller-supplied strings (JSON keys, XML element names, map keys), so without
@@ -171,6 +171,10 @@ public final class ParserUtil {
      * lookup and changes no result. Same precedent as {@code Beans.MAX_CACHED_NAMES}.</p>
      */
     private static final int MAX_CACHED_PROP_NAMES = POOL_SIZE * 2;
+
+    // A count limit alone can retain very large ignored JSON keys for the lifetime of a BeanInfo.
+    // This limits lookup-time memoization only: declared names and the lookup result are unchanged.
+    private static final int MAX_CACHED_PROP_NAME_LENGTH = 256;
 
     private ParserUtil() {
         // Singleton.
@@ -331,7 +335,7 @@ public final class ParserUtil {
      * <p>The method checks for time zone settings in the following order:</p>
      * <ol>
      *   <li>{@code @JsonXmlField(timeZone="...")}</li>
-     *   <li>{@code @JsonFormat(timezone="...")}</li>
+     *   <li>{@code @JsonFormat(timezone="...")}, excluding its {@code ##default} sentinel</li>
      *   <li>Global time zone from {@code JsonXmlConfig}</li>
      * </ol>
      *
@@ -354,9 +358,13 @@ public final class ParserUtil {
             }
 
             try {
-                if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)
-                        && Strings.isNotEmpty(field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone())) {
-                    return field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
+                if (field.isAnnotationPresent(com.fasterxml.jackson.annotation.JsonFormat.class)) {
+                    final String timeZone = field.getAnnotation(com.fasterxml.jackson.annotation.JsonFormat.class).timezone();
+
+                    // Jackson's sentinel leaves the context default unspecified; treating it as a zone ID silently selects GMT.
+                    if (Strings.isNotEmpty(timeZone) && !com.fasterxml.jackson.annotation.JsonFormat.DEFAULT_TIMEZONE.equals(timeZone)) {
+                        return timeZone;
+                    }
                 }
             } catch (final Throwable e) { // NOSONAR
                 // ignore
@@ -889,11 +897,12 @@ public final class ParserUtil {
      * @return a BeanInfo instance containing metadata about the class
      * @throws IllegalArgumentException if {@code beanType} is {@code null}, is neither a {@code Class} nor a
      *         {@code ParameterizedType} with a {@code Class} raw type (for example a {@code TypeVariable},
-     *         {@code WildcardType} or {@code GenericArrayType}), or is not a bean class (no properties), or, when its
-     *         {@code BeanInfo} is first built, its metadata is invalid (conflicting aliases; a custom, type, column or table
-     *         name with surrounding whitespace; an empty {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number
-     *         format pattern or {@code ignoredFields} regular expression; or a declared exposure on a transient or
-     *         non-serializable field).
+     *         {@code WildcardType} or {@code GenericArrayType}), or is not a bean class (including any
+     *         {@link Throwable} subclass), or its metadata is invalid when its {@code BeanInfo} is first built
+     *         (conflicting aliases; a custom, type, column or table name with surrounding whitespace; an empty
+     *         {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number format pattern or
+     *         {@code ignoredFields} regular expression; or a declared exposure on a transient or non-serializable
+     *         field).
      * @throws UnsupportedOperationException if, when the {@code BeanInfo} is first built, a {@code java.time.LocalDate} or
      *         {@code java.time.LocalTime} property is annotated with the {@code "long"} date format
      * @see BeanInfo
@@ -930,11 +939,12 @@ public final class ParserUtil {
      *
      * @param beanClass the class to get bean information for
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or is not a bean class (no properties), or, when its
-     *         {@code BeanInfo} is first built, its metadata is invalid (conflicting aliases; a custom, type, column or table
-     *         name with surrounding whitespace; an empty {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number
-     *         format pattern or {@code ignoredFields} regular expression; or a declared exposure on a transient or
-     *         non-serializable field).
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or is not a bean class (including any
+     *         {@link Throwable} subclass), or its metadata is invalid when its {@code BeanInfo} is first built
+     *         (conflicting aliases; a custom, type, column or table name with surrounding whitespace; an empty
+     *         {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number format pattern or
+     *         {@code ignoredFields} regular expression; or a declared exposure on a transient or non-serializable
+     *         field).
      * @throws UnsupportedOperationException if, when the {@code BeanInfo} is first built, a {@code java.time.LocalDate} or
      *         {@code java.time.LocalTime} property is annotated with the {@code "long"} date format
      * @see BeanInfo
@@ -946,15 +956,13 @@ public final class ParserUtil {
     }
 
     /**
-     * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
+     * @throws IllegalArgumentException if the class is not a bean class (including any {@link Throwable} subclass), or its property
+     *         metadata contains conflicting aliases, invalid names, or incompatible field exposure
      * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
      */
     private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType)
             throws IllegalArgumentException, UnsupportedOperationException {
-        if (!Beans.isBeanClass(beanClass)) {
-            throw new IllegalArgumentException(
-                    "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(beanClass));
-        }
+        Beans.checkBeanClass(beanClass);
 
         BeanInfo beanInfo = beanInfoPool.get(javaType);
 
@@ -984,7 +992,8 @@ public final class ParserUtil {
      * @param beanType the java type of the bean class to get information for
      * @param isASMSupported whether ASM support is enabled
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
+     * @throws IllegalArgumentException if the class is not a bean class (including any {@link Throwable} subclass), or its property
+     *         metadata contains conflicting aliases, invalid names, or incompatible field exposure
      * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
      * @see BeanInfo
      * @deprecated This overload is for internal tests only. Use {@link #getBeanInfo(java.lang.reflect.Type)} for normal bean metadata lookup.
@@ -1001,13 +1010,16 @@ public final class ParserUtil {
             beanClass = (Class<?>) beanType;
         }
 
+        Beans.checkBeanClass(beanClass);
+
         return new BeanInfo(beanClass, beanType, isASMSupported);
     }
 
     /**
      * Refreshes the cached bean property information for the specified class.
      *
-     * <p>This method removes the cached BeanInfo for the specified class, forcing
+     * <p>This method removes the cached BeanInfo for the specified class (for a {@code Class}, also the ones cached for
+     * its parameterized types such as {@code Box<String>}), forcing
      * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}. The nested-path chains
      * memoized by the other cached {@code BeanInfo}s ({@link BeanInfo#getPropInfoChain(String)}, e.g.
      * {@code "inner.city"} on an outer bean) are dropped as well, because they may hold properties of the evicted
@@ -1039,6 +1051,12 @@ public final class ParserUtil {
     public static void refreshBeanPropInfo(final java.lang.reflect.Type beanType) {
         synchronized (beanInfoPool) {
             beanInfoPool.remove(beanType);
+
+            // The pool is keyed by the full reflective type, so a parameterized use of the class (Box<String>)
+            // has its own BeanInfo built from the same class metadata; evict it too.
+            if (beanType instanceof Class) {
+                beanInfoPool.keySet().removeIf(key -> key instanceof ParameterizedType pt && beanType.equals(pt.getRawType()));
+            }
 
             // Another bean's memoized nested-path chain (e.g. "inner.city" on Outer) holds PropInfos taken from the
             // evicted BeanInfo, so it would keep resolving the old property model; drop those chains to have them
@@ -1220,12 +1238,20 @@ public final class ParserUtil {
         final Set<String> transientSeriPropNameSet = N.newHashSet();
 
         /**
-         * Every spelling that resolves to a property: names, naming-policy tags, column names and aliases
-         * (registered at construction, unconditionally) plus fuzzy hits memoized by {@link #getPropInfo(String)}
-         * (capped at {@link ParserUtil#MAX_CACHED_PROP_NAMES}). Holds real bindings only; misses live in
-         * {@link #missedPropNames} so the fuzzy scan in {@code getPropInfo} never has to walk over them.
+         * Declared property names, naming-policy tags, column names and aliases. Populated only during
+         * construction; fuzzy resolution must scan this stable vocabulary rather than previous lookup results.
+         *
+         * <p>Kept as a {@code ConcurrentCacheMap} with its original capacity although it is read-only after
+         * construction: {@link #resolveAlias(String)} breaks equal-rank ties by iteration order, and
+         * {@code get(null)} must return {@code null} so that {@link #getPropInfo(String)} rejects a {@code null}
+         * name with {@code IllegalArgumentException} rather than a {@code NullPointerException}.</p>
          */
         private final Map<String, Optional<PropInfo>> propInfoMap;
+
+        // Keep memoized hits out of the alias candidates: otherwise looking up "getValue" teaches the
+        // next lookup to accept "getgetValue". This also bounds each scan by declared metadata instead
+        // of all caller spellings that have ever resolved successfully.
+        private final Map<String, Optional<PropInfo>> fuzzyPropInfoMap = new ConcurrentHashMap<>();
 
         /**
          * Negative cache of {@link #getPropInfo(String)}: names that resolved to nothing. Bounded by
@@ -1259,6 +1285,16 @@ public final class ParserUtil {
         private final Object[] defaultFieldValues;
         private final Constructor<?> noArgsConstructor;
         private final Constructor<?> allArgsConstructor;
+
+        /**
+         * {@code true} when {@link #createBeanResult()} may invoke {@link #noArgsConstructor} directly: the class is a
+         * plain (top-level or static nested), non-abstract, non-container class with a no-args constructor - exactly
+         * the case in which {@code N.newInstance(clazz)} resolves and invokes that same cached constructor, after
+         * re-deriving this classification on every call (for a top-level class through two native {@code Class}
+         * queries, {@code isAnonymousClass()} and {@code isMemberClass()}). The classification never changes for a
+         * class, so it is taken once here.
+         */
+        private final boolean invokeNoArgsConstructorDirectly;
 
         /** Whether this bean is immutable (e.g., a record or has no setters) */
         public final boolean isImmutable;
@@ -1368,14 +1404,16 @@ public final class ParserUtil {
             final List<String> idPropNames = new ArrayList<>();
             final List<String> readOnlyIdPropNames = new ArrayList<>();
 
-            if (beanClass.isAnnotationPresent(Id.class)) {
-                final String[] values = beanClass.getAnnotation(Id.class).value();
+            // Resolve identifiers from the same hierarchy view as the other class metadata. Direct
+            // reflection would lose non-@Inherited markers declared on a superclass or interface.
+            if (annotations.containsKey(Id.class)) {
+                final String[] values = ((Id) annotations.get(Id.class)).value();
                 N.checkArgNotEmpty(values, "values for annotation @Id on Type/Class cannot be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
             }
 
-            if (beanClass.isAnnotationPresent(ReadOnlyId.class)) {
-                final String[] values = beanClass.getAnnotation(ReadOnlyId.class).value();
+            if (annotations.containsKey(ReadOnlyId.class)) {
+                final String[] values = ((ReadOnlyId) annotations.get(ReadOnlyId.class)).value();
                 N.checkArgNotEmpty(values, "values for annotation @ReadOnlyId on Type/Class cannot be null or empty");
                 idPropNames.addAll(Arrays.asList(values));
                 readOnlyIdPropNames.addAll(Arrays.asList(values));
@@ -1397,15 +1435,16 @@ public final class ParserUtil {
             Field field = null;
             Method getMethod = null;
             Method setMethod = null;
+            final ASMAccessors asmAccessors = ASMUtil.isASMAvailable() && isASMSupported ? new ASMAccessors() : null;
 
             for (final String propName : propNameList) {
                 field = Beans.getPropField(beanClass, propName);
                 getMethod = Beans.getPropGetter(beanClass, propName);
                 setMethod = isByBuilder ? Beans.getPropSetter(builderInfo.builderClass(), propName) : Beans.getPropSetter(beanClass, propName);
 
-                propInfo = ASMUtil.isASMAvailable() && isASMSupported
+                propInfo = asmAccessors != null && isASMAccessible(beanClass, field, getMethod, setMethod)
                         ? new ASMPropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
-                                readOnlyIdPropNames, typeParamArgMap)
+                                readOnlyIdPropNames, typeParamArgMap, asmAccessors)
                         : new PropInfo(propName, field, getMethod, setMethod, jsonXmlConfig, annotations, idx, isImmutable, isByBuilder, idPropNames,
                                 readOnlyIdPropNames, typeParamArgMap);
 
@@ -1415,10 +1454,14 @@ public final class ParserUtil {
                 // naming-policy tags are registered in the passes after this loop.
                 propInfoMap.put(propName, Optional.of(propInfo));
 
-                // These two checks reject a DECLARED direction on a property that cannot honour it; the implicit
-                // SERIALIZE_ONLY of a read-only (getter-only) property is not a declaration.
+                // These two checks reject a DECLARED direction on a property that cannot honour it. The SERIALIZE_ONLY
+                // of a read-only property is not a declaration when it was implied - no @JsonXmlField, or one left at
+                // (or set to) BOTH, which a read-only property cannot honour for input (see PropInfo.jsonXmlExpose).
+                final boolean implicitReadOnlyDirection = propInfo.isReadOnlyProperty && (field == null || !field.isAnnotationPresent(JsonXmlField.class)
+                        || field.getAnnotation(JsonXmlField.class).direction() == JsonXmlField.Direction.BOTH);
+
                 if (!isJsonXmlSerializable(propInfo.name, propInfo.field, jsonXmlConfig)) {
-                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !propInfo.isReadOnlyProperty) {
+                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !implicitReadOnlyDirection) {
                         throw new IllegalArgumentException(
                                 "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
                     }
@@ -1428,7 +1471,7 @@ public final class ParserUtil {
                     seriPropInfoList.add(propInfo);
 
                     if (propInfo.isTransient) {
-                        if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !propInfo.isReadOnlyProperty) {
+                        if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !implicitReadOnlyDirection) {
                             throw new IllegalArgumentException(
                                     "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for transient field: " + propInfo.field);
                         }
@@ -1605,6 +1648,13 @@ public final class ParserUtil {
                 ClassUtil.setAccessibleQuietly(allArgsConstructor, true);
             }
 
+            // Mirrors the checks N.newInstance(Class) makes before it invokes a no-args constructor; any class that
+            // fails one of them keeps going through N.newInstance in createBeanResult().
+            final int classModifiers = beanClass.getModifiers();
+            invokeNoArgsConstructorDirectly = noArgsConstructor != null && !Collection.class.isAssignableFrom(beanClass)
+                    && !Map.class.isAssignableFrom(beanClass) && !beanClass.isPrimitive() && !beanClass.isArray() && !Modifier.isAbstract(classModifiers)
+                    && (Modifier.isStatic(classModifiers) || !ClassUtil.isAnonymousOrMemberClass(beanClass));
+
             boolean tmpIsMarkedToBean = annotations.containsKey(Entity.class);
 
             if (!tmpIsMarkedToBean) {
@@ -1676,6 +1726,42 @@ public final class ParserUtil {
             }
         }
 
+        private static boolean isASMAccessible(final Class<?> beanClass, final Field field, final Method getter, final Method setter) {
+            // Generated accessors use a separate class loader, so even package-private declaring classes are inaccessible.
+            // They also cast a written value to the setter's parameter type, or to the type of a public non-final field
+            // they assign directly. Public types must also be exported to the generated accessor's module. Only a public
+            // non-final field gets a FieldAccess (see ASMPropInfo), so any other field puts no requirement on its class.
+            return isASMAccessibleType(beanClass)
+                    && (field == null || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())
+                            || isASMAccessibleType(field.getDeclaringClass()) && isASMAccessibleType(field.getType()))
+                    && (getter == null || Modifier.isPublic(getter.getModifiers()) && isASMAccessibleType(getter.getDeclaringClass()))
+                    && (setter == null || Modifier.isPublic(setter.getModifiers()) && isASMAccessibleType(setter.getDeclaringClass())
+                            && areASMAccessibleTypes(setter.getParameterTypes()));
+        }
+
+        /**
+         * Whether every parameter type can be named by an accessor generated in another runtime package and module.
+         */
+        private static boolean areASMAccessibleTypes(final Class<?>[] types) {
+            for (final Class<?> type : types) {
+                if (!isASMAccessibleType(type)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static boolean isASMAccessibleType(Class<?> type) {
+            while (type.isArray()) {
+                type = type.getComponentType();
+            }
+
+            // Checking exports to ParserUtil's module is insufficient: reflectasm defines its accessor in a separate
+            // unnamed module. Require an unqualified export and conservatively use reflection for qualified exports.
+            return type.isPrimitive() || Modifier.isPublic(type.getModifiers()) && type.getModule().isExported(type.getPackageName());
+        }
+
         private static void collectOwnerTypeArguments(final java.lang.reflect.Type ownerType,
                 final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
             if (!(ownerType instanceof ParameterizedType parameterizedOwner) || !(parameterizedOwner.getRawType() instanceof Class<?> ownerClass)) {
@@ -1729,6 +1815,12 @@ public final class ParserUtil {
             if (propInfoOpt == null) {
                 N.checkArgNotNull(propName, cs.propName);
 
+                propInfoOpt = fuzzyPropInfoMap.get(propName);
+
+                if (propInfoOpt != null) {
+                    return propInfoOpt.orElseNull();
+                }
+
                 if (missedPropNames.contains(propName)) {
                     return null;
                 }
@@ -1739,8 +1831,7 @@ public final class ParserUtil {
                 // fallback: the getter map does not contain a property backed solely by a public field, so
                 // asking it first let a getter-backed `children` win "haschildren" over a field-only
                 // `hasChildren` through the has-prefix rule. propInfoMap holds bindings only (misses are kept
-                // apart in missedPropNames), so this scan is bounded by the bean's own vocabulary plus the
-                // capped fuzzy hits, not by the number of unknown keys ever seen.
+                // apart in missedPropNames), so this scan is bounded by the bean's own vocabulary.
                 propInfoOpt = resolveAlias(propName);
 
                 if (propInfoOpt == null) {
@@ -1757,7 +1848,7 @@ public final class ParserUtil {
                     // the input is an unknown caller-supplied spelling - a JSON/XML key the bean lacks under
                     // ignoreUnmatchedProperty, a foreign map key, a DataSet column - and a stream of them filled
                     // those bounded pools with junk for the JVM's lifetime (NameUtil then refused every later
-                    // legitimate name). Real property names are memoized on the HIT path (propInfoMap).
+                    // legitimate name). Resolved spellings are memoized on the HIT path (fuzzyPropInfoMap).
                     final String normalized = normalizePropNameUncached(propName);
 
                     if (!propName.equalsIgnoreCase(normalized)) {
@@ -1771,19 +1862,19 @@ public final class ParserUtil {
                     }
                 }
 
-                // Memoize the outcome, but only while the caches are below MAX_CACHED_PROP_NAMES: both keys
+                // Memoize reasonably sized names only while the caches are below MAX_CACHED_PROP_NAMES: both keys
                 // are caller data (a fuzzy HIT can be spelled in unboundedly many ways too). size() on a
                 // ConcurrentHashMap is cheap and a small overshoot under concurrency is harmless.
                 if (propInfoOpt == null || !propInfoOpt.isPresent()) {
-                    if (missedPropNames.size() < MAX_CACHED_PROP_NAMES) {
+                    if (propName.length() <= MAX_CACHED_PROP_NAME_LENGTH && missedPropNames.size() < MAX_CACHED_PROP_NAMES) {
                         missedPropNames.add(propName);
                     }
 
                     return null;
                 }
 
-                if (propInfoMap.size() < MAX_CACHED_PROP_NAMES) {
-                    propInfoMap.put(propName, propInfoOpt);
+                if (propName.length() <= MAX_CACHED_PROP_NAME_LENGTH && fuzzyPropInfoMap.size() < MAX_CACHED_PROP_NAMES - propInfoMap.size()) {
+                    fuzzyPropInfoMap.put(propName, propInfoOpt);
                 }
             }
 
@@ -1831,6 +1922,9 @@ public final class ParserUtil {
          * Gets the value of a property from the specified object.
          *
          * <p>Supports nested property access using dot notation (e.g., "address.street").
+         * Collection properties on an intermediate path are traversed through their first element,
+         * matching {@link #setPropValue(Object, String, Object)}. An empty collection is treated like
+         * a {@code null} intermediate property; a collection at the end of the path is returned as is.
          * If any intermediate property in a nested path is {@code null}, returns the default
          * value for the final property type.</p>
          *
@@ -1861,8 +1955,15 @@ public final class ParserUtil {
                     final int len = propInfoQueue.size();
                     Object propBean = obj;
 
-                    for (final PropInfo info : propInfoQueue) {
+                    for (int i = 0; i < len; i++) {
+                        final PropInfo info = propInfoQueue.get(i);
                         propBean = info.getPropValue(propBean);
+
+                        // The next PropInfo belongs to the collection's element type, not the collection
+                        // itself. Only intermediate collections are unwrapped, preserving terminal values.
+                        if (i < len - 1 && info.type.isCollection() && propBean != null) {
+                            propBean = N.firstOrNullIfEmpty((Collection<?>) propBean);
+                        }
 
                         if (propBean == null) {
                             return (T) propInfoQueue.get(len - 1).type.defaultValue();
@@ -1893,10 +1994,11 @@ public final class ParserUtil {
          * @param propName the property name
          * @param propValue the value to set
          * @throws IllegalArgumentException if {@code propName} is {@code null}, no setter is found for {@code propName}, or the
-         *         property is read-only (a getter with no backing field and no setter).
+         *         property (the last property of a nested path) is read-only (no supported write path).
          * @throws RuntimeException if reading an intermediate property on a nested path, creating a missing intermediate value, or storing
          *         the value fails (see {@link PropInfo#setPropValue(Object, Object)})
-         * @throws UnsupportedOperationException if a property on a nested path is read-only and a value must be stored into it
+         * @throws UnsupportedOperationException if an intermediate property on a nested path is read-only and its value is
+         *         {@code null}, so a newly created value would have to be stored into it
          */
         public void setPropValue(final Object obj, final String propName, final Object propValue)
                 throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
@@ -1920,13 +2022,15 @@ public final class ParserUtil {
          * @param propName the property name (supports nested paths)
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist or that are
-         *        read-only (a getter with no backing field and no setter)
+         *        read-only (no supported write path); for a nested path, the last property is checked
+         *        before any missing intermediate value is created
          * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws IllegalArgumentException if {@code propName} is {@code null}, or if no setter is found for {@code propName} or the
-         *         property is read-only and {@code ignoreUnmatchedProperty} is {@code false}.
+         *         property (the last property of a nested path) is read-only and {@code ignoreUnmatchedProperty} is {@code false}.
          * @throws RuntimeException if reading an intermediate property on a nested path, creating a missing intermediate value, or storing
          *         the value fails (see {@link PropInfo#setPropValue(Object, Object)})
-         * @throws UnsupportedOperationException if a property on a nested path is read-only and a value must be stored into it
+         * @throws UnsupportedOperationException if an intermediate property on a nested path is read-only and its value is
+         *         {@code null}, so a newly created value would have to be stored into it
          */
         @SuppressWarnings("rawtypes")
         public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty)
@@ -1937,7 +2041,7 @@ public final class ParserUtil {
                 // Nothing can store the value; treat it like an unmatched name rather than failing inside setPropValue.
                 if (!ignoreUnmatchedProperty) {
                     throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: " + clazz.getCanonicalName()
-                            + " (the property is read-only: a getter without a backing field or setter)");
+                            + " (the property is read-only: no supported write path)");
                 }
 
                 return false;
@@ -1953,6 +2057,17 @@ public final class ParserUtil {
                         return false;
                     }
                 } else {
+                    // Same rule as a plain read-only name above. Checked before the walk, which creates and attaches
+                    // missing intermediate values that must not be left behind for a value that cannot be stored.
+                    if (propInfoQueue.get(propInfoQueue.size() - 1).isReadOnlyProperty) {
+                        if (!ignoreUnmatchedProperty) {
+                            throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: "
+                                    + clazz.getCanonicalName() + " (the last property of the path is read-only: no supported write path)");
+                        }
+
+                        return false;
+                    }
+
                     Object propBean = obj;
                     Object subPropValue = null;
 
@@ -2018,10 +2133,11 @@ public final class ParserUtil {
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
          * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases (a
-         *         read-only property - a getter with no backing field and no setter - counts as no match).
+         *         read-only property with no supported write path counts as no match).
          * @throws RuntimeException if storing the value into the matched property fails (see
          *         {@link #setPropValue(Object, String, Object, boolean)})
-         * @throws UnsupportedOperationException if the matched name is a nested path whose property is read-only
+         * @throws UnsupportedOperationException if the matched name is a nested path through a read-only intermediate property
+         *         whose value is {@code null}
          */
         public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue)
                 throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
@@ -2046,13 +2162,14 @@ public final class ParserUtil {
          * @param propInfoFromOtherBean property information from another bean
          * @param propValue the value to set
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist or that are
-         *        read-only (a getter with no backing field and no setter)
+         *        read-only (no supported write path)
          * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases and
          *         {@code ignoreUnmatchedProperty} is {@code false}.
          * @throws RuntimeException if storing the value into the matched property fails (see
          *         {@link #setPropValue(Object, String, Object, boolean)})
-         * @throws UnsupportedOperationException if the matched name is a nested path whose property is read-only
+         * @throws UnsupportedOperationException if the matched name is a nested path through a read-only intermediate property
+         *         whose value is {@code null}
          */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty)
                 throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
@@ -2207,7 +2324,8 @@ public final class ParserUtil {
          * Gets a queue of property information for nested property paths.
          *
          * <p>This method parses dot-separated property paths and returns a list of
-         * PropInfo objects representing each level of the path.</p>
+         * PropInfo objects representing each level of the path. Resolved generic arguments are
+         * retained for the root bean, intermediate beans, and intermediate collection element types.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2237,13 +2355,11 @@ public final class ParserUtil {
                 final String[] strs = PROP_NAME_SPLITTER.splitToArray(propName);
 
                 if (strs.length > 1) {
-                    Class<?> propClass = clazz;
-                    BeanInfo propBeanInfo = null;
+                    BeanInfo propBeanInfo = this;
 
                     PropInfo propInfo = null;
 
                     for (int i = 0, len = strs.length; i < len; i++) {
-                        propBeanInfo = Beans.isBeanClass(propClass) ? ParserUtil.getBeanInfo(propClass) : null;
                         propInfo = propBeanInfo == null ? null : propBeanInfo.getPropInfo(strs[i]);
 
                         if (propInfo == null) {
@@ -2257,10 +2373,10 @@ public final class ParserUtil {
 
                         propInfoQueue.add(propInfo);
 
-                        if (propInfo.type.isCollection()) {
-                            propClass = propInfo.type.elementType().javaType();
-                        } else {
-                            propClass = propInfo.clazz;
+                        if (i < len - 1) {
+                            // A raw Class loses bindings such as Box<Child>, preventing the next segment from resolving through T.
+                            final Type<?> propType = propInfo.type.isCollection() ? propInfo.type.elementType() : propInfo.type;
+                            propBeanInfo = Beans.isBeanClass(propType.javaType()) ? ParserUtil.getBeanInfo(propType.reflectType()) : null;
                         }
                     }
                 }
@@ -2268,7 +2384,7 @@ public final class ParserUtil {
                 propInfoQueue = N.isEmpty(propInfoQueue) ? N.emptyList() : ImmutableList.wrap(propInfoQueue);
 
                 // Keys are caller-supplied paths; cap the memoization like getPropInfo does.
-                if (propInfoQueueMap.size() < MAX_CACHED_PROP_NAMES) {
+                if (propName.length() <= MAX_CACHED_PROP_NAME_LENGTH && propInfoQueueMap.size() < MAX_CACHED_PROP_NAMES) {
                     propInfoQueueMap.put(propName, propInfoQueue);
                 }
             }
@@ -2352,7 +2468,13 @@ public final class ParserUtil {
             }
 
             if (propInfo == null) {
-                final Optional<PropInfo> propInfoOpt = propInfoMap.get(new String(cbuf, fromIndex, len));
+                final String propName = new String(cbuf, fromIndex, len);
+                Optional<PropInfo> propInfoOpt = propInfoMap.get(propName);
+
+                if (propInfoOpt == null) {
+                    propInfoOpt = fuzzyPropInfoMap.get(propName);
+                }
+
                 propInfo = propInfoOpt == null ? null : propInfoOpt.orElse(null);
             }
 
@@ -2532,7 +2654,13 @@ public final class ParserUtil {
          */
         @Beta
         public Object createBeanResult() throws UnsupportedOperationException, RuntimeException {
-            return isImmutable ? (builderInfo != null ? builderInfo.newBuilder() : createArgsForConstructor()) : N.newInstance(clazz);
+            if (isImmutable) {
+                return builderInfo != null ? builderInfo.newBuilder() : createArgsForConstructor();
+            }
+
+            // The direct call invokes the constructor N.newInstance(clazz) would resolve for this class, minus the
+            // per-instance re-classification of the class (see invokeNoArgsConstructorDirectly).
+            return invokeNoArgsConstructorDirectly ? ClassUtil.invokeConstructor(noArgsConstructor) : N.newInstance(clazz);
         }
 
         /**
@@ -2718,6 +2846,7 @@ public final class ParserUtil {
         public final Method setMethod;
 
         final VarHandle fieldHandle;
+        private final boolean isFieldVolatile;
 
         //    final MethodHandle getMethodHandle;
         //    final MethodHandle setMethodHandle;
@@ -2770,7 +2899,9 @@ public final class ParserUtil {
 
         /**
          * Pre-compiled DateTimeFormatter for Java 8+ date/time types.
-         * Null if no date format is specified, or if the format is the {@code "long"} epoch-millis marker.
+         * Null if no date format is specified, if the format is the {@code "long"} epoch-millis marker, or if a
+         * {@code java.util.Date}, {@code Calendar}, {@code Timestamp} or Joda-Time property's pattern is valid only in that
+         * property's own pattern syntax.
          */
         final DateTimeFormatter dateTimeFormatter;
 
@@ -2875,13 +3006,17 @@ public final class ParserUtil {
         final boolean canSetFieldByGetMethod;
 
         /**
-         * {@code true} when nothing can store a value into this property: it has a getter but no backing
-         * field, no setter and no getter-returned collection to fill (a computed property such as
-         * {@code getFullName()}), and it is not a component of an immutable bean assembled through a
-         * constructor or builder. Such a property is exposed as {@link Direction#SERIALIZE_ONLY}, so the parsers
-         * skip its value on read instead of failing, and {@link #setPropValue(Object, Object)} rejects it.
+         * {@code true} when this property has no permitted field write, setter or supported getter-returned
+         * collection to fill, and is not a component of an immutable bean assembled through a constructor or builder.
+         * This includes a backing field restricted by {@link AccessFieldByMethod} when there is no write accessor.
+         * {@link #setPropValue(Object, Object)} rejects such a property. It is exposed as {@link Direction#SERIALIZE_ONLY},
+         * so parsers skip its value on input, unless its field's {@link JsonXmlField} explicitly declares
+         * {@link Direction#SERIALIZE_ONLY} or {@link Direction#DESERIALIZE_ONLY}. A {@code @JsonXmlField} that leaves the
+         * direction at {@code BOTH} - typically one used only to rename or format the field - does not ask for input
+         * the property cannot accept, so it is treated as serialize-only as well; an explicit
+         * {@code DESERIALIZE_ONLY} still makes deserialization reject the write.
          */
-        final boolean isReadOnlyProperty;
+        public final boolean isReadOnlyProperty;
 
         /**
          * The ordinal position of this field in the bean.
@@ -2949,6 +3084,7 @@ public final class ParserUtil {
             annotations = ImmutableMap.wrap(getAnnotations());
 
             this.fieldHandle = unreflect(declaringClass, field);
+            isFieldVolatile = field != null && Modifier.isVolatile(field.getModifiers());
             //    this.getMethodHandle = unreflect(declaringClass, getMethod);
             //    this.setMethodHandle = unreflect(declaringClass, setMethod);
 
@@ -3002,7 +3138,7 @@ public final class ParserUtil {
             isLongDateFormat = Strings.isNotEmpty(dateFormat) && "long".equalsIgnoreCase(dateFormat);
 
             // "long" is the epoch-millis marker, not a pattern; DateTimeFormatter.ofPattern would reject it.
-            dateTimeFormatter = Strings.isEmpty(dateFormat) || isLongDateFormat ? null : DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            dateTimeFormatter = Strings.isEmpty(dateFormat) || isLongDateFormat ? null : newDateTimeFormatter(dateFormat, timeZone, zoneId, clazz);
             isJsonRawValue = isJsonRawValue(field);
 
             JodaDateTimeFormatterHolder tmpJodaDTFH = null;
@@ -3130,19 +3266,52 @@ public final class ParserUtil {
             canSetFieldByGetMethod = Beans.isRegisteredXmlBindingClass(declaringClass) && getMethod != null
                     && (Map.class.isAssignableFrom(getMethod.getReturnType()) || Collection.class.isAssignableFrom(getMethod.getReturnType()));
 
-            // An immutable bean stores values into a constructor/builder slot, so its components are never read-only
-            // even without a setter; everything else needs a field, a setter or a fillable getter collection.
-            isReadOnlyProperty = field == null && setMethod == null && !canSetFieldByGetMethod && !isImmutableBean;
+            // A method-only property must not reach the final field.set fallback just because its setter is absent.
+            // Constructor/builder slots and supported getter-bound collections still provide valid write paths.
+            isReadOnlyProperty = (field == null || isAccessFieldByMethod) && setMethod == null && !canSetFieldByGetMethod && !isImmutableBean;
 
             // A declared direction wins; a read-only property is implicitly serialize-only, which is exactly what the
             // JSON/XML parsers need to skip its value on read (a document may legitimately carry the computed value
-            // this bean wrote out) instead of dereferencing the missing field.
-            jsonXmlExpose = field != null && field.isAnnotationPresent(JsonXmlField.class) ? field.getAnnotation(JsonXmlField.class).direction()
-                    : (isReadOnlyProperty ? JsonXmlField.Direction.SERIALIZE_ONLY : JsonXmlField.Direction.BOTH);
+            // this bean wrote out) instead of dereferencing the missing field. BOTH - the annotation's default, which
+            // Java cannot tell apart from an explicit BOTH - is narrowed to SERIALIZE_ONLY for a read-only property:
+            // a @JsonXmlField used only to rename or format the field must not turn a skipped value into a failure.
+            final JsonXmlField.Direction declaredDirection = field != null && field.isAnnotationPresent(JsonXmlField.class)
+                    ? field.getAnnotation(JsonXmlField.class).direction()
+                    : JsonXmlField.Direction.BOTH;
+
+            jsonXmlExpose = isReadOnlyProperty && declaredDirection == JsonXmlField.Direction.BOTH ? JsonXmlField.Direction.SERIALIZE_ONLY : declaredDirection;
 
             this.fieldOrder = fieldOrder;
             this.isImmutableBean = isImmutableBean;
             this.isByBuilder = isByBuilder;
+        }
+
+        // Builds - and so validates - the java.time formatter, which only the java.time readers/writers use. Date, Calendar
+        // and Timestamp properties are read and written with SimpleDateFormat syntax and Joda-Time properties with Joda's;
+        // both accept patterns java.time rejects ("hh:mm aa", "dd MMMMMM yyyy", '#'), so a pattern java.time rejects is
+        // validated in such a property's own syntax instead, and no java.time formatter is kept for it. java.sql.Date/Time
+        // are not in the list: their readers parse with java.time syntax (Dates.parseToLocalDate/LocalTime).
+        private static DateTimeFormatter newDateTimeFormatter(final String dateFormat, final TimeZone timeZone, final ZoneId zoneId, final Class<?> propClass)
+                throws IllegalArgumentException {
+            try {
+                return DateTimeFormatter.ofPattern(dateFormat).withZone(zoneId);
+            } catch (final IllegalArgumentException e) {
+                try {
+                    if (propClass == java.util.Date.class || propClass == Calendar.class || propClass == Timestamp.class) {
+                        new java.text.SimpleDateFormat(dateFormat).hashCode(); //NOSONAR - validation only
+                        return null;
+                    }
+
+                    if ("org.joda.time.DateTime".equals(propClass.getName()) || "org.joda.time.MutableDateTime".equals(propClass.getName())) {
+                        new JodaDateTimeFormatterHolder(dateFormat, timeZone).hashCode(); //NOSONAR - validation only
+                        return null;
+                    }
+                } catch (final IllegalArgumentException e2) {
+                    // Invalid in the property's own syntax too: report the java.time failure as before.
+                }
+
+                throw e;
+            }
         }
 
         /**
@@ -3179,7 +3348,8 @@ public final class ParserUtil {
 
             try {
                 if (isFieldHandleGettable) {
-                    return (T) fieldHandle.get(obj);
+                    // VarHandle's access mode overrides the field modifier: plain get loses volatile read semantics.
+                    return (T) (isFieldVolatile ? fieldHandle.getVolatile(obj) : fieldHandle.get(obj));
                 } else {
                     return (T) (isFieldGettable ? field.get(obj) : getMethod.invoke(obj));
                 }
@@ -3194,7 +3364,7 @@ public final class ParserUtil {
          */
         final String readOnlyMessage() {
             return "Property '" + name + "' of class " + ClassUtil.getCanonicalClassName(declaringClass)
-                    + " is read-only (a getter without a backing field or setter); its value cannot be set";
+                    + " is read-only (no permitted field write, setter, or supported getter-based write); its value cannot be set";
         }
 
         /**
@@ -3214,12 +3384,19 @@ public final class ParserUtil {
          *   <li>Direct field access (if accessible and settable)</li>
          *   <li>Setter method invocation</li>
          *   <li>Setting via getter for collections/maps (XML binding)</li>
-         *   <li>Forced field access as last resort</li>
+         *   <li>Forced field access as last resort, unless {@link AccessFieldByMethod} forbids it</li>
          * </ol>
          *
          * <p>For a builder-based immutable bean {@code obj} is the builder instance, so the value is routed to the
          * <i>builder's</i> setter. A property whose builder declares no setter is silently skipped - the bean's own
          * field cannot be written into the builder, and the builder author chose not to accept that property.</p>
+         *
+         * <p>For a constructor-based immutable bean, {@code obj} holds constructor arguments. Values already
+         * accepted by the constructor, including unboxing followed by primitive widening, are retained; other
+         * values use the same configured-type conversion as mutable properties. A {@code null} uses the property's
+         * default value, so primitive constructor arguments remain valid.</p>
+         * <p>A resolved generic property is converted to its bound type when needed, even when its erased
+         * field or setter parameter would accept the original value as {@code Object}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -3248,13 +3425,11 @@ public final class ParserUtil {
                 propValue = N.toJson(propValue);
             }
 
+            propValue = resolvedGenericValue(this, propValue);
+
             if (isImmutableBean) {
                 if (!isByBuilder) {
-                    // Coalesce nulls to the type's default before storing in the Object[] slot.
-                    // The canonical-constructor invocation later auto-unboxes primitive slots; a raw
-                    // null overwriting the default would NPE on unbox (e.g. record R(int x) and JSON
-                    // {"x": null} -> NPE on Integer.intValue()).
-                    ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
+                    ((Object[]) obj)[fieldOrder] = constructorArgument(this, propValue);
                     return;
                 }
 
@@ -3277,7 +3452,12 @@ public final class ParserUtil {
 
                 try {
                     if (isFieldHandleSettable) {
-                        fieldHandle.set(obj, propValue);
+                        // Preserve the volatile write that the ordinary Field.set path performs for this field.
+                        if (isFieldVolatile) {
+                            fieldHandle.setVolatile(obj, propValue);
+                        } else {
+                            fieldHandle.set(obj, propValue);
+                        }
                     } else if (isFieldSettable) {
                         field.set(obj, propValue);
                     } else if (setMethod != null) {
@@ -3338,6 +3518,96 @@ public final class ParserUtil {
                     }
                 }
             }
+        }
+
+        /**
+         * Converts an incompatible value when a generic write member has a narrower resolved property type.
+         * Reflection accepts any reference in an erased Object field or setter parameter, so its usual
+         * argument-mismatch fallback cannot enforce a binding such as T = Integer. Raw JSON normalization
+         * runs first; ordinary members, unresolved bounds, nulls and compatible references are unchanged.
+         * A property omitted by a builder remains ignored without attempting a conversion.
+         *
+         * @param propInfo the resolved property's metadata
+         * @param value the value after raw-JSON normalization
+         * @return the compatible original value, or the value converted through the configured type
+         * @throws RuntimeException if conversion to the resolved type fails
+         */
+        private static Object resolvedGenericValue(final PropInfo propInfo, final Object value) throws RuntimeException {
+            if (value == null || propInfo.clazz.isPrimitive() || propInfo.clazz.isInstance(value) || (propInfo.isByBuilder && propInfo.setMethod == null)) {
+                return value;
+            }
+
+            final Class<?> erasedClass;
+            final java.lang.reflect.Type genericType;
+
+            if (propInfo.field != null && (propInfo.isFieldSettable || propInfo.isFieldHandleSettable || propInfo.setMethod == null)) {
+                erasedClass = propInfo.field.getType();
+                genericType = propInfo.field.getGenericType();
+            } else if (propInfo.setMethod != null) {
+                erasedClass = propInfo.setMethod.getParameterTypes()[0];
+                genericType = propInfo.setMethod.getGenericParameterTypes()[0];
+            } else {
+                return value;
+            }
+
+            return !(genericType instanceof Class<?>) && erasedClass != propInfo.clazz && erasedClass.isAssignableFrom(propInfo.clazz)
+                    ? N.convert(value, propInfo.jsonXmlType)
+                    : value;
+        }
+
+        /**
+         * Prepares a constructor slot using the mutable setter's conversion policy. An Object array accepts
+         * every reference, so storing directly would defer incompatible values (for example a String for an
+         * int component) until constructor invocation, bypassing conversion altogether.
+         *
+         * @param propInfo the constructor property's metadata
+         * @param value the already-normalized raw-JSON value, or {@code null}
+         * @return the original compatible value, the property's default, or its converted value
+         * @throws RuntimeException if conversion to the configured property type fails
+         */
+        private static Object constructorArgument(final PropInfo propInfo, final Object value) throws RuntimeException {
+            if (value == null) {
+                return propInfo.type.defaultValue();
+            }
+
+            if (propInfo.clazz.isInstance(value) || acceptsPrimitiveArgument(propInfo.clazz, value.getClass())) {
+                return value;
+            }
+
+            return N.convert(value, propInfo.jsonXmlType);
+        }
+
+        /**
+         * Checks the unboxing and widening conversions accepted by reflective constructor invocation. In
+         * particular, Character widens numerically without parsing its text, and narrowing is left to the
+         * configured type converter rather than silently cast here.
+         *
+         * @param target the property class
+         * @param source the non-null argument's runtime class
+         * @return whether the argument can be passed unchanged to this primitive parameter
+         */
+        private static boolean acceptsPrimitiveArgument(final Class<?> target, final Class<?> source) {
+            if (!target.isPrimitive()) {
+                return false;
+            }
+
+            if (ClassUtil.wrap(target) == source) {
+                return true;
+            }
+
+            if (source == Byte.class) {
+                return target == short.class || target == int.class || target == long.class || target == float.class || target == double.class;
+            } else if (source == Short.class || source == Character.class) {
+                return target == int.class || target == long.class || target == float.class || target == double.class;
+            } else if (source == Integer.class) {
+                return target == long.class || target == float.class || target == double.class;
+            } else if (source == Long.class) {
+                return target == float.class || target == double.class;
+            } else if (source == Float.class) {
+                return target == double.class;
+            }
+
+            return false;
         }
 
         /**
@@ -3947,6 +4217,10 @@ public final class ParserUtil {
                     // but not JSON numbers. Use the normal string writer for quoting and escaping.
                     if (config instanceof JsonSerConfig && !JSON_NUMBER_TOKEN.matcher(formatted).matches()) {
                         Type.of(String.class).serializeTo(writer, formatted, config);
+                    } else if (config instanceof XmlSerConfig) {
+                        // A pattern affix is literal text (e.g. "'<'0.00" or "'R&D '0"); written raw it made the XML
+                        // unreadable, so escape it like the date branch above does.
+                        writer.writeCharacter(formatted);
                     } else {
                         writer.write(formatted);
                     }
@@ -4537,24 +4811,52 @@ public final class ParserUtil {
         }
     }
 
+    // Scoped to one BeanInfo construction: reflectasm caches generated classes, but each get() creates
+    // a new accessor and complete method/field metadata arrays. Do not retain another global class cache.
+    private static final class ASMAccessors {
+        private final Map<Class<?>, com.esotericsoftware.reflectasm.MethodAccess> methods = new HashMap<>();
+        private final Map<Class<?>, com.esotericsoftware.reflectasm.FieldAccess> fields = new HashMap<>();
+
+        com.esotericsoftware.reflectasm.MethodAccess methodAccess(final Method method) {
+            return method == null ? null : methods.computeIfAbsent(method.getDeclaringClass(), com.esotericsoftware.reflectasm.MethodAccess::get);
+        }
+
+        com.esotericsoftware.reflectasm.FieldAccess fieldAccess(final Field field) {
+            return field == null ? null : fields.computeIfAbsent(field.getDeclaringClass(), com.esotericsoftware.reflectasm.FieldAccess::get);
+        }
+    }
+
     /**
-     * A {@link PropInfo} that reads and writes the property through reflectasm-generated accessors
-     * instead of {@code java.lang.reflect}.
+     * A {@link PropInfo} that uses reflectasm-generated accessors where they can reach the selected member,
+     * and inherited reflective access otherwise.
      *
      * <p>Instances are created only when reflectasm is available on the classpath and ASM support is
      * enabled for the bean. Behavior is identical to {@code PropInfo}; only the access mechanism differs.
-     * When an accessor index cannot be resolved (index {@code -1}) the corresponding reflective path is
-     * used as the fallback.</p>
+     * In particular the property is accessed field-first exactly as {@code PropInfo} does: a gettable
+     * (settable) field is read (written) directly - through a generated {@code FieldAccess} when the field is
+     * public and not final, and through the inherited {@code PropInfo} field access otherwise - and the
+     * getter/setter is used only when the field cannot be, e.g. under {@link AccessFieldByMethod}. A getter or
+     * setter must never be preferred over the field just because the generated accessor is faster: which member
+     * is used must not depend on whether reflectasm is present.</p>
      *
      * @see PropInfo
      */
     @SuppressFBWarnings("EQ_DOESNT_OVERRIDE_EQUALS")
     static class ASMPropInfo extends PropInfo { //NOSONAR
-        /** Generated accessor for the declaring class of the getter, or {@code null} if there is no getter. */
+        /**
+         * Generated accessor for the declaring class of the getter, or {@code null} if there is no getter or the
+         * property is read through its field ({@link #isFieldGettable}).
+         */
         final com.esotericsoftware.reflectasm.MethodAccess getMethodAccess;
-        /** Generated accessor for the declaring class of the setter, or {@code null} if there is no setter. */
+        /**
+         * Generated accessor for the declaring class of the setter, or {@code null} if there is no setter or the
+         * property is written through its field ({@link #isFieldSettable}).
+         */
         final com.esotericsoftware.reflectasm.MethodAccess setMethodAccess;
-        /** Generated accessor for the declaring class of the field, or {@code null} if there is no field. */
+        /**
+         * Generated accessor for the declaring class of the field, or {@code null} if there is no field or the field
+         * is not public, is final, or is not directly gettable (the cases where {@link #fieldAccessIndex} is {@code -1}).
+         */
         final com.esotericsoftware.reflectasm.FieldAccess fieldAccess;
 
         /** Index of the getter within {@link #getMethodAccess}, or {@code -1} if unavailable. */
@@ -4579,6 +4881,7 @@ public final class ParserUtil {
          * @param idPropNames list of property names that are identifiers
          * @param readOnlyIdPropNames list of property names that are read-only identifiers
          * @param typeParamArgMap mapping of type variables to actual types for generic resolution
+         * @param asmAccessors accessor instances shared only within this bean metadata construction
          * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without
          *         a usable constructor, the custom name or the column name has surrounding whitespace, or the date or number format is not a
          *         valid pattern
@@ -4587,25 +4890,33 @@ public final class ParserUtil {
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
-                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) throws IllegalArgumentException, UnsupportedOperationException {
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap, final ASMAccessors asmAccessors)
+                throws IllegalArgumentException, UnsupportedOperationException {
             super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableBean, isByBuilder, idPropNames,
                     readOnlyIdPropNames, typeParamArgMap);
 
-            getMethodAccess = getMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(getMethod.getDeclaringClass());
-            setMethodAccess = setMethod == null ? null : com.esotericsoftware.reflectasm.MethodAccess.get(setMethod.getDeclaringClass());
-            fieldAccess = field == null ? null : com.esotericsoftware.reflectasm.FieldAccess.get(field.getDeclaringClass());
+            // Field-first, as in PropInfo: an accessor is generated only for a direction that cannot use the field.
+            getMethodAccess = isFieldGettable ? null : asmAccessors.methodAccess(getMethod);
+            setMethodAccess = isFieldSettable ? null : asmAccessors.methodAccess(setMethod);
+            // A FieldAccess is generated only for a field it can serve: one that is gettable, public and not final.
+            // Other usable fields are accessed by PropInfo; method-only properties use their getter/setter instead.
+            // Neither case requires a generated field accessor to reach the field's declaring class.
+            final boolean isFieldAccessible = field != null && isFieldGettable && Modifier.isPublic(field.getModifiers())
+                    && !Modifier.isFinal(field.getModifiers());
 
-            getMethodAccessIndex = getMethod == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
-            setMethodAccessIndex = setMethod == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
-            fieldAccessIndex = (field == null || !isFieldGettable || !Modifier.isPublic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) ? -1
-                    : fieldAccess.getIndex(field.getName());
+            fieldAccess = isFieldAccessible ? asmAccessors.fieldAccess(field) : null;
+
+            getMethodAccessIndex = getMethodAccess == null ? -1 : getMethodAccess.getIndex(getMethod.getName(), 0);
+            setMethodAccessIndex = setMethodAccess == null ? -1 : setMethodAccess.getIndex(setMethod.getName(), setMethod.getParameterTypes());
+            fieldAccessIndex = isFieldAccessible ? fieldAccess.getIndex(field.getName()) : -1;
         }
 
         /**
          * {@inheritDoc}
          *
-         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
-         * property access than standard reflection.</p>
+         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) where it can, reading the
+         * field first exactly like {@link PropInfo#getPropValue(Object)}: a gettable field that the generated
+         * {@code FieldAccess} cannot reach is read through the inherited field access, never through the getter.</p>
          * @throws RuntimeException if the target is incompatible with this property, its array representation lacks the property slot,
          *         or reading its field or invoking its getter throws an exception
          */
@@ -4616,14 +4927,20 @@ public final class ParserUtil {
                 return (T) ((Object[]) obj)[fieldOrder];
             }
 
-            return (T) ((fieldAccessIndex > -1) ? fieldAccess.get(obj, fieldAccessIndex) : getMethodAccess.invoke(obj, getMethodAccessIndex));
+            if (fieldAccessIndex > -1) {
+                return (T) fieldAccess.get(obj, fieldAccessIndex);
+            }
+
+            // Field-first (see AccessFieldByMethod): the getter is used only when the field cannot be.
+            return isFieldGettable ? super.getPropValue(obj) : (T) getMethodAccess.invoke(obj, getMethodAccessIndex);
         }
 
         /**
          * {@inheritDoc}
          *
-         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
-         * property access than standard reflection.</p>
+         * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) where it can, writing the
+         * field first exactly like {@link PropInfo#setPropValue(Object, Object)}: a settable field that the generated
+         * {@code FieldAccess} cannot reach is written through the inherited field access, never through the setter.</p>
          * @throws UnsupportedOperationException if this property is read-only and cannot accept {@code propValue}
          * @throws RuntimeException if the target cannot accept the property value, conversion to the property type is unsupported,
          *         or accessing the field or invoking its getter or setter throws an exception
@@ -4631,6 +4948,13 @@ public final class ParserUtil {
         @SuppressFBWarnings
         @Override
         public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException, RuntimeException {
+            if (isFieldSettable && fieldAccessIndex < 0) {
+                // Field-first (see AccessFieldByMethod): a settable field the generated FieldAccess cannot reach is
+                // written exactly as PropInfo writes it, not through the setter.
+                super.setPropValue(obj, propValue);
+                return;
+            }
+
             if (isReadOnlyProperty) {
                 throw new UnsupportedOperationException(readOnlyMessage());
             }
@@ -4642,11 +4966,11 @@ public final class ParserUtil {
                 propValue = N.toJson(propValue);
             }
 
+            propValue = PropInfo.resolvedGenericValue(this, propValue);
+
             if (isImmutableBean) {
                 if (!isByBuilder) {
-                    // Coalesce nulls to the type default; otherwise primitive-typed record/builder
-                    // components NPE on auto-unbox during canonical-constructor invocation.
-                    ((Object[]) obj)[fieldOrder] = propValue == null ? type.defaultValue() : propValue;
+                    ((Object[]) obj)[fieldOrder] = PropInfo.constructorArgument(this, propValue);
 
                     return;
                 }
@@ -4814,6 +5138,8 @@ public final class ParserUtil {
      * Instances are shared between naming policies that resolve to the same name.</p>
      */
     static class XmlNameTag {
+        private volatile byte validatedNameKinds;
+
         /** The bare name, e.g. {@code age}. */
         final char[] name;
         /** Generic start tag, e.g. {@code <property name="age">}. */
@@ -4891,6 +5217,21 @@ public final class ParserUtil {
             namedNullWithType = ("<" + name + " type=\"" + typeAttr + "\" isNull=\"true\" />").toCharArray();
         }
 
+        /** Validates a cached name only when the writer will actually emit it, after its exclusion checks. */
+        void checkXmlName(final boolean elementName, final String what) {
+            final byte mask = (byte) (elementName ? 1 : 2);
+            if ((validatedNameKinds & mask) == 0) {
+                if (elementName) {
+                    AbstractXmlParser.checkXmlElementName(name, what);
+                } else {
+                    AbstractXmlParser.checkXmlAttributeName(name, what);
+                }
+
+                // A racing update can only cause an extra validation, never skip a failed validation.
+                validatedNameKinds = (byte) (validatedNameKinds | mask);
+            }
+        }
+
         /**
          * Escapes {@code value} so it can be written inside a double-quoted XML attribute, applying the same
          * substitutions {@link BufferedXmlWriter} applies to text: {@code &}, {@code <}, {@code >}, {@code "}
@@ -4903,6 +5244,19 @@ public final class ParserUtil {
          * @return {@code value} with the characters above replaced; the same String content when it holds none
          */
         private static String escapeXmlAttributeValue(final String value) {
+            boolean needsEscaping = false;
+            for (int i = 0, len = value.length(); i < len; i++) {
+                final char ch = value.charAt(i);
+                if (ch < 32 || ch == 127 || ch == '&' || ch == '<' || ch == '>' || ch == '"' || ch == '\'') {
+                    needsEscaping = true;
+                    break;
+                }
+            }
+
+            if (!needsEscaping) {
+                return value;
+            }
+
             final BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
 
             try {

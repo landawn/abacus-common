@@ -457,15 +457,15 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         final Clob clob = mock(Clob.class);
         when(clob.length()).thenReturn(0L);
 
-        final char[] result = type.valueOf((Object) clob);
+        final char[] result = type.valueOf(clob);
 
         assertEquals(0, result.length);
         verify(clob, never()).getSubString(1L, 0);
         verify(clob).free();
 
         // SerialClob rejects getSubString(1, 0) on a zero-length lob; the guard returns the empty array instead
-        assertEquals(0, type.valueOf((Object) new SerialClob(new char[0])).length);
-        assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf((Object) new SerialClob(new char[] { 'a', 'b' })));
+        assertEquals(0, type.valueOf(new SerialClob(new char[0])).length);
+        assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf(new SerialClob(new char[] { 'a', 'b' })));
     }
 
     // ---- perf review 2026-09-26 G015 begin ----
@@ -512,4 +512,12 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> type.valueOf("['ab']"));
     }
     // ---- perf review 2026-09-26 G015 end ----
+
+    // 2026-10-05: the compact JSON text form. A bare null is the NUL default; quoted content is decoded exactly once.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new char[] { '1', '\0', 'A', 'b', '3' }, type.valueOf("[\"1\", null, \"65\", 'b', \"\\u0033\"]"));
+        assertArrayEquals(new char[] { '\0', '\0' }, type.valueOf("[null,null]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
+    }
 }

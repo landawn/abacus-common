@@ -199,13 +199,13 @@ public class IndexTest extends IndexTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Index.allOf(new double[0], 1d, 0, Double.NaN));
 
         // the same fault must be reported the same way whether it surfaces through Index or through N
-        assertEquals(assertThrows(IllegalArgumentException.class, () -> N.indexOf((float[]) null, 1f, 0, -1f)).getMessage(),
+        assertEquals(assertThrows(IllegalArgumentException.class, () -> CommonUtil.indexOf((float[]) null, 1f, 0, -1f)).getMessage(),
                 assertThrows(IllegalArgumentException.class, () -> Index.of((float[]) null, 1f, 0, -1f)).getMessage());
-        assertEquals(assertThrows(IllegalArgumentException.class, () -> N.lastIndexOf(new double[0], 1d, -1, -1d)).getMessage(),
+        assertEquals(assertThrows(IllegalArgumentException.class, () -> CommonUtil.lastIndexOf(new double[0], 1d, -1, -1d)).getMessage(),
                 assertThrows(IllegalArgumentException.class, () -> Index.last(new double[0], 1d, -1, -1d)).getMessage());
-        assertEquals(assertThrows(IllegalArgumentException.class, () -> N.indexOf(new float[0], 1f, 0, -1f)).getMessage(),
+        assertEquals(assertThrows(IllegalArgumentException.class, () -> CommonUtil.indexOf(new float[0], 1f, 0, -1f)).getMessage(),
                 assertThrows(IllegalArgumentException.class, () -> Index.allOf(new float[0], 1f, 0, -1f)).getMessage());
-        assertEquals(assertThrows(IllegalArgumentException.class, () -> N.indexOf(new double[0], 1d, 0, Double.NaN)).getMessage(),
+        assertEquals(assertThrows(IllegalArgumentException.class, () -> CommonUtil.indexOf(new double[0], 1d, 0, Double.NaN)).getMessage(),
                 assertThrows(IllegalArgumentException.class, () -> Index.allOf(new double[0], 1d, 0, Double.NaN)).getMessage());
     }
 

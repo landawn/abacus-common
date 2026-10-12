@@ -300,16 +300,16 @@ public final class Suppliers {
     }
 
     /**
-     * Tests whether an instance of {@code targetType} can be created without first invoking a
-     * constructor to find out. This is {@code true} when the class declares a no-argument constructor,
-     * or when it is a non-static member or anonymous class, whose declared constructor takes the
-     * enclosing instance and so is not found by a no-argument constructor lookup but is still handled
-     * by {@link N#newInstance(Class)}.
+     * Determines whether factory discovery should defer reflective construction to invocation without
+     * running a constructor probe. This is {@code true} when the class declares a no-argument constructor,
+     * or when it is a non-static member or anonymous class. This is a discovery predicate, not a construction guarantee:
+     * anonymous containers deliberately receive a factory that rejects them at invocation. Named member classes can
+     * use enclosing-instance construction through {@link N#newInstance(Class)}.
      *
      * <p>Package-private: {@link IntFunctions} applies the same rule for its collection/map factories.</p>
      *
      * @param targetType the class to test, must not be {@code null}
-     * @return {@code true} if {@code targetType} has a usable no-argument construction path, {@code false} otherwise
+     * @return whether factory lookup should defer the construction attempt to invocation
      * @throws IllegalArgumentException if {@code targetType} is {@code null}
      */
     static boolean canInstantiateWithoutProbe(final Class<?> targetType) throws IllegalArgumentException {
@@ -1683,9 +1683,13 @@ public final class Suppliers {
      * abstract classes, and immutable collection types are mapped to the mutable implementations listed below.</p>
      *
      * <p>Calling this method does not invoke a concrete collection's constructor. Each invocation of the returned
-     * supplier performs one construction attempt and, for the built-in and normally constructible concrete types,
-     * returns a fresh empty collection. An exception thrown by a concrete constructor is propagated by the returned
-     * supplier's {@code get()} call.</p>
+     * supplier performs one construction attempt; standard mutable implementations return fresh empty collections.
+     * An exception thrown by a concrete constructor is propagated by the returned supplier's {@code get()} call.</p>
+     *
+     * <p>For an anonymous class, unless a supplier is registered for it or it has a built-in mapping listed below, the
+     * returned supplier's {@code get()} throws {@link IllegalArgumentException} without constructing anything; use a
+     * named class instead. A registered supplier must return an instance of {@code targetType} itself, and readers do not
+     * use it (see {@link N#newInstance(Class)}).</p>
      *
      * <p>Supported types include:</p>
      * <ul>
@@ -1725,7 +1729,7 @@ public final class Suppliers {
      * @return a Supplier that creates mutable collections according to the mappings above
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Collection class, is an
      *         unsupported abstract class, has no usable no-argument construction path, or has no suitable fallback
-     *         implementation.
+     *         implementation. An anonymous class is rejected by the returned supplier's {@code get()}, not here.
      * @see #registerForCollection(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
@@ -1774,6 +1778,10 @@ public final class Suppliers {
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
                 throw new IllegalArgumentException("Can't create instance for abstract class: " + targetType);
             } else {
+                // Anonymous classes get this supplier too; N.newInstance rejects them in get() (its comment says why).
+                // Lookup stays lazy so callers keep seeing the failure where they did. A registered supplier, found
+                // before this discovery, must return targetType itself, and the readers reject an anonymous class before
+                // consulting any factory, so it is no workaround for deserializing into an anonymous class.
                 if (canInstantiateWithoutProbe(targetType)) {
                     ret = () -> N.newInstance(targetType);
                 }
@@ -1819,9 +1827,13 @@ public final class Suppliers {
      * abstract classes, {@code EnumMap}, and immutable map types use the mutable fallbacks listed below.</p>
      *
      * <p>Calling this method does not invoke a concrete map's constructor. Each invocation of the returned supplier
-     * performs one construction attempt and, for the built-in and normally constructible concrete types, returns a
-     * fresh empty map. An exception thrown by a concrete constructor is propagated by the returned supplier's
-     * {@code get()} call.</p>
+     * performs one construction attempt; standard mutable implementations return fresh empty maps.
+     * An exception thrown by a concrete constructor is propagated by the returned supplier's {@code get()} call.</p>
+     *
+     * <p>For an anonymous class, unless a supplier is registered for it or it has a built-in mapping listed below, the
+     * returned supplier's {@code get()} throws {@link IllegalArgumentException} without constructing anything; use a
+     * named class instead. A registered supplier must return an instance of {@code targetType} itself, and readers do not
+     * use it (see {@link N#newInstance(Class)}).</p>
      *
      * <p>Supported types include:</p>
      * <ul>
@@ -1861,7 +1873,7 @@ public final class Suppliers {
      * @return a Supplier that creates mutable maps according to the mappings above
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, is not a Map class, is an unsupported
      *         abstract class, has no usable no-argument construction path, or has no suitable fallback
-     *         implementation.
+     *         implementation. An anonymous class is rejected by the returned supplier's {@code get()}, not here.
      * @see #registerForMap(Class, java.util.function.Supplier)
      */
     @SuppressWarnings("rawtypes")
@@ -1899,6 +1911,10 @@ public final class Suppliers {
             } else if (Modifier.isAbstract(targetType.getModifiers())) {
                 throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetType);
             } else {
+                // Anonymous classes get this supplier too; N.newInstance rejects them in get() (its comment says why).
+                // Lookup stays lazy so callers keep seeing the failure where they did. A registered supplier, found
+                // before this discovery, must return targetType itself, and the readers reject an anonymous class before
+                // consulting any factory, so it is no workaround for deserializing into an anonymous class.
                 if (canInstantiateWithoutProbe(targetType)) {
                     ret = () -> N.newInstance(targetType);
                 }

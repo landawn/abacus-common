@@ -1,6 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
@@ -23,13 +28,16 @@ import java.util.regex.Pattern;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class PerformanceCollectionsRegressionTest {
+public class PerformanceCollectionsRegressionTest extends TestBase {
     private static volatile Object allocationSink;
 
     @Test
     public void duplicateCompositeKeysReuseUnretainedCandidates() throws Exception {
-        allocated(() -> { }); // Skip consistently if this VM cannot report thread allocation.
+        allocated(() -> {
+        }); // Skip consistently if this VM cannot report thread allocation.
         // Concrete Mockito mocks instrument Object.equals for the rest of the suite, adding
         // dispatch allocations to array-key comparisons. Measure production code in a fresh VM.
         final String executable = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "java").toString();
@@ -37,8 +45,9 @@ public class PerformanceCollectionsRegressionTest {
         final java.nio.file.Path output = java.nio.file.Files.createTempFile("dedup-allocation-", ".log");
         Process process = null;
         try {
-            process = new ProcessBuilder(executable, "-cp", classpath, DuplicateKeyAllocationProcess.class.getName())
-                    .redirectErrorStream(true).redirectOutput(output.toFile()).start();
+            process = new ProcessBuilder(executable, "-cp", classpath, DuplicateKeyAllocationProcess.class.getName()).redirectErrorStream(true)
+                    .redirectOutput(output.toFile())
+                    .start();
             assertTrue(process.waitFor(30, TimeUnit.SECONDS), "allocation probe did not terminate");
             assertEquals(0, process.exitValue(), java.nio.file.Files.readString(output));
         } finally {
@@ -58,8 +67,7 @@ public class PerformanceCollectionsRegressionTest {
 
     private static void verifyDuplicateKeyCandidateAllocation() {
         for (int i = 0; i < 5; i++) {
-            dataset(List.of("a", "b"), Collections.nCopies(1000, 1), Collections.nCopies(1000, "x"))
-                    .removeDuplicateRowsBy(List.of("a", "b"));
+            dataset(List.of("a", "b"), Collections.nCopies(1000, 1), Collections.nCopies(1000, "x")).removeDuplicateRowsBy(List.of("a", "b"));
         }
         final RowDataset data = dataset(List.of("a", "b"), Collections.nCopies(100000, 1), Collections.nCopies(100000, "x"));
         final long bytes = allocated(() -> data.removeDuplicateRowsBy(List.of("a", "b")));
@@ -74,8 +82,8 @@ public class PerformanceCollectionsRegressionTest {
     public void simpleKeyDedupPreservesNullNanSignedZeroAndNoOpViews() {
         for (boolean compound : new boolean[] { false, true }) {
             final RowDataset data = dataset(List.of("k", "tag", "v"),
-                    Arrays.asList(null, null, Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L), -0.0, +0.0, -0.0),
-                    Collections.nCopies(7, "same"), List.of("null", "duplicate", "nan", "duplicate", "negative", "positive", "duplicate"));
+                    Arrays.asList(null, null, Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L), -0.0, +0.0, -0.0), Collections.nCopies(7, "same"),
+                    List.of("null", "duplicate", "nan", "duplicate", "negative", "positive", "duplicate"));
             if (compound) {
                 data.removeDuplicateRowsBy(List.of("k", "tag"));
             } else {
@@ -93,12 +101,23 @@ public class PerformanceCollectionsRegressionTest {
         final AtomicReference<RowDataset> owner = new AtomicReference<>();
         class Key {
             final int value;
-            Key(int value) { this.value = value; }
-            @Override public int hashCode() {
-                if (value == 2) { owner.get().set(0, 1, "after"); }
+
+            Key(int value) {
+                this.value = value;
+            }
+
+            @Override
+            public int hashCode() {
+                if (value == 2) {
+                    owner.get().set(0, 1, "after");
+                }
                 return value;
             }
-            @Override public boolean equals(Object other) { return other instanceof Key key && key.value == value; }
+
+            @Override
+            public boolean equals(Object other) {
+                return other instanceof Key key && key.value == value;
+            }
         }
         final RowDataset data = dataset(List.of("k", "v"), List.of(new Key(1), new Key(2), new Key(1)), List.of("before", "second", "duplicate"));
         owner.set(data);
@@ -123,12 +142,11 @@ public class PerformanceCollectionsRegressionTest {
 
     @Test
     public void allFlatMapAritiesAlignCopiedColumnsForNullEmptyAndExpandedRows() {
-        final RowDataset source = dataset(List.of("a", "b", "c", "copy"), List.of(1, 2, 3), List.of(10, 20, 30),
-                List.of(100, 200, 300), List.of("one", "two", "three"));
+        final RowDataset source = dataset(List.of("a", "b", "c", "copy"), List.of(1, 2, 3), List.of(10, 20, 30), List.of(100, 200, 300),
+                List.of("one", "two", "three"));
         final java.util.function.Function<Object, List<?>> values = value -> Integer.valueOf(1).equals(value) ? null
                 : Integer.valueOf(2).equals(value) ? List.of() : Arrays.asList(value, null);
-        final List<Dataset> results = List.of(
-                source.flatMapColumn("a", "out", List.of("copy"), values),
+        final List<Dataset> results = List.of(source.flatMapColumn("a", "out", List.of("copy"), values),
                 source.flatMapColumns(Tuple.of("a", "b"), "out", List.of("copy"), (a, b) -> values.apply(a)),
                 source.flatMapColumns(Tuple.of("a", "b", "c"), "out", List.of("copy"), (a, b, c) -> values.apply(a)),
                 source.flatMapColumns(List.of("a", "b", "c"), "out", List.of("copy"), row -> values.apply(row.get(0))));
@@ -188,7 +206,9 @@ public class PerformanceCollectionsRegressionTest {
 
         // null or empty properties mean no properties, like the two-argument overload.
         assertTrue(RowDataset.fromOwnedColumns(new ArrayList<>(List.of("a")), new ArrayList<>(List.of(new ArrayList<>())), null).getProperties().isEmpty());
-        assertTrue(RowDataset.fromOwnedColumns(new ArrayList<>(List.of("a")), new ArrayList<>(List.of(new ArrayList<>())), new HashMap<>()).getProperties().isEmpty());
+        assertTrue(RowDataset.fromOwnedColumns(new ArrayList<>(List.of("a")), new ArrayList<>(List.of(new ArrayList<>())), new HashMap<>())
+                .getProperties()
+                .isEmpty());
         assertTrue(RowDataset.fromOwnedColumns(new ArrayList<>(List.of("a")), new ArrayList<>(List.of(new ArrayList<>()))).getProperties().isEmpty());
     }
 
@@ -261,8 +281,7 @@ public class PerformanceCollectionsRegressionTest {
         final String[] blank = { executable, "-cp", testClasses, ListingProcess.class.getName(), "blank" };
         assertEquals(List.of(""), method.invoke(fileSystem, blank, 1, 15000L, null, true));
         final String[] empty = { executable, "-cp", testClasses, ListingProcess.class.getName(), "empty" };
-        final var failure = assertThrows(java.lang.reflect.InvocationTargetException.class,
-                () -> method.invoke(fileSystem, empty, 1, 15000L, null, true));
+        final var failure = assertThrows(java.lang.reflect.InvocationTargetException.class, () -> method.invoke(fileSystem, empty, 1, 15000L, null, true));
         assertInstanceOf(java.io.IOException.class, failure.getCause());
         assertTrue(failure.getCause().getMessage().contains("did not return any info"));
     }
@@ -275,8 +294,8 @@ public class PerformanceCollectionsRegressionTest {
         final java.nio.file.Path output = java.nio.file.Files.createTempFile("observer-blocking-callback-", ".log");
         Process process = null;
         try {
-            process = new ProcessBuilder(executable, "-Djdk.virtualThreadScheduler.parallelism=1", "-Djdk.virtualThreadScheduler.maxPoolSize=1",
-                    "-cp", classpath, BlockingCallbackProcess.class.getName()).redirectErrorStream(true).redirectOutput(output.toFile()).start();
+            process = new ProcessBuilder(executable, "-Djdk.virtualThreadScheduler.parallelism=1", "-Djdk.virtualThreadScheduler.maxPoolSize=1", "-cp",
+                    classpath, BlockingCallbackProcess.class.getName()).redirectErrorStream(true).redirectOutput(output.toFile()).start();
             assertTrue(process.waitFor(30, TimeUnit.SECONDS), "blocking callback probe did not terminate");
             assertEquals(0, process.exitValue(), java.nio.file.Files.readString(output));
         } finally {
@@ -306,7 +325,10 @@ public class PerformanceCollectionsRegressionTest {
                         Thread.currentThread().interrupt();
                         throw new IllegalStateException(e);
                     }
-                }, e -> { error.set(e); completed.countDown(); }, completed::countDown);
+                }, e -> {
+                    error.set(e);
+                    completed.countDown();
+                }, completed::countDown);
                 try {
                     assertTrue(entered.await(10, TimeUnit.SECONDS), "source callback did not start");
                     Thread.ofVirtual().start(unrelatedProgress::countDown);
@@ -358,7 +380,10 @@ public class PerformanceCollectionsRegressionTest {
             final CountDownLatch terminal = new CountDownLatch(1);
             final List<Integer> values = new ArrayList<>();
             final AtomicReference<Exception> error = new AtomicReference<>();
-            observer.observe(values::add, e -> { error.set(e); terminal.countDown(); }, terminal::countDown);
+            observer.observe(values::add, e -> {
+                error.set(e);
+                terminal.countDown();
+            }, terminal::countDown);
             assertTrue(terminal.await(5, TimeUnit.SECONDS));
             synchronized (field(observer, "eventGate")) {
                 Object dispatcher = observer.dispatcher;
@@ -395,8 +420,12 @@ public class PerformanceCollectionsRegressionTest {
                     uncaught.set(failure);
                     stopped.countDown();
                 });
-                if (failureMode == 0) { throw fatal; }
-                if (failureMode == 2) { throw new IllegalStateException("expected source callback failure"); }
+                if (failureMode == 0) {
+                    throw fatal;
+                }
+                if (failureMode == 2) {
+                    throw new IllegalStateException("expected source callback failure");
+                }
             }, error -> {
                 terminalCalls.incrementAndGet();
                 throw fatal;
@@ -418,7 +447,10 @@ public class PerformanceCollectionsRegressionTest {
     public void longestPrefixValidatesTheWholeKeyAndSupportsSequentialLists() {
         final PrefixSearchTable.Builder<String, Integer> builder = PrefixSearchTable.builder();
         final LinkedList<String> key = new LinkedList<>() {
-            @Override public String get(int index) { throw new AssertionError("indexed traversal of a sequential key"); }
+            @Override
+            public String get(int index) {
+                throw new AssertionError("indexed traversal of a sequential key");
+            }
         };
         key.addAll(List.of("a", "b", "c"));
         builder.add(List.of("a"), 1).add(key, 3);
@@ -479,13 +511,18 @@ public class PerformanceCollectionsRegressionTest {
         assertEquals(new java.util.HashSet<>(source), SetMultimap.fromCollection(source, value -> "key").get("key"));
         assertEquals(2, Multiset.of(1, 2, 1, null).count(1));
         final Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("first", 1); map.put("second", 2); map.put("third", 3);
+        map.put("first", 1);
+        map.put("second", 2);
+        map.put("third", 3);
         assertEquals(List.of("first", "third"), new ArrayList<>(Maps.filterByValue(map, value -> value != 2).keySet()));
         final Map<String, List<Integer>> columns = new LinkedHashMap<>();
-        columns.put("a", List.of(1, 2, 3)); columns.put("b", List.of(4));
+        columns.put("a", List.of(1, 2, 3));
+        columns.put("b", List.of(4));
         assertEquals(List.of(Map.of("a", 1, "b", 4), Map.of("a", 2), Map.of("a", 3)), Maps.transpose(columns));
         final Map<Integer, Integer> large = new HashMap<>();
-        for (int i = 0; i < 100000; i++) { large.put(i, i); }
+        for (int i = 0; i < 100000; i++) {
+            large.put(i, i);
+        }
         Maps.filterByKey(large, key -> key == 0);
         final long bytes = allocated(() -> allocationSink = Maps.filterByKey(large, key -> key == 0));
         assertTrue(bytes < 100000, "a one-entry result should not allocate an input-sized table: " + bytes);
@@ -494,7 +531,8 @@ public class PerformanceCollectionsRegressionTest {
     @Test
     public void sheetColumnInsertionKeepsCallerAndSelfViewsIsolated() {
         final Sheet<Integer, String, Integer> sheet = new Sheet<>(List.of(1, 2), List.of("a"));
-        sheet.set(1, "a", 10); sheet.set(2, "a", 20);
+        sheet.set(1, "a", 10);
+        sheet.set(2, "a", 20);
         final List<Integer> values = new ArrayList<>(List.of(30, 40));
         sheet.addColumn("b", values);
         values.set(0, 999);
@@ -521,7 +559,9 @@ public class PerformanceCollectionsRegressionTest {
         assertEquals(List.of("x", "z"), multiple.getColumn("v"));
         final RowDataset sideEffect = dataset(List.of("k", "v"), List.of(1, 2, 1), List.of("before", "b", "c"));
         sideEffect.removeDuplicateRowsBy("k", value -> {
-            if (Integer.valueOf(2).equals(value)) { sideEffect.set(0, 1, "after"); }
+            if (Integer.valueOf(2).equals(value)) {
+                sideEffect.set(0, 1, "after");
+            }
             return value;
         });
         assertEquals(List.of("before", "b"), sideEffect.getColumn("v"));
@@ -531,7 +571,10 @@ public class PerformanceCollectionsRegressionTest {
     public void emptyDatasetSetOperationsValidateSchemaWithoutIndexingRightRows() {
         final RowDataset empty = dataset(List.of("k"), List.of());
         final Object key = new Object() {
-            @Override public int hashCode() { throw new AssertionError("right row indexed for empty left"); }
+            @Override
+            public int hashCode() {
+                throw new AssertionError("right row indexed for empty left");
+            }
         };
         final RowDataset right = dataset(List.of("k"), List.of(key));
         assertEquals(0, empty.intersect(right).size());
@@ -544,7 +587,41 @@ public class PerformanceCollectionsRegressionTest {
     }
 
     @Test
-    public void flatMapCanShrinkToEmptyWithoutInputSizedStorage() {
+    public void flatMapCanShrinkToEmptyWithoutInputSizedStorage() throws Exception {
+        final Dataset expanded = dataset(List.of("k", "v"), List.of(1, 2), List.of("a", "b")).flatMapColumn("k", "mapped", List.of("v"),
+                value -> Arrays.asList(value, null));
+        assertEquals(Arrays.asList(1, null, 2, null), expanded.getColumn("mapped"));
+        assertEquals(List.of("a", "a", "b", "b"), expanded.getColumn("v"));
+        allocated(() -> {
+        }); // Skip consistently if this VM cannot report thread allocation.
+        // Inline Mockito mocks make List.of() allocate a fresh list for the rest of the suite.
+        // That cost is the test mapper, not column storage. Measure production code in a fresh VM.
+        final String executable = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "java").toString();
+        final String classpath = System.getProperty("surefire.test.class.path", System.getProperty("java.class.path"));
+        final java.nio.file.Path output = java.nio.file.Files.createTempFile("flatmap-allocation-", ".log");
+        Process process = null;
+        try {
+            process = new ProcessBuilder(executable, "-cp", classpath, FlatMapEmptyAllocationProcess.class.getName()).redirectErrorStream(true)
+                    .redirectOutput(output.toFile())
+                    .start();
+            assertTrue(process.waitFor(60, TimeUnit.SECONDS), "allocation probe did not terminate");
+            assertEquals(0, process.exitValue(), java.nio.file.Files.readString(output));
+        } finally {
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+                process.waitFor(5, TimeUnit.SECONDS);
+            }
+            java.nio.file.Files.deleteIfExists(output);
+        }
+    }
+
+    public static final class FlatMapEmptyAllocationProcess {
+        public static void main(String[] args) {
+            verifyFlatMapEmptyAllocation();
+        }
+    }
+
+    private static void verifyFlatMapEmptyAllocation() {
         final RowDataset data = dataset(List.of("k", "v"), Collections.nCopies(100000, 1), Collections.nCopies(100000, "x"));
         data.flatMapColumn("k", "mapped", List.of("v"), value -> List.of());
         final long bytes = allocated(() -> allocationSink = data.flatMapColumn("k", "mapped", List.of("v"), value -> List.of()));
@@ -552,20 +629,16 @@ public class PerformanceCollectionsRegressionTest {
         assertEquals(0, empty.size());
         assertEquals(List.of("v", "mapped"), empty.columnNames());
         assertTrue(bytes < 100000, "empty output allocated input-sized column storage: " + bytes);
-        final Dataset expanded = dataset(List.of("k", "v"), List.of(1, 2), List.of("a", "b"))
-                .flatMapColumn("k", "mapped", List.of("v"), value -> Arrays.asList(value, null));
-        assertEquals(Arrays.asList(1, null, 2, null), expanded.getColumn("mapped"));
-        assertEquals(List.of("a", "a", "b", "b"), expanded.getColumn("v"));
     }
 
     @Test
     public void csvImporterAdoptsPrivateColumnsButKeepsCallbackHeadersIsolated() {
         final AtomicReference<List<String>> headers = new AtomicReference<>();
-        final Dataset data = CsvUtil.load(new StringReader("a,b\n1,2\n3,4\n"), null, 0, Long.MAX_VALUE, row -> true,
-                (names, row, output) -> {
-                    headers.set(names);
-                    output[0] = row.get(0); output[1] = row.get(1);
-                });
+        final Dataset data = CsvUtil.load(new StringReader("a,b\n1,2\n3,4\n"), null, 0, Long.MAX_VALUE, row -> true, (names, row, output) -> {
+            headers.set(names);
+            output[0] = row.get(0);
+            output[1] = row.get(1);
+        });
         assertEquals(2, data.size());
         data.renameColumn("a", "renamed");
         assertEquals(List.of("a", "b"), headers.get());
@@ -578,14 +651,19 @@ public class PerformanceCollectionsRegressionTest {
     @SafeVarargs
     private static RowDataset dataset(List<String> names, List<?>... columns) {
         final List<List<Object>> copied = new ArrayList<>();
-        for (List<?> column : columns) { copied.add(new ArrayList<>(column)); }
+        for (List<?> column : columns) {
+            copied.add(new ArrayList<>(column));
+        }
         return new RowDataset(new ArrayList<>(names), copied);
     }
 
     private static void combineFinite(int count) {
         final KahanSummation sum = new KahanSummation();
         final KahanSummation other = KahanSummation.of(0.1);
-        for (int i = 0; i < count; i++) { sum.combine(1, 0.1); sum.combine(other); }
+        for (int i = 0; i < count; i++) {
+            sum.combine(1, 0.1);
+            sum.combine(other);
+        }
         allocationSink = sum;
     }
 
@@ -594,7 +672,9 @@ public class PerformanceCollectionsRegressionTest {
         org.junit.jupiter.api.Assumptions.assumeTrue(bean instanceof com.sun.management.ThreadMXBean);
         final com.sun.management.ThreadMXBean allocation = (com.sun.management.ThreadMXBean) bean;
         org.junit.jupiter.api.Assumptions.assumeTrue(allocation.isThreadAllocatedMemorySupported());
-        if (!allocation.isThreadAllocatedMemoryEnabled()) { allocation.setThreadAllocatedMemoryEnabled(true); }
+        if (!allocation.isThreadAllocatedMemoryEnabled()) {
+            allocation.setThreadAllocatedMemoryEnabled(true);
+        }
         final long id = Thread.currentThread().threadId();
         final long before = allocation.getThreadAllocatedBytes(id);
         action.run();

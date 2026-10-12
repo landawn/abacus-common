@@ -54,7 +54,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -535,7 +534,7 @@ public class IOUtilReview20260925bTest extends TestBase {
         IOUtil.write((Object) null, sw);
         IOUtil.write((CharSequence) null, sw);
         IOUtil.write("x", sw, true);
-        IOUtil.writeLine((Object) 1, sw);
+        IOUtil.writeLine(1, sw);
         assertEquals("nullnullx1\n", sw.toString());
 
         final File f = tempDir.resolve("c609.txt").toFile();
@@ -963,7 +962,7 @@ public class IOUtilReview20260925bTest extends TestBase {
         Files.write(source.toPath(), payload);
 
         try (FileChannel real = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+             FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileChannel stuck = new DelegatingFileChannel(real) {
                 @Override
                 public long position() {
@@ -986,7 +985,7 @@ public class IOUtilReview20260925bTest extends TestBase {
 
         // destination that cannot answer position(): a pipe-backed channel on any platform
         try (FileChannel real = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel realDest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+             FileChannel realDest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileChannel pipeLike = new DelegatingFileChannel(realDest) {
                 @Override
                 public long position() throws IOException {
@@ -1003,7 +1002,7 @@ public class IOUtilReview20260925bTest extends TestBase {
         final File target2 = tempDir.resolve("c613-throw-out2.bin").toFile();
 
         try (FileChannel real = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel dest = FileChannel.open(target2.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
+             FileChannel dest = FileChannel.open(target2.toPath(), StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
             final FileChannel pipeLike = new DelegatingFileChannel(real) {
                 @Override
                 public long position() throws IOException {
@@ -1018,7 +1017,7 @@ public class IOUtilReview20260925bTest extends TestBase {
 
         // a closed channel is reported as such
         try (FileChannel real = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel dest = FileChannel.open(target2.toPath(), StandardOpenOption.WRITE)) {
+             FileChannel dest = FileChannel.open(target2.toPath(), StandardOpenOption.WRITE)) {
             final FileChannel closed = new DelegatingFileChannel(dest) {
                 @Override
                 public long position() throws IOException {
@@ -1040,7 +1039,7 @@ public class IOUtilReview20260925bTest extends TestBase {
 
         // (4) read-only destination: NonWritableChannelException before any source byte is consumed
         try (FileChannel in = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel readOnly = FileChannel.open(target.toPath(), StandardOpenOption.READ)) {
+             FileChannel readOnly = FileChannel.open(target.toPath(), StandardOpenOption.READ)) {
             in.position(10);
             assertThrows(NonWritableChannelException.class, () -> IOUtil.transfer(in, readOnly));
             assertEquals(10, in.position(), "source position unchanged");
@@ -1048,7 +1047,7 @@ public class IOUtilReview20260925bTest extends TestBase {
 
         // (5) source position == size (> 0): 0, destination untouched
         try (FileChannel in = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE)) {
+             FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE)) {
             in.position(in.size());
             assertEquals(0, IOUtil.transfer(in, dest));
             assertEquals(0, dest.position());
@@ -1058,7 +1057,7 @@ public class IOUtilReview20260925bTest extends TestBase {
 
         // (6) regular files: exact, both positions honoured
         try (FileChannel in = FileChannel.open(source.toPath(), StandardOpenOption.READ);
-                FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE)) {
+             FileChannel dest = FileChannel.open(target.toPath(), StandardOpenOption.WRITE)) {
             in.position(100);
             dest.position(3);
             assertEquals(payload.length - 100, IOUtil.transfer(in, dest));
@@ -1165,7 +1164,8 @@ public class IOUtilReview20260925bTest extends TestBase {
                 assertTrue(c.length() >= initial, "copy holds at least the initial length: " + c.length());
                 assertTrue(c.length() <= live.length(), "copy never exceeds the source");
 
-                try (InputStream src = new FileInputStream(live); InputStream cp = new FileInputStream(c)) {
+                try (InputStream src = new FileInputStream(live);
+                     InputStream cp = new FileInputStream(c)) {
                     final byte[] prefix = IOUtil.readBytes(src, 0, (int) c.length());
                     assertArrayEquals(prefix, IOUtil.readAllBytes(cp), "prefix bytes equal");
                 }

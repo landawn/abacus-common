@@ -331,7 +331,7 @@ public class ClobTypeTest extends TestBase {
     public void reviewFixes20260906_valueOfObjectClobReturnsSameInstanceWithoutTouchingIt() throws SQLException {
         final Clob clob = mock(Clob.class);
 
-        assertSame(clob, type.valueOf((Object) clob));
+        assertSame(clob, type.valueOf(clob));
 
         verify(clob, never()).free();
         verify(clob, never()).length();
@@ -342,7 +342,7 @@ public class ClobTypeTest extends TestBase {
     public void reviewFixes20260906_valueOfObjectSerialClobRemainsUsableAfterwards() throws SQLException {
         final SerialClob sc = new SerialClob("hello".toCharArray());
 
-        assertSame(sc, type.valueOf((Object) sc));
+        assertSame(sc, type.valueOf(sc));
         assertEquals(5L, sc.length());
         assertEquals("hello", sc.getSubString(1, 5));
     }
@@ -350,8 +350,8 @@ public class ClobTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_valueOfObjectNonClobThrowsBeforeAnyRead() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) "x"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) 42));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) new char[] { 'a' }));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(42));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(new char[] { 'a' }));
         // the String overload is unchanged
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf("x"));
     }
@@ -367,8 +367,8 @@ public class ClobTypeTest extends TestBase {
         final SerialClob sc = new SerialClob("ab".toCharArray());
         final Clob foreign = mock(Clob.class);
 
-        assertSame(sc, serialType.valueOf((Object) sc));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> serialType.valueOf((Object) foreign));
+        assertSame(sc, serialType.valueOf(sc));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> serialType.valueOf(foreign));
 
         verify(foreign, never()).free();
         verify(foreign, never()).length();

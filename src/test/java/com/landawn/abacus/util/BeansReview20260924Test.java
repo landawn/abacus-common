@@ -361,7 +361,7 @@ public class BeansReview20260924Test extends TestBase {
 
         // the same selection is rejected for an empty map and by mapsToBeans - now all agree
         assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(new HashMap<>(), Arrays.asList("bogus"), Person.class));
-        assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(new ArrayList<Map<String, Object>>(), Arrays.asList("bogus"), Person.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(new ArrayList<>(), Arrays.asList("bogus"), Person.class));
 
         assertNull(Beans.mapToBean((Map<String, Object>) null, Arrays.asList("firstName", "FIRST_NAME", "address.city"), Person.class));
         assertNull(Beans.mapToBean((Map<String, Object>) null, Collections.<String> emptyList(), Person.class));

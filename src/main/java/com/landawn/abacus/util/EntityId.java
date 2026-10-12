@@ -563,14 +563,16 @@ public interface EntityId {
          * }</pre>
          *
          * <p>Each invocation returns a snapshot. Subsequent calls to {@link #put(String, Object)}
-         * do not modify identifiers returned by earlier invocations.</p>
+         * do not modify identifiers returned by earlier invocations. Building an empty snapshot before
+         * the first property is added leaves an unnamed builder free to infer its entity name from that property.</p>
          *
          * @return a snapshot of the constructed EntityId
          */
         @SuppressWarnings("deprecation")
         public EntityId build() {
             if (entityId == null) {
-                entityId = new Seid(Strings.EMPTY);
+                // A snapshot must not select the builder's name before its first successful put.
+                return new Seid(Strings.EMPTY);
             }
 
             return entityId.copy();

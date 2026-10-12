@@ -1,6 +1,14 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -21,10 +29,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Spliterator;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -76,12 +80,13 @@ public class OpenUtilFixesTest extends TestBase {
             });
             final int selected = route;
             final com.landawn.abacus.exception.UncheckedIOException failure = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> {
-                if (selected == 0)
+                if (selected == 0) {
                     iterator.hasNext();
-                else if (selected == 1)
+                } else if (selected == 1) {
                     iterator.next();
-                else
+                } else {
                     iterator.stream().toList();
+                }
             });
             assertSame(read, failure.getCause());
             assertArrayEquals(new Throwable[] { close }, failure.getSuppressed());
@@ -98,10 +103,12 @@ public class OpenUtilFixesTest extends TestBase {
 
         public String invoke(final String value) throws IOException, InterruptedException {
             calls++;
-            if (value.equals("io"))
+            if (value.equals("io")) {
                 throw new IOException("读取");
-            if (value.equals("interrupt"))
+            }
+            if (value.equals("interrupt")) {
                 throw new InterruptedException("中断");
+            }
             return value;
         }
     }
@@ -119,8 +126,9 @@ public class OpenUtilFixesTest extends TestBase {
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             Thread.interrupted();
-            if (interrupted)
+            if (interrupted) {
                 Thread.currentThread().interrupt();
+            }
         }
         assertEquals(2, target.calls);
         assertEquals("你好🙂", Reflection.on(target).invoke("invoke", "你好🙂"));
@@ -174,8 +182,9 @@ public class OpenUtilFixesTest extends TestBase {
         final var values = map.values();
         final var entries = map.entrySet();
         final var late = values.spliterator();
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++) {
             map.put(i, "值" + i);
+        }
         assertTrue(late.hasCharacteristics(Spliterator.ORDERED));
         final List<String> copied = new ArrayList<>();
         late.forEachRemaining(copied::add);
@@ -237,20 +246,22 @@ public class OpenUtilFixesTest extends TestBase {
                 final TrackingReader reader = new TrackingReader(xml);
                 final int selected = route;
                 final org.junit.jupiter.api.function.Executable bytes = () -> {
-                    if (selected == 0)
+                    if (selected == 0) {
                         PropertiesUtil.loadFromXml(input);
-                    else if (selected == 1)
+                    } else if (selected == 1) {
                         PropertiesUtil.loadFromXml(input, Properties.class);
-                    else
+                    } else {
                         PropertiesUtil.xmlToJava(input, directory.toString(), "example", "Config", false);
+                    }
                 };
                 final org.junit.jupiter.api.function.Executable chars = () -> {
-                    if (selected == 0)
+                    if (selected == 0) {
                         PropertiesUtil.loadFromXml(reader);
-                    else if (selected == 1)
+                    } else if (selected == 1) {
                         PropertiesUtil.loadFromXml(reader, Properties.class);
-                    else
+                    } else {
                         PropertiesUtil.xmlToJava(reader, directory.toString(), "example", "Config", false);
+                    }
                 };
                 if (xml.equals("<config>")) {
                     assertThrows(RuntimeException.class, bytes);
@@ -286,8 +297,9 @@ public class OpenUtilFixesTest extends TestBase {
                 }
             }
         } finally {
-            if (!suspended)
+            if (!suspended) {
                 Profiler.resume();
+            }
         }
     }
 
@@ -383,8 +395,9 @@ public class OpenUtilFixesTest extends TestBase {
         final ContinuableFuture<Integer> throwing = new ContinuableFuture<>(new FutureTask<>(() -> 1)) {
             @Override
             public boolean cancel(boolean interrupt) {
-                if (attempts.incrementAndGet() == 1)
+                if (attempts.incrementAndGet() == 1) {
                     throw new IllegalStateException("first attempt");
+                }
                 return super.cancel(interrupt);
             }
         };
@@ -419,12 +432,13 @@ public class OpenUtilFixesTest extends TestBase {
             final ResultSet resultSet = jdbc(ResultSet.class, "result", same, statement, closed);
             final int selected = route;
             assertSame(same, assertThrows(Error.class, () -> {
-                if (selected == 0)
+                if (selected == 0) {
                     DataSourceUtil.close(resultSet, true, true);
-                else if (selected == 1)
+                } else if (selected == 1) {
                     DataSourceUtil.close(resultSet, statement);
-                else
+                } else {
                     DataSourceUtil.close(statement, connection);
+                }
             }));
             assertEquals(route == 0 ? 3 : 2, closed.size());
             assertEquals(0, same.getSuppressed().length);
@@ -444,14 +458,17 @@ public class OpenUtilFixesTest extends TestBase {
         return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, (proxy, method, args) -> {
             if (method.getName().equals("close")) {
                 closed.add(name);
-                if (failure != null)
+                if (failure != null) {
                     throw failure;
+                }
                 return null;
             }
-            if (method.getName().equals("getStatement") || method.getName().equals("getConnection"))
+            if (method.getName().equals("getStatement") || method.getName().equals("getConnection")) {
                 return parent;
-            if (method.getName().equals("toString"))
+            }
+            if (method.getName().equals("toString")) {
                 return name;
+            }
             return null;
         }));
     }

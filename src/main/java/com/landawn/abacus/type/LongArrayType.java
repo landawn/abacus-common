@@ -83,8 +83,9 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * <p>A non-{@code null} element may also be enclosed in a matching pair of double or single quotes (for example
      * {@code ["1", null]}), which is the form {@link #serializeTo(CharacterWriter, Long[], JsonXmlSerConfig)} writes
-     * when {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed before the element is parsed.
-     * A quoted {@code "null"} is not a {@code null} element.</p>
+     * when {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed and the JSON escapes in the
+     * content are decoded once before the element is parsed. An empty quoted element is rejected as a malformed
+     * number rather than read as {@code null}. A quoted {@code "null"} is not a {@code null} element.</p>
      *
      * <p>Special cases:
      * <ul>
@@ -98,9 +99,10 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      *
      * @param str the string to parse; may be {@code null}
      * @return the parsed {@code Long[]}, or {@code null} if {@code str} is {@code null} or blank
-     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if a non-{@code null} element (after removing its enclosing quotes, if any) is not a
-     *         valid integer literal
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a quoted element
+     *         contains a malformed Unicode escape
+     * @throws NumberFormatException if a quoted element is empty, or a non-{@code null} element (after removing
+     *         enclosing quotes and decoding escapes once, if quoted) is not a valid integer literal
      * @throws ArithmeticException if an element is outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Long[])
@@ -114,6 +116,12 @@ public final class LongArrayType extends ObjectArrayType<Long> {
             return N.EMPTY_LONG_OBJ_ARRAY;
         }
 
+        final Long[] decimalArray = (Long[]) parseNumericArray(str, elementType, Long.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Long[] array = new Long[len];
@@ -123,17 +131,9 @@ public final class LongArrayType extends ObjectArrayType<Long> {
                 if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
                     array[i] = null;
                 } else {
-                    String element = elements[i];
-                    final int elementLength = element.length();
-
-                    // serializeTo quotes every value under writeLongAsString; read that form back. An empty quoted
-                    // element is left as is so it fails as a malformed number instead of becoming null.
-                    if (elementLength > 2 && (element.charAt(0) == '"' || element.charAt(0) == '\'')
-                            && element.charAt(elementLength - 1) == element.charAt(0)) {
-                        element = element.substring(1, elementLength - 1);
-                    }
-
-                    array[i] = elementType.valueOf(element);
+                    // Quoted long values can contain JSON escapes, just like primitive long[] elements.
+                    // The helper leaves empty quoted tokens intact so they still fail instead of becoming null.
+                    array[i] = elementType.valueOf(jsonElementContent(elements[i]));
                 }
             }
         }

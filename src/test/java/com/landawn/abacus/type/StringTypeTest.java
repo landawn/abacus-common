@@ -209,7 +209,7 @@ public class StringTypeTest extends TestBase {
     public void reviewFixes20260906_classJavadocExample() throws SQLException {
         Type<String> stringType = TypeFactory.getType(String.class);
         assertEquals("hello", stringType.valueOf("hello"));
-        assertEquals("123", stringType.valueOf((Object) 123));
+        assertEquals("123", stringType.valueOf(123));
         assertNull(stringType.valueOf((String) null));
 
         PreparedStatement stmt = mock(PreparedStatement.class);

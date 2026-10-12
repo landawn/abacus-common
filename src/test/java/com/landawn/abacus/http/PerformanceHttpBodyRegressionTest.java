@@ -1,6 +1,9 @@
 package com.landawn.abacus.http;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -8,11 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
 
 @Tag("unit")
-class PerformanceHttpBodyRegressionTest {
+class PerformanceHttpBodyRegressionTest extends TestBase {
     @Test
     void ownedBodyAvoidsHandoffCopyButPublicAccessorsRemainDefensive() throws Exception {
         byte[] body = { 1, 2, 3 };

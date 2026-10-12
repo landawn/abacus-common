@@ -18,14 +18,16 @@ import java.util.function.BiConsumer;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.CsvUtil.CsvRecordReader;
 
 @Tag("unit")
-class CsvRecordReaderTest {
+class CsvRecordReaderTest extends TestBase {
     /** Any line parser other than CSV_LINE_PARSER (by identity) frames physical lines. */
     private static final BiConsumer<String, String[]> PHYSICAL_LINE_PARSER = CsvUtil.CSV_LINE_PARSER_BY_SPLITTER;
+
     @Test
     void currentRecordAndDestinationClearing() throws IOException {
         CsvRecordReader reader = new CsvRecordReader(new StringReader("a,b\nc\n\n"));
@@ -95,12 +97,22 @@ class CsvRecordReaderTest {
         class Source extends StringReader {
             int reads;
             boolean closed;
-            Source() { super("skip,too,many\na,b\nc"); }
-            @Override public int read(char[] chars, int offset, int length) throws IOException {
+
+            Source() {
+                super("skip,too,many\na,b\nc");
+            }
+
+            @Override
+            public int read(char[] chars, int offset, int length) throws IOException {
                 reads++;
                 return super.read(chars, offset, length);
             }
-            @Override public void close() { closed = true; super.close(); }
+
+            @Override
+            public void close() {
+                closed = true;
+                super.close();
+            }
         }
         Source source = new Source();
         CsvRecordReader reader = new CsvRecordReader(source);
@@ -140,8 +152,14 @@ class CsvRecordReaderTest {
         assertThrows(IllegalArgumentException.class, () -> reader.stream(null, 0, new String[1]));
         assertThrows(IllegalArgumentException.class, () -> reader.stream(CsvUtil.CSV_LINE_PARSER, 0, null));
         Reader broken = new Reader() {
-            @Override public int read(char[] chars, int offset, int length) throws IOException { throw new IOException("broken"); }
-            @Override public void close() { }
+            @Override
+            public int read(char[] chars, int offset, int length) throws IOException {
+                throw new IOException("broken");
+            }
+
+            @Override
+            public void close() {
+            }
         };
         CsvRecordReader failing = new CsvRecordReader(broken);
         try (var stream = failing.stream(CsvUtil.CSV_LINE_PARSER, 0, new String[1])) {
@@ -207,11 +225,13 @@ class CsvRecordReaderTest {
         assertArrayEquals(new String[] { "a", "b", null }, row);
 
         RuntimeException failure = new IllegalStateException("custom parser failed");
-        assertSame(failure, assertThrows(IllegalStateException.class,
-                () -> reader.parseRecordInto((text, out) -> { throw failure; }, row)));
+        assertSame(failure, assertThrows(IllegalStateException.class, () -> reader.parseRecordInto((text, out) -> {
+            throw failure;
+        }, row)));
         IndexOutOfBoundsException overflow = new IndexOutOfBoundsException("custom overflow");
-        assertSame(overflow, assertThrows(ParsingException.class,
-                () -> reader.parseRecordInto((text, out) -> { throw overflow; }, row)).getCause());
+        assertSame(overflow, assertThrows(ParsingException.class, () -> reader.parseRecordInto((text, out) -> {
+            throw overflow;
+        }, row)).getCause());
         reader.parseRecordInto(row);
         assertArrayEquals(new String[] { "a", "b", null }, row);
         assertTrue(reader.nextRecord(CsvUtil.CSV_LINE_PARSER));

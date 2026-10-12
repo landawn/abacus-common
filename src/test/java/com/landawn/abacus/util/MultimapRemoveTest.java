@@ -1335,7 +1335,7 @@ public class MultimapRemoveTest extends MultimapTestSupport {
     // G053-02: pre-sized identity index in copyEntriesInto - copy/toMap of many keys incl. an emptied key
     @Test
     public void testCopy_manyKeysWithEmptiedKey() {
-        final ListMultimap<Integer, Integer> mm = N.newListMultimap();
+        final ListMultimap<Integer, Integer> mm = CommonUtil.newListMultimap();
 
         for (int i = 0; i < 1000; i++) {
             mm.put(i, i);
@@ -1357,7 +1357,7 @@ public class MultimapRemoveTest extends MultimapTestSupport {
         assertEquals(1000, map.size());
         assertEquals(Arrays.asList(3, -3), map.get(3));
         assertTrue(map.get(3) != mm.get(3));
-        assertTrue(N.<Integer, Integer> newListMultimap().copy().isEmpty());
+        assertTrue(CommonUtil.<Integer, Integer> newListMultimap().copy().isEmpty());
     }
 
     // ---- perf review 2026-09-26 G053 end ----

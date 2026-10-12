@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +19,6 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import com.landawn.abacus.TestBase;
-import org.junit.jupiter.api.Assertions;
 
 public class GuavaMultisetTypeTest extends TestBase {
 
@@ -87,7 +87,7 @@ public class GuavaMultisetTypeTest extends TestBase {
         final Multiset<String> multiset = org.mockito.Mockito.mock(Multiset.class);
         org.mockito.Mockito.when(multiset.size()).thenThrow(new AssertionError("total occurrence count must not size the temporary map"));
         org.mockito.Mockito.when(multiset.elementSet()).thenReturn(Set.of("x"));
-        org.mockito.Mockito.when(multiset.count("x")).thenReturn(Integer.MAX_VALUE);
+        org.mockito.Mockito.when(multiset.entrySet()).thenReturn(Set.of(com.google.common.collect.Multisets.immutableEntry("x", Integer.MAX_VALUE)));
 
         final String str = multisetType.stringOf(multiset);
 
@@ -279,8 +279,7 @@ public class GuavaMultisetTypeTest extends TestBase {
 
     @Test
     public void testImmutableMultisetStringOfKeepsInsertionOrder() {
-        final Type<com.google.common.collect.ImmutableMultiset<String>> immutable = TypeFactory
-                .getType("com.google.common.collect.ImmutableMultiset<String>");
+        final Type<com.google.common.collect.ImmutableMultiset<String>> immutable = TypeFactory.getType("com.google.common.collect.ImmutableMultiset<String>");
         final String json = "{\"z\": 1, \"a\": 2, \"m\": 3, \"b\": 4, \"q\": 5}";
 
         // valueOf builds the ImmutableMultiset in document order; stringOf must write that order back

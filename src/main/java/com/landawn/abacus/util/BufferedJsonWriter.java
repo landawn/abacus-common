@@ -246,7 +246,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
     @Override
     public void writeCharacter(final char ch) throws IOException {
         if (Character.isSurrogate(ch)) {
-            write(getCharNum(ch));
+            writeUnicodeEscape(ch);
         } else {
             super.writeCharacter(ch);
         }
@@ -321,7 +321,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
                         write(cbuf, from, i - from);
                     }
 
-                    write(getCharNum(ch));
+                    writeUnicodeEscape(ch);
                     from = i + 1;
                 }
             }
@@ -407,7 +407,7 @@ public final class BufferedJsonWriter extends CharacterWriter {
                         write(str, from, i - from);
                     }
 
-                    write(getCharNum(ch));
+                    writeUnicodeEscape(ch);
                     from = i + 1;
                 }
             }

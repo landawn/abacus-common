@@ -632,17 +632,26 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     @Test
     public void c132_javadocExamples() {
         assertEquals("abcdefghi",
-                new String(CharStream.merge(Arrays.asList(CharStream.of("adg"), CharStream.of("beh"), CharStream.of("cfi")),
-                        (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray()));
+                new String(
+                        CharStream
+                                .merge(Arrays.asList(CharStream.of("adg"), CharStream.of("beh"), CharStream.of("cfi")),
+                                        (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                                .toArray()));
         assertEquals("789456123",
-                new String(CharStream.merge(Arrays.asList(CharStream.of("123"), CharStream.of("456"), CharStream.of("789")),
-                        (x, y) -> x > y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray()));
+                new String(
+                        CharStream
+                                .merge(Arrays.asList(CharStream.of("123"), CharStream.of("456"), CharStream.of("789")),
+                                        (x, y) -> x > y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                                .toArray()));
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 },
-                IntStream.merge(Arrays.asList(IntStream.of(1, 5, 9), IntStream.of(2, 6), IntStream.of(3, 7), IntStream.of(4, 8)),
-                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
+                IntStream
+                        .merge(Arrays.asList(IntStream.of(1, 5, 9), IntStream.of(2, 6), IntStream.of(3, 7), IntStream.of(4, 8)),
+                                (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                        .toArray());
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 },
-                ShortStream.merge(Arrays.asList(ShortStream.of((short) 1, (short) 5, (short) 9), ShortStream.of((short) 2, (short) 6, (short) 10),
-                        ShortStream.of((short) 3, (short) 7, (short) 11), ShortStream.of((short) 4, (short) 8, (short) 12)),
+                ShortStream.merge(
+                        Arrays.asList(ShortStream.of((short) 1, (short) 5, (short) 9), ShortStream.of((short) 2, (short) 6, (short) 10),
+                                ShortStream.of((short) 3, (short) 7, (short) 11), ShortStream.of((short) 4, (short) 8, (short) 12)),
                         (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
     }
 
@@ -706,19 +715,19 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
 
             final IntStream r = src.transformViaJdkStream(s -> s.map(x -> x * 2));
             assertSettings(src, r);
-            assertEquals(72L, (long) r.sum());
+            assertEquals(72L, r.sum());
             assertEquals(1, closed.get());
 
             // a JDK pipeline turned sequential stays sequential
             final IntStream r2 = IntStream.of(1, 2, 3, 4, 5, 6, 7, 8).parallel(ps(exec)).transformViaJdkStream(s -> s.sequential().map(x -> x * 2));
             assertFalse(r2.isParallel());
-            assertEquals(72L, (long) r2.sum());
+            assertEquals(72L, r2.sum());
 
             // a sequential receiver whose JDK pipeline turns parallel gets the default settings (nothing to carry over)
             final IntStream r3 = IntStream.of(1, 2, 3, 4, 5, 6, 7, 8).transformViaJdkStream(s -> s.parallel().map(x -> x * 2));
             assertTrue(r3.isParallel());
             assertEquals(StreamBase.DEFAULT_MAX_THREAD_NUM, r3.maxThreadNum());
-            assertEquals(72L, (long) r3.sum());
+            assertEquals(72L, r3.sum());
 
             // a failing transfer still closes the receiver
             final AtomicInteger closed2 = new AtomicInteger();
@@ -744,19 +753,19 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
 
             final LongStream r = src.transformViaJdkStream(s -> s.map(x -> x * 2));
             assertSettings(src, r);
-            assertEquals(72L, (long) r.sum());
+            assertEquals(72L, r.sum());
             assertEquals(1, closed.get());
 
             // a JDK pipeline turned sequential stays sequential
             final LongStream r2 = LongStream.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L).parallel(ps(exec)).transformViaJdkStream(s -> s.sequential().map(x -> x * 2));
             assertFalse(r2.isParallel());
-            assertEquals(72L, (long) r2.sum());
+            assertEquals(72L, r2.sum());
 
             // a sequential receiver whose JDK pipeline turns parallel gets the default settings (nothing to carry over)
             final LongStream r3 = LongStream.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L).transformViaJdkStream(s -> s.parallel().map(x -> x * 2));
             assertTrue(r3.isParallel());
             assertEquals(StreamBase.DEFAULT_MAX_THREAD_NUM, r3.maxThreadNum());
-            assertEquals(72L, (long) r3.sum());
+            assertEquals(72L, r3.sum());
 
             // a failing transfer still closes the receiver
             final AtomicInteger closed2 = new AtomicInteger();
@@ -786,7 +795,9 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
             assertEquals(1, closed.get());
 
             // a JDK pipeline turned sequential stays sequential
-            final DoubleStream r2 = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0).parallel(ps(exec)).transformViaJdkStream(s -> s.sequential().map(x -> x * 2));
+            final DoubleStream r2 = DoubleStream.of(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
+                    .parallel(ps(exec))
+                    .transformViaJdkStream(s -> s.sequential().map(x -> x * 2));
             assertFalse(r2.isParallel());
             assertEquals(72L, (long) r2.sum());
 

@@ -2557,7 +2557,6 @@ public class StringsSubstringsTest extends StringsTestSupport {
         assertEquals("D", StrUtil.substringBeforeLastOrElse(null, "", "D"));
     }
 
-
     @Test
     public void testEncodeUrlQuery_verbatimQueryString() {
         assertEquals("q=a b;c=d", Strings.encodeUrlQuery("q=a b;c=d"));

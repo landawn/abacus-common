@@ -398,16 +398,25 @@ public class MapsReview20260924Test extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Test
-    public void testC390_numberNaNReadsAsFalse() {
+    public void testC390_numberNaNIsNotABooleanValue() {
+        // Code review 2026-10-05: only an Integer, Short or Byte 1 (true), 0 or -1 (false) is a boolean value, so a
+        // Double - NaN (once read as false), a fraction, even 1.0 - is rejected rather than silently read as a boolean.
         final Map<String, Object> map = new HashMap<>();
         map.put("nan", Double.NaN);
         map.put("fnan", Float.NaN);
         map.put("half", 0.5d);
+        map.put("oneDouble", 1.0d);
+        map.put("one", 1);
+        map.put("zero", (short) 0);
 
-        assertFalse(Maps.getAsBoolean(map, "nan").get());
-        assertFalse(Maps.getAsBoolean(map, "fnan").get());
-        assertTrue(Maps.getAsBoolean(map, "half").get());
-        assertFalse(Maps.getAsBooleanOrDefaultIfAbsent(map, "nan", true));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(map, "nan"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(map, "fnan"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(map, "half"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(map, "oneDouble"));
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBooleanOrDefaultIfAbsent(map, "nan", true));
+        assertTrue(Maps.getAsBoolean(map, "one").get());
+        assertFalse(Maps.getAsBoolean(map, "zero").get());
+        assertFalse(Maps.getAsBooleanOrDefaultIfAbsent(map, "zero", true));
     }
 
     @Test

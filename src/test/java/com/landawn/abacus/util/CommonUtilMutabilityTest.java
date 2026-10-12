@@ -67,8 +67,8 @@ public class CommonUtilMutabilityTest extends TestBase {
                 Set.of("a", "b", "c"), Arrays.asList("a", null).stream().toList(), ImmutableList.of("a"), ImmutableSet.of("a"));
 
         for (final Collection<?> c : collections) {
-            assertEquals(Mutability.KNOWN_UNMODIFIABLE, N.mutabilityOf(c), c.getClass().getName());
-            assertSame(c, N.unmodifiableCollection(c));
+            assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(c), c.getClass().getName());
+            assertSame(c, CommonUtil.unmodifiableCollection(c));
         }
     }
 
@@ -80,8 +80,8 @@ public class CommonUtilMutabilityTest extends TestBase {
                 Map.of("k", "v"), Map.of("k", "v", "k2", "v2"), ImmutableMap.of("k", "v"), ImmutableBiMap.of("k", "v"), ImmutableSortedMap.of("k", "v"));
 
         for (final Map<?, ?> m : maps) {
-            assertEquals(Mutability.KNOWN_UNMODIFIABLE, N.mutabilityOf(m), m.getClass().getName());
-            assertSame(m, N.unmodifiableMap(m));
+            assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(m), m.getClass().getName());
+            assertSame(m, CommonUtil.unmodifiableMap(m));
         }
     }
 
@@ -90,16 +90,16 @@ public class CommonUtilMutabilityTest extends TestBase {
         final List<Collection<?>> collections = List.of(new ArrayList<>(), new LinkedList<>(), new HashSet<>(), new LinkedHashSet<>(), new TreeSet<>(),
                 new ArrayDeque<>(), new IdentityHashSet<>());
         for (final Collection<?> c : collections) {
-            assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(c), c.getClass().getName());
+            assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(c), c.getClass().getName());
         }
 
         for (final Map<?, ?> m : List.of(new HashMap<>(), new LinkedHashMap<>(), new TreeMap<>(), new ConcurrentHashMap<>())) {
-            assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(m), m.getClass().getName());
+            assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(m), m.getClass().getName());
         }
 
         final TreeSet<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         sorted.add("a");
-        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(sorted));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(sorted));
         assertThrows(NullPointerException.class, () -> sorted.add(null));
         assertTrue(sorted.add("b"));
     }
@@ -113,24 +113,24 @@ public class CommonUtilMutabilityTest extends TestBase {
                 EnumSet.noneOf(Character.UnicodeScript.class), EnumSet.allOf(Character.UnicodeScript.class));
 
         for (final Collection<?> c : collections) {
-            assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(c), c.getClass().getName());
+            assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(c), c.getClass().getName());
         }
 
         final List<Map<?, ?>> maps = List.of(new IdentityHashMap<>(), new WeakHashMap<>(), new EnumMap<>(Thread.State.class), new Hashtable<>(),
                 new ConcurrentSkipListMap<>(), new Properties());
 
         for (final Map<?, ?> m : maps) {
-            assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(m), m.getClass().getName());
+            assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(m), m.getClass().getName());
         }
     }
 
     @Test
     public void subclassesOfKnownMutableClassesStayUnknown() {
         // Registering Properties itself must not also register subclasses that can restrict mutation.
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(new Properties() {
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(new Properties() {
             private static final long serialVersionUID = 1L;
         }));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(new ArrayList<>() {
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(new ArrayList<>() {
             private static final long serialVersionUID = 1L;
         }));
     }
@@ -138,13 +138,13 @@ public class CommonUtilMutabilityTest extends TestBase {
     @Test
     public void synchronousQueuesStayUnknownAndBoundedQueuesRemainMutable() {
         // SynchronousQueue.add(..) fails unless a consumer is already waiting.
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(new SynchronousQueue<>()));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(new SynchronousQueue<>()));
         assertThrows(IllegalStateException.class, () -> new SynchronousQueue<>().add("a"));
 
         // Capacity restrictions do not make a bounded queue unmodifiable. Classification must leave it untouched.
         final ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
         queue.add("full");
-        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(queue));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(queue));
         assertEquals(List.of("full"), new ArrayList<>(queue));
         assertThrows(IllegalStateException.class, () -> queue.add("overflow"));
         assertEquals("full", queue.remove());
@@ -153,37 +153,37 @@ public class CommonUtilMutabilityTest extends TestBase {
 
     @Test
     public void nullHasNoKnownMutability() {
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf((Collection<?>) null));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf((Map<?, ?>) null));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf((Collection<?>) null));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf((Map<?, ?>) null));
     }
 
     @Test
     public void partiallyMutableListsAndViewsRemainUnknownAndAreStillWrapped() {
         final List<String> fixed = Arrays.asList("a", "b");
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(fixed));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(fixed));
         assertThrows(UnsupportedOperationException.class, () -> fixed.add("c"));
         assertEquals("a", fixed.set(0, "changed"));
-        assertThrows(UnsupportedOperationException.class, () -> N.unmodifiableList(fixed).set(0, "blocked"));
+        assertThrows(UnsupportedOperationException.class, () -> CommonUtil.unmodifiableList(fixed).set(0, "blocked"));
 
         // Registering List.of sublists must not classify mutable ArrayList views as unmodifiable.
         final List<String> backingList = new ArrayList<>(List.of("a", "b"));
         final List<String> subList = backingList.subList(0, 1);
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(subList));
-        assertThrows(UnsupportedOperationException.class, () -> N.unmodifiableList(subList).set(0, "blocked"));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(subList));
+        assertThrows(UnsupportedOperationException.class, () -> CommonUtil.unmodifiableList(subList).set(0, "blocked"));
         assertEquals("a", subList.set(0, "changed"));
         assertEquals(List.of("changed", "b"), backingList);
 
         final Map<String, Integer> backing = new HashMap<>(Map.of("k", 1));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(backing.keySet()));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(backing.values()));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(backing.entrySet()));
-        assertThrows(UnsupportedOperationException.class, () -> N.unmodifiableCollection(backing.keySet()).remove("k"));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(backing.keySet()));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(backing.values()));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(backing.entrySet()));
+        assertThrows(UnsupportedOperationException.class, () -> CommonUtil.unmodifiableCollection(backing.keySet()).remove("k"));
         assertEquals(Map.of("k", 1), backing);
         assertTrue(backing.keySet().remove("k"));
 
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(new TreeMap<String, Integer>().descendingMap()));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(Collections.checkedList(new ArrayList<>(), String.class)));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(Collections.synchronizedMap(new HashMap<>())));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(new TreeMap<String, Integer>().descendingMap()));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(Collections.checkedList(new ArrayList<>(), String.class)));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(Collections.synchronizedMap(new HashMap<>())));
     }
 
     @Test
@@ -193,8 +193,8 @@ public class CommonUtilMutabilityTest extends TestBase {
         assertSame(addable.getClass(), nonAddable.getClass());
 
         for (int i = 0; i < 2; i++) {
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(addable));
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(nonAddable));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(addable));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(nonAddable));
         }
         assertTrue(addable.add("a"));
         assertThrows(UnsupportedOperationException.class, () -> nonAddable.add("a"));
@@ -218,8 +218,8 @@ public class CommonUtilMutabilityTest extends TestBase {
                 throw new AssertionError("add must not be called");
             }
         };
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(c));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(c));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(c));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(c));
     }
 
     @Test
@@ -245,8 +245,8 @@ public class CommonUtilMutabilityTest extends TestBase {
                 throw new AssertionError("size must not be called");
             }
         };
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(m));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(m));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(m));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(m));
     }
 
     private static final class ConfigurableList extends AbstractList<String> {
@@ -300,13 +300,13 @@ public class CommonUtilMutabilityTest extends TestBase {
         final ConfigurableList writable = new ConfigurableList();
         writable.writable = true;
         for (int i = 0; i < 2; i++) {
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(readOnly));
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(writable));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(readOnly));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(writable));
         }
         readOnly.writable = true;
         writable.writable = false;
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(writable));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(readOnly));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(writable));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(readOnly));
         assertEquals(0, readOnly.addCalls);
         assertEquals(0, writable.addCalls);
         assertEquals(List.of("original"), readOnly);
@@ -315,8 +315,8 @@ public class CommonUtilMutabilityTest extends TestBase {
         final ConfigurableMap mutableMap = new ConfigurableMap(new HashMap<>(Map.of("k", "v")));
         final ConfigurableMap immutableMap = new ConfigurableMap(Map.of("k", "v"));
         for (int i = 0; i < 2; i++) {
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(mutableMap));
-            assertEquals(Mutability.UNKNOWN, N.mutabilityOf(immutableMap));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(mutableMap));
+            assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(immutableMap));
         }
         assertEquals(0, mutableMap.putCalls);
         assertEquals(0, immutableMap.putCalls);
@@ -346,8 +346,8 @@ public class CommonUtilMutabilityTest extends TestBase {
         final Map<Object, Object> before = new LinkedHashMap<>(map);
         final Iterator<Object> keys = map.keySet().iterator();
 
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(map));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(map));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(map));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(map));
         assertEquals(0, map.evictions);
         assertEquals(before, map);
         assertEquals("first", keys.next());
@@ -377,8 +377,8 @@ public class CommonUtilMutabilityTest extends TestBase {
         c.addCalls = 0;
         final Iterator<Object> elements = c.iterator();
 
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(c));
-        assertEquals(Mutability.UNKNOWN, N.mutabilityOf(c));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(c));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(c));
         assertEquals(0, c.addCalls);
         assertEquals(List.of("first", "second"), new ArrayList<>(c));
         assertEquals("first", elements.next());
@@ -395,7 +395,7 @@ public class CommonUtilMutabilityTest extends TestBase {
         map.get("a");
         final Iterator<String> keys = map.keySet().iterator();
 
-        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(map));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(map));
         assertEquals(List.of("b", "c", "a"), new ArrayList<>(map.keySet()));
         assertEquals("b", keys.next());
         assertEquals("c", keys.next());

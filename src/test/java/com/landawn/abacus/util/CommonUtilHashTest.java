@@ -231,7 +231,7 @@ public class CommonUtilHashTest extends CommonUtilTestSupport {
             assertEquals(CommonUtil.hashCode(ba, 0, len), CommonUtil.hashCode(ba));
             assertEquals(CommonUtil.hashCode(sa, 0, len), CommonUtil.hashCode(sa));
             assertEquals(CommonUtil.hashCode(ia, 0, len), CommonUtil.hashCode(ia));
-            assertEquals(CommonUtil.hashCode(ia), CommonUtil.deepHashCode((Object) ia));
+            assertEquals(CommonUtil.hashCode(ia), CommonUtil.deepHashCode(ia));
         }
     }
     // ---- perf review 2026-09-26 G026 end ----

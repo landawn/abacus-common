@@ -276,7 +276,7 @@ public class MapsReview20260925Test extends TestBase {
     @Test
     public void testU1603_getByPathAsIntEmptyTextIsAbsentAndOtherTypesAreReadFromTheirStringForm() {
         final Map<String, Object> root = new HashMap<>();
-        root.put("user", N.asMap("joiner", new StringJoiner(","), "flag", Boolean.TRUE, "age", "25", "score", "", "blank", " "));
+        root.put("user", CommonUtil.asMap("joiner", new StringJoiner(","), "flag", Boolean.TRUE, "age", "25", "score", "", "blank", " "));
 
         assertFalse(Maps.getByPathAsInt(root, "user.joiner").isPresent());
         assertEquals(-1, Maps.getByPathAsIntOrDefaultIfAbsent(root, "user.joiner", -1));
@@ -290,7 +290,7 @@ public class MapsReview20260925Test extends TestBase {
         assertThrows(NumberFormatException.class, () -> Maps.getByPathAsInt(root, "user.blank"));
         assertThrows(NumberFormatException.class, () -> Maps.getByPathAsIntOrDefaultIfAbsent(root, "user.blank", -1));
 
-        final Map<String, Object> m = N.asMap("joiner", new StringJoiner(","), "flag", Boolean.TRUE);
+        final Map<String, Object> m = CommonUtil.asMap("joiner", new StringJoiner(","), "flag", Boolean.TRUE);
         assertFalse(Maps.getAsByte(m, "joiner").isPresent());
         assertFalse(Maps.getAsShort(m, "joiner").isPresent());
         assertFalse(Maps.getAsInt(m, "joiner").isPresent());

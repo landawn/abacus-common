@@ -110,7 +110,9 @@ public interface KeyedObjectPool<K, E extends Poolable> extends Pool {
      * any previous mapping for {@code key} is removed; a value that expires afterwards (during
      * memory measurement or lock acquisition) is rejected in-lock after the previous mapping has
      * been detached, exactly like a capacity or memory rejection. The old element is not
-     * destroyed when it is the same instance as {@code value}.
+     * destroyed when it is the same instance as {@code value}. A successful same-instance put moves
+     * that mapping to the newest insertion position; a rejected put retains its original position
+     * and admission memory charge.
      *
      * <p>The put operation returns {@code false} (does not insert) if:</p>
      * <ul>

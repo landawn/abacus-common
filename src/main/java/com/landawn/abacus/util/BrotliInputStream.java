@@ -49,7 +49,11 @@ public final class BrotliInputStream extends InputStream {
     // same call has to decode more and the stream is already finished - silently losing the bytes it just
     // copied. Owning the buffer here keeps read() cheap while guaranteeing that a partially drained buffer
     // is never reported as end-of-stream.
-    private final byte[] buf;
+    // It is allocated by the first read(): the array read and skip paths never touch it, so a consumer that only
+    // reads arrays (an InputStreamReader, readAllBytes) does not pay for a buffer it never uses.
+    private byte[] buf;
+
+    private final int readBufferSize;
 
     private int bufOff;
 
@@ -101,7 +105,7 @@ public final class BrotliInputStream extends InputStream {
         // The decoder's own buffer is only ever read by its own read(), which this class never calls, so it
         // is kept at the minimum and the buffering happens in buf instead (see the field comment above).
         in = new org.brotli.dec.BrotliInputStream(source, 1);
-        buf = new byte[byteReadBufferSize];
+        readBufferSize = byteReadBufferSize;
     }
 
     /**
@@ -123,6 +127,10 @@ public final class BrotliInputStream extends InputStream {
     @Override
     public int read() throws IllegalStateException, IOException {
         if (bufOff >= bufLen) {
+            if (buf == null) {
+                buf = new byte[readBufferSize];
+            }
+
             bufLen = in.read(buf, 0, buf.length);
             bufOff = 0;
 

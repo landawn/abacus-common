@@ -175,9 +175,9 @@ class UtilANFollowupValidationTest extends TestBase {
 
     private static void compareBeans(final boolean ordering, final Object first, final Object second, final Collection<String> properties) {
         if (ordering) {
-            assertTrue(N.compareByProps(first, second, properties) < 0);
+            assertTrue(CommonUtil.compareByProps(first, second, properties) < 0);
         } else {
-            assertFalse(N.equalsByProps(first, second, properties));
+            assertFalse(CommonUtil.equalsByProps(first, second, properties));
         }
     }
 

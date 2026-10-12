@@ -63,7 +63,7 @@ public class BuilderEqualsTest extends BuilderTestSupport {
         Integer nullable = null;
         assertFalse(Builder.equals((Object) 1, nullable).result());
         Assertions.assertThrows(NullPointerException.class, () -> Builder.equals(1, (int) nullable));
-        assertFalse(Builder.equals((Object) Integer.valueOf(1), Long.valueOf(1)).result());
+        assertFalse(Builder.equals(Integer.valueOf(1), Long.valueOf(1)).result());
         assertTrue(Builder.equals(1L, boxed.longValue()).result());
     }
 

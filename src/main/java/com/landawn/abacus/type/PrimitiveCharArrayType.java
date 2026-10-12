@@ -166,6 +166,8 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * Automatically detects whether characters are quoted and handles both formats. Backslash
      * escape sequences inside quoted elements are decoded.
      * Whitespace outside quoted elements is ignored; quote a space character as {@code ' '}.
+     * The unquoted literal {@code null} is the element default, the NUL character, because a primitive array cannot hold
+     * {@code null}.
      * Brackets containing only whitespace represent an empty array.
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
@@ -200,6 +202,12 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
         for (int i = 0; i < len; i++) {
             final String element = strs[i];
 
+            // A bare null token in the compact JSON text form maps to the element type's default (NUL).
+            if ("null".equals(element)) {
+                a[i] = elementType.valueOf((String) null);
+                continue;
+            }
+
             if (element.length() >= 2) {
                 final char quoteChar = element.charAt(0);
 
@@ -223,20 +231,23 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
 
     /**
      * Converts an object to a char array.
-     * Handles {@link Reader} (reads all characters) and {@link Clob} objects (extracts character content and frees the Clob)
-     * as special cases. For other object types, converts to string first then parses as char array.
+     * Clones a {@code char[]} input to produce an independent copy. Reads all characters from a {@link Reader},
+     * or extracts character content from a {@link Clob} and frees it. For all remaining object types, converts the
+     * object to its string representation first and then parses that string as a char array.
      * Returns {@code null} if input is {@code null}.
      *
-     * @param obj the object to convert (can be a {@link Reader}, {@link Clob}, or any other type)
-     * @return the char array representation of the object, an empty array for a zero-length Clob, or {@code null} if input is null
+     * @param obj the object to convert (can be a {@code char[]}, {@link Reader}, {@link Clob}, or any other type)
+     * @return an independent copy of a {@code char[]} input, the char array representation of another object,
+     *         an empty array for a zero-length Clob, or {@code null} if input is null
      * @throws UncheckedIOException if {@code obj} is a {@link Reader} and reading its remaining characters fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
      * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}
-     * @throws IllegalArgumentException if {@code obj} is of any other type and its string representation is rejected by
-     *         {@link #valueOf(String)} (an empty or whitespace-only unquoted element, a numeric character code outside the
-     *         char range, or a malformed Unicode escape)
-     * @throws NumberFormatException if {@code obj} is of any other type and an element of its string representation has
-     *         multiple characters after removing quotes and escapes and is not an integer character code
+     * @throws IllegalArgumentException if {@code obj} is neither a {@code char[]}, a {@link Reader}, nor a {@link Clob},
+     *         and its string representation is rejected by {@link #valueOf(String)} (an empty or whitespace-only
+     *         unquoted element, a numeric character code outside the char range, or a malformed Unicode escape)
+     * @throws NumberFormatException if {@code obj} is neither a {@code char[]}, a {@link Reader}, nor a {@link Clob},
+     *         and an element of its string representation has multiple characters after removing quotes and escapes
+     *         and is not an integer character code
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -245,6 +256,9 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
             throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException, IllegalArgumentException, NumberFormatException {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (obj instanceof char[] chars) {
+            // Keep the independent-copy behavior without escaping and reparsing the entire array.
+            return chars.clone();
         } else if (obj instanceof Reader reader) {
             return IOUtil.readAllChars(reader);
         } else if (obj instanceof Clob clob) {

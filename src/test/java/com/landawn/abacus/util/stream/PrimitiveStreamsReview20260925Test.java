@@ -193,9 +193,11 @@ public class PrimitiveStreamsReview20260925Test extends TestBase {
     @Test
     public void u2602_shortZip_nullResultIsNpeNonNullResultUnboxed() {
         assertArrayEquals(new short[] { 11, 22 },
-                ShortStream.zip(Arrays.asList(ShortStream.of((short) 1, (short) 2), ShortStream.of((short) 10, (short) 20)), a -> (short) (a[0] + a[1])).toArray());
+                ShortStream.zip(Arrays.asList(ShortStream.of((short) 1, (short) 2), ShortStream.of((short) 10, (short) 20)), a -> (short) (a[0] + a[1]))
+                        .toArray());
         assertArrayEquals(new short[] { 11, 20 },
-                ShortStream.zip(Arrays.asList(ShortStream.of((short) 1), ShortStream.of((short) 10, (short) 20)), new short[] { 0, 0 }, a -> (short) (a[0] + a[1]))
+                ShortStream
+                        .zip(Arrays.asList(ShortStream.of((short) 1), ShortStream.of((short) 10, (short) 20)), new short[] { 0, 0 }, a -> (short) (a[0] + a[1]))
                         .toArray());
 
         NullPointerException e = assertThrows(NullPointerException.class,
@@ -208,7 +210,8 @@ public class PrimitiveStreamsReview20260925Test extends TestBase {
 
     @Test
     public void u2703_floatZip_nullResultIsNpeNonNullResultUnboxed() {
-        assertArrayEquals(new float[] { 11f, 22f }, FloatStream.zip(Arrays.asList(FloatStream.of(1f, 2f), FloatStream.of(10f, 20f)), a -> a[0] + a[1]).toArray(), 0f);
+        assertArrayEquals(new float[] { 11f, 22f },
+                FloatStream.zip(Arrays.asList(FloatStream.of(1f, 2f), FloatStream.of(10f, 20f)), a -> a[0] + a[1]).toArray(), 0f);
         assertArrayEquals(new float[] { 11f, 20f },
                 FloatStream.zip(Arrays.asList(FloatStream.of(1f), FloatStream.of(10f, 20f)), new float[] { 0f, 0f }, a -> a[0] + a[1]).toArray(), 0f);
 
@@ -222,8 +225,8 @@ public class PrimitiveStreamsReview20260925Test extends TestBase {
 
     @Test
     public void u2703_doubleZip_nullResultIsNpeNonNullResultUnboxed() {
-        assertArrayEquals(new double[] { 11d, 22d }, DoubleStream.zip(Arrays.asList(DoubleStream.of(1d, 2d), DoubleStream.of(10d, 20d)), a -> a[0] + a[1]).toArray(),
-                0d);
+        assertArrayEquals(new double[] { 11d, 22d },
+                DoubleStream.zip(Arrays.asList(DoubleStream.of(1d, 2d), DoubleStream.of(10d, 20d)), a -> a[0] + a[1]).toArray(), 0d);
         assertArrayEquals(new double[] { 11d, 20d },
                 DoubleStream.zip(Arrays.asList(DoubleStream.of(1d), DoubleStream.of(10d, 20d)), new double[] { 0d, 0d }, a -> a[0] + a[1]).toArray(), 0d);
 

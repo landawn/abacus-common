@@ -77,7 +77,7 @@ public class ExcReviewN8Test extends com.landawn.abacus.TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> N.fromJson("{}", 1, 3, Object.class));
         // streamJson: elementType validated first, non-array root -> UnsupportedOperationException
         assertThrows(IllegalArgumentException.class, () -> N.streamJson("[1]", (com.landawn.abacus.type.Type<Integer>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.streamJson("[1]", N.typeOf(Integer.class))); // unsupported element type
-        assertThrows(UnsupportedOperationException.class, () -> N.streamJson("{\"a\":1}", N.typeOf(java.util.Map.class)));
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson("[1]", CommonUtil.typeOf(Integer.class))); // unsupported element type
+        assertThrows(UnsupportedOperationException.class, () -> N.streamJson("{\"a\":1}", CommonUtil.typeOf(java.util.Map.class)));
     }
 }

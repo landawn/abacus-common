@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Collectors;
-import java.util.Iterator;
 
 public class SeqTest extends SeqTestSupport {
 
@@ -241,7 +241,7 @@ public class SeqTest extends SeqTestSupport {
     @Test
     public void testAverageIntPreservesExtremeIntegerTotals() throws Exception {
         assertEquals(-0.5, Seq.of(Integer.MIN_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
-        assertEquals((double) Integer.MAX_VALUE, Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
+        assertEquals(Integer.MAX_VALUE, Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
         assertTrue(Seq.<Integer, Exception> empty().averageInt(value -> value).isEmpty());
     }
 
@@ -1229,6 +1229,7 @@ public class SeqTest extends SeqTestSupport {
         assertEquals(Collections.emptyList(), target.get(2));
         assertEquals(2, target.size());
     }
+
     // ---- perf review 2026-09-26 G069 end ----
     // ---- perf review 2026-09-26 G112 begin ----
     // Reference windows for sliding(windowSize, increment): window i covers [i * increment, i * increment + windowSize) clipped to the
@@ -1379,5 +1380,97 @@ public class SeqTest extends SeqTestSupport {
             assertFalse(iter.hasNext());
         }
     }
+
     // ---- perf review 2026-09-26 G112 end ----
+    // ---- bug review 2026-09-30 G071 begin ----
+    // G071-01: groupTo(.., downstream, mapFactory) finished the groups with entry.setValue, which a map with
+    // immutable entry views (ConcurrentSkipListMap) rejects; Stream.groupTo accepts the same map.
+    @Test
+    public void testGroupTo_collectorWithConcurrentSkipListMapFactory() throws Exception {
+        final java.util.concurrent.ConcurrentSkipListMap<Integer, Long> counts = Seq.of("a", "bb", "cc")
+                .groupTo(String::length, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new);
+        assertEquals("{1=1, 2=2}", counts.toString());
+
+        final java.util.concurrent.ConcurrentSkipListMap<Integer, String> joined = Seq.of("a", "bb", "cc")
+                .groupTo(String::length, s -> s.toUpperCase(), Collectors.joining(","), java.util.concurrent.ConcurrentSkipListMap::new);
+        assertEquals("{1=A, 2=BB,CC}", joined.toString());
+
+        // An empty sequence still accepts an immutable (empty) map from the factory.
+        final Map<Integer, Long> empty = Seq.<String, Exception> empty()
+                .groupTo(String::length, Collectors.counting(), () -> ImmutableMap.<Integer, Long> empty());
+        assertTrue(empty.isEmpty());
+    }
+
+    // ---- bug review 2026-09-30 G071 end ----
+    // ---- bug review 2026-09-30 verify G117 begin ----
+    // groupTo(.., downstream, mapFactory): a failing finisher still propagates its own exception through the replaceAll
+    // pass (HashMap and ConcurrentSkipListMap), and a null finisher result is kept by a HashMap.
+    @Test
+    public void testGroupTo_finisherFailureAndNullResult() throws Exception {
+        assertThrows(IllegalStateException.class,
+                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
+                    throw new IllegalStateException("finisher");
+                }), java.util.HashMap::new));
+        assertThrows(IllegalStateException.class,
+                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
+                    throw new IllegalStateException("finisher");
+                }), java.util.concurrent.ConcurrentSkipListMap::new));
+
+        final Map<Integer, Object> nulls = Seq.of("a", "bb")
+                .groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> null), java.util.HashMap::new);
+        assertEquals(2, nulls.size());
+        assertTrue(nulls.containsKey(1) && nulls.get(1) == null && nulls.containsKey(2) && nulls.get(2) == null);
+    }
+    // ---- bug review 2026-09-30 verify G117 end ----
+
+    // ---- bug review 2026-09-30 G142 begin ----
+    // G142: Seq.defer fails with IllegalStateException when the supplier returns the deferred sequence itself (it flat-mapped
+    // into itself until StackOverflowError), as Stream.defer does; an ordinary supplier is unaffected.
+    @Test
+    public void testDefer_supplierReturningTheDeferredSequenceItself() {
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] self = new Seq[1];
+        self[0] = Seq.defer(() -> self[0]);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(1, 2), Seq.<Integer, RuntimeException> defer(() -> Seq.of(1, 2)).toList());
+    }
+    // ---- bug review 2026-09-30 G142 end ----
+
+    // ---- bug review 2026-09-30 G143 begin ----
+    // G143: a self-returning supplier fails with IllegalStateException instead of recursing; a null supplier result is still an
+    // empty sequence. G149: the failure is final - iterating on after it does not invoke the supplier again (a second terminal
+    // operation only fails because the first one closed the sequence).
+    @Test
+    public void testDefer_selfReturningSupplierIsInvokedOnceAndNullIsEmpty() {
+        final int[] calls = new int[1];
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] self = new Seq[1];
+        self[0] = Seq.defer(() -> {
+            calls[0]++;
+            return self[0];
+        });
+
+        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertTrue(first.getMessage().contains("deferred sequence itself"), first.getMessage());
+        final IllegalStateException second = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertTrue(second.getMessage().contains("closed"), second.getMessage());
+        org.junit.jupiter.api.Assertions.assertEquals(1, calls[0]);
+
+        final int[] iterCalls = new int[1];
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] iterSelf = new Seq[1];
+        iterSelf[0] = Seq.defer(() -> {
+            iterCalls[0]++;
+            return iterSelf[0];
+        });
+        final Throwables.Iterator<Object, RuntimeException> iter = iterSelf[0].iteratorEx();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(1, iterCalls[0]);
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, Seq.<Object, RuntimeException> defer(() -> null).count());
+    }
+    // ---- bug review 2026-09-30 G143 end ----
+
 }

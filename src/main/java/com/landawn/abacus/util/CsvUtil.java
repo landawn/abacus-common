@@ -1231,7 +1231,7 @@ public final class CsvUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Dataset ds = CsvUtil.load(new File("data.csv"));
-     * System.out.println("Columns: " + ds.columnNameList());
+     * System.out.println("Columns: " + ds.columnNames());
      * System.out.println("Row count: " + ds.size());
      * }</pre>
      *

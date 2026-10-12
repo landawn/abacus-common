@@ -278,13 +278,14 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
     @Test
     public void testStream_BeanTargetRejectsUnknownPropertyInWholeHeaderSelection() {
         // Partial explicit selection naming a column the bean has no property for is rejected ...
-        try (Stream<CsvUtilTestSupport.Person> partial = CsvUtil.stream(new StringReader("id,unknownColumn,name\n1,x,John\n"), List.of("id", "unknownColumn"), CsvUtilTestSupport.Person.class,
-                true)) {
+        try (Stream<CsvUtilTestSupport.Person> partial = CsvUtil.stream(new StringReader("id,unknownColumn,name\n1,x,John\n"), List.of("id", "unknownColumn"),
+                CsvUtilTestSupport.Person.class, true)) {
             assertThrows(IllegalArgumentException.class, partial::toList);
         }
 
         // ... and so is an explicit selection that happens to name every header column.
-        try (Stream<CsvUtilTestSupport.Person> whole = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), List.of("unknownColumn", "id"), CsvUtilTestSupport.Person.class, true)) {
+        try (Stream<CsvUtilTestSupport.Person> whole = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), List.of("unknownColumn", "id"),
+                CsvUtilTestSupport.Person.class, true)) {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, whole::toList);
             assertTrue(ex.getMessage().contains("unknownColumn"));
         }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyChar;
 import static org.mockito.Mockito.atLeast;
@@ -243,12 +244,28 @@ public class BooleanArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void reviewFixes20260906_valueOfKeepsNullElementsAndMapsUnknownTokensToFalse() {
-        // the boxed twin of T7-05: the 4-character literal null is a null element, other unknown tokens are false
+    public void reviewFixes20260906_valueOfKeepsNullElementsAndRejectsUnknownTokens() {
+        // the boxed twin of T7-05: the 4-character literal null is a null element; any other token that is not
+        // boolean text is rejected (code review 2026-10-05; it used to be false)
         assertArrayEquals(new Boolean[] { true, null }, type.valueOf("[true, null]"));
         assertArrayEquals(new Boolean[] { null }, type.valueOf("[null]"));
-        assertArrayEquals(new Boolean[] { false, false, true, null }, type.valueOf("[NULL, yes, 1, null]"));
+        assertArrayEquals(new Boolean[] { false, true, false, null }, type.valueOf("[N, 1, -1, null]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[NULL]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[yes]"));
         assertArrayEquals(new Boolean[] { true, null }, type.valueOf(type.stringOf(new Boolean[] { true, null })));
         assertEquals(0, type.valueOf("[]").length);
+    }
+
+    // 2026-10-05: the compact JSON text form. Quoted content is decoded exactly once by the shared
+    // AbstractArrayType.jsonElementContent; a bare null and an empty or blank quoted element are the default, null.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new Boolean[] { true, true, false, true, null, true }, type.valueOf("[\"true\", 'Y', \"0\", \"\\u0031\", null, '\\t1']"));
+        assertArrayEquals(new Boolean[] { null, null, null }, type.valueOf("[\"\", '', \" \"]"));
+        assertArrayEquals(new Boolean[] { true, false }, type.valueOf("[\"1\", '-1']"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"null\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"yes\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"1']"));
     }
 }

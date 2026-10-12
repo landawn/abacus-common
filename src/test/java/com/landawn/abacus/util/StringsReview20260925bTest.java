@@ -74,8 +74,7 @@ public class StringsReview20260925bTest extends TestBase {
         final NullPointerException e1 = assertThrows(NullPointerException.class, () -> Strings.mapWords("a-b", "-", w -> null));
         assertEquals("mapper returned null", e1.getMessage());
 
-        final NullPointerException e2 = assertThrows(NullPointerException.class,
-                () -> Strings.mapWords("a-b", "-", List.of("zz"), w -> null));
+        final NullPointerException e2 = assertThrows(NullPointerException.class, () -> Strings.mapWords("a-b", "-", List.of("zz"), w -> null));
         assertEquals("mapper returned null", e2.getMessage());
 
         final NullPointerException e3 = assertThrows(NullPointerException.class, () -> Strings.mapWords("a b", w -> null));
@@ -263,8 +262,7 @@ public class StringsReview20260925bTest extends TestBase {
     @Test
     public void testC516_truncateOffsetAndStripCharsContracts() {
         assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.truncate("abc", -1, 2)).getMessage().contains("offset"));
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.truncateEach(new String[] { "abc" }, -1, 2)).getMessage()
-                .contains("offset"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.truncateEach(new String[] { "abc" }, -1, 2)).getMessage().contains("offset"));
         assertEquals("abc", Strings.stripStart("abc", ""));
         assertEquals("abc", Strings.stripEnd("abc", ""));
         assertEquals(" abc ", Strings.stripStart(" abc ", ""));
@@ -529,10 +527,9 @@ public class StringsReview20260925bTest extends TestBase {
         assertEquals(Map.of("a", "%zz"), Strings.parseUrlQueryLenient("a=%zz", (Charset) null, Map.class));
         assertEquals(Map.of("a", "b c"), Strings.parseUrlQueryLenient("a=b+c", Charsets.UTF_8, Map.class));
         assertTrue(Strings.parseUrlQueryLenient("", Map.class).isEmpty());
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.parseUrlQueryLenient("", (Class<?>) null)).getMessage()
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.parseUrlQueryLenient("", (Class<?>) null)).getMessage().contains("targetType"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.parseUrlQueryLenient("a=1", Charsets.UTF_8, (Class<?>) null)).getMessage()
                 .contains("targetType"));
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.parseUrlQueryLenient("a=1", Charsets.UTF_8, (Class<?>) null))
-                .getMessage().contains("targetType"));
     }
 
     // ---------------------------------------------------------------- C-538: token family rejects a null/empty delimiter

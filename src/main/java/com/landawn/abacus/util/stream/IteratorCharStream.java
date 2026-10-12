@@ -33,7 +33,6 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
-import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -426,15 +425,35 @@ class IteratorCharStream extends AbstractCharStream {
 
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
-            private CharStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextChar());
+                        final CharStream s = mapper.apply(elements.nextChar());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -445,7 +464,7 @@ class IteratorCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -461,15 +480,15 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -587,15 +606,35 @@ class IteratorCharStream extends AbstractCharStream {
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextChar());
+                        final IntStream s = mapper.apply(elements.nextChar());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -606,7 +645,7 @@ class IteratorCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -622,15 +661,15 @@ class IteratorCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -655,17 +694,36 @@ class IteratorCharStream extends AbstractCharStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<T> iter = new SequentialFlatMapObjIterator<>() {
             private Iterator<? extends T> cur = null;
-            private Stream<? extends T> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextChar());
+                        final Stream<? extends T> s = mapper.apply(elements.nextChar());
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -676,7 +734,7 @@ class IteratorCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -690,17 +748,12 @@ class IteratorCharStream extends AbstractCharStream {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -1941,7 +1994,7 @@ class IteratorCharStream extends AbstractCharStream {
 
         checkArgNotNull(supplier, cs.supplier);
 
-        final Holder<CharStream> holder = new Holder<>();
+        final MappedStreamHolder holder = new MappedStreamHolder();
 
         return newStream(new CharIteratorEx() { //NOSONAR
             private CharIteratorEx iter;
@@ -1995,15 +2048,18 @@ class IteratorCharStream extends AbstractCharStream {
                         final CharStream s = supplier.get();
                         try {
                             iter = s == null ? CharIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = CharIteratorEx.empty();
+                        }
                     }
                 }
             }
-        }, false).onClose(() -> close(holder));
+        }, false).onClose(holder::close);
     }
 
     /**

@@ -167,7 +167,8 @@ public class PrimitiveLongListTypeTest extends TestBase {
         map.put("ids", list);
         final String mapJson = com.landawn.abacus.util.N.toJson(map, config);
         assertEquals("{\"ids\": [\"9007199254740993\", \"-2\"]}", mapJson);
-        final java.util.Map<String, LongList> back = com.landawn.abacus.util.N.fromJson(mapJson, Type.<java.util.Map<String, LongList>> of("Map<String, LongList>"));
+        final java.util.Map<String, LongList> back = com.landawn.abacus.util.N.fromJson(mapJson,
+                Type.<java.util.Map<String, LongList>> of("Map<String, LongList>"));
         assertEquals(list, back.get("ids"));
     }
     // ---- deep review 2026-09-25 G016 end ----

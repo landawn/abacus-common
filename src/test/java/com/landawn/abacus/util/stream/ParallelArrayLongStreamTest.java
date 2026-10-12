@@ -3,7 +3,6 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -203,8 +202,9 @@ public class ParallelArrayLongStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(l -> {
-                if (l == 5L)
+                if (l == 5L) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -212,8 +212,9 @@ public class ParallelArrayLongStreamTest extends TestBase {
         parallelStream = createLongStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(l -> {
-                if (l == 7L)
+                if (l == 7L) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return l;
             }).toArray();
         });
@@ -797,8 +798,9 @@ public class ParallelArrayLongStreamTest extends TestBase {
     public void testReduce_WithIdentity_ParallelPath() {
         long result = createLongStream(TEST_ARRAY).reduce(0L, Long::sum);
         long expected = 0;
-        for (long v : TEST_ARRAY)
+        for (long v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, result);
     }
 
@@ -1427,10 +1429,18 @@ public class ParallelArrayLongStreamTest extends TestBase {
             assertFalse(LongStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
             assertFalse(LongStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
 
-            assertEquals(1100L, new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
-            assertEquals(2899L, new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
-            assertFalse(new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
-            assertFalse(new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+            assertEquals(1100L,
+                    new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true)
+                            .get());
+            assertEquals(2899L,
+                    new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true)
+                            .get());
+            assertFalse(
+                    new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000)
+                            .isPresent());
+            assertFalse(
+                    new ParallelArrayLongStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999)
+                            .isPresent());
         }
     }
     // ---- perf review 2026-09-26 G101 end ----

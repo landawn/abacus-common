@@ -408,7 +408,7 @@ public final class TypeAttrParser {
     }
 
     /**
-     * Strips a trailing run of {@code []} pairs from a class name. Checking emptiness through this keeps the
+     * Strips a trailing run of {@code []} pairs, including whitespace between dimensions, from a class name. Checking emptiness through this keeps the
      * component-less array rejection reachable from every path: the bare spelling {@code "[]"} is rejected by
      * the array branch, which peels the brackets and re-enters with an empty name, but {@code "[]()"} and
      * {@code "[]<A>"} never take that branch and would otherwise parse to the class name {@code "[]"}.
@@ -418,6 +418,11 @@ public final class TypeAttrParser {
 
         while (end >= 2 && className.charAt(end - 2) == '[' && className.charAt(end - 1) == ']') {
             end -= 2;
+
+            // Match the array-suffix parser: separated dimensions must not hide an absent component name.
+            while (end > 0 && Character.isWhitespace(className.charAt(end - 1))) {
+                end--;
+            }
         }
 
         return end == className.length() ? className : className.substring(0, end).trim();

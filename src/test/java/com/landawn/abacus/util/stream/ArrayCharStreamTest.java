@@ -1331,12 +1331,11 @@ public class ArrayCharStreamTest extends TestBase {
     // G087-02: unsorted ArrayCharStream.distinct() keeps first occurrences in encounter order over the full char domain
     @Test
     public void testDistinct_unsortedArrayFullDomainMatchesFirstOccurrenceOrder() {
-        final char[] edge = { 'b', '\uffff', '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff', '\u0000', '\u00ff', '\u0100', '@',
-                '\u8000', '\u7fff', '\u8000' };
+        final char[] edge = { 'b', '\uffff', '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff', '\u0000', '\u00ff', '\u0100', '@', '\u8000', '\u7fff',
+                '\u8000' };
         assertTrue(Arrays.equals(new char[] { 'b', '\uffff', '\u0000', '?', '@', '\u007f', '\u0080', '\u00ff', '\u0100', '\u8000', '\u7fff' },
                 CharStream.of(edge).distinct().toArray()));
-        assertTrue(Arrays.equals(new char[] { '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff' },
-                CharStream.of(edge, 2, 10).distinct().toArray()));
+        assertTrue(Arrays.equals(new char[] { '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff' }, CharStream.of(edge, 2, 10).distinct().toArray()));
         assertEquals(0, CharStream.of(new char[0]).distinct().count());
         assertTrue(Arrays.equals(new char[] { '\u0080' }, CharStream.of(new char[] { '\u0080', '\u0080' }).distinct().toArray()));
         // growth from a small table straight to the top word, then back to low values

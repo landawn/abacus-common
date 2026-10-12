@@ -3,8 +3,6 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -210,7 +207,8 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertEquals(Arrays.asList("b"), N.flatMap(new String[] { "a", "b" }, s -> "a".equals(s) ? null : Arrays.asList(s)));
 
         // C-207: the new distinctBy examples actually dedupe
-        assertEquals(Arrays.asList("apple", "kiwi"), new ArrayList<>(N.distinctBy(new String[] { "apple", "grape", "kiwi" }, String::length, LinkedHashSet::new)));
+        assertEquals(Arrays.asList("apple", "kiwi"),
+                new ArrayList<>(N.distinctBy(new String[] { "apple", "grape", "kiwi" }, String::length, LinkedHashSet::new)));
         assertEquals(Arrays.asList("apple", "kiwi"),
                 new ArrayList<>(N.distinctBy(Arrays.asList("apple", "grape", "kiwi"), String::length, LinkedHashSet::new)));
         assertEquals(Arrays.asList("apple", "kiwi"),
@@ -241,7 +239,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
 
         N.flatMap(arr, 0, 10, x -> Collections.<Integer> emptyList(), (IntFunction<List<Integer>>) n -> {
             requested[0] = n;
-            return new ArrayList<Integer>(n);
+            return new ArrayList<>(n);
         });
         assertEquals(10, requested[0]);
     }
@@ -260,11 +258,10 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertThrows(NullPointerException.class, () -> N.filter(new ArrayList<String>(), 0, 0, s -> true, nullSupplier));
         assertThrows(NullPointerException.class, () -> N.filter(Arrays.asList("x").iterator(), s -> false, nullSupplier));
         assertThrows(NullPointerException.class, () -> N.distinctBy(new String[] { "a" }, s -> s, nullSupplier));
-        assertThrows(NullPointerException.class, () -> N.flatMap(Arrays.asList("a"), s -> Arrays.asList(s), (IntFunction<List<String>>) nullSupplier));
+        assertThrows(NullPointerException.class, () -> N.flatMap(Arrays.asList("a"), s -> Arrays.asList(s), nullSupplier));
 
         // skipRange (C-214)
-        final NullPointerException e1 = assertThrows(NullPointerException.class,
-                () -> N.skipRange(Arrays.asList(1, 2, 3), 0, 1, n -> (List<Integer>) null));
+        final NullPointerException e1 = assertThrows(NullPointerException.class, () -> N.skipRange(Arrays.asList(1, 2, 3), 0, 1, n -> (List<Integer>) null));
         assertEquals("supplier returned null", e1.getMessage());
         assertThrows(NullPointerException.class, () -> N.skipRange(new ArrayList<Integer>(), 0, 0, n -> (List<Integer>) null));
         // index check still comes first
@@ -279,24 +276,21 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertThrows(NullPointerException.class, () -> N.concat(Arrays.asList(Arrays.asList("a")), nullSupplier));
 
         // merge / groupBy / countBy (C-256)
-        assertThrows(NullPointerException.class,
-                () -> N.merge(new ArrayList<List<String>>(), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
-        assertThrows(NullPointerException.class,
-                () -> N.merge(Arrays.asList(Arrays.asList("a")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
+        assertThrows(NullPointerException.class, () -> N.merge(new ArrayList<List<String>>(), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
+        assertThrows(NullPointerException.class, () -> N.merge(Arrays.asList(Arrays.asList("a")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
         assertThrows(NullPointerException.class,
                 () -> N.merge(Arrays.asList(Arrays.asList("a"), Arrays.asList("b")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
         assertThrows(NullPointerException.class,
-                () -> N.merge(Arrays.asList(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")), (a, b) -> MergeResult.TAKE_FIRST,
-                        nullSupplier));
+                () -> N.merge(Arrays.asList(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
         final NullPointerException e3 = assertThrows(NullPointerException.class,
-                () -> N.groupBy((Iterable<String>) null, s -> s, () -> (Map<String, List<String>>) null));
+                () -> N.groupBy((Iterable<String>) null, s -> s, () -> null));
         assertEquals("mapSupplier returned null", e3.getMessage());
-        assertThrows(NullPointerException.class, () -> N.countBy(Arrays.asList("a"), s -> s, () -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> N.countBy(Arrays.asList("a"), s -> s, () -> null));
 
         // flatten / flattenEachElement (C-267)
         assertThrows(NullPointerException.class, () -> N.flatten(new ArrayList<List<String>>(), nullSupplier));
-        assertThrows(NullPointerException.class, () -> N.flattenEachElement(Arrays.asList("a"), () -> (List<Object>) null));
-        assertThrows(NullPointerException.class, () -> N.flattenEachElement(null, () -> (List<Object>) null));
+        assertThrows(NullPointerException.class, () -> N.flattenEachElement(Arrays.asList("a"), () -> null));
+        assertThrows(NullPointerException.class, () -> N.flattenEachElement(null, () -> null));
 
         // a non-null supplier result is still used as is
         assertEquals(new ArrayList<>(Arrays.asList("A", "B")), N.map(new String[] { "a", "b" }, String::toUpperCase, IntFunctions.ofList()));
@@ -486,11 +480,9 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
                 assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<Integer> emptyList())).getMessage());
         assertEquals("The specified iterable cannot be null or empty",
                 assertThrows(IllegalArgumentException.class, () -> N.minMax((List<Integer>) null)).getMessage());
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<Integer> emptyIterator(), (Comparator<Integer>) null))
-                .getMessage()
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<Integer> emptyIterator(), (Comparator<Integer>) null)).getMessage()
                 .contains("comparator"));
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<Integer> emptyList(), (Comparator<Integer>) null))
-                .getMessage()
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<Integer> emptyList(), (Comparator<Integer>) null)).getMessage()
                 .contains("comparator"));
 
         // unchanged results
@@ -732,7 +724,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertFalse(N.contains(Set.of("a"), null));
         assertFalse(N.contains(List.of("a"), null));
         assertFalse(N.contains((Iterable<?>) Set.of("a"), null));
-        assertFalse(N.contains(new TreeSet<>(List.of("a")), (Object) 1));
+        assertFalse(N.contains(new TreeSet<>(List.of("a")), 1));
         assertTrue(N.contains(Set.of("a"), "a"));
 
         assertFalse(N.containsAll(List.of("a"), Arrays.asList((Object) null)));
@@ -839,7 +831,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
     public void testC234_splitIteratorMessageMatchesItsSiblings() {
         final String expected = assertThrows(IllegalArgumentException.class, () -> N.split(Arrays.asList(1), 0)).getMessage();
         assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> N.split(Arrays.asList(1).iterator(), 0)).getMessage());
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3)), N.toList(N.split(Arrays.asList(1, 2, 3).iterator(), 2)));
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3)), CommonUtil.toList(N.split(Arrays.asList(1, 2, 3).iterator(), 2)));
     }
 
     // ------------------------------------------------------------------ C-235
@@ -1083,7 +1075,8 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
 
     @Test
     public void testC251_multiIndexOutOfBoundsMessageNamesTheIndexAndLength() {
-        assertEquals("Index 5 out of bounds for length 3", assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[] { 1, 2, 3 }, 0, 5)).getMessage());
+        assertEquals("Index 5 out of bounds for length 3",
+                assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[] { 1, 2, 3 }, 0, 5)).getMessage());
         assertEquals("Index -1 out of bounds for length 3",
                 assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new char[] { 'a', 'b', 'c' }, 1, -1)).getMessage());
         assertEquals("Index 3 out of bounds for length 3",
@@ -1128,9 +1121,9 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
     @Test
     public void testC250_addAllOfNothingNeverTouchesTheReceiver() {
         final List<Integer> ro = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1)));
-        assertFalse(N.addAll(ro, (Iterable<Integer>) new ArrayList<Integer>()));
+        assertFalse(N.addAll(ro, new ArrayList<Integer>()));
         assertFalse(N.addAll(ro, Collections.<Integer> emptyIterator()));
-        assertFalse(N.addAll(List.<Integer> of(), (Iterable<Integer>) Collections.<Integer> emptyList()));
+        assertFalse(N.addAll(List.<Integer> of(), Collections.<Integer> emptyList()));
         assertFalse(N.addAll(ro, (Iterable<Integer>) () -> Collections.<Integer> emptyIterator()));
         assertThrows(UnsupportedOperationException.class, () -> N.addAll(ro, (Iterable<Integer>) Arrays.asList(2)));
 
@@ -1177,7 +1170,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertEquals(Arrays.asList("1:10a", "2:20b", "-1:30c"), zipped3);
 
         // null / empty / plain Iterable inputs
-        assertEquals(Arrays.asList("?=30", "?=25"), N.zip(N.<String> emptyList(), Arrays.asList(30, 25), "?", 0, (n, age) -> n + "=" + age));
+        assertEquals(Arrays.asList("?=30", "?=25"), N.zip(CommonUtil.<String> emptyList(), Arrays.asList(30, 25), "?", 0, (n, age) -> n + "=" + age));
         assertEquals(Arrays.asList("A=0"), N.zip(Arrays.asList("A"), (Iterable<Integer>) null, "?", 0, (n, age) -> n + "=" + age));
         final Iterable<Integer> plain = () -> Arrays.asList(7, 8).iterator();
         assertEquals(Arrays.asList("x7", "?8"), N.zip(Arrays.asList("x"), plain, "?", 0, (n, v) -> n + v));
@@ -1425,7 +1418,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
         assertEquals(3L, N.sumIntToLong(Arrays.<Number> asList(1, null, 2L)));
         assertEquals(1.0, N.averageInt(new Integer[] { 1, null, 2 }));
         assertEquals(1.0, N.averageLong(Arrays.<Number> asList(1.7, null, 2L)));
-        assertEquals((double) Long.MAX_VALUE, N.averageLong(new Long[] { Long.MAX_VALUE }));
+        assertEquals(Long.MAX_VALUE, N.averageLong(new Long[] { Long.MAX_VALUE }));
         // sumLong keeps its documented longValue() conversion
         assertEquals(-1L, N.sumLong(new Number[] { new BigInteger("18446744073709551615") }));
     }

@@ -36,8 +36,8 @@ public class CloseFailurePrecedenceReview20260924bTest extends TestBase {
         }
     }
 
-    private static void assertPrimaryWins(final Supplier<? extends BaseStream<?, ?, ?, ?, ?, ?, ?, ?>> source, final Consumer<BaseStream<?, ?, ?, ?, ?, ?, ?, ?>> terminal,
-            final String label) {
+    private static void assertPrimaryWins(final Supplier<? extends BaseStream<?, ?, ?, ?, ?, ?, ?, ?>> source,
+            final Consumer<BaseStream<?, ?, ?, ?, ?, ?, ?, ?>> terminal, final String label) {
         final Boom closeFailure = new Boom("closeX");
         final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = source.get().onClose(() -> {
             throw closeFailure;
@@ -240,8 +240,8 @@ public class CloseFailurePrecedenceReview20260924bTest extends TestBase {
         }
     }
 
-    private static <X extends Throwable> void assertFailureWinsOverClose(final Class<X> expected, final Stream<?> s,
-            final Consumer<Stream<?>> terminal, final String label) {
+    private static <X extends Throwable> void assertFailureWinsOverClose(final Class<X> expected, final Stream<?> s, final Consumer<Stream<?>> terminal,
+            final String label) {
         final Boom closeFailure = new Boom("closeX");
         final int[] closes = new int[1];
         s.onClose(() -> {
@@ -290,7 +290,8 @@ public class CloseFailurePrecedenceReview20260924bTest extends TestBase {
     public void parallelMinMaxWithoutFailureStillCloseOnce() {
         final int[] closes = new int[1];
         assertEquals("a", Stream.of("b", "a", "c").parallel(2).onClose(() -> closes[0]++).min(Comparator.naturalOrder()).orElseThrow());
-        assertEquals("c", Stream.of(Arrays.asList("b", "a", "c").iterator()).parallel(2).onClose(() -> closes[0]++).max(Comparator.naturalOrder()).orElseThrow());
+        assertEquals("c",
+                Stream.of(Arrays.asList("b", "a", "c").iterator()).parallel(2).onClose(() -> closes[0]++).max(Comparator.naturalOrder()).orElseThrow());
         assertTrue(Stream.<String> empty().parallel(2).onClose(() -> closes[0]++).min(Comparator.naturalOrder()).isEmpty());
         assertTrue(Stream.of(java.util.Collections.<String> emptyIterator()).parallel(2).onClose(() -> closes[0]++).max(Comparator.naturalOrder()).isEmpty());
         assertEquals(4, closes[0]);
@@ -421,11 +422,11 @@ public class CloseFailurePrecedenceReview20260924bTest extends TestBase {
                 s -> s.toMap(x -> failOn2(x), x -> x, (a, b) -> a, HashMap::new), s -> s.toMultimap(x -> failOn2(x), x -> x),
                 s -> s.collect(ArrayList::new, (c, x) -> c.add(failOn2(x))), s -> s.collect(ArrayList::new, (c, x) -> c.add(failOn2(x)), List::addAll),
                 s -> s.collect(Collectors.mapping(CloseFailurePrecedenceReview20260924bTest::failOn2, Collectors.toList())), s -> s.maxAll(THROWING_COMPARATOR),
-                s -> s.kthLargest(2, THROWING_COMPARATOR), s -> s.min(THROWING_COMPARATOR), s -> s.max(THROWING_COMPARATOR), s -> s.allMatch(x -> failOn2(x) > 0),
-                s -> s.noneMatch(x -> failOn2(x) < 0), s -> s.anyMatch(x -> failOn2(x) > 5), s -> s.hasMatchCountBetween(0, 9, x -> failOn2(x) > 0),
-                s -> s.findFirst(x -> failOn2(x) > 5), s -> s.findLast(x -> failOn2(x) > 5), s -> s.foldLeft((a, b) -> failOn2(a) + failOn2(b)),
-                s -> s.foldLeft(0, (a, b) -> failOn2(a) + failOn2(b)), s -> s.foldRight((a, b) -> failOn2(a) + failOn2(b)),
-                s -> s.foldRight(0, (a, b) -> failOn2(a) + failOn2(b)));
+                s -> s.kthLargest(2, THROWING_COMPARATOR), s -> s.min(THROWING_COMPARATOR), s -> s.max(THROWING_COMPARATOR),
+                s -> s.allMatch(x -> failOn2(x) > 0), s -> s.noneMatch(x -> failOn2(x) < 0), s -> s.anyMatch(x -> failOn2(x) > 5),
+                s -> s.hasMatchCountBetween(0, 9, x -> failOn2(x) > 0), s -> s.findFirst(x -> failOn2(x) > 5), s -> s.findLast(x -> failOn2(x) > 5),
+                s -> s.foldLeft((a, b) -> failOn2(a) + failOn2(b)), s -> s.foldLeft(0, (a, b) -> failOn2(a) + failOn2(b)),
+                s -> s.foldRight((a, b) -> failOn2(a) + failOn2(b)), s -> s.foldRight(0, (a, b) -> failOn2(a) + failOn2(b)));
 
         int i = 0;
         for (final Supplier<Stream<Integer>> src : sources) {
@@ -472,10 +473,12 @@ public class CloseFailurePrecedenceReview20260924bTest extends TestBase {
         // the closing terminal toArray() before the generator is called, so a failing close handler pre-empts the
         // generator/copy failure there - see the F10b fix report.)
         assertFailureWinsOverClose(ArrayStoreException.class, Stream.of(1, 2, 3), s -> ((ArrayStream<Integer>) s).toArray(new String[3]), "array toArray(A[])");
-        assertFailureWinsOverClose(ArrayStoreException.class, Stream.of(new Integer[] { 0, 1, 2, 3 }, 1, 3), s -> ((ArrayStream<Integer>) s).toArray(new String[2]),
-                "array sub-range toArray(A[])");
-        assertFailureWinsOverClose(ArrayStoreException.class, Stream.of(1, 2, 3), s -> ((Stream<Integer>) s).toArray(String[]::new), "array toArray(generator)");
-        assertFailureWinsOverClose(NullPointerException.class, Stream.of(1, 2, 3), s -> ((Stream<Integer>) s).toArray(n -> null), "array toArray(null generator result)");
+        assertFailureWinsOverClose(ArrayStoreException.class, Stream.of(new Integer[] { 0, 1, 2, 3 }, 1, 3),
+                s -> ((ArrayStream<Integer>) s).toArray(new String[2]), "array sub-range toArray(A[])");
+        assertFailureWinsOverClose(ArrayStoreException.class, Stream.of(1, 2, 3), s -> ((Stream<Integer>) s).toArray(String[]::new),
+                "array toArray(generator)");
+        assertFailureWinsOverClose(NullPointerException.class, Stream.of(1, 2, 3), s -> ((Stream<Integer>) s).toArray(n -> null),
+                "array toArray(null generator result)");
         assertFailureWinsOverClose(NullPointerException.class, Stream.of(new Integer[0]), s -> ((Stream<Integer>) s).toArray(n -> null),
                 "empty array toArray(null generator result)");
     }

@@ -155,8 +155,7 @@ public class ThrowablesReview20260924bTest extends TestBase {
     @Test
     public void testDefer_sourceClosesButReportsTrue_whileLoopEndsCleanly() throws Exception {
         final Object[] holder = new Object[1];
-        final Throwables.Iterator<String, Exception> deferred = Throwables.Iterator
-                .defer(() -> hooked(Arrays.asList("a", "中", "😀"), closeOnCall(holder, 3)));
+        final Throwables.Iterator<String, Exception> deferred = Throwables.Iterator.defer(() -> hooked(Arrays.asList("a", "中", "😀"), closeOnCall(holder, 3)));
         holder[0] = deferred;
 
         final List<String> seen = new ArrayList<>();

@@ -1520,6 +1520,8 @@ public final class Throwables {
         /**
          * Returns an iterator that reads lines from the specified Reader.
          * The iterator wraps the reader in a BufferedReader if it isn't one already.
+         * Closing the iterator leaves it exhausted, including when a reader callback closes it while a line
+         * is being read. A line returned by that callback after closing is discarded.
          *
          * <p><b>Resource Management:</b> When {@code closeResource()} is called, it will close the underlying
          * BufferedReader (and thus the original Reader). Because this iterator does not implement
@@ -1573,7 +1575,14 @@ public final class Throwables {
                     } else if (finished) {
                         return false;
                     } else {
-                        cachedLine = br.readLine();
+                        final String line = br.readLine();
+
+                        // A reader can close this iterator re-entrantly. Do not restore a cached line after close.
+                        if (finished) {
+                            return false;
+                        }
+
+                        cachedLine = line;
 
                         if (cachedLine == null) {
                             finished = true;
@@ -1602,13 +1611,14 @@ public final class Throwables {
 
                 @Override
                 protected void closeResourceInternal() {
+                    // Publish exhaustion before calling user code, including a re-entrant reader.close().
+                    cachedLine = null;
+                    finished = true;
+
                     try {
                         br.close();
                     } catch (final IOException e) {
                         throw ExceptionUtil.toRuntimeException(e, true);
-                    } finally {
-                        cachedLine = null;
-                        finished = true;
                     }
                 }
             };

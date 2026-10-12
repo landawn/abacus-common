@@ -615,6 +615,11 @@ public final class Iterators {
      * @return {@code true} if the iterators contain equal elements in the same order, {@code false} otherwise. Two {@code null} or empty iterators are considered equal.
      */
     public static boolean equalsInOrder(final Iterator<?> iterator1, final Iterator<?> iterator2) {
+        // Aliased inputs represent the same remaining sequence; advancing each would consume it twice.
+        if (iterator1 == iterator2) {
+            return true;
+        }
+
         final boolean isIterator1Empty = N.isEmpty(iterator1);
         final boolean isIterator2Empty = N.isEmpty(iterator2);
 
@@ -2747,41 +2752,35 @@ public final class Iterators {
              */
             @Override
             public T next() throws NoSuchElementException {
+                // A head pulled from a source is marked pending before the other head is pulled or the selector runs, so
+                // a source or selector that throws loses nothing: the next call compares the same pair again, as
+                // Stream.merge does. A consumed head slot is cleared before it is returned, so the merge does not retain
+                // already returned heads; any unconsumed pending head remains available for the next call.
                 if (hasNextA) {
-                    if (iterB.hasNext()) {
-                        if (nextSelector.apply(nextA, (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                            hasNextA = false;
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            return nextB;
-                        }
+                    if (hasNextB) {
+                        return selectPending();
+                    } else if (iterB.hasNext()) {
+                        nextB = iterB.next();
+                        hasNextB = true;
+                        return selectPending();
                     } else {
-                        hasNextA = false;
-                        return nextA;
+                        return takeA();
                     }
                 } else if (hasNextB) {
                     if (iterA.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), nextB) == MergeResult.TAKE_FIRST) {
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            hasNextB = false;
-                            return nextB;
-                        }
+                        nextA = iterA.next();
+                        hasNextA = true;
+                        return selectPending();
                     } else {
-                        hasNextB = false;
-                        return nextB;
+                        return takeB();
                     }
                 } else if (iterA.hasNext()) {
                     if (iterB.hasNext()) {
-                        if (nextSelector.apply((nextA = iterA.next()), (nextB = iterB.next())) == MergeResult.TAKE_FIRST) {
-                            hasNextB = true;
-                            return nextA;
-                        } else {
-                            hasNextA = true;
-                            return nextB;
-                        }
+                        nextA = iterA.next();
+                        hasNextA = true;
+                        nextB = iterB.next();
+                        hasNextB = true;
+                        return selectPending();
                     } else {
                         return iterA.next();
                     }
@@ -2790,6 +2789,29 @@ public final class Iterators {
                 } else {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // selectPending, takeA and takeB stay small enough for the JIT to inline them at every call site.
+            private T selectPending() {
+                if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
+                    return takeA();
+                }
+
+                return takeB();
+            }
+
+            private T takeA() {
+                hasNextA = false;
+                final T result = nextA;
+                nextA = null;
+                return result;
+            }
+
+            private T takeB() {
+                hasNextB = false;
+                final T result = nextB;
+                nextB = null;
+                return result;
             }
         };
     }
@@ -3026,66 +3048,95 @@ public final class Iterators {
             private T produce(final int k, final T leftValue, final boolean leftValueSupplied) throws NoSuchElementException {
                 final Iterator<? extends T> iterB = sources[k + 1];
 
+                // As in merge(A, B): an element is marked pending at node k as soon as it is pulled from iterB or handed
+                // up by the node below, so a source or selector that throws leaves it pending and the next call compares
+                // the same pair again. needsValueFromLeft() sees hasNextA[k] and does not pull another one.
                 if (hasNextA[k]) {
-                    if (iterB.hasNext()) {
+                    final T a = (T) nextA[k];
+
+                    if (hasNextB[k]) {
+                        return select(k, a, (T) nextB[k]);
+                    } else if (iterB.hasNext()) {
                         final T b = iterB.next();
-                        nextB[k] = b;
-
-                        if (nextSelector.apply((T) nextA[k], b) == MergeResult.TAKE_FIRST) {
-                            hasNextA[k] = false;
-                            hasNextB[k] = true;
-
-                            return (T) nextA[k];
-                        }
-
-                        return b;
+                        pendB(k, b);
+                        return select(k, a, b);
                     }
 
-                    hasNextA[k] = false;
-
-                    return (T) nextA[k];
+                    releaseA(k);
+                    return a;
                 } else if (hasNextB[k]) {
                     if (leftHasNext[k]) {
                         final T a = leftElement(k, leftValue, leftValueSupplied);
-                        nextA[k] = a;
-
-                        if (nextSelector.apply(a, (T) nextB[k]) == MergeResult.TAKE_FIRST) {
-                            return a;
-                        }
-
-                        hasNextA[k] = true;
-                        hasNextB[k] = false;
-
-                        return (T) nextB[k];
+                        pendA(k, a);
+                        return select(k, a, (T) nextB[k]);
                     }
 
-                    hasNextB[k] = false;
-
-                    return (T) nextB[k];
+                    final T b = (T) nextB[k];
+                    releaseB(k);
+                    return b;
                 } else if (leftHasNext[k]) {
-                    if (iterB.hasNext()) {
-                        final T a = leftElement(k, leftValue, leftValueSupplied);
-                        final T b = iterB.next();
-                        nextA[k] = a;
-                        nextB[k] = b;
+                    final T a;
 
-                        if (nextSelector.apply(a, b) == MergeResult.TAKE_FIRST) {
-                            hasNextB[k] = true;
+                    if (leftValueSupplied) {
+                        // The node below has already released this value: keep it pending before asking iterB, which
+                        // may throw. Node 0 pulls from its leaf only after iterB.hasNext(), as merge(A, B) does.
+                        a = leftValue;
+                        pendA(k, a);
 
+                        if (!iterB.hasNext()) {
+                            releaseA(k);
                             return a;
                         }
-
-                        hasNextA[k] = true;
-
-                        return b;
+                    } else if (iterB.hasNext()) {
+                        a = leftElement(k, leftValue, false);
+                        pendA(k, a);
+                    } else {
+                        return leftElement(k, leftValue, false);
                     }
 
-                    return leftElement(k, leftValue, leftValueSupplied);
+                    final T b = iterB.next();
+                    pendB(k, b);
+                    return select(k, a, b);
                 } else if (iterB.hasNext()) {
                     return iterB.next();
                 }
 
                 throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+
+            /**
+             * Lets the selector choose between node {@code k}'s two pending heads {@code a} and {@code b} and releases
+             * the chosen one; if the selector throws, both stay pending.
+             */
+            private T select(final int k, final T a, final T b) {
+                if (nextSelector.apply(a, b) == MergeResult.TAKE_FIRST) {
+                    releaseA(k);
+                    return a;
+                }
+
+                releaseB(k);
+                return b;
+            }
+
+            // select and the four slot helpers below stay small enough for the JIT to inline them at every call site.
+            private void pendA(final int k, final T a) {
+                nextA[k] = a;
+                hasNextA[k] = true;
+            }
+
+            private void pendB(final int k, final T b) {
+                nextB[k] = b;
+                hasNextB[k] = true;
+            }
+
+            private void releaseA(final int k) {
+                hasNextA[k] = false;
+                nextA[k] = null;
+            }
+
+            private void releaseB(final int k) {
+                hasNextB[k] = false;
+                nextB[k] = null;
             }
         };
     }

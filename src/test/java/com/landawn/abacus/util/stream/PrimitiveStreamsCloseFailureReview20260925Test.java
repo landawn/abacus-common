@@ -95,8 +95,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
      * For every terminal: the terminal's own failure wins, the close failure is suppressed onto it exactly once, the close
      * handler ran exactly once, and the stream is closed afterwards.
      */
-    private static <S extends BaseStream<?, ?, ?, ?, ?, ?, ?, S>> void assertPrimaryWins(final String family, final String sourceName,
-            final Supplier<S> source, final Terms<S> terms) {
+    private static <S extends BaseStream<?, ?, ?, ?, ?, ?, ?, S>> void assertPrimaryWins(final String family, final String sourceName, final Supplier<S> source,
+            final Terms<S> terms) {
         for (final Term<S> t : terms.list) {
             final String label = family + " " + sourceName + " " + t.name;
             final Boom closeFailure = new Boom("closeX");
@@ -203,7 +203,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<ByteStream> byteNullFactoryTerminals() {
-        return new Terms<ByteStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<ByteStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -398,7 +399,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<CharStream> charNullFactoryTerminals() {
-        return new Terms<CharStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<CharStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -593,7 +595,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<ShortStream> shortNullFactoryTerminals() {
-        return new Terms<ShortStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<ShortStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -605,7 +608,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_shortAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("short", "array.map(boom)", () -> ShortStream.of((short) 1, (short) 2, (short) 3).map(x -> (short) boom(x)), shortAbstractTerminals());
+        assertPrimaryWins("short", "array.map(boom)", () -> ShortStream.of((short) 1, (short) 2, (short) 3).map(x -> (short) boom(x)),
+                shortAbstractTerminals());
         assertPrimaryWins("short", "iterator.map(boom)", () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)).map(x -> (short) boom(x)),
                 shortAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
@@ -620,11 +624,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_shortIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("short", "iterator.map(failOn2)", () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)).map(x -> (short) failOn2(x)),
-                shortIteratorTerminals());
+        assertPrimaryWins("short", "iterator.map(failOn2)",
+                () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)).map(x -> (short) failOn2(x)), shortIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("short", "iterator.filter(failOn2)", () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)).filter(x -> failOn2(x) > 0),
-                shortIteratorTerminals());
+        assertPrimaryWins("short", "iterator.filter(failOn2)",
+                () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)).filter(x -> failOn2(x) > 0), shortIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
         assertPrimaryWins("short", "iterator", () -> ShortStream.of(ShortIterator.of((short) 1, (short) 2, (short) 3)), shortNullFactoryTerminals());
         assertPrimaryWins("short", "empty iterator", () -> ShortStream.of(ShortIterator.of((short) 1)).filter(x -> false), shortNullFactoryTerminals());
@@ -653,7 +657,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayShortStream, src 1: ParallelIteratorShortStream
-                final ShortStream a = (src == 0 ? ShortStream.of(new short[] { 1, 2, 3 }) : ShortStream.of(ShortIterator.of(new short[] { 1, 2, 3 }))).parallel(3)
+                final ShortStream a = (src == 0 ? ShortStream.of(new short[] { 1, 2, 3 }) : ShortStream.of(ShortIterator.of(new short[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(() -> {
                             aClosed.incrementAndGet();
                             throw closeFailure;
@@ -707,10 +712,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
             final Boom closeFailure = new Boom("closeX");
             final AtomicInteger closes = new AtomicInteger();
             final ShortStream s = (kind == 2 ? ShortStream.of(ShortIterator.of(new short[100])).parallel(4)
-                    : ShortStream.of(new short[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR))).onClose(() -> {
-                        closes.incrementAndGet();
-                        throw closeFailure;
-                    });
+                    : ShortStream.of(new short[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR)))
+                            .onClose(() -> {
+                                closes.incrementAndGet();
+                                throw closeFailure;
+                            });
             assertTrue(s instanceof ParallelArrayShortStream == (kind < 2), label);
 
             final NullPointerException e = assertThrows(NullPointerException.class, () -> s.collect(() -> null, (c, x) -> {
@@ -750,8 +756,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("toMultiset", s -> s.toMultiset(Multiset::new))
                 .up("toMap", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo", s -> s.groupTo(x -> x, Collectors.counting(), () -> new HashMap<>()))
-                .up("reduce(identity)", s -> s.reduce((int) 0, (a, b) -> (int) (a + b)))
-                .up("reduce", s -> s.reduce((a, b) -> (int) (a + b)))
+                .up("reduce(identity)", s -> s.reduce(0, (a, b) -> (a + b)))
+                .up("reduce", s -> s.reduce((a, b) -> (a + b)))
                 .up("collect", s -> s.collect(ArrayList::new, (c, x) -> c.add(x), (a, b) -> a.addAll(b)))
                 .up("min", s -> s.min())
                 .up("max", s -> s.max())
@@ -775,8 +781,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("noneMatch(predicate)", s -> s.noneMatch(x -> failOn2(x) < 0))
                 .up("findFirst(predicate)", s -> s.findFirst(x -> failOn2(x) < 0))
                 .up("findLast(predicate)", s -> s.findLast(x -> failOn2(x) < 0))
-                .up("reduce(identity, accumulator)", s -> s.reduce((int) 0, (a, b) -> (int) failOn2(b)))
-                .up("reduce(accumulator)", s -> s.reduce((a, b) -> (int) failOn2(b)))
+                .up("reduce(identity, accumulator)", s -> s.reduce(0, (a, b) -> failOn2(b)))
+                .up("reduce(accumulator)", s -> s.reduce((a, b) -> failOn2(b)))
                 .up("toMap(keyMapper)", s -> s.toMap(x -> failOn2(x), x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo(keyMapper)", s -> s.groupTo(x -> failOn2(x), Collectors.counting(), () -> new HashMap<>()))
                 .up("collect(accumulator)", s -> s.collect(ArrayList::new, (c, x) -> c.add(failOn2(x)), (a, b) -> a.addAll(b)))
@@ -788,7 +794,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<IntStream> intNullFactoryTerminals() {
-        return new Terms<IntStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<IntStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -800,42 +807,42 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_intAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("int", "array.map(boom)", () -> IntStream.of((int) 1, (int) 2, (int) 3).map(x -> (int) boom(x)), intAbstractTerminals());
-        assertPrimaryWins("int", "iterator.map(boom)", () -> IntStream.of(IntIterator.of((int) 1, (int) 2, (int) 3)).map(x -> (int) boom(x)),
+        assertPrimaryWins("int", "array.map(boom)", () -> IntStream.of(1, 2, 3).map(x -> boom(x)), intAbstractTerminals());
+        assertPrimaryWins("int", "iterator.map(boom)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> boom(x)),
                 intAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
-        assertPrimaryWins("int", "iterator (2 elements)", () -> IntStream.of(IntIterator.of((int) 1, (int) 2)),
+        assertPrimaryWins("int", "iterator (2 elements)", () -> IntStream.of(IntIterator.of(1, 2)),
                 new Terms<IntStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
-        assertPrimaryWins("int", "array (2 elements)", () -> IntStream.of((int) 1, (int) 2),
+        assertPrimaryWins("int", "array (2 elements)", () -> IntStream.of(1, 2),
                 new Terms<IntStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
         // a successful terminal still surfaces the close failure alone
-        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of((int) 7), intAbstractTerminals());
-        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(IntIterator.of((int) 7)), intAbstractTerminals());
+        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(7), intAbstractTerminals());
+        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(IntIterator.of(7)), intAbstractTerminals());
     }
 
     @Test
     public void u30_intIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("int", "iterator.map(failOn2)", () -> IntStream.of(IntIterator.of((int) 1, (int) 2, (int) 3)).map(x -> (int) failOn2(x)),
+        assertPrimaryWins("int", "iterator.map(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> failOn2(x)),
                 intIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("int", "iterator.filter(failOn2)", () -> IntStream.of(IntIterator.of((int) 1, (int) 2, (int) 3)).filter(x -> failOn2(x) > 0),
+        assertPrimaryWins("int", "iterator.filter(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
                 intIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
-        assertPrimaryWins("int", "iterator", () -> IntStream.of(IntIterator.of((int) 1, (int) 2, (int) 3)), intNullFactoryTerminals());
-        assertPrimaryWins("int", "empty iterator", () -> IntStream.of(IntIterator.of((int) 1)).filter(x -> false), intNullFactoryTerminals());
+        assertPrimaryWins("int", "iterator", () -> IntStream.of(IntIterator.of(1, 2, 3)), intNullFactoryTerminals());
+        assertPrimaryWins("int", "empty iterator", () -> IntStream.of(IntIterator.of(1)).filter(x -> false), intNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone
-        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(IntIterator.of((int) 1, (int) 2, (int) 3)), intIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(IntIterator.of(1, 2, 3)), intIteratorTerminals());
     }
 
     @Test
     public void u29_intArrayTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("int", "array", () -> IntStream.of((int) 1, (int) 2, (int) 3), intArrayTerminals());
+        assertPrimaryWins("int", "array", () -> IntStream.of(1, 2, 3), intArrayTerminals());
         assertPrimaryWins("int", "array sub-range", () -> IntStream.of(new int[] { 0, 1, 2, 3 }, 1, 3), intArrayTerminals());
-        assertPrimaryWins("int", "array", () -> IntStream.of((int) 1, (int) 2, (int) 3), intNullFactoryTerminals());
+        assertPrimaryWins("int", "array", () -> IntStream.of(1, 2, 3), intNullFactoryTerminals());
         assertPrimaryWins("int", "array sub-range", () -> IntStream.of(new int[] { 0, 1, 2, 3 }, 1, 3), intNullFactoryTerminals());
         assertPrimaryWins("int", "empty array range", () -> IntStream.of(new int[] { 0, 1, 2, 3 }, 1, 1), intNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone (the same 22 terminals, array-backed)
-        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of((int) 1, (int) 2, (int) 3), intIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("int", () -> IntStream.of(1, 2, 3), intIteratorTerminals());
     }
 
     @Test
@@ -870,10 +877,10 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (int) 0, (int) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (int) 0, (int) 0, (int) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 }, label);
                 // the ISE of the closed argument is the primary; the receiver's close failure is suppressed onto it
@@ -945,8 +952,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("toMultiset", s -> s.toMultiset(Multiset::new))
                 .up("toMap", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo", s -> s.groupTo(x -> x, Collectors.counting(), () -> new HashMap<>()))
-                .up("reduce(identity)", s -> s.reduce((long) 0, (a, b) -> (long) (a + b)))
-                .up("reduce", s -> s.reduce((a, b) -> (long) (a + b)))
+                .up("reduce(identity)", s -> s.reduce(0, (a, b) -> (a + b)))
+                .up("reduce", s -> s.reduce((a, b) -> (a + b)))
                 .up("collect", s -> s.collect(ArrayList::new, (c, x) -> c.add(x), (a, b) -> a.addAll(b)))
                 .up("min", s -> s.min())
                 .up("max", s -> s.max())
@@ -970,7 +977,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("noneMatch(predicate)", s -> s.noneMatch(x -> failOn2(x) < 0))
                 .up("findFirst(predicate)", s -> s.findFirst(x -> failOn2(x) < 0))
                 .up("findLast(predicate)", s -> s.findLast(x -> failOn2(x) < 0))
-                .up("reduce(identity, accumulator)", s -> s.reduce((long) 0, (a, b) -> (long) failOn2(b)))
+                .up("reduce(identity, accumulator)", s -> s.reduce(0, (a, b) -> (long) failOn2(b)))
                 .up("reduce(accumulator)", s -> s.reduce((a, b) -> (long) failOn2(b)))
                 .up("toMap(keyMapper)", s -> s.toMap(x -> failOn2(x), x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo(keyMapper)", s -> s.groupTo(x -> failOn2(x), Collectors.counting(), () -> new HashMap<>()))
@@ -983,7 +990,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<LongStream> longNullFactoryTerminals() {
-        return new Terms<LongStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<LongStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -995,13 +1003,13 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_longAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("long", "array.map(boom)", () -> LongStream.of((long) 1, (long) 2, (long) 3).map(x -> (long) boom(x)), longAbstractTerminals());
-        assertPrimaryWins("long", "iterator.map(boom)", () -> LongStream.of(LongIterator.of((long) 1, (long) 2, (long) 3)).map(x -> (long) boom(x)),
+        assertPrimaryWins("long", "array.map(boom)", () -> LongStream.of(1, 2, 3).map(x -> (long) boom(x)), longAbstractTerminals());
+        assertPrimaryWins("long", "iterator.map(boom)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) boom(x)),
                 longAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
-        assertPrimaryWins("long", "iterator (2 elements)", () -> LongStream.of(LongIterator.of((long) 1, (long) 2)),
+        assertPrimaryWins("long", "iterator (2 elements)", () -> LongStream.of(LongIterator.of(1, 2)),
                 new Terms<LongStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
-        assertPrimaryWins("long", "array (2 elements)", () -> LongStream.of((long) 1, (long) 2),
+        assertPrimaryWins("long", "array (2 elements)", () -> LongStream.of(1, 2),
                 new Terms<LongStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
         // a successful terminal still surfaces the close failure alone
         assertCloseFailureSurfacesOnSuccess("long", () -> LongStream.of((long) 7), longAbstractTerminals());
@@ -1010,27 +1018,27 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_longIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("long", "iterator.map(failOn2)", () -> LongStream.of(LongIterator.of((long) 1, (long) 2, (long) 3)).map(x -> (long) failOn2(x)),
+        assertPrimaryWins("long", "iterator.map(failOn2)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) failOn2(x)),
                 longIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("long", "iterator.filter(failOn2)", () -> LongStream.of(LongIterator.of((long) 1, (long) 2, (long) 3)).filter(x -> failOn2(x) > 0),
+        assertPrimaryWins("long", "iterator.filter(failOn2)", () -> LongStream.of(LongIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
                 longIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
-        assertPrimaryWins("long", "iterator", () -> LongStream.of(LongIterator.of((long) 1, (long) 2, (long) 3)), longNullFactoryTerminals());
+        assertPrimaryWins("long", "iterator", () -> LongStream.of(LongIterator.of(1, 2, 3)), longNullFactoryTerminals());
         assertPrimaryWins("long", "empty iterator", () -> LongStream.of(LongIterator.of((long) 1)).filter(x -> false), longNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone
-        assertCloseFailureSurfacesOnSuccess("long", () -> LongStream.of(LongIterator.of((long) 1, (long) 2, (long) 3)), longIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("long", () -> LongStream.of(LongIterator.of(1, 2, 3)), longIteratorTerminals());
     }
 
     @Test
     public void u29_longArrayTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("long", "array", () -> LongStream.of((long) 1, (long) 2, (long) 3), longArrayTerminals());
+        assertPrimaryWins("long", "array", () -> LongStream.of(1, 2, 3), longArrayTerminals());
         assertPrimaryWins("long", "array sub-range", () -> LongStream.of(new long[] { 0, 1, 2, 3 }, 1, 3), longArrayTerminals());
-        assertPrimaryWins("long", "array", () -> LongStream.of((long) 1, (long) 2, (long) 3), longNullFactoryTerminals());
+        assertPrimaryWins("long", "array", () -> LongStream.of(1, 2, 3), longNullFactoryTerminals());
         assertPrimaryWins("long", "array sub-range", () -> LongStream.of(new long[] { 0, 1, 2, 3 }, 1, 3), longNullFactoryTerminals());
         assertPrimaryWins("long", "empty array range", () -> LongStream.of(new long[] { 0, 1, 2, 3 }, 1, 1), longNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone (the same 22 terminals, array-backed)
-        assertCloseFailureSurfacesOnSuccess("long", () -> LongStream.of((long) 1, (long) 2, (long) 3), longIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("long", () -> LongStream.of(1, 2, 3), longIteratorTerminals());
     }
 
     @Test
@@ -1065,10 +1073,10 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (long) 0, (long) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (long) 0, (long) 0, (long) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 }, label);
                 // the ISE of the closed argument is the primary; the receiver's close failure is suppressed onto it
@@ -1142,8 +1150,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("toMultiset", s -> s.toMultiset(Multiset::new))
                 .up("toMap", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo", s -> s.groupTo(x -> x, Collectors.counting(), () -> new HashMap<>()))
-                .up("reduce(identity)", s -> s.reduce((float) 0, (a, b) -> (float) (a + b)))
-                .up("reduce", s -> s.reduce((a, b) -> (float) (a + b)))
+                .up("reduce(identity)", s -> s.reduce(0, (a, b) -> (a + b)))
+                .up("reduce", s -> s.reduce((a, b) -> (a + b)))
                 .up("collect", s -> s.collect(ArrayList::new, (c, x) -> c.add(x), (a, b) -> a.addAll(b)))
                 .up("min", s -> s.min())
                 .up("max", s -> s.max())
@@ -1167,7 +1175,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("noneMatch(predicate)", s -> s.noneMatch(x -> failOn2(x) < 0))
                 .up("findFirst(predicate)", s -> s.findFirst(x -> failOn2(x) < 0))
                 .up("findLast(predicate)", s -> s.findLast(x -> failOn2(x) < 0))
-                .up("reduce(identity, accumulator)", s -> s.reduce((float) 0, (a, b) -> (float) failOn2(b)))
+                .up("reduce(identity, accumulator)", s -> s.reduce(0, (a, b) -> (float) failOn2(b)))
                 .up("reduce(accumulator)", s -> s.reduce((a, b) -> (float) failOn2(b)))
                 .up("toMap(keyMapper)", s -> s.toMap(x -> failOn2(x), x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo(keyMapper)", s -> s.groupTo(x -> failOn2(x), Collectors.counting(), () -> new HashMap<>()))
@@ -1180,7 +1188,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<FloatStream> floatNullFactoryTerminals() {
-        return new Terms<FloatStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<FloatStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -1192,13 +1201,14 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_floatAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("float", "array.map(boom)", () -> FloatStream.of((float) 1, (float) 2, (float) 3).map(x -> (float) boom(x)), floatAbstractTerminals());
-        assertPrimaryWins("float", "iterator.map(boom)", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2, (float) 3)).map(x -> (float) boom(x)),
+        assertPrimaryWins("float", "array.map(boom)", () -> FloatStream.of(1, 2, 3).map(x -> (float) boom(x)),
+                floatAbstractTerminals());
+        assertPrimaryWins("float", "iterator.map(boom)", () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) boom(x)),
                 floatAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
-        assertPrimaryWins("float", "iterator (2 elements)", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2)),
+        assertPrimaryWins("float", "iterator (2 elements)", () -> FloatStream.of(FloatIterator.of(1, 2)),
                 new Terms<FloatStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
-        assertPrimaryWins("float", "array (2 elements)", () -> FloatStream.of((float) 1, (float) 2),
+        assertPrimaryWins("float", "array (2 elements)", () -> FloatStream.of(1, 2),
                 new Terms<FloatStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
         // a successful terminal still surfaces the close failure alone
         assertCloseFailureSurfacesOnSuccess("float", () -> FloatStream.of((float) 7), floatAbstractTerminals());
@@ -1207,27 +1217,27 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_floatIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("float", "iterator.map(failOn2)", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2, (float) 3)).map(x -> (float) failOn2(x)),
-                floatIteratorTerminals());
+        assertPrimaryWins("float", "iterator.map(failOn2)",
+                () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) failOn2(x)), floatIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("float", "iterator.filter(failOn2)", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2, (float) 3)).filter(x -> failOn2(x) > 0),
-                floatIteratorTerminals());
+        assertPrimaryWins("float", "iterator.filter(failOn2)",
+                () -> FloatStream.of(FloatIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0), floatIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
-        assertPrimaryWins("float", "iterator", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2, (float) 3)), floatNullFactoryTerminals());
+        assertPrimaryWins("float", "iterator", () -> FloatStream.of(FloatIterator.of(1, 2, 3)), floatNullFactoryTerminals());
         assertPrimaryWins("float", "empty iterator", () -> FloatStream.of(FloatIterator.of((float) 1)).filter(x -> false), floatNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone
-        assertCloseFailureSurfacesOnSuccess("float", () -> FloatStream.of(FloatIterator.of((float) 1, (float) 2, (float) 3)), floatIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("float", () -> FloatStream.of(FloatIterator.of(1, 2, 3)), floatIteratorTerminals());
     }
 
     @Test
     public void u29_floatArrayTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("float", "array", () -> FloatStream.of((float) 1, (float) 2, (float) 3), floatArrayTerminals());
+        assertPrimaryWins("float", "array", () -> FloatStream.of(1, 2, 3), floatArrayTerminals());
         assertPrimaryWins("float", "array sub-range", () -> FloatStream.of(new float[] { 0, 1, 2, 3 }, 1, 3), floatArrayTerminals());
-        assertPrimaryWins("float", "array", () -> FloatStream.of((float) 1, (float) 2, (float) 3), floatNullFactoryTerminals());
+        assertPrimaryWins("float", "array", () -> FloatStream.of(1, 2, 3), floatNullFactoryTerminals());
         assertPrimaryWins("float", "array sub-range", () -> FloatStream.of(new float[] { 0, 1, 2, 3 }, 1, 3), floatNullFactoryTerminals());
         assertPrimaryWins("float", "empty array range", () -> FloatStream.of(new float[] { 0, 1, 2, 3 }, 1, 1), floatNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone (the same 22 terminals, array-backed)
-        assertCloseFailureSurfacesOnSuccess("float", () -> FloatStream.of((float) 1, (float) 2, (float) 3), floatIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("float", () -> FloatStream.of(1, 2, 3), floatIteratorTerminals());
     }
 
     @Test
@@ -1240,7 +1250,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayFloatStream, src 1: ParallelIteratorFloatStream
-                final FloatStream a = (src == 0 ? FloatStream.of(new float[] { 1, 2, 3 }) : FloatStream.of(FloatIterator.of(new float[] { 1, 2, 3 }))).parallel(3)
+                final FloatStream a = (src == 0 ? FloatStream.of(new float[] { 1, 2, 3 }) : FloatStream.of(FloatIterator.of(new float[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(() -> {
                             aClosed.incrementAndGet();
                             throw closeFailure;
@@ -1262,10 +1273,10 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (float) 0, (float) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (float) 0, (float) 0, (float) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 }, label);
                 // the ISE of the closed argument is the primary; the receiver's close failure is suppressed onto it
@@ -1294,10 +1305,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
             final Boom closeFailure = new Boom("closeX");
             final AtomicInteger closes = new AtomicInteger();
             final FloatStream s = (kind == 2 ? FloatStream.of(FloatIterator.of(new float[100])).parallel(4)
-                    : FloatStream.of(new float[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR))).onClose(() -> {
-                        closes.incrementAndGet();
-                        throw closeFailure;
-                    });
+                    : FloatStream.of(new float[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR)))
+                            .onClose(() -> {
+                                closes.incrementAndGet();
+                                throw closeFailure;
+                            });
             assertTrue(s instanceof ParallelArrayFloatStream == (kind < 2), label);
 
             final NullPointerException e = assertThrows(NullPointerException.class, () -> s.collect(() -> null, (c, x) -> {
@@ -1339,8 +1351,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("toMultiset", s -> s.toMultiset(Multiset::new))
                 .up("toMap", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo", s -> s.groupTo(x -> x, Collectors.counting(), () -> new HashMap<>()))
-                .up("reduce(identity)", s -> s.reduce((double) 0, (a, b) -> (double) (a + b)))
-                .up("reduce", s -> s.reduce((a, b) -> (double) (a + b)))
+                .up("reduce(identity)", s -> s.reduce(0, (a, b) -> (a + b)))
+                .up("reduce", s -> s.reduce((a, b) -> (a + b)))
                 .up("collect", s -> s.collect(ArrayList::new, (c, x) -> c.add(x), (a, b) -> a.addAll(b)))
                 .up("min", s -> s.min())
                 .up("max", s -> s.max())
@@ -1364,7 +1376,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 .up("noneMatch(predicate)", s -> s.noneMatch(x -> failOn2(x) < 0))
                 .up("findFirst(predicate)", s -> s.findFirst(x -> failOn2(x) < 0))
                 .up("findLast(predicate)", s -> s.findLast(x -> failOn2(x) < 0))
-                .up("reduce(identity, accumulator)", s -> s.reduce((double) 0, (a, b) -> (double) failOn2(b)))
+                .up("reduce(identity, accumulator)", s -> s.reduce(0, (a, b) -> (double) failOn2(b)))
                 .up("reduce(accumulator)", s -> s.reduce((a, b) -> (double) failOn2(b)))
                 .up("toMap(keyMapper)", s -> s.toMap(x -> failOn2(x), x -> x, (a, b) -> a, () -> new HashMap<>()))
                 .up("groupTo(keyMapper)", s -> s.groupTo(x -> failOn2(x), Collectors.counting(), () -> new HashMap<>()))
@@ -1377,7 +1389,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     /** C-016/C-101 null factories: NPE "... returned null" wins over the close failure (also on an EMPTY array range). */
     private static Terms<DoubleStream> doubleNullFactoryTerminals() {
-        return new Terms<DoubleStream>().expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
+        return new Terms<DoubleStream>()
+                .expect("toCollection(null supplier)", s -> s.toCollection(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMultiset(null supplier)", s -> s.toMultiset(() -> null), NullPointerException.class, "supplier returned null")
                 .expect("toMap(null mapFactory)", s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), NullPointerException.class, "mapFactory returned null")
                 .expect("groupTo(null mapFactory)", s -> s.groupTo(x -> x, Collectors.counting(), () -> null), NullPointerException.class,
@@ -1389,13 +1402,14 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_doubleAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("double", "array.map(boom)", () -> DoubleStream.of((double) 1, (double) 2, (double) 3).map(x -> (double) boom(x)), doubleAbstractTerminals());
-        assertPrimaryWins("double", "iterator.map(boom)", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2, (double) 3)).map(x -> (double) boom(x)),
+        assertPrimaryWins("double", "array.map(boom)", () -> DoubleStream.of(1, 2, 3).map(x -> (double) boom(x)),
                 doubleAbstractTerminals());
+        assertPrimaryWins("double", "iterator.map(boom)",
+                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) boom(x)), doubleAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
-        assertPrimaryWins("double", "iterator (2 elements)", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2)),
+        assertPrimaryWins("double", "iterator (2 elements)", () -> DoubleStream.of(DoubleIterator.of(1, 2)),
                 new Terms<DoubleStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
-        assertPrimaryWins("double", "array (2 elements)", () -> DoubleStream.of((double) 1, (double) 2),
+        assertPrimaryWins("double", "array (2 elements)", () -> DoubleStream.of(1, 2),
                 new Terms<DoubleStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
         // a successful terminal still surfaces the close failure alone
         assertCloseFailureSurfacesOnSuccess("double", () -> DoubleStream.of((double) 7), doubleAbstractTerminals());
@@ -1404,27 +1418,27 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_doubleIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("double", "iterator.map(failOn2)", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2, (double) 3)).map(x -> (double) failOn2(x)),
-                doubleIteratorTerminals());
+        assertPrimaryWins("double", "iterator.map(failOn2)",
+                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) failOn2(x)), doubleIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("double", "iterator.filter(failOn2)", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2, (double) 3)).filter(x -> failOn2(x) > 0),
-                doubleIteratorTerminals());
+        assertPrimaryWins("double", "iterator.filter(failOn2)",
+                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0), doubleIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
-        assertPrimaryWins("double", "iterator", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2, (double) 3)), doubleNullFactoryTerminals());
+        assertPrimaryWins("double", "iterator", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)), doubleNullFactoryTerminals());
         assertPrimaryWins("double", "empty iterator", () -> DoubleStream.of(DoubleIterator.of((double) 1)).filter(x -> false), doubleNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone
-        assertCloseFailureSurfacesOnSuccess("double", () -> DoubleStream.of(DoubleIterator.of((double) 1, (double) 2, (double) 3)), doubleIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("double", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)), doubleIteratorTerminals());
     }
 
     @Test
     public void u29_doubleArrayTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("double", "array", () -> DoubleStream.of((double) 1, (double) 2, (double) 3), doubleArrayTerminals());
+        assertPrimaryWins("double", "array", () -> DoubleStream.of(1, 2, 3), doubleArrayTerminals());
         assertPrimaryWins("double", "array sub-range", () -> DoubleStream.of(new double[] { 0, 1, 2, 3 }, 1, 3), doubleArrayTerminals());
-        assertPrimaryWins("double", "array", () -> DoubleStream.of((double) 1, (double) 2, (double) 3), doubleNullFactoryTerminals());
+        assertPrimaryWins("double", "array", () -> DoubleStream.of(1, 2, 3), doubleNullFactoryTerminals());
         assertPrimaryWins("double", "array sub-range", () -> DoubleStream.of(new double[] { 0, 1, 2, 3 }, 1, 3), doubleNullFactoryTerminals());
         assertPrimaryWins("double", "empty array range", () -> DoubleStream.of(new double[] { 0, 1, 2, 3 }, 1, 1), doubleNullFactoryTerminals());
         // a successful terminal still surfaces the close failure alone (the same 22 terminals, array-backed)
-        assertCloseFailureSurfacesOnSuccess("double", () -> DoubleStream.of((double) 1, (double) 2, (double) 3), doubleIteratorTerminals());
+        assertCloseFailureSurfacesOnSuccess("double", () -> DoubleStream.of(1, 2, 3), doubleIteratorTerminals());
     }
 
     @Test
@@ -1437,7 +1451,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayDoubleStream, src 1: ParallelIteratorDoubleStream
-                final DoubleStream a = (src == 0 ? DoubleStream.of(new double[] { 1, 2, 3 }) : DoubleStream.of(DoubleIterator.of(new double[] { 1, 2, 3 }))).parallel(3)
+                final DoubleStream a = (src == 0 ? DoubleStream.of(new double[] { 1, 2, 3 }) : DoubleStream.of(DoubleIterator.of(new double[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(() -> {
                             aClosed.incrementAndGet();
                             throw closeFailure;
@@ -1459,10 +1474,10 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (double) 0, (double) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (double) 0, (double) 0, (double) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 }, label);
                 // the ISE of the closed argument is the primary; the receiver's close failure is suppressed onto it
@@ -1491,10 +1506,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
             final Boom closeFailure = new Boom("closeX");
             final AtomicInteger closes = new AtomicInteger();
             final DoubleStream s = (kind == 2 ? DoubleStream.of(DoubleIterator.of(new double[100])).parallel(4)
-                    : DoubleStream.of(new double[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR))).onClose(() -> {
-                        closes.incrementAndGet();
-                        throw closeFailure;
-                    });
+                    : DoubleStream.of(new double[100]).parallel(ps(kind == 0 ? BaseStream.SplitStrategy.ARRAY : BaseStream.SplitStrategy.ITERATOR)))
+                            .onClose(() -> {
+                                closes.incrementAndGet();
+                                throw closeFailure;
+                            });
             assertTrue(s instanceof ParallelArrayDoubleStream == (kind < 2), label);
 
             final NullPointerException e = assertThrows(NullPointerException.class, () -> s.collect(() -> null, (c, x) -> {

@@ -762,4 +762,244 @@ public class JaxbParserTest extends TestBase {
         // and the parser still works afterwards
         assertEquals("Ines", parser.deserialize(new StringReader(PERSON_XML), null, Person.class).getName());
     }
+
+    // ---- perf review 2026-10-07 G14 begin ----
+
+    @XmlRootElement(name = "g14Doc")
+    @jakarta.xml.bind.annotation.XmlAccessorType(jakarta.xml.bind.annotation.XmlAccessType.FIELD)
+    public static class G14Doc {
+        @jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter(G14ItemAdapter.class)
+        public List<String> items = new ArrayList<>();
+    }
+
+    /** Fails the marshal of any item that starts with "fail-", after the preceding items were already emitted. */
+    public static class G14ItemAdapter extends jakarta.xml.bind.annotation.adapters.XmlAdapter<String, String> {
+        @Override
+        public String marshal(final String value) {
+            if (value != null && value.startsWith("fail-")) {
+                throw new IllegalStateException("G14 adapter failure on " + value);
+            }
+            return value;
+        }
+
+        @Override
+        public String unmarshal(final String value) {
+            return value;
+        }
+    }
+
+    private static G14Doc g14Doc(final int count, final int failAt) {
+        final G14Doc doc = new G14Doc();
+        for (int i = 0; i < count; i++) {
+            doc.items.add((i == failAt ? "fail-" : "item-") + i + " \u00e9\u4e2d some padding text to make the element wider " + i);
+        }
+        return doc;
+    }
+
+    // G14-01: the buffered file stream must produce exactly the bytes the OutputStream overload produces (several
+    // 8 KB buffer boundaries, non-ASCII content) and must release the file handle.
+    @Test
+    public void testSerializeToFile_largeDocumentIsByteIdenticalToStreamOutput() throws IOException {
+        final G14Doc doc = g14Doc(2000, -1);
+        final ByteArrayOutputStream expected = new ByteArrayOutputStream();
+        parser.serialize(doc, null, expected);
+        assertTrue(expected.size() > 8192 * 10);
+
+        final File file = tempDir.resolve("g14-large.xml").toFile();
+        parser.serialize(doc, null, file);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(expected.toByteArray(), Files.readAllBytes(file.toPath()));
+        assertEquals(doc.items, parser.deserialize(file, null, G14Doc.class).items);
+
+        // On Windows an open handle would make the delete fail.
+        Files.delete(file.toPath());
+        assertFalse(file.exists());
+    }
+
+    // G14-01: a document that fits one chunk, a null object (empty file) and an existing larger file being overwritten.
+    @Test
+    public void testSerializeToFile_smallNullAndOverwrite() throws IOException {
+        final File file = tempDir.resolve("g14-small.xml").toFile();
+        final G14Doc big = g14Doc(500, -1);
+        parser.serialize(big, null, file);
+        final long bigLength = file.length();
+        assertTrue(bigLength > 8192);
+
+        final G14Doc small = g14Doc(1, -1);
+        final ByteArrayOutputStream expected = new ByteArrayOutputStream();
+        parser.serialize(small, null, expected);
+        parser.serialize(small, null, file);
+        assertTrue(file.length() < bigLength);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(expected.toByteArray(), Files.readAllBytes(file.toPath()));
+
+        parser.serialize(null, null, file);
+        assertEquals(0L, file.length());
+    }
+
+    // G14-01: a marshal failure in the middle of the document leaves the same partial content in the file as the
+    // OutputStream overload leaves in a stream (the chunks JAXB flushed before failing), with the same exception.
+    @Test
+    public void testSerializeToFile_partialContentOnMarshalFailureIsUnchanged() throws IOException {
+        final G14Doc doc = g14Doc(400, 300);
+        final ByteArrayOutputStream partial = new ByteArrayOutputStream();
+        final ParsingException streamFailure = assertThrows(ParsingException.class, () -> parser.serialize(doc, null, partial));
+        assertTrue(partial.size() > 8192, "the failure must come after several buffer flushes: " + partial.size());
+
+        final File file = tempDir.resolve("g14-partial.xml").toFile();
+        final ParsingException fileFailure = assertThrows(ParsingException.class, () -> parser.serialize(doc, null, file));
+        assertEquals(streamFailure.getMessage(), fileFailure.getMessage());
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(partial.toByteArray(), Files.readAllBytes(file.toPath()));
+
+        Files.delete(file.toPath());
+        assertFalse(file.exists());
+    }
+
+    // G14-02: the buffered file input must hand Xerces exactly the file bytes: a UTF-16 document (BOM, 2-byte code
+    // units split across several 8 KB buffer boundaries) round-trips through both File overloads, an empty file still
+    // fails as a malformed document, and the handle is released after success and after failure.
+    @Test
+    public void testDeserializeFromFile_largeUtf16AndEmptyFileArePinned() throws IOException {
+        final List<String> expected = g14Doc(2000, -1).items;
+        final StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-16\"?><g14Doc>");
+        for (final String item : expected) {
+            xml.append("<items>").append(item).append("</items>");
+        }
+        xml.append("</g14Doc>");
+        final File file = tempDir.resolve("g14-utf16.xml").toFile();
+        Files.writeString(file.toPath(), xml, StandardCharsets.UTF_16);
+        assertTrue(file.length() > 8192 * 20);
+
+        assertEquals(expected, parser.deserialize(file, null, G14Doc.class).items);
+        assertEquals(expected, parser.deserialize(file, null, Type.of(G14Doc.class)).items);
+        Files.delete(file.toPath());
+        assertFalse(file.exists());
+
+        final File empty = tempDir.resolve("g14-empty.xml").toFile();
+        Files.write(empty.toPath(), new byte[0]);
+        assertThrows(ParsingException.class, () -> parser.deserialize(empty, null, G14Doc.class));
+        Files.delete(empty.toPath());
+        assertFalse(empty.exists());
+    }
+
+    // G14-02: a document smaller than the buffer and one that is only a prolog and root element.
+    @Test
+    public void testDeserializeFromFile_smallDocuments() throws IOException {
+        final File file = tempDir.resolve("g14-tiny.xml").toFile();
+        IOUtil.write(PERSON_XML, file);
+        assertEquals("Ines", parser.deserialize(file, null, Person.class).getName());
+
+        final List<String> expected = g14Doc(3, -1).items;
+        parser.serialize(g14Doc(3, -1), null, file);
+        assertTrue(file.length() < 8192);
+        assertEquals(expected, parser.deserialize(file, null, G14Doc.class).items);
+
+        IOUtil.write("<g14Doc/>", file);
+        assertEquals(List.of(), parser.deserialize(file, null, G14Doc.class).items);
+    }
+
+    // ---- perf review 2026-10-07 G14 end ----
+
+    // ---- perf review 2026-10-07 round 2 R2C begin ----
+
+    /** R2C-02: a stream whose writes fail like a full disk (optionally only its close), recording its close calls. */
+    private static final class R2FailingOutputStream extends OutputStream {
+        final boolean failWrites;
+        final boolean failClose;
+        int closes;
+
+        R2FailingOutputStream(final boolean failWrites, final boolean failClose) {
+            this.failWrites = failWrites;
+            this.failClose = failClose;
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            if (failWrites) {
+                throw new IOException("r2 disk full");
+            }
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            if (failWrites) {
+                throw new IOException("r2 disk full");
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            closes++;
+
+            if (failClose) {
+                throw new IOException("r2 close failure");
+            }
+        }
+    }
+
+    private static boolean r2CausedBy(Throwable t, final String message) {
+        while (t != null) {
+            if (message.equals(t.getMessage())) {
+                return true;
+            }
+            t = t.getCause();
+        }
+        return false;
+    }
+
+    // R2C-02: the file serialization closes its buffered stream after a failed marshal. That close flushes what the buffer
+    // still holds, so it fails again on a full disk: the caller must get the ORIGINAL failure, with the close failure
+    // attached as a suppressed exception (closing in a finally block replaced the original), and the stream closed once.
+    @Test
+    public void testSerializeToOwnedStream_closeFailureAfterFailedWriteIsSuppressed() {
+        final R2FailingOutputStream underlying = new R2FailingOutputStream(true, false);
+        final java.io.BufferedOutputStream buffered = new java.io.BufferedOutputStream(underlying);
+
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class, () -> parser.serializeToOwnedStream(g14Doc(3, -1), null, buffered));
+
+        assertTrue(r2CausedBy(e, "r2 disk full"), String.valueOf(e));
+        assertEquals(1, e.getSuppressed().length);
+        assertTrue(r2CausedBy(e.getSuppressed()[0], "r2 disk full"), String.valueOf(e.getSuppressed()[0]));
+        assertEquals(1, underlying.closes);
+    }
+
+    // R2C-02: after a successful marshal, a failing close is the reported failure (nothing to suppress), and a marshal
+    // failure that is not an I/O failure keeps its own exception with a clean close.
+    @Test
+    public void testSerializeToOwnedStream_closeFailureAfterSuccessIsReported() {
+        final R2FailingOutputStream underlying = new R2FailingOutputStream(false, true);
+
+        final IOException e = assertThrows(IOException.class,
+                () -> parser.serializeToOwnedStream(g14Doc(3, -1), null, new java.io.BufferedOutputStream(underlying)));
+
+        assertEquals("r2 close failure", e.getMessage());
+        assertEquals(0, e.getSuppressed().length);
+        assertEquals(1, underlying.closes);
+
+        final R2FailingOutputStream clean = new R2FailingOutputStream(false, false);
+        final RuntimeException adapterFailure = assertThrows(RuntimeException.class,
+                () -> parser.serializeToOwnedStream(g14Doc(3, 1), null, new java.io.BufferedOutputStream(clean)));
+
+        assertTrue(r2CausedBy(adapterFailure, "G14 adapter failure on fail-1 \u00e9\u4e2d some padding text to make the element wider 1")
+                || String.valueOf(adapterFailure).contains("G14 adapter failure"), String.valueOf(adapterFailure));
+        assertEquals(0, adapterFailure.getSuppressed().length);
+        assertEquals(1, clean.closes);
+    }
+
+    // R2C-02: the public File overload still wraps a failure to open the file in UncheckedIOException and leaves no handle
+    // behind, and a successful write to a file is unchanged.
+    @Test
+    public void testSerializeToFile_directoryAndSuccessUnchanged() throws IOException {
+        final File dir = tempDir.resolve("r2-dir").toFile();
+        assertTrue(dir.mkdir());
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(g14Doc(1, -1), null, dir));
+
+        final File file = tempDir.resolve("r2-ok.xml").toFile();
+        parser.serialize(g14Doc(5, -1), null, file);
+        assertEquals(g14Doc(5, -1).items, parser.deserialize(file, null, G14Doc.class).items);
+        Files.delete(file.toPath());
+        assertFalse(file.exists());
+    }
+
+    // ---- perf review 2026-10-07 round 2 R2C end ----
 }

@@ -188,6 +188,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * values before every invocation. The consumer must not retain that holder; each returned
      * {@link Triple} is a separate shallow snapshot of the values populated for that iteration.</p>
      *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AtomicInteger counter = new AtomicInteger(0);
@@ -231,6 +235,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * <p>Invoking {@code output} consumes the cached positive availability result even if the
      * consumer throws. External state changes and partial source consumption performed by a
      * failing consumer cannot be rolled back.</p>
+     *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -407,6 +415,10 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * generator that fails deterministically at some index therefore keeps failing there rather than
      * silently skipping that triple; guard against that in the generator if a failure should be skipped
      * instead of retried. External side effects performed by a failing consumer cannot be rolled back.</p>
+     *
+     * <p>The holder is cleared before calling {@code output}; it is not cleared after consumption.
+     * It may retain the most recently generated values, including values written before an exception,
+     * until the next call to {@code output} or until the iterator becomes unreachable.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1592,11 +1604,17 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             public boolean hasNext() {
                 if (!hasNextFlag && !exhausted) {
                     while (iter.hasNext()) {
-                        iter.next(setNext);
+                        try {
+                            iter.next(setNext);
 
-                        if (predicate.test(next.left(), next.middle(), next.right())) {
-                            hasNextFlag = true;
-                            break;
+                            if (predicate.test(next.left(), next.middle(), next.right())) {
+                                hasNextFlag = true;
+                                break;
+                            }
+                        } finally {
+                            if (!hasNextFlag) {
+                                next.set(null, null, null);
+                            }
                         }
                     }
 
@@ -1619,8 +1637,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 }
 
                 hasNextFlag = false;
-
-                return next.copy();
+                final Triple<A, B, C> result = next.copy();
+                next.set(null, null, null);
+                return result;
             }
 
             /**
@@ -1638,8 +1657,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 }
 
                 hasNextFlag = false;
-
-                action.accept(next.left(), next.middle(), next.right());
+                final A a = next.left();
+                final B b = next.middle();
+                final C c = next.right();
+                next.set(null, null, null);
+                action.accept(a, b, c);
             }
 
             /**
@@ -1651,8 +1673,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
                 while (hasNext()) {
                     hasNextFlag = false;
-
-                    action.accept(next.left(), next.middle(), next.right());
+                    final A a = next.left();
+                    final B b = next.middle();
+                    final C c = next.right();
+                    next.set(null, null, null);
+                    action.accept(a, b, c);
                 }
             }
 
@@ -1667,8 +1692,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
                 while (hasNext()) {
                     hasNextFlag = false;
-
-                    action.accept(next.left(), next.middle(), next.right());
+                    final A a = next.left();
+                    final B b = next.middle();
+                    final C c = next.right();
+                    next.set(null, null, null);
+                    action.accept(a, b, c);
                 }
             }
 
@@ -1725,9 +1753,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public R next() {
-                iter.next(setNext); // throws NoSuchElementException when exhausted
-
-                return mapper.apply(tmp.left(), tmp.middle(), tmp.right());
+                final A a;
+                final B b;
+                final C c;
+                try {
+                    iter.next(setNext); // throws NoSuchElementException when exhausted
+                    a = tmp.left();
+                    b = tmp.middle();
+                    c = tmp.right();
+                } finally {
+                    tmp.set(null, null, null);
+                }
+                return mapper.apply(a, b, c);
             }
         };
     }

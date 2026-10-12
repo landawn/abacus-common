@@ -115,7 +115,6 @@ public class MultiClassRegressionATest extends TestBase {
         map.put("strZero", "0");
         map.put("strTrue", "true");
         map.put("strFalse", "false");
-        map.put("strJunk", "not-a-boolean");
         map.put("boolTrue", Boolean.TRUE);
         map.put("boolFalse", Boolean.FALSE);
 
@@ -131,9 +130,16 @@ public class MultiClassRegressionATest extends TestBase {
         // the specific values that used to disagree
         Assertions.assertTrue(Maps.getAsBoolean(map, "intOne").get());
         Assertions.assertTrue(Maps.getAsBoolean(map, "strOne").get());
-        Assertions.assertTrue(Maps.getAsBoolean(map, "intMinusOne").get());
+        // Only 1 is true (code review 2026-10-05): 0 and -1 are false, and any other number is rejected, as for every
+        // number-to-boolean conversion.
+        Assertions.assertFalse(Maps.getAsBoolean(map, "intMinusOne").get());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(Map.of("intTwo", 2), "intTwo"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Maps.getAs(Map.of("strTwo", "2"), "strTwo", Boolean.class));
         Assertions.assertFalse(Maps.getAsBoolean(map, "intZero").get());
-        Assertions.assertFalse(Maps.getAsBoolean(map, "strJunk").get());
+        // Text that is not boolean text is rejected by both accessors alike (code review 2026-10-05; it used to be false).
+        final Map<String, Object> junk = Map.of("strJunk", "not-a-boolean");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(junk, "strJunk"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Maps.getAs(junk, "strJunk", Boolean.class));
 
         Assertions.assertFalse(Maps.getAsBoolean(map, "absent").isPresent());
         Assertions.assertTrue(Maps.getAsBooleanOrDefaultIfAbsent(map, "absent", true));

@@ -49,13 +49,13 @@ public class AbstractIntStreamTest extends TestBase {
             return value;
         }).scan((left, right) -> {
             accumulatorCalls.incrementAndGet();
-            return (int) (left + right);
+            return left + right;
         })) {
             final com.landawn.abacus.util.IntIterator iter = stream.iterator();
             org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextInt));
-            org.junit.jupiter.api.Assertions.assertEquals((int) 2, iter.nextInt());
+            org.junit.jupiter.api.Assertions.assertEquals(2, iter.nextInt());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
-            org.junit.jupiter.api.Assertions.assertEquals((int) 5, iter.nextInt());
+            org.junit.jupiter.api.Assertions.assertEquals(5, iter.nextInt());
             org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
         }
@@ -723,22 +723,22 @@ public class AbstractIntStreamTest extends TestBase {
     @Test
     public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
         // reversed(): count() must consume all remaining elements
-        IntIteratorEx revIter = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        IntIteratorEx revIter = createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         assertEquals(5L, revIter.count());
         Assertions.assertFalse(revIter.hasNext());
 
         // rotated(): count() must consume all remaining elements
-        IntIteratorEx rotIter = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        IntIteratorEx rotIter = createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
         assertEquals(5L, rotIter.count());
         Assertions.assertFalse(rotIter.hasNext());
 
         // reverseSorted(): count() must consume all remaining elements
-        IntIteratorEx rsIter = (IntIteratorEx) createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        IntIteratorEx rsIter = createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
         assertEquals(5L, rsIter.count());
         Assertions.assertFalse(rsIter.hasNext());
 
         // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
-        IntIteratorEx revIter2 = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        IntIteratorEx revIter2 = createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         revIter2.nextInt();
         revIter2.nextInt();
         assertEquals(3L, revIter2.count());
@@ -747,18 +747,18 @@ public class AbstractIntStreamTest extends TestBase {
 
     @Test
     public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
-        IntIteratorEx reversed = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        IntIteratorEx reversed = createIntStream(new int[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         assertEquals(5, reversed.toArray().length);
         Assertions.assertFalse(reversed.hasNext());
         assertEquals(0, reversed.toArray().length);
 
-        IntIteratorEx rotated = (IntIteratorEx) createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        IntIteratorEx rotated = createIntStream(new int[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
         rotated.nextInt();
         assertEquals(4, rotated.toArray().length);
         Assertions.assertFalse(rotated.hasNext());
         assertEquals(0, rotated.toArray().length);
 
-        IntIteratorEx reverseSorted = (IntIteratorEx) createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        IntIteratorEx reverseSorted = createIntStream(new int[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
         reverseSorted.nextInt();
         reverseSorted.nextInt();
         assertEquals(3, reverseSorted.toArray().length);
@@ -857,14 +857,13 @@ public class AbstractIntStreamTest extends TestBase {
                     final int[] copy = Arrays.copyOfRange(backing, from, from + len);
 
                     // full toArray()
-                    assertArrayEquals(expected, (source == 0 ? IntStream.of(backing, from, from + len) : IntStream.of(IntIterator.of(copy))).rotated(distance).toArray(),
-                            msg);
+                    assertArrayEquals(expected,
+                            (source == 0 ? IntStream.of(backing, from, from + len) : IntStream.of(IntIterator.of(copy))).rotated(distance).toArray(), msg);
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final IntIteratorEx byNext = (IntIteratorEx) (source == 0 ? IntStream.of(backing, from, from + len) : IntStream.of(IntIterator.of(copy)))
-                                .rotated(distance)
-                                .iteratorEx();
+                        final IntIteratorEx byNext = (source == 0 ? IntStream.of(backing, from, from + len)
+                                : IntStream.of(IntIterator.of(copy))).rotated(distance).iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextInt(), msg + ", k=" + k + ", j=" + j);
@@ -873,7 +872,7 @@ public class AbstractIntStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final IntIteratorEx byAdvance = (IntIteratorEx) (source == 0 ? IntStream.of(backing, from, from + len)
+                        final IntIteratorEx byAdvance = (source == 0 ? IntStream.of(backing, from, from + len)
                                 : IntStream.of(IntIterator.of(copy))).rotated(distance).iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);

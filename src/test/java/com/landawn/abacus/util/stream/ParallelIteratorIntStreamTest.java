@@ -144,8 +144,9 @@ public class ParallelIteratorIntStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(i -> {
-                if (i == 5)
+                if (i == 5) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -153,8 +154,9 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         parallelStream = createIntStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(i -> {
-                if (i == 7)
+                if (i == 7) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return i;
             }).toArray();
         });
@@ -273,8 +275,9 @@ public class ParallelIteratorIntStreamTest extends TestBase {
     public void testMap_ParallelPath() {
         int sum = createIntStream(TEST_ARRAY).map(i -> i * 2).reduce(0, Integer::sum);
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v * 2;
+        }
         assertEquals(expected, sum);
     }
 
@@ -619,8 +622,9 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         AtomicInteger sum = new AtomicInteger(0);
         createIntStream(TEST_ARRAY).forEach(i -> sum.addAndGet(i));
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, sum.get());
     }
 
@@ -1242,14 +1246,14 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         int firstMod7 = -1;
 
         for (int i = values.length - 1; i >= 0; i--) {
-            if (((int) values[i]) % 7 == 5) {
+            if ((values[i]) % 7 == 5) {
                 firstMod7 = i;
             }
         }
 
         for (int round = 0; round < 20; round++) {
             assertEquals(values[1000], g103Parallel(values).findFirst(v -> v >= threshold).get());
-            assertEquals(values[firstMod7], g103Parallel(values).findFirst(v -> ((int) v) % 7 == 5).get());
+            assertEquals(values[firstMod7], g103Parallel(values).findFirst(v -> (v) % 7 == 5).get());
             assertEquals(values[0], g103Parallel(values).findFirst(v -> true).get());
         }
 
@@ -1268,7 +1272,7 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         int lastMod7 = -1;
 
         for (int i = 0; i < values.length; i++) {
-            if (((int) values[i]) % 7 == 5) {
+            if ((values[i]) % 7 == 5) {
                 lastMod7 = i;
             }
         }
@@ -1281,7 +1285,7 @@ public class ParallelIteratorIntStreamTest extends TestBase {
             }).get());
             assertEquals(values.length, calls.get());
             assertEquals(values[9], g103Parallel(values).findLast(v -> v < upper).get());
-            assertEquals(values[lastMod7], g103Parallel(values).findLast(v -> ((int) v) % 7 == 5).get());
+            assertEquals(values[lastMod7], g103Parallel(values).findLast(v -> (v) % 7 == 5).get());
         }
 
         assertFalse(g103Parallel(values).findLast(v -> false).isPresent());

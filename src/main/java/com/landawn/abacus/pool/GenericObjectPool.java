@@ -135,6 +135,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
             throws IllegalArgumentException, IllegalStateException {
@@ -154,6 +155,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
      *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
             final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
@@ -173,6 +175,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
      *         {@code balanceFactor} is non-finite or outside [0, 1]
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
@@ -194,6 +197,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *         {@code balanceFactor} is non-finite or outside [0, 1];
      *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
@@ -212,7 +216,27 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
         // Register shutdown hook AFTER all subclass state is fully initialized so a JVM shutdown
         // racing the constructor cannot invoke close() against a null pool/cmp.
-        registerShutdownHook();
+        registerShutdownHookOrCancelEviction();
+    }
+
+    /**
+     * Registers the shutdown hook, cancelling the already-scheduled eviction task if registration fails.
+     * A failure here aborts construction or deserialization, so no caller ever gets a reference that could
+     * {@link #close()} the pool, and the task would otherwise keep running on the shared executor forever.
+     *
+     * @throws IllegalStateException if JVM shutdown has begun
+     * @throws SecurityException if a security manager denies registering the shutdown hook
+     */
+    private void registerShutdownHookOrCancelEviction() {
+        try {
+            registerShutdownHook();
+        } catch (RuntimeException | Error e) {
+            if (scheduleFuture != null) {
+                scheduleFuture.cancel(false);
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -738,7 +762,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * method keeps retrying for a valid object until one is found or the timeout expires. When a
      * valid object is returned, its activity print's last access time and access count are updated.
      * Expired objects are detached and accounted while locked; their destruction callbacks run
-     * after this invocation releases the pool lock.</p>
+     * outside the pool lock before waiting again or completing the invocation.</p>
      *
      * @param timeout the maximum time to wait
      * @param unit the time unit of the timeout argument, must not be {@code null}
@@ -766,6 +790,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
         // Initial lock contention consumes the same waiting budget as the condition wait.
         nanos = Math.max(0, nanos - (System.nanoTime() - lockStart));
+        boolean locked = true;
 
         try {
             takeLoop: while (true) {
@@ -807,10 +832,37 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
                     break takeLoop;
                 }
 
+                if (expiredElements != null) {
+                    // Detached values no longer count toward capacity. Release them before
+                    // parking, rather than retaining every expired admission for the timeout.
+                    final long cleanupStart = System.nanoTime();
+                    lock.unlock();
+                    locked = false;
+                    try {
+                        invokeDestroyCallbacks(expiredElements, Caller.EVICT);
+                    } finally {
+                        expiredElements.clear();
+                        expiredElements = null;
+                    }
+
+                    final long remaining = Math.max(0, nanos - (System.nanoTime() - cleanupStart));
+                    if (!lock.tryLock(remaining, TimeUnit.NANOSECONDS)) {
+                        assertNotClosed();
+                        break takeLoop;
+                    }
+                    locked = true;
+                    nanos = Math.max(0, nanos - (System.nanoTime() - cleanupStart));
+                    // A callback may add an object or close the pool. Check again under the
+                    // lock instead of awaiting a signal that may have already been delivered.
+                    continue;
+                }
+
                 nanos = notEmpty.awaitNanos(nanos);
             }
         } finally {
-            lock.unlock();
+            if (locked) {
+                lock.unlock();
+            }
             invokeDestroyCallbacks(expiredElements, Caller.EVICT);
         }
 
@@ -1430,7 +1482,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
         if (!isClosed) {
             initShutdownHook();
-            registerShutdownHook();
+            registerShutdownHookOrCancelEviction();
         }
     }
 

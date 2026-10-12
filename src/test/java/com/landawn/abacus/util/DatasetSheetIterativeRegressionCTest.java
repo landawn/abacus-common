@@ -654,7 +654,7 @@ public class DatasetSheetIterativeRegressionCTest extends TestBase {
     @Test
     public void test_emptyDataset_propertiesAreTheSharedEmptyMap_regression_20260918() {
         // Before the fix Dataset.empty()._properties was null, so this returned a wrapper, not the shared map.
-        assertSame(N.<String, Object> emptyMap(), Dataset.empty().getProperties());
+        assertSame(CommonUtil.<String, Object> emptyMap(), Dataset.empty().getProperties());
 
         // The identity is stable across calls, which is what the == guards in RowDataset rely on.
         assertSame(Dataset.empty().getProperties(), Dataset.empty().getProperties());

@@ -311,7 +311,7 @@ public class CalendarTypeTest extends TestBase {
         buddhist.setTimeInMillis(1700000000123L);
         assertEquals(2566, buddhist.get(Calendar.YEAR)); // Buddhist era year - precondition for the test
 
-        final Calendar result = type.valueOf((Object) buddhist);
+        final Calendar result = type.valueOf(buddhist);
         assertNotSame(buddhist, result);
         assertEquals(GregorianCalendar.class, result.getClass());
         assertEquals(1700000000123L, result.getTimeInMillis());

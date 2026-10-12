@@ -168,7 +168,7 @@ public class NAddTest extends NTestSupport {
         assertThrows(IllegalArgumentException.class, () -> N.add((Integer[]) null, 1));
 
         // ... and a "safe operation" on a null input is a no-op rather than an exception.
-        N.reverse((Object[]) null);
+        CommonUtil.reverse((Object[]) null);
     }
 
     @Test

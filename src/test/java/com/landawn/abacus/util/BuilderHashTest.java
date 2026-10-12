@@ -367,7 +367,7 @@ public class BuilderHashTest extends BuilderTestSupport {
         // primitive zeros: ANY object hashing to 0 behaves the same.
         final int lone = Builder.hash(7).result();
         for (final Object v : new Object[] { "", "\0", new HashSet<>(), new HashMap<>(), BigInteger.ZERO }) {
-            assertEquals(0, N.hashCode(v));
+            assertEquals(0, CommonUtil.hashCode(v));
             assertEquals(0, Builder.hash(v).result());
             assertEquals(lone, Builder.hash(v).hash(7).result());
         }
@@ -381,7 +381,7 @@ public class BuilderHashTest extends BuilderTestSupport {
         assertNotEquals(Builder.hash(7).result(), Builder.hash(-0.0d).hash(7).result());
 
         // an empty List hashes to 1, not 0 - the contrast the class javadoc now draws
-        assertEquals(1, N.hashCode(new ArrayList<>()));
+        assertEquals(1, CommonUtil.hashCode(new ArrayList<>()));
         assertNotEquals(Builder.hash(7).result(), Builder.hash(new ArrayList<>()).hash(7).result());
     }
 

@@ -5584,6 +5584,7 @@ public class CharStreamTest extends TestBase {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new char[0], CharStream.flatten(new char[][] { null, {}, null }, true).toArray());
     }
+
     // ---- perf review 2026-09-26 G091 end ----
     // ---- perf review 2026-09-26 G112 begin ----
     // G112-01: bulk count()/toCharList()/toArray() of concat(List<char[]>) / concat(char[]...) - null/empty arrays, skip into/at/after a
@@ -5648,14 +5649,14 @@ public class CharStreamTest extends TestBase {
 
         // the list iterator is advanced exactly as element-by-element iteration advances it
         final int[] calls = new int[2];
-        final List<char[]> counting = new ArrayList<char[]>(list) {
+        final List<char[]> counting = new ArrayList<>(list) {
             private static final long serialVersionUID = 1L;
 
             @Override
             public java.util.Iterator<char[]> iterator() {
                 final java.util.Iterator<char[]> it = super.iterator();
 
-                return new java.util.Iterator<char[]>() {
+                return new java.util.Iterator<>() {
                     @Override
                     public boolean hasNext() {
                         calls[0]++;
@@ -5825,6 +5826,7 @@ public class CharStreamTest extends TestBase {
         assertArrayEquals(Arrays.copyOf(data, 10), CharStream.of(r6).limit(10).toArray());
         assertEquals(1, r6.readCalls);
     }
+
     // ---- perf review 2026-09-26 G112 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static char[] flattenVerticallyReferenceG114(final char[][] a) {

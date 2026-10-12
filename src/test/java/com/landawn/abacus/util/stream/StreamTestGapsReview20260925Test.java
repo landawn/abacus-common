@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Joiner;
+import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
 import com.landawn.abacus.util.u.Optional;
@@ -87,8 +88,10 @@ public class StreamTestGapsReview20260925Test extends TestBase {
         assertEquals(seq, Stream.of(rows.iterator()).parallel(4).collect(Collectors.MoreCollectors.averagingInt(r -> r[0], r -> r[1], r -> r[2])));
 
         // Empty parallel stream: the combiner sees only empty containers.
-        final Tuple3<Double, Double, Double> empty = Stream.<int[]> empty().parallel(4).collect(Collectors.MoreCollectors.averagingInt(r -> r[0], r -> r[1], r -> r[2]));
-        assertEquals(Tuple3.of(0.0, 0.0, 0.0), empty);
+        final Tuple3<Double, Double, Double> empty = Stream.<int[]> empty()
+                .parallel(4)
+                .collect(Collectors.MoreCollectors.averagingInt(r -> r[0], r -> r[1], r -> r[2]));
+        assertEquals(Tuple.of(0.0, 0.0, 0.0), empty);
     }
 
     @Test
@@ -116,14 +119,16 @@ public class StreamTestGapsReview20260925Test extends TestBase {
         assertBigAverage(700, seq3._3);
         assertEquals(seq3, par3);
 
-        assertEquals(seq3, Stream.of(rows.iterator())
-                .parallel(4)
-                .collect(Collectors.MoreCollectors.averagingBigInteger(r -> BigInteger.valueOf(r[0]), r -> BigInteger.valueOf(r[1]),
-                        r -> BigInteger.valueOf(r[2]))));
+        assertEquals(seq3,
+                Stream.of(rows.iterator())
+                        .parallel(4)
+                        .collect(Collectors.MoreCollectors.averagingBigInteger(r -> BigInteger.valueOf(r[0]), r -> BigInteger.valueOf(r[1]),
+                                r -> BigInteger.valueOf(r[2]))));
 
-        assertEquals(Tuple2.of(BigDecimal.ZERO, BigDecimal.ZERO), Stream.<int[]> empty()
-                .parallel(4)
-                .collect(Collectors.MoreCollectors.averagingBigInteger(r -> BigInteger.valueOf(r[0]), r -> BigInteger.valueOf(r[1]))));
+        assertEquals(Tuple.of(BigDecimal.ZERO, BigDecimal.ZERO),
+                Stream.<int[]> empty()
+                        .parallel(4)
+                        .collect(Collectors.MoreCollectors.averagingBigInteger(r -> BigInteger.valueOf(r[0]), r -> BigInteger.valueOf(r[1]))));
     }
 
     @Test
@@ -151,15 +156,17 @@ public class StreamTestGapsReview20260925Test extends TestBase {
         assertBigAverage(700, seq3._3);
         assertEquals(seq3, par3);
 
-        assertEquals(seq3, Stream.of(rows.iterator())
-                .parallel(4)
-                .collect(Collectors.MoreCollectors.averagingBigDecimal(r -> BigDecimal.valueOf(r[0]), r -> BigDecimal.valueOf(r[1]),
-                        r -> BigDecimal.valueOf(r[2]))));
+        assertEquals(seq3,
+                Stream.of(rows.iterator())
+                        .parallel(4)
+                        .collect(Collectors.MoreCollectors.averagingBigDecimal(r -> BigDecimal.valueOf(r[0]), r -> BigDecimal.valueOf(r[1]),
+                                r -> BigDecimal.valueOf(r[2]))));
 
-        assertEquals(Tuple3.of(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO), Stream.<int[]> empty()
-                .parallel(4)
-                .collect(Collectors.MoreCollectors.averagingBigDecimal(r -> BigDecimal.valueOf(r[0]), r -> BigDecimal.valueOf(r[1]),
-                        r -> BigDecimal.valueOf(r[2]))));
+        assertEquals(Tuple.of(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO),
+                Stream.<int[]> empty()
+                        .parallel(4)
+                        .collect(Collectors.MoreCollectors.averagingBigDecimal(r -> BigDecimal.valueOf(r[0]), r -> BigDecimal.valueOf(r[1]),
+                                r -> BigDecimal.valueOf(r[2]))));
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -225,7 +232,8 @@ public class StreamTestGapsReview20260925Test extends TestBase {
                 throw closeFailure;
             });
 
-            final Boom e = variant == 0 ? assertThrows(Boom.class, () -> es.join(",", "=", "{", "}")) : assertThrows(Boom.class, () -> es.joinTo(Joiner.with(",")));
+            final Boom e = variant == 0 ? assertThrows(Boom.class, () -> es.join(",", "=", "{", "}"))
+                    : assertThrows(Boom.class, () -> es.joinTo(Joiner.with(",")));
             assertSame(closeFailure, e);
             assertEquals(0, e.getSuppressed().length);
             assertEquals(1, closed.get());

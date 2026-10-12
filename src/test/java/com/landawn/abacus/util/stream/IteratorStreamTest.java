@@ -402,7 +402,7 @@ public class IteratorStreamTest extends TestBase {
             try (final Stream<Integer> source = Stream.repeat(7, size)) {
                 final ObjIteratorEx<Integer> delegate = source.iteratorEx();
                 final long[] advanced = { 0 };
-                final ObjIteratorEx<Integer> guard = new ObjIteratorEx<Integer>() {
+                final ObjIteratorEx<Integer> guard = new ObjIteratorEx<>() {
                     @Override
                     boolean supportsFailureAtomicAdvance() {
                         return delegate.supportsFailureAtomicAdvance();
@@ -1062,7 +1062,7 @@ public class IteratorStreamTest extends TestBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void assertHugeSlidingCount(final Stream<? extends List<Integer>> stream, final int windowSize, final long expectedCount) {
         try {
-            final ObjIteratorEx<? extends List<Integer>> iter = (ObjIteratorEx) stream.iteratorEx();
+            final ObjIteratorEx<? extends List<Integer>> iter = stream.iteratorEx();
 
             assertEquals(windowSize, iter.next().size());
             assertEquals(expectedCount, iter.count());
@@ -1077,7 +1077,7 @@ public class IteratorStreamTest extends TestBase {
     private static void assertSlidingRemainingCount(final Stream<? extends List<Integer>> stream, final List<Integer> source,
             final long expectedRemainingCount) {
         try {
-            final ObjIteratorEx<? extends List<Integer>> iter = (ObjIteratorEx) stream.iteratorEx();
+            final ObjIteratorEx<? extends List<Integer>> iter = stream.iteratorEx();
 
             assertEquals(source.subList(0, Math.min(2, source.size())), iter.next());
             assertEquals(expectedRemainingCount, iter.count());

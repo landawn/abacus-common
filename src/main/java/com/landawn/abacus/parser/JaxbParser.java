@@ -188,17 +188,33 @@ final class JaxbParser extends AbstractXmlParser {
         checkSerializationConfig(config);
         N.checkArgNotNull(output, cs.output);
 
-        OutputStream os = null;
-
         try {
             createNewFileIfNotExists(output);
 
-            os = IOUtil.newFileOutputStream(output);
-            serialize(obj, config, os);
+            // JAXB's UTF-8 writer hands the stream 1 KB chunks, so an unbuffered file stream costs one
+            // write call per kilobyte; the buffered stream flushes the same bytes 8 KB at a time.
+            serializeToOwnedStream(obj, config, IOUtil.newBufferedOutputStream(output));
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            IOUtil.close(os);
+        }
+    }
+
+    /**
+     * Serializes into a stream this parser owns and closes afterwards. Closing a buffered stream writes what it still
+     * holds, so a close that follows a failed serialization can fail again (a disk that was full for the marshal is
+     * still full): that second failure is attached to the first as a suppressed exception instead of replacing it,
+     * which is what closing in a {@code finally} block did. A close failure after a successful serialization is the
+     * failure reported. {@link #serialize(Object, XmlSerConfig, File)} must stay the only caller: the tests exercise
+     * this method directly, because the class is final and a file stream cannot be made to fail portably.
+     *
+     * @param obj the object to serialize
+     * @param config the serialization configuration, may be {@code null}
+     * @param os the stream to write to; it is closed before this method returns or throws
+     * @throws IOException if closing {@code os} fails after a successful serialization
+     */
+    void serializeToOwnedStream(final Object obj, final XmlSerConfig config, final OutputStream os) throws IOException {
+        try (os) {
+            serialize(obj, config, os);
         }
     }
 
@@ -483,7 +499,9 @@ final class JaxbParser extends AbstractXmlParser {
         InputStream is = null;
 
         try {
-            is = IOUtil.newFileInputStream(source);
+            // Xerces reads the XML declaration one byte at a time before it switches to 8 KB chunks; on a raw
+            // file stream every one of those bytes is a read call, on the buffered stream they come from one fill.
+            is = IOUtil.newBufferedInputStream(source);
 
             return deserialize(is, config, targetClass);
         } finally {

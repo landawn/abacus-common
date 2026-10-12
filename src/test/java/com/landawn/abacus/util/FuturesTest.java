@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -143,7 +143,8 @@ public class FuturesTest extends TestBase {
     }
 
     // Inspect only this library's captured callback state, without depending on field names or GC timing.
-    // A retained queue represents retained result payloads even when the caller has no returned iterator.
+    // Follow the weak completion handle while registration still owns it strongly; after failed registration,
+    // its queue must be detached even if a callback acquired a strong handle before the failure.
     private static BlockingQueue<?> retainedIterationQueue(final Object callback) throws IllegalAccessException {
         final java.util.Set<Object> visited = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
         final java.util.ArrayDeque<Object> remaining = new java.util.ArrayDeque<>();
@@ -152,6 +153,13 @@ public class FuturesTest extends TestBase {
             final Object state = remaining.remove();
             if (state instanceof BlockingQueue<?> queue) {
                 return queue;
+            }
+            if (state instanceof java.lang.ref.Reference<?> reference) {
+                final Object referent = reference.get();
+                if (referent != null) {
+                    remaining.add(referent);
+                }
+                continue;
             }
             if (!visited.add(state) || !state.getClass().getName().startsWith(Futures.class.getName() + "$")) {
                 continue;
@@ -1965,7 +1973,7 @@ public class FuturesTest extends TestBase {
         // G46-002: reading cfs.size() and then iterating cfs again left the iterator waiting for a relay that
         // was never registered, and the untimed overload then blocked in take() forever.
         final List<Future<? extends String>> actual = Collections.singletonList(CompletableFuture.completedFuture("a"));
-        final Collection<Future<? extends String>> skewed = new java.util.AbstractCollection<Future<? extends String>>() {
+        final Collection<Future<? extends String>> skewed = new java.util.AbstractCollection<>() {
             @Override
             public java.util.Iterator<Future<? extends String>> iterator() {
                 return actual.iterator();
@@ -2358,7 +2366,7 @@ public class FuturesTest extends TestBase {
                             cancelled.cancel(true);
                             inputs.add(cancelled);
                         }
-                        default -> inputs.add(new CompletableFuture<String>());
+                        default -> inputs.add(new CompletableFuture<>());
                     }
                 }
 

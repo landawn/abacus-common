@@ -44,8 +44,7 @@ public class DatasetSheetReview20260922Test extends TestBase {
 
     private static Dataset dupRows() {
         // three distinct (a, b) keys over four rows, one of them repeated; a null and a supplementary character
-        return Dataset.rows(List.of("a", "b", "v"),
-                new Object[][] { { 1, "x", 10 }, { null, EMOJI, 20 }, { 1, "x", 30 }, { 3, "z", 40 } });
+        return Dataset.rows(List.of("a", "b", "v"), new Object[][] { { 1, "x", 10 }, { null, EMOJI, 20 }, { 1, "x", 30 }, { 3, "z", 40 } });
     }
 
     // ---- C-021: a keyExtractor returning its reused argument ----------------------------------------------
@@ -274,12 +273,10 @@ public class DatasetSheetReview20260922Test extends TestBase {
         assertThrows(ConcurrentModificationException.class, () -> removed.forEach(Tuple.of("a", "b"), (x, y) -> removed.removeRow(0)));
 
         final Dataset sorted = Dataset.rows(List.of("a", "b", "c"), new Object[][] { { 2, "x", 0 }, { 1, "y", 0 } });
-        assertThrows(ConcurrentModificationException.class,
-                () -> sorted.forEach(Tuple.of("a", "b", "c"), (x, y, z) -> sorted.sortBy("a")));
+        assertThrows(ConcurrentModificationException.class, () -> sorted.forEach(Tuple.of("a", "b", "c"), (x, y, z) -> sorted.sortBy("a")));
 
         final Dataset reverse = Dataset.rows(List.of("a"), new Object[][] { { 1 }, { 2 } });
-        assertThrows(ConcurrentModificationException.class,
-                () -> reverse.forEach(reverse.size() - 1, -1, r -> reverse.addRow(new Object[] { 3 })));
+        assertThrows(ConcurrentModificationException.class, () -> reverse.forEach(reverse.size() - 1, -1, r -> reverse.addRow(new Object[] { 3 })));
 
         final Dataset written = Dataset.rows(List.of("a"), new Object[][] { { 1 }, { 2 }, { 3 } });
         final List<Object> visited = new ArrayList<>();
@@ -518,7 +515,8 @@ public class DatasetSheetReview20260922Test extends TestBase {
     @Test
     public void c036_toStringListsEveryColumnAndRendersArrayKeys() {
         final Sheet<String, String, Integer> uninitialized = new Sheet<>(List.of("r1", "r2"), List.of("c1", EMOJI));
-        final Sheet<String, String, Integer> initialized = Sheet.rows(List.of("r1", "r2"), List.of("c1", EMOJI), new Integer[][] { { null, null }, { null, null } });
+        final Sheet<String, String, Integer> initialized = Sheet.rows(List.of("r1", "r2"), List.of("c1", EMOJI),
+                new Integer[][] { { null, null }, { null, null } });
 
         assertEquals(initialized, uninitialized);
         assertEquals(initialized.toString(), uninitialized.toString());
@@ -545,9 +543,12 @@ public class DatasetSheetReview20260922Test extends TestBase {
         assertNull(jdk.get(0, 0));
 
         // any other exception still propagates: the caller asked for it explicitly
-        assertThrows(IllegalStateException.class, () -> empty.rollup(List.of("k"), "v", "m",
-                com.landawn.abacus.util.stream.Collectors.collectingOrElseThrowIfEmpty(Collectors.toList(), () -> new IllegalStateException("empty")))
-                .toList());
+        assertThrows(IllegalStateException.class,
+                () -> empty
+                        .rollup(List.of("k"), "v", "m",
+                                com.landawn.abacus.util.stream.Collectors.collectingOrElseThrowIfEmpty(Collectors.toList(),
+                                        () -> new IllegalStateException("empty")))
+                        .toList());
 
         // non-empty input is unaffected
         final Dataset some = Dataset.rows(List.of("k", "v"), new Object[][] { { "a", 3 }, { "b", 5 } });
@@ -741,12 +742,11 @@ public class DatasetSheetReview20260922Test extends TestBase {
         for (final var call : calls) {
             // a column inserted before the divided one used to make it replace the wrong column ("id" was lost)
             final Dataset added = Dataset.rows(List.of("id", "v"), new Object[][] { { 1, "a" }, { 2, "b" }, { 3, "c" } });
-            assertThrows(ConcurrentModificationException.class,
-                    () -> call.accept(added, () -> {
-                        if (!added.containsColumn("z")) {
-                            added.addColumn(0, "z", Arrays.asList(new Object[added.size()]));
-                        }
-                    }));
+            assertThrows(ConcurrentModificationException.class, () -> call.accept(added, () -> {
+                if (!added.containsColumn("z")) {
+                    added.addColumn(0, "z", Arrays.asList(new Object[added.size()]));
+                }
+            }));
             assertEquals(List.of("z", "id", "v"), added.columnNames());
 
             // a removed row used to shift the new columns by one row
@@ -790,11 +790,10 @@ public class DatasetSheetReview20260922Test extends TestBase {
             distinct.addRow(new Object[] { 3 });
             return k;
         }));
-        assertThrows(ConcurrentModificationException.class,
-                () -> distinct.distinctBy(List.of("k"), r -> {
-                    distinct.addRow(new Object[] { 4 });
-                    return r.get(0);
-                }));
+        assertThrows(ConcurrentModificationException.class, () -> distinct.distinctBy(List.of("k"), r -> {
+            distinct.addRow(new Object[] { 4 });
+            return r.get(0);
+        }));
 
         // a key extractor that only reads (or writes cells) is unaffected
         final Dataset ok = Dataset.rows(List.of("k"), new Object[][] { { 1 }, { 1 }, { 2 } });

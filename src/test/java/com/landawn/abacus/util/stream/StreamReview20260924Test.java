@@ -240,8 +240,8 @@ public class StreamReview20260924Test extends TestBase {
     @Test
     public void testC031_emptyAndNullInputs() {
         assertEquals(List.of(), Stream.parallelZipIterators((List<Iterator<Integer>>) null, StreamReview20260924Test::sum, 2).toList());
-        assertEquals(List.of(), Stream.parallelZipIterators(new ArrayList<Iterator<Integer>>(), new ArrayList<Integer>(), StreamReview20260924Test::sum, 2)
-                .toList());
+        assertEquals(List.of(),
+                Stream.parallelZipIterators(new ArrayList<Iterator<Integer>>(), new ArrayList<Integer>(), StreamReview20260924Test::sum, 2).toList());
         assertThrows(IllegalArgumentException.class, () -> Stream.parallelZipIterators(iterators(List.of(1)), List.of(), StreamReview20260924Test::sum, 2));
 
         // A null iterator is treated as empty.
@@ -362,8 +362,8 @@ public class StreamReview20260924Test extends TestBase {
     public void testC033_primitiveZipWithDefaults_closesSourcesOnlyWithTheResult() {
         List<String> closed = new ArrayList<>();
         final List<String> c1 = closed;
-        assertNoEarlyClose(Stream.zip(List.of(IntStream.of(1).onClose(() -> c1.add("a")), IntStream.of(1, 2, 3).onClose(() -> c1.add("b"))),
-                new int[] { 0, 0 }, args -> args[0] + args[1]), closed);
+        assertNoEarlyClose(Stream.zip(List.of(IntStream.of(1).onClose(() -> c1.add("a")), IntStream.of(1, 2, 3).onClose(() -> c1.add("b"))), new int[] { 0, 0 },
+                args -> args[0] + args[1]), closed);
 
         closed = new ArrayList<>();
         final List<String> c2 = closed;
@@ -389,8 +389,8 @@ public class StreamReview20260924Test extends TestBase {
 
         closed = new ArrayList<>();
         final List<String> c6 = closed;
-        assertNoEarlyClose(Stream.zip(List.of(FloatStream.of(1).onClose(() -> c6.add("a")), FloatStream.of(1, 2).onClose(() -> c6.add("b"))), new float[] { 0, 0 },
-                args -> args[0] + args[1]), closed);
+        assertNoEarlyClose(Stream.zip(List.of(FloatStream.of(1).onClose(() -> c6.add("a")), FloatStream.of(1, 2).onClose(() -> c6.add("b"))),
+                new float[] { 0, 0 }, args -> args[0] + args[1]), closed);
 
         closed = new ArrayList<>();
         final List<String> c7 = closed;
@@ -403,7 +403,7 @@ public class StreamReview20260924Test extends TestBase {
         assertEquals(List.of(2, 2, 3), Stream.zip(List.of(IntStream.of(1), IntStream.of(1, 2, 3)), new int[] { 0, 0 }, args -> args[0] + args[1]).toList());
         assertEquals(List.of("xy", "-z"),
                 Stream.zip(List.of(CharStream.of('x'), CharStream.of('y', 'z')), new char[] { '-', '-' }, args -> "" + args[0] + args[1]).toList());
-        assertEquals(List.of(), Stream.zip(new ArrayList<IntStream>(), new int[0], args -> args.length).toList());
+        assertEquals(List.of(), Stream.zip(new ArrayList<>(), new int[0], args -> args.length).toList());
     }
 
     // ============================================================== C-052 / C-017 / C-063 / S1-11: documented behaviour (locks)
@@ -480,7 +480,8 @@ public class StreamReview20260924Test extends TestBase {
     public void testC070_durationMustBePositive_noArithmeticException() {
         assertEquals(List.of(1, 2, 3), Stream.of(1, 2, 3).maxWait(Duration.ofMillis(Long.MAX_VALUE), 0).toList());
         // A huge duration is accepted; only a boundary that leaves the long range fails, and that is on traversal.
-        assertEquals(List.of(List.of(1, 2, 3)), Stream.of(1, 2, 3).window(Duration.ofMillis(Long.MAX_VALUE / 4), () -> 0L, Collectors.toList()).limit(1).toList());
+        assertEquals(List.of(List.of(1, 2, 3)),
+                Stream.of(1, 2, 3).window(Duration.ofMillis(Long.MAX_VALUE / 4), () -> 0L, Collectors.toList()).limit(1).toList());
 
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(Duration.ofMillis(0)));
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(Duration.ofMillis(-1)));
@@ -540,8 +541,7 @@ public class StreamReview20260924Test extends TestBase {
 
     @Test
     public void testC074_splitToLines_terminatorsAndEdges() {
-        assertEquals(List.of("a", "b", "c", "d", "e", "f", "g", "h", "i"),
-                Stream.splitToLines("a\u000Bb\u000Cc\u0085d e f\r\ng\rh\ni").toList());
+        assertEquals(List.of("a", "b", "c", "d", "e", "f", "g", "h", "i"), Stream.splitToLines("a\u000Bb\u000Cc\u0085d e f\r\ng\rh\ni").toList());
         assertEquals(List.of("a", "", "b"), Stream.splitToLines("a\r\n\nb").toList());
         assertEquals(List.of(), Stream.splitToLines(null).toList());
         assertEquals(List.of(""), Stream.splitToLines("").toList());
@@ -632,12 +632,8 @@ public class StreamReview20260924Test extends TestBase {
             final long gap = rnd.nextInt(4) == 0 ? rnd.nextInt(3 * (int) Math.min(increment, 1000)) : rnd.nextLong() >>> rnd.nextInt(64);
             final long time = endTime + gap;
 
-            if (time < endTime) {
-                continue; // overflowed
-            }
-
             // Only compare against the loop when it terminates quickly.
-            if (Long.compareUnsigned(Long.divideUnsigned(time - endTime, increment), 1_000) > 0) {
+            if ((time < endTime) || (Long.compareUnsigned(Long.divideUnsigned(time - endTime, increment), 1_000) > 0)) {
                 continue;
             }
 
@@ -695,9 +691,10 @@ public class StreamReview20260924Test extends TestBase {
         assertEquals(List.of(), late);
 
         // Iterator (async) source.
-        assertEquals(List.of(List.of(1L, 2L), List.of(3L, 4L), List.of(12L)), Stream.of(List.of(1L, 2L, 3L, 4L, 12L).iterator())
-                .window(Duration.ofMillis(10), 2, () -> 0L, addingLateHandler(late), Collectors.toList())
-                .toList());
+        assertEquals(List.of(List.of(1L, 2L), List.of(3L, 4L), List.of(12L)),
+                Stream.of(List.of(1L, 2L, 3L, 4L, 12L).iterator())
+                        .window(Duration.ofMillis(10), 2, () -> 0L, addingLateHandler(late), Collectors.toList())
+                        .toList());
         assertEquals(List.of(), late);
     }
 
@@ -738,13 +735,13 @@ public class StreamReview20260924Test extends TestBase {
         final List<String> late = new ArrayList<>();
 
         assertEquals(List.of(List.of(1L, 2L, 3L, 4L), List.of(12L)),
-                Stream.of(1L, 2L, 3L, 4L, 12L).window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, addingLateHandler(late), Collectors.toList())
+                Stream.of(1L, 2L, 3L, 4L, 12L)
+                        .window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, addingLateHandler(late), Collectors.toList())
                         .toList());
         assertEquals(List.of(), late);
 
         assertEquals(List.of(List.of(1L, 5L), List.of(12L)),
-                Stream.of(1L, 12L, 5L).window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, addingLateHandler(late), Collectors.toList())
-                        .toList());
+                Stream.of(1L, 12L, 5L).window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, addingLateHandler(late), Collectors.toList()).toList());
         assertEquals(List.of("5->[0,10)"), late);
     }
 
@@ -791,8 +788,8 @@ public class StreamReview20260924Test extends TestBase {
 
     @Test
     public void testC010_delayForLateData_emptyAndNullResults() {
-        assertEquals(List.of(), Stream.<Long> empty().window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, delayingHandler(2), Collectors.toList())
-                .toList());
+        assertEquals(List.of(),
+                Stream.<Long> empty().window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, delayingHandler(2), Collectors.toList()).toList());
 
         final WindowHandler<Long, Long> nullResults = WindowHandler.<Long, Long> builder()
                 .timeExtractor(Long::longValue)
@@ -841,11 +838,12 @@ public class StreamReview20260924Test extends TestBase {
                 .onLateData((e, result) -> result.add(e))
                 .build();
 
-        assertEquals(List.of(List.of(1L, 2L, 5L), List.of(11L)), Stream.of(1L, 2L, 11L, 5L)
-                .window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, delaying, Collectors.toList())
-                .map(ArrayList::new)
-                .map(l -> (List<Long>) l)
-                .toList());
+        assertEquals(List.of(List.of(1L, 2L, 5L), List.of(11L)),
+                Stream.of(1L, 2L, 11L, 5L)
+                        .window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, delaying, Collectors.toList())
+                        .map(ArrayList::new)
+                        .map(l -> (List<Long>) l)
+                        .toList());
     }
 
     // ============================================================== C-072: maxWait window on array sources (doc lock)

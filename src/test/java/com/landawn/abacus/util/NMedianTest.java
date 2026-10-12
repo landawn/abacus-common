@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class NMedianTest extends NTestSupport {
     @Test
@@ -448,7 +448,6 @@ public class NMedianTest extends NTestSupport {
         assertEquals(2.0d, N.median(new float[] { 1.0f, 2.0f, Float.NaN }, 0, 3), 0.0d);
         assertEquals(2.0d, N.median(new double[] { 1.0d, 2.0d, Double.NaN }, 0, 3), 0.0d);
     }
-
 
     @Test
     public void testKthLargestComparableTreatsNullAsSmallest() {

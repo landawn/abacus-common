@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -53,7 +54,6 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.ByteArrayOutputStream;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
@@ -191,7 +191,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
         try {
             serialize(obj, config, os);
 
-            return Strings.base64Encode(os.toByteArray());
+            return BinaryParserSupport.encodeBase64(os);
         } finally {
             Objectory.recycle(os);
         }
@@ -464,7 +464,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 return value;
             case MAP:
                 if (value instanceof Map<?, ?> map) {
-                    final Map<Object, Object> result = new LinkedHashMap<>();
+                    final Map<Object, Object> result = LinkedHashMap.newLinkedHashMap(map.size());
                     for (final Map.Entry<?, ?> entry : map.entrySet()) {
                         result.put(entry.getKey(), toAvroDatum(entry.getValue(), schema.getValueType(), ignoreUnknownFields));
                     }
@@ -550,8 +550,29 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
         final Type<Object> type = Type.of(cls);
 
         if (type.isBean()) {
-            // Preserve null properties so strict schema validation checks the same field names as for a map.
-            return toGenericRecord(Beans.beanToMap(obj, false), schema, ignoreUnknownFields);
+            final List<PropInfo> properties = ParserUtil.getBeanInfo(cls).propInfoList;
+            final Object[] values = new Object[properties.size()];
+
+            // Beans.beanToMap evaluated every getter before schema validation/conversion. Retain that
+            // order, including null properties, without allocating a map table and one node per property.
+            for (int i = 0; i < values.length; i++) {
+                values[i] = properties.get(i).getPropValue(obj);
+            }
+
+            final Record localRecord = new Record(schema);
+            for (int i = 0; i < values.length; i++) {
+                final String name = properties.get(i).name;
+                final Field field = schema.getField(name);
+
+                if (field == null && !ignoreUnknownFields) {
+                    throw new IllegalArgumentException("Unknown source field '" + name + "' for Avro record " + schema.getFullName());
+                }
+                if (field != null) {
+                    localRecord.put(field.pos(), toAvroDatum(values[i], field.schema(), ignoreUnknownFields));
+                }
+            }
+
+            return localRecord;
         } else if (type.isMap()) {
             final Map<String, Object> m = (Map<String, Object>) obj;
             final Record localRecord = new Record(schema);
@@ -841,27 +862,30 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             return bean;
         } else if (targetType.isCollection() && (eleType != null && SpecificRecord.class.isAssignableFrom(eleType.javaType()))) {
             final Class<Object> eleClass = eleType.javaType();
-            @SuppressWarnings("rawtypes")
-            final Collection<Object> c = N.newCollection((Class<Collection>) targetClass);
             trustSpecificRecordClass(eleClass);
             final SpecificDatumReader<Object> datumReader = new SpecificDatumReader<>(eleClass);
 
             try (DataFileStream<Object> dataFileReader = new DataFileStream<>(targetInput, datumReader)) {
                 if (dataFileReader.getSchema().getType() == Schema.Type.ARRAY) {
-                    // The class-based reader starts with a record schema; wrap it for an array datum.
-                    datumReader.setExpected(Schema.createArray(datumReader.getExpected()));
+                    // The class-based reader starts with a record schema. Preserve nullable array items
+                    // when wrapping it, otherwise a null written by this parser cannot be read back.
+                    final Schema recordSchema = datumReader.getExpected();
+                    final Schema elementSchema = dataFileReader.getSchema().getElementType().isNullable()
+                            ? Schema.createUnion(Schema.create(Schema.Type.NULL), recordSchema)
+                            : recordSchema;
+                    datumReader.setExpected(Schema.createArray(elementSchema));
                     return dataFileReader.hasNext()
                             ? (T) convertAvroCollection((Collection<?>) dataFileReader.next(), targetType, eleType, ignoreUnmatchedProperty)
                             : null;
                 }
+                final Collection<Object> c = newAvroCollection(targetType);
                 while (dataFileReader.hasNext()) {
                     c.add(dataFileReader.next());
                 }
+                return (T) c;
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
-
-            return (T) c;
         } else {
             if (config == null || config.getSchema() == null) {
                 throw new IllegalArgumentException("Schema is not specified");
@@ -1163,9 +1187,9 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 }
 
                 final Object value = source.get(field.name());
-                if (value != null) {
-                    beanInfo.setPropValue(result, field.name(), convertAvroValue(value, property.jsonXmlType, ignoreUnmatchedProperty));
-                }
+                // A schema field with a null value is present, so it must replace any constructor/builder
+                // default. PropInfo also supplies the Java default when the destination is primitive.
+                beanInfo.setPropValue(result, field.name(), convertAvroValue(value, property.jsonXmlType, ignoreUnmatchedProperty));
             }
             return beanInfo.finishBeanResult(result);
         } else if (targetType.isMap()) {

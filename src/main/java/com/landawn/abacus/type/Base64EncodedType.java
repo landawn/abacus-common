@@ -101,4 +101,26 @@ public class Base64EncodedType extends AbstractType<byte[]> {
     public byte[] valueOf(final String base64String) throws IllegalArgumentException {
         return Strings.base64Decode(base64String);
     }
+
+    /**
+     * Converts an arbitrary object to a {@code byte[]}.
+     * A {@code byte[]} is returned as is (not copied); every other object is converted through its own type's
+     * string form and then {@link #valueOf(String)}, exactly as the inherited default does.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return {@code obj} itself if it is a {@code byte[]}, the bytes decoded from the string form of any other
+     *         object, or an empty byte array if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the string form of a non-{@code byte[]} {@code obj} is not valid Base64
+     * @see #valueOf(String)
+     */
+    @Override
+    public byte[] valueOf(final Object obj) throws IllegalArgumentException {
+        // The inherited default would render a byte[] as its list text ("[1, 2, 3]") and then try to
+        // Base64-decode that text.
+        if (obj instanceof byte[] bytes) {
+            return bytes;
+        }
+
+        return super.valueOf(obj);
+    }
 }

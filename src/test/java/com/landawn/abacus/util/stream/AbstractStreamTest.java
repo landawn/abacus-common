@@ -1620,8 +1620,9 @@ public class AbstractStreamTest extends TestBase {
         List<Integer> result = new ArrayList<>();
         stream.forEachUntil((i, flag) -> {
             result.add(i);
-            if (i == 3)
+            if (i == 3) {
                 flag.setValue(true);
+            }
         });
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
@@ -1633,8 +1634,9 @@ public class AbstractStreamTest extends TestBase {
         MutableBoolean flag = MutableBoolean.of(false);
         stream.forEachUntil(flag, i -> {
             result.add(i);
-            if (i == 3)
+            if (i == 3) {
                 flag.setValue(true);
+            }
         });
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
@@ -4402,10 +4404,12 @@ public class AbstractStreamTest extends TestBase {
     public void test_fullJoin() {
         List<Pair<Integer, String>> result = Stream.of(Pair.of(1, "A"), Pair.of(2, "B"))
                 .fullJoin(List.of(Pair.of(1, "X"), Pair.of(3, "Y")), p -> p.left(), p -> p.left(), (p1, p2) -> {
-                    if (p1 != null && p2 != null)
+                    if (p1 != null && p2 != null) {
                         return Pair.of(p1.left(), p1.right() + p2.right());
-                    if (p1 != null)
+                    }
+                    if (p1 != null) {
                         return Pair.of(p1.left(), p1.right());
+                    }
                     return Pair.of(p2.left(), p2.right());
                 })
                 .sorted(Comparator.comparing(p -> p.left()))
@@ -5400,9 +5404,8 @@ public class AbstractStreamTest extends TestBase {
 
     @Test
     public void testPersistNullStatementMessageNamesStmt() {
-        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> Stream.of(1).persist((PreparedStatement) null, 1, 0, (i, ps) -> {
-                }));
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Stream.of(1).persist((PreparedStatement) null, 1, 0, (i, ps) -> {
+        }));
         assertEquals("'statement' cannot be null", e.getMessage());
     }
 
@@ -5438,6 +5441,7 @@ public class AbstractStreamTest extends TestBase {
                 () -> Stream.of(1, 2).collapse((first, last, next) -> true, "", (java.util.function.BiFunction<String, Integer, String>) null));
         assertEquals("'mergeFunction' cannot be null", e.getMessage());
     }
+
     // ---- deep review 2026-09-25 G110 end ----
     // ---- perf review 2026-09-26 G086 begin ----
     // G086-01: mapMulti (sequential buffer) - variable fan-out (0, 1, many), order kept, buffer drained and reused across bursts
@@ -5494,9 +5498,10 @@ public class AbstractStreamTest extends TestBase {
         assertThrows(java.util.NoSuchElementException.class, iter::next);
     }
 
-    // G086-01: elements a mapper emitted before it failed are still delivered after the failure, in order
+    // G086-01, revised 2026-10-07: elements a mapper emitted before it failed are discarded with that call, as the
+    // primitive mapMulti operations do; iteration continues with the next source element.
     @Test
-    public void testMapMulti_elementsEmittedBeforeMapperFailureAreKept() {
+    public void testMapMulti_elementsEmittedBeforeMapperFailureAreDiscarded() {
         final ObjIterator<Integer> iter = Stream.of(1, 2, 3).<Integer> mapMulti((n, consumer) -> {
             consumer.accept(n);
 
@@ -5511,11 +5516,11 @@ public class AbstractStreamTest extends TestBase {
         assertEquals(-1, iter.next());
         assertThrows(IllegalStateException.class, iter::hasNext);
         assertTrue(iter.hasNext());
-        assertEquals(2, iter.next());
         assertEquals(3, iter.next());
         assertEquals(-3, iter.next());
         assertFalse(iter.hasNext());
     }
+
     // G086-02: rotated() toArray(A[]) copies the two contiguous runs in bulk when no array-store check can fail; checked against a modulo oracle
     @Test
     public void testRotated_toArrayMatchesModuloOracle() {
@@ -5586,20 +5591,17 @@ public class AbstractStreamTest extends TestBase {
         assertFalse(String.valueOf(e.getMessage()).contains("arraycopy"), e.getMessage());
     }
 
-    // G086-02: toArray into the stream's own backing array keeps the element-by-element (in-place) result
+    // G086-02 corrected 2026-10-03: the 09-26 performance oracle pinned overwrite corruption.
+    // toArray must preserve the rotated encounter order even when the destination aliases the source.
     @Test
-    public void testRotated_toArrayIntoBackingArrayKeepsElementWiseResult() {
+    public void testRotated_toArrayIntoBackingArrayPreservesRotatedElements() {
         final Integer[] backing = { 1, 2, 3, 4, 5 };
-        final Integer[] simulated = backing.clone();
-
-        for (int i = 0; i < 5; i++) {
-            simulated[i] = simulated[(3 + i) % 5]; // rotated(2): start = 5 - 2
-        }
+        final Integer[] expected = { 4, 5, 1, 2, 3 };
 
         final ObjIterator<Integer> iter = Stream.of(backing).rotated(2).iterator();
 
         org.junit.jupiter.api.Assertions.assertSame(backing, iter.toArray(backing));
-        assertArrayEquals(simulated, backing);
+        assertArrayEquals(expected, backing);
     }
     // ---- perf review 2026-09-26 G086 end ----
 
@@ -5715,4 +5717,140 @@ public class AbstractStreamTest extends TestBase {
     }
 
     // ---- bug review 2026-09-27 verify G122 end ----
+
+    // ---- bug review 2026-10-02 G089 begin ----
+
+    // A target Writer whose write() (failWrite) or flush() always fails; each failure message carries its 1-based number.
+    private static java.io.Writer g089FailingWriter(final boolean failWrite, final AtomicInteger failures) {
+        return new java.io.Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws IOException {
+                if (failWrite) {
+                    throw new IOException("write failed #" + failures.incrementAndGet());
+                }
+            }
+
+            @Override
+            public void flush() throws IOException {
+                if (!failWrite) {
+                    throw new IOException("flush failed #" + failures.incrementAndGet());
+                }
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    // G089-01: persist(toLine, Writer) - the final flush is the first write to the target; its IOException must surface
+    // (documented "@throws IOException if ... flushing the output fails") instead of being replaced by the
+    // UncheckedIOException of the recycle that retries the same buffered write.
+    @Test
+    public void testPersistWriter_finalFlushFailureThrowsIOException() {
+        final AtomicInteger failures = new AtomicInteger();
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<String> source = Stream.of("a", "b").onClose(closeCount::incrementAndGet);
+
+        final IOException e = assertThrows(IOException.class, () -> source.persist(Fn.identity(), g089FailingWriter(true, failures)));
+
+        assertEquals("write failed #1", e.getMessage());
+        assertEquals(1, e.getSuppressed().length);
+        assertTrue(e.getSuppressed()[0] instanceof UncheckedIOException);
+        assertEquals(1, closeCount.get());
+
+        final AtomicInteger flushFailures = new AtomicInteger();
+        final IOException e2 = assertThrows(IOException.class,
+                () -> Stream.of("a").persist("H", "T", (s, w) -> w.write(s), g089FailingWriter(false, flushFailures)));
+        assertEquals("flush failed #1", e2.getMessage());
+    }
+
+    // G089-01: same for persistToJson(Writer) and persistToCsv(.., Writer), which share the final flush/recycle step.
+    @Test
+    public void testPersistToJsonAndCsvWriter_finalFlushFailureThrowsIOException() {
+        final AtomicInteger jsonFailures = new AtomicInteger();
+        final IOException jsonFailure = assertThrows(IOException.class, () -> Stream.of(1, 2).persistToJson(g089FailingWriter(true, jsonFailures)));
+        assertEquals("write failed #1", jsonFailure.getMessage());
+
+        final AtomicInteger csvFailures = new AtomicInteger();
+        final IOException csvFailure = assertThrows(IOException.class,
+                () -> Stream.of(List.of(List.of(1, 2))).persistToCsv(List.of("a", "b"), g089FailingWriter(true, csvFailures)));
+        assertEquals("write failed #1", csvFailure.getMessage());
+
+        final AtomicInteger csvFlushFailures = new AtomicInteger();
+        final IOException csvFlushFailure = assertThrows(IOException.class,
+                () -> Stream.of(List.of(Map.of("k", 1))).persistToCsv(g089FailingWriter(false, csvFlushFailures)));
+        assertEquals("flush failed #1", csvFlushFailure.getMessage());
+    }
+
+    // ---- bug review 2026-10-02 G089 end ----
+
+    // ---- bug review 2026-10-02 verify G122 begin ----
+
+    // An OutputStream target whose flush() always fails; each failure message carries its 1-based number.
+    private static java.io.OutputStream g122FlushFailingStream(final AtomicInteger failures) {
+        return new java.io.OutputStream() {
+            @Override
+            public void write(final int b) {
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("flush failed #" + failures.incrementAndGet());
+            }
+        };
+    }
+
+    // G089-01: persistToJson/persistToCsv(.., OutputStream) end in the Writer terminal's final flush too, so a failing flush
+    // of the target is the documented IOException (it was the UncheckedIOException of the recycle's retry); the toLine
+    // OutputStream overload, which already threw it, is unchanged
+    @Test
+    public void testPersistToJsonAndCsvOutputStream_finalFlushFailureThrowsIOException() {
+        final AtomicInteger jsonFailures = new AtomicInteger();
+        final IOException jsonFailure = assertThrows(IOException.class, () -> Stream.of(1, 2).persistToJson(g122FlushFailingStream(jsonFailures)));
+        assertEquals("flush failed #1", jsonFailure.getMessage());
+
+        final AtomicInteger csvFailures = new AtomicInteger();
+        final IOException csvFailure = assertThrows(IOException.class,
+                () -> Stream.of(List.of(List.of(1, 2))).persistToCsv(List.of("a", "b"), g122FlushFailingStream(csvFailures)));
+        assertEquals("flush failed #1", csvFailure.getMessage());
+
+        final AtomicInteger lineFailures = new AtomicInteger();
+        final IOException lineFailure = assertThrows(IOException.class, () -> Stream.of("a").persist(Fn.identity(), g122FlushFailingStream(lineFailures)));
+        assertEquals("flush failed #1", lineFailure.getMessage());
+    }
+
+    // G089-01: a failure of the write loop (the toLine mapper here) stays the primary failure when the target fails too;
+    // the flush and recycle failures are added to it as suppressed, as before
+    @Test
+    public void testPersistWriter_loopFailureStaysPrimaryWhenTheTargetFailsToo() {
+        final AtomicInteger failures = new AtomicInteger();
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> Stream.of("a", "b").persist(s -> {
+            if ("b".equals(s)) {
+                throw new IllegalStateException("mapper failed");
+            }
+
+            return s;
+        }, g089FailingWriter(true, failures)));
+
+        assertEquals("mapper failed", e.getMessage());
+        assertEquals(2, e.getSuppressed().length);
+        assertEquals("write failed #1", e.getSuppressed()[0].getMessage());
+        assertTrue(e.getSuppressed()[1] instanceof UncheckedIOException);
+    }
+
+    // G089-01: a pooled writer whose final flush failed is never handed out again with its unwritten characters: the
+    // next persist to a non-buffered target writes exactly its own line
+    @Test
+    public void testPersistWriter_failedFinalFlushLeavesNoStaleCharactersForTheNextPersist() throws IOException {
+        for (int i = 0; i < 3; i++) {
+            assertThrows(Exception.class, () -> Stream.of("stale").persist(Fn.identity(), g089FailingWriter(true, new AtomicInteger())));
+        }
+
+        final StringWriter target = new StringWriter();
+        assertEquals(1, Stream.of("fresh").persist(Fn.identity(), target));
+        assertEquals("fresh\n", target.toString());
+    }
+
+    // ---- bug review 2026-10-02 verify G122 end ----
 }

@@ -140,11 +140,18 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
+     * <p>Each element is the compact JSON text form of {@code stringOf}: an element enclosed in a matching pair of double or
+     * single quotes is read by its content with its JSON escapes decoded once, so {@code ["1", 2]} yields {@code {1, 2}},
+     * as {@link com.landawn.abacus.parser.JsonParser} reads the array; an empty quoted element is rejected as a malformed
+     * number rather than read as the default; and the unquoted literal {@code null} is the element default {@code 0},
+     * because a primitive array cannot hold {@code null}.</p>
+     *
      * @param str the string to parse
      * @return the parsed byte array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
      * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws NumberFormatException if an element, read by its content when quoted, is not a valid integer literal (an
+     *         empty quoted element included)
      * @throws ArithmeticException if an element is outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(byte[])
@@ -158,13 +165,21 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
             return N.EMPTY_BYTE_ARRAY;
         }
 
+        final byte[] decimalArray = (byte[]) parseNumericArray(str, elementType, byte.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] strs = split(str);
         final int len = strs.length;
         final byte[] a = new byte[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                a[i] = elementType.valueOf(strs[i]);
+                // Compact JSON text form: quoted numbers, escapes and null defaults come through
+                // jsonElementContent (split preserves quotes), as PrimitiveLongArrayType already did by hand.
+                a[i] = elementType.valueOf(jsonElementContent(strs[i]));
             }
         }
 
@@ -173,22 +188,24 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
 
     /**
      * Converts an object to a byte array.
-     * Handles {@link InputStream} (reads all bytes) and {@link Blob} objects (extracts bytes and frees the Blob)
-     * as special cases. For other object types, converts the object to its string representation first
-     * and then parses that string as a byte array.
+     * Clones a {@code byte[]} input to produce an independent copy. Reads all bytes from an {@link InputStream},
+     * or extracts bytes from a {@link Blob} and frees it. For all remaining object types, converts the object to
+     * its string representation first and then parses that string as a byte array.
      * Returns {@code null} if input is {@code null}.
      *
-     * @param obj the object to convert (can be an {@link InputStream}, {@link Blob}, or any other type)
-     * @return the byte array representation of the object, an empty array for a zero-length Blob, or {@code null} if input is null
+     * @param obj the object to convert (can be a {@code byte[]}, {@link InputStream}, {@link Blob}, or any other type)
+     * @return an independent copy of a {@code byte[]} input, the byte array representation of another object,
+     *         an empty array for a zero-length Blob, or {@code null} if input is null
      * @throws UncheckedIOException if {@code obj} is an {@link InputStream} and reading its remaining bytes fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
      * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
-     * @throws IllegalArgumentException if {@code obj} is of any other type and its string representation contains an
-     *         unquoted element that is empty or whitespace-only (see {@link #valueOf(String)})
-     * @throws NumberFormatException if {@code obj} is of any other type and an element of its string representation is
-     *         not a valid integer literal
-     * @throws ArithmeticException if {@code obj} is of any other type and an element of its string representation is
-     *         outside the {@code byte} range
+     * @throws IllegalArgumentException if {@code obj} is neither a {@code byte[]}, an {@link InputStream}, nor a
+     *         {@link Blob}, and its string representation contains an unquoted element that is empty or whitespace-only
+     *         (see {@link #valueOf(String)})
+     * @throws NumberFormatException if {@code obj} is neither a {@code byte[]}, an {@link InputStream}, nor a
+     *         {@link Blob}, and an element of its string representation is not a valid integer literal
+     * @throws ArithmeticException if {@code obj} is neither a {@code byte[]}, an {@link InputStream}, nor a
+     *         {@link Blob}, and an element of its string representation is outside the {@code byte} range
      */
     @MayReturnNull
     @SuppressFBWarnings
@@ -197,6 +214,9 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
             NumberFormatException, ArithmeticException {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (obj instanceof byte[] bytes) {
+            // Keep the independent-copy behavior without formatting and parsing every byte.
+            return bytes.clone();
         } else if (obj instanceof InputStream is) {
             return IOUtil.readAllBytes(is);
         } else if (obj instanceof Blob blob) {

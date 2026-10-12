@@ -106,7 +106,8 @@ public class DateType extends AbstractDateType<Date> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive): returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns today's date (via {@link com.landawn.abacus.util.Dates#currentDate()})</li>
-     *   <li>More than four characters of ASCII digits, optionally preceded by {@code +} or {@code -}: epoch milliseconds,
+     *   <li>More than four characters consisting of an optional {@code +} or {@code -} followed only by ASCII digits
+     *       (the sign counts toward the length: {@code "-2024"} is {@code -2024} ms): epoch milliseconds,
      *       converted via the {@code Dates.create*} epoch factory. Shorter numeric text such as {@code "0"} or {@code "2024"}
      *       is not read as epoch milliseconds; it goes to the formatted parser, which rejects it as ambiguous
      *       ({@link IllegalArgumentException})</li>

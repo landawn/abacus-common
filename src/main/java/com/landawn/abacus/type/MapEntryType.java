@@ -201,7 +201,8 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * handler of the value's runtime class is used instead, exactly as
      * {@link #serializeTo(CharacterWriter, Map.Entry, JsonXmlSerConfig)} does, so a map, collection or bean value
      * keeps the {@code toString()}-style form rather than falling back to {@code ObjectType}'s JSON
-     * {@code stringOf}. The key keeps its declared handler, as it does in {@code serializeTo}.
+     * {@code stringOf}. The key keeps its declared handler, as it does in {@code serializeTo} for every declared key
+     * type other than {@code Object} and the other types served by the generic object handler (e.g. {@code Serializable}).
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
@@ -274,6 +275,9 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}. Map-key quoting follows JSON key rules (string keys remain quoted even when
      * {@code config} is {@code null}); the value is delegated to its type handler with the supplied config.
+     * A key whose declared type is {@code Object} (a raw {@code Map.Entry}) or another type served by the generic object
+     * handler (e.g. {@code Serializable}) is quoted by the rule of its runtime class, as the JSON map writer quotes every
+     * key of a {@code Map}.
      * Under a {@code JsonSerConfig}, a key whose text depends on {@code writeLongAsString} (a long key),
      * {@code writeBigDecimalAsPlain} (a {@code BigDecimal} key) or a {@code dateTimeFormat} other than
      * {@code LONG} (a date/time key) is written with that configured text, exactly as the JSON map writer writes the
@@ -323,6 +327,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     /**
      * @throws IOException if writing the serialized key to the JSON writer fails
      */
+    @SuppressWarnings("unchecked")
     private void serializeKey(final CharacterWriter writer, final K key, final JsonXmlSerConfig<?> config) throws IOException {
         final boolean isQuoteMapKey = config instanceof JsonSerConfig jsonConfig ? jsonConfig.isQuoteMapKey() : config != null;
 
@@ -334,25 +339,33 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
             } else {
                 writer.write(NULL_CHAR_ARRAY);
             }
-        } else if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.javaType().isEnum())) {
-            if (config instanceof JsonSerConfig jsonConfig && isConfigSensitiveKey(jsonConfig)) {
+            return;
+        }
+
+        // An Object-typed key (a raw Map.Entry) is judged by its runtime handler, as the JSON map writer judges every
+        // key: the generic object handler is not serializable, so the key would otherwise be written in its value form
+        // (an unquoted 5, a bare string under a null config) and the map-key quoting rule would never apply.
+        final Type<Object> effectiveKeyType = keyType.isObject() ? Type.of(key.getClass()) : (Type<Object>) keyType;
+
+        if (effectiveKeyType.isSerializable() && !(effectiveKeyType.isArray() || effectiveKeyType.isCollection() || effectiveKeyType.javaType().isEnum())) {
+            if (config instanceof JsonSerConfig jsonConfig && isConfigSensitiveKey(effectiveKeyType, jsonConfig)) {
                 // Same rule as the JSON map writer: a key whose text depends on writeLongAsString, writeBigDecimalAsPlain
                 // or a textual dateTimeFormat is written with its value-side text, so a Map.Entry key agrees with the
                 // same key in a Map (stringOf would, for example, drop the milliseconds of a java.util.Date key).
-                serializeKeyWithConfig(writer, key, jsonConfig, isQuoteMapKey);
-            } else if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+                serializeKeyWithConfig(writer, key, effectiveKeyType, jsonConfig, isQuoteMapKey);
+            } else if (isQuoteMapKey || !(effectiveKeyType.isNumber() || effectiveKeyType.isBoolean())) {
                 writer.write(SK._DOUBLE_QUOTE);
-                writer.writeCharacter(keyType.stringOf(key));
+                writer.writeCharacter(effectiveKeyType.stringOf(key));
                 writer.write(SK._DOUBLE_QUOTE);
             } else {
-                writer.writeCharacter(keyType.stringOf(key));
+                writer.writeCharacter(effectiveKeyType.stringOf(key));
             }
         } else {
             keyType.serializeTo(writer, key, config);
         }
     }
 
-    private boolean isConfigSensitiveKey(final JsonSerConfig config) {
+    private static boolean isConfigSensitiveKey(final Type<?> keyType, final JsonSerConfig config) {
         final Class<?> keyClass = keyType.javaType();
 
         return (config.isWriteLongAsString() && (keyType.isLong() || AtomicLong.class.equals(keyClass) || MutableLong.class.equals(keyClass))) //
@@ -364,7 +377,8 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
     /**
      * @throws IOException if writing the serialized key to the JSON writer fails
      */
-    private void serializeKeyWithConfig(final CharacterWriter writer, final K key, final JsonSerConfig config, final boolean isQuoteMapKey) throws IOException {
+    private static void serializeKeyWithConfig(final CharacterWriter writer, final Object key, final Type<Object> keyType, final JsonSerConfig config,
+            final boolean isQuoteMapKey) throws IOException {
         final BufferedJsonWriter keyWriter = Objectory.createBufferedJsonWriter();
         String keyText = null;
 

@@ -61,15 +61,15 @@ public class IterablesReview20260924Test extends TestBase {
     public void testC156_linkedHashSetSliceStreamsOnlyItsRange() {
         final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
 
-        assertSliceTraversals(N.slice(set, 1, 3), Arrays.asList("b", "c"));
-        assertSliceTraversals(N.slice(set, 0, 2), Arrays.asList("a", "b"));
-        assertSliceTraversals(N.slice(set, 3, 5), Arrays.asList("d", "e"));
+        assertSliceTraversals(CommonUtil.slice(set, 1, 3), Arrays.asList("b", "c"));
+        assertSliceTraversals(CommonUtil.slice(set, 0, 2), Arrays.asList("a", "b"));
+        assertSliceTraversals(CommonUtil.slice(set, 3, 5), Arrays.asList("d", "e"));
     }
 
     @Test
     public void testC156_treeSetSliceStreamsOnlyItsRange() {
         final TreeSet<Integer> set = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5));
-        final Collection<Integer> slice = N.slice(set, 3, 5);
+        final Collection<Integer> slice = CommonUtil.slice(set, 3, 5);
 
         assertSliceTraversals(slice, Arrays.asList(4, 5));
         assertEquals(9, slice.stream().mapToInt(Integer::intValue).sum());
@@ -79,30 +79,30 @@ public class IterablesReview20260924Test extends TestBase {
     public void testC156_arrayDequeSliceStreamsOnlyItsRange() {
         final ArrayDeque<Integer> deque = new ArrayDeque<>(Arrays.asList(1, 2, 3, 4, 5));
 
-        assertSliceTraversals(N.slice(deque, 0, 2), Arrays.asList(1, 2));
-        assertSliceTraversals(N.slice(deque, 1, 4), Arrays.asList(2, 3, 4));
+        assertSliceTraversals(CommonUtil.slice(deque, 0, 2), Arrays.asList(1, 2));
+        assertSliceTraversals(CommonUtil.slice(deque, 1, 4), Arrays.asList(2, 3, 4));
     }
 
     @Test
     public void testC156_emptyAndFullRange() {
         final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
 
-        assertSliceTraversals(N.slice(set, 2, 2), Collections.<String> emptyList());
-        assertSliceTraversals(N.slice(set, 0, 0), Collections.<String> emptyList());
-        assertSliceTraversals(N.slice(set, 5, 5), Collections.<String> emptyList());
-        assertSliceTraversals(N.slice(set, 0, 5), Arrays.asList("a", "b", "c", "d", "e"));
+        assertSliceTraversals(CommonUtil.slice(set, 2, 2), Collections.<String> emptyList());
+        assertSliceTraversals(CommonUtil.slice(set, 0, 0), Collections.<String> emptyList());
+        assertSliceTraversals(CommonUtil.slice(set, 5, 5), Collections.<String> emptyList());
+        assertSliceTraversals(CommonUtil.slice(set, 0, 5), Arrays.asList("a", "b", "c", "d", "e"));
     }
 
     @Test
     public void testC156_unicodeAndNullElements() {
         final Set<String> set = new LinkedHashSet<>(Arrays.asList("été", null, "中文", "😀", "z"));
 
-        assertSliceTraversals(N.slice(set, 1, 4), Arrays.asList(null, "中文", "😀"));
+        assertSliceTraversals(CommonUtil.slice(set, 1, 4), Arrays.asList(null, "中文", "😀"));
     }
 
     @Test
     public void testC156_forEachNullActionThrowsNpe() {
-        final Collection<String> slice = N.slice(new LinkedHashSet<>(Arrays.asList("a", "b", "c")), 1, 2);
+        final Collection<String> slice = CommonUtil.slice(new LinkedHashSet<>(Arrays.asList("a", "b", "c")), 1, 2);
 
         assertThrows(NullPointerException.class, () -> slice.forEach(null));
     }
@@ -110,7 +110,7 @@ public class IterablesReview20260924Test extends TestBase {
     @Test
     public void testC156_backingSetShrinksAfterSliceWasCreated() {
         final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
-        final Collection<String> slice = N.slice(set, 1, 4);
+        final Collection<String> slice = CommonUtil.slice(set, 1, 4);
         final Spliterator<String> earlySpliterator = slice.spliterator(); // late-binding: created before the change
 
         set.remove("a");
@@ -209,8 +209,8 @@ public class IterablesReview20260924Test extends TestBase {
         assertEquals(Integer.MAX_VALUE, Iterables.sumInt(Arrays.asList(2147483647.9)).getAsInt());
         assertEquals(Integer.MIN_VALUE, Iterables.sumInt(Arrays.asList(-2147483648.9)).getAsInt());
         assertEquals(Integer.MAX_VALUE, Iterables.sumInt(Arrays.asList(Long.valueOf(Integer.MAX_VALUE))).getAsInt());
-        assertEquals((double) Long.MAX_VALUE, Iterables.averageLong(Arrays.asList(BigInteger.valueOf(Long.MAX_VALUE))).getAsDouble());
-        assertEquals((double) Long.MIN_VALUE, Iterables.averageLong(new Number[] { new BigDecimal(Long.MIN_VALUE) }).getAsDouble());
+        assertEquals(Long.MAX_VALUE, Iterables.averageLong(Arrays.asList(BigInteger.valueOf(Long.MAX_VALUE))).getAsDouble());
+        assertEquals(Long.MIN_VALUE, Iterables.averageLong(new Number[] { new BigDecimal(Long.MIN_VALUE) }).getAsDouble());
 
         // sumIntToLong's total may exceed int (only each ELEMENT must fit)
         assertEquals(2L * Integer.MAX_VALUE, Iterables.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, (long) Integer.MAX_VALUE)).getAsLong());

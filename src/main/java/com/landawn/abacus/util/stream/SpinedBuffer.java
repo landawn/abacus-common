@@ -34,7 +34,7 @@ import com.landawn.abacus.util.cs;
 /**
  * A dynamically growing append-only buffer that uses a spine-and-chunk layout instead of a single
  * resizable backing array. The first chunk has size {@code initialCapacity}; subsequent chunks
- * have a fixed size and are tracked by a spine (an array of chunk arrays) which itself grows by
+ * grow geometrically up to a bounded size and are tracked by a spine (an array of chunk arrays) which itself grows by
  * doubling its number of chunk slots. This avoids the O(n) copy cost of a doubling {@code ArrayList}-style buffer while
  * keeping per-element access cheap.
  *
@@ -48,19 +48,17 @@ import com.landawn.abacus.util.cs;
  */
 final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E> {
     private static final int CHUNK_SIZE = 9;
+    private static final int MAX_CHUNK_SIZE = 1 << 16;
 
-    /**
-     * Initial number of chunk slots in the spine. The spine then grows by <b>doubling</b>, not by a
-     * constant increment: {@link #CHUNK_SIZE} is fixed, so a buffer of {@code n} elements needs
-     * {@code n / CHUNK_SIZE} chunks, and growing the spine by a constant would reallocate and copy it
-     * a linear number of times, making {@code add} quadratic overall.
-     */
+    /** Initial spine size; the spine doubles when all chunk slots are occupied. */
     private static final int SPINE_SIZE_TO_INCREASE = 8;
 
     private final int initialCapacity;
     private E[][] spine = null; //NOSONAR
     private E[] curChunk = (E[]) N.EMPTY_OBJECT_ARRAY; //NOSONAR
     private int size = 0; //NOSONAR
+    private int chunkIndex;
+    private int elementIndex;
 
     /**
      * Constructs a SpinedBuffer with the default initial capacity.
@@ -136,34 +134,23 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
      */
     @Override
     public boolean add(final E e) {
-        if (size < initialCapacity) {
-            if (curChunk.length == 0) {
-                curChunk = (E[]) new Object[CHUNK_SIZE];
-            }
-
-            curChunk[size] = e;
-        } else {
+        if (curChunk.length == 0) {
+            curChunk = (E[]) new Object[initialCapacity];
+        } else if (elementIndex == curChunk.length) {
             if (spine == null) {
                 spine = (E[][]) new Object[SPINE_SIZE_TO_INCREASE][];
                 spine[0] = curChunk;
-                spine[1] = (E[]) new Object[CHUNK_SIZE];
-                curChunk = spine[1];
-            } else {
-                final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
-
-                if (spine.length <= chunkIndex) {
-                    spine = N.copyOf(spine, spine.length << 1);
-                }
-
-                if (spine[chunkIndex] == null) {
-                    curChunk = (E[]) new Object[CHUNK_SIZE];
-                    spine[chunkIndex] = curChunk;
-                }
+            } else if (chunkIndex + 1 == spine.length) {
+                spine = N.copyOf(spine, spine.length << 1);
             }
 
-            curChunk[(size - spine[0].length) % CHUNK_SIZE] = e;
+            final int nextChunkSize = curChunk.length >= MAX_CHUNK_SIZE / 2 ? MAX_CHUNK_SIZE : curChunk.length * 2;
+            curChunk = (E[]) new Object[nextChunkSize];
+            spine[++chunkIndex] = curChunk;
+            elementIndex = 0;
         }
 
+        curChunk[elementIndex++] = e;
         size++;
         return true;
     }
@@ -211,10 +198,10 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
             final int localSize = size();
 
             return new ObjIterator<>() {
-                private final E[] firstChunk = spine[0];
-                private final int firstChunkLen = firstChunk.length;
-                private int cursor = 0;
-                private E next = null;
+                private final E[][] chunks = spine;
+                private int cursor;
+                private int chunk;
+                private int offset;
 
                 @Override
                 public boolean hasNext() {
@@ -227,15 +214,13 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    if (cursor < firstChunkLen) {
-                        return firstChunk[cursor++];
-                    } else {
-                        next = spine[(cursor - firstChunkLen) / CHUNK_SIZE + 1][(cursor - firstChunkLen) % CHUNK_SIZE];
-
-                        cursor++;
-
-                        return next;
+                    if (offset == chunks[chunk].length) {
+                        chunk++;
+                        offset = 0;
                     }
+
+                    cursor++;
+                    return chunks[chunk][offset++];
                 }
             };
         }
@@ -262,6 +247,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         private int[][] spine = null;
         private int[] curChunk = N.EMPTY_INT_ARRAY;
         private int size = 0;
+        private int chunkIndex;
+        private int elementIndex;
 
         /**
          * Constructs a SpinedBuffer.OfInt with the default initial capacity.
@@ -342,34 +329,23 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          */
         @SuppressWarnings("SameReturnValue")
         public boolean add(final int e) {
-            if (size < initialCapacity) {
-                if (curChunk.length == 0) {
-                    curChunk = new int[CHUNK_SIZE];
-                }
-
-                curChunk[size] = e;
-            } else {
+            if (curChunk.length == 0) {
+                curChunk = new int[initialCapacity];
+            } else if (elementIndex == curChunk.length) {
                 if (spine == null) {
                     spine = new int[SPINE_SIZE_TO_INCREASE][];
                     spine[0] = curChunk;
-                    spine[1] = new int[CHUNK_SIZE];
-                    curChunk = spine[1];
-                } else {
-                    final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
-
-                    if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length << 1);
-                    }
-
-                    if (spine[chunkIndex] == null) {
-                        curChunk = new int[CHUNK_SIZE];
-                        spine[chunkIndex] = curChunk;
-                    }
+                } else if (chunkIndex + 1 == spine.length) {
+                    spine = N.copyOf(spine, spine.length << 1);
                 }
 
-                curChunk[(size - spine[0].length) % CHUNK_SIZE] = e;
+                final int nextChunkSize = curChunk.length >= MAX_CHUNK_SIZE / 2 ? MAX_CHUNK_SIZE : curChunk.length * 2;
+                curChunk = new int[nextChunkSize];
+                spine[++chunkIndex] = curChunk;
+                elementIndex = 0;
             }
 
+            curChunk[elementIndex++] = e;
             size++;
             return true;
         }
@@ -402,10 +378,10 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                 final int localSize = size();
 
                 return new IntIterator() {
-                    private final int[] firstChunk = spine[0];
-                    private final int firstChunkLen = firstChunk.length;
-                    private int cursor = 0;
-                    private int next = 0;
+                    private final int[][] chunks = spine;
+                    private int cursor;
+                    private int chunk;
+                    private int offset;
 
                     @Override
                     public boolean hasNext() {
@@ -418,15 +394,13 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        if (cursor < firstChunkLen) {
-                            return firstChunk[cursor++];
-                        } else {
-                            next = spine[(cursor - firstChunkLen) / CHUNK_SIZE + 1][(cursor - firstChunkLen) % CHUNK_SIZE];
-
-                            cursor++;
-
-                            return next;
+                        if (offset == chunks[chunk].length) {
+                            chunk++;
+                            offset = 0;
                         }
+
+                        cursor++;
+                        return chunks[chunk][offset++];
                     }
                 };
             }
@@ -463,6 +437,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         private long[][] spine = null;
         private long[] curChunk = N.EMPTY_LONG_ARRAY;
         private int size = 0;
+        private int chunkIndex;
+        private int elementIndex;
 
         /**
          * Constructs a SpinedBuffer.OfLong with the default initial capacity.
@@ -543,34 +519,23 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          */
         @SuppressWarnings("SameReturnValue")
         public boolean add(final long e) {
-            if (size < initialCapacity) {
-                if (curChunk.length == 0) {
-                    curChunk = new long[CHUNK_SIZE];
-                }
-
-                curChunk[size] = e;
-            } else {
+            if (curChunk.length == 0) {
+                curChunk = new long[initialCapacity];
+            } else if (elementIndex == curChunk.length) {
                 if (spine == null) {
                     spine = new long[SPINE_SIZE_TO_INCREASE][];
                     spine[0] = curChunk;
-                    spine[1] = new long[CHUNK_SIZE];
-                    curChunk = spine[1];
-                } else {
-                    final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
-
-                    if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length << 1);
-                    }
-
-                    if (spine[chunkIndex] == null) {
-                        curChunk = new long[CHUNK_SIZE];
-                        spine[chunkIndex] = curChunk;
-                    }
+                } else if (chunkIndex + 1 == spine.length) {
+                    spine = N.copyOf(spine, spine.length << 1);
                 }
 
-                curChunk[(size - spine[0].length) % CHUNK_SIZE] = e;
+                final int nextChunkSize = curChunk.length >= MAX_CHUNK_SIZE / 2 ? MAX_CHUNK_SIZE : curChunk.length * 2;
+                curChunk = new long[nextChunkSize];
+                spine[++chunkIndex] = curChunk;
+                elementIndex = 0;
             }
 
+            curChunk[elementIndex++] = e;
             size++;
             return true;
         }
@@ -603,10 +568,10 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                 final int localSize = size();
 
                 return new LongIterator() {
-                    private final long[] firstChunk = spine[0];
-                    private final int firstChunkLen = firstChunk.length;
-                    private int cursor = 0;
-                    private long next = 0;
+                    private final long[][] chunks = spine;
+                    private int cursor;
+                    private int chunk;
+                    private int offset;
 
                     @Override
                     public boolean hasNext() {
@@ -619,15 +584,13 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        if (cursor < firstChunkLen) {
-                            return firstChunk[cursor++];
-                        } else {
-                            next = spine[(cursor - firstChunkLen) / CHUNK_SIZE + 1][(cursor - firstChunkLen) % CHUNK_SIZE];
-
-                            cursor++;
-
-                            return next;
+                        if (offset == chunks[chunk].length) {
+                            chunk++;
+                            offset = 0;
                         }
+
+                        cursor++;
+                        return chunks[chunk][offset++];
                     }
                 };
             }
@@ -664,6 +627,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
         private double[][] spine = null;
         private double[] curChunk = N.EMPTY_DOUBLE_ARRAY;
         private int size = 0;
+        private int chunkIndex;
+        private int elementIndex;
 
         /**
          * Constructs a SpinedBuffer.OfDouble with the default initial capacity.
@@ -744,34 +709,23 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          */
         @SuppressWarnings("SameReturnValue")
         public boolean add(final double e) {
-            if (size < initialCapacity) {
-                if (curChunk.length == 0) {
-                    curChunk = new double[CHUNK_SIZE];
-                }
-
-                curChunk[size] = e;
-            } else {
+            if (curChunk.length == 0) {
+                curChunk = new double[initialCapacity];
+            } else if (elementIndex == curChunk.length) {
                 if (spine == null) {
                     spine = new double[SPINE_SIZE_TO_INCREASE][];
                     spine[0] = curChunk;
-                    spine[1] = new double[CHUNK_SIZE];
-                    curChunk = spine[1];
-                } else {
-                    final int chunkIndex = (size - spine[0].length) / CHUNK_SIZE + 1;
-
-                    if (spine.length <= chunkIndex) {
-                        spine = N.copyOf(spine, spine.length << 1);
-                    }
-
-                    if (spine[chunkIndex] == null) {
-                        curChunk = new double[CHUNK_SIZE];
-                        spine[chunkIndex] = curChunk;
-                    }
+                } else if (chunkIndex + 1 == spine.length) {
+                    spine = N.copyOf(spine, spine.length << 1);
                 }
 
-                curChunk[(size - spine[0].length) % CHUNK_SIZE] = e;
+                final int nextChunkSize = curChunk.length >= MAX_CHUNK_SIZE / 2 ? MAX_CHUNK_SIZE : curChunk.length * 2;
+                curChunk = new double[nextChunkSize];
+                spine[++chunkIndex] = curChunk;
+                elementIndex = 0;
             }
 
+            curChunk[elementIndex++] = e;
             size++;
             return true;
         }
@@ -804,10 +758,10 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                 final int localSize = size();
 
                 return new DoubleIterator() {
-                    private final double[] firstChunk = spine[0];
-                    private final int firstChunkLen = firstChunk.length;
-                    private int cursor = 0;
-                    private double next = 0;
+                    private final double[][] chunks = spine;
+                    private int cursor;
+                    private int chunk;
+                    private int offset;
 
                     @Override
                     public boolean hasNext() {
@@ -820,15 +774,13 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        if (cursor < firstChunkLen) {
-                            return firstChunk[cursor++];
-                        } else {
-                            next = spine[(cursor - firstChunkLen) / CHUNK_SIZE + 1][(cursor - firstChunkLen) % CHUNK_SIZE];
-
-                            cursor++;
-
-                            return next;
+                        if (offset == chunks[chunk].length) {
+                            chunk++;
+                            offset = 0;
                         }
+
+                        cursor++;
+                        return chunks[chunk][offset++];
                     }
                 };
             }

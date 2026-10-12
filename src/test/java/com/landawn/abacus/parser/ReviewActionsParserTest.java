@@ -1,6 +1,14 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -83,8 +91,9 @@ public class ReviewActionsParserTest extends TestBase {
         List<AbstractXmlParser> parsers = new ArrayList<>();
         for (XmlParserType backend : XmlParserType.values()) {
             parsers.add(new AbacusXmlParserImpl(backend, null, null, approved));
-            if (backend != XmlParserType.SAX)
+            if (backend != XmlParserType.SAX) {
                 parsers.add(new XmlParserImpl(backend, null, null, approved));
+            }
         }
         return parsers;
     }
@@ -143,10 +152,11 @@ public class ReviewActionsParserTest extends TestBase {
                 }
             }
         } finally {
-            if (before == null)
+            if (before == null) {
                 System.clearProperty(property);
-            else
+            } else {
                 System.setProperty(property, before);
+            }
         }
         assertEquals(7, ParserFactory.createXmlParser(null, null, Set.of(PolicyBean.class)).deserialize(xml, PolicyBean.class).getValue());
         assertEquals(7, ParserFactory.createAbacusXmlParser(null, null, Set.of(PolicyBean.class)).deserialize(xml, PolicyBean.class).getValue());

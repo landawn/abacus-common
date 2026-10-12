@@ -235,13 +235,13 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * invocations throw an {@link IllegalStateException}. Calling
      * {@link #flush()} after the stream is closed has no effect.</p>
      *
-     * <p>Closing a stream that was already closed <i>successfully</i> has no effect. A close that <i>failed</i>
-     * is different: the end marker was never written, so the stream is still unfinished and
-     * {@link #write(int) write} is still accepted rather than rejected with an
-     * {@link IllegalStateException}. A subsequent close retries the finish, but the first failure already
-     * closed the underlying stream, so the retry normally fails with that stream's closed-stream error
-     * rather than with the original one; it repeats the original error only for a sink that still fails the
-     * same way once closed. Either way a failed close cannot be recovered from - do not loop on it.</p>
+     * <p>Closing a stream that was already closed <i>successfully</i> has no effect. If closing fails before
+     * the end marker is written, the delegate remains unfinished: {@link #write(int) write} is still
+     * accepted and a subsequent close retries finishing. If flushing or closing the underlying stream
+     * fails after the end marker is written, the delegate is already finished and further writes are
+     * rejected. In either case this wrapper attempts to close the underlying stream after the failure,
+     * preserving the original exception and suppressing any distinct cleanup failure. A later close
+     * therefore depends on the underlying stream's state; a failed close has no general recovery guarantee.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

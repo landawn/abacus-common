@@ -1474,7 +1474,8 @@ public final class HttpUtil {
      *
      * <p>An unrecognized or unsupported charset name does not raise an exception; it falls back to
      * {@code defaultIfNull}, as does a missing {@code charset} parameter. A quoted value
-     * ({@code charset="utf-8"}) is unquoted before it is resolved; as a leniency the charset value
+     * ({@code charset="utf-8"}) is unquoted before it is resolved, with backslash-escaped characters
+     * in double quotes decoded according to HTTP quoted-pair rules. As a leniency the charset value
      * itself is also unquoted from single quotes ({@code charset='utf-8'}).</p>
      *
      * <p>While scanning the other parameters only a double quote opens a quoted string (RFC 9110
@@ -1577,6 +1578,29 @@ public final class HttpUtil {
 
                 if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
                     charsetName = charsetName.substring(1, charsetName.length() - 1).trim();
+
+                    if (first == '"' && charsetName.indexOf('\\') >= 0) {
+                        // HTTP quoted-pair removes one backslash before the following character; it is
+                        // not Java escaping. A valid quoted charset such as "ISO-8859\-1" must resolve
+                        // just like its token spelling, or response text is decoded with the fallback.
+                        final StringBuilder unescaped = new StringBuilder(charsetName.length());
+
+                        for (int i = 0; i < charsetName.length(); i++) {
+                            char ch = charsetName.charAt(i);
+
+                            if (ch == '\\') {
+                                if (++i == charsetName.length()) {
+                                    return defaultIfNull; // The apparent closing quote was escaped, leaving an unterminated value.
+                                }
+
+                                ch = charsetName.charAt(i);
+                            }
+
+                            unescaped.append(ch);
+                        }
+
+                        charsetName = unescaped.toString();
+                    }
                 }
             }
 

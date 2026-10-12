@@ -107,6 +107,12 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
             return N.EMPTY_SHORT_OBJ_ARRAY;
         }
 
+        final Short[] decimalArray = (Short[]) parseNumericArray(str, elementType, Short.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Short[] array = new Short[len];

@@ -114,11 +114,15 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * Expected format: [true, false, true] or similar boolean value representations.
      * Returns {@code null} if input is {@code null}, empty, or blank, or an empty array if input is {@code "[]"}.
      *
-     * <p>Each element is parsed with the {@code boolean} element type's lenient rules: {@code true} (case-insensitive),
-     * {@code Y}, {@code y} and {@code 1} parse as {@code true}; any other token - including the literal
-     * {@code null} - parses as {@code false}, because a primitive array cannot hold {@code null}. This matches the
-     * JSON parser's null-to-default rule for primitive arrays. Use {@code Boolean[]} to preserve {@code null}
-     * elements. For example {@code "[1, null, yes]"} yields {@code {true, false, false}}.</p>
+     * <p>Each element is parsed with the {@code boolean} element type's rule: {@code 1}, {@code y}, {@code Y} and
+     * {@code true} (any case) parse as {@code true}; {@code 0}, {@code -1}, {@code n}, {@code N} and {@code false} (any
+     * case) parse as {@code false}; any other element ({@code 2}, {@code 1.0}, {@code yes}) is rejected. The literal
+     * {@code null} parses as {@code false}, because a primitive array cannot hold {@code null}; this matches the JSON
+     * parser's null-to-default rule for primitive arrays. Use {@code Boolean[]} to preserve {@code null} elements. An
+     * element enclosed in a matching pair of double or single quotes is read by its content, with its escape sequences
+     * decoded, as the JSON parser reads a string token, so {@code "[\"true\", 'Y']"} yields {@code {true, true}}; an empty
+     * or blank quoted element is {@code false}, the default. For example
+     * {@code "[1, null, N, -1]"} yields {@code {true, false, false, false}}, and {@code "[1, 2]"} is rejected.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
@@ -127,7 +131,8 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
      * @param str the string to parse
      * @return the parsed boolean array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
-     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, a quoted element holds a
+     *         malformed escape sequence, or an element is none of the accepted texts.
      * @see #valueOf(Object)
      * @see #stringOf(boolean[])
      */
@@ -146,7 +151,14 @@ public final class PrimitiveBooleanArrayType extends AbstractPrimitiveArrayType<
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                a[i] = elementType.valueOf(strs[i]);
+                // split preserves an element's surrounding quotes: a JSON string token must be read as its unescaped content,
+                // as PrimitiveCharArrayType.valueOf already does and as the JSON parser reads a BooleanList; quoted text never
+                // parsed as true. Unescaping matters now that unrecognized text is rejected: an escaped tab before 1, or an
+                // escaped em space, is padding around 1 or blank text, not letters. The shared jsonElementContent does the
+                // decoding (code review 2026-10-05): the unquoted literal null becomes null and an empty quoted element its
+                // empty content, both of which the element type reads as its default, false, because a primitive element
+                // cannot hold null; the literal null is not boolean text, so the element type would reject it as a token.
+                a[i] = elementType.valueOf(jsonElementContent(strs[i], true));
             }
         }
 

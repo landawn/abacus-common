@@ -24,6 +24,7 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
@@ -140,7 +141,8 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * precision and scale, including nested generic values.</p>
      * <p>The first slot must use integer notation and fit in a {@code long} (or be null, interpreted
      * as zero); fractional, scientific-notation, and out-of-range metadata is rejected, including
-     * when quoted. Quoted integer text is JSON-decoded before validation.</p>
+     * when quoted, and so is an empty or blank quoted timestamp ({@code ["", "a"]}). Quoted integer text is
+     * JSON-decoded before validation.</p>
      *
      * @param str the string to parse
      * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null}
@@ -149,8 +151,8 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a blank string, unbalanced brackets
      *         and trailing text)
      * @throws ParsingException if the value token is not valid JSON for the declared value type
-     * @throws NumberFormatException if the timestamp slot is not an integer literal (fractional or scientific notation), or a value token cannot be
-     *         converted to the declared value type
+     * @throws NumberFormatException if the timestamp slot is not an integer literal (fractional or scientific notation, or an empty or blank
+     *         string), or a value token cannot be converted to the declared value type
      * @throws ArithmeticException if the timestamp does not fit in a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Timed)
@@ -165,6 +167,12 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
 
         // Keep the decoded metadata text: ordinary numeric payload coercion may truncate a fraction.
         final Object[] a = Utils.parseTupleElements(str, name(), List.of(TypeFactory.getType(String.class), valueType));
+
+        // Only a JSON null timestamp means zero; the Long parser would read "" as null (blank text gets the same message here).
+        if (a[0] != null && Strings.isBlank((String) a[0])) {
+            throw new NumberFormatException("Timestamp of " + name() + " must be an integer, but was: \"" + EscapeUtil.escapeJava((String) a[0]) + "\"");
+        }
+
         final Long parsedTimestamp = (Long) TypeFactory.getType(Long.class).valueOf((String) a[0]);
         final long timestamp = parsedTimestamp == null ? 0 : parsedTimestamp;
         final T value = (T) a[1];

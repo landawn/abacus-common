@@ -94,14 +94,14 @@ public class RefTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
         final Ref value = mock(Ref.class);
 
-        assertSame(value, refType.valueOf((Object) value));
+        assertSame(value, refType.valueOf(value));
         assertNull(refType.valueOf((Object) null));
     }
 
     @Test
     public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
         assertThrows(UnsupportedOperationException.class, () -> refType.valueOf((Object) "x"));
-        assertThrows(UnsupportedOperationException.class, () -> refType.valueOf((Object) 42));
+        assertThrows(UnsupportedOperationException.class, () -> refType.valueOf(42));
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> refType.valueOf("x"));
     }

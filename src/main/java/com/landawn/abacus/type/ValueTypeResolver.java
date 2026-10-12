@@ -340,12 +340,17 @@ final class ValueTypeResolver {
             if (!visiting.add(variable)) {
                 return true;
             }
-            for (java.lang.reflect.Type bound : variable.getBounds()) {
-                if (!accepts(bound, source, visiting)) {
-                    return false;
+            try {
+                for (java.lang.reflect.Type bound : variable.getBounds()) {
+                    if (!accepts(bound, source, visiting)) {
+                        return false;
+                    }
                 }
+                return true;
+            } finally {
+                // Sibling occurrences must check their own source type; only the current recursive path may skip a bound.
+                visiting.remove(variable);
             }
-            return true;
         }
         if (!ClassUtil.wrap(raw(target)).isAssignableFrom(ClassUtil.wrap(raw(source)))) {
             return false;

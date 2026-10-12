@@ -94,14 +94,14 @@ public class SQLXMLTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
         final SQLXML value = mock(SQLXML.class);
 
-        assertSame(value, sqlXMLType.valueOf((Object) value));
+        assertSame(value, sqlXMLType.valueOf(value));
         assertNull(sqlXMLType.valueOf((Object) null));
     }
 
     @Test
     public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
         assertThrows(UnsupportedOperationException.class, () -> sqlXMLType.valueOf((Object) "x"));
-        assertThrows(UnsupportedOperationException.class, () -> sqlXMLType.valueOf((Object) 42));
+        assertThrows(UnsupportedOperationException.class, () -> sqlXMLType.valueOf(42));
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> sqlXMLType.valueOf("x"));
     }

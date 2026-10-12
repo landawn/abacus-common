@@ -251,12 +251,12 @@ import lombok.experimental.Accessors;
  *       {@code readLine} and {@code readFirstLine} over a {@code Reader} (which read it one character at a time,
  *       through an exact line reader that never consumes past the line it returns), and {@code readAllLines},
  *       {@code readLastLine} and {@code contentEqualsIgnoreEOL(Reader, Reader)} (which read it through this
- *       package's pooled {@link BufferedReader}) - follow one rule for such a source:
+ *       package's pooled {@code BufferedReader}) - follow one rule for such a source:
  *       a read that returns zero is retried once, and a second consecutive zero is end of input. A zero is never
  *       turned into a character, and an always-zero source ends the read instead of spinning. The readers that
  *       buffer or decode through the JDK keep the JDK's behaviour instead: {@code forEachLine(Reader, ..)}, and
  *       every line reader handed a caller-supplied {@link java.io.BufferedReader} (other than this package's
- *       own {@link BufferedReader}, whose {@code readLine} applies the rule above), read a zero again until data
+ *       own {@code BufferedReader}, whose {@code readLine} applies the rule above), read a zero again until data
  *       or end of input arrives - so they read past two consecutive zeros, and an always-zero source spins
  *       there - and the byte-stream line readers are decoded by the JDK, which reports a zero-byte read as an
  *       {@code IOException} ("Underlying input stream returned zero bytes").
@@ -1006,7 +1006,9 @@ public final class IOUtil {
      * every platform and runs on a single shared daemon thread, so concurrent callers share one attempt and a
      * lookup that ignores interruption can neither accumulate threads nor keep the JVM alive. If the host name
      * cannot be determined, {@code "UNKNOWN_HOST_NAME"} is returned and the failure is retried after a short
-     * backoff rather than cached permanently. Interruption is restored before returning.
+     * backoff rather than cached permanently. Interruption is restored before returning, with a name a concurrent
+     * caller has already cached in place of {@code "UNKNOWN_HOST_NAME"}.
+     * Completion or timeout of an older attempt does not discard a newer retry; a cached success takes precedence.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1041,23 +1043,26 @@ public final class IOUtil {
             Thread.currentThread().interrupt();
             logger.warn(e, "Interrupted while resolving the host name");
 
-            // Leave the attempt in flight: it did not fail, and the next caller can still use its result.
-            return UNKNOWN_HOST_NAME;
+            // Leave the attempt in flight: it did not fail, and the next caller can still use its result. A peer may
+            // already have cached the name while this caller waited, as in the timeout branch below.
+            ret = hostName;
+            return ret != null ? ret : UNKNOWN_HOST_NAME;
         } catch (final TimeoutException e) {
             logger.error(e, "Timed out resolving the host name after {} seconds", HOST_NAME_RESOLVE_TIMEOUT_SECONDS);
 
             // Deliberately not cancelled: a native name lookup may ignore interruption, so cancelling would
             // not free the resolver thread. The attempt stays in flight for a later caller to reuse, but the
             // backoff stops every later call from blocking for the full timeout all over again.
-            backOffHostNameResolution();
+            backOffHostNameResolution(future);
 
-            return UNKNOWN_HOST_NAME;
+            ret = hostName;
+            return ret != null ? ret : UNKNOWN_HOST_NAME;
         } catch (final Exception e) {
             logger.error(e, "Failed to get host name");
             ret = null;
         }
 
-        return completeHostNameResolution(ret);
+        return completeHostNameResolution(future, ret);
     }
 
     /**
@@ -1111,12 +1116,20 @@ public final class IOUtil {
     /**
      * Records the outcome of a completed resolution attempt: caches a resolved name for the lifetime of the
      * JVM, or starts a retry backoff so a failing lookup is not repeated on every call.
+     * A caller finishing an already retired attempt leaves the current attempt unchanged.
      *
+     * @param observedFuture the attempt this caller awaited.
      * @param resolved the resolved host name, or {@code null}/empty if the attempt failed.
      * @return the host name, or {@code "UNKNOWN_HOST_NAME"} if it could not be determined.
      */
-    private static String completeHostNameResolution(final String resolved) {
+    private static String completeHostNameResolution(final Future<String> observedFuture, final String resolved) {
         synchronized (hostNameLock) {
+            // A delayed caller may resume after a peer retired this attempt and a later retry started.
+            // Only the attempt still registered here owns the resolver and retry deadline.
+            if (hostNameFuture != observedFuture) {
+                return hostName != null ? hostName : UNKNOWN_HOST_NAME;
+            }
+
             hostNameFuture = null;
 
             // Released on every outcome, not only on success: the executor's single worker used to stay parked
@@ -1138,9 +1151,17 @@ public final class IOUtil {
     /**
      * Suppresses further host-name resolution attempts for a short period after an attempt timed out, so that
      * a lookup which never completes cannot make every subsequent call block for the full timeout.
+     * An already retired attempt does not change the current resolver or retry deadline.
+     *
+     * @param observedFuture the attempt that timed out for this caller.
      */
-    private static void backOffHostNameResolution() {
+    private static void backOffHostNameResolution(final Future<String> observedFuture) {
         synchronized (hostNameLock) {
+            // Timeout handling can be delayed just like completion; do not shut down a newer retry.
+            if (hostNameFuture != observedFuture) {
+                return;
+            }
+
             hostNameRetryAtMillis = System.currentTimeMillis() + HOST_NAME_RETRY_BACKOFF_MILLIS;
 
             // The in-flight lookup is deliberately kept (see the caller), and shutdown() lets it run to completion;
@@ -1760,6 +1781,27 @@ public final class IOUtil {
             return N.EMPTY_BYTE_ARRAY;
         }
 
+        // Content still in the pooled read buffer is copied out before the buffer goes back to the pool.
+        return readFully(source, maxLength, null, (content, count, pooled, unused) -> pooled ? N.copyOfRange(content, 0, count) : content);
+    }
+
+    /**
+     * The read loop of {@link #readBytes(InputStream, long, long)} and {@link #readAllBytesToString(InputStream, Charset)}.
+     * Reads {@code source} into the pooled read buffer, growing into a private array by 1.75x when that fills up, until the
+     * end of input, a zero-length read or {@code maxLength} bytes, and hands what was read to {@code finisher} before the
+     * pooled buffer goes back to the pool. Content that outgrew the pooled buffer is first trimmed into an exact-size array
+     * (unless the grown array is exactly full) and the grown array is dropped, so it does not stay reachable while the
+     * finisher works on the trimmed copy - while a big text is decoded, for instance.
+     *
+     * @param <R> the result type.
+     * @param source the stream to read, already checked to be non-{@code null}.
+     * @param maxLength the maximum number of bytes to read.
+     * @param charset handed on to {@code finisher} unchanged, may be {@code null}.
+     * @param finisher turns the bytes read into the result.
+     * @return the result of {@code finisher}.
+     * @throws IOException if reading the input fails.
+     */
+    private static <R> R readFully(final InputStream source, final long maxLength, final Charset charset, final ReadFinisher<R> finisher) throws IOException {
         final byte[] buf = Objectory.createByteArrayBuffer();
         byte[] byteArray = buf;
         int arrayLength = byteArray.length;
@@ -1804,16 +1846,43 @@ public final class IOUtil {
             }
 
             if (count <= 0) {
-                return N.EMPTY_BYTE_ARRAY;
+                return finisher.finish(N.EMPTY_BYTE_ARRAY, 0, false, charset);
+            }
+
+            if (byteArray == buf) {
+                return finisher.finish(buf, count, true, charset);
             }
 
             // A grown array is private to this call and never pooled: when it is exactly full (the read stopped at
-            // maxLength, the capacity the last growth was capped to) it already is the result - skip the final copy.
-            return byteArray != buf && count == arrayLength ? byteArray : N.copyOfRange(byteArray, 0, count);
+            // maxLength, the capacity the last growth was capped to) it already is the content - skip the copy.
+            final byte[] content = count == arrayLength ? byteArray : N.copyOfRange(byteArray, 0, count);
+            byteArray = null; // NOSONAR - the grown array must not stay reachable while the finisher works on its trimmed copy
 
+            return finisher.finish(content, count, false, charset);
         } finally {
             Objectory.recycle(buf);
         }
+    }
+
+    /**
+     * Turns what {@link #readFully(InputStream, long, Charset, ReadFinisher)} read into its result, while the pooled read
+     * buffer is still borrowed.
+     *
+     * @param <R> the result type.
+     */
+    @FunctionalInterface
+    private interface ReadFinisher<R> {
+        /**
+         * @param content the bytes read. When {@code pooled}, the pooled read buffer, holding them in its first {@code count}
+         *                elements; it goes back to the pool once this method returns, so it must not escape. Otherwise an
+         *                array private to the read holding exactly the {@code count} bytes - {@link N#EMPTY_BYTE_ARRAY} when
+         *                nothing was read.
+         * @param count   the number of bytes read.
+         * @param pooled  whether {@code content} is the pooled read buffer.
+         * @param charset the charset given to {@code readFully}, may be {@code null}.
+         * @return the result of the read.
+         */
+        R finish(byte[] content, int count, boolean pooled, Charset charset);
     }
 
     /**
@@ -2405,9 +2474,49 @@ public final class IOUtil {
     public static String readAllToString(final InputStream source, final Charset charset) throws IllegalArgumentException, UncheckedIOException {
         // Decoding the whole byte[] in one call is faster than streaming through an InputStreamReader, at the
         // cost of holding the bytes and the String at the same time - hence the size warning above.
-        final byte[] bytes = readAllBytes(source);
+        try {
+            return readAllBytesToString(source, checkCharset(charset));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
-        return new String(bytes, checkCharset(charset));
+    /**
+     * {@code new String(readBytes(source, 0, Long.MAX_VALUE), charset)} without the copy that would only feed the decoder.
+     *
+     * <p>The source is read by {@link #readFully(InputStream, long, Charset, ReadFinisher)}, the loop of
+     * {@link #readBytes(InputStream, long, long)}, with no length limit - exactly as {@link #readAllBytes(InputStream)} reads
+     * it. Only the end differs: content that still fits the pooled read buffer is decoded straight from it by a java.base
+     * charset, instead of first being copied into an exact-size array that is decoded once and dropped. A caller-supplied
+     * {@code Charset} implementation is still handed that private copy, never the shared pooled array. Content that outgrew
+     * the buffer is decoded from its exact-size trimmed copy, as before, so the larger grown array is not kept reachable
+     * while a big text is decoded.
+     *
+     * @param source the stream to read, must not be {@code null}.
+     * @param charset the resolved charset to decode with.
+     * @return the decoded content.
+     * @throws IllegalArgumentException if {@code source} is {@code null}.
+     * @throws IOException if reading the input fails.
+     */
+    private static String readAllBytesToString(final InputStream source, final Charset charset) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(source, cs.source);
+
+        return readFully(source, Long.MAX_VALUE, charset, (content, count, pooled, decodeWith) -> {
+            if (!pooled) {
+                return new String(content, decodeWith);
+            }
+
+            if (decodeWith.getClass().getModule() == Charset.class.getModule()) {
+                // A java.base charset decodes straight from the pooled buffer, before the buffer goes back to the pool.
+                // Asked via getModule(): getClassLoader() is permission-checked under a SecurityManager for a
+                // platform-loaded (jdk.charsets) charset such as Big5, and would fail a read that readAllBytes + decode
+                // never failed.
+                return new String(content, 0, count, decodeWith);
+            }
+
+            // A caller-supplied Charset gets a private exact-size copy, never the shared pooled array.
+            return new String(N.copyOfRange(content, 0, count), decodeWith);
+        });
     }
 
     /**
@@ -4744,7 +4853,11 @@ public final class IOUtil {
     public static void write(final short value, final Writer output) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(output, cs.output);
 
-        output.write(N.stringOf(value));
+        if (output instanceof com.landawn.abacus.util.BufferedWriter buffered) {
+            buffered.write(value);
+        } else {
+            output.write(N.stringOf(value));
+        }
     }
 
     /**
@@ -4771,7 +4884,11 @@ public final class IOUtil {
     public static void write(final int value, final Writer output) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(output, cs.output);
 
-        output.write(N.stringOf(value));
+        if (output instanceof com.landawn.abacus.util.BufferedWriter buffered) {
+            buffered.writeInt(value);
+        } else {
+            output.write(N.stringOf(value));
+        }
     }
 
     /**
@@ -4797,7 +4914,11 @@ public final class IOUtil {
     public static void write(final long value, final Writer output) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(output, cs.output);
 
-        output.write(N.stringOf(value));
+        if (output instanceof com.landawn.abacus.util.BufferedWriter buffered) {
+            buffered.write(value);
+        } else {
+            output.write(N.stringOf(value));
+        }
     }
 
     /**
@@ -9405,6 +9526,10 @@ public final class IOUtil {
      * provider other than the default file system (a zip file system, say) is opened through that provider and
      * gets the same three answers.
      *
+     * <p>For a non-default provider, if constructing the reader fails after its input stream has been opened, the
+     * stream is closed and any close failure is suppressed on the construction failure. On success, closing the
+     * returned reader closes the stream.
+     *
      * @param path    the path of the file to be read from.
      * @param charset the charset to be used; {@code null} uses the default charset (UTF-8).
      * @return a new BufferedReader instance.
@@ -9413,6 +9538,7 @@ public final class IOUtil {
      *         be opened.
      * @see #newBufferedReader(File, Charset)
      */
+    @SuppressWarnings("resource")
     public static java.io.BufferedReader newBufferedReader(final Path path, final Charset charset) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(path, cs.path);
 
@@ -9444,7 +9570,21 @@ public final class IOUtil {
 
         // InputStreamReader, not Files.newBufferedReader's decoder: it replaces malformed input like every other
         // decoder in this class.
-        return new java.io.BufferedReader(newInputStreamReader(is, charset));
+        try {
+            return new java.io.BufferedReader(newInputStreamReader(is, charset));
+        } catch (final RuntimeException | Error e) {
+            // Ownership transfers only after both wrappers exist. A custom decoder can fail during construction,
+            // leaving no reader for the caller to close; retain that failure even when releasing the input fails.
+            try {
+                is.close();
+            } catch (final Throwable suppressed) { //NOSONAR
+                if (suppressed != e) {
+                    e.addSuppressed(suppressed);
+                }
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -10592,7 +10732,9 @@ public final class IOUtil {
         sourceFile = sourceFile.getCanonicalFile();
         destinationDirectory = destinationDirectory.getCanonicalFile();
 
-        final String srcCanonicalPath = sourceFile.getCanonicalPath();
+        // sourceFile is canonical now, so its path IS the canonical path: getCanonicalPath() here would only
+        // resolve every element of it once more, on disk (about as costly as the canonicalisation above).
+        final String srcCanonicalPath = sourceFile.getPath();
 
         if (sourceFile.isDirectory()) {
             // Containment is decided by where the directories actually sit. getCanonicalPath does not
@@ -10600,14 +10742,21 @@ public final class IOUtil {
             // outside used to be rejected, and one outside pointing back in used to be accepted.
             final Path srcLocation = sourceFile.toPath().toRealPath();
             final Path destLocation = resolvedDirectoryLocation(destinationDirectory);
+            // Compared in the source's spelling (see inSpellingOf); a copyDirectory child needs no second look, as
+            // copyDirectory has already checked its own pair that way.
+            final Path destInSourceSpelling = guard == null ? inSpellingOf(destLocation, srcLocation) : destLocation;
 
-            requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), destLocation.toString(), "copy");
+            requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), destInSourceSpelling.toString(), "copy");
+
+            if (guard == null) {
+                requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destLocation, srcLocation, "copy");
+            }
 
             final File targetDir = new File(destLocation.toFile(), srcName);
             final Path spelledTarget = destLocation.resolve(srcName);
 
             // Checked before createDestDirectory, so a rejected call still leaves no new directory behind.
-            requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), spelledTarget.toString());
+            requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), destInSourceSpelling.resolve(srcName).toString());
 
             // srcLocation is the source's REAL path while the target is only spelled, so a directory link copied
             // into the directory that holds it (target = the link itself, which leads to the source) slipped past
@@ -10624,7 +10773,8 @@ public final class IOUtil {
                 }
 
                 if (linkTarget != null) {
-                    requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), linkTarget.toString());
+                    // A link's real path is spelled on the real volume: compared in the source's own (subst/UNC) spelling.
+                    requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(linkTarget, srcLocation).toString());
                 }
             }
 
@@ -10814,7 +10964,8 @@ public final class IOUtil {
      * are DERIVED, never queried per directory: one {@code toRealPath()} for the source root, one for the output
      * root, one per junction met; a plain subdirectory is its parent's real path plus its name.
      *
-     * <p>Paths are compared as spelled, which fails across an ALIAS: a {@code subst} or mapped drive or a UNC share
+     * <p>Paths are compared as spelled, including case on Windows: distinct entries in a case-sensitive directory
+     * must not be mistaken for a cycle. This spelling comparison fails across an ALIAS: a {@code subst} or mapped drive or a UNC share
      * names the same directories under another root, {@code toRealPath()} keeps such a spelling (no reparse point
      * on the path), {@code getCanonicalPath()} resolves a subst drive on JDK 25 but nothing on JDK 21, and a
      * junction's real target is always spelled on the real volume. So when a junction target's root differs from a
@@ -10846,13 +10997,15 @@ public final class IOUtil {
         }
 
         private boolean leadsBackAsSpelled(final Path junctionTarget) {
+            final String targetSpelling = junctionTarget.toString();
+
             for (final Path onPath : sourcePath) {
-                if (onPath.startsWith(junctionTarget)) {
+                if (isSameOrInside(onPath.toString(), targetSpelling)) {
                     return true;
                 }
             }
 
-            return outputRoot != null && (junctionTarget.startsWith(outputRoot) || outputRoot.startsWith(junctionTarget));
+            return outputRoot != null && (isSameOrInside(targetSpelling, outputRoot.toString()) || isSameOrInside(outputRoot.toString(), targetSpelling));
         }
 
         /**
@@ -10861,7 +11014,8 @@ public final class IOUtil {
          */
         private Path inSeedSpelling(final Path target) {
             for (final Map.Entry<Path, Path> alias : aliases.entrySet()) {
-                if (target.startsWith(alias.getKey())) {
+                // Path.startsWith folds case on Windows; only an exact prefix can reuse this learned alias.
+                if (isSameOrInside(target.toString(), alias.getKey().toString())) {
                     return alias.getValue().resolve(alias.getKey().relativize(target));
                 }
             }
@@ -11097,6 +11251,21 @@ public final class IOUtil {
     }
 
     /**
+     * {@code location} respelled under {@code reference}'s root when its own root is another spelling of the same
+     * place - a subst or mapped drive, or a UNC share naming a local directory, which {@code toRealPath()} keeps (as
+     * {@code getCanonicalPath()} keeps a UNC spelling, and a subst drive before JDK 22) - so that a containment check
+     * compares like with like; {@code location} itself otherwise. Without it {@code Q:\src\sub} (Q: a subst drive for
+     * {@code C:\data}) passed as "outside" {@code C:\data\src}, and copyDirectory copied the source into itself for
+     * ever on JDK 21. Same-root pairs, the common case, cost nothing; an alias is found by file identity, as
+     * {@link CopyCycleGuard} finds one.
+     */
+    private static Path inSpellingOf(final Path location, final Path reference) {
+        final Path translated = new CopyCycleGuard(reference).inSeedSpelling(location);
+
+        return translated == null ? location : translated;
+    }
+
+    /**
      * Rejects a destination directory that is the source directory itself, or lies inside it.
      *
      * <p>Copying or moving a directory into itself has no meaning, and attempting it damages the source: the
@@ -11120,6 +11289,48 @@ public final class IOUtil {
         if (isSameOrInside(destCanonicalPath, srcCanonicalPath)) {
             throw new IllegalArgumentException("Failed to " + operation + " due to the target directory: " + destCanonicalPath
                     + " is in or same as the source directory: " + srcCanonicalPath);
+        }
+    }
+
+    /**
+     * The same rejection for a destination directory that does not exist yet, located where it will be created: under
+     * the real path of its deepest existing ancestor, in the source's spelling. A directory that does not exist is
+     * otherwise located by its canonical path, which keeps a junction or symbolic link on the way to it (on JDK 25 as
+     * on JDK 21), so a destination to be created beneath a junction into the source passed as "outside" it:
+     * copyDirectory and moveToDirectory created it inside the source before failing (copyDirectory after copying part
+     * of the source into it), and copyToDirectory copied the source into it for ever. An existing destination costs
+     * one {@code exists()} call: its real path has already been compared.
+     *
+     * @param destinationDirectory the destination directory, as passed to the operation.
+     * @param destLocation {@link #resolvedDirectoryLocation(File)} of {@code destinationDirectory}: its canonical path
+     *        when it does not exist.
+     * @param srcLocation the resolved location of the source directory.
+     * @param operation the verb used in the message ({@code "copy"} / {@code "move"}).
+     * @throws IllegalArgumentException if the destination would be created as the source or inside it.
+     */
+    private static void requireNewDestDirectoryOutsideSourceDirectory(final File destinationDirectory, final Path destLocation, final Path srcLocation,
+            final String operation) throws IllegalArgumentException {
+        if (destinationDirectory.exists()) {
+            return;
+        }
+
+        for (Path ancestor = destLocation.getParent(); ancestor != null; ancestor = ancestor.getParent()) {
+            final Path ancestorReal;
+
+            try {
+                ancestorReal = ancestor.toRealPath();
+            } catch (final IOException e) {
+                continue; // not created yet either
+            }
+
+            final Path whereCreated = ancestorReal.resolve(ancestor.relativize(destLocation));
+
+            // Equal: no link on the way, and that spelling has been compared already.
+            if (!whereCreated.toString().equals(destLocation.toString())) {
+                requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(whereCreated, srcLocation).toString(), operation);
+            }
+
+            return;
         }
     }
 
@@ -11322,9 +11533,12 @@ public final class IOUtil {
         // named the recursive call's arguments rather than the caller's. The peer copyToDirectory(..) has
         // always rejected the same input up front; this makes the two agree.
         final Path srcLocation = resolvedDirectoryLocation(sourceDirectory);
-        final Path destLocation = resolvedDirectoryLocation(destinationDirectory);
+        final Path destResolved = resolvedDirectoryLocation(destinationDirectory);
+        // In the source's spelling: a subst/UNC alias of a directory inside the source must not read as "outside" it.
+        final Path destLocation = inSpellingOf(destResolved, srcLocation);
 
         requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), destLocation.toString(), "copy");
+        requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destResolved, srcLocation, "copy");
 
         // Copying into an ANCESTOR of srcDir is legal, but the one immediate child whose name repeats the first
         // directory below destinationDirectory on the path down to srcDir would be copied onto that ancestor. The walk rejects
@@ -12388,8 +12602,12 @@ public final class IOUtil {
             // that surfaced as a platform-specific failure ("The parameter is incorrect" on Windows, an
             // AccessDeniedException for the nested case) AFTER the destination had already been created
             // inside the source. Rejected here instead, matching copyToDirectory(..)/copyDirectory(..).
-            requireDestDirectoryOutsideSourceDirectory(resolvedDirectoryLocation(source).toString(), resolvedDirectoryLocation(destinationDirectory).toString(),
-                    "move");
+            // The destination is compared in the source's spelling, so a subst/UNC alias inside the source is caught too.
+            final Path srcLocation = resolvedDirectoryLocation(source);
+            final Path destResolved = resolvedDirectoryLocation(destinationDirectory);
+
+            requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(destResolved, srcLocation).toString(), "move");
+            requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destResolved, srcLocation, "move");
         }
 
         // The entry keeps the source's own name, resolved as copyToDirectory(..) resolves it: "x/." moves as "x"
@@ -14349,9 +14567,12 @@ public final class IOUtil {
      * ({@code fsutil file setCaseSensitiveInfo <dir> enable}) the siblings {@code P} and {@code p} were "the same
      * directory": {@code moveToDirectory(P/f.txt, p, ATOMIC_MOVE)} silently replaced {@code p/f.txt}, and
      * {@code copyToDirectory(P/g.txt, p)} created {@code "Copy of g.txt"}. {@link Path#toRealPath(LinkOption...)}
-     * (following links) resolves junctions, symbolic links and subst drives and returns the on-disk case, so its
-     * strings are compared exactly - case-sensitively. Elsewhere {@code Files.isSameFile} compares file keys (device
-     * and inode) and is kept.
+     * (following links) resolves junctions and symbolic links and returns the on-disk case, so equal strings are the
+     * same directory and strings that are equal only ignoring case are taken as two different ones (siblings in a
+     * case-sensitive directory). It keeps a subst or mapped drive and a UNC spelling, though (no reparse point on the
+     * path), so any other pair is decided by {@code Files.isSameFile}, which - the two paths no longer being equal
+     * ignoring case - opens both and compares their file identity. Elsewhere {@code Files.isSameFile} compares file
+     * keys (device and inode) and is kept.
      *
      * @param a a directory.
      * @param b another directory.
@@ -14360,7 +14581,19 @@ public final class IOUtil {
     private static boolean isSameDirectory(final File a, final File b) {
         try {
             if (IS_OS_WINDOWS) {
-                return a.toPath().toRealPath().toString().equals(b.toPath().toRealPath().toString());
+                final Path realA = a.toPath().toRealPath();
+                final Path realB = b.toPath().toRealPath();
+                final String spelledA = realA.toString();
+                final String spelledB = realB.toString();
+
+                if (spelledA.equals(spelledB)) {
+                    return true;
+                }
+
+                // Equal ignoring case only: two entries of a case-sensitive directory (toRealPath returns the on-disk
+                // case). Any other difference may be an alias toRealPath keeps ("Q:\dir" on a subst drive for
+                // "C:\real\dir"), which only file identity sees through.
+                return !spelledA.equalsIgnoreCase(spelledB) && Files.isSameFile(realA, realB);
             }
 
             return Files.isSameFile(a.toPath(), b.toPath());
@@ -15944,6 +16177,14 @@ public final class IOUtil {
     }
 
     /**
+     * {@link #scaleBy(InputStream, SampleScale, long)} against {@code source.length()}, which is looked up only when
+     * sampling was requested: it is a file-system call that every other read of {@code source} would make for nothing.
+     */
+    private static InputStream scaleByLengthOf(final InputStream in, final SampleScale sampleScale, final File source) {
+        return sampleScale == null ? in : scaleBy(in, sampleScale, source.length());
+    }
+
+    /**
      * Counts the bytes read from the stream it wraps.
      *
      * <p>Used to measure how much of a source a line sample consumed. That is strictly better than re-encoding
@@ -16382,7 +16623,13 @@ public final class IOUtil {
         // stays an empty result: those are the documented "nothing to list" answers callers probe with.
         checkListableDirectory(parentPath);
 
-        listFiles0(parentPath, recursively, filter, files);
+        if (filter == directories_excluded_filter || filter == directories_only_filter) {
+            // The two built-in selections by kind only ask isDirectory(), which the descent test asks as well: one
+            // stat per entry answers both, as it already does for the lazy twin (DepthFirstFileIterator).
+            listFilesByKind0(parentPath, recursively, filter == directories_only_filter, files);
+        } else {
+            listFiles0(parentPath, recursively, filter, files);
+        }
 
         return files;
     }
@@ -16418,6 +16665,38 @@ public final class IOUtil {
             // Avoid infinite recursion on cyclic symbolic links: don't descend into symlinked directories.
             if (recursively && file.isDirectory() && !isSymbolicLinkOrJunction(file)) {
                 listFiles0(file, recursively, filter, files);
+            }
+        }
+    }
+
+    /**
+     * {@link #listFiles0(File, boolean, Throwables.BiPredicate, List)} for the built-in selections by kind
+     * ({@code listFiles(.., excludeDirectory = true)} and {@code listDirectories(..)}): the same traversal, order and
+     * link rule, but each entry's {@code isDirectory()} is asked once, for the selection and the descent test
+     * together, instead of once by the filter and again by the descent test.
+     *
+     * @param directory       a directory that exists (see {@link #listFiles0(File, boolean, Throwables.BiPredicate, List)}).
+     * @param recursively     whether to descend into subdirectories.
+     * @param directoriesOnly {@code true} to append the directories, {@code false} to append every other entry.
+     * @param files           the result being built.
+     */
+    private static void listFilesByKind0(final File directory, final boolean recursively, final boolean directoriesOnly, final List<File> files) {
+        final File[] subFiles = directory.listFiles();
+
+        if (N.isEmpty(subFiles)) {
+            return;
+        }
+
+        for (final File file : subFiles) {
+            final boolean isDirectory = file.isDirectory();
+
+            if (isDirectory == directoriesOnly) {
+                files.add(file);
+            }
+
+            // Same cycle guard as listFiles0: a symlinked directory is never descended into.
+            if (recursively && isDirectory && !isSymbolicLinkOrJunction(file)) {
+                listFilesByKind0(file, recursively, directoriesOnly, files);
             }
         }
     }
@@ -16666,7 +16945,8 @@ public final class IOUtil {
                     return;
                 }
 
-                final File file = level.files[level.cursor++];
+                final File file = level.files[level.cursor];
+                level.files[level.cursor++] = null;
                 final boolean isDirectory = file.isDirectory();
 
                 // Pushed BEFORE the entry is handed back, so the next call reads from this new level: that is
@@ -16882,7 +17162,26 @@ public final class IOUtil {
             throw new IllegalArgumentException("A file URL must name a file: " + url);
         }
 
-        return new File(decodeUrl(path).replace('/', File.separatorChar));
+        final String decodedPath = decodeUrl(path);
+
+        // The two drive rules above read the still-encoded path, so a drive letter or colon spelled as an escape
+        // ("file:///C%3A", "file:///%43:x", "file:C%3A") decoded into the very bare or drive-relative drive they refuse.
+        // Every leading separator is skipped, as java.io.File drops them all before a drive letter: the four-slash
+        // "file:////C:x/y" (path "//C:x/y", two segments, so not a share-less UNC root) became File("C:x\y").
+        if (IS_OS_WINDOWS) {
+            int letter = 0;
+
+            while (letter < decodedPath.length() && (decodedPath.charAt(letter) == '/' || decodedPath.charAt(letter) == '\\')) {
+                letter++;
+            }
+
+            if (decodedPath.length() >= letter + 2 && decodedPath.charAt(letter + 1) == ':' && isDriveLetter(decodedPath.charAt(letter))
+                    && (decodedPath.length() == letter + 2 || (decodedPath.charAt(letter + 2) != '/' && decodedPath.charAt(letter + 2) != '\\'))) {
+                throw new IllegalArgumentException("A file URL naming a drive must also name an absolute path on it: " + url);
+            }
+        }
+
+        return new File(decodedPath.replace('/', File.separatorChar));
     }
 
     /**
@@ -17394,8 +17693,9 @@ public final class IOUtil {
             return false;
         }
 
-        if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
-            // same file
+        // File.equals folds case on Windows even inside a case-sensitive directory. Only identical canonical
+        // spellings prove this shortcut; different spellings can safely fall through to the content comparison.
+        if (file1.getCanonicalPath().equals(file2.getCanonicalPath())) {
             return true;
         }
 
@@ -17504,8 +17804,8 @@ public final class IOUtil {
         checkFileExists(file1, cs.file1);
         checkFileExists(file2, cs.file2);
 
-        if (file1.getCanonicalFile().equals(file2.getCanonicalFile())) {
-            // same file
+        // As in contentEquals0, do not fold case: Windows can hold distinct case-sensitive sibling files.
+        if (file1.getCanonicalPath().equals(file2.getCanonicalPath())) {
             return true;
         }
 
@@ -17771,8 +18071,8 @@ public final class IOUtil {
     /**
      * Compares the contents of two Readers to determine if they are equal or not, ignoring EOL characters.
      * <p>
-     * This method buffers the input internally using
-     * {@link BufferedReader} if they are not already buffered.
+     * This method buffers the input internally using this package's pooled
+     * {@code BufferedReader} if they are not already a {@link java.io.BufferedReader}.
      * </p>
      *
      * <p><b>Reader position:</b> both readers are read to end of input, or to the first differing line; either
@@ -18277,6 +18577,7 @@ public final class IOUtil {
          * @throws IllegalArgumentException if {@code file} is null or a failed open identifies it as a directory
          * @throws UncheckedIOException if opening the file or its compressed archive fails
          * @throws RuntimeException if constructing the buffered reader or line iterator fails after the source is opened
+         * @throws Error if reader construction raises an error; the opened resources are released before it propagates
          */
         private void open() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
             final Holder<ZipFile> zipHolder = new Holder<>();
@@ -18293,7 +18594,8 @@ public final class IOUtil {
 
             try {
                 openedLines = new LineIterator(newBufferedReader(openedStream, charset));
-            } catch (final RuntimeException e) {
+            } catch (final RuntimeException | Error e) {
+                // A custom charset can raise an Error before these owned handles are published to close().
                 closeQuietly(openedStream);
                 closeQuietly(openedZip);
 
@@ -19237,7 +19539,7 @@ public final class IOUtil {
                 // The counter goes UNDER the decompressor, so it measures compressed bytes taken from the file -
                 // the same unit as file.length(). Counting above it would measure decompressed bytes and make any
                 // scaling against the file length wrong by the whole compression ratio.
-                is = new GZIPInputStream(scaleBy(fis, sampleScale, source.length()));
+                is = new GZIPInputStream(scaleByLengthOf(fis, sampleScale, source));
             } catch (final Throwable e) {
                 closeSuppressing(fis, e);
                 throw e;
@@ -19272,7 +19574,7 @@ public final class IOUtil {
                 throw e;
             }
         } else {
-            is = scaleBy(openFileInputStream(source), sampleScale, source.length());
+            is = scaleByLengthOf(openFileInputStream(source), sampleScale, source);
         }
 
         return is;

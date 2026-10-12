@@ -1688,8 +1688,10 @@ public final class PropertiesUtil {
      *
      * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
-     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
-     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * nested {@code Properties} element, including one produced for a subclass with only null-valued mappings,
+     * keeps its structural type only with {@code writeTypeInfo} {@code true}, which marks it {@code type="Properties"}.
+     * Loading without a typed target reconstructs a base {@code Properties}. Written without type information,
+     * the empty element is {@code <name></name>}, which no longer
      * differs from an empty text value and loads as an empty {@code String}.
      * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
      * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
@@ -1752,8 +1754,10 @@ public final class PropertiesUtil {
      *
      * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
-     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
-     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * nested {@code Properties} element, including one produced for a subclass with only null-valued mappings,
+     * keeps its structural type only with {@code writeTypeInfo} {@code true}, which marks it {@code type="Properties"}.
+     * Loading without a typed target reconstructs a base {@code Properties}. Written without type information,
+     * the empty element is {@code <name></name>}, which no longer
      * differs from an empty text value and loads as an empty {@code String}.
      * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
      * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
@@ -1804,8 +1808,10 @@ public final class PropertiesUtil {
      *
      * <p><b>Round-trip caveats.</b> {@link #loadFromXml(File)} and its siblings strip leading and trailing
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
-     * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
-     * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
+     * nested {@code Properties} element, including one produced for a subclass with only null-valued mappings,
+     * keeps its structural type only with {@code writeTypeInfo} {@code true}, which marks it {@code type="Properties"}.
+     * Loading without a typed target reconstructs a base {@code Properties}. Written without type information,
+     * the empty element is {@code <name></name>}, which no longer
      * differs from an empty text value and loads as an empty {@code String}.
      * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
      * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
@@ -1968,7 +1974,13 @@ public final class PropertiesUtil {
                 bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             }
 
-            if ((isFirstCall || !writeTypeInfo) || !properties.getClass().equals(Properties.class)) {
+            // A subclass with no emitted children is just as ambiguous as an empty base Properties.
+            // Null values are omitted below, so isEmpty() alone would miss null-only subclasses.
+            // Keep nonempty subclasses unmarked: xmlToJava derives their nested classes from the children.
+            final boolean writePropertiesMarker = !isFirstCall && writeTypeInfo
+                    && (properties.getClass().equals(Properties.class) || properties.values().stream().noneMatch(Objects::nonNull));
+
+            if (!writePropertiesMarker) {
                 bw.write("<" + rootElementName + ">");
             } else {
                 bw.write("<" + rootElementName + " " + TYPE + "=\"" + PROPERTIES_TYPE_ATTR + "\">");

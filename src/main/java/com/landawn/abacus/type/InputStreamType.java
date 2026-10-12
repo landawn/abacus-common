@@ -21,6 +21,7 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.sql.Blob;
@@ -38,6 +39,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.Objectory;
 
 /**
  * Type handler for {@link java.io.InputStream} and its subclasses.
@@ -168,6 +170,54 @@ public class InputStreamType extends AbstractType<InputStream> {
     }
 
     /**
+     * Whether {@link #wrap(byte[])} can create the handled class: the single list of supported classes.
+     */
+    private boolean isWrappable() {
+        return typeClass == (Class<?>) InputStream.class || typeClass == (Class<?>) ByteArrayInputStream.class
+                || typeClass == (Class<?>) BufferedInputStream.class || typeClass == (Class<?>) FilterInputStream.class
+                || typeClass == (Class<?>) DataInputStream.class || typeClass == (Class<?>) PushbackInputStream.class;
+    }
+
+    /**
+     * Returns {@code opened} - a JDBC stream or a stream owning a Blob locator - as the handled
+     * class: as is when it already is one, wrapped when the handled class wraps a stream (closing the result closes
+     * {@code opened}), or as a {@link ByteArrayInputStream} holding a copy of its content, after which {@code opened} is closed.
+     * A null stream is returned unchanged. An unsupported target closes the acquired stream before failing.
+     *
+     * @param opened the acquired stream whose ownership is transferred to this method; may be null
+     * @return the stream in the handled class, or null
+     * @throws UncheckedIOException if copying or closing an acquired stream fails
+     * @throws UnsupportedOperationException if the stream does not already match an unsupported handled class
+     */
+    private InputStream asHandledClass(final InputStream opened) throws UncheckedIOException {
+        if (opened == null || typeClass.isInstance(opened)) {
+            return opened;
+        } else if (typeClass == (Class<?>) BufferedInputStream.class || typeClass == (Class<?>) FilterInputStream.class) {
+            return new BufferedInputStream(opened);
+        } else if (typeClass == (Class<?>) DataInputStream.class) {
+            return new DataInputStream(opened);
+        } else if (typeClass == (Class<?>) PushbackInputStream.class) {
+            return new PushbackInputStream(opened);
+        }
+
+        try (InputStream source = opened) {
+            // A JDBC driver can supply an arbitrary stream class. Do not copy content into an unrelated target;
+            // reject it while still closing the stream acquired for this failed conversion.
+            if (!isWrappable()) {
+                throw unsupportedStreamClass();
+            }
+
+            return new ByteArrayInputStream(IOUtil.readAllBytes(source));
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private UnsupportedOperationException unsupportedStreamClass() {
+        return new UnsupportedOperationException("Construction from content is not supported for stream class: " + typeClass.getName());
+    }
+
+    /**
      * Wraps raw bytes in a stream of the handled class.
      *
      * @param bytes the content to wrap; must not be {@code null}
@@ -176,82 +226,132 @@ public class InputStreamType extends AbstractType<InputStream> {
      */
     private InputStream wrap(final byte[] bytes) throws UnsupportedOperationException {
         // In particular, decoder constructors cannot reconstruct already decoded stringOf output.
-        if (typeClass == (Class<?>) InputStream.class || typeClass == (Class<?>) ByteArrayInputStream.class) {
+        if (!isWrappable()) {
+            throw unsupportedStreamClass();
+        } else if (typeClass == (Class<?>) InputStream.class || typeClass == (Class<?>) ByteArrayInputStream.class) {
             return new ByteArrayInputStream(bytes);
         } else if (typeClass == (Class<?>) BufferedInputStream.class || typeClass == (Class<?>) FilterInputStream.class) {
             return new BufferedInputStream(new ByteArrayInputStream(bytes));
         } else if (typeClass == (Class<?>) DataInputStream.class) {
             return new DataInputStream(new ByteArrayInputStream(bytes));
-        } else if (typeClass == (Class<?>) PushbackInputStream.class) {
+        } else {
             return new PushbackInputStream(new ByteArrayInputStream(bytes));
         }
-
-        throw new UnsupportedOperationException("Text construction is not supported for stream class: " + typeClass.getName());
     }
 
     /**
      * Converts an arbitrary object to an {@link InputStream}.
+     * An object that already is an instance of the handled stream class is returned as is (not read, copied or closed).
      * {@link Blob} instances are converted via {@link Blob#getBinaryStream()}; ownership of a supplied
      * locator is transferred to the returned stream, whose {@link InputStream#close()} method also calls
-     * {@link Blob#free()}.
+     * {@link Blob#free()} - a {@code BufferedInputStream}, {@code DataInputStream} or {@code PushbackInputStream} wraps the
+     * Blob's stream, while a {@code ByteArrayInputStream} gets a copy of the content and the locator is released at once.
+     * An unsupported handled class is rejected before the Blob is opened.
      * A {@code byte[]} is wrapped as-is (the raw bytes, no charset involved) in a stream of the handled class,
-     * subject to the same supported-class rule as {@link #valueOf(String)}.
-     * All other objects are first converted to a string and then to a stream via {@link #valueOf(String)}.
+     * subject to the same supported-class rule as {@link #valueOf(String)}; any other {@link InputStream} has its
+     * remaining bytes read (it is consumed but not closed - the caller still owns it) and wrapped the same way. When the
+     * handled class cannot be created from bytes, {@link UnsupportedOperationException} is thrown before the supplied
+     * stream is read.
+     * All other objects are first converted to a string and then to a stream via {@link #valueOf(String)}; a
+     * {@link java.io.Reader} (consumed but not closed) or a {@link java.sql.Clob} (read and then released) is read to its end
+     * that way, after the handled class has been checked.
      *
      * @param obj the object to convert; may be {@code null}
      * @return an {@link InputStream} representation of the object, or {@code null} if {@code obj} is {@code null};
-     *         when {@code obj} is a {@code Blob}, closing the returned stream also releases the locator
-     * @throws UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}
+     *         when {@code obj} is a {@code Blob} returned as (or wrapped around) its owning stream, closing the returned stream
+     *         also releases the locator; a {@code ByteArrayInputStream} copy is returned with the locator already released
+     * @throws UncheckedSQLException if a {@link java.sql.SQLException} occurs while reading from a {@link Blob}, or while reading
+     *         or releasing a supplied {@link java.sql.Clob}
+     * @throws UncheckedIOException if reading a supplied stream of another class, or a supplied reader, fails, or reading or
+     *         releasing a {@code Blob} fails while it is copied into a {@code ByteArrayInputStream}
      * @throws UnsupportedOperationException if content is supplied for an unsupported stream class
      */
     @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public InputStream valueOf(final Object obj) throws UncheckedSQLException, UnsupportedOperationException {
+    public InputStream valueOf(final Object obj) throws UncheckedSQLException, UncheckedIOException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (typeClass.isInstance(obj)) {
+            // Returned as is: converting would consume the caller's stream (and the string route would decode its bytes as
+            // text, replacing those that are not valid in the charset: 0x80 -> EF BF BD).
+            return (InputStream) obj;
         } else if (obj instanceof Blob blob) {
+            // Checked before the Blob is opened: the opened stream is the class Utils makes, not the handled class.
+            if (!isWrappable()) {
+                throw unsupportedStreamClass();
+            }
+
+            final InputStream opened;
+
             try {
-                return Utils.openBinaryStream(blob);
+                opened = Utils.openBinaryStream(blob);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
+
+            return opened == null ? null : asHandledClass(opened);
         } else if (obj instanceof byte[] bytes) {
             // The string route would render the array as its list text ("[1, 2, 3]").
             return wrap(bytes);
+        } else if (obj instanceof InputStream inputStream) {
+            // A stream of another class: copy its remaining raw bytes. The string route would decode them as text (lossy).
+            // Check the target first, so that an unsupported one does not consume the caller's stream.
+            if (!isWrappable()) {
+                throw unsupportedStreamClass();
+            }
+
+            return wrap(IOUtil.readAllBytes(inputStream));
         } else {
-            return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
+            // A Reader or a Clob is read to its end by stringOf (a Clob is also released): reject an unsupported target first,
+            // as for a stream above.
+            if ((obj instanceof java.io.Reader || obj instanceof java.sql.Clob) && !isWrappable()) {
+                throw unsupportedStreamClass();
+            }
+
+            // A Clob is read by the Clob type handler, whatever its class looks like to the type lookup.
+            return valueOf(Type.<Object> of(obj instanceof java.sql.Clob ? java.sql.Clob.class : obj.getClass()).stringOf(obj));
         }
     }
 
     /**
      * Retrieves an {@link InputStream} from the specified column in a {@link ResultSet}
      * via {@link ResultSet#getBinaryStream(int)}.
+     * A stream already of the handled class is returned unchanged. Supported wrapper classes wrap it lazily;
+     * closing the returned stream closes the JDBC stream. A {@link ByteArrayInputStream} target copies its bytes
+     * and closes the JDBC stream before returning. Other mismatched targets are rejected and the acquired stream is closed.
      *
      * @param rs the {@link ResultSet} to read from
      * @param columnIndex the 1-based column index
      * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
      * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws UncheckedIOException if copying or closing the acquired stream fails
+     * @throws UnsupportedOperationException if the acquired stream does not match an unsupported handled class
      */
     @Override
     public InputStream get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
-        return rs.getBinaryStream(columnIndex);
+        return asHandledClass(rs.getBinaryStream(columnIndex));
     }
 
     /**
      * Retrieves an {@link InputStream} from the specified column in a {@link ResultSet} using the column label,
      * via {@link ResultSet#getBinaryStream(String)}.
+     * A stream already of the handled class is returned unchanged. Supported wrapper classes wrap it lazily;
+     * closing the returned stream closes the JDBC stream. A {@link ByteArrayInputStream} target copies its bytes
+     * and closes the JDBC stream before returning. Other mismatched targets are rejected and the acquired stream is closed.
      *
      * @param rs the {@link ResultSet} to read from
      * @param columnName the label of the column to retrieve
      * @return the binary stream from the column, or {@code null} if the column value is SQL {@code NULL}
      * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws UncheckedIOException if copying or closing the acquired stream fails
+     * @throws UnsupportedOperationException if the acquired stream does not match an unsupported handled class
      */
     @Override
     public InputStream get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
-        return rs.getBinaryStream(columnName);
+        return asHandledClass(rs.getBinaryStream(columnName));
     }
 
     /**
@@ -358,8 +458,12 @@ public class InputStreamType extends AbstractType<InputStream> {
 
     /**
      * Writes the string content of an {@link InputStream} to a {@link CharacterWriter}.
-     * The stream is fully consumed and converted to a string.
+     * The built-in handler fully consumes the stream using a bounded character buffer.
+     * Subclasses inheriting this method retain their {@link #stringOf(InputStream)} conversion,
+     * including any custom consumption behavior, before its returned text is escaped.
      * If {@code config} specifies a string quotation character, the output is quoted.
+     * The built-in path writes content as it is read and does not close the stream. If reading fails part way,
+     * the opening quotation and the content read before the failure have already been written, so the output is incomplete.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}, applying string quotation and character escaping according to the supplied serialization
@@ -383,12 +487,66 @@ public class InputStreamType extends AbstractType<InputStream> {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            if ((config == null) || (config.getStringQuotation() == 0)) {
-                writer.writeCharacter(stringOf(x));
-            } else {
-                writer.write(config.getStringQuotation());
-                Utils.writeStringContent(writer, stringOf(x), config.getStringQuotation());
-                writer.write(config.getStringQuotation());
+            if (getClass() != InputStreamType.class) {
+                // Streaming the raw bytes would bypass a subclass's stringOf conversion and its
+                // consumption/failure contract. Retain config reads around that callback as well:
+                // a custom conversion may change the quotation used for its returned content.
+                if (config == null || config.getStringQuotation() == 0) {
+                    writer.writeCharacter(stringOf(x));
+                } else {
+                    writer.write(config.getStringQuotation());
+                    Utils.writeStringContent(writer, stringOf(x), config.getStringQuotation());
+                    writer.write(config.getStringQuotation());
+                }
+                return;
+            }
+
+            final char quotation = config == null ? 0 : config.getStringQuotation();
+            final Reader reader = IOUtil.newInputStreamReader(x, charset);
+            final char[] buf = Objectory.createCharArrayBuffer();
+
+            try {
+                if (quotation != 0) {
+                    writer.write(quotation);
+                }
+
+                // A high surrogate ending one chunk is held back and written with the next chunk. Writers escape a
+                // surrogate they see unpaired, so splitting a pair across two writes would change its spelling
+                // (two escaped halves instead of the character) depending on where the chunk boundary falls.
+                int carried = 0;
+
+                while (true) {
+                    final int count;
+                    try {
+                        count = IOUtil.read(reader, buf, carried, buf.length - carried);
+                    } catch (final IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+
+                    if (count == IOUtil.EOF) {
+                        if (carried > 0) {
+                            // A lone trailing high surrogate is escaped exactly as it was when the whole value was written at once.
+                            Utils.writeStringContent(writer, buf, 0, carried, quotation);
+                        }
+
+                        break;
+                    }
+
+                    final int available = carried + count;
+                    carried = available > 0 && Character.isHighSurrogate(buf[available - 1]) ? 1 : 0;
+
+                    Utils.writeStringContent(writer, buf, 0, available - carried, quotation);
+
+                    if (carried > 0) {
+                        buf[0] = buf[available - 1];
+                    }
+                }
+
+                if (quotation != 0) {
+                    writer.write(quotation);
+                }
+            } finally {
+                Objectory.recycle(buf);
             }
         }
     }

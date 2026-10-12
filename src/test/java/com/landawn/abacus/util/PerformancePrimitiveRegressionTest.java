@@ -1,6 +1,14 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Array;
@@ -36,20 +44,20 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         final byte[] leftCopy = left.clone();
         final byte[] rightCopy = right.clone();
         // Warm class initialization before measuring the operation's temporary storage.
-        assertTrue(N.containsSameElements(new byte[] { -128, 0, 127 }, new byte[] { 127, -128, 0 }));
+        assertTrue(CommonUtil.containsSameElements(new byte[] { -128, 0, 127 }, new byte[] { 127, -128, 0 }));
         final com.sun.management.ThreadMXBean allocation = allocationBean();
         final long thread = Thread.currentThread().threadId();
         final long before = allocation.getThreadAllocatedBytes(thread);
-        final boolean same = N.containsSameElements(left, right);
+        final boolean same = CommonUtil.containsSameElements(left, right);
         final long allocated = allocation.getThreadAllocatedBytes(thread) - before;
         assertTrue(same);
         assertTrue(allocated < 100_000, "allocated " + allocated + " bytes comparing byte arrays");
         assertArrayEquals(leftCopy, left);
         assertArrayEquals(rightCopy, right);
         right[0]++;
-        assertFalse(N.containsSameElements(left, right));
-        assertTrue(N.containsSameElements((byte[]) null, new byte[0]));
-        assertFalse(N.containsSameElements((byte[]) null, new byte[] { 0 }));
+        assertFalse(CommonUtil.containsSameElements(left, right));
+        assertTrue(CommonUtil.containsSameElements((byte[]) null, new byte[0]));
+        assertFalse(CommonUtil.containsSameElements((byte[]) null, new byte[] { 0 }));
     }
 
     @Test
@@ -70,16 +78,16 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
             final short[] shortsCopy = shorts.clone();
             final char[] reversedCharsCopy = reversedChars.clone();
             final short[] reversedShortsCopy = reversedShorts.clone();
-            assertTrue(N.containsSameElements(chars, reversedChars), "char size " + size);
-            assertTrue(N.containsSameElements(shorts, reversedShorts), "short size " + size);
+            assertTrue(CommonUtil.containsSameElements(chars, reversedChars), "char size " + size);
+            assertTrue(CommonUtil.containsSameElements(shorts, reversedShorts), "short size " + size);
             assertArrayEquals(charsCopy, chars);
             assertArrayEquals(shortsCopy, shorts);
             assertArrayEquals(reversedCharsCopy, reversedChars);
             assertArrayEquals(reversedShortsCopy, reversedShorts);
             reversedChars[size / 2] ^= 1;
             reversedShorts[size / 2] ^= 1;
-            assertFalse(N.containsSameElements(chars, reversedChars), "char size " + size);
-            assertFalse(N.containsSameElements(shorts, reversedShorts), "short size " + size);
+            assertFalse(CommonUtil.containsSameElements(chars, reversedChars), "char size " + size);
+            assertFalse(CommonUtil.containsSameElements(shorts, reversedShorts), "short size " + size);
         }
 
         final char[] chars = new char[100_000];
@@ -88,18 +96,18 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         Arrays.fill(shorts, Short.MIN_VALUE);
         final char[] otherChars = chars.clone();
         final short[] otherShorts = shorts.clone();
-        assertTrue(N.containsSameElements(chars, otherChars));
-        assertTrue(N.containsSameElements(shorts, otherShorts));
+        assertTrue(CommonUtil.containsSameElements(chars, otherChars));
+        assertTrue(CommonUtil.containsSameElements(shorts, otherShorts));
         otherChars[otherChars.length - 1] = Character.MIN_VALUE;
         otherShorts[otherShorts.length - 1] = Short.MAX_VALUE;
-        assertFalse(N.containsSameElements(chars, otherChars));
-        assertFalse(N.containsSameElements(shorts, otherShorts));
-        assertTrue(N.containsSameElements((char[]) null, new char[0]));
-        assertTrue(N.containsSameElements(new short[0], (short[]) null));
-        assertFalse(N.containsSameElements(chars, (char[]) null));
-        assertFalse(N.containsSameElements(shorts, new short[1]));
-        assertTrue(N.containsSameElements(chars, chars));
-        assertTrue(N.containsSameElements(shorts, shorts));
+        assertFalse(CommonUtil.containsSameElements(chars, otherChars));
+        assertFalse(CommonUtil.containsSameElements(shorts, otherShorts));
+        assertTrue(CommonUtil.containsSameElements((char[]) null, new char[0]));
+        assertTrue(CommonUtil.containsSameElements(new short[0], (short[]) null));
+        assertFalse(CommonUtil.containsSameElements(chars, (char[]) null));
+        assertFalse(CommonUtil.containsSameElements(shorts, new short[1]));
+        assertTrue(CommonUtil.containsSameElements(chars, chars));
+        assertTrue(CommonUtil.containsSameElements(shorts, shorts));
     }
 
     @Test
@@ -112,13 +120,13 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         }
         final char[] otherChars = chars.clone();
         final short[] otherShorts = shorts.clone();
-        assertTrue(N.containsSameElements(chars, otherChars));
-        assertTrue(N.containsSameElements(shorts, otherShorts));
+        assertTrue(CommonUtil.containsSameElements(chars, otherChars));
+        assertTrue(CommonUtil.containsSameElements(shorts, otherShorts));
         final com.sun.management.ThreadMXBean allocation = allocationBean();
         final long thread = Thread.currentThread().threadId();
         long before = allocation.getThreadAllocatedBytes(thread);
-        final boolean sameChars = N.containsSameElements(chars, otherChars);
-        final boolean sameShorts = N.containsSameElements(shorts, otherShorts);
+        final boolean sameChars = CommonUtil.containsSameElements(chars, otherChars);
+        final boolean sameShorts = CommonUtil.containsSameElements(shorts, otherShorts);
         long allocated = allocation.getThreadAllocatedBytes(thread) - before;
         assertTrue(sameChars);
         assertTrue(sameShorts);
@@ -128,13 +136,13 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         final char[] otherSmallChars = { 'a', 0, 'a', Character.MAX_VALUE };
         final short[] smallShorts = { Short.MIN_VALUE, Short.MAX_VALUE, 0, -1 };
         final short[] otherSmallShorts = { 0, -1, Short.MAX_VALUE, Short.MIN_VALUE };
-        assertTrue(N.containsSameElements(smallChars, otherSmallChars));
-        assertTrue(N.containsSameElements(smallShorts, otherSmallShorts));
+        assertTrue(CommonUtil.containsSameElements(smallChars, otherSmallChars));
+        assertTrue(CommonUtil.containsSameElements(smallShorts, otherSmallShorts));
         boolean sameSmallInputs = true;
         before = allocation.getThreadAllocatedBytes(thread);
         for (int i = 0; i < 100; i++) {
-            sameSmallInputs &= N.containsSameElements(smallChars, otherSmallChars);
-            sameSmallInputs &= N.containsSameElements(smallShorts, otherSmallShorts);
+            sameSmallInputs &= CommonUtil.containsSameElements(smallChars, otherSmallChars);
+            sameSmallInputs &= CommonUtil.containsSameElements(smallShorts, otherSmallShorts);
         }
         allocated = allocation.getThreadAllocatedBytes(thread) - before;
         assertTrue(sameSmallInputs);
@@ -202,7 +210,9 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
     @Test
     public void narrowPrimitiveSetsPreserveDomainsAndRanges() {
         final byte[] allBytes = new byte[256];
-        for (int i = 0; i < allBytes.length; i++) allBytes[i] = (byte) i;
+        for (int i = 0; i < allBytes.length; i++) {
+            allBytes[i] = (byte) i;
+        }
         assertEquals(256, ByteList.of(allBytes).toSet().size());
         assertEquals(256, ByteStream.of(allBytes).toSet().size());
         assertEquals(Set.of((byte) 1), ByteList.of((byte) 0, (byte) 1, (byte) 1, (byte) 2).toSet(1, 3));
@@ -220,15 +230,22 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         Assumptions.assumeTrue(bean.isThreadAllocatedMemorySupported());
         bean.setThreadAllocatedMemoryEnabled(true);
         final int[] distinct = new int[250_000];
-        for (int i = 0; i < distinct.length; i++) distinct[i] = i;
+        for (int i = 0; i < distinct.length; i++) {
+            distinct[i] = i;
+        }
         final IntList right = IntList.of(distinct), empty = new IntList();
         final byte[] bytes = new byte[1_000_000];
         final char[] chars = new char[1_000_000];
         final short[] shorts = new short[1_000_000];
         final boolean[] booleans = new boolean[1_000_000];
         // Initialize factories before measuring allocation attributable to input cardinality.
-        ByteStream.of((byte) 0).toSet(); CharStream.of('a').toSet(); ShortStream.of((short) 0).toSet();
-        ByteList.of((byte) 0).toSet(); CharList.of('a').toSet(); ShortList.of((short) 0).toSet(); BooleanList.of(false).toSet();
+        ByteStream.of((byte) 0).toSet();
+        CharStream.of('a').toSet();
+        ShortStream.of((short) 0).toSet();
+        ByteList.of((byte) 0).toSet();
+        CharList.of('a').toSet();
+        ShortList.of((short) 0).toSet();
+        BooleanList.of(false).toSet();
         final long thread = Thread.currentThread().threadId(), before = bean.getThreadAllocatedBytes(thread);
         assertTrue(empty.intersection(right).isEmpty());
         assertTrue(empty.difference(right).isEmpty());
@@ -250,7 +267,10 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
             final Object array = Array.newInstance(PRIMITIVES[i], 1);
             final Object source = type.getMethod("of", array.getClass()).invoke(null, array);
             final AtomicInteger calls = new AtomicInteger();
-            final Supplier<Object> factory = () -> { calls.incrementAndGet(); return source; };
+            final Supplier<Object> factory = () -> {
+                calls.incrementAndGet();
+                return source;
+            };
             final Iterator<?> iterator = (Iterator<?>) type.getMethod("defer", Supplier.class).invoke(null, factory);
             assertEquals(0, calls.get());
             assertTrue(iterator.hasNext());
@@ -270,7 +290,9 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
             f.setAccessible(true);
             final Object value = f.get(iterator);
             assertNotSame(factory, value, "factory remains in " + f.getName());
-            if (value instanceof Holder<?> holder) assertNull(holder.value());
+            if (value instanceof Holder<?> holder) {
+                assertNull(holder.value());
+            }
         }
     }
 
@@ -278,7 +300,10 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
     public void deferredFailureCachingNullAndRecursiveContractsArePreserved() throws Exception {
         final AtomicInteger calls = new AtomicInteger();
         final RuntimeException failure = new RuntimeException("once");
-        final Supplier<IntIterator> factory = () -> { calls.incrementAndGet(); throw failure; };
+        final Supplier<IntIterator> factory = () -> {
+            calls.incrementAndGet();
+            throw failure;
+        };
         final IntIterator iterator = IntIterator.defer(factory);
         assertSame(failure, assertThrows(RuntimeException.class, iterator::hasNext));
         assertSame(failure, assertThrows(RuntimeException.class, iterator::nextInt));
@@ -287,7 +312,10 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
         assertThrows(IllegalStateException.class, () -> IntIterator.defer(() -> null).hasNext());
         assertFalse(ObjIterator.defer(() -> null).hasNext());
         final IntIterator[] recursive = new IntIterator[1];
-        recursive[0] = IntIterator.defer(() -> { recursive[0].hasNext(); return IntIterator.empty(); });
+        recursive[0] = IntIterator.defer(() -> {
+            recursive[0].hasNext();
+            return IntIterator.empty();
+        });
         final IllegalStateException recursion = assertThrows(IllegalStateException.class, recursive[0]::hasNext);
         assertSame(recursion, assertThrows(IllegalStateException.class, recursive[0]::hasNext));
     }
@@ -300,7 +328,9 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
                 final AtomicInteger calls = new AtomicInteger();
                 final Supplier<Object> factory = () -> {
                     calls.incrementAndGet();
-                    if (failure instanceof RuntimeException runtime) throw runtime;
+                    if (failure instanceof RuntimeException runtime) {
+                        throw runtime;
+                    }
                     throw (Error) failure;
                 };
                 final Iterator<?> iterator = (Iterator<?>) type.getMethod("defer", Supplier.class).invoke(null, factory);
@@ -317,7 +347,9 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
             for (final boolean selfReturn : new boolean[] { false, true }) {
                 final Iterator<?>[] reference = new Iterator<?>[1];
                 final Supplier<Object> recursive = () -> {
-                    if (!selfReturn) reference[0].hasNext();
+                    if (!selfReturn) {
+                        reference[0].hasNext();
+                    }
                     return reference[0];
                 };
                 reference[0] = (Iterator<?>) type.getMethod("defer", Supplier.class).invoke(null, recursive);
@@ -332,7 +364,10 @@ public class PerformancePrimitiveRegressionTest extends TestBase {
     public void fullCharAndShortDomainsAndCustomSetSuppliersRemainSupported() {
         final char[] chars = new char[65_536];
         final short[] shorts = new short[65_536];
-        for (int i = 0; i < chars.length; i++) { chars[i] = (char) i; shorts[i] = (short) i; }
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) i;
+            shorts[i] = (short) i;
+        }
         assertEquals(65_536, CharList.of(chars).toSet().size());
         assertEquals(65_536, CharStream.of(chars).toSet().size());
         assertEquals(65_536, ShortList.of(shorts).toSet().size());

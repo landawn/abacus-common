@@ -299,10 +299,10 @@ public class ReaderTypeTest extends TestBase {
 
     @Test
     public void reviewFixes20260906_valueOfObjectCharArrayReadsRawCharacters() throws IOException {
-        assertEquals("ab", IOUtil.readAllToString(readerType.valueOf((Object) new char[] { 'a', 'b' })));
-        assertEquals("", IOUtil.readAllToString(readerType.valueOf((Object) new char[0])));
+        assertEquals("ab", IOUtil.readAllToString(readerType.valueOf(new char[] { 'a', 'b' })));
+        assertEquals("", IOUtil.readAllToString(readerType.valueOf(new char[0])));
         // surrogate pair and non-Latin text survive
-        assertEquals("中😀", IOUtil.readAllToString(readerType.valueOf((Object) "中😀".toCharArray())));
+        assertEquals("中😀", IOUtil.readAllToString(readerType.valueOf("中😀".toCharArray())));
         // the list text is exactly what a char[] used to become
         assertEquals("['a', 'b']", Type.of(char[].class).stringOf(new char[] { 'a', 'b' }));
     }
@@ -311,35 +311,35 @@ public class ReaderTypeTest extends TestBase {
     public void reviewFixes20260906_valueOfObjectCharArrayHonoursTheHandledReaderClass() throws IOException {
         final char[] chars = { 'a', 'b' };
 
-        final Reader sr = Type.of(StringReader.class).valueOf((Object) chars);
+        final Reader sr = Type.of(StringReader.class).valueOf(chars);
         assertTrue(sr instanceof StringReader);
         assertEquals("ab", IOUtil.readAllToString(sr));
 
-        final Reader car = Type.of(CharArrayReader.class).valueOf((Object) chars);
+        final Reader car = Type.of(CharArrayReader.class).valueOf(chars);
         assertTrue(car instanceof CharArrayReader);
         assertEquals("ab", IOUtil.readAllToString(car));
 
-        final Reader br = Type.of(BufferedReader.class).valueOf((Object) chars);
+        final Reader br = Type.of(BufferedReader.class).valueOf(chars);
         assertTrue(br instanceof BufferedReader);
         assertEquals("ab", IOUtil.readAllToString(br));
 
-        final Reader pr = Type.of(PushbackReader.class).valueOf((Object) chars);
+        final Reader pr = Type.of(PushbackReader.class).valueOf(chars);
         assertTrue(pr instanceof PushbackReader);
         assertEquals("ab", IOUtil.readAllToString(pr));
     }
 
     @Test
     public void reviewFixes20260906_valueOfObjectCharArrayUnsupportedReaderClassStillThrows() {
-        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf((Object) new char[] { 'a' }));
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(new char[] { 'a' }));
         assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf("x"));
     }
 
     @Test
     public void reviewFixes20260906_valueOfObjectOtherRoutesUnchanged() throws IOException {
-        assertEquals("sb", IOUtil.readAllToString(readerType.valueOf((Object) new StringBuilder("sb"))));
-        assertEquals("7", IOUtil.readAllToString(readerType.valueOf((Object) 7)));
+        assertEquals("sb", IOUtil.readAllToString(readerType.valueOf(new StringBuilder("sb"))));
+        assertEquals("7", IOUtil.readAllToString(readerType.valueOf(7)));
         // a byte[] is NOT decoded with an assumed charset: it still takes the string route
-        assertEquals("[1, 2]", IOUtil.readAllToString(readerType.valueOf((Object) new byte[] { 1, 2 })));
+        assertEquals("[1, 2]", IOUtil.readAllToString(readerType.valueOf(new byte[] { 1, 2 })));
         assertNull(readerType.valueOf((Object) null));
     }
 
@@ -348,5 +348,138 @@ public class ReaderTypeTest extends TestBase {
         assertEquals("ab", IOUtil.readAllToString(N.convert(new char[] { 'a', 'b' }, Reader.class)));
         assertEquals("ab", IOUtil.readAllToString(N.convert(new char[] { 'a', 'b' }, StringReader.class)));
     }
+
+    // ---- bug review 2026-09-30 G121 begin ----
+    // G121: a Reader argument is returned as is (it was read into a String and consumed).
+    @Test
+    public void testValueOfObject_readerIsReturnedAsIs() throws IOException {
+        final Reader reader = new StringReader("abc");
+        assertSame(reader, readerType.valueOf(reader));
+        assertEquals("abc", IOUtil.readAllToString(reader));
+
+        // unchanged: char[] and other objects
+        assertEquals("ab", IOUtil.readAllToString(readerType.valueOf(new char[] { 'a', 'b' })));
+        assertEquals("7", IOUtil.readAllToString(readerType.valueOf(7)));
+    }
+    // ---- bug review 2026-09-30 G121 end ----
+
+    // ---- bug review 2026-09-30 G142 begin ----
+    /** Records close() so a test can check that the conversion leaves the caller's reader open. */
+    private static final class G142CloseTrackingReader extends java.io.FilterReader {
+        boolean closed;
+
+        G142CloseTrackingReader(final String text) {
+            super(new StringReader(text));
+        }
+
+        @Override
+        public void close() throws IOException {
+            closed = true;
+            super.close();
+        }
+    }
+
+    // G142: a Reader of another class is copied into a reader of the handled class (consumed, not closed); an unsupported target
+    // is rejected before a supplied reader or stream is read - it drained the caller's reader and then threw.
+    @Test
+    public void testValueOfObject_readerOfAnotherClassAndUnsupportedTarget() throws IOException {
+        final G142CloseTrackingReader source = new G142CloseTrackingReader("abc\u00e9");
+        final Reader converted = Type.of(BufferedReader.class).valueOf(source);
+        org.junit.jupiter.api.Assertions.assertTrue(converted instanceof BufferedReader);
+        org.junit.jupiter.api.Assertions.assertEquals("abc\u00e9", com.landawn.abacus.util.IOUtil.readAllToString(converted));
+        org.junit.jupiter.api.Assertions.assertFalse(source.closed);
+        org.junit.jupiter.api.Assertions.assertEquals(-1, source.read());
+
+        final StringReader unread = new StringReader("xyz");
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(unread));
+        org.junit.jupiter.api.Assertions.assertEquals('x', unread.read());
+
+        final java.io.ByteArrayInputStream stream = new java.io.ByteArrayInputStream(new byte[] { 'q' });
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(stream));
+        org.junit.jupiter.api.Assertions.assertEquals(1, stream.available());
+        org.junit.jupiter.api.Assertions.assertEquals("q",
+                com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
+    }
+    // ---- bug review 2026-09-30 G142 end ----
+
+    // ---- bug review 2026-09-30 G144 begin ----
+    // G144: a supplied InputStream is decoded as UTF-8.
+    @Test
+    public void testValueOfObject_inputStreamDecodedAsUtf8() throws IOException {
+        final java.io.ByteArrayInputStream stream = new java.io.ByteArrayInputStream("h\u00e9".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        org.junit.jupiter.api.Assertions.assertEquals("h\u00e9",
+                com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
+    }
+
+    // G144: a Clob is returned as the handled reader class (it was always the internal owning wrapper): wrapped for a
+    // BufferedReader (closing it releases the locator), copied for a StringReader/CharArrayReader (the locator released at
+    // once), and rejected before it is opened for an unsupported class.
+    @Test
+    public void testValueOfObject_clobAsHandledClass() throws Exception {
+        final Clob buffered = mock(Clob.class);
+        when(buffered.getCharacterStream()).thenReturn(new StringReader("abc"));
+        final Reader bufferedReader = Type.of(BufferedReader.class).valueOf(buffered);
+        org.junit.jupiter.api.Assertions.assertTrue(bufferedReader instanceof BufferedReader);
+        org.junit.jupiter.api.Assertions.assertEquals("abc", com.landawn.abacus.util.IOUtil.readAllToString(bufferedReader));
+        verify(buffered, org.mockito.Mockito.never()).free();
+        bufferedReader.close();
+        verify(buffered).free();
+
+        for (final Class<? extends Reader> copyClass : java.util.List.of(StringReader.class, CharArrayReader.class)) {
+            final Clob copied = mock(Clob.class);
+            when(copied.getCharacterStream()).thenReturn(new StringReader("xyz"));
+            final Reader copy = Type.of(copyClass).valueOf(copied);
+            org.junit.jupiter.api.Assertions.assertTrue(copyClass.isInstance(copy), copyClass.getName());
+            verify(copied).free();
+            org.junit.jupiter.api.Assertions.assertEquals("xyz", com.landawn.abacus.util.IOUtil.readAllToString(copy));
+        }
+
+        final Clob unsupported = mock(Clob.class);
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(unsupported));
+        verify(unsupported, org.mockito.Mockito.never()).getCharacterStream();
+    }
+    // ---- bug review 2026-09-30 G144 end ----
+
+    // ---- bug review 2026-09-30 G145 begin ----
+    // G145: more Clob shapes - PushbackReader (wrapped), FilterReader (the owning reader itself), a null reader, a copy whose read
+    // fails (the locator is still released) and an unsupported class (nothing opened or released).
+    @Test
+    public void testValueOfObject_moreClobShapes() throws Exception {
+        final Clob pushback = mock(Clob.class);
+        when(pushback.getCharacterStream()).thenReturn(new StringReader("abc"));
+        final Reader pushbackReader = Type.of(PushbackReader.class).valueOf(pushback);
+        org.junit.jupiter.api.Assertions.assertTrue(pushbackReader instanceof PushbackReader);
+        org.junit.jupiter.api.Assertions.assertEquals("abc", com.landawn.abacus.util.IOUtil.readAllToString(pushbackReader));
+        pushbackReader.close();
+        verify(pushback).free();
+
+        final Clob filter = mock(Clob.class);
+        when(filter.getCharacterStream()).thenReturn(new StringReader("abc"));
+        org.junit.jupiter.api.Assertions.assertTrue(Type.of(java.io.FilterReader.class).valueOf(filter) instanceof java.io.FilterReader);
+
+        final Clob nullReader = mock(Clob.class);
+        org.junit.jupiter.api.Assertions.assertNull(Type.of(StringReader.class).valueOf(nullReader));
+        verify(nullReader).free();
+
+        final Clob failing = mock(Clob.class);
+        when(failing.getCharacterStream()).thenReturn(new Reader() {
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) throws IOException {
+                throw new IOException("read failed");
+            }
+
+            @Override
+            public void close() {
+            }
+        });
+        org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> Type.of(StringReader.class).valueOf(failing));
+        verify(failing).free();
+
+        final Clob unsupported = mock(Clob.class);
+        org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(unsupported));
+        verify(unsupported, org.mockito.Mockito.never()).free();
+    }
+    // ---- bug review 2026-09-30 G145 end ----
 
 }

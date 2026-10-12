@@ -50,7 +50,7 @@ public class MultimapReview20260925Test extends TestBase {
 
     @Test
     public void testU2201_replaceEntry_caseInsensitiveNewSetFromMap_replacesUnderTheSetsOwnRule() {
-        final Multimap<String, String, Set<String>> mm = N.newMultimap(HashMap::new, MultimapReview20260925Test::caseInsensitiveSet);
+        final Multimap<String, String, Set<String>> mm = CommonUtil.newMultimap(HashMap::new, MultimapReview20260925Test::caseInsensitiveSet);
         mm.putValues("k", List.of("a", "b"));
 
         // "A" is 'contained' only as "a" itself: the replacement r9620 performed, refused with ISE before the fix
@@ -77,7 +77,7 @@ public class MultimapReview20260925Test extends TestBase {
     @Test
     public void testU2201_knownEqualsOrIdentitySetsStillRefuseBeforeAnythingIsRemoved() {
         // LinkedHashSet: the C-353 case - refused, order untouched
-        final SetMultimap<String, Integer> linked = N.newLinkedSetMultimap();
+        final SetMultimap<String, Integer> linked = CommonUtil.newLinkedSetMultimap();
         linked.putValues("k", List.of(1, 2, 3));
         assertThrows(IllegalStateException.class, () -> linked.replaceEntry("k", 1, 3));
         assertEquals(List.of(1, 2, 3), new ArrayList<>(linked.get("k")));
@@ -87,14 +87,14 @@ public class MultimapReview20260925Test extends TestBase {
         assertEquals(List.of(2, 3, 9), new ArrayList<>(linked.get("k")));
 
         // HashSet
-        final SetMultimap<String, Integer> hash = N.newSetMultimap();
+        final SetMultimap<String, Integer> hash = CommonUtil.newSetMultimap();
         hash.putValues("k", List.of(1, 2, 3));
         assertThrows(IllegalStateException.class, () -> hash.replaceEntry("k", 1, 3));
         assertEquals(Set.of(1, 2, 3), hash.get("k"));
 
         // EnumSet
         final Supplier<Set<Color>> enumSets = () -> EnumSet.noneOf(Color.class);
-        final Multimap<String, Color, Set<Color>> enums = N.newMultimap(HashMap::new, enumSets);
+        final Multimap<String, Color, Set<Color>> enums = CommonUtil.newMultimap(HashMap::new, enumSets);
         enums.putValues("k", List.of(Color.RED, Color.GREEN));
         assertThrows(IllegalStateException.class, () -> enums.replaceEntry("k", Color.RED, Color.GREEN));
         assertEquals(EnumSet.of(Color.RED, Color.GREEN), enums.get("k"));
@@ -103,7 +103,7 @@ public class MultimapReview20260925Test extends TestBase {
 
         // CopyOnWriteArraySet
         final Supplier<Set<Integer>> cowSets = CopyOnWriteArraySet::new;
-        final Multimap<String, Integer, Set<Integer>> cow = N.newMultimap(HashMap::new, cowSets);
+        final Multimap<String, Integer, Set<Integer>> cow = CommonUtil.newMultimap(HashMap::new, cowSets);
         cow.putValues("k", List.of(1, 2, 3));
         assertThrows(IllegalStateException.class, () -> cow.replaceEntry("k", 1, 3));
         assertEquals(List.of(1, 2, 3), new ArrayList<>(cow.get("k")));
@@ -113,7 +113,7 @@ public class MultimapReview20260925Test extends TestBase {
         // IdentityHashSet: a member that is not equals to oldValue is a distinct member (refused); an
         // equal-but-distinct new value is handed to remove-then-add, which succeeds under identity
         final Supplier<Set<String>> identitySets = IdentityHashSet::new;
-        final Multimap<String, String, Set<String>> identity = N.newMultimap(HashMap::new, identitySets);
+        final Multimap<String, String, Set<String>> identity = CommonUtil.newMultimap(HashMap::new, identitySets);
         final String a = new String("a");
         final String b = new String("b");
         identity.putValues("k", List.of(a, b));
@@ -128,10 +128,10 @@ public class MultimapReview20260925Test extends TestBase {
     @Test
     public void testU2201_subclassedSetDecidesByRemoveThenAdd() {
         // an anonymous HashSet subclass is not exactly a HashSet: the base path still refuses a duplicate
-        final Supplier<Set<Integer>> subclassed = () -> new HashSet<Integer>() {
+        final Supplier<Set<Integer>> subclassed = () -> new HashSet<>() {
             private static final long serialVersionUID = 1L;
         };
-        final Multimap<String, Integer, Set<Integer>> sub = N.newMultimap(HashMap::new, subclassed);
+        final Multimap<String, Integer, Set<Integer>> sub = CommonUtil.newMultimap(HashMap::new, subclassed);
         sub.putValues("k", List.of(1, 2, 3));
         assertThrows(IllegalStateException.class, () -> sub.replaceEntry("k", 1, 3));
         assertEquals(Set.of(1, 2, 3), sub.get("k"));
@@ -139,7 +139,7 @@ public class MultimapReview20260925Test extends TestBase {
         assertEquals(Set.of(2, 3, 9), sub.get("k"));
 
         // a sorted set is decided by its comparator, as before
-        final Multimap<String, String, TreeSet<String>> ci = N.newMultimap(HashMap::new, () -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
+        final Multimap<String, String, TreeSet<String>> ci = CommonUtil.newMultimap(HashMap::new, () -> new TreeSet<>(String.CASE_INSENSITIVE_ORDER));
         ci.putValues("k", List.of("a", "b"));
         assertTrue(ci.replaceEntry("k", "a", "A"));
         assertThrows(IllegalStateException.class, () -> ci.replaceEntry("k", "A", "B"));
@@ -204,7 +204,7 @@ public class MultimapReview20260925Test extends TestBase {
     @Test
     public void testU2204_computeAndMergeOnAnAbsentKeyReportTheNullValueSupplier() {
         final Supplier<List<Integer>> nullSupplier = () -> null;
-        final Multimap<String, Integer, List<Integer>> mm = N.newMultimap(HashMap::new, nullSupplier);
+        final Multimap<String, Integer, List<Integer>> mm = CommonUtil.newMultimap(HashMap::new, nullSupplier);
 
         NullPointerException e = assertThrows(NullPointerException.class, () -> mm.computeIfAbsent("k", k -> List.of(1)));
         assertEquals("valueSupplier returned null", e.getMessage());
@@ -228,7 +228,7 @@ public class MultimapReview20260925Test extends TestBase {
 
     @Test
     public void testU2206_toMapRejectsALossySetCopy() {
-        final Set<String> values = new HashSet<String>() {
+        final Set<String> values = new HashSet<>() {
             private static final long serialVersionUID = 1L;
         };
         values.add("a");
@@ -244,7 +244,7 @@ public class MultimapReview20260925Test extends TestBase {
         assertEquals(Set.of("a", "A"), mm.get("k"));
 
         // a faithful copy is fine
-        final SetMultimap<String, String> ok = N.newLinkedSetMultimap();
+        final SetMultimap<String, String> ok = CommonUtil.newLinkedSetMultimap();
         ok.putValues("k", List.of("a", "A"));
         assertEquals(Set.of("a", "A"), ok.toMap().get("k"));
     }
@@ -255,14 +255,14 @@ public class MultimapReview20260925Test extends TestBase {
 
     @Test
     public void testU2207_toMultisetRejectsABiMapMapSupplier() {
-        final Multimap<String, Integer, List<Integer>> mm = N.newMultimap(BiMap::new, ArrayList::new);
+        final Multimap<String, Integer, List<Integer>> mm = CommonUtil.newMultimap(BiMap::new, ArrayList::new);
         mm.put("a", 1);
 
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, mm::toMultiset);
         assertTrue(e.getMessage().contains("cannot supply a BiMap"), e.getMessage());
 
         // control: an ordinary map supplier
-        final ListMultimap<String, Integer> plain = N.newListMultimap();
+        final ListMultimap<String, Integer> plain = CommonUtil.newListMultimap();
         plain.putValues("a", Arrays.asList(1, 2));
         plain.put("b", 3);
         final Multiset<String> counts = plain.toMultiset();

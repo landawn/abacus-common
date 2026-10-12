@@ -21,7 +21,6 @@ import java.math.BigDecimal;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
-import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 
@@ -146,10 +145,6 @@ class JsonStreamReader extends JsonStringReader {
      */
     @Override
     public int nextToken(final Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException {
-        if (strBeginIndex >= strEndIndex) {
-            refill();
-        }
-
         lastEvent = nextEvent;
 
         text = null;
@@ -157,6 +152,12 @@ class JsonStreamReader extends JsonStringReader {
         nextChar = 0;
         whitespaceAfterText = false;
         startIndexForText = strBeginIndex;
+
+        // The previous token is complete. Reset its range before refilling so a token ending exactly
+        // at a buffer boundary does not cause a needless copy into, or enlargement of, the scratch buffer.
+        if (strBeginIndex >= strEndIndex) {
+            refill();
+        }
 
         if (nextEvent == START_DOUBLE_QUOTE || nextEvent == START_SINGLE_QUOTE) {
             final char quoteChar = nextEvent == START_DOUBLE_QUOTE ? SK._DOUBLE_QUOTE : SK._SINGLE_QUOTE;
@@ -568,10 +569,7 @@ class JsonStreamReader extends JsonStringReader {
                 if (endIndexForText > startIndexForText) {
                     final int copyLen = endIndexForText - startIndexForText;
 
-                    // Grow cbuf if the prefix is longer than the current buffer capacity
-                    while (copyLen > cbufLen) {
-                        enlargeCharBuffer();
-                    }
+                    ensureCharBufferCapacity(copyLen);
 
                     N.copy(strValue, startIndexForText, cbuf, 0, copyLen);
                     nextChar = copyLen;
@@ -579,7 +577,14 @@ class JsonStreamReader extends JsonStringReader {
             }
 
             try {
-                final int n = IOUtil.read(reader, strValue, 0, strValue.length);
+                // A positive short read is immediately usable. Filling the whole buffer here can
+                // block a lazy stream even though a complete value has already arrived.
+                int n = reader.read(strValue, 0, strValue.length);
+
+                if (n == 0) {
+                    // Match the previous helper's bounded retry for a non-progressing Reader.
+                    n = reader.read(strValue, 0, strValue.length);
+                }
 
                 if (n > 0) {
                     strBeginIndex = 0;

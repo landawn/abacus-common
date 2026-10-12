@@ -45,30 +45,30 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     @Test
     public void testToleranceIndexSearchUsesFuzzyEquality() {
         float[] floats = { Float.NaN, -0.0f, Float.NaN, +0.0f };
-        assertEquals(0, N.indexOf(floats, Float.NaN, 0, 0.0f));
-        assertEquals(2, N.lastIndexOf(floats, Float.NaN, 3, 0.0f));
-        assertEquals(1, N.indexOf(floats, +0.0f, 0, 0.0f));
-        assertEquals(3, N.lastIndexOf(floats, -0.0f, 3, 0.0f));
+        assertEquals(0, CommonUtil.indexOf(floats, Float.NaN, 0, 0.0f));
+        assertEquals(2, CommonUtil.lastIndexOf(floats, Float.NaN, 3, 0.0f));
+        assertEquals(1, CommonUtil.indexOf(floats, +0.0f, 0, 0.0f));
+        assertEquals(3, CommonUtil.lastIndexOf(floats, -0.0f, 3, 0.0f));
         float[] floatInfinity = { Float.NEGATIVE_INFINITY };
-        assertEquals(0, N.indexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY));
-        assertEquals(0, N.lastIndexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY));
-        assertEquals(-1, N.indexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, 0.0f));
-        assertEquals(-1, N.lastIndexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, 0.0f));
-        assertEquals(-1, N.indexOf(floatInfinity, Float.NaN, 0, Float.POSITIVE_INFINITY));
-        assertEquals(-1, N.lastIndexOf(floatInfinity, Float.NaN, 0, Float.POSITIVE_INFINITY));
+        assertEquals(0, CommonUtil.indexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY));
+        assertEquals(0, CommonUtil.lastIndexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, Float.POSITIVE_INFINITY));
+        assertEquals(-1, CommonUtil.indexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, 0.0f));
+        assertEquals(-1, CommonUtil.lastIndexOf(floatInfinity, Float.POSITIVE_INFINITY, 0, 0.0f));
+        assertEquals(-1, CommonUtil.indexOf(floatInfinity, Float.NaN, 0, Float.POSITIVE_INFINITY));
+        assertEquals(-1, CommonUtil.lastIndexOf(floatInfinity, Float.NaN, 0, Float.POSITIVE_INFINITY));
 
         double[] doubles = { Double.NaN, -0.0, Double.NaN, +0.0 };
-        assertEquals(0, N.indexOf(doubles, Double.NaN, 0, 0.0));
-        assertEquals(2, N.lastIndexOf(doubles, Double.NaN, 3, 0.0));
-        assertEquals(1, N.indexOf(doubles, +0.0, 0, 0.0));
-        assertEquals(3, N.lastIndexOf(doubles, -0.0, 3, 0.0));
+        assertEquals(0, CommonUtil.indexOf(doubles, Double.NaN, 0, 0.0));
+        assertEquals(2, CommonUtil.lastIndexOf(doubles, Double.NaN, 3, 0.0));
+        assertEquals(1, CommonUtil.indexOf(doubles, +0.0, 0, 0.0));
+        assertEquals(3, CommonUtil.lastIndexOf(doubles, -0.0, 3, 0.0));
         double[] doubleInfinity = { Double.NEGATIVE_INFINITY };
-        assertEquals(0, N.indexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY));
-        assertEquals(0, N.lastIndexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY));
-        assertEquals(-1, N.indexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, 0.0));
-        assertEquals(-1, N.lastIndexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, 0.0));
-        assertEquals(-1, N.indexOf(doubleInfinity, Double.NaN, 0, Double.POSITIVE_INFINITY));
-        assertEquals(-1, N.lastIndexOf(doubleInfinity, Double.NaN, 0, Double.POSITIVE_INFINITY));
+        assertEquals(0, CommonUtil.indexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY));
+        assertEquals(0, CommonUtil.lastIndexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY));
+        assertEquals(-1, CommonUtil.indexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, 0.0));
+        assertEquals(-1, CommonUtil.lastIndexOf(doubleInfinity, Double.POSITIVE_INFINITY, 0, 0.0));
+        assertEquals(-1, CommonUtil.indexOf(doubleInfinity, Double.NaN, 0, Double.POSITIVE_INFINITY));
+        assertEquals(-1, CommonUtil.lastIndexOf(doubleInfinity, Double.NaN, 0, Double.POSITIVE_INFINITY));
     }
 
     @Test
@@ -76,16 +76,16 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         TreeMap<String, Integer> tree = new TreeMap<>();
         tree.put("a", 1);
         tree.put("b", 2);
-        Map.Entry<String, Integer> entry = N.lastEntry(tree).get();
+        Map.Entry<String, Integer> entry = CommonUtil.lastEntry(tree).get();
         assertEquals("b", entry.getKey());
         assertEquals(2, entry.setValue(3));
         assertEquals(3, tree.get("b"));
 
         Map<String, Integer> concurrent = new java.util.concurrent.ConcurrentSkipListMap<>(tree);
-        Map.Entry<String, Integer> concurrentEntry = N.lastEntry(concurrent).get();
+        Map.Entry<String, Integer> concurrentEntry = CommonUtil.lastEntry(concurrent).get();
         assertEquals("b", concurrentEntry.getKey());
         assertThrows(UnsupportedOperationException.class, () -> concurrentEntry.setValue(4));
-        Map.Entry<String, Integer> unmodifiableEntry = N.lastEntry(Collections.unmodifiableMap(tree)).get();
+        Map.Entry<String, Integer> unmodifiableEntry = CommonUtil.lastEntry(Collections.unmodifiableMap(tree)).get();
         assertThrows(UnsupportedOperationException.class, () -> unmodifiableEntry.setValue(4));
         assertEquals(3, concurrent.get("b"));
         assertEquals(3, tree.get("b"));
@@ -99,15 +99,15 @@ public class CommonUtilTest extends CommonUtilTestSupport {
             visited.add(value);
             return value.length() > 1;
         };
-        assertEquals("ccc", N.findLast(values, predicate).get());
+        assertEquals("ccc", CommonUtil.findLast(values, predicate).get());
         assertEquals(Arrays.asList("ccc"), visited);
         visited.clear();
         Iterable<String> iterable = () -> Arrays.asList(values).iterator();
-        assertEquals("ccc", N.findLast(iterable, predicate).get());
+        assertEquals("ccc", CommonUtil.findLast(iterable, predicate).get());
         assertEquals(Arrays.asList("ccc"), visited);
         visited.clear();
         Iterator<String> iterator = Arrays.asList(values).iterator();
-        assertEquals("ccc", N.findLast(iterator, predicate).get());
+        assertEquals("ccc", CommonUtil.findLast(iterator, predicate).get());
         assertEquals(Arrays.asList(values), visited);
         assertFalse(iterator.hasNext());
     }
@@ -115,9 +115,9 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     @Test
     public void testAsArrayAliasesWhileCollectionFactoriesCopy() {
         String[] source = { "a", "b" };
-        String[] array = N.asArray(source);
-        List<String> list = N.asList(source);
-        Set<String> set = N.asSet(source);
+        String[] array = CommonUtil.asArray(source);
+        List<String> list = CommonUtil.asList(source);
+        Set<String> set = CommonUtil.asSet(source);
         assertSame(source, array);
         array[0] = "changed";
         assertEquals("changed", source[0]);
@@ -128,19 +128,19 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     @Test
     public void testNumericArrayNarrowingDependsOnNumberType() {
         List<Number> values = Arrays.asList(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, new java.math.BigDecimal("1E+400"));
-        assertArrayEquals(new byte[] { -1, 0, 0, 0 }, N.toByteArray(values));
-        assertArrayEquals(new short[] { -1, 0, 0, 0 }, N.toShortArray(values));
-        assertArrayEquals(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0, 0 }, N.toIntArray(values));
-        assertArrayEquals(new long[] { Long.MAX_VALUE, Long.MIN_VALUE, 0, 0 }, N.toLongArray(values));
-        assertArrayEquals(new float[] { Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN, Float.POSITIVE_INFINITY }, N.toFloatArray(values));
-        assertArrayEquals(new double[] { Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY }, N.toDoubleArray(values));
+        assertArrayEquals(new byte[] { -1, 0, 0, 0 }, CommonUtil.toByteArray(values));
+        assertArrayEquals(new short[] { -1, 0, 0, 0 }, CommonUtil.toShortArray(values));
+        assertArrayEquals(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0, 0 }, CommonUtil.toIntArray(values));
+        assertArrayEquals(new long[] { Long.MAX_VALUE, Long.MIN_VALUE, 0, 0 }, CommonUtil.toLongArray(values));
+        assertArrayEquals(new float[] { Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN, Float.POSITIVE_INFINITY }, CommonUtil.toFloatArray(values));
+        assertArrayEquals(new double[] { Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY }, CommonUtil.toDoubleArray(values));
     }
 
     @Test
     public void testMutabilityClassificationPreservesExistingIterators() {
         List<String> list = new ArrayList<>(Arrays.asList("value"));
         Iterator<String> listIterator = list.iterator();
-        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(list));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(list));
         assertEquals("value", listIterator.next());
         assertFalse(listIterator.hasNext());
         assertEquals(Arrays.asList("value"), list);
@@ -148,7 +148,7 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         Map<String, Integer> map = new HashMap<>();
         map.put("key", 1);
         Iterator<String> keyIterator = map.keySet().iterator();
-        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(map));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(map));
         assertEquals("key", keyIterator.next());
         assertFalse(keyIterator.hasNext());
         assertEquals(Collections.singletonMap("key", 1), map);
@@ -156,17 +156,17 @@ public class CommonUtilTest extends CommonUtilTestSupport {
 
     @Test
     public void testNewInstanceSupportsCollectionAndMapInterfaces() {
-        List<String> list = N.newInstance(List.class);
-        Map<String, Integer> map = N.newInstance(Map.class);
+        List<String> list = CommonUtil.newInstance(List.class);
+        Map<String, Integer> map = CommonUtil.newInstance(Map.class);
         assertTrue(list.isEmpty());
         assertTrue(map.isEmpty());
         list.add("value");
         map.put("key", 1);
         assertEquals(Arrays.asList("value"), list);
         assertEquals(Collections.singletonMap("key", 1), map);
-        assertNotSame(list, N.newInstance(List.class));
-        assertNotSame(map, N.newInstance(Map.class));
-        assertThrows(IllegalArgumentException.class, () -> N.newInstance(Runnable.class));
+        assertNotSame(list, CommonUtil.newInstance(List.class));
+        assertNotSame(map, CommonUtil.newInstance(Map.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(Runnable.class));
     }
 
     @Test
@@ -941,7 +941,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertArrayEquals(new int[] { 10, 20, 30 }, a);
     }
 
-
     @Test
     public void testNewDataset_rowsFirstRowShapeDecidesColumns() {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList(new HashMap<String, Object>())));
@@ -1025,8 +1024,8 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     @Test
     public void testContainsSameElements_primitiveDifferentialAgainstCounts() {
         final Random rnd = new Random(20260926L);
-        final float[] floatPool = { 0.0f, -0.0f, Float.NaN, Float.intBitsToFloat(0x7fc00001), Float.intBitsToFloat(0xffc00000), 1.5f,
-                Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, -Float.MAX_VALUE };
+        final float[] floatPool = { 0.0f, -0.0f, Float.NaN, Float.intBitsToFloat(0x7fc00001), Float.intBitsToFloat(0xffc00000), 1.5f, Float.POSITIVE_INFINITY,
+                Float.NEGATIVE_INFINITY, Float.MIN_VALUE, -Float.MAX_VALUE };
         final double[] doublePool = { 0.0, -0.0, Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L), Double.longBitsToDouble(0xfff8000000000000L), 1.5,
                 Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.MIN_VALUE, -Double.MAX_VALUE };
 
@@ -1189,4 +1188,59 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     }
 
     // ---- perf review 2026-09-26 G029 end ----
+
+    // ---- bug review 2026-09-30 G134 begin ----
+    public static class G134Bean {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    // Anonymous containers are rejected rather than substituted or recreated with initializer data. Anonymous beans
+    // retain their runtime type and existing initialization/copy behavior.
+    @Test
+    public void testAnonymousContainersRejectedAndAnonymousBeansPreserved() {
+        final var list = new java.util.ArrayList<String>() {
+            {
+                add("x");
+            }
+        };
+        final var map = new java.util.HashMap<String, Integer>() {
+            {
+                put("x", 1);
+            }
+        };
+        final var bean = new G134Bean() {
+            {
+                setName("x");
+            }
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(list.getClass()));
+
+        final var newBean = CommonUtil.newInstance(bean.getClass());
+        org.junit.jupiter.api.Assertions.assertSame(bean.getClass(), newBean.getClass());
+
+        assertThrows(IllegalArgumentException.class, () -> N.fromJson("[\"a\"]", list.getClass()));
+        assertThrows(IllegalArgumentException.class, () -> N.fromJson("{\"a\": 2}", map.getClass()));
+
+        final var parsedBean = N.fromJson("{\"name\": \"j\"}", bean.getClass());
+        org.junit.jupiter.api.Assertions.assertSame(bean.getClass(), parsedBean.getClass());
+        org.junit.jupiter.api.Assertions.assertEquals("j", parsedBean.getName());
+
+        final var copy = Beans.copy(bean);
+        org.junit.jupiter.api.Assertions.assertSame(bean.getClass(), copy.getClass());
+        org.junit.jupiter.api.Assertions.assertEquals("x", copy.getName());
+
+        assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(list.getClass()).get());
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(map.getClass()).apply(4));
+    }
+    // ---- bug review 2026-09-30 G134 end ----
+
 }

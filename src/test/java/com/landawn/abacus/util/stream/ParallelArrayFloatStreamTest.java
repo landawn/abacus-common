@@ -3,7 +3,6 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -201,8 +200,9 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(f -> {
-                if (f == 5.0f)
+                if (f == 5.0f) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -210,8 +210,9 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         parallelStream = createFloatStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(f -> {
-                if (f == 7.0f)
+                if (f == 7.0f) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return f;
             }).toArray();
         });
@@ -790,8 +791,9 @@ public class ParallelArrayFloatStreamTest extends TestBase {
     public void testReduce_WithIdentity_ParallelPath() {
         float result = createFloatStream(TEST_ARRAY).reduce(0.0f, Float::sum);
         float expected = 0;
-        for (float v : TEST_ARRAY)
+        for (float v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, result, 0.01f);
     }
 
@@ -1166,10 +1168,12 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         float valA = 0.0f;
         float valB = -1.0f;
         FloatBinaryOperator zipper = (f1, f2) -> {
-            if (f1 == valA)
+            if (f1 == valA) {
                 return f2;
-            if (f2 == valB)
+            }
+            if (f2 == valB) {
                 return f1;
+            }
             return f1 + f2;
         };
         List<Float> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
@@ -1427,10 +1431,18 @@ public class ParallelArrayFloatStreamTest extends TestBase {
             assertFalse(FloatStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
             assertFalse(FloatStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
 
-            assertEquals(1100.0f, new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
-            assertEquals(2899.0f, new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
-            assertFalse(new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
-            assertFalse(new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+            assertEquals(1100.0f,
+                    new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true)
+                            .get());
+            assertEquals(2899.0f,
+                    new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true)
+                            .get());
+            assertFalse(
+                    new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000)
+                            .isPresent());
+            assertFalse(
+                    new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999)
+                            .isPresent());
         }
     }
 

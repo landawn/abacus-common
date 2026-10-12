@@ -1741,8 +1741,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
     // G011-05: a value that the memory rule must reject anyway must not cost live pooled entries.
     @Test
     public void testPut_neverAdmissibleValueDoesNotVacate() throws InterruptedException {
-        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> "big".equals(v.getValue()) ? 1000
-                : "bad".equals(v.getValue()) ? -1 : 10;
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> "big".equals(v.getValue()) ? 1000 : "bad".equals(v.getValue()) ? -1 : 10;
         final KeyedObjectPool<String, TestPoolable> roomy = PoolFactory.createKeyedObjectPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
         final KeyedObjectPool<String, TestPoolable> full = PoolFactory.createKeyedObjectPool(3, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
         try {

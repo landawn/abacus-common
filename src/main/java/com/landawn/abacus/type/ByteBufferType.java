@@ -47,6 +47,11 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
 
     private final Class<ByteBuffer> typeClass;
 
+    /** Initialized only when a heap buffer does not satisfy the requested class. */
+    private static final class DirectBufferClass {
+        private static final Class<? extends ByteBuffer> TYPE = ByteBuffer.allocateDirect(0).getClass();
+    }
+
     /**
      * Package-private constructor for {@code ByteBufferType} using the standard {@link java.nio.ByteBuffer} class.
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
@@ -157,9 +162,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *
      * <p>{@link #valueOf(byte[])} is {@code static} and can only ever build a heap buffer, so this instance
      * helper is what keeps a handler created for a {@code ByteBuffer} subclass from advertising a
-     * {@link #javaType()} it never returns. The produced buffer is tested for assignability rather than the
-     * target class being classified: on this JDK {@code DirectByteBuffer} extends {@code MappedByteBuffer},
-     * so the direct allocation satisfies both.</p>
+     * {@link #javaType()} it never returns. Assignability is checked against the platform's actual direct
+     * buffer class before allocating the payload, so an unsupported class (a read-only buffer class, for
+     * example) is rejected without a payload-sized native allocation. On this JDK, {@code DirectByteBuffer}
+     * extends {@code MappedByteBuffer}, so the direct allocation satisfies both.</p>
      *
      * @param bytes the content to wrap; must not be {@code null}
      * @return a buffer of the handled class holding {@code bytes}, positioned at {@code bytes.length}
@@ -172,9 +178,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
             return heapBuffer;
         }
 
+        if (!typeClass.isAssignableFrom(DirectBufferClass.TYPE)) {
+            throw new UnsupportedOperationException("Content construction is not supported for byte buffer class: " + typeClass.getName());
+        }
+
         final ByteBuffer directBuffer = ByteBuffer.allocateDirect(bytes.length);
         directBuffer.put(bytes);
 
+        // Defensive only: allocateDirect returns DirectBufferClass.TYPE for every capacity, which passed the check above.
         if (typeClass.isInstance(directBuffer)) {
             return directBuffer;
         }
@@ -213,8 +224,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
     /**
      * Extracts the written content of a {@link java.nio.ByteBuffer} as a byte array.
      * Copies bytes from index {@code 0} up to (but not including) the buffer's current
-     * {@link java.nio.ByteBuffer#position() position}. The copy is read through a duplicate, so
-     * the original buffer's position, limit, and mark are not modified.
+     * {@link java.nio.ByteBuffer#position() position}. The buffer's position, limit, and mark are not modified.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -229,11 +239,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      */
     public static byte[] byteArrayOf(final ByteBuffer x) throws IllegalArgumentException {
         N.checkArgNotNull(x, cs.x);
-        final ByteBuffer duplicate = x.duplicate();
-        final byte[] bytes = new byte[duplicate.position()];
+        final byte[] bytes = new byte[x.position()];
 
-        duplicate.position(0);
-        duplicate.get(bytes);
+        // Absolute bulk reads preserve position, limit and mark without allocating a duplicate buffer.
+        x.get(0, bytes);
 
         return bytes;
     }
@@ -242,7 +251,7 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Wraps a byte array in a {@link java.nio.ByteBuffer} with position set to the end
      * of the data (i.e. {@code bytes.length}).
      * The resulting buffer has capacity equal to {@code bytes.length} and limit equal to
-     * {@code bytes.length}, with position at {@code bytes.length} — ready for reading
+     * {@code bytes.length}, with position at {@code bytes.length} - ready for reading
      * via {@link #byteArrayOf(ByteBuffer)}.
      *
      * <p><b>Usage Examples:</b></p>

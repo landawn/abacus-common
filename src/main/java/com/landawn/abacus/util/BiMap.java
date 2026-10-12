@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -1039,14 +1040,21 @@ public final class BiMap<K, V> implements Map<K, V> {
      * does keep its order (a {@code SortedMap}'s comparator included; a
      * {@link java.util.concurrent.ConcurrentNavigableMap} source yields a
      * {@link java.util.concurrent.ConcurrentSkipListMap}, in the copy's key map and in every {@link #copy()}
-     * and {@link #inverse()} made from it). A source whose class cannot be instantiated reflectively
-     * through a no-argument constructor - {@code Collections.unmodifiableMap(aLinkedHashMap)}, for instance - is copied into a
-     * {@code LinkedHashMap} that keeps the source's encounter order; only key semantics hidden behind such a
-     * wrapper (a comparator, identity equivalence) are lost. The value-to-key map is a {@link HashMap} for a
-     * {@code HashMap} source and a {@code LinkedHashMap} otherwise: the source's key handling cannot apply to
+     * and {@link #inverse()} made from it). When an empty key-to-value backing map cannot be recreated, the fallback
+     * uses a known JDK map family ({@code IdentityHashMap}, {@code WeakHashMap} or {@code ConcurrentHashMap}) or otherwise
+     * a {@code LinkedHashMap} that keeps the source's encounter order, as {@link Maps} does for its results. Key semantics
+     * hidden behind wrappers and arbitrary subclass overrides are not preserved by the fallback. A map recreated through
+     * a sized constructor also falls back to {@code LinkedHashMap} if no supplier is available for subsequent copies.
+     * The value-to-key map is a {@link HashMap} for a {@code HashMap} source and a {@code LinkedHashMap} otherwise:
+     * the source's key handling cannot apply to
      * keys taken from its values. Supply explicit map suppliers to
      * {@link #BiMap(Supplier, Supplier)} and insert the entries yourself when a particular
      * iteration order must be guaranteed.</p>
+     *
+     * <p>These backing-map choices do not make the resulting BiMap weak-keyed or thread-safe. Its value-to-key map
+     * strongly retains the original keys, even when the key-to-value map is a {@code WeakHashMap}. Concurrent mutation
+     * requires external synchronization, even when the key-to-value map is concurrent, because operations update both
+     * backing maps.</p>
      *
      * @param <K> the type of the keys in the map.
      * @param <V> the type of the values in the map.
@@ -1989,15 +1997,31 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @throws NullPointerException if either of this BiMap's map suppliers returns {@code null}.
      */
     public BiMap<K, V> copy() throws IllegalArgumentException, NullPointerException {
-        final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
+        final Object linkedHashMapSupplier = Suppliers.ofLinkedHashMap();
+        final BiMap<K, V> copy;
 
-        // The constructor can only check that the supplied maps are empty and differ from each other at
-        // that moment. A supplier handing out one shared instance therefore passes construction whenever
-        // this BiMap is still empty, and the "copy" would then be an alias: writes to it would show up
-        // here. (Once this BiMap is non-empty, that constructor check already rejects it.)
-        // Either new direction can alias either original direction when K and V have the same type.
-        if (copy.keyMap == keyMap || copy.keyMap == valueMap || copy.valueMap == keyMap || copy.valueMap == valueMap) {
-            throw new IllegalArgumentException("The map suppliers returned this BiMap's own backing maps; they must return new empty maps on every call");
+        // A default-capacity LinkedHashMap holds 12 (16 * 0.75) entries before its first resize.
+        if (keyMapSupplier == linkedHashMapSupplier && valueMapSupplier == linkedHashMapSupplier
+                && keyMap.size() > DEFAULT_INITIAL_CAPACITY * DEFAULT_LOAD_FACTOR) {
+            // Both suppliers are the library's own, which only ever returns a new, empty, insertion-ordered
+            // LinkedHashMap. Create the two maps directly at the capacity they would grow to while the copy is
+            // filled - the same class and the same final table size, and an insertion-ordered map iterates the same
+            // at any capacity - instead of resizing both about log2(size / 12) times on the way.
+            // Deliberately not done for HashMap: its iteration order can depend on how the table grew, because
+            // colliding buckets are treeified at different moments.
+            final int size = keyMap.size();
+            copy = new BiMap<>(keyMapSupplier, valueMapSupplier, LinkedHashMap.newLinkedHashMap(size), LinkedHashMap.newLinkedHashMap(size));
+        } else {
+            copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
+
+            // The constructor can only check that the supplied maps are empty and differ from each other at
+            // that moment. A supplier handing out one shared instance therefore passes construction whenever
+            // this BiMap is still empty, and the "copy" would then be an alias: writes to it would show up
+            // here. (Once this BiMap is non-empty, that constructor check already rejects it.)
+            // Either new direction can alias either original direction when K and V have the same type.
+            if (copy.keyMap == keyMap || copy.keyMap == valueMap || copy.valueMap == keyMap || copy.valueMap == valueMap) {
+                throw new IllegalArgumentException("The map suppliers returned this BiMap's own backing maps; they must return new empty maps on every call");
+            }
         }
 
         copy.putAll(keyMap);
@@ -2103,7 +2127,23 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public String toString() {
-        return keyMap.toString();
+        // The backing map cannot recognize this wrapper as its own self-reference.
+        // Identity-based backing maps can contain this BiMap as either a key or a value.
+        final StringBuilder result = new StringBuilder("{");
+        final Iterator<Map.Entry<K, V>> iter = keyMap.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            final Map.Entry<K, V> entry = iter.next();
+            final K key = entry.getKey();
+            final V value = entry.getValue();
+            result.append(key == this ? "(this Map)" : key).append('=').append(value == this ? "(this Map)" : value);
+
+            if (iter.hasNext()) {
+                result.append(", ");
+            }
+        }
+
+        return result.append('}').toString();
     }
 
     /**

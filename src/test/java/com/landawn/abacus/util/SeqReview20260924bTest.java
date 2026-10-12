@@ -96,8 +96,7 @@ public class SeqReview20260924bTest extends TestBase {
         assertEquals(expected, drainContinuingAfterFailures(failingOnceAt(10, 5).split(3, ArrayList::new)));
 
         // Bounded collection: the stale elements used to overflow it ("Queue full") and lose the chunk [6, 7, 8].
-        assertEquals(expected,
-                drainContinuingAfterFailures(failingOnceAt(10, 5).split(3, IntFunctions.<Integer> ofArrayBlockingQueue())));
+        assertEquals(expected, drainContinuingAfterFailures(failingOnceAt(10, 5).split(3, IntFunctions.<Integer> ofArrayBlockingQueue())));
         assertEquals(expected, drainContinuingAfterFailures(failingOnceAt(10, 5).split(3, ArrayBlockingQueue::new)));
 
         // Default list factory (fresh list per chunk) gives the same result.
@@ -128,8 +127,7 @@ public class SeqReview20260924bTest extends TestBase {
         final List<Object> expectedTumbling = Arrays.asList(Arrays.asList(1, 2, 3), "boom@5", Arrays.asList(6, 7, 8), Arrays.asList(9, 10));
 
         assertEquals(expectedTumbling, drainContinuingAfterFailures(failingOnceAt(10, 5).sliding(3, 3, n -> new ArrayList<>(n))));
-        assertEquals(expectedTumbling,
-                drainContinuingAfterFailures(failingOnceAt(10, 5).sliding(3, 3, IntFunctions.<Integer> ofArrayBlockingQueue())));
+        assertEquals(expectedTumbling, drainContinuingAfterFailures(failingOnceAt(10, 5).sliding(3, 3, IntFunctions.<Integer> ofArrayBlockingQueue())));
     }
 
     @Test
@@ -139,8 +137,8 @@ public class SeqReview20260924bTest extends TestBase {
 
         assertEquals(Arrays.asList(Arrays.asList("é", "中", "😀"), Arrays.asList("a", "b", "c"), Arrays.asList("d")),
                 Seq.<String, Exception> of(words).split(3, ArrayBlockingQueue::new).map(ArrayList::new).toList());
-        assertEquals(Arrays.asList(Arrays.asList("é", "中"), Arrays.asList("中", "😀"), Arrays.asList("😀", "a"),
-                Arrays.asList("a", "b"), Arrays.asList("b", "c"), Arrays.asList("c", "d")),
+        assertEquals(Arrays.asList(Arrays.asList("é", "中"), Arrays.asList("中", "😀"), Arrays.asList("😀", "a"), Arrays.asList("a", "b"),
+                Arrays.asList("b", "c"), Arrays.asList("c", "d")),
                 Seq.<String, Exception> of(words).sliding(2, 1, ArrayBlockingQueue::new).map(ArrayList::new).toList());
 
         // empty source: the supplier is never asked
@@ -437,7 +435,8 @@ public class SeqReview20260924bTest extends TestBase {
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("a", "b", "a").toMap(x -> x, x -> 1));
         assertEquals("Duplicate key a (attempted merging values 1 and 1)", e.getMessage());
 
-        e = assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("a", "bb", "cc").toMap(String::length, x -> x, Suppliers.<Integer, String> ofLinkedHashMap()));
+        e = assertThrows(IllegalStateException.class,
+                () -> Seq.<String, Exception> of("a", "bb", "cc").toMap(String::length, x -> x, Suppliers.<Integer, String> ofLinkedHashMap()));
         assertEquals("Duplicate key 2 (attempted merging values bb and cc)", e.getMessage());
 
         e = assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("x", "y").toImmutableMap(x -> "k", x -> x));
@@ -446,7 +445,8 @@ public class SeqReview20260924bTest extends TestBase {
         e = assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("x", "y").toMap(x -> "k", x -> x, Fnn.throwingMerger()));
         assertEquals("Duplicate key k (attempted merging values x and y)", e.getMessage());
 
-        e = assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("x", "y").toMap(x -> "k", x -> x, (a, b) -> Fn.<String> throwingMerger().apply(a, b)));
+        e = assertThrows(IllegalStateException.class,
+                () -> Seq.<String, Exception> of("x", "y").toMap(x -> "k", x -> x, (a, b) -> Fn.<String> throwingMerger().apply(a, b)));
         assertEquals("Duplicate key (attempted merging values x and y)", e.getMessage()); // a wrapper is not the shared merger
 
         // null key and null values

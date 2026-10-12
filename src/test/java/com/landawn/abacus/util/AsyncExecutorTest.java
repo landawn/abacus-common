@@ -1046,7 +1046,7 @@ public class AsyncExecutorTest extends TestBase {
             final AtomicInteger attempts = new AtomicInteger();
             final ContinuableFuture<String> future = executor.executeWithRetry(() -> {
                 attempts.incrementAndGet();
-                return (String) null;
+                return null;
             }, 2, 0L, (result, e) -> result == null);
 
             final ExecutionException ex = assertThrows(ExecutionException.class, future::get);

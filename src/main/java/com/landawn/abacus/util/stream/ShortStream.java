@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -43,6 +44,7 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BiConsumers;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FS;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
@@ -2608,7 +2610,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * Returns a {@code ShortStream} that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
      * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
      * the supplier so the supplied stream can be closed.
      *
@@ -2633,7 +2637,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * });
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToShort(it -> it.get())}.
+     * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
+     * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
+     * not detected (see {@link Stream#defer(Supplier)}).
      *
      * @param supplier the supplier that provides the ShortStream
      * @return a new ShortStream supplied by the given supplier
@@ -2644,10 +2650,22 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<ShortStream> s = Fn.memoize(supplier);
-        return ShortStream.of(ShortIterator.defer(() -> {
+        // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
+        final Holder<ShortStream> deferred = new Holder<>();
+
+        final ShortStream result = ShortStream.of(ShortIterator.defer(() -> {
             final ShortStream source = s.get();
+
+            if (source != null && source == deferred.value()) {
+                throw new IllegalStateException("Stream supplier returned the deferred stream itself");
+            }
+
             return source == null ? ShortIterator.empty() : source.iteratorEx();
         })).onClose(newCloseHandler(s));
+
+        deferred.setValue(result);
+
+        return result;
     }
 
     /**
@@ -4337,7 +4355,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
         final List<? extends ShortStream> sources = new ArrayList<>(streams);
 
         return new IteratorShortStream(new ShortIteratorEx() { //NOSONAR
-            private final Iterator<? extends ShortStream> iterators = sources.iterator();
+            private final ListIterator<? extends ShortStream> iterators = sources.listIterator();
             private ShortStream cur;
             private ShortIterator iter;
 
@@ -4345,7 +4363,13 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             public boolean hasNext() {
                 while ((iter == null || !iter.hasNext()) && iterators.hasNext()) {
                     if (cur != null) {
+                        // The slot is taken before close(): a close handler that re-enters this iterator moves it on.
+                        final int index = iterators.previousIndex();
                         cur.close();
+                        // Drop the closed input from the private snapshot (the close handler skips a closed stream anyway):
+                        // otherwise it keeps whatever the exhausted input still references, such as the array of a
+                        // sorted() input, reachable until this stream itself is unreachable.
+                        sources.set(index, null);
                     }
 
                     cur = iterators.next();
@@ -5135,7 +5159,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
             @Override
             public boolean hasNext() {
-                return iterA.hasNext() || iterB.hasNext() || hasNextA || hasNextB;
+                // A buffered head already proves availability; probing its source can evaluate an unneeded tail.
+                return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
             @Override

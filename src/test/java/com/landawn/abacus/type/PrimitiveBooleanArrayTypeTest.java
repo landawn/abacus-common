@@ -96,15 +96,17 @@ public class PrimitiveBooleanArrayTypeTest extends TestBase {
     }
 
     @Test
-    public void reviewFixes20260906_valueOfMapsNullAndUnknownTokensToFalse() {
-        // documented contract (T7-05): the boolean element type's lenient parse; a primitive array cannot hold null
+    public void reviewFixes20260906_valueOfMapsNullToFalseAndRejectsUnknownTokens() {
+        // documented contract (T7-05): a primitive array cannot hold null, so the literal null is false; any other token
+        // that is not boolean text is rejected (code review 2026-10-05; it used to be false)
         assertArrayEquals(new boolean[] { false }, type.valueOf("[null]"));
         assertArrayEquals(new boolean[] { true, false }, type.valueOf("[1, null]"));
-        assertArrayEquals(new boolean[] { false }, type.valueOf("[NULL]"));
-        assertArrayEquals(new boolean[] { false }, type.valueOf("[yes]"));
-        assertArrayEquals(new boolean[] { true, false, false, true, true }, type.valueOf("[Y, n, T, y, TRUE]"));
-        assertArrayEquals(new boolean[] { true, false, false }, type.valueOf("[1, null, yes]"));
-        assertArrayEquals(new boolean[] { true, false }, type.valueOf((Object) new Boolean[] { true, null }));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[NULL]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[yes]"));
+        assertArrayEquals(new boolean[] { true, false, false, true, true }, type.valueOf("[Y, n, -1, y, TRUE]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[Y, n, T, y, TRUE]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, null, yes]"));
+        assertArrayEquals(new boolean[] { true, false }, type.valueOf(new Boolean[] { true, null }));
         assertArrayEquals(new boolean[] { true, false, true }, type.valueOf(type.stringOf(new boolean[] { true, false, true })));
         assertEquals(0, type.valueOf("[]").length);
         assertNull(type.valueOf((String) null));
@@ -122,5 +124,18 @@ public class PrimitiveBooleanArrayTypeTest extends TestBase {
 
         assertEquals(0, type.hashCode(null));
         assertEquals(Arrays.hashCode(new boolean[] { true, false }), type.hashCode(new boolean[] { true, false }));
+    }
+
+    // 2026-10-05: the compact JSON text form. Quoted content is decoded exactly once by the shared
+    // AbstractArrayType.jsonElementContent; a bare null and an empty or blank quoted element are the default, false.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new boolean[] { true, true, false, true, false, true }, type.valueOf("[\"true\", 'Y', \"0\", \"\\u0031\", null, '\\t1']"));
+        assertArrayEquals(new boolean[] { false, false, false }, type.valueOf("[\"\", '', \" \"]"));
+        assertArrayEquals(new boolean[] { true, false }, type.valueOf("[\"1\", '-1']"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"null\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"yes\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("[\"1']"));
     }
 }

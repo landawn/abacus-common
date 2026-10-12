@@ -4930,8 +4930,9 @@ public class FloatStreamTest extends TestBase {
         Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1.0f, 2.0f), FloatStream.of(10.0f, 20.0f), FloatStream.of(100.0f, 200.0f));
         FloatStream result = FloatStream.zip(streams, floats -> {
             float sum = 0.0f;
-            for (Float f : floats)
+            for (Float f : floats) {
                 sum += f;
+            }
             return sum;
         });
         assertArrayEquals(new float[] { 111.0f, 222.0f }, result.toArray());
@@ -4944,8 +4945,9 @@ public class FloatStreamTest extends TestBase {
         float[] defaults = { 0.0f, 100.0f };
         FloatStream result = FloatStream.zip(streams, defaults, floats -> {
             float sum = 0.0f;
-            for (Float f : floats)
+            for (Float f : floats) {
                 sum += f;
+            }
             return sum;
         });
         assertEquals(3, result.count());
@@ -6339,6 +6341,7 @@ public class FloatStreamTest extends TestBase {
                     FloatStream.flatten(array, true).skip(skip).toArray());
         }
     }
+
     // ---- perf review 2026-09-26 G096 end ----
     // ---- perf review 2026-09-26 G112 begin ----
     // G112-01: bulk count()/toFloatList()/toArray() of concat(List<float[]>) / concat(float[]...) - null/empty arrays, skip into/at/after a
@@ -6347,12 +6350,12 @@ public class FloatStreamTest extends TestBase {
     public void testConcatListOfArrays_bulkOpsMatchElementwise_G112() {
         final float[] a = new float[20];
         final float[] b = new float[40];
-        final float[] c = { (float) 1, (float) 2, (float) 3 };
+        final float[] c = { 1, 2, 3 };
         for (int i = 0; i < a.length; i++) {
-            a[i] = (float) (10 + i);
+            a[i] = 10 + i;
         }
         for (int i = 0; i < b.length; i++) {
-            b[i] = (float) (100 + i);
+            b[i] = 100 + i;
         }
         final List<float[]> list = Arrays.asList(null, a, null, new float[0], c, b, c, new float[0]);
         final float[] all = new float[66];
@@ -6367,7 +6370,7 @@ public class FloatStreamTest extends TestBase {
             assertEquals(expected.length, FloatStream.concat(list).skip(n).count(), "skip " + n);
             final FloatList xl = FloatStream.concat(list).skip(n).toFloatList();
             assertArrayEquals(expected, xl.toArray(), "skip " + n);
-            xl.add((float) 7);
+            xl.add(7);
             assertEquals(expected.length + 1, xl.size());
         }
 
@@ -6378,17 +6381,17 @@ public class FloatStreamTest extends TestBase {
         assertEquals(0, FloatStream.concat(empties).toArray().length);
         assertEquals(0, FloatStream.concat(empties).count());
         final FloatList emptyList = FloatStream.concat(empties).toFloatList();
-        emptyList.add((float) 9);
+        emptyList.add(9);
         assertEquals(1, emptyList.size());
 
         final float[] result = FloatStream.concat(Arrays.asList(b)).toArray();
         assertArrayEquals(b, result);
         assertFalse(result == b);
-        result[0] = (float) 0;
-        assertEquals((float) 100, b[0]);
+        result[0] = 0;
+        assertEquals(100, b[0]);
 
         // the list is read when the terminal operation runs; close handlers still run
-        final List<float[]> live = new ArrayList<>(Arrays.asList(new float[] { (float) 1 }, new float[] { (float) 2 }));
+        final List<float[]> live = new ArrayList<>(Arrays.asList(new float[] { 1 }, new float[] { 2 }));
         final FloatStream stream = FloatStream.concat(live);
         live.set(1, b);
         final AtomicInteger closed = new AtomicInteger();
@@ -6397,20 +6400,20 @@ public class FloatStreamTest extends TestBase {
 
         // partially consumed iterator, then drained in bulk
         final FloatIterator iter = FloatStream.concat(list).iterator();
-        assertEquals((float) 10, iter.nextFloat());
+        assertEquals(10, iter.nextFloat());
         assertArrayEquals(Arrays.copyOfRange(all, 1, all.length), iter.toArray());
         assertFalse(iter.hasNext());
 
         // the list iterator is advanced exactly as element-by-element iteration advances it
         final int[] calls = new int[2];
-        final List<float[]> counting = new ArrayList<float[]>(list) {
+        final List<float[]> counting = new ArrayList<>(list) {
             private static final long serialVersionUID = 1L;
 
             @Override
             public java.util.Iterator<float[]> iterator() {
                 final java.util.Iterator<float[]> it = super.iterator();
 
-                return new java.util.Iterator<float[]>() {
+                return new java.util.Iterator<>() {
                     @Override
                     public boolean hasNext() {
                         calls[0]++;
@@ -6438,6 +6441,7 @@ public class FloatStreamTest extends TestBase {
         assertEquals(9, calls[0]);
         assertEquals(8, calls[1]);
     }
+
     // ---- perf review 2026-09-26 G112 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static float[] flattenVerticallyReferenceG114(final float[][] a) {
@@ -6510,7 +6514,7 @@ public class FloatStreamTest extends TestBase {
                     a[i] = new float[len];
 
                     for (int j = 0; j < len; j++) {
-                        a[i][j] = (float) (i * 100 + j);
+                        a[i][j] = i * 100 + j;
                     }
                 }
             }
@@ -6539,7 +6543,7 @@ public class FloatStreamTest extends TestBase {
         oneLongRow[999] = new float[5000];
 
         for (int j = 0; j < 5000; j++) {
-            oneLongRow[999][j] = (float) j;
+            oneLongRow[999][j] = j;
         }
 
         assertArrayEquals(oneLongRow[999], FloatStream.flatten(oneLongRow, true).toArray());

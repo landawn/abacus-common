@@ -2,6 +2,7 @@ package com.landawn.abacus.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,14 +42,13 @@ import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Beans;
 import com.landawn.abacus.util.Dates;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.IdentityHashSet;
 import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.ImmutableMap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 import testfixtures.types.WeekDay;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import com.landawn.abacus.util.IdentityHashSet;
 
 public abstract class AbstractParserTest extends AbstractTest {
 
@@ -376,7 +376,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     }
 
     @Test
-    public void reviewFixes20260907_uninstantiableContainerTypeAttributeFallsBackToTheDeclaredType() {
+    public void reviewFixes20260907_uninstantiableContainerTypeAttributeFallsBackToTheDeclaredType() throws ReflectiveOperationException {
         // No no-argument constructor at all: the reader would fail with "No default constructor found".
         assertSame(Map.class, AbstractParser.getConcreteClass(ImmutableMap.class, Map.class));
         assertSame(List.class, AbstractParser.getConcreteClass(ImmutableList.class, List.class));
@@ -384,10 +384,14 @@ public abstract class AbstractParserTest extends AbstractTest {
         assertSame(List.class, AbstractParser.getConcreteClass(List.of(1).getClass(), List.class));
         assertSame(Map.class, AbstractParser.getConcreteClass(Collections.unmodifiableMap(new HashMap<>()).getClass(), Map.class));
 
-        // A no-argument constructor that exists but is private in a java.base package that is not open:
-        // N.newInstance cannot use it either, so this must fall back too.
-        assertSame(Map.class, AbstractParser.getConcreteClass(Collections.emptyMap().getClass(), Map.class));
-        assertSame(List.class, AbstractParser.getConcreteClass(Collections.emptyList().getClass(), List.class));
+        // These private no-argument constructors are unusable when java.util is closed. With --add-opens,
+        // the reader can instantiate them, so the more specific runtime class must be retained instead.
+        final Class<?> emptyMapClass = Collections.emptyMap().getClass();
+        final Class<?> emptyListClass = Collections.emptyList().getClass();
+        assertSame(emptyMapClass.getDeclaredConstructor().trySetAccessible() ? emptyMapClass : Map.class,
+                AbstractParser.getConcreteClass(emptyMapClass, Map.class));
+        assertSame(emptyListClass.getDeclaredConstructor().trySetAccessible() ? emptyListClass : List.class,
+                AbstractParser.getConcreteClass(emptyListClass, List.class));
 
         // Instantiable containers keep the more specific class.
         assertSame(LinkedHashMap.class, AbstractParser.getConcreteClass(LinkedHashMap.class, Map.class));
@@ -530,7 +534,6 @@ public abstract class AbstractParserTest extends AbstractTest {
 
     }
 
-
     @Test
     public void testHasCircularReferenceRecordsFirstVisitInSet() {
         final IdentityHashSet<Object> visited = new IdentityHashSet<>();
@@ -550,5 +553,27 @@ public abstract class AbstractParserTest extends AbstractTest {
         // Scalars are never tracked.
         assertFalse(AbstractParser.hasCircularReference("scalar", visited, null, null));
         assertTrue(visited.size() == 1);
+    }
+
+    public static class FailingTypeAttributeTarget {
+        public FailingTypeAttributeTarget() {
+            throw new IllegalStateException("type attribute constructor failure");
+        }
+    }
+
+    // The type-attribute failure is logged as one line without a stack trace; with no property class to fall back to,
+    // it must stay reachable as the cause of the ParsingException.
+    @Test
+    public void testNewPropInstanceKeepsTypeAttributeFailureAsCause() {
+        final ParsingException failure = assertThrows(ParsingException.class, () -> AbstractParser.newPropInstance(null, FailingTypeAttributeTarget.class));
+        Throwable cause = failure.getCause();
+        while (cause != null && !(cause instanceof IllegalStateException)) {
+            cause = cause.getCause();
+        }
+        assertNotNull(cause, String.valueOf(failure.getCause()));
+        assertEquals("type attribute constructor failure", cause.getMessage());
+
+        // No type attribute: there is no failure to report as the cause.
+        org.junit.jupiter.api.Assertions.assertNull(assertThrows(ParsingException.class, () -> AbstractParser.newPropInstance(null, null)).getCause());
     }
 }

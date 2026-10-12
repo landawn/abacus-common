@@ -995,7 +995,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         N.checkArgNotNull(characteristics, cs.characteristics);
 
         for (int i = 0, len = characteristics.length; i < len; i++) {
-            N.checkArgNotNull(characteristics[i], "characteristics[" + i + "]");
+            if (characteristics[i] == null) {
+                // Runs for every collector construction: build the indexed message only for a failing element.
+                N.checkArgNotNull(characteristics[i], "characteristics[" + i + "]");
+            }
         }
     }
 
@@ -2927,7 +2930,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * into a {@code List}.
      *
      * <p>This collector maintains a sliding window of the last n elements encountered.
-     * It uses a {@code LinkedList}-based {@code Deque} internally for efficient addition
+     * It uses a bounded circular buffer internally for efficient addition
      * and removal of elements at both ends, which also allows {@code null} elements to be
      * collected.</p>
      *
@@ -2954,34 +2957,16 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, List<T>> last(final int n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        // LinkedList for null tolerance: ArrayDeque rejects null elements, which the sibling first(n) accepts.
-        final Supplier<Deque<T>> supplier = LinkedList::new;
-
-        final BiConsumer<Deque<T>, T> accumulator = (deque, t) -> {
-            if (n > 0) {
-                if (deque.size() >= n) {
-                    deque.pollFirst();
-                }
-
-                deque.offerLast(t);
-            }
-        };
-
-        final BinaryOperator<Deque<T>> combiner = (a, b) -> {
-            if (N.notEmpty(a) && N.notEmpty(b)) {
+        final Supplier<LastWindow<T>> supplier = () -> new LastWindow<>(n);
+        final BinaryOperator<LastWindow<T>> combiner = (a, b) -> {
+            if (a.size > 0 && b.size > 0) {
                 throw new UnsupportedOperationException("The 'first' and 'last' collectors can only be used with sequential streams");
             }
 
-            while (b.size() < n && !a.isEmpty()) {
-                b.addFirst(a.pollLast());
-            }
-
-            return b;
+            return b.size == 0 ? a : b;
         };
 
-        final Function<Deque<T>, List<T>> finisher = ArrayList::new;
-
-        return create(supplier, accumulator, combiner, finisher, CH_NOID);
+        return create(supplier, LastWindow::add, combiner, LastWindow::toList, CH_NOID);
     }
 
     /**
@@ -3285,11 +3270,25 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         final BiConsumer<A, ? super U> downstreamAccumulator = downstream.accumulator();
 
         final BiConsumer<A, T> accumulator = (a, t) -> {
-            try (Stream<? extends U> stream = mapper.apply(t)) {
+            @SuppressWarnings("resource")
+            final Stream<? extends U> stream = mapper.apply(t);
+
+            try {
                 final ObjIterator<? extends U> iter = StreamBase.iterate(stream);
 
                 while (iter.hasNext()) {
                     downstreamAccumulator.accept(a, iter.next());
+                }
+            } catch (final Throwable e) {
+                // Preserve the traversal failure even when a close handler throws the same instance.
+                if (stream != null) {
+                    stream.closeAfterFailure(e);
+                }
+
+                throw e;
+            } finally {
+                if (stream != null) {
+                    stream.close();
                 }
             }
         };
@@ -3893,6 +3892,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return create(supplier, accumulator, combiner, finisher, CH_UNORDERED_NOID);
     }
 
+    // Same containers, combiners and finishers as summingLong(it -> 1L) / summingInt(it -> 1), without a mapper call per element.
+    private static final BiConsumer<long[], Object> Counting_Accumulator = (a, t) -> a[0]++;
+
+    private static final BiConsumer<int[], Object> CountingToInt_Accumulator = (a, t) -> a[0]++;
+
     /**
      * Returns a {@code Collector} that counts the number of input elements.
      *
@@ -3919,7 +3923,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that counts the input elements
      */
     public static <T> Collector<T, ?, Long> counting() {
-        return summingLong(it -> 1L);
+        return create(SummingLong_Supplier, Counting_Accumulator, SummingLong_Combiner, SummingLong_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -3948,7 +3952,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @return a {@code Collector} that counts the input elements as an {@code Integer}
      */
     public static <T> Collector<T, ?, Integer> countingToInt() {
-        return summingInt(it -> 1);
+        return create(SummingInt_Supplier, CountingToInt_Accumulator, SummingInt_Combiner, SummingInt_Finisher, CH_UNORDERED_NOID);
     }
 
     /**
@@ -8112,6 +8116,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
                 a.setLeft(N.len(t) < N.len(a.left()) ? t : a.left());
             }
+
+            if (a.right() == 0) {
+                // Keep the CharSequence calls above (including their exceptions), then release the unused source.
+                a.setLeft(null);
+            }
         };
 
         final BinaryOperator<Pair<CharSequence, Integer>> combiner = (a, b) -> {
@@ -8169,6 +8178,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
                 }
 
                 a.setLeft(N.len(t) < N.len(a.left()) ? t : a.left());
+            }
+
+            if (a.right() == 0) {
+                // No later input can extend an empty common suffix.
+                a.setLeft(null);
             }
         };
 
@@ -12748,4 +12762,48 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         }
 
     }
+
+    /** Null-tolerant last-element window, allocating only as input arrives. */
+    private static final class LastWindow<T> {
+        private final int limit;
+        private Object[] values = N.EMPTY_OBJECT_ARRAY;
+        private int size;
+        private int first;
+
+        private LastWindow(final int limit) {
+            this.limit = limit;
+        }
+
+        private void add(final T value) {
+            if (limit == 0) {
+                return;
+            }
+
+            if (size < limit) {
+                if (size == values.length) {
+                    final int capacity = (int) Math.min(limit, Math.max(8L, (long) values.length * 2));
+                    values = N.copyOf(values, capacity);
+                }
+
+                values[size++] = value;
+            } else {
+                values[first] = value;
+                first = first + 1 == size ? 0 : first + 1;
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private List<T> toList() {
+            final List<T> result = new ArrayList<>(size);
+            int cursor = first;
+
+            for (int i = 0; i < size; i++) {
+                result.add((T) values[cursor]);
+                cursor = cursor + 1 == size ? 0 : cursor + 1;
+            }
+
+            return result;
+        }
+    }
+
 }

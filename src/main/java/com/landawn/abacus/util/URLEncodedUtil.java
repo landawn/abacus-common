@@ -1125,7 +1125,8 @@ public final class URLEncodedUtil {
                     for (int j = i; j < runEnd; j++) {
                         appendPercentEscape(content.charAt(j), output);
                     }
-                } else {
+                } else if (charset != Charsets.UTF_8 || !appendUtf8PercentEscapes(content, i, runEnd, output)) {
+                    // Every other charset, and a UTF-8 run holding an unpaired surrogate, goes through the reporting encoder.
                     // CharsetEncoder.encode(CharBuffer) resets the encoder before each run, so one instance serves all runs.
                     if (encoder == null) {
                         encoder = charset.newEncoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -1149,6 +1150,49 @@ public final class URLEncodedUtil {
                 i = runEnd;
             }
         }
+    }
+
+    /**
+     * Percent-escapes {@code content[start, end)} as the UTF-8 bytes that the UTF-8 encoder produces for it, without
+     * creating an encoder or any buffer, and with the same {@code output} calls as escaping the encoder's bytes. A run
+     * holding an unpaired surrogate is left untouched (nothing is appended) and {@code false} is returned, so the
+     * caller's reporting encoder rejects it with the usual exception.
+     *
+     * @return {@code true} if the run was escaped, {@code false} if it is malformed UTF-16
+     * @throws IOException if appending to {@code output} fails
+     */
+    private static boolean appendUtf8PercentEscapes(final String content, final int start, final int end, final Appendable output) throws IOException {
+        for (int i = start; i < end; i++) {
+            final char ch = content.charAt(i);
+
+            // A high surrogate must be followed by a low one inside the run (the pair is then skipped); a lone low one is malformed.
+            if (Character.isSurrogate(ch) && (!Character.isHighSurrogate(ch) || ++i == end || !Character.isLowSurrogate(content.charAt(i)))) {
+                return false;
+            }
+        }
+
+        for (int i = start; i < end; i++) {
+            final char ch = content.charAt(i);
+
+            if (ch < 0x80) {
+                appendPercentEscape(ch, output);
+            } else if (ch < 0x800) {
+                appendPercentEscape(0xC0 | (ch >> 6), output);
+                appendPercentEscape(0x80 | (ch & 0x3F), output);
+            } else if (!Character.isHighSurrogate(ch)) {
+                appendPercentEscape(0xE0 | (ch >> 12), output);
+                appendPercentEscape(0x80 | ((ch >> 6) & 0x3F), output);
+                appendPercentEscape(0x80 | (ch & 0x3F), output);
+            } else {
+                final int codePoint = Character.toCodePoint(ch, content.charAt(++i));
+                appendPercentEscape(0xF0 | (codePoint >> 18), output);
+                appendPercentEscape(0x80 | ((codePoint >> 12) & 0x3F), output);
+                appendPercentEscape(0x80 | ((codePoint >> 6) & 0x3F), output);
+                appendPercentEscape(0x80 | (codePoint & 0x3F), output);
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -1946,7 +1990,9 @@ public final class URLEncodedUtil {
                     i += 3;
                 }
 
-                if (strict) {
+                if (charset == Charsets.UTF_8 && appendWellFormedUtf8(escapedBytes, byteCount, result)) {
+                    // Decoded directly; a malformed UTF-8 run is left to the decoder paths below, which reject or replace it.
+                } else if (strict) {
                     // CharsetDecoder.decode(ByteBuffer) resets the decoder before each run, so one instance serves all runs.
                     if (decoder == null) {
                         decoder = charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -1973,6 +2019,40 @@ public final class URLEncodedUtil {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Appends the characters of {@code bytes[0, count)} if they are well-formed UTF-8, decoded exactly as the UTF-8
+     * decoder decodes them but without a decoder or any buffer, and returns {@code true}. For any malformed sequence
+     * (bad lead or continuation byte, truncation, overlong form, encoded surrogate, value above U+10FFFF) the output is
+     * restored and {@code false} is returned, so the caller's decoder path rejects or replaces the run as before.
+     */
+    private static boolean appendWellFormedUtf8(final byte[] bytes, final int count, final StringBuilder output) {
+        final int mark = output.length();
+
+        for (int i = 0; i < count;) {
+            final int lead = bytes[i] & 0xFF;
+            // Sequence length by lead byte: 1 for ASCII, 2 for C2..DF, 3 for E0..EF, 4 for F0..F4, 0 for any other lead.
+            final int length = lead < 0x80 ? 1 : lead < 0xC2 ? 0 : lead < 0xE0 ? 2 : lead < 0xF0 ? 3 : lead < 0xF5 ? 4 : 0;
+            int codePoint = length == 1 ? lead : lead & (0xFF >> (length + 1));
+            boolean wellFormed = length > 0 && i + length <= count;
+
+            for (int j = i + 1; wellFormed && j < i + length; j++) {
+                wellFormed = (bytes[j] & 0xC0) == 0x80;
+                codePoint = (codePoint << 6) | (bytes[j] & 0x3F);
+            }
+
+            if (!wellFormed || (length == 3 && (codePoint < 0x800 || Character.isSurrogate((char) codePoint)))
+                    || (length == 4 && (codePoint < 0x10000 || codePoint > Character.MAX_CODE_POINT))) {
+                output.setLength(mark);
+                return false;
+            }
+
+            output.appendCodePoint(codePoint);
+            i += length;
+        }
+
+        return true;
     }
 
     private static int asciiHexDigit(final char ch) {

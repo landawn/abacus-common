@@ -149,8 +149,9 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(f -> {
-                if (f == 5.0f)
+                if (f == 5.0f) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -158,8 +159,9 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
         parallelStream = createFloatStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(f -> {
-                if (f == 7.0f)
+                if (f == 7.0f) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return f;
             }).toArray();
         });

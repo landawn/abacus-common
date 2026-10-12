@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -19,15 +18,15 @@ import com.landawn.abacus.type.Type;
 public class UtilNullArgumentValidationTest extends TestBase {
     @Test
     public void requiredTypeTokensAreRejectedBeforeConversion() {
-        assertThrows(IllegalArgumentException.class, () -> N.convert(null, (Class<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.convert("text", (Class<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.convert(null, (Type<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.castIfAssignable(null, (Type<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.newCollection(null, 0));
-        assertThrows(IllegalArgumentException.class, () -> N.newMap(null, 0));
-        assertThrows(IllegalArgumentException.class, () -> N.newInstance((Class<?>) null));
-        assertNull(N.convert(null, String.class));
-        assertEquals(123, N.convert("123", Integer.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(null, (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert("text", (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(null, (Type<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.castIfAssignable(null, (Type<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newMap(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance((Class<?>) null));
+        assertNull(CommonUtil.convert(null, String.class));
+        assertEquals(123, CommonUtil.convert("123", Integer.class));
     }
 
     @Test
@@ -80,9 +79,9 @@ public class UtilNullArgumentValidationTest extends TestBase {
         final BiMap<String, Integer> map = new BiMap<>();
         assertThrows(IllegalArgumentException.class, () -> BiMap.copyOf(null));
         assertThrows(IllegalArgumentException.class, () -> map.forcePutAll(null));
-        assertThrows(NullPointerException.class, () -> ((Map<String, Integer>) map).putAll(null));
+        assertThrows(NullPointerException.class, () -> map.putAll(null));
         assertThrows(NullPointerException.class, () -> IntIterator.empty().forEachRemaining((Consumer<Integer>) null));
-        assertThrows(NullPointerException.class, () -> N.requireNonNull(null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.requireNonNull(null));
         assertThrows(NullPointerException.class, () -> MutableInt.of(1).compareTo(null));
     }
 }

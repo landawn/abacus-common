@@ -407,6 +407,8 @@ public final class ExceptionUtil {
     /**
      * Attempts to extract the original checked exception from a wrapper exception.
      * This is useful when dealing with wrapped exceptions from reflection or concurrent operations.
+     * A custom runtime wrapper is also recognized when its class matches the result of the checked cause's
+     * registered mapper, including a mapper inherited from the nearest registered superclass.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -455,10 +457,21 @@ public final class ExceptionUtil {
                 return (Exception) cause;
             }
 
-            if (toRuntimeExceptionFuncMap.containsKey(cause.getClass())
-                    && toRuntimeExceptionFuncMap.get(cause.getClass()).apply(cause).getClass().equals(e.getClass())) {
+            Function<Throwable, RuntimeException> mapper = toRuntimeExceptionFuncMap.get(cause.getClass());
+            final boolean directlyRegistered = mapper != null;
 
-                runtimeToCheckedExceptionClassMap.get(e.getClass()).set(cause.getClass());
+            if (!directlyRegistered) {
+                // Match forward conversion's nearest-superclass lookup and registration invalidation.
+                mapper = resolvedToRuntimeExceptionFuncCache.get(cause.getClass());
+            }
+
+            // The default wrapper was already handled above; constructing it here cannot establish a match.
+            if (mapper != CHECKED_FUNC && mapper.apply(cause).getClass().equals(e.getClass())) {
+                // Registered classes are already retained by the registry. A derived cause class may belong to
+                // a disposable loader and must not be retained by a longer-lived runtime wrapper's cache entry.
+                if (directlyRegistered) {
+                    runtimeToCheckedExceptionClassMap.get(e.getClass()).set(cause.getClass());
+                }
 
                 return (Exception) cause;
             }

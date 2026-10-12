@@ -87,10 +87,10 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * Parses a string and returns a new {@link java.util.concurrent.atomic.AtomicBoolean} containing
      * the parsed value. Surrounding padding is removed first ({@linkplain Character#isWhitespace(char) Unicode
      * whitespace} such as {@code U+3000}, or any character {@code <= ' '}). The stripped string
-     * is interpreted using the type system's boolean parsing rules: single-character {@code "Y"},
-     * {@code "y"}, or {@code "1"} yields {@code true}; multi-character inputs are interpreted via
-     * {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}); any other
-     * value yields {@code false}.
+     * is interpreted using the type system's boolean parsing rules: {@code "1"}, {@code "y"}, {@code "Y"} and
+     * {@code "true"} (any case) yield {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and
+     * {@code "false"} (any case) yield {@code false}; any other text ({@code "2"}, {@code "1.0"}, {@code "yes"}) is
+     * rejected.
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
@@ -99,14 +99,38 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * @param str the string to parse; may be {@code null} or blank
      * @return a new {@code AtomicBoolean} containing the parsed boolean value,
      *         or {@code null} if {@code str} is {@code null}, empty, or blank
+     * @throws IllegalArgumentException if {@code str} is not blank and, without its padding, is none of the accepted texts
      * @see #valueOf(Object)
      * @see #stringOf(AtomicBoolean)
      */
     @Override
-    public AtomicBoolean valueOf(final String str) {
+    public AtomicBoolean valueOf(final String str) throws IllegalArgumentException {
         // parseBoolean already strips padding with the same definition Strings.isBlank uses (plus every
         // character <= ' '), so an outer String.trim() here would be a no-op that only reads narrower.
         return Strings.isBlank(str) ? null : new AtomicBoolean(parseBoolean(str));
+    }
+
+    /**
+     * Converts an object to {@code AtomicBoolean}. A {@link Number} is read as the {@code Boolean} handler reads it: an
+     * {@code Integer}, {@code Short} or {@code Byte} {@code 1} is {@code true}, {@code 0} and {@code -1} are
+     * {@code false}, and any other value ({@code 2}), or a {@code Number} of any other class ({@code 1L}, {@code 1.0}),
+     * is rejected. Any other object is converted through its string form, read by {@link #valueOf(String)}.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the converted value, or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if {@code obj} is an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, or an object whose string form is
+     *         not blank and is none of the texts {@link #valueOf(String)} accepts
+     */
+    @Override
+    public AtomicBoolean valueOf(final Object obj) throws IllegalArgumentException {
+        if (obj instanceof Number number) {
+            // Read the Number itself, as Boolean does: through its string form a Long 1 would pass as the text "1",
+            // though Boolean rejects a Long, and every rejection would be reported as text.
+            return new AtomicBoolean(booleanOf(number));
+        }
+
+        return super.valueOf(obj);
     }
 
     /**

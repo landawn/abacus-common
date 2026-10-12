@@ -906,6 +906,7 @@ public class AvroParserTest extends TestBase {
         assertEquals("n", bean.getName());
         org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 4, 5, 6 }, bean.getData());
     }
+
     private static Schema g006FixedSchema() {
         return new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G006Fixed\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},"
                 + "{\"name\":\"data\",\"type\":{\"type\":\"fixed\",\"name\":\"G006Two\",\"size\":2}}]}");
@@ -934,7 +935,8 @@ public class AvroParserTest extends TestBase {
         bean.setName("n");
         bean.setData(new byte[] { 1, 2, 3 });
 
-        assertThrows(IllegalArgumentException.class, () -> parser.serialize(bean, new AvroSerConfig().setSchema(g006FixedSchema()), new ByteArrayOutputStream()));
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.serialize(bean, new AvroSerConfig().setSchema(g006FixedSchema()), new ByteArrayOutputStream()));
     }
 
     // G006-04: a fixed datum read into a byte[] property failed: Type.valueOf(Object) treated GenericData.Fixed as a bean.

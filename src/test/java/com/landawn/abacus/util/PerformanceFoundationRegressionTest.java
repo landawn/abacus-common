@@ -1,6 +1,13 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -21,21 +28,37 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.TestBase;
 
 @Tag("unit")
-class PerformanceFoundationRegressionTest {
+class PerformanceFoundationRegressionTest extends TestBase {
     @Test
     void closedThrowingWrappersReleaseCapturedReferences() throws Exception {
         final AtomicInteger closes = new AtomicInteger();
         final Throwables.Iterator<Integer, RuntimeException> source = new Throwables.Iterator<>() {
-            @Override public boolean hasNext() { return true; }
-            @Override public Integer next() { return 1; }
-            @Override protected void closeResourceInternal() { closes.incrementAndGet(); }
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return 1;
+            }
+
+            @Override
+            protected void closeResourceInternal() {
+                closes.incrementAndGet();
+            }
         };
         final Object payload = new Object();
-        final Throwables.Iterator<Integer, RuntimeException> mapped = source.map(value -> { payload.hashCode(); return value + 1; });
+        final Throwables.Iterator<Integer, RuntimeException> mapped = source.map(value -> {
+            payload.hashCode();
+            return value + 1;
+        });
         assertEquals(2, mapped.next());
         mapped.closeResource();
         mapped.closeResource();
@@ -44,8 +67,10 @@ class PerformanceFoundationRegressionTest {
         assertThrows(NoSuchElementException.class, mapped::next);
         assertReferenceFieldsCleared(mapped);
 
-        final Throwables.Iterator<Integer, RuntimeException> filtered = Throwables.Iterator.<Integer, RuntimeException>of(1, 2, 3)
-                .filter(value -> { payload.hashCode(); return value == 2; });
+        final Throwables.Iterator<Integer, RuntimeException> filtered = Throwables.Iterator.<Integer, RuntimeException> of(1, 2, 3).filter(value -> {
+            payload.hashCode();
+            return value == 2;
+        });
         assertTrue(filtered.hasNext()); // A cached element must be released as well.
         filtered.closeResource();
         assertFalse(filtered.hasNext());
@@ -71,17 +96,30 @@ class PerformanceFoundationRegressionTest {
     @Test
     void throwingWrapperReentrantCloseAndFailedCloseStillReleaseReferences() throws Exception {
         final List<Throwables.Iterator<Integer, RuntimeException>> holder = new ArrayList<>();
-        final Throwables.Iterator<Integer, RuntimeException> filtered = Throwables.Iterator.<Integer, RuntimeException>of(1)
-                .filter(value -> { holder.get(0).closeResource(); return true; });
+        final Throwables.Iterator<Integer, RuntimeException> filtered = Throwables.Iterator.<Integer, RuntimeException> of(1).filter(value -> {
+            holder.get(0).closeResource();
+            return true;
+        });
         holder.add(filtered);
         assertFalse(filtered.hasNext());
         assertReferenceFieldsCleared(filtered);
 
         final RuntimeException failure = new RuntimeException("close");
         final Throwables.Iterator<Integer, RuntimeException> mapped = new Throwables.Iterator<Integer, RuntimeException>() {
-            @Override public boolean hasNext() { return true; }
-            @Override public Integer next() { return 1; }
-            @Override protected void closeResourceInternal() { throw failure; }
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return 1;
+            }
+
+            @Override
+            protected void closeResourceInternal() {
+                throw failure;
+            }
         }.map(value -> value);
         assertSame(failure, assertThrows(RuntimeException.class, mapped::closeResource));
         assertDoesNotThrow(mapped::closeResource);
@@ -101,30 +139,49 @@ class PerformanceFoundationRegressionTest {
     void conversionGraphRetainsCycleDetectionAndAcceptsSharedScalarSubgraphs() {
         final List<String> shared = Arrays.asList("1", "2", null);
         assertEquals(Arrays.asList(Arrays.asList(1, 2, null), Arrays.asList(1, 2, null)),
-                N.convert(List.of(shared, shared), new TypeReference<List<List<Integer>>>() { }.type()));
+                CommonUtil.convert(List.of(shared, shared), new TypeReference<List<List<Integer>>>() {
+                }.type()));
         final List<Object> cycle = new ArrayList<>();
         cycle.add(cycle);
-        assertThrows(IllegalArgumentException.class, () -> N.convert(cycle, new TypeReference<List<String>>() { }.type()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(cycle, new TypeReference<List<String>>() {
+        }.type()));
         final Map<String, Object> mapCycle = new HashMap<>();
         mapCycle.put("self", mapCycle);
-        assertThrows(IllegalArgumentException.class, () -> N.convert(mapCycle, new TypeReference<Map<String, String>>() { }.type()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(mapCycle, new TypeReference<Map<String, String>>() {
+        }.type()));
         final Object[] arrayCycle = new Object[1];
         arrayCycle[0] = arrayCycle;
-        assertThrows(IllegalArgumentException.class, () -> N.convert(arrayCycle, new TypeReference<List<String>>() { }.type()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(arrayCycle, new TypeReference<List<String>>() {
+        }.type()));
     }
 
     private static final class CountedKey {
         private static int comparisons;
         private final int value;
-        private CountedKey(final int value) { this.value = value; }
-        @Override public int hashCode() { return value; }
-        @Override public boolean equals(final Object other) { comparisons++; return other instanceof CountedKey key && value == key.value; }
+
+        private CountedKey(final int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            comparisons++;
+            return other instanceof CountedKey key && value == key.value;
+        }
     }
 
     @Test
     void disjointUsesLinearHashWorkForOrdinaryListsButKeepsCustomMembership() {
         final List<CountedKey> left = new ArrayList<>(), right = new LinkedList<>();
-        for (int i = 0; i < 1000; i++) { left.add(new CountedKey(i)); right.add(new CountedKey(i + 1000)); }
+        for (int i = 0; i < 1000; i++) {
+            left.add(new CountedKey(i));
+            right.add(new CountedKey(i + 1000));
+        }
         CountedKey.comparisons = 0;
         assertTrue(N.disjoint(left, right));
         assertTrue(CountedKey.comparisons < 10000, "ordinary well-hashed Lists must not perform a million equality checks");
@@ -132,7 +189,10 @@ class PerformanceFoundationRegressionTest {
         assertFalse(N.disjoint(left, right));
 
         final List<Integer> custom = new ArrayList<>(Collections.nCopies(30, 1)) {
-            @Override public boolean contains(final Object ignored) { return true; }
+            @Override
+            public boolean contains(final Object ignored) {
+                return true;
+            }
         };
         assertFalse(N.disjoint(custom, new ArrayList<>(Collections.nCopies(20, 2))));
         final Set<String> sorted = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
@@ -160,13 +220,19 @@ class PerformanceFoundationRegressionTest {
         assertEquals(List.of("a", "bb", "ccc"), N.distinctBy(Arrays.asList("a", "b", "bb", "cc", "ccc"), String::length));
         final AtomicInteger capacity = new AtomicInteger();
         final AtomicInteger mappings = new AtomicInteger();
-        assertEquals(List.of("same"), N.distinctBy(repeated, value -> { mappings.incrementAndGet(); return value; }, size -> {
+        assertEquals(List.of("same"), N.distinctBy(repeated, value -> {
+            mappings.incrementAndGet();
+            return value;
+        }, size -> {
             capacity.set(size);
             return new ArrayList<String>();
         }));
         assertEquals(repeated.length, capacity.get());
         assertEquals(repeated.length, mappings.get());
-        N.distinctBy(Arrays.asList(repeated), value -> value, size -> { capacity.set(size); return new ArrayList<String>(); });
+        N.distinctBy(Arrays.asList(repeated), value -> value, size -> {
+            capacity.set(size);
+            return new ArrayList<String>();
+        });
         assertEquals(repeated.length, capacity.get());
     }
 
@@ -178,7 +244,12 @@ class PerformanceFoundationRegressionTest {
             final List<Integer> superset = randomValues(random, random.nextInt(80));
             final List<Integer> remaining = new ArrayList<>(superset);
             boolean expected = true;
-            for (final Integer value : subset) { if (!remaining.remove(value)) { expected = false; break; } }
+            for (final Integer value : subset) {
+                if (!remaining.remove(value)) {
+                    expected = false;
+                    break;
+                }
+            }
             assertEquals(expected, N.isSubCollection(subset, superset));
         }
         assertFalse(N.isSubCollection(List.of(new int[] { 1 }), List.of(new int[] { 1 })));
@@ -188,37 +259,49 @@ class PerformanceFoundationRegressionTest {
 
     private static List<Integer> randomValues(final Random random, final int count) {
         final List<Integer> values = new ArrayList<>();
-        for (int i = 0; i < count; i++) { final int value = random.nextInt(12); values.add(value == 0 ? null : value); }
+        for (int i = 0; i < count; i++) {
+            final int value = random.nextInt(12);
+            values.add(value == 0 ? null : value);
+        }
         return values;
     }
 
     @Test
     void boundedPrimitiveMultisetsPreserveCountsAndSignedEndpoints() {
-        assertTrue(N.containsSameElements(new boolean[] { true, false, true }, new boolean[] { true, true, false }));
-        assertFalse(N.containsSameElements(new boolean[] { true, false, true }, new boolean[] { false, true, false }));
-        assertTrue(N.containsSameElements((boolean[]) null, new boolean[0]));
-        assertFalse(N.containsSameElements((boolean[]) null, new boolean[] { false }));
-        assertTrue(N.containsSameElements(new byte[] { -128, 127, 0, -128 }, new byte[] { 127, -128, -128, 0 }));
-        assertFalse(N.containsSameElements(new byte[] { -128, 127 }, new byte[] { -128, -128 }));
-        assertTrue(N.containsSameElements(new short[] { Short.MIN_VALUE, Short.MAX_VALUE, 0 }, new short[] { 0, Short.MAX_VALUE, Short.MIN_VALUE }));
-        assertTrue(N.containsSameElements(new char[] { 0, 65535, 1 }, new char[] { 65535, 1, 0 }));
+        assertTrue(CommonUtil.containsSameElements(new boolean[] { true, false, true }, new boolean[] { true, true, false }));
+        assertFalse(CommonUtil.containsSameElements(new boolean[] { true, false, true }, new boolean[] { false, true, false }));
+        assertTrue(CommonUtil.containsSameElements((boolean[]) null, new boolean[0]));
+        assertFalse(CommonUtil.containsSameElements((boolean[]) null, new boolean[] { false }));
+        assertTrue(CommonUtil.containsSameElements(new byte[] { -128, 127, 0, -128 }, new byte[] { 127, -128, -128, 0 }));
+        assertFalse(CommonUtil.containsSameElements(new byte[] { -128, 127 }, new byte[] { -128, -128 }));
+        assertTrue(CommonUtil.containsSameElements(new short[] { Short.MIN_VALUE, Short.MAX_VALUE, 0 }, new short[] { 0, Short.MAX_VALUE, Short.MIN_VALUE }));
+        assertTrue(CommonUtil.containsSameElements(new char[] { 0, 65535, 1 }, new char[] { 65535, 1, 0 }));
     }
 
     @Test
     void linkedListSteppedSlicesOnlyTraverseTheWindowAndHandleExtremeSteps() {
         final LinkedList<Integer> source = new LinkedList<>() {
-            @Override public Object[] toArray() { throw new AssertionError("whole-list snapshot"); }
-            @Override public <T> T[] toArray(final T[] output) { throw new AssertionError("whole-list snapshot"); }
+            @Override
+            public Object[] toArray() {
+                throw new AssertionError("whole-list snapshot");
+            }
+
+            @Override
+            public <T> T[] toArray(final T[] output) {
+                throw new AssertionError("whole-list snapshot");
+            }
         };
-        for (int i = 0; i < 101; i++) { source.add(i); }
-        assertEquals(List.of(0, 2, 4, 6, 8), N.copyOfRange(source, 0, 10, 2));
-        assertEquals(List.of(99, 96, 93, 90), N.copyOfRange(source, 99, 89, -3));
-        assertEquals(List.of(9, 6, 3, 0), N.copyOfRange(source, 9, -1, -3));
-        assertEquals(List.of(100), N.copyOfRange(source, 100, -1, Integer.MIN_VALUE));
-        assertEquals(List.of(0), N.copyOfRange(source, 0, 101, Integer.MAX_VALUE));
-        assertEquals(List.of(), N.copyOfRange(source, 5, 0, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.copyOfRange(source, 101, -1, -2));
-        final List<Integer> copy = N.copyOfRange(source, 0, 4, 2);
+        for (int i = 0; i < 101; i++) {
+            source.add(i);
+        }
+        assertEquals(List.of(0, 2, 4, 6, 8), CommonUtil.copyOfRange(source, 0, 10, 2));
+        assertEquals(List.of(99, 96, 93, 90), CommonUtil.copyOfRange(source, 99, 89, -3));
+        assertEquals(List.of(9, 6, 3, 0), CommonUtil.copyOfRange(source, 9, -1, -3));
+        assertEquals(List.of(100), CommonUtil.copyOfRange(source, 100, -1, Integer.MIN_VALUE));
+        assertEquals(List.of(0), CommonUtil.copyOfRange(source, 0, 101, Integer.MAX_VALUE));
+        assertEquals(List.of(), CommonUtil.copyOfRange(source, 5, 0, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange(source, 101, -1, -2));
+        final List<Integer> copy = CommonUtil.copyOfRange(source, 0, 4, 2);
         copy.set(0, -1);
         assertEquals(0, source.getFirst());
     }
@@ -283,7 +366,9 @@ class PerformanceFoundationRegressionTest {
     @Test
     void hexStringDecodeMatchesArrayValidationAndAllByteValues() {
         final byte[] bytes = new byte[256];
-        for (int i = 0; i < bytes.length; i++) { bytes[i] = (byte) i; }
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = (byte) i;
+        }
         final String text = Hex.encodeToString(bytes);
         assertArrayEquals(bytes, Hex.decode(text));
         assertArrayEquals(bytes, Hex.decode(text.toUpperCase(java.util.Locale.ROOT)));
@@ -297,11 +382,31 @@ class PerformanceFoundationRegressionTest {
     private static final class CountedSequence implements CharSequence {
         private final String value;
         private int reads;
-        private CountedSequence(final String value) { this.value = value; }
-        @Override public int length() { return value.length(); }
-        @Override public char charAt(final int index) { reads++; return value.charAt(index); }
-        @Override public CharSequence subSequence(final int start, final int end) { return value.subSequence(start, end); }
-        @Override public String toString() { return value; }
+
+        private CountedSequence(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public int length() {
+            return value.length();
+        }
+
+        @Override
+        public char charAt(final int index) {
+            reads++;
+            return value.charAt(index);
+        }
+
+        @Override
+        public CharSequence subSequence(final int start, final int end) {
+            return value.subSequence(start, end);
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
     }
 
     @Test
@@ -311,7 +416,8 @@ class PerformanceFoundationRegressionTest {
         assertEquals(List.of(input), Splitter.with("a".repeat(255) + "b").split(sequence));
         assertTrue(sequence.reads <= input.length() * 2, "repeated delimiter prefixes must not be rescanned at every character");
         final String delimiter = "::".repeat(8);
-        assertEquals(List.of("x", "y"), Splitter.with(delimiter).trim(true).omitEmptyStrings(true).split(" x " + delimiter + " " + delimiter + " y " + delimiter));
+        assertEquals(List.of("x", "y"),
+                Splitter.with(delimiter).trim(true).omitEmptyStrings(true).split(" x " + delimiter + " " + delimiter + " y " + delimiter));
         assertEquals(List.of("a", "b" + delimiter + "c"), Splitter.with(delimiter).limit(2).split("a" + delimiter + "b" + delimiter + "c"));
         final StringBuilder mutableDelimiter = new StringBuilder(delimiter);
         final Splitter splitter = Splitter.with(mutableDelimiter);
@@ -344,9 +450,20 @@ class PerformanceFoundationRegressionTest {
     void emptinessPredicatesDoNotRequestCollectionCardinality() throws Exception {
         for (final boolean empty : new boolean[] { false, true }) {
             final Collection<Integer> collection = new AbstractCollection<>() {
-                @Override public int size() { throw new AssertionError("size must not be evaluated"); }
-                @Override public boolean isEmpty() { return empty; }
-                @Override public Iterator<Integer> iterator() { return (empty ? List.<Integer>of() : List.of(1)).iterator(); }
+                @Override
+                public int size() {
+                    throw new AssertionError("size must not be evaluated");
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return empty;
+                }
+
+                @Override
+                public Iterator<Integer> iterator() {
+                    return (empty ? List.<Integer> of() : List.of(1)).iterator();
+                }
             };
             assertEquals(empty, Fn.isEmptyCollection().test(collection));
             assertEquals(!empty, Fn.notEmptyCollection().test(collection));
@@ -402,9 +519,13 @@ class PerformanceFoundationRegressionTest {
     }
 
     private static int tokenIndex(final String text, final String token, final String delimiter, final int bound, final boolean reverse) {
-        if (reverse && bound < 0) { return -1; }
+        if (reverse && bound < 0) {
+            return -1;
+        }
         for (int i = 0; i <= token.length() - delimiter.length(); i++) {
-            if (token.regionMatches(true, i, delimiter, 0, delimiter.length())) { return -1; }
+            if (token.regionMatches(true, i, delimiter, 0, delimiter.length())) {
+                return -1;
+            }
         }
         final int from = reverse ? Math.min(bound, text.length() - token.length())
                 : token.isEmpty() ? Math.min(Math.max(bound, 0), text.length()) : Math.max(bound, 0);

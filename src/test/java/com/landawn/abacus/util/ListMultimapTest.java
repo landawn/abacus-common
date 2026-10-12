@@ -1493,7 +1493,6 @@ public class ListMultimapTest extends TestBase {
     }
     // ---- deep review 2026-09-25 G051 end ----
 
-
     // ---- bug review 2026-09-27 G114 begin ----
 
     // G114-02: invert() mirrored a BiMap backing map, which then rejected the second inverted key whose key list
@@ -1603,7 +1602,7 @@ public class ListMultimapTest extends TestBase {
     // G123-02: toMap() of a BiMap-backed list multimap whose value lists were made equal in place used to throw from a BiMap copy
     @Test
     public void testToMap_biMapBackingWithValueListsMadeEqual() {
-        final ListMultimap<String, Integer> multimap = N.newListMultimap(BiMap::new, ArrayList::new);
+        final ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap(BiMap::new, ArrayList::new);
         multimap.put("a", 1);
         multimap.put("b", 2);
         multimap.put("b", 1);
@@ -1619,4 +1618,49 @@ public class ListMultimapTest extends TestBase {
     }
 
     // ---- bug review 2026-09-27 verify G123 end ----
+
+    // ---- bug review 2026-09-30 G114 begin ----
+    // G114-05 (G052-01): fromMap of a double-brace anonymous map mirrored its class; the reflective new instance re-ran the
+    // initializer, so the backing map arrived pre-filled with a stale non-list value (x=1)
+    @Test
+    public void testFromMap_prefilledAnonymousSourceClass() {
+        final Map<String, Integer> source = new HashMap<>() {
+            {
+                put("x", 1);
+            }
+        };
+        source.remove("x");
+        source.put("y", 2);
+
+        final ListMultimap<String, Integer> multimap = ListMultimap.fromMap(source);
+
+        Assertions.assertEquals(1, multimap.keyCount());
+        Assertions.assertNull(multimap.get("x"));
+        Assertions.assertEquals(Arrays.asList(2), multimap.get("y"));
+
+        final ListMultimap<String, Integer> merged = ListMultimap.merge(source, Map.of("z", 3));
+        Assertions.assertEquals(2, merged.keyCount());
+        Assertions.assertNull(merged.get("x"));
+        Assertions.assertEquals(Arrays.asList(3), merged.get("z"));
+    }
+
+    // G114-05 (G052-02): toImmutableMap mirrored a double-brace anonymous backing-map class; the initializer's key survived as a stale entry
+    @Test
+    public void testToImmutableMap_prefilledAnonymousBackingMapClass() {
+        final Map<String, List<Integer>> backing = new HashMap<>() {
+            {
+                put("a", new ArrayList<>(Arrays.asList(1)));
+            }
+        };
+        final ListMultimap<String, Integer> multimap = ListMultimap.wrap(backing);
+        multimap.removeAll("a");
+        multimap.put("b", 2);
+
+        final ImmutableMap<String, ImmutableList<Integer>> result = multimap.toImmutableMap();
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertFalse(result.containsKey("a"));
+        Assertions.assertEquals(Arrays.asList(2), result.get("b"));
+    }
+    // ---- bug review 2026-09-30 G114 end ----
 }

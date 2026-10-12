@@ -745,8 +745,11 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      *         and {@link #empty()} always build one that permits it, and so does {@link #copyOf(Map)} for a
      *         plain source map - even a {@link java.util.Hashtable} or
      *         {@link java.util.concurrent.ConcurrentHashMap} one, whose {@code null}-hostility concerns its keys,
-     *         not the reverse map's. Only a {@code BiMap} or {@code ImmutableBiMap} source whose own value map
-     *         rejects {@code null} keys produces one that does not
+     *         not the reverse map's. Among those factories, only a {@code BiMap} or {@code ImmutableBiMap} source
+     *         whose own value map rejects {@code null} keys produces one that does not. An {@link #inverse()} view
+     *         answers this lookup from the original map's key-to-value map instead, so
+     *         {@code ImmutableBiMap.copyOf(aTreeMap).inverse().getByValue(null)} (or the same over a
+     *         {@code Hashtable} or {@code ConcurrentHashMap} source) does throw
      * @throws ClassCastException if {@code value} has a type that the reverse backing map cannot query or compare
      */
     public K getByValue(final Object value) throws NullPointerException, ClassCastException {

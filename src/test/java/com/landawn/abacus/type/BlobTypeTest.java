@@ -203,7 +203,7 @@ public class BlobTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectBlobReturnsSameInstanceWithoutTouchingIt() throws SQLException {
         final Blob blob = mock(Blob.class);
 
-        assertSame(blob, type.valueOf((Object) blob));
+        assertSame(blob, type.valueOf(blob));
 
         verify(blob, never()).free();
         verify(blob, never()).length();
@@ -215,7 +215,7 @@ public class BlobTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectSerialBlobRemainsUsableAfterwards() throws SQLException {
         final SerialBlob sb = new SerialBlob(new byte[] { 1, 2, 3 });
 
-        assertSame(sb, type.valueOf((Object) sb));
+        assertSame(sb, type.valueOf(sb));
         assertEquals(3L, sb.length());
         Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, sb.getBytes(1, 3));
     }
@@ -228,8 +228,8 @@ public class BlobTypeTest extends TestBase {
     @Test
     public void reviewFixes20260908_valueOfObjectNonBlobThrowsBeforeAnyRead() {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) "x"));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) 42));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf((Object) new byte[] { 1 }));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(42));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf(new byte[] { 1 }));
         // the String overload is unchanged
         Assertions.assertThrows(UnsupportedOperationException.class, () -> type.valueOf("x"));
     }
@@ -240,8 +240,8 @@ public class BlobTypeTest extends TestBase {
         final SerialBlob sb = new SerialBlob(new byte[] { 7, 8 });
         final Blob foreign = mock(Blob.class);
 
-        assertSame(sb, serialType.valueOf((Object) sb));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> serialType.valueOf((Object) foreign));
+        assertSame(sb, serialType.valueOf(sb));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> serialType.valueOf(foreign));
 
         verify(foreign, never()).free();
         verify(foreign, never()).length();

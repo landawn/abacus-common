@@ -77,14 +77,20 @@ import com.landawn.abacus.util.u.OptionalInt;
  * counted as a {@code long} and then narrowed exactly.
  *
  * <p><b>Cost.</b> Element and predicate searches are O(n) and allocate nothing beyond the result, with the one
- * exception noted below. Subarray and sublist
- * searches are a straightforward scan with early termination on the first mismatch - O(n*m) worst case, with no
- * pattern preprocessing (no KMP/Boyer-Moore), so a long, highly self-similar pattern really does cost that.
+ * exception noted below. Subarray and sublist searches scan candidate positions with early termination on the first
+ * mismatch. The primitive-array {@code ofSubArray}/{@code lastOfSubArray} searches keep that allocation-free scan for
+ * ordinary inputs, but once a pattern of at least 16 elements has spent {@code max(64, 4 * searched length)}
+ * comparisons on rejected candidates (a candidate rejected at its first element is not counted, except in the
+ * {@code boolean} overloads), the rest of the search runs Knuth-Morris-Pratt: O(n + m) in total, allocating
+ * an {@code int[]} failure table of the pattern length. Object-array and list searches keep the plain scan - O(n*m)
+ * worst case, with no pattern preprocessing - because their {@code equals} calls keep their original order and count,
+ * so there a long, highly self-similar pattern really does cost that.
  * Single-element collection searches take an indexed path when the collection is a {@link RandomAccess} list;
- * otherwise {@code of} and {@code allOf} walk the iterator, while {@code last} calls the collection's own public
- * {@code descendingIterator()} if it has one and, failing that, copies the whole collection to an array first -
- * that copy being the exception, so {@code last} on, say, a {@link java.util.LinkedHashSet} costs O(n) extra
- * space. A sublist search takes the indexed path when the searched list is {@code RandomAccess} (copying only the
+ * otherwise {@code of} and {@code allOf} walk the iterator, while {@code last} uses reverse traversal for deques,
+ * navigable sets, and non-list sequenced collections, then tries a public {@code descendingIterator()} on other
+ * collection types. If no reverse iterator is available, it copies the collection to an array first, costing O(n)
+ * extra space (for example, for a sequential list without a descending iterator). A sublist search takes the indexed
+ * path when the searched list is {@code RandomAccess} (copying only the
  * matched slice of a pattern that is not {@code RandomAccess}, O(m) extra space), and otherwise copies the searched
  * region and the pattern to arrays first, which costs O(n) extra space.
  *
@@ -1149,14 +1155,24 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
+        // Unlike the other primitive overloads, no separate scan for the first element: the first element of a boolean
+        // pattern matches about every other position, so such a scan would not pay for itself.
+        for (int i = first, maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
+            int j = startIndexOfSubArray;
+            for (int k = i; j < endIndexOfTargetSubArray; k++, j++) {
                 if (source[k] != subArrayToFind[j]) {
                     break;
                 } else if (j == endIndexOfTargetSubArray - 1) {
                     return toOptionalInt(i);
                 }
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1293,14 +1309,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final char head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (source[k] != subArrayToFind[j]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1433,14 +1472,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final byte head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (source[k] != subArrayToFind[j]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1573,14 +1635,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final short head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (source[k] != subArrayToFind[j]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1715,14 +1800,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final int head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (source[k] != subArrayToFind[j]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1857,14 +1965,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final long head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (source[k] != subArrayToFind[j]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -1999,14 +2130,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final float head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (!N.equals(source[k], subArrayToFind[j])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (!N.equals(source[i], head)) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && !N.equals(source[i], head)) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -2141,14 +2295,37 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.max(fromIndex, 0);
+        final int maxFromIndex = len - sizeToMatch;
+        final double head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(len - first);
 
-        for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (!N.equals(source[k], subArrayToFind[j])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+        for (int i = first; i <= maxFromIndex; i++) {
+            if (!N.equals(source[i], head)) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (++i <= maxFromIndex && !N.equals(source[i], head)) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i + 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, false));
             }
         }
 
@@ -2297,12 +2474,26 @@ public final class Index {
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
         for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++, j++) {
-                if (!N.equals(source[k], subArrayToFind[j])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray - 1) {
-                    return toOptionalInt(i);
+            if (!N.equals(source[i], subArrayToFind[startIndexOfSubArray])) {
+                // Each candidate's first comparison runs in a loop of its own (as in String.indexOf), which the JIT keeps
+                // tight; the equals calls, their arguments and their order are exactly those of a candidate-by-candidate scan.
+                while (++i <= maxFromIndex && !N.equals(source[i], subArrayToFind[startIndexOfSubArray])) {
+                    // not a candidate
                 }
+
+                if (i > maxFromIndex) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
             }
         }
 
@@ -3475,14 +3666,24 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
+        // Unlike the other primitive overloads, no separate scan for the first element: the first element of a boolean
+        // pattern matches about every other position, so such a scan would not pay for itself.
+        for (int i = first; i >= 0; i--) {
+            int j = startIndexOfSubArray;
+            for (int k = i; j < endIndexOfTargetSubArray; k++, j++) {
+                if (source[k] != subArrayToFind[j]) {
                     break;
-                } else if (j == endIndexOfTargetSubArray) {
+                } else if (j == endIndexOfTargetSubArray - 1) {
                     return toOptionalInt(i);
                 }
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -3613,14 +3814,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final char head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -3751,14 +3974,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final byte head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -3892,14 +4137,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final short head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -4033,14 +4300,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final int head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -4174,14 +4463,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final long head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (source[k] != subArrayToFind[j++]) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (source[i] != head) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && source[i] != head) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && source[k] == subArrayToFind[j]; k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -4317,14 +4628,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final float head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (!N.equals(source[k], subArrayToFind[j++])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (!N.equals(source[i], head)) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && !N.equals(source[i], head)) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -4460,14 +4793,36 @@ public final class Index {
         }
 
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
+        final int first = N.min(startIndexFromBack, len - sizeToMatch);
+        final double head = subArrayToFind[startIndexOfSubArray];
+        int remainingWork = subArraySearchBudget(first + sizeToMatch);
 
-        for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (!N.equals(source[k], subArrayToFind[j++])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+        for (int i = first; i >= 0; i--) {
+            if (!N.equals(source[i], head)) {
+                // The first element is looked for in a loop of its own (as in String.indexOf), which the JIT keeps a
+                // tight scan however often candidates are verified.
+                while (--i >= 0 && !N.equals(source[i], head)) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
+            }
+
+            // Keep ordinary searches allocation-free; repeated prefixes get a linear-work fallback.
+            if (sizeToMatch >= 16 && (remainingWork -= j - startIndexOfSubArray + 1) <= 0) {
+                return toOptionalInt(subArrayKmp(source, i - 1, subArrayToFind, startIndexOfSubArray, sizeToMatch, true));
             }
         }
 
@@ -4603,12 +4958,26 @@ public final class Index {
         final int endIndexOfTargetSubArray = startIndexOfSubArray + sizeToMatch;
 
         for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-            for (int k = i, j = startIndexOfSubArray; j < endIndexOfTargetSubArray; k++) {
-                if (!N.equals(source[k], subArrayToFind[j++])) {
-                    break;
-                } else if (j == endIndexOfTargetSubArray) {
-                    return toOptionalInt(i);
+            if (!N.equals(source[i], subArrayToFind[startIndexOfSubArray])) {
+                // Each candidate's first comparison runs in a loop of its own (as in String.indexOf), which the JIT keeps
+                // tight; the equals calls, their arguments and their order are exactly those of a candidate-by-candidate scan.
+                while (--i >= 0 && !N.equals(source[i], subArrayToFind[startIndexOfSubArray])) {
+                    // not a candidate
                 }
+
+                if (i < 0) {
+                    break;
+                }
+            }
+
+            int j = startIndexOfSubArray + 1;
+
+            for (int k = i + 1; j < endIndexOfTargetSubArray && N.equals(source[k], subArrayToFind[j]); k++, j++) {
+                // the candidate still matches
+            }
+
+            if (j == endIndexOfTargetSubArray) {
+                return toOptionalInt(i);
             }
         }
 
@@ -5712,6 +6081,261 @@ public final class Index {
         }
 
         return bitSet;
+    }
+
+    private static int subArraySearchBudget(final int searchLength) {
+        // Four comparisons per source value tolerate ordinary short partial matches without a table.
+        return (int) Math.min(Integer.MAX_VALUE, Math.max(64L, 4L * searchLength));
+    }
+
+    // Primitive equality is an equivalence relation, including N.equals for NaN and signed zero.
+    // Object/list searches deliberately keep their original equals call order.
+    private static int subArrayKmp(final boolean[] source, final int bound, final boolean[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final char[] source, final int bound, final char[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final byte[] source, final int bound, final byte[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final short[] source, final int bound, final short[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final int[] source, final int bound, final int[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final long[] source, final int bound, final long[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (pattern[patternStart + step * i] == pattern[patternStart + step * matched]) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && source[i] != pattern[patternStart + step * matched]) {
+                matched = failure[matched - 1];
+            }
+            if (source[i] == pattern[patternStart + step * matched] && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final float[] source, final int bound, final float[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (N.equals(pattern[patternStart + step * i], pattern[patternStart + step * matched])) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && !N.equals(source[i], pattern[patternStart + step * matched])) {
+                matched = failure[matched - 1];
+            }
+            if (N.equals(source[i], pattern[patternStart + step * matched]) && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
+    }
+
+    private static int subArrayKmp(final double[] source, final int bound, final double[] pattern, final int offset, final int size, final boolean reverse) {
+        if (reverse ? bound < 0 : bound > source.length - size) {
+            return N.INDEX_NOT_FOUND;
+        }
+
+        final int[] failure = new int[size];
+        final int patternStart = reverse ? offset + size - 1 : offset;
+        final int step = reverse ? -1 : 1;
+
+        for (int i = 1, matched = 0; i < size;) {
+            if (N.equals(pattern[patternStart + step * i], pattern[patternStart + step * matched])) {
+                failure[i++] = ++matched;
+            } else if (matched > 0) {
+                matched = failure[matched - 1];
+            } else {
+                i++;
+            }
+        }
+
+        final int first = reverse ? bound + size - 1 : bound;
+        for (int i = first, matched = 0; i >= 0 && i < source.length; i += step) {
+            while (matched > 0 && !N.equals(source[i], pattern[patternStart + step * matched])) {
+                matched = failure[matched - 1];
+            }
+            if (N.equals(source[i], pattern[patternStart + step * matched]) && ++matched == size) {
+                return reverse ? i : i - size + 1;
+            }
+        }
+        return N.INDEX_NOT_FOUND;
     }
 
     /**

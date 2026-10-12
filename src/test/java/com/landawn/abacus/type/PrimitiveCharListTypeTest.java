@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,7 +22,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PrimitiveCharListTypeTest extends TestBase {
 
@@ -165,7 +165,6 @@ public class PrimitiveCharListTypeTest extends TestBase {
         assertNull(type.valueOf(""));
         org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
     }
-
 
     @Test
     public void testValueOfMalformedUnicodeEscapeInQuotedElementThrowsIllegalArgumentException() {

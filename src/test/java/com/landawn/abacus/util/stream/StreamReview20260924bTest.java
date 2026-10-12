@@ -556,7 +556,7 @@ public class StreamReview20260924bTest extends TestBase {
     public void testC107_primitiveZip_sizeCheckStillEager() {
         assertThrows(IllegalArgumentException.class, () -> Stream.zip(List.of(IntStream.of(1)), new int[0], Arrays::toString));
         assertThrows(IllegalArgumentException.class, () -> Stream.zip(List.of(IntStream.of(1)), (int[]) null, Arrays::toString));
-        assertEquals(List.of(), Stream.zip(new ArrayList<IntStream>(), new int[0], Arrays::toString).toList());
+        assertEquals(List.of(), Stream.zip(new ArrayList<>(), new int[0], Arrays::toString).toList());
         assertEquals(List.of(), Stream.zip((List<IntStream>) null, (int[]) null, Arrays::toString).toList());
     }
 
@@ -578,11 +578,10 @@ public class StreamReview20260924bTest extends TestBase {
         assertEquals(0, mapperCalls.get());
 
         final List<String> withRest = Stream.of(10, 30)
-                .joinByRange(Stream.of(5, 25, 40), (slot, t) -> t < slot, java.util.stream.Collectors.toList(), (slot, ts) -> slot + ":" + ts,
-                        remaining -> {
-                            mapperCalls.incrementAndGet();
-                            return Stream.of("rest:" + com.landawn.abacus.util.Iterators.count(remaining));
-                        })
+                .joinByRange(Stream.of(5, 25, 40), (slot, t) -> t < slot, java.util.stream.Collectors.toList(), (slot, ts) -> slot + ":" + ts, remaining -> {
+                    mapperCalls.incrementAndGet();
+                    return Stream.of("rest:" + com.landawn.abacus.util.Iterators.count(remaining));
+                })
                 .toList();
 
         assertEquals(List.of("10:[5]", "30:[25]", "rest:1"), withRest);

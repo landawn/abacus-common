@@ -32,6 +32,8 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
+import com.landawn.abacus.parser.JsonParser;
+import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.type.EnumType;
 import com.landawn.abacus.type.ImmutableMapEntryType;
 import com.landawn.abacus.type.IndexedType;
@@ -441,7 +443,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
                     final String json = IOUtil.readAllToString(input);
                     // Direct type conversion consumes raw text and bypasses the parser's EOF check.
                     // Validate a complete root independently before applying its declared generic type.
-                    N.fromJson(json, new JsonDeserConfig(), Object.class);
+                    STRUCTURE_VALIDATOR.validate(json);
                     return N.fromJson(json, jdc, targetType);
                 }
             } else if (!usesDirectValueConversion(targetType) && first == -1 && !targetType.isObject()) {
@@ -720,6 +722,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         return quotation == 0 ? "none" : "'" + quotation + "'";
     }
 
+    private static final JsonParser STRUCTURE_VALIDATOR = ParserFactory.createJsonParser();
+
     /**
      * @throws ParsingException if serialization produces text that is not a valid JSON value
      * @throws UncheckedIOException if writing the serialized JSON to the response writer fails
@@ -728,7 +732,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         final StringWriter buffer = new StringWriter();
         N.toJson(value, jsc, buffer);
         final String json = buffer.toString();
-        N.fromJson(json, new JsonDeserConfig(), Object.class);
+        STRUCTURE_VALIDATOR.validate(json);
         try {
             writer.write(json);
         } catch (final IOException e) {

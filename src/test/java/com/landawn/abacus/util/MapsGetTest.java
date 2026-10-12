@@ -1225,7 +1225,8 @@ public class MapsGetTest extends MapsTestSupport {
         assertTrue(Maps.getAsBoolean(map, "one").get());
         assertFalse(Maps.getAsBoolean(map, "n").get());
         assertFalse(Maps.getAsBoolean(map, "zero").get());
-        assertFalse(Maps.getAsBoolean(map, "t").get());
+        // 'T' is not boolean text (code review 2026-10-05; it used to be false)
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(map, "t"));
 
         // identical to the one-character String form, which is the whole point of the rule
         Map<String, Object> strings = new HashMap<>();
@@ -1237,7 +1238,7 @@ public class MapsGetTest extends MapsTestSupport {
         assertTrue(Maps.getAsBoolean(strings, "upperY").get());
         assertTrue(Maps.getAsBoolean(strings, "lowerY").get());
         assertTrue(Maps.getAsBoolean(strings, "one").get());
-        assertFalse(Maps.getAsBoolean(strings, "t").get());
+        assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(strings, "t"));
     }
 
     /**
@@ -1260,14 +1261,23 @@ public class MapsGetTest extends MapsTestSupport {
         }
 
         Map<String, Object> falses = new HashMap<>();
-        falses.put("interior", "tr ue"); // interior padding is not stripped
-        falses.put("paddedT", " T ");
-        falses.put("paddedYes", " yes ");
+        falses.put("paddedN", " n ");
+        falses.put("paddedMinusOne", " -1 ");
         falses.put("onlyPadding", "   ");
         falses.put("empty", "");
 
-        for (String key : new String[] { "interior", "paddedT", "paddedYes", "onlyPadding", "empty" }) {
+        for (String key : new String[] { "paddedN", "paddedMinusOne", "onlyPadding", "empty" }) {
             assertFalse(Maps.getAsBoolean(falses, key).get(), "should be false: " + falses.get(key));
+        }
+
+        // Text that is none of the accepted texts, once stripped, is rejected (code review 2026-10-05).
+        Map<String, Object> rejected = new HashMap<>();
+        rejected.put("interior", "tr ue"); // interior padding is not stripped
+        rejected.put("paddedT", " T ");
+        rejected.put("paddedYes", " yes ");
+
+        for (String key : new String[] { "interior", "paddedT", "paddedYes" }) {
+            assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(rejected, key), "should be rejected: " + rejected.get(key));
         }
     }
 }

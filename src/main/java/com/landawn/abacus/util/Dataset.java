@@ -106,10 +106,12 @@ import com.landawn.abacus.util.stream.Stream;
  * matching properties. Unmatched columns are ignored by default, independently of selection collection
  * identity. Use {@link #withMissingPropertyPolicy(MissingPropertyPolicy)} with
  * {@link MissingPropertyPolicy#ERROR} to reject them. Nested prefixes obey the same policy.
+ * Nested beans and collection elements retain their declared generic type arguments during conversion.
  * Each value is independently converted to the matching property type when necessary; heterogeneous
  * columns therefore have the same conversion rules in every row. Already-assignable values are retained,
  * and null uses the property type's default (null for references, the Java default for primitives).
  * Class-based conversion supports records, including nested records. Conversion failures propagate.
+ * A supplied mutable root bean uses the same nested conversion rules, including construction of nested records.
  * Lazy typed streams snapshot their column selections and prefix mappings when created.
  * A collection-valued nested property (e.g. {@code devices.id} for a {@code List<Device> devices}) is replaced by a
  * new collection holding the row's element, even when the bean's constructor pre-initialises the field; only

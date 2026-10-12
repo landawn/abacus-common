@@ -212,8 +212,9 @@ public class ParallelArrayShortStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(s -> {
-                if (s == 5)
+                if (s == 5) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -221,8 +222,9 @@ public class ParallelArrayShortStreamTest extends TestBase {
         parallelStream = createShortStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(s -> {
-                if (s == 7)
+                if (s == 7) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return s;
             }).toArray();
         });
@@ -1120,10 +1122,12 @@ public class ParallelArrayShortStreamTest extends TestBase {
         short valA = 0;
         short valB = -1;
         ShortBinaryOperator zipper = (s1, s2) -> {
-            if (s1 == valA)
+            if (s1 == valA) {
                 return s2;
-            if (s2 == valB)
+            }
+            if (s2 == valB) {
                 return s1;
+            }
             return (short) (s1 + s2);
         };
         List<Short> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
@@ -1344,8 +1348,7 @@ public class ParallelArrayShortStreamTest extends TestBase {
         assertEquals((short) 9, ShortStream.of(source).parallel(ps).reduce((short) -1, (a, b) -> b));
 
         final List<Short> collected = ShortStream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
-        assertEquals(Arrays.asList((short) 0, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9),
-                collected);
+        assertEquals(Arrays.asList((short) 0, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9), collected);
     }
 
     // ---- perf review 2026-09-26 G102 begin ----
@@ -1381,10 +1384,12 @@ public class ParallelArrayShortStreamTest extends TestBase {
                         final OptionalShort expectedFirst = first < 0 ? OptionalShort.empty() : OptionalShort.of(source[first]);
                         final OptionalShort expectedLast = last < 0 ? OptionalShort.empty() : OptionalShort.of(source[last]);
 
-                        assertEquals(expectedFirst, new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false,
-                                new ArrayList<>()).findFirst(predicate::test));
-                        assertEquals(expectedLast, new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false,
-                                new ArrayList<>()).findLast(predicate::test));
+                        assertEquals(expectedFirst,
+                                new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false, new ArrayList<>())
+                                        .findFirst(predicate::test));
+                        assertEquals(expectedLast,
+                                new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false, new ArrayList<>())
+                                        .findLast(predicate::test));
                     }
                 }
             }
@@ -1393,22 +1398,23 @@ public class ParallelArrayShortStreamTest extends TestBase {
                 final AtomicInteger calls = new AtomicInteger();
                 final ShortStream stream = new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null, false, new ArrayList<>());
 
-                assertEquals(OptionalShort.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+                assertEquals(OptionalShort.empty(),
+                        last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
                 assertEquals(source.length, calls.get());
             }
 
             final RuntimeException failure = new RuntimeException("find failure");
 
-            assertSame(failure, assertThrows(RuntimeException.class, () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null,
-                    false, new ArrayList<>()).findFirst(value -> {
+            assertSame(failure, assertThrows(RuntimeException.class,
+                    () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null, false, new ArrayList<>()).findFirst(value -> {
                         if (value == 0) {
                             throw failure;
                         }
 
                         return false;
                     })));
-            assertSame(failure, assertThrows(RuntimeException.class, () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null,
-                    false, new ArrayList<>()).findLast(value -> {
+            assertSame(failure, assertThrows(RuntimeException.class,
+                    () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null, false, new ArrayList<>()).findLast(value -> {
                         if (value == 0) {
                             throw failure;
                         }

@@ -191,8 +191,8 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         final int distinctElementCount = x.elementSet().size();
         final Map<E, Integer> map = isOrdered ? N.newLinkedHashMap(distinctElementCount) : N.newHashMap(distinctElementCount);
 
-        for (final E e : x.elementSet()) {
-            map.put(e, x.count(e));
+        for (final Multiset.Entry<E> entry : x.entrySet()) {
+            map.put(entry.getElement(), entry.getCount());
         }
 
         return Utils.jsonParser.serialize(map, Utils.jsc);

@@ -134,7 +134,8 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
             for (int step = 1; step <= 5; step++) {
                 assertArrayEquals(ShortStream.of(s).step(step).toArray(), ShortStream.of(s).map(x -> x).step(step).toArray(), "len=" + len + ", step=" + step);
                 assertArrayEquals(FloatStream.of(f).step(step).toArray(), FloatStream.of(f).map(x -> x).step(step).toArray(), "len=" + len + ", step=" + step);
-                assertArrayEquals(DoubleStream.of(d).step(step).toArray(), DoubleStream.of(d).map(x -> x).step(step).toArray(), "len=" + len + ", step=" + step);
+                assertArrayEquals(DoubleStream.of(d).step(step).toArray(), DoubleStream.of(d).map(x -> x).step(step).toArray(),
+                        "len=" + len + ", step=" + step);
 
                 assertEquals(ShortStream.of(s).step(step).count(), ShortStream.of(s).map(x -> x).step(step).count());
                 assertEquals(DoubleStream.of(d).step(step).count(), DoubleStream.of(d).map(x -> x).step(step).count());
@@ -197,7 +198,10 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
     public void testC014_transformViaJdkStreamSuccessPathUnchanged() {
         final AtomicInteger closed = new AtomicInteger();
 
-        final double[] result = DoubleStream.of(5, 1, 3).onClose(closed::incrementAndGet).transformViaJdkStream(java.util.stream.DoubleStream::sorted).toArray();
+        final double[] result = DoubleStream.of(5, 1, 3)
+                .onClose(closed::incrementAndGet)
+                .transformViaJdkStream(java.util.stream.DoubleStream::sorted)
+                .toArray();
 
         assertArrayEquals(new double[] { 1, 3, 5 }, result);
         assertEquals(1, closed.get());
@@ -241,33 +245,33 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
     @Test
     public void testC016_shortNullFactories() {
         for (final Supplier<ShortStream> src : shortSources()) {
-            assertNullFactoryRejected(src, s -> s.toCollection(() -> (List<Short>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMultiset(() -> (Multiset<Short>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> (Map<Short, Short>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> (Map<Short, Short>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> (Map<Short, Long>) null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toCollection(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMultiset(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> null), "mapFactory returned null");
         }
     }
 
     @Test
     public void testC016_floatNullFactories() {
         for (final Supplier<FloatStream> src : floatSources()) {
-            assertNullFactoryRejected(src, s -> s.toCollection(() -> (List<Float>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMultiset(() -> (Multiset<Float>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> (Map<Float, Float>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> (Map<Float, Float>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> (Map<Float, Long>) null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toCollection(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMultiset(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> null), "mapFactory returned null");
         }
     }
 
     @Test
     public void testC016_doubleNullFactories() {
         for (final Supplier<DoubleStream> src : doubleSources()) {
-            assertNullFactoryRejected(src, s -> s.toCollection(() -> (List<Double>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMultiset(() -> (Multiset<Double>) null), "supplier returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> (Map<Double, Double>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> (Map<Double, Double>) null), "mapFactory returned null");
-            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> (Map<Double, Long>) null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toCollection(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMultiset(() -> null), "supplier returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, (a, b) -> a, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.toMap(x -> x, x -> x, () -> null), "mapFactory returned null");
+            assertNullFactoryRejected(src, s -> s.groupTo(x -> x, Collectors.counting(), () -> null), "mapFactory returned null");
         }
     }
 
@@ -275,7 +279,7 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
     public void testC016_nonNullFactoriesStillWork() {
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 1), ShortStream.of((short) 1, (short) 2, (short) 1).map(x -> x).toCollection(ArrayList::new));
         assertEquals(2, FloatStream.of(1f, 2f, 1f).toMultiset(Multiset::new).count(1f));
-        assertEquals(new ArrayList<Double>(), DoubleStream.empty().toCollection(ArrayList::new));
+        assertEquals(new ArrayList<>(), DoubleStream.empty().toCollection(ArrayList::new));
         assertEquals(1, DoubleStream.of(1d, 2d, 1d).map(x -> x).groupTo(x -> x, Collectors.counting(), java.util.TreeMap::new).get(2d));
     }
 
@@ -379,12 +383,14 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
                 FloatStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertArrayEquals(new float[] { 1f, 2f, 3f, Float.NaN },
                 FloatStream.merge(a, b, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
-        assertArrayEquals(new double[] { 1d, 2d, 3d, Double.NaN }, DoubleStream.of(2d, 3d)
-                .mergeWith(DoubleStream.of(1d, Double.NaN), (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray());
-        assertArrayEquals(new float[] { -0.0f, 0.0f, 1f, 2f }, FloatStream.of(-0.0f, 1f)
-                .mergeWith(FloatStream.of(0.0f, 2f), (x, y) -> Float.compare(x, y) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toArray());
+        assertArrayEquals(new double[] { 1d, 2d, 3d, Double.NaN },
+                DoubleStream.of(2d, 3d)
+                        .mergeWith(DoubleStream.of(1d, Double.NaN), (x, y) -> Double.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                        .toArray());
+        assertArrayEquals(new float[] { -0.0f, 0.0f, 1f, 2f },
+                FloatStream.of(-0.0f, 1f)
+                        .mergeWith(FloatStream.of(0.0f, 2f), (x, y) -> Float.compare(x, y) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                        .toArray());
     }
 
     @Test

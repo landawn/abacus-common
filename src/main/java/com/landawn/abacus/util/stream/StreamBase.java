@@ -15,9 +15,12 @@
 package com.landawn.abacus.util.stream;
 
 import java.io.Serial;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
@@ -158,6 +161,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     static final int MAX_BUFFERED_SIZE = 10240;
     static final int DEFAULT_BUFFERED_SIZE_PER_ITERATOR = 64;
+
+    // Largest array the sequential primitive mapMulti buffers may grow to (the usual VM array-size headroom).
+    private static final int MAX_MAP_MULTI_BUFFER_SIZE = Integer.MAX_VALUE - 8;
 
     static final int BATCH_SIZE_FOR_FLUSH = 1000;
 
@@ -458,7 +464,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     private final boolean sorted;
     private final Comparator<? super T> cmp;
     private Deque<LocalRunnable> closeHandlers;
-    private volatile boolean isClosed = false;
+    // Default initialization avoids a redundant volatile write on every stream allocation.
+    private volatile boolean isClosed;
 
     /**
      * Creates a stream carrying the given sortedness hint and close handlers.
@@ -1040,7 +1047,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * or staying parallel if it already is, and then switches back to sequential.
      * This is a shorthand for "sequential-to-parallel-to-sequential" transformation.
      *
-     * <p>The parallel execution uses the default thread count and executor.
+     * <p>On a sequential stream the parallel execution uses the default thread count and executor;
+     * a stream that is already parallel keeps its current thread count, split strategy and executor.
      *
      * <pre>{@code
      * // Apply expensive mapping in parallel, then continue sequentially:
@@ -1225,11 +1233,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         try {
             result = operator.get();
         } catch (final Throwable e) {
-            try {
-                close();
-            } catch (final Throwable e2) {
-                e.addSuppressed(e2);
-            }
+            // A callback and a close handler can throw the same instance; self-suppression must not replace it.
+            closeAfterFailure(e);
 
             throw e;
         }
@@ -1357,7 +1362,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     /**
      * Returns whether this stream is known to be sorted, so that operations such as
      * {@code sorted()} or {@code distinct()} can take a cheaper path.
-     * {@code false} only means "not known to be sorted" — the elements may still happen to be in order.
+     * {@code false} only means "not known to be sorted" &mdash; the elements may still happen to be in order.
      *
      * @return {@code true} if this stream is known to be sorted
      */
@@ -1502,10 +1507,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     }
 
     /**
-     * Closes this stream after {@code primaryFailure} ended a terminal operation, without letting a failing close
-     * handler replace it: a close failure is added to {@code primaryFailure} as a suppressed exception instead
-     * (same contract as {@code Seq.closeAfterFailure}). The {@code finally { close(); }} that follows is then a
-     * no-op, because {@code close()} is idempotent.
+     * Closes this stream while preserving an existing failure. Callers use this helper for failed terminal operations,
+     * argument checks, and explicitly handled failures while constructing an intermediate stage. It does not make
+     * other intermediate-operation failures close the stream automatically.
+     *
+     * <p>A distinct close failure is added to {@code primaryFailure} as a suppressed exception instead of replacing
+     * it (the same contract as {@code Seq.closeAfterFailure}). Any subsequent {@code close()}, including one in a
+     * caller's {@code finally} block, is a no-op because {@code close()} is idempotent.
      *
      * @param primaryFailure the exception that is about to propagate
      */
@@ -1602,13 +1610,6 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         if (ex != null) {
             throw toRuntimeException(ex, true);
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    static void close(final Holder<? extends BaseStream> holder) {
-        if (holder.value() != null) {
-            holder.value().close();
         }
     }
 
@@ -3176,10 +3177,35 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     static <E extends Exception> void completeAndShutdownTempExecutor(final List<ContinuableFuture<Void>> futureList, final Holder<Throwable> eHolder,
             @SuppressWarnings("rawtypes") final BaseStream stream, final AsyncExecutor specifiedAsyncExecutor, final AsyncExecutor asyncExecutorToUse)
             throws E {
+        completeAndFinishResult(futureList, eHolder, () -> null, stream, specifiedAsyncExecutor, asyncExecutorToUse, (E) null);
+    }
+
+    /**
+     * Waits for all workers, then constructs a shared result before executor shutdown and source cleanup.
+     * Unlike {@code completeAndFinishResults}, this does not allocate a list for tasks returning only {@code Void}.
+     * Result construction failures keep precedence over cleanup failures.
+     *
+     * @param <R> the finished result type
+     * @param <E> the checked worker/finisher-exception type
+     * @param futureList the submitted tasks
+     * @param eHolder the shared worker-failure holder
+     * @param finisher the supplier of the result after every task is quiescent
+     * @param stream the source stream to close after the result is assembled
+     * @param specifiedAsyncExecutor the caller-supplied executor, which must not be shut down
+     * @param asyncExecutorToUse the executor actually used for the tasks
+     * @param throwableTypeToNotUse an unused type token for checked-exception inference
+     * @return the finished result
+     * @throws E if a worker, finisher, or cleanup reports an exception
+     */
+    static <R, E extends Exception> R completeAndFinishResult(final List<ContinuableFuture<Void>> futureList, final Holder<Throwable> eHolder,
+            final Throwables.Supplier<? extends R, E> finisher, @SuppressWarnings("rawtypes") final BaseStream stream,
+            final AsyncExecutor specifiedAsyncExecutor, final AsyncExecutor asyncExecutorToUse, final E throwableTypeToNotUse) throws E {
         Throwable failure = null;
+        R finishedResult = null;
 
         try {
-            complete(futureList, eHolder, (E) null);
+            complete(futureList, eHolder, throwableTypeToNotUse);
+            finishedResult = finisher.get();
         } catch (final Throwable e) { // NOSONAR
             failure = e;
         }
@@ -3200,8 +3226,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         if (failure != null) {
             final Holder<Throwable> failureHolder = Holder.of(failure);
-            throwException(failureHolder, (E) null);
+            throwException(failureHolder, throwableTypeToNotUse);
         }
+
+        return finishedResult;
     }
 
     /**
@@ -3730,6 +3758,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      *
      * <p>{@code iteratorEx()} and {@code close()} are deliberately left outside the monitor - holding it
      * across foreign code would turn a close that never blocks into one that can.
+     *
+     * <p>Sequential {@code flatMap} iterators use {@link SequentialMappedStreamHolder} or
+     * {@link SequentialFlatMapObjIterator} to avoid two monitor operations per mapped child.
+     * One-shot suppliers ({@code appendIfEmpty}, {@code deferTail}) use this holder.
      */
     static final class MappedStreamHolder {
         private BaseStream<?, ?, ?, ?, ?, ?, ?, ?> current;
@@ -3751,6 +3783,41 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
 
         /**
+         * Takes ownership of {@code mapped}, or closes it when this holder is already closed.
+         *
+         * <p>A buffered reader may finish a lazily evaluated supplier ({@code appendIfEmpty}, {@code deferTail})
+         * after a short-circuiting consumer has closed its pipeline. That late result never acquired an owner, so
+         * the thread that produced it closes it here, outside the monitor.
+         *
+         * @param mapped the lazily created stream, may be {@code null}
+         * @return {@code true} if {@code mapped} is now owned; {@code false} if it arrived after closing and was closed
+         */
+        boolean adoptOrClose(final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> mapped) {
+            if (adopt(mapped)) {
+                return true;
+            }
+
+            if (mapped != null) {
+                mapped.close();
+            }
+
+            return false;
+        }
+
+        /**
+         * Closes the held stream, if any, and rejects every later adoption. The stream's close handlers run
+         * outside the monitor, as on the parallel flatMap paths.
+         */
+        @SuppressWarnings("resource")
+        void close() {
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> mapped = detach(true);
+
+            if (mapped != null) {
+                mapped.close();
+            }
+        }
+
+        /**
          * Hands back the stream being held, if any, for the caller to close outside the monitor.
          *
          * <p>Note what this deliberately does <i>not</i> do: it never clears the caller's {@code cur}
@@ -3769,6 +3836,127 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
             final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = current;
             current = null;
             return tmp;
+        }
+    }
+
+    /**
+     * Owns a sequential flatMap child when a buffered or parallel reader races pipeline closure.
+     * Only the producer publishes children; either thread may atomically claim one for closing.
+     *
+     * <p>Callers isolate child advancement from the small per-element {@code hasNext} path so resource
+     * coordination does not prevent that frequently called path from being inlined.
+     */
+    static final class SequentialMappedStreamHolder {
+        private static final VarHandle CURRENT;
+
+        static {
+            try {
+                CURRENT = MethodHandles.lookup().findVarHandle(SequentialMappedStreamHolder.class, "current", BaseStream.class);
+            } catch (final ReflectiveOperationException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        @SuppressWarnings("unused")
+        private volatile BaseStream<?, ?, ?, ?, ?, ?, ?, ?> current;
+        private volatile boolean closed;
+
+        boolean isClosed() {
+            return closed;
+        }
+
+        boolean adoptOrClose(final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> mapped) {
+            if (mapped == null) {
+                return !closed;
+            }
+
+            // Full volatile publication must precede the closed check. Together with close's flag write before
+            // its atomic claim, this prevents both threads from missing a child returned during cancellation.
+            current = mapped;
+
+            if (!closed) {
+                return true;
+            }
+
+            release();
+            return false;
+        }
+
+        @SuppressWarnings("resource")
+        void release() {
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> mapped = (BaseStream<?, ?, ?, ?, ?, ?, ?, ?>) CURRENT.getAndSet(this, null);
+
+            // Claim before invoking foreign code: competing close calls must not wait behind a child's callback.
+            // The iterator's cur field remains producer-owned and is never cleared by the closing thread.
+            if (mapped != null) {
+                mapped.close();
+            }
+        }
+
+        void close() {
+            closed = true;
+            release();
+        }
+    }
+
+    /**
+     * The same single-producer ownership protocol as {@link SequentialMappedStreamHolder}, embedded in
+     * object-output iterators to avoid an extra holder lookup and generic stream-close dispatch per child.
+     * The current element iterator remains producer-owned; cancellation only claims the child stream.
+     *
+     * <p>Callers keep child advancement separate from their small per-element {@code hasNext} path so
+     * ownership coordination does not prevent that frequently called path from being inlined.
+     */
+    abstract static class SequentialFlatMapObjIterator<T> extends ObjIteratorEx<T> {
+        private static final VarHandle CURRENT;
+
+        static {
+            try {
+                CURRENT = MethodHandles.lookup().findVarHandle(SequentialFlatMapObjIterator.class, "current", Stream.class);
+            } catch (final ReflectiveOperationException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        @SuppressWarnings("unused")
+        private volatile Stream<?> current;
+        private volatile boolean closed;
+
+        final boolean isClosed() {
+            return closed;
+        }
+
+        final boolean adoptOrClose(final Stream<? extends T> mapped) {
+            if (mapped == null) {
+                return !closed;
+            }
+
+            // Full volatile publication precedes the closed check. Close publishes its flag before the
+            // atomic claim, so either the producer or the closer must reclaim a child returned during cancellation.
+            current = mapped;
+
+            if (!closed) {
+                return true;
+            }
+
+            release();
+            return false;
+        }
+
+        @SuppressWarnings("resource")
+        final void release() {
+            // Claim before foreign code; a competing close must not wait behind this child's callback.
+            final Stream<?> mapped = (Stream<?>) CURRENT.getAndSet(this, null);
+
+            if (mapped != null) {
+                mapped.close();
+            }
+        }
+
+        @Override
+        public final void closeResource() {
+            closed = true;
+            release();
         }
     }
 
@@ -3948,4 +4136,47 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
+    /**
+     * Returns a copy of a sequential {@code mapMulti} fan-out buffer with room for at least one more value: 10 slots
+     * first, then 1.75 times the current length, as the primitive lists grow.
+     *
+     * @param buffer the full buffer
+     * @return the grown buffer
+     * @throws OutOfMemoryError if the buffer already has the maximum array length
+     */
+    static int[] growMapMultiBuffer(final int[] buffer) {
+        return Arrays.copyOf(buffer, mapMultiBufferCapacity(buffer.length));
+    }
+
+    /**
+     * Returns a copy of a sequential {@code mapMulti} fan-out buffer with room for at least one more value.
+     *
+     * @param buffer the full buffer
+     * @return the grown buffer
+     * @throws OutOfMemoryError if the buffer already has the maximum array length
+     * @see #growMapMultiBuffer(int[])
+     */
+    static long[] growMapMultiBuffer(final long[] buffer) {
+        return Arrays.copyOf(buffer, mapMultiBufferCapacity(buffer.length));
+    }
+
+    /**
+     * Returns a copy of a sequential {@code mapMulti} fan-out buffer with room for at least one more value.
+     *
+     * @param buffer the full buffer
+     * @return the grown buffer
+     * @throws OutOfMemoryError if the buffer already has the maximum array length
+     * @see #growMapMultiBuffer(int[])
+     */
+    static double[] growMapMultiBuffer(final double[] buffer) {
+        return Arrays.copyOf(buffer, mapMultiBufferCapacity(buffer.length));
+    }
+
+    private static int mapMultiBufferCapacity(final int length) {
+        if (length >= MAX_MAP_MULTI_BUFFER_SIZE) {
+            throw new OutOfMemoryError("Required capacity is too large: " + length + " values were already emitted for one element");
+        }
+
+        return length == 0 ? 10 : (int) Math.min(MAX_MAP_MULTI_BUFFER_SIZE, Math.max(length + 1L, (long) (length * 1.75)));
+    }
 }

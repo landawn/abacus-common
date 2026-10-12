@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.ObjIterator;
 
@@ -180,7 +181,8 @@ public class StreamImplReview20260924bTest extends TestBase {
     public void testC090_bufferedWithHugeBoundDoesNotPreallocate() {
         final AtomicInteger closed = new AtomicInteger();
         // c1final: OutOfMemoryError "Requested array size exceeds VM limit" at the intermediate call; source left open.
-        assertEquals(Arrays.asList(1, 2, 3), Stream.of(Arrays.asList(1, 2, 3).iterator()).onClose(closed::incrementAndGet).buffered(Integer.MAX_VALUE).toList());
+        assertEquals(Arrays.asList(1, 2, 3),
+                Stream.of(Arrays.asList(1, 2, 3).iterator()).onClose(closed::incrementAndGet).buffered(Integer.MAX_VALUE).toList());
         assertEquals(1, closed.get());
 
         assertEquals(range(0, 100), Stream.of(range(0, 100).iterator()).buffered(1 << 28).toList());
@@ -234,8 +236,8 @@ public class StreamImplReview20260924bTest extends TestBase {
                 () -> Stream.of("é", "b", "é").collect(Collectors.toConcurrentMap(x -> x, String::length)));
         assertEquals("Duplicate key é (attempted merging values 1 and 1)", e.getMessage());
 
-        e = assertThrows(IllegalStateException.class,
-                () -> Stream.of("a", "a").collect(Collectors.toConcurrentMap(x -> x, x -> 1, (Supplier<ConcurrentMap<String, Integer>>) ConcurrentHashMap::new)));
+        e = assertThrows(IllegalStateException.class, () -> Stream.of("a", "a")
+                .collect(Collectors.toConcurrentMap(x -> x, x -> 1, (Supplier<ConcurrentMap<String, Integer>>) ConcurrentHashMap::new)));
         assertEquals("Duplicate key a (attempted merging values 1 and 1)", e.getMessage());
 
         e = assertThrows(IllegalStateException.class,
@@ -329,6 +331,9 @@ public class StreamImplReview20260924bTest extends TestBase {
         }
     }
 
+    // Accessor-based on purpose: properties are read through their fields unless @AccessFieldByMethod says otherwise
+    // (in both the reflective and the ASM mode), and this fixture checks that a row's own overriding getter is used.
+    @AccessFieldByMethod
     public static class Parrot extends Animal {
         public Parrot() {
         }
@@ -362,7 +367,7 @@ public class StreamImplReview20260924bTest extends TestBase {
         assertEquals(3, Stream.<Animal> of(new Dog("rex", "lab"), new Cat("tom", 9), new Dog("fido", "pug")).persistToCsv(Arrays.asList("name"), w));
         assertEquals("\"name\"\n\"rex\"\n\"tom\"\n\"fido\"", w.toString().trim());
 
-        // Each row is read through its own class's accessor (an overriding getter is honoured).
+        // Each row is read through its own class's metadata (Parrot's overriding getter is honoured: @AccessFieldByMethod).
         final StringWriter w2 = new StringWriter();
         assertEquals(3, Stream.<Animal> of(new Dog("rex", "lab"), new Parrot("pa"), new Cat("ü", 1)).persistToCsv(Arrays.asList("name"), w2));
         assertEquals("\"name\"\n\"rex\"\n\"Polly-pa\"\n\"ü\"", w2.toString().trim());
@@ -409,9 +414,10 @@ public class StreamImplReview20260924bTest extends TestBase {
     @Test
     public void testC100_persistToCsvClosesStreamOnRejectedRow() {
         final AtomicInteger closed = new AtomicInteger();
-        assertThrows(IllegalArgumentException.class, () -> Stream.<Object> of(new Dog("a", "b"), new Rock())
-                .onClose(closed::incrementAndGet)
-                .persistToCsv(Arrays.asList("name"), new StringWriter()));
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.<Object> of(new Dog("a", "b"), new Rock())
+                        .onClose(closed::incrementAndGet)
+                        .persistToCsv(Arrays.asList("name"), new StringWriter()));
         assertEquals(1, closed.get());
     }
 
@@ -438,9 +444,8 @@ public class StreamImplReview20260924bTest extends TestBase {
         assertEquals(Arrays.asList('a', 'b', 'c'), chars.toList());
 
         // A huge flagged range no longer materializes (c1final: full copy + sort, OOM for MIN..MAX).
-        assertTimeoutPreemptively(Duration.ofSeconds(10),
-                () -> assertEquals(Arrays.asList(Integer.MIN_VALUE, Integer.MIN_VALUE + 1),
-                        IntStream.range(Integer.MIN_VALUE, Integer.MAX_VALUE).boxed().sorted().limit(2).toList()));
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertEquals(Arrays.asList(Integer.MIN_VALUE, Integer.MIN_VALUE + 1),
+                IntStream.range(Integer.MIN_VALUE, Integer.MAX_VALUE).boxed().sorted().limit(2).toList()));
     }
 
     @Test
@@ -465,15 +470,15 @@ public class StreamImplReview20260924bTest extends TestBase {
         assertTrue(e.getMessage().contains("cannot be combined"), e.getMessage());
 
         final AtomicInteger closed = new AtomicInteger();
-        e = assertThrows(IllegalArgumentException.class, () -> Stream.of(range(0, 1000).toArray(new Integer[0]))
-                .parallel(4)
-                .onClose(closed::incrementAndGet)
-                .collect(AtomicInteger::new, (a, x) -> a.addAndGet(x)));
+        e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(range(0, 1000).toArray(new Integer[0]))
+                        .parallel(4)
+                        .onClose(closed::incrementAndGet)
+                        .collect(AtomicInteger::new, (a, x) -> a.addAndGet(x)));
         assertTrue(e.getMessage().contains("cannot be combined"), e.getMessage());
         assertEquals(1, closed.get());
 
-        e = assertThrows(IllegalArgumentException.class,
-                () -> IntStream.range(0, 1000).parallel(4).collect(AtomicInteger::new, (a, x) -> a.addAndGet(x)));
+        e = assertThrows(IllegalArgumentException.class, () -> IntStream.range(0, 1000).parallel(4).collect(AtomicInteger::new, (a, x) -> a.addAndGet(x)));
         assertTrue(e.getMessage().contains("cannot be combined"), e.getMessage());
 
         // Supported containers still combine.
@@ -513,8 +518,8 @@ public class StreamImplReview20260924bTest extends TestBase {
         final List<Integer> data = Arrays.asList(1, 3, 2, 4, 5, 7, 6);
         final List<List<Integer>> expected = Arrays.asList(Arrays.asList(1, 3), Arrays.asList(2, 4), Arrays.asList(5, 7), Arrays.asList(6));
 
-        for (final Function<List<Integer>, Stream<Integer>> kind : Arrays.<Function<List<Integer>, Stream<Integer>>> asList(
-                list -> Stream.of(list.toArray(new Integer[0])), list -> Stream.of(list.iterator()))) {
+        for (final Function<List<Integer>, Stream<Integer>> kind : Arrays
+                .<Function<List<Integer>, Stream<Integer>>> asList(list -> Stream.of(list.toArray(new Integer[0])), list -> Stream.of(list.iterator()))) {
             final AtomicInteger calls = new AtomicInteger();
             final Predicate<Integer> even = x -> {
                 calls.incrementAndGet();
@@ -726,8 +731,8 @@ public class StreamImplReview20260924bTest extends TestBase {
             }
         }
 
-        assertEquals("supplier returned null", assertThrows(NullPointerException.class, () -> EntryStream.<String, Integer> empty()
-                .collect(() -> (List<Map.Entry<String, Integer>>) null, List::add)).getMessage());
+        assertEquals("supplier returned null", assertThrows(NullPointerException.class,
+                () -> EntryStream.<String, Integer> empty().collect(() -> (List<Map.Entry<String, Integer>>) null, List::add)).getMessage());
     }
 
     @Test
@@ -859,11 +864,7 @@ public class StreamImplReview20260924bTest extends TestBase {
 
         // Parallel left.
         r = new Right();
-        final List<String> par = Stream.of(1, 2, 9, 5)
-                .parallel(3)
-                .fullJoin(r.stream(1, 2, 3, 4), x -> x, y -> y, (l, rt) -> l + ":" + rt)
-                .sorted()
-                .toList();
+        final List<String> par = Stream.of(1, 2, 9, 5).parallel(3).fullJoin(r.stream(1, 2, 3, 4), x -> x, y -> y, (l, rt) -> l + ":" + rt).sorted().toList();
         assertEquals(Arrays.asList("1:1", "2:2", "5:null", "9:null", "null:3", "null:4"), par);
         assertEquals(1, r.closed.get());
 
@@ -969,7 +970,8 @@ public class StreamImplReview20260924bTest extends TestBase {
 
         // The Stream-b overload closes b exactly once, traversed or not.
         final Right r = new Right();
-        Stream.of(1, 5).joinByRange(r.stream(1, 2), (l, x) -> x <= l, java.util.stream.Collectors.toList(), (l, xs) -> l + "=" + xs, iter -> Stream.<String> empty())
+        Stream.of(1, 5)
+                .joinByRange(r.stream(1, 2), (l, x) -> x <= l, java.util.stream.Collectors.toList(), (l, xs) -> l + "=" + xs, iter -> Stream.<String> empty())
                 .close();
         assertEquals(1, r.closed.get());
         final Right r2 = new Right();

@@ -38,8 +38,8 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.UnknownHostException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.NonReadableChannelException;
@@ -1431,10 +1431,9 @@ public class IOUtilReview20260925cTest extends TestBase {
             assertThrows(IllegalArgumentException.class, () -> IOUtil.deleteIfExists(target), spelling);
             assertFalse(IOUtil.deleteQuietly(target), spelling);
             assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(target, dest), spelling);
-            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(target, dest, java.nio.file.StandardCopyOption.ATOMIC_MOVE),
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(target, dest, java.nio.file.StandardCopyOption.ATOMIC_MOVE), spelling);
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(target, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING),
                     spelling);
-            assertThrows(IllegalArgumentException.class,
-                    () -> IOUtil.moveToDirectory(target, dest, java.nio.file.StandardCopyOption.REPLACE_EXISTING), spelling);
 
             final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.deleteIfExists(target), spelling);
             assertTrue(e.getMessage().contains("must not end in '..'"), e.getMessage());
@@ -1521,8 +1520,7 @@ public class IOUtilReview20260925cTest extends TestBase {
         assumeTrue(IOUtil.IS_OS_WINDOWS, "junctions are Windows-only");
         assertTrue(link.isAbsolute() && target.isAbsolute());
 
-        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath()).redirectErrorStream(true)
-                .start();
+        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath()).redirectErrorStream(true).start();
         p.getInputStream().readAllBytes();
         assumeTrue(p.waitFor() == 0, "mklink /J failed");
     }
@@ -1856,8 +1854,7 @@ public class IOUtilReview20260925cTest extends TestBase {
         final File cs = newDir("c693/d1/d2/d3/cs");
         assertTrue(cs.isAbsolute());
 
-        final Process process = new ProcessBuilder("fsutil", "file", "setCaseSensitiveInfo", cs.getAbsolutePath(), "enable").redirectErrorStream(true)
-                .start();
+        final Process process = new ProcessBuilder("fsutil", "file", "setCaseSensitiveInfo", cs.getAbsolutePath(), "enable").redirectErrorStream(true).start();
         process.getInputStream().readAllBytes();
         assumeTrue(process.waitFor() == 0, "fsutil setCaseSensitiveInfo is not available");
 
@@ -1872,8 +1869,7 @@ public class IOUtilReview20260925cTest extends TestBase {
         Files.write(victim.toPath(), "keep".getBytes(StandardCharsets.UTF_8));
 
         assertThrows(java.nio.file.FileAlreadyExistsException.class, () -> IOUtil.moveToDirectory(src, lower));
-        assertThrows(java.nio.file.FileAlreadyExistsException.class,
-                () -> IOUtil.moveToDirectory(src, lower, java.nio.file.StandardCopyOption.ATOMIC_MOVE));
+        assertThrows(java.nio.file.FileAlreadyExistsException.class, () -> IOUtil.moveToDirectory(src, lower, java.nio.file.StandardCopyOption.ATOMIC_MOVE));
         assertEquals("keep", read(victim), "p/f.txt must not be replaced");
         assertEquals("src", read(src));
 

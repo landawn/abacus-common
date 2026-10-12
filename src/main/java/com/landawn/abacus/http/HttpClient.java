@@ -1882,7 +1882,7 @@ public final class HttpClient implements AutoCloseable {
         if (doOutput) {
             // Validated before a connection is opened, so a contradictory configuration fails
             // without consuming an in-flight slot or touching the network.
-            checkRequestContentEncoding(requestContentFormat, settingsContentType, requestContentEncoding);
+            checkRequestContentEncoding(requestContentFormat, requestContentEncoding);
         }
 
         final HttpURLConnection connection = openConnection(httpMethod, queryParameters, settings, doOutput, true);
@@ -1903,6 +1903,27 @@ public final class HttpClient implements AutoCloseable {
                         ? defaultRequestContentType(requestContentFormat, isRawText, isRawBinary, requestCharset)
                         : settingsContentType;
 
+                // A String body is encoded once, up front: its encoded length then selects fixed-length streaming
+                // below, so it is not sent chunked to servers or HTTP/1.0 proxies that reject chunked uploads.
+                final byte[] stringBytes = request instanceof String str ? str.getBytes(requestCharset) : null;
+
+                if (resolveFlag(settings == null ? null : settings.streamRequestBodyOrNull(), _settings.streamRequestBodyOrNull(),
+                        HttpSettings.DEFAULT_STREAM_REQUEST_BODY)) {
+                    // Set the mode before getOutputStream connects. Compressed sizes and serialized/streamed
+                    // bodies are unknown without buffering or consuming them a second time.
+                    final boolean compressed = requestContentFormat != ContentFormat.KRYO
+                            && Strings.isNotEmpty(HttpUtil.getContentEncoding(requestContentFormat));
+                    final long length = compressed ? -1
+                            : request instanceof File file ? file.length()
+                                    : request instanceof byte[] bytes ? bytes.length : stringBytes != null ? stringBytes.length : -1;
+
+                    if (length >= 0) {
+                        connection.setFixedLengthStreamingMode(length);
+                    } else {
+                        connection.setChunkedStreamingMode(8192);
+                    }
+                }
+
                 os = HttpUtil.getOutputStream(connection, requestContentFormat, requestContentType, requestContentEncoding);
 
                 if (request instanceof File fileRequest) {
@@ -1922,8 +1943,8 @@ public final class HttpClient implements AutoCloseable {
                         Objectory.recycle(bw);
                     }
                 } else {
-                    if (request instanceof String) {
-                        IOUtil.write(((String) request).getBytes(requestCharset), os);
+                    if (stringBytes != null) {
+                        IOUtil.write(stringBytes, os);
                     } else if (request.getClass().equals(byte[].class)) {
                         IOUtil.write((byte[]) request, os);
                     } else {
@@ -1978,11 +1999,14 @@ public final class HttpClient implements AutoCloseable {
             // Only an HttpResponse result gets here with an error status. For a 4xx/5xx sent without a body,
             // HttpURLConnection exposes no stream at all (getInputStream() throws, getErrorStream() is null):
             // that is an empty body, not an I/O failure, so the response must still be returned for inspection.
+            final boolean oneWayRequest = isOneWayRequest(settings, resultClass, outputFile, outputStream, outputWriter);
+            // An ignored response still needs its transport stream closed, but constructing a decoder
+            // would read its header and could fail on a body the caller never requested.
             is = HttpUtil.hasResponseBody(httpMethod.name(), statusCode) && (statusCode < 400 || connection.getErrorStream() != null)
-                    ? HttpUtil.getInputStream(connection, respContentFormat)
+                    ? HttpUtil.getInputStream(connection, oneWayRequest ? ContentFormat.NONE : respContentFormat)
                     : N.emptyInputStream();
 
-            if (isOneWayRequest(settings, resultClass, outputFile, outputStream, outputWriter)) {
+            if (oneWayRequest) {
                 return null;
             } else if (outputFile != null) {
                 // Created here rather than before the request: opening it up front truncated an
@@ -2099,23 +2123,28 @@ public final class HttpClient implements AutoCloseable {
     /**
      * Rejects a {@code Content-Encoding} that contradicts the compression the active
      * {@link ContentFormat} actually applies, instead of shipping a body whose declared encoding
-     * does not match its bytes. An encoding this client does not implement (for example
-     * {@code identity} or {@code deflate}) is passed through untouched and is never rejected.
+     * does not match its bytes. Unsupported and stacked encodings are rejected; {@code x-gzip}
+     * aliases {@code gzip}, and {@code identity} is accepted for an uncompressed format.
      *
      * @param contentFormat the active content format, which decides the compression applied
-     * @param contentType the resolved request content type, used to interpret the declared encoding
      * @param declaredEncoding the {@code Content-Encoding} resolved from the settings, may be empty
-     * @throws IllegalArgumentException if the declared encoding names a supported compression that
-     *         differs from the one the content format applies.
+     * @throws IllegalArgumentException if the declared encoding differs from the one the content format applies
      */
-    private static void checkRequestContentEncoding(final ContentFormat contentFormat, final String contentType, final String declaredEncoding)
-            throws IllegalArgumentException {
+    private static void checkRequestContentEncoding(final ContentFormat contentFormat, final String declaredEncoding) throws IllegalArgumentException {
         if (Strings.isEmpty(declaredEncoding)) {
             return;
         }
 
         final String appliedEncoding = HttpUtil.getContentEncoding(contentFormat);
-        final String declaredCompression = HttpUtil.getContentEncoding(HttpUtil.getContentFormat(contentType, declaredEncoding));
+        // Compare the complete declaration: format lookup discards unknown/stacked encodings and
+        // encodings unsupported for a media type (for example gzip on a form), hiding a wire mismatch.
+        String declaredCompression = declaredEncoding.trim();
+
+        if ("x-gzip".equalsIgnoreCase(declaredCompression)) {
+            declaredCompression = "gzip";
+        } else if ("identity".equalsIgnoreCase(declaredCompression)) {
+            declaredCompression = Strings.EMPTY;
+        }
 
         if (!declaredCompression.equalsIgnoreCase(appliedEncoding)) {
             throw new IllegalArgumentException("Content-Encoding: " + declaredEncoding + " conflicts with content format " + contentFormat + ", which applies "

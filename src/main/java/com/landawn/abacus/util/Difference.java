@@ -2972,17 +2972,25 @@ public sealed class Difference<L, R> permits KeyValueDifference {
 
                 Map<K1, V1> mapA = null;
                 Map<K2, V2> mapB = null;
+                // MapDifference.of(Map, Map, Collection) copies a selection that is not a Set into a HashSet on
+                // every call. Make that copy once, at the first matched pair, and hand the same Set to every pair.
+                Collection<CK> keySelection = null;
 
                 for (final Map.Entry<K, Map<? extends K1, ? extends V1>> entry : beanMapA.entrySet()) {
                     mapA = (Map<K1, V1>) entry.getValue();
 
                     if (beanMapB.containsKey(entry.getKey())) {
                         mapB = (Map<K2, V2>) beanMapB.get(entry.getKey());
+
+                        if (keySelection == null) {
+                            keySelection = N.isEmpty(keysToCompare) || keysToCompare instanceof Set ? keysToCompare : new HashSet<>(keysToCompare);
+                        }
+
                         // Compute the per-map difference once and decide equality from it, so this check cannot
                         // disagree with the value equality used to build that difference. A raw N.equals/
                         // N.equalsByKeys pre-check compares array values by reference and would file an
                         // equal-content pair under differentValues with an empty difference.
-                        final MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> mapDiff = MapDifference.of(mapA, mapB, keysToCompare);
+                        final MapDifference<Map<K1, V1>, Map<K2, V2>, Map<CK, Pair<V1, V2>>> mapDiff = MapDifference.of(mapA, mapB, keySelection);
 
                         if (mapDiff.areEqual()) {
                             common.add(mapA);
@@ -3012,6 +3020,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * This class extends {@link KeyValueDifference} to provide bean-specific comparison functionality.
      * It uses reflection to compare bean properties and supports various comparison options including
      * custom value equivalence predicates and selective property comparison.
+     *
+     * <p>When comparing all properties, fuzzy name matching must map distinct, non-ignored properties of the
+     * first bean to distinct properties of the second bean. Exact canonical names take precedence over fuzzy matches;
+     * a fuzzy property whose target has an exact match is reported as left-only. Remaining ambiguous many-to-one correspondence is rejected
+     * with {@link IllegalArgumentException}, even when the values are equal or {@code null}. Explicit property
+     * selections may use multiple aliases for the same property and are compared under each requested name.
      *
      * <p>The comparison results include:
      * <ul>
@@ -3122,7 +3136,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *        properties whose value is {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class (e.g., a
-         *         primitive wrapper, array, {@link Collection}, or {@link Map}).
+         *         primitive wrapper, array, {@link Collection}, or {@link Map}), or distinct non-ignored properties of the first bean
+         *         resolve to the same property of the second bean without an exact-name match to disambiguate them.
          * @throws RuntimeException if bean metadata cannot be resolved or a selected property cannot be read; a getter or reflection failure is propagated as an unchecked exception
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -3186,7 +3201,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *        {@code bean1} are reported as left-only, including those whose value is {@code null}.
          * @param propNamesToCompare the property names to compare. If {@code null} or empty, all properties are compared.
          * @return a {@code BeanDifference} object containing the comparison results for the specified properties
-         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class.
+         * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or all properties are compared
+         *         and distinct non-ignored properties of the first bean resolve to the same property of the second bean without an exact-name match to disambiguate them.
          * @throws RuntimeException if bean metadata cannot be resolved or a selected property cannot be read; a getter or reflection failure is propagated as an unchecked exception
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object)
@@ -3254,7 +3270,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *        for every property present on both beans, so either argument may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
-         *         {@code valueEquivalence} is {@code null}.
+         *         {@code valueEquivalence} is {@code null}, or all properties are compared and distinct non-ignored properties
+         *         of the first bean resolve to the same property of the second bean without an exact-name match to disambiguate them.
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -3330,7 +3347,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *                         present on both beans, so either value may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
-         *         {@code valueEquivalence} is {@code null}.
+         *         {@code valueEquivalence} is {@code null}, or all properties are compared and distinct non-ignored properties
+         *         of the first bean resolve to the same property of the second bean without an exact-name match to disambiguate them.
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -3408,7 +3426,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          *        invoked for every requested property present on both beans, so either value may be {@code null}.
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
-         *         {@code valueEquivalence} is {@code null}.
+         *         {@code valueEquivalence} is {@code null}, or all properties are compared and distinct non-ignored properties
+         *         of the first bean resolve to the same property of the second bean without an exact-name match to disambiguate them.
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
@@ -3468,7 +3487,19 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     // in both `common` and `onlyOnRight`, and let a @DiffIgnore property spelled differently on
                     // the two classes leak into `onlyOnRight`. Track what the first pass actually consumed, by
                     // PropInfo identity - the same shape MapDifference uses for its consumed-key tracker.
-                    final Set<PropInfo> consumedPropInfosOfBean2 = Collections.newSetFromMap(new IdentityHashMap<>());
+                    // Ignored aliases consume right-side properties without comparing them, so active matches are
+                    // told apart by the value: TRUE once an active left property matched the key, FALSE while only
+                    // ignored ones consumed it (one map rather than a consumed set plus a matched set: one table
+                    // and one update per compared property). Reusing one right property for distinct left
+                    // properties would hide a structural difference, even when the predicate accepts both values
+                    // (including nulls).
+                    final Map<PropInfo, Boolean> consumedPropInfosOfBean2 = new IdentityHashMap<>();
+                    // Reserve exact canonical names before considering fuzzy matches, independently of
+                    // metadata iteration order. Ignored left properties do not reserve an active match.
+                    // The set is only consulted for a fuzzy match (a right property spelled differently from
+                    // the left one), so it is built on the first such match: two beans of one class, or of
+                    // classes sharing their property names, never need it.
+                    Set<String> activeLeftNames = null;
                     Object val1 = null;
                     Object val2 = null;
 
@@ -3483,10 +3514,26 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                                     || (!diffIgnoredPropNamesForBean2.isEmpty() && (diffIgnoredPropNamesForBean2.contains(propInfo1.name)
                                             || (propInfo2 != null && diffIgnoredPropNamesForBean2.contains(propInfo2.name))))) {
                                 if (propInfo2 != null) {
-                                    consumedPropInfosOfBean2.add(propInfo2);
+                                    consumedPropInfosOfBean2.putIfAbsent(propInfo2, Boolean.FALSE);
                                 }
 
                                 continue;
+                            }
+
+                            if (propInfo2 != null && !propInfo1.name.equals(propInfo2.name)) {
+                                if (activeLeftNames == null) {
+                                    activeLeftNames = new HashSet<>();
+
+                                    for (final PropInfo propInfo : beanInfo1.propInfoList) {
+                                        if (!diffIgnoredPropNamesForBean1.contains(propInfo.name)) {
+                                            activeLeftNames.add(propInfo.name);
+                                        }
+                                    }
+                                }
+
+                                if (activeLeftNames.contains(propInfo2.name)) {
+                                    propInfo2 = null;
+                                }
                             }
 
                             val1 = propInfo1.getPropValue(bean1);
@@ -3494,7 +3541,12 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                             if (propInfo2 == null) {
                                 onlyOnLeft.put(propInfo1.name, val1);
                             } else {
-                                consumedPropInfosOfBean2.add(propInfo2);
+                                if (Boolean.TRUE.equals(consumedPropInfosOfBean2.put(propInfo2, Boolean.TRUE))) {
+                                    // getName(), not getCanonicalName(): the latter is null for local and anonymous bean classes.
+                                    throw new IllegalArgumentException("Multiple properties of " + bean1Class.getName() + " resolve to property '"
+                                            + propInfo2.name + "' of " + bean2Class.getName());
+                                }
+
                                 val2 = propInfo2.getPropValue(bean2);
 
                                 // The equivalence predicate decides first, even when both values are null: a
@@ -3516,7 +3568,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
                     }
 
                     for (final PropInfo propInfo : beanInfo2.propInfoList) {
-                        if (consumedPropInfosOfBean2.contains(propInfo)
+                        if (consumedPropInfosOfBean2.containsKey(propInfo)
                                 || (!diffIgnoredPropNamesForBean2.isEmpty() && diffIgnoredPropNamesForBean2.contains(propInfo.name))) {
                             continue;
                         }
@@ -3657,7 +3709,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
-         *         instance, or if {@code idExtractor} is {@code null}.
+         *         instance, if {@code idExtractor} is {@code null}, or all properties are compared and a matched bean pair
+         *         has an ambiguous many-to-one property correspondence not disambiguated by exact names.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor} throws during processing.
          */
@@ -3713,7 +3766,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor the function to extract a unique identifier from each bean.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
-         *         instance, or if {@code idExtractor} is {@code null}.
+         *         instance, if {@code idExtractor} is {@code null}, or all properties are compared and a matched bean pair
+         *         has an ambiguous many-to-one property correspondence not disambiguated by exact names.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor} throws during processing.
          */
@@ -3773,7 +3827,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
-         *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
+         *         instance, if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}, or all properties are compared
+         *         and a matched bean pair has an ambiguous many-to-one property correspondence not disambiguated by exact names.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor1} or {@code idExtractor2} throws during processing.
          */
@@ -3844,7 +3899,8 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @param idExtractor2 the function to extract identifiers from beans in the second collection.
          * @return a non-{@code null} {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
-         *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
+         *         instance, if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}, or all properties are compared
+         *         and a matched bean pair has an ambiguous many-to-one property correspondence not disambiguated by exact names.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
          * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor1} or {@code idExtractor2} throws during processing.
          */

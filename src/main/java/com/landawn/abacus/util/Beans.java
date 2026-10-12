@@ -40,7 +40,6 @@ import java.util.function.Predicate;
 import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Internal;
-import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.NotNull;
 import com.landawn.abacus.annotation.Record;
@@ -194,10 +193,12 @@ import com.landawn.abacus.util.stream.Stream;
  * {@code name} resolves) reads {@code node.getName()}, not the outer {@code name}; the class-qualified form is
  * only used when the qualifier is not such a property.
  *
- * <p><b>Read-only properties:</b> a getter with no backing field and no setter (for example a computed
- * {@code getFullName()} on an {@code @Entity} class) is a property on the read side ({@code beanToMap},
- * {@code stream}) but can never be written. The write side treats it as an unmatched name, decided before
- * anything is written: the "all properties" operations ({@code clearAllProps}, {@code randomize(bean)},
+ * <p><b>Read-only properties:</b> a property with no permitted field write, setter or supported getter-based
+ * write is read-only (see {@link PropInfo#isReadOnlyProperty}). Examples include a computed {@code getFullName()}
+ * on an {@code @Entity} class and a backing field restricted by {@code @AccessFieldByMethod} with no write accessor.
+ * Supported XML-binding getter collections and immutable constructor/builder slots are not read-only.
+ * The property remains available on the read side ({@code beanToMap}, {@code stream}). The write side treats it
+ * as an unmatched name before anything is written: the "all properties" operations ({@code clearAllProps}, {@code randomize(bean)},
  * {@code newRandomBean(cls)}, the lenient {@code mergeInto}/{@code copyAs} overloads, the tolerant
  * {@code mapToBean}, and the {@code propFilter} overloads of {@code copy}/{@code copyAs}/{@code mergeInto}) skip it,
  * while naming it explicitly ({@code clearProps}, {@code randomize(bean, names)}, a {@code selectPropNames}
@@ -775,6 +776,10 @@ public final class Beans {
         registeredNonBeanClass.put(java.sql.Date.class, java.sql.Date.class);
         registeredNonBeanClass.put(java.sql.Time.class, java.sql.Time.class);
         registeredNonBeanClass.put(java.sql.Timestamp.class, java.sql.Timestamp.class);
+        registeredNonBeanClass.put(Throwable.class, Throwable.class);
+        registeredNonBeanClass.put(Error.class, Error.class);
+        registeredNonBeanClass.put(Exception.class, Exception.class);
+        registeredNonBeanClass.put(RuntimeException.class, RuntimeException.class);
     }
 
     private static final Class<?> recordClass;
@@ -806,16 +811,17 @@ public final class Beans {
 
     /**
      * The longest caller-supplied spelling {@link #resolveAlias(Class, String, Map)} will even consider matching.
+     * Also bounds admission of caller spellings to the optimization caches, without limiting exact lookup or conversion.
      *
-     * <p>No real JavaBean property name comes close, so anything longer is caller data rather than a property
-     * name; refusing to match it keeps the fuzzy comparison (which strips underscores and accessor prefixes)
-     * from being run over arbitrarily long strings. The alias resolver in {@code ParserUtil.BeanInfo} applies the same
-     * limit - keep the two in sync.</p>
+     * <p>This bounds fuzzy comparison work and retained caller data; it is not a limit on Java property names.
+     * Longer declared names still resolve through exact metadata lookup. Refusing to match longer aliases keeps
+     * the fuzzy comparison (which strips underscores and accessor prefixes) from scanning arbitrarily long strings.
+     * The alias resolver in {@code ParserUtil.BeanInfo} applies the same limit - keep the two in sync.</p>
      */
     private static final int MAX_PROP_NAME_LENGTH = 128;
 
     /**
-     * Memoizes {@code key -> value} only while {@code pool} is below {@link #MAX_CACHED_NAMES}.
+     * Memoizes {@code key -> value} only for bounded-length keys while {@code pool} is below {@link #MAX_CACHED_NAMES}.
      *
      * <p>Every one of these pools is a pure cache: skipping an insert costs a recomputation on the next
      * lookup and changes no result. See {@link #MAX_CACHED_NAMES} for why the cap is needed at all.</p>
@@ -829,7 +835,7 @@ public final class Beans {
     private static <V> V cacheName(final Map<String, V> pool, final String key, final V value) {
         // size() on a ConcurrentHashMap is a cheap sumCount(); a small overshoot under concurrency is
         // harmless, since the cap is about bounding growth rather than an exact limit.
-        if (pool.size() < MAX_CACHED_NAMES) {
+        if (key.length() <= MAX_PROP_NAME_LENGTH && pool.size() < MAX_CACHED_NAMES) {
             pool.put(key, value);
         }
 
@@ -839,7 +845,7 @@ public final class Beans {
     /**
      * Memoizes the outcome of one caller-supplied property-name lookup - the resolved accessor, or the
      * not-found sentinel - so the next lookup for the same spelling is a map hit instead of a full accessor
-     * rescan. The entry is only added while the per-class cache is below {@link #MAX_CACHED_NAMES}.
+     * rescan. The entry is only added for bounded-length spellings while the per-class cache is below {@link #MAX_CACHED_NAMES}.
      *
      * <p>Both outcomes have to be capped, because both are keyed by the <i>caller's</i> spelling rather than by
      * the bean's property name, and neither is bounded by the bean. The miss side is obvious. The hit side is
@@ -856,13 +862,18 @@ public final class Beans {
      * @param value the resolved accessor, or the cache's not-found sentinel
      */
     private static <V> void cachePropLookup(final Map<String, V> propMap, final String propName, final V value) {
-        if (propMap.size() < MAX_CACHED_NAMES) {
+        // The entry cap alone would still retain arbitrarily large caller strings. This controls
+        // admission only: exact property lookup and name conversion retain their normal behavior.
+        if (propName.length() <= MAX_PROP_NAME_LENGTH && propMap.size() < MAX_CACHED_NAMES) {
             propMap.put(propName, value);
         }
     }
 
     /**
      * Checks if the specified class is a bean class.
+     *
+     * <p>{@link Throwable} and all its subclasses are excluded, even when annotated with {@code @Entity} or {@code @Record}.
+     * Their property-name, field and accessor maps are empty; named property lookups reject them as non-beans.</p>
      *
      * <p>A class is <b>not</b> a bean class if it has been passed to {@link #registerNonBeanClass(Class)};
      * that registration outranks every rule below. Otherwise a class is considered a bean class if it:</p>
@@ -893,7 +904,8 @@ public final class Beans {
      * @see #registerNonBeanClass(Class)
      */
     public static boolean isBeanClass(final Class<?> targetClass) {
-        if (targetClass == null) {
+        // Throwable is excluded even when annotated as an entity or explicitly given property accessors.
+        if (targetClass == null || Throwable.class.isAssignableFrom(targetClass)) {
             return false;
         }
 
@@ -933,7 +945,11 @@ public final class Beans {
     private static IllegalArgumentException newNotABeanClassException(final Class<?> targetClass) {
         final String reason;
 
-        if (registeredNonBeanClass.containsKey(targetClass)) {
+        if (targetClass == null) {
+            reason = "the class is null";
+        } else if (Throwable.class.isAssignableFrom(targetClass)) {
+            reason = "Throwable subclasses are never treated as beans";
+        } else if (registeredNonBeanClass.containsKey(targetClass)) {
             reason = "it is registered as a non-bean class - see Beans.registerNonBeanClass(Class)";
         } else if (CharSequence.class.isAssignableFrom(targetClass)) {
             reason = "CharSequence implementations are never treated as beans";
@@ -949,23 +965,34 @@ public final class Beans {
             reason = "no property getter/setter method or public field was found";
         }
 
-        return new IllegalArgumentException("Not a bean class: " + ClassUtil.getCanonicalClassName(targetClass) + " - " + reason);
+        return new IllegalArgumentException(
+                "Not a bean class: " + (targetClass == null ? "null" : ClassUtil.getCanonicalClassName(targetClass)) + " - " + reason);
+    }
+
+    /**
+     * Validates a bean class for internal consumers in other packages, using the same rejection reasons as property lookup.
+     *
+     * @param targetClass the class to validate
+     * @throws IllegalArgumentException if the class is null or is not a bean class
+     */
+    @Internal
+    public static void checkBeanClass(final Class<?> targetClass) throws IllegalArgumentException {
+        if (!isBeanClass(targetClass)) {
+            throw newNotABeanClassException(targetClass);
+        }
     }
 
     /**
      * {@link ParserUtil#getBeanInfo(Class)} for a public entry point, rejecting a non-bean class with the
-     * reason-bearing {@link #newNotABeanClassException(Class)} instead of ParserUtil's uniform "No property
-     * getter/setter method or public field found" (wrong for a {@code String}, which has accessors).
+     * reason-bearing {@link #newNotABeanClassException(Class)} shared with ParserUtil.
      *
      * @param targetClass the class; must not be {@code null}
      * @return the bean info
      * @throws IllegalArgumentException if {@code targetClass} is not a bean class
      */
     private static BeanInfo checkedBeanInfo(final Class<?> targetClass) throws IllegalArgumentException {
-        if (!isBeanClass(targetClass)) {
-            throw newNotABeanClassException(targetClass);
-        }
-
+        // ParserUtil.getBeanInfo(Class) validates through checkBeanClass(Class) before anything else - the same
+        // isBeanClass test and the same exception - so checking here as well only ran isBeanClass twice per call.
         return ParserUtil.getBeanInfo(targetClass);
     }
 
@@ -1868,7 +1895,9 @@ public final class Beans {
      *       annotated itself, while that subclass's own getter-only methods do not become properties); or a
      *       JAXB-style {@link Collection}/{@link Map} getter enabled via {@link #registerXmlBindingClass(Class)}
      *       (a registration also covers subclasses), which likewise need not have a backing field; or</li>
-     *   <li>a {@code public}, non-{@code static}, non-{@code final} field, with or without any accessor.</li>
+     *   <li>a {@code public}, non-{@code static}, non-{@code final} field, with or without any accessor;
+     *       a getter without a setter does not remove that field's property. It remains writable unless
+     *       {@code @AccessFieldByMethod} disallows direct field access and no supported write accessor is available.</li>
      * </ul>
      *
      * <p>Consequently a setter with no getter, and a getter with no setter on an ordinary mutable class
@@ -1914,7 +1943,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class whose property names are to be retrieved; must not be {@code null}.
-     * @return an immutable list of property names for the specified class; empty if it has no properties.
+     * @return an immutable list of property names for the specified class; empty if it has no properties or is a
+     *         {@link Throwable} subclass.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #isBeanClass(Class)
      * @see #getPropGetters(Class)
@@ -2240,11 +2270,35 @@ public final class Beans {
             return true;
         }
 
-        final String propName = methodName
-                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
+        final String propName = accessorSuffix(methodName);
 
         return propName.equalsIgnoreCase(fieldName)
                 || (!fieldName.isEmpty() && fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
+    }
+
+    /**
+     * Whether {@code method}, already accepted by {@link #isFieldGetMethod(Method, Field)}, names {@code field} with its exact
+     * case: {@code getUserName()} for {@code userName}, but not {@code getUsername()}. Both {@code getXxx} for {@code xxx}
+     * and the JavaBeans spelling {@code getxXX} for {@code xXX} count, as does the leading-underscore form.
+     */
+    private static boolean isExactFieldGetMethod(final Method method, final Field field) {
+        final String fieldName = field.getName();
+        final String methodName = method.getName();
+
+        if (fieldName.equals(methodName)) {
+            return true;
+        }
+
+        final String propName = accessorSuffix(methodName);
+        final String name = !fieldName.isEmpty() && fieldName.charAt(0) == '_' && !propName.equalsIgnoreCase(fieldName) ? fieldName.substring(1) : fieldName;
+
+        return propName.equals(Strings.capitalize(name)) || propName.equals(name);
+    }
+
+    /** The part of an accessor name after its {@code is}/{@code has}/{@code get}/{@code set} prefix, or the whole name without one. */
+    private static String accessorSuffix(final String methodName) {
+        return methodName
+                .substring(methodName.startsWith(IS) ? 2 : ((methodName.startsWith(HAS) || methodName.startsWith(GET) || methodName.startsWith(SET)) ? 3 : 0));
     }
 
     /**
@@ -2439,7 +2493,7 @@ public final class Beans {
 
     /**
      * Whether the dotted {@code input} is a genuine nested path of {@code targetClass}: its head segment names a property
-     * whose type is a bean class, and the remainder resolves as a <i>property</i> of that type - through
+     * whose type is a bean class (including a head backed only by a public field), and the remainder resolves as a <i>property</i> of that type - through
      * {@code ParserUtil.BeanInfo.getPropInfo}, the lookup {@code BeanInfo.getPropInfoChain} walks the path with
      * and the one {@code ParserUtil.BeanInfo}'s copy of the resolver uses - so a tail backed only by a public
      * field counts. See {@link #resolveAlias(Class, String, Map)}.
@@ -2467,6 +2521,17 @@ public final class Beans {
             for (final Map.Entry<String, Method> entry : getPropGetters(targetClass).entrySet()) {
                 if (head.equalsIgnoreCase(entry.getKey())) {
                     headType = accessorType(entry.getValue());
+                    break;
+                }
+            }
+        }
+
+        if (headType == null) {
+            // A getter/setter lookup has no candidate for a field-only head. Consult the published field
+            // model too, or the fallback from BeanInfo reinterprets a genuine path as the outer alias.
+            for (final Map.Entry<String, Field> entry : getPropFields(targetClass).entrySet()) {
+                if (head.equalsIgnoreCase(entry.getKey())) {
+                    headType = entry.getValue().getType();
                     break;
                 }
             }
@@ -2611,7 +2676,10 @@ public final class Beans {
      *
      * <p>A field with no matching getter is kept only when it is a {@code public} non-{@code static}
      * non-{@code final} field - a bare public field is a property in its own right. When several methods
-     * match one field the longest name wins, so an explicit {@code getFoo()} beats a bare {@code foo()}.</p>
+     * match one field, a getter naming the field with its exact case wins over a case-insensitive match, then the
+     * longest name wins, so an explicit {@code getFoo()} beats a bare {@code foo()}. A getter that exactly names
+     * another declared field is never borrowed case-insensitively: {@code userName} and {@code username} (or
+     * {@code url} and {@code URL}) each keep their own accessor.</p>
      *
      * @param targetClass the hierarchy level being scanned
      * @param methods {@code targetClass.getMethods()}, already filtered of accessors declared by a registered
@@ -2622,13 +2690,50 @@ public final class Beans {
         final Field[] declaredFields = targetClass.getDeclaredFields();
         final List<Tuple2<Field, Method>> fieldGetMethodList = new ArrayList<>(declaredFields.length);
 
+        // Fields differing only in case used to pair with whichever case-insensitive getter getMethods() listed last,
+        // an order that varies between JVM runs: one property then read and wrote its sibling's field. Record the
+        // getters each field owns by exact name, so a sibling can only fall back to a getter nobody owns.
+        Set<Method> exactlyOwnedGetters = null;
+
+        for (final Field field : declaredFields) {
+            for (final Method method : methods) {
+                if (isFieldGetMethod(method, field) && isExactFieldGetMethod(method, field)) {
+                    if (exactlyOwnedGetters == null) {
+                        exactlyOwnedGetters = new HashSet<>();
+                    }
+
+                    exactlyOwnedGetters.add(method);
+                }
+            }
+        }
+
         // sort the methods by the order of declared fields
         for (final Field field : declaredFields) {
             Method fieldGetMethod = null;
+            boolean fieldGetMethodIsExact = false;
 
             for (final Method method : methods) {
-                if (isFieldGetMethod(method, field) && (fieldGetMethod == null || method.getName().length() >= fieldGetMethod.getName().length())) {
+                if (!isFieldGetMethod(method, field)) {
+                    continue;
+                }
+
+                final boolean exact = isExactFieldGetMethod(method, field);
+
+                if (!exact && exactlyOwnedGetters != null && exactlyOwnedGetters.contains(method)) {
+                    continue; // another field's own getter
+                }
+
+                if (fieldGetMethod == null || (exact && !fieldGetMethodIsExact)) {
                     fieldGetMethod = method;
+                    fieldGetMethodIsExact = exact;
+                } else if (exact == fieldGetMethodIsExact) {
+                    final int lengthDiff = method.getName().length() - fieldGetMethod.getName().length();
+
+                    // Same-name candidates keep the historical later-wins rule; differently spelled ties are
+                    // decided by name rather than by the unspecified getMethods() order.
+                    if (lengthDiff > 0 || (lengthDiff == 0 && method.getName().compareTo(fieldGetMethod.getName()) <= 0)) {
+                        fieldGetMethod = method;
+                    }
                 }
             }
 
@@ -2736,6 +2841,11 @@ public final class Beans {
      */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     private static PropScan scanPropAccessors(final Class<?> targetClass) {
+        // Property-list APIs must agree with isBeanClass for every Throwable subclass.
+        if (Throwable.class.isAssignableFrom(targetClass)) {
+            return new PropScan(null, new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
+        }
+
         // Introspection must not construct the class merely to read its metadata: newInstance() runs an
         // arbitrary user constructor, which in real beans opens files, registers listeners or starts
         // threads - and every isBeanClass/getPropNameList call used to trigger it. The instance exists
@@ -2821,6 +2931,8 @@ public final class Beans {
                 for (final Tuple2<Field, Method> tp : fieldGetMethodList) {
                     field = tp._1;
                     method = tp._2;
+                    final boolean isPublicMutableField = Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers())
+                            && !Modifier.isFinal(field.getModifiers());
 
                     if (method != null) {
                         propName = getPropNameByMethod(method);
@@ -2851,10 +2963,14 @@ public final class Beans {
                         }
 
                         // isJAXBGetMethod last: it is the only disjunct that can construct `cls` and invoke
-                        // a user getter, and the four cheap structural checks decide the same way.
-                        if (isEntityLevel || Beans.isRecordClass(clazz) || builderClass != null || isImmutable
+                        // a user getter, and the structural checks decide the same way.
+                        if (isPublicMutableField || isEntityLevel || Beans.isRecordClass(clazz) || builderClass != null || isImmutable
                                 || isJAXBGetMethod(targetClass, instance, method, field)) {
-                            //ClassUtil.setAccessibleQuietly(field, true);
+                            // A public mutable field remains a property when a getter is added without a setter.
+                            // Keep the getter and the writable field, including on a non-public declaring class.
+                            if (isPublicMutableField) {
+                                ClassUtil.setAccessibleQuietly(field, true);
+                            }
                             ClassUtil.setAccessibleQuietly(method, true);
 
                             propFieldMap.put(propName, field);
@@ -2863,7 +2979,7 @@ public final class Beans {
 
                             //NOSONAR
                         }
-                    } else if (Modifier.isPublic(field.getModifiers()) && !Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+                    } else if (isPublicMutableField) {
                         propName = field.getName();
                         propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
 
@@ -3129,7 +3245,9 @@ public final class Beans {
      */
     private static void applyRegisteredPropertyAccessors(final Class<?> targetClass, final Map<String, Method> propMethodMap,
             final Map<Class<?>, Map<String, Method>> registeredMethodPool) throws IllegalArgumentException {
-        if (registeredNonBeanClass.containsKey(targetClass)) {
+        // Do not call isBeanClass here: it depends on this scan and would recurse before the model is published.
+        // Explicit accessors must not restore properties removed by either exclusion.
+        if (Throwable.class.isAssignableFrom(targetClass) || registeredNonBeanClass.containsKey(targetClass)) {
             return;
         }
 
@@ -3226,6 +3344,12 @@ public final class Beans {
 
         Method setMethod = resolveSetter(beanClass, declaringClass, candidates, setMethodName, propType);
 
+        // The case-insensitive fallback must not borrow a sibling property's setter: with getUserName() and
+        // getUsername() but only setUsername(), writing userName would otherwise overwrite username.
+        if (setMethod != null && !setMethod.getName().equals(setMethodName) && isSetterOfAnotherGetter(candidates, getMethod, setMethod)) {
+            setMethod = null;
+        }
+
         // A getter named exactly like its field (`name()` rather than `getName()`) pairs with a setter of the
         // same name (`name(String)`).
         if (setMethod == null && getDeclaredField(declaringClass, getMethodName) != null) {
@@ -3235,6 +3359,24 @@ public final class Beans {
         return ((setMethod != null)
                 && (void.class.equals(setMethod.getReturnType()) || setMethod.getReturnType().isAssignableFrom(setMethod.getDeclaringClass()))) ? setMethod
                         : null;
+    }
+
+    /**
+     * Whether a case-insensitively matched {@code setMethod} is the exact-case setter of a different getter among
+     * {@code candidates} (for example {@code setUsername} when pairing {@code getUserName}).
+     */
+    private static boolean isSetterOfAnotherGetter(final List<Method> candidates, final Method getMethod, final Method setMethod) {
+        final String suffix = accessorSuffix(setMethod.getName());
+
+        for (final Method method : candidates) {
+            if (method != getMethod && !method.getName().equals(getMethod.getName()) && method.getParameterCount() == 0
+                    && !Modifier.isStatic(method.getModifiers()) && suffix.equals(accessorSuffix(method.getName()))
+                    && (method.getName().startsWith(GET) || method.getName().startsWith(IS) || method.getName().startsWith(HAS))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -3386,8 +3528,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class from which the field is to be retrieved; must not be {@code null}.
-     * @param propName the name of the property whose backing field is to be retrieved. A name longer than 128
-     *        characters never matches a property (it is treated as "not found", not as an error).
+     * @param propName the name of the property whose backing field is to be retrieved. Exact declared names may exceed
+     *        128 characters; the limit applies to fuzzy alias matching and caching caller-supplied spellings.
      * @return the field associated with the specified property name, or {@code null} if no matching field is found and the class is a bean class.
      * @throws IllegalArgumentException if {@code targetClass} or {@code propName} is {@code null}, or if no matching field is found and the
      *         specified class is not a bean class.
@@ -3466,7 +3608,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class whose property fields are to be retrieved; must not be {@code null}.
-     * @return an immutable map of property name to backing {@link Field} for the specified class; never {@code null}.
+     * @return an immutable map of property name to backing {@link Field} for the specified class; empty for
+     *         {@link Throwable} subclasses, never {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     public static ImmutableMap<String, Field> getPropFields(final Class<?> targetClass) throws IllegalArgumentException {
@@ -3496,8 +3639,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class from which the property get method is to be retrieved; must not be {@code null}.
-     * @param propName the name of the property whose get method is to be retrieved. A name longer than 128
-     *        characters never matches a property (it is treated as "not found", not as an error).
+     * @param propName the name of the property whose get method is to be retrieved. Exact declared names may exceed
+     *        128 characters; the limit applies to fuzzy alias matching and caching caller-supplied spellings.
      * @return the property get method available on the specified class, or {@code null} if no matching method
      *         is found and the class is a bean class.
      * @throws IllegalArgumentException if {@code targetClass} or {@code propName} is {@code null}, or if no matching method is found and the
@@ -3561,7 +3704,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class from which the property getter methods are to be retrieved; must not be {@code null}.
-     * @return an immutable map of property name to getter {@link Method} for the specified class; never {@code null}.
+     * @return an immutable map of property name to getter {@link Method} for the specified class; empty for
+     *         {@link Throwable} subclasses, never {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     public static ImmutableMap<String, Method> getPropGetters(final Class<?> targetClass) throws IllegalArgumentException {
@@ -3598,8 +3742,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class from which the property set method is to be retrieved; must not be {@code null}.
-     * @param propName the name of the property whose set method is to be retrieved. A name longer than 128
-     *        characters never matches a property (it is treated as "not found", not as an error).
+     * @param propName the name of the property whose set method is to be retrieved. Exact declared names may exceed
+     *        128 characters; the limit applies to fuzzy alias matching and caching caller-supplied spellings.
      * @return the property set method available on the specified class, or {@code null} if no matching method
      *         is found and the class is a bean class, or the builder class of an already-introspected one.
      * @throws IllegalArgumentException if {@code targetClass} or {@code propName} is {@code null}, or if no matching method is found and the
@@ -3680,7 +3824,8 @@ public final class Beans {
      * }</pre>
      *
      * @param targetClass the class from which the property setter methods are to be retrieved; must not be {@code null}.
-     * @return an immutable map of property name to setter {@link Method} for the specified class; never {@code null}.
+     * @return an immutable map of property name to setter {@link Method} for the specified class; empty for
+     *         {@link Throwable} subclasses, never {@code null}.
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     public static ImmutableMap<String, Method> getPropSetters(final Class<?> targetClass) throws IllegalArgumentException {
@@ -4487,7 +4632,11 @@ public final class Beans {
 
         if (newPropName == null) {
             newPropName = Strings.toCamelCase(str);
-            newPropName = NameUtil.getCachedName(newPropName);
+
+            if (newPropName.length() <= MAX_PROP_NAME_LENGTH) {
+                newPropName = NameUtil.getCachedName(newPropName);
+            }
+
             cacheName(camelCasePropNamePool, str, newPropName);
         }
 
@@ -4581,6 +4730,7 @@ public final class Beans {
      *       missing intermediate bean (here {@code address}) is created automatically as the dotted path is resolved;
      *       each intermediate type must itself be a JavaBean (a {@code Record}/immutable intermediate cannot be populated).</li>
      * </ul>
+     * <p>Nested map values retain the property's resolved generic type, including arguments inherited from a superclass.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4667,9 +4817,9 @@ public final class Beans {
      * @param map the map to be converted; if {@code null}, {@code null} is returned.
      * @param ignoreUnmatchedProperty if {@code true}, map keys that do not correspond to any bean property
      *        (and cannot be resolved as a dotted nested-property path) are silently ignored, and so is a
-     *        {@code null} key and a key naming a read-only property (a getter without a backing field or setter,
-     *        such as the computed value {@code beanToMap} writes out for it); if {@code false}, an
-     *        {@link IllegalArgumentException} is thrown for any of them.
+     *        {@code null} key and a key naming a read-only property (one with no permitted write path,
+     *        such as a computed getter or a field restricted by {@code @AccessFieldByMethod} with no write accessor);
+     *        if {@code false}, an {@link IllegalArgumentException} is thrown for any of them.
      * @param targetType the class of the bean to create; must be a valid bean class.
      * @return a new bean of the specified type with properties populated from the map,
      *         or {@code null} if {@code map} is {@code null}.
@@ -4683,13 +4833,30 @@ public final class Beans {
     public static <T> T mapToBean(final Map<String, Object> map, final boolean ignoreUnmatchedProperty, final Class<? extends T> targetType)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkBeanClass(targetType);
 
         if (map == null) {
+            N.checkBeanClass(targetType);
+
             return null;
         }
 
-        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
+        // ParserUtil.getBeanInfo(Class) validates through checkBeanClass(Class) before anything else - the same test
+        // and exception as N.checkBeanClass - so a non-null map no longer runs that check twice per call.
+        return mapToBean(map, ignoreUnmatchedProperty, ParserUtil.getBeanInfo(targetType));
+    }
+
+    /**
+     * Converts a non-null map using metadata that retains the nested property's resolved generic arguments.
+     * The public entry point validates the root class and handles a null map before calling this helper.
+     *
+     * @param <T> the result bean type
+     * @param map the non-null property map
+     * @param ignoreUnmatchedProperty whether unknown or read-only properties are ignored at every level
+     * @param beanInfo metadata for the exact target type, including generic arguments
+     * @return the populated bean
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T mapToBean(final Map<String, Object> map, final boolean ignoreUnmatchedProperty, final BeanInfo beanInfo) {
         final Object result = beanInfo.createBeanResult();
         ParserUtil.PropInfo propInfo = null;
 
@@ -4715,7 +4882,8 @@ public final class Beans {
                 beanInfo.setPropValue(result, propName, propValue, ignoreUnmatchedProperty);
             } else {
                 if (propValue != null && isNestedBeanProp(propInfo) && Type.of(propValue.getClass()).isMap()) {
-                    propInfo.setPropValue(result, mapToBean((Map<String, Object>) propValue, ignoreUnmatchedProperty, propInfo.clazz));
+                    propInfo.setPropValue(result,
+                            mapToBean((Map<String, Object>) propValue, ignoreUnmatchedProperty, ParserUtil.getBeanInfo(propInfo.type.reflectType())));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -4769,8 +4937,8 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if a selected property
      *         does not exist in the target bean class. A key of a <i>nested</i> map that the nested bean type has
      *         no property for does not throw - it is ignored; see above.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
-     *         before anything is written.
+     *         A read-only property (one with no permitted write path), or a dot-separated path ending in one,
+     *         is rejected with this exception as well, before anything is written.
      * @see #mapToBean(Map, boolean, Class)
      */
     @MayReturnNull
@@ -4778,13 +4946,16 @@ public final class Beans {
     public static <T> T mapToBean(final Map<String, Object> map, final Collection<String> selectPropNames, final Class<? extends T> targetType)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
-        N.checkBeanClass(targetType);
 
+        // The bean class is checked once per call: mapToBean(Map, Class) and ParserUtil.getBeanInfo(Class) both
+        // validate it through checkBeanClass(Class) before doing anything else, with the same exception.
         if (selectPropNames == null) {
             return mapToBean(map, targetType);
         }
 
         if (map == null) {
+            N.checkBeanClass(targetType);
+
             // Validate the selection first: whether a bogus selection is rejected must not depend on the data
             // (mapsToBeans and a non-null map already reject it).
             checkSelectPropNames(selectPropNames, targetType);
@@ -4804,13 +4975,7 @@ public final class Beans {
             // BeanInfo.setPropValue(.., false) uses, and it is what used to reject a bogus name from inside
             // the write below. mapsToBeans applies it via checkSelectPropNames before its empty-input
             // shortcut, so both entry points reject the same selections.
-            if (propInfo == null && beanInfo.getPropInfoChain(propName).isEmpty()) {
-                throw new IllegalArgumentException(noSetterFoundMessage(propName, targetType));
-            }
-
-            if (propInfo != null && isReadOnlyProp(propInfo)) {
-                throw new IllegalArgumentException(readOnlyPropMessage(propName, targetType));
-            }
+            checkPropExists(beanInfo, propName, propInfo);
 
             // A selected name the map does not contain is skipped rather than written as the type's default:
             // writing it clobbered a constructor/field initializer, and the sibling mapToBean(Map, Class),
@@ -4826,10 +4991,10 @@ public final class Beans {
                 beanInfo.setPropValue(result, propName, propValue, false);
             } else {
                 if (propValue != null && isNestedBeanProp(propInfo) && Type.of(propValue.getClass()).isMap()) {
-                    // Deliberately the lenient 2-arg overload: this method's strictness is about the *selection*,
+                    // Deliberately lenient for nested maps: this method's strictness is about the *selection*,
                     // which only names top-level properties. An unmatched key inside a nested map is dropped -
                     // documented above. mapToBean(Map, boolean, Class) is the overload that propagates strictness.
-                    propInfo.setPropValue(result, mapToBean((Map<String, Object>) propValue, propInfo.clazz));
+                    propInfo.setPropValue(result, mapToBean((Map<String, Object>) propValue, true, ParserUtil.getBeanInfo(propInfo.type.reflectType())));
                 } else {
                     propInfo.setPropValue(result, propValue);
                 }
@@ -4907,7 +5072,8 @@ public final class Beans {
      *        element yields a {@code null} entry at the same position of the result, as {@code mapToBean} returns
      *        {@code null} for a {@code null} map.
      * @param ignoreUnmatchedProperty if {@code true}, map keys without a matching bean property are silently ignored;
-     *        if {@code false}, an {@link IllegalArgumentException} is thrown for unmatched keys.
+     *        if {@code false}, an {@link IllegalArgumentException} is thrown for unmatched keys. A key naming a read-only
+     *        property counts as unmatched (see {@link #mapToBean(Map, boolean, Class)}).
      * @param targetType the class of the bean to create for each map; must be a valid bean class.
      * @return a list of new bean instances with properties populated from the corresponding map entries.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if
@@ -4963,7 +5129,8 @@ public final class Beans {
      * @param targetType the class of the bean to create for each map; must be a valid bean class.
      * @return a list of new bean instances with the selected properties populated from the corresponding maps.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if a selected property
-     *         does not exist in the target bean class.
+     *         does not exist in the target bean class or has no permitted write path. For a dot-separated path,
+     *         the last property must be writable.
      * @see #mapToBean(Map, Class)
      */
     public static <T> List<T> mapsToBeans(final Collection<? extends Map<String, Object>> mapList, final Collection<String> selectPropNames,
@@ -4994,8 +5161,8 @@ public final class Beans {
 
     /**
      * Rejects any name in {@code selectPropNames} that {@code targetType} has no settable property for, using
-     * exactly the predicate {@code mapToBean(Map, Collection, Class)} applies per name. A {@code null} or
-     * empty selection has nothing to check.
+     * exactly the predicate {@code mapToBean(Map, Collection, Class)} applies per name
+     * ({@link #checkPropExists(BeanInfo, String)}). A {@code null} or empty selection has nothing to check.
      *
      * @param selectPropNames the selected property names; may be {@code null} or empty
      * @param targetType the bean class the names must resolve against
@@ -5010,15 +5177,25 @@ public final class Beans {
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
 
         for (final String propName : selectPropNames) {
-            final PropInfo propInfo = beanInfo.getPropInfo(propName);
+            checkPropExists(beanInfo, propName);
+        }
+    }
 
-            if (propInfo == null && beanInfo.getPropInfoChain(propName).isEmpty()) {
-                throw new IllegalArgumentException(noSetterFoundMessage(propName, targetType));
-            }
-
-            if (propInfo != null && isReadOnlyProp(propInfo)) {
-                throw new IllegalArgumentException(readOnlyPropMessage(propName, targetType));
-            }
+    /**
+     * {@link #checkPropExists(BeanInfo, String)} for a name whose {@code beanInfo.getPropInfo(propName)} the caller has
+     * already resolved, so a selected name is not resolved twice. Must stay equivalent to that method: a resolved
+     * property is rejected only when it is read-only; an unresolved name takes the dot-separated path check.
+     *
+     * @param beanInfo metadata for the bean being written
+     * @param propName the selected property name
+     * @param propInfo {@code beanInfo.getPropInfo(propName)}
+     * @throws IllegalArgumentException if the bean class has no such property, or it is read-only
+     */
+    private static void checkPropExists(final BeanInfo beanInfo, final String propName, final PropInfo propInfo) throws IllegalArgumentException {
+        if (propInfo == null) {
+            checkPropExists(beanInfo, propName);
+        } else if (isReadOnlyProp(propInfo)) {
+            throw new IllegalArgumentException(readOnlyPropMessage(propName, beanInfo.clazz));
         }
     }
 
@@ -5332,11 +5509,13 @@ public final class Beans {
 
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.CAMEL_CASE : keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
-        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (selectPropNames == null) {
+            // That overload looks the BeanInfo up (and rejects a non-bean class) itself, before reading anything:
+            // resolving it here as well only repeated the lookup on this, the default path.
             beanToMap(bean, true, null, keyNamingPolicy, output);
         } else {
+            final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
             ParserUtil.PropInfo propInfo = null;
 
             // Two accepted spellings of one property ("firstName" and "first_name", say) resolve to the same
@@ -5378,7 +5557,30 @@ public final class Beans {
      * @return the key to store under
      */
     private static String convertMapKey(final String propName, final NamingPolicy keyNamingPolicy) {
-        return isVerbatimKeyPolicy(keyNamingPolicy) ? propName : keyNamingPolicy.convert(propName);
+        return isVerbatimKeyPolicy(keyNamingPolicy) ? propName : convertPropName(propName, keyNamingPolicy);
+    }
+
+    /**
+     * {@code keyNamingPolicy.convert(propName)} for a property name, answered from the name caches where one exists.
+     *
+     * <p>The conversion loops used to run the full case conversion for every property of every bean they
+     * converted: under {@link NamingPolicy#SNAKE_CASE} the {@code Strings.toSnakeCase} call per key cost several
+     * times the rest of a {@code beanToMap} call. Property names are a small, fixed vocabulary, which is what
+     * {@link #toSnakeCase(String)} and {@link #toScreamingSnakeCase(String)} cache; they return exactly what those
+     * two policies' converters return. The other converting policies have no cache and convert as before.</p>
+     *
+     * @param propName the property name to convert
+     * @param keyNamingPolicy a converting (not verbatim) policy
+     * @return the converted name
+     */
+    private static String convertPropName(final String propName, final NamingPolicy keyNamingPolicy) {
+        if (keyNamingPolicy == NamingPolicy.SNAKE_CASE) {
+            return toSnakeCase(propName);
+        } else if (keyNamingPolicy == NamingPolicy.SCREAMING_SNAKE_CASE) {
+            return toScreamingSnakeCase(propName);
+        } else {
+            return keyNamingPolicy.convert(propName);
+        }
     }
 
     /**
@@ -5418,8 +5620,8 @@ public final class Beans {
      * class of {@code propValue}: an {@code Object}- or interface-typed property is emitted as-is even when
      * it happens to hold a bean. That keeps the output shape a function of the bean class rather than of the
      * data, keeps it invertible by {@link #mapToBean(Map, Class)} (which gates on the same declared type),
-     * and avoids expanding values such as {@link Throwable} or {@link java.io.File}, which are
-     * structurally beans but whose useful state is not in their properties.</p>
+     * and avoids expanding values such as {@link java.io.File}, whose useful state is not in its bean properties.
+     * {@link Throwable} subclasses are excluded from the bean model altogether.</p>
      *
      * @param propInfo metadata for the property being emitted
      * @param propName the name to derive the key from
@@ -5795,7 +5997,7 @@ public final class Beans {
                 continue;
             }
 
-            output.put(isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName), propValue);
+            output.put(isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy), propValue);
         }
     }
 
@@ -6237,11 +6439,13 @@ public final class Beans {
         }
 
         final Class<?> beanClass = bean.getClass();
-        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (selectPropNames == null) {
+            // deepBeanToMapAll looks the BeanInfo up itself, before reading anything - see beanToMap(Object,
+            // Collection, NamingPolicy, Map).
             deepBeanToMapAll(bean, nestedIgnoreNullProperty, null, keyNamingPolicy, nestedMapSupplier, output);
         } else {
+            final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
             ParserUtil.PropInfo propInfo = null;
 
             // Two accepted spellings of one property ("firstName" and "first_name", say) resolve to the same
@@ -6654,7 +6858,7 @@ public final class Beans {
                     continue;
                 }
 
-                final String key = isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName);
+                final String key = isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy);
 
                 if ((propValue == null) || !isNestedBeanProp(propInfo)) {
                     output.put(key, propValue);
@@ -7081,11 +7285,13 @@ public final class Beans {
 
         keyNamingPolicy = keyNamingPolicy == null ? NamingPolicy.CAMEL_CASE : keyNamingPolicy;
         final Class<?> beanClass = bean.getClass();
-        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
 
         if (selectPropNames == null) {
+            // That overload looks the BeanInfo up itself, before reading anything - see beanToMap(Object,
+            // Collection, NamingPolicy, Map).
             beanToFlatMap(bean, nestedIgnoreNullProperty, null, keyNamingPolicy, output);
         } else {
+            final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
             ParserUtil.PropInfo propInfo = null;
 
             // Two accepted spellings of one property ("firstName" and "first_name", say) resolve to the same
@@ -7503,22 +7709,22 @@ public final class Beans {
                     if (isCamelCaseOrNoChange) {
                         output.put(propName, propValue);
                     } else {
-                        output.put(keyNamingPolicy.convert(propName), propValue);
+                        output.put(convertPropName(propName, keyNamingPolicy), propValue);
                     }
                 } else {
                     if (isCamelCaseOrNoChange) {
                         output.put(parentPropName + SK.PERIOD + propName, propValue);
                     } else {
-                        output.put(parentPropName + SK.PERIOD + keyNamingPolicy.convert(propName), propValue);
+                        output.put(parentPropName + SK.PERIOD + convertPropName(propName, keyNamingPolicy), propValue);
                     }
                 }
             } else {
                 if (isNullParentPropName) {
-                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy, isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName),
-                            output);
+                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
+                            isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy), output);
                 } else {
                     beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            parentPropName + SK.PERIOD + (isCamelCaseOrNoChange ? propName : keyNamingPolicy.convert(propName)), output);
+                            parentPropName + SK.PERIOD + (isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy)), output);
                 }
             }
         }
@@ -8203,6 +8409,7 @@ public final class Beans {
      * @throws IllegalArgumentException if a selected property is not found in the bean class,
      *         or if the copy is made property by property (not by the optimized whole-object copy) and the class of a
      *         non-{@code null} {@code sourceBean} is not a bean class.
+     *         A selected read-only target property is rejected with this exception as well.
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
@@ -8327,6 +8534,7 @@ public final class Beans {
      *         non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     *         A selected read-only target property is rejected with this exception as well.
      */
     public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
@@ -8371,6 +8579,7 @@ public final class Beans {
      *         non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     *         A selected read-only target property is rejected with this exception as well.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -8425,7 +8634,8 @@ public final class Beans {
      * skips a source property the target does not have, and is what makes copying into a narrower DTO work -
      * a property that <i>passes</i> the filter is treated as explicitly requested, so it must exist on the
      * target too or an {@link IllegalArgumentException} is thrown. Exclude such properties in the filter
-     * itself, or drop the filter, if that is not what you want.</p>
+     * itself, or drop the filter, if that is not what you want. A passing property the target cannot write - a
+     * read-only property - is skipped.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8575,7 +8785,8 @@ public final class Beans {
      * @param <T> the type of the target bean.
      * @param sourceBean the source bean to copy properties from; may be {@code null}.
      * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
-     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown. A target property that
+     *        cannot be written (a read-only property) counts as unmatched.
      * @param ignoredPropNames a set of source property names to exclude from copying; ignored if {@code null}.
      *        Each name is resolved the way a selected name is (case-insensitive, underscores ignored), so any
      *        accepted spelling of a property excludes it; a name matching no property excludes nothing.
@@ -8763,7 +8974,8 @@ public final class Beans {
      * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
      * @param targetBean the target bean into which properties are merged; must not be {@code null}.
      * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
-     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown. A target property that
+     *        cannot be written (a read-only property) counts as unmatched.
      * @param ignoredPropNames a set of source property names to exclude from merging; ignored if {@code null}.
      *        Each name is resolved the way a selected name is (case-insensitive, underscores ignored), so any
      *        accepted spelling of a property excludes it; a name matching no property excludes nothing.
@@ -8810,7 +9022,8 @@ public final class Beans {
      * @param sourceBean the source bean from which properties are copied; if {@code null}, the target bean is returned unchanged.
      * @param targetBean the target bean into which properties are merged; must not be {@code null}.
      * @param ignoreUnmatchedProperty if {@code true}, source properties without a matching target property
-     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown.
+     *        are silently skipped; if {@code false}, an {@link IllegalArgumentException} is thrown. A target property that
+     *        cannot be written (a read-only property) counts as unmatched.
      * @param ignoredPropNames a set of source property names to exclude from merging; ignored if {@code null}.
      *        Each name is resolved the way a selected name is (case-insensitive, underscores ignored), so any
      *        accepted spelling of a property excludes it; a name matching no property excludes nothing.
@@ -8951,6 +9164,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
      *         in the source bean or in the target bean,
      *         or if {@code sourceBean} is not {@code null} and its class or the class of {@code targetBean} is not a bean class.
+     *         A selected read-only target property is rejected with this exception as well.
      * @throws UnsupportedOperationException if {@code targetBean} is an instance of a class treated as an immutable
      *         bean (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
      *         constructor); it cannot be merged into in place.
@@ -8996,6 +9210,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
      *         in the source bean or in the target bean, or if {@code mergeFunction} is {@code null},
      *         or if {@code sourceBean} is not {@code null} and its class or the class of {@code targetBean} is not a bean class.
+     *         A selected read-only target property is rejected with this exception as well.
      * @throws UnsupportedOperationException if {@code targetBean} is an instance of a class treated as an immutable
      *         bean (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
      *         constructor); it cannot be merged into in place.
@@ -9043,6 +9258,7 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetBean} is {@code null}, or if a selected property is not found
      *         in the source bean or in the target bean, or if {@code propNameConverter} is {@code null},
      *         or if {@code sourceBean} is not {@code null} and its class or the class of {@code targetBean} is not a bean class.
+     *         A selected read-only target property is rejected with this exception as well.
      * @throws UnsupportedOperationException if {@code targetBean} is an instance of a class treated as an immutable
      *         bean (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
      *         constructor); it cannot be merged into in place.
@@ -9106,6 +9322,7 @@ public final class Beans {
      *         in the source bean or in the target bean, or if any of {@code propNameConverter}, {@code mergeFunction} is
      *         {@code null},
      *         or if {@code sourceBean} is not {@code null} and its class or the class of {@code targetBean} is not a bean class.
+     *         A selected read-only target property is rejected with this exception as well.
      * @throws UnsupportedOperationException if {@code targetBean} is an instance of a class treated as an immutable
      *         bean (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
      *         constructor); it cannot be merged into in place.
@@ -9277,7 +9494,8 @@ public final class Beans {
      * {@code mergeFunction}-only overload silently skip a source property the target does not have; a property
      * that <i>passes</i> this filter is instead treated as explicitly requested, so it must exist on the
      * target or an {@link IllegalArgumentException} is thrown - the same rule an explicit
-     * {@code selectPropNames} collection follows.</p>
+     * {@code selectPropNames} collection follows. Unlike a selected one, a passing property the target cannot write - a
+     * read-only property - is skipped.</p>
      *
      * <p><b>Why {@code mergeIntoIf} rather than another {@code mergeInto} overload:</b> this family used to
      * be named {@code mergeInto}, which made {@code mergeInto(src, tgt, (a, b) -> a)} an "ambiguous method
@@ -9589,7 +9807,7 @@ public final class Beans {
      * @param propNames the names of the properties to clear; if empty, the method does nothing.
      * @throws IllegalArgumentException if any name in {@code propNames} is not a property of the bean,
      *         or if {@code bean} is not {@code null}, {@code propNames} is not empty, and the class of {@code bean} is not a bean class.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
+     *         A read-only property (one with no permitted write path) is rejected with this exception as well,
      *         before anything is written.
      * @throws UnsupportedOperationException if {@code bean} is an instance of a class treated as an immutable bean
      *         (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
@@ -9625,7 +9843,7 @@ public final class Beans {
      * @param propNames the collection of property names to clear; if empty, the method does nothing.
      * @throws IllegalArgumentException if any name in {@code propNames} is not a property of the bean,
      *         or if {@code bean} is not {@code null}, {@code propNames} is not empty, and the class of {@code bean} is not a bean class.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
+     *         A read-only property (one with no permitted write path) is rejected with this exception as well,
      *         before anything is written.
      * @throws UnsupportedOperationException if {@code bean} is an instance of a class treated as an immutable bean
      *         (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
@@ -9656,13 +9874,14 @@ public final class Beans {
      * <p>A dot-separated name is resolved with {@link BeanInfo#getPropInfoChain(String)}, the same predicate the
      * write itself uses. It used to be waved through unchecked, which quietly defeated the all-or-nothing
      * guarantee of {@link #clearProps(Object, String...)}: {@code clearProps(bean, "name", "bogus.path")}
-     * cleared {@code name} and only then threw. Only the <i>path</i> is validated here; what the intermediate
-     * values happen to be at write time cannot be known without reading the bean, and the write itself
+     * cleared {@code name} and only then threw. Only the <i>path</i> is validated here, independently of the data: what
+     * the intermediate values happen to be at write time cannot be known without reading the bean, and the write itself
      * instantiates any missing intermediate bean as it descends.</p>
      *
      * @param beanInfo metadata for the bean being modified
      * @param propName the property name to check; may be a dot-separated nested path
-     * @throws IllegalArgumentException if the bean class has no such property
+     * @throws IllegalArgumentException if the bean class has no such property, or it (the last property of a path) is
+     *         read-only
      */
     private static void checkPropExists(final BeanInfo beanInfo, final String propName) throws IllegalArgumentException {
         final PropInfo propInfo = beanInfo.getPropInfo(propName);
@@ -9680,7 +9899,7 @@ public final class Beans {
         final List<PropInfo> chain = propName.indexOf(SK._PERIOD) < 0 ? null : beanInfo.getPropInfoChain(propName);
 
         if (N.isEmpty(chain)) {
-            throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: " + beanInfo.clazz.getCanonicalName());
+            throw new IllegalArgumentException(noSetterFoundMessage(propName, beanInfo.clazz));
         }
 
         if (isReadOnlyProp(chain.get(chain.size() - 1))) {
@@ -9689,15 +9908,13 @@ public final class Beans {
     }
 
     /**
-     * Whether {@code propInfo} is a read-only property: a getter with no backing field and no setter (for
-     * example a computed {@code getFullName()} on an {@code @Entity} class), which {@code PropInfo.setPropValue}
-     * rejects with {@link UnsupportedOperationException}.
+     * Whether {@code propInfo} is a read-only property, which {@code PropInfo.setPropValue} rejects with
+     * {@link UnsupportedOperationException}. This includes a getter with no backing field or setter and a
+     * method-only property whose backing field cannot substitute for a missing setter.
      *
-     * <p>A mirror of {@code ParserUtil.PropInfo.isReadOnlyProperty}, which is package-private there. It is exact:
-     * {@code PropInfo} sets {@code jsonXmlExpose} to {@code SERIALIZE_ONLY} for a property without a field if and
-     * only if that property is read-only (an explicit direction can only come from a field annotation). A JAXB
-     * getter-only collection and an immutable/builder bean's component are therefore not read-only. Keep in sync
-     * with {@code PropInfo}'s constructor.</p>
+     * <p>Use the metadata's write capability directly: field presence and serialization direction cannot identify
+     * method-only properties reliably. Supported getter-bound collections and immutable constructor/builder slots
+     * remain writable.</p>
      *
      * <p>The write-side "all properties" operations used to call {@code setPropValue} on such a property and
      * failed with that exception - usually after other properties had already been written.</p>
@@ -9706,7 +9923,7 @@ public final class Beans {
      * @return {@code true} if the property cannot be written
      */
     private static boolean isReadOnlyProp(final PropInfo propInfo) {
-        return propInfo.field == null && propInfo.setMethod == null && propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY;
+        return propInfo.isReadOnlyProperty;
     }
 
     /**
@@ -9731,7 +9948,7 @@ public final class Beans {
 
     private static String readOnlyPropMessage(final String propName, final Class<?> targetClass) {
         return "No setter method found with property name: " + propName + " in class: " + ClassUtil.getCanonicalClassName(targetClass)
-                + " (the property is read-only: a getter without a backing field or setter)";
+                + " (the property is read-only: no permitted field write, setter, or supported getter-based write)";
     }
 
     /**
@@ -9794,8 +10011,9 @@ public final class Beans {
      * Beans.clearAllProps(null);   // no change
      * }</pre>
      *
-     * <p>Read-only properties (a getter with no backing field and no setter, such as a computed
-     * {@code getFullName()} on an {@code @Entity} class) are skipped.</p>
+     * <p>Read-only properties (see {@link PropInfo#isReadOnlyProperty}) are skipped. Examples include computed
+     * getters and properties restricted to accessor access by {@code @AccessFieldByMethod} when no supported
+     * write accessor is available.</p>
      *
      * @param bean the bean object whose properties are to be erased. If this is {@code null}, the method does nothing.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a bean class.
@@ -9840,11 +10058,13 @@ public final class Beans {
      *       property declared as the abstract {@code java.lang.Number} itself is left at its default value, and so
      *       is a {@code Number} subclass that cannot be created from a string (such as {@code LongAdder})</li>
      *   <li>Nested bean objects (filled recursively; a reference cycle stops the recursion and leaves the
-     *       property at its default value, and so does an abstract bean type with no detected builder)</li>
+     *       property at its default value, and so does a bean type that cannot be instantiated - an abstract one
+     *       with no detected builder, or one with no accessible no-arg constructor, builder or all-arguments constructor)</li>
      * </ul>
      *
-     * <p>Read-only properties (a getter without a backing field or setter, such as a computed getter on an
-     * {@code @Entity} class) are skipped.</p>
+     * <p>Read-only properties (see {@link PropInfo#isReadOnlyProperty}) are skipped. Examples include computed
+     * getters and properties restricted to accessor access by {@code @AccessFieldByMethod} when no supported
+     * write accessor is available.</p>
      *
      * <p><b>Unsupported property types are still written:</b> a property whose type is not in the list above -
      * a {@link java.util.Collection}, a {@link Map}, an {@code enum} or a {@code java.time} type, for example -
@@ -9899,7 +10119,7 @@ public final class Beans {
      * @param propNamesToFill the names of the properties to fill with random values; must not be {@code null}.
      * @throws IllegalArgumentException if {@code bean} is {@code null} or not a valid bean class, if
      *         {@code propNamesToFill} is {@code null}, or if a property name is not found in the bean.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
+     *         A read-only property (one with no permitted write path) is rejected with this exception as well,
      *         before anything is written.
      * @throws UnsupportedOperationException if {@code bean} is an instance of a class treated as an immutable bean
      *         (a record, a builder-based class, one with no writable property, or one with no accessible no-arg
@@ -9930,8 +10150,9 @@ public final class Beans {
      * Beans.newRandomBean((Class<?>) null);   // throws IllegalArgumentException
      * }</pre>
      *
-     * <p>Read-only properties (a getter without a backing field or setter, such as a computed getter on an
-     * {@code @Entity} class) are skipped.</p>
+     * <p>Read-only properties (see {@link PropInfo#isReadOnlyProperty}) are skipped. Examples include computed
+     * getters and properties restricted to accessor access by {@code @AccessFieldByMethod} when no supported
+     * write accessor is available.</p>
      *
      * <p><b>Unsupported property types are still written:</b> a property whose type is not one of the types
      * {@link #randomize(Object)} lists as supported - a {@link Collection}, a {@link Map}, an {@code enum} or a
@@ -9942,8 +10163,10 @@ public final class Beans {
      * @param beanClass the class to instantiate and populate; must not be {@code null} and must be a valid bean class.
      * @return a new instance with all properties filled with random values; never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class.
+     * @throws UnsupportedOperationException if {@code beanClass} cannot be instantiated: it is abstract without a builder,
+     *         or has no accessible no-argument constructor and no builder or constructor taking all its properties either.
      */
-    public static <T> T newRandomBean(final Class<? extends T> beanClass) throws IllegalArgumentException {
+    public static <T> T newRandomBean(final Class<? extends T> beanClass) throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         N.checkBeanClass(beanClass);
 
@@ -9984,10 +10207,13 @@ public final class Beans {
      * @return a new instance with the specified properties filled with random values; never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class, if
      *         {@code propNamesToFill} is {@code null}, or if a property name is not found in the class.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
+     *         A read-only property (one with no permitted write path) is rejected with this exception as well,
      *         before anything is written.
+     * @throws UnsupportedOperationException if {@code beanClass} cannot be instantiated: it is abstract without a builder,
+     *         or has no accessible no-argument constructor and no builder or constructor taking all its properties either.
      */
-    public static <T> T newRandomBean(final Class<? extends T> beanClass, final Collection<String> propNamesToFill) throws IllegalArgumentException {
+    public static <T> T newRandomBean(final Class<? extends T> beanClass, final Collection<String> propNamesToFill)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         N.checkBeanClass(beanClass);
 
@@ -10066,8 +10292,9 @@ public final class Beans {
      * Beans.newRandomBeanList(User.class, 0);   // returns [] (empty list)
      * }</pre>
      *
-     * <p>Read-only properties (a getter without a backing field or setter, such as a computed getter on an
-     * {@code @Entity} class) are skipped.</p>
+     * <p>Read-only properties (see {@link PropInfo#isReadOnlyProperty}) are skipped. Examples include computed
+     * getters and properties restricted to accessor access by {@code @AccessFieldByMethod} when no supported
+     * write accessor is available.</p>
      *
      * <p><b>Unsupported property types are still written:</b> a property whose type is not one of the types
      * {@link #randomize(Object)} lists as supported - a {@link Collection}, a {@link Map}, an {@code enum} or a
@@ -10081,8 +10308,12 @@ public final class Beans {
      *         never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class, or
      *         {@code count} is negative.
+     * @throws UnsupportedOperationException if {@code count} is positive and {@code beanClass} cannot be instantiated: it is
+     *         abstract without a builder, or has no accessible no-argument constructor and no builder or constructor taking all
+     *         its properties either.
      */
-    public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final int count) throws IllegalArgumentException {
+    public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final int count)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         N.checkBeanClass(beanClass);
 
@@ -10126,11 +10357,14 @@ public final class Beans {
      *         properties filled; never {@code null}.
      * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class,
      *         {@code propNamesToFill} is {@code null} or contains an unknown property name, or {@code count} is negative.
-     *         A read-only property (a getter without a backing field or setter) is rejected with this exception as well,
+     *         A read-only property (one with no permitted write path) is rejected with this exception as well,
      *         before anything is written.
+     * @throws UnsupportedOperationException if {@code count} is positive and {@code beanClass} cannot be instantiated: it is
+     *         abstract without a builder, or has no accessible no-argument constructor and no builder or constructor taking all
+     *         its properties either.
      */
     public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         N.checkBeanClass(beanClass);
 
@@ -10167,7 +10401,7 @@ public final class Beans {
 
     /**
      * Resolves every name in {@code propNamesToFill} to its {@link PropInfo}, rejecting the whole request if
-     * any name is unknown.
+     * any name is unknown or read-only.
      *
      * <p>Resolving before the first write prevents unknown-property errors from causing partial updates: validating inside
      * the write loop left {@code randomize(bean, List.of("name", "bogus"))} with a randomized {@code name} and
@@ -10177,7 +10411,7 @@ public final class Beans {
      * @param propNamesToFill the property names to resolve; must not be {@code null}
      * @return the resolved property metadata, in the order the names were given
      * @throws IllegalArgumentException if {@code propNamesToFill} is {@code null} or names a property that the
-     *         bean class does not have
+     *         bean class does not have or cannot write because it is read-only
      */
     private static List<PropInfo> resolvePropInfos(final BeanInfo beanInfo, final Collection<String> propNamesToFill) throws IllegalArgumentException {
         N.checkArgNotNull(propNamesToFill, cs.propNamesToFill);
@@ -10217,10 +10451,11 @@ public final class Beans {
             type = propInfo.type;
 
             if (String.class.equals(parameterClass)) {
+                // randomUuid(random), not Strings.uuid(): see randomUuid.
                 if (Strings.containsIgnoreCase(propName, "email")) {
-                    propValue = Strings.uuid().substring(0, 12) + "@email.com";
+                    propValue = randomUuid(random).substring(0, 12) + "@email.com";
                 } else {
-                    propValue = Strings.uuid().substring(0, 16);
+                    propValue = randomUuid(random).substring(0, 16);
                 }
             } else if (boolean.class.equals(parameterClass) || Boolean.class.equals(parameterClass)) {
                 propValue = random.nextBoolean();
@@ -10244,15 +10479,18 @@ public final class Beans {
                 propValue = randomNumberOf(type, random);
             } else if (java.util.Date.class.isAssignableFrom(parameterClass) || Calendar.class.isAssignableFrom(parameterClass)) {
                 propValue = type.valueOf(String.valueOf(System.currentTimeMillis()));
-            } else if (Beans.isBeanClass(parameterClass) && !(Modifier.isAbstract(parameterClass.getModifiers()) && getBuilderInfo(parameterClass) == null)) {
+            } else if (Beans.isBeanClass(parameterClass) && !parameterClass.isEnum()
+                    && !(Modifier.isAbstract(parameterClass.getModifiers()) && getBuilderInfo(parameterClass) == null)) {
                 // An abstract bean type without a builder cannot be instantiated (newRandomBean threw
                 // UnsupportedOperationException after earlier properties had been written); it gets its default.
+                // Neither can an enum, although isBeanClass accepts one that declares a getter/setter pair or a public
+                // mutable field: an enum property is an unsupported type and gets its default like any other.
                 // Skip recursion if we'd revisit a class already on this thread's call stack
                 // (cycle / self-reference). Leaves the property at its default (null) value.
                 if (NEW_RANDOM_VISITED.get().contains(parameterClass)) {
                     propValue = type.defaultValue();
                 } else {
-                    propValue = newRandomBean(parameterClass);
+                    propValue = newNestedRandomBean(parameterClass, type);
                 }
             } else {
                 propValue = type.defaultValue();
@@ -10260,6 +10498,46 @@ public final class Beans {
 
             propInfo.setPropValue(bean, propValue);
         }
+    }
+
+    /**
+     * A random version-4 UUID in the canonical string form of {@link java.util.UUID#randomUUID()}, drawn from
+     * {@code random}.
+     *
+     * <p>{@code UUID.randomUUID()} - which {@link Strings#uuid()} returns - draws from a shared, synchronized
+     * {@code SecureRandom}. That one call cost several times the rest of a random fill and serialized concurrent
+     * callers, while every other random value of this fill already comes from {@link ThreadLocalRandom}. The
+     * version and variant bits are set exactly as {@code UUID.randomUUID()} sets them, so the string has the same
+     * shape: 32 lowercase hex digits in 8-4-4-4-12 groups, a {@code 4} at index 14.</p>
+     *
+     * @param random the generator of the current fill
+     * @return a new random UUID string
+     */
+    private static String randomUuid(final ThreadLocalRandom random) {
+        final long mostSigBits = (random.nextLong() & ~0xF000L) | 0x4000L; // version 4
+        final long leastSigBits = (random.nextLong() & 0x3FFFFFFFFFFFFFFFL) | 0x8000000000000000L; // IETF variant
+
+        return new java.util.UUID(mostSigBits, leastSigBits).toString();
+    }
+
+    // newRandomBean(beanClass) for a nested bean property, except that a concrete bean type which cannot be instantiated
+    // (no accessible no-arg constructor, builder or all-arguments constructor: createBeanResult() throws
+    // UnsupportedOperationException) gets its default, like an abstract one. The exception used to abort the whole fill
+    // after the earlier properties had been written. Only creation is guarded - failures while filling still propagate.
+    private static Object newNestedRandomBean(final Class<?> beanClass, final Type<Object> type) {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
+        final List<PropInfo> propInfos = resolvePropInfos(beanInfo, writablePropNames(beanClass));
+        final Object result;
+
+        try {
+            result = beanInfo.createBeanResult();
+        } catch (final UnsupportedOperationException e) {
+            return type.defaultValue();
+        }
+
+        fillInRandomScope(beanClass, result, propInfos);
+
+        return beanInfo.finishBeanResult(result);
     }
 
     /**

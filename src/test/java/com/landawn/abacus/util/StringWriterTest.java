@@ -202,7 +202,7 @@ public class StringWriterTest extends AbstractTest {
 
         writer.write(" more");
         writer.append('!');
-        writer.append((CharSequence) "?");
+        writer.append("?");
         writer.append("xyz", 0, 1);
         writer.write(new char[] { 'a', 'b' });
         writer.write(new char[] { 'c', 'd' }, 0, 1);

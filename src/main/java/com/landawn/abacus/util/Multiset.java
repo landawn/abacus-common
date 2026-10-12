@@ -274,7 +274,10 @@ public final class Multiset<E> implements Collection<E> {
      *
      */
     public Multiset() {
-        this(HashMap.class);
+        // The map this(HashMap.class) resolves to on every call: HashMap is a built-in class, so no supplier can be
+        // registered for it and Suppliers.ofMap(HashMap.class) always yields a new HashMap. Creating it directly skips
+        // the per-construction Class -> Supplier lookup and the supplier-result checks.
+        backingMap = new HashMap<>();
     }
 
     /**
@@ -2272,8 +2275,10 @@ public final class Multiset<E> implements Collection<E> {
      * <p>The result has the backing map's own type (a sorted backing map yields a sorted map of the same kind
      * - a {@link TreeMap}, or a {@link java.util.concurrent.ConcurrentSkipListMap} for a concurrent one - with
      * the same comparator), so it keeps the backing map's key equivalence. When that type cannot be instantiated
-     * reflectively (for example a {@code Collections.synchronizedMap} wrapper) the result falls back to a
-     * {@link LinkedHashMap}; if the backing map separates elements that {@code equals} treats as equal, two of
+     * reflectively (for example a {@code Collections.synchronizedMap} wrapper or an anonymous map class) the result
+     * falls back to the matching JDK map family where one is known ({@code IdentityHashMap}, {@code WeakHashMap} or
+     * {@code ConcurrentHashMap}, so identity keys stay apart) and otherwise to a {@link LinkedHashMap}; if the backing
+     * map separates elements that {@code equals} treats as equal and the result is such a {@code LinkedHashMap}, two of
      * them would then collapse into one entry, and rather than silently lose a count this method throws.
      * Use {@link #toMap(IntFunction)} with a map of the matching equivalence, or {@link #entrySet()}, for
      * such a multiset.</p>
@@ -2367,8 +2372,8 @@ public final class Multiset<E> implements Collection<E> {
      * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
      * two of its elements would collapse into a single entry; rather than return counts that do not sum to
      * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} (which copies into the backing map's own
-     * type when that type can be instantiated reflectively, and throws otherwise), {@link #toMap(IntFunction)}
-     * with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * type when that type can be instantiated reflectively, otherwise into the fallback map it documents, and throws
+     * only if that fallback would merge two elements), {@link #toMap(IntFunction)} with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
      * those elements when they were added, so it is unaffected.</p>
      *
      * @return a new insertion-ordered map (a {@link LinkedHashMap}) whose iteration order is by
@@ -2402,8 +2407,8 @@ public final class Multiset<E> implements Collection<E> {
      * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
      * two of its elements would collapse into a single entry; rather than return counts that do not sum to
      * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} (which copies into the backing map's own
-     * type when that type can be instantiated reflectively, and throws otherwise), {@link #toMap(IntFunction)}
-     * with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * type when that type can be instantiated reflectively, otherwise into the fallback map it documents, and throws
+     * only if that fallback would merge two elements), {@link #toMap(IntFunction)} with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
      * those elements when they were added, so it is unaffected.</p>
      *
      * @param comparator the comparator to be used for sorting the counts of the elements
@@ -2439,8 +2444,8 @@ public final class Multiset<E> implements Collection<E> {
      * {@link java.util.IdentityHashMap}, or a comparator that separates elements {@code equals} calls equal)
      * two of its elements would collapse into a single entry; rather than return counts that do not sum to
      * {@link #sumOfOccurrences()}, this throws. Use {@link #toMap()} (which copies into the backing map's own
-     * type when that type can be instantiated reflectively, and throws otherwise), {@link #toMap(IntFunction)}
-     * with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
+     * type when that type can be instantiated reflectively, otherwise into the fallback map it documents, and throws
+     * only if that fallback would merge two elements), {@link #toMap(IntFunction)} with a map of the backing map's own key equivalence, or {@link #entrySet()} for such a multiset. A <i>coarser</i> backing (for example {@code String.CASE_INSENSITIVE_ORDER}) already merged
      * those elements when they were added, so it is unaffected.</p>
      *
      * @param comparator the comparator to be used for sorting the keys of the elements; must not be {@code null}
@@ -2495,7 +2500,8 @@ public final class Multiset<E> implements Collection<E> {
             if (resultMap.put(entry.getKey(), entry.getValue().value()) != null) {
                 throw new IllegalStateException("Cannot represent this Multiset as a sorted Map<E, Integer>: its backing map holds '" + entry.getKey()
                         + "' as distinct from another element that is equal to it under equals/hashCode, so they would collapse into one entry."
-                        + " Use toMap() (which copies into the backing map's own type when that type can be instantiated reflectively, and throws otherwise),"
+                        + " Use toMap() (which copies into the backing map's own type when that type can be instantiated reflectively, otherwise into its"
+                        + " documented fallback map, and throws only if that fallback would merge two elements),"
                         + " toMap(IntFunction) with a map of the backing map's own key equivalence, or entrySet().");
             }
         }
@@ -2748,8 +2754,8 @@ public final class Multiset<E> implements Collection<E> {
     /**
      * Returns the hash code value for this multiset.
      *
-     * <p>The hash code is computed based on the backing map's hash code,
-     * which includes both the elements and their counts.</p>
+     * <p>The hash code is the sum of the hashes of the element-count entries, where each entry's hash
+     * is the element's hash code (zero for {@code null}) XOR its occurrence count.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2762,7 +2768,14 @@ public final class Multiset<E> implements Collection<E> {
      */
     @Override
     public int hashCode() {
-        return backingMap.hashCode();
+        int result = 0;
+
+        // Identity-based maps also hash their values by identity; the count cells are an implementation detail.
+        for (final Map.Entry<E, MutableInt> entry : backingMap.entrySet()) {
+            result += (entry.getKey() == null ? 0 : entry.getKey().hashCode()) ^ entry.getValue().intValue();
+        }
+
+        return result;
     }
 
     /**
@@ -2777,21 +2790,44 @@ public final class Multiset<E> implements Collection<E> {
      * System.out.println(ms1.equals(ms2));   // prints true
      * }</pre>
      *
-     * <p><b>Equality is delegated to the backing maps, so it is only well defined between multisets whose
-     * backing maps share the same key equivalence.</b> Two multisets built on maps that judge keys
-     * differently - a {@link HashMap} versus an {@link java.util.IdentityHashMap}, or versus a
-     * {@link TreeMap} whose comparator is inconsistent with {@code equals} - can compare unequal in one
-     * direction and equal in the other, and can report different hash codes while comparing equal. This
-     * is inherited from {@link Map#equals(Object)}, which probes the other map with its own lookup rules;
-     * the JDK documents the same hazard for {@code IdentityHashMap} and comparator-inconsistent
-     * {@code TreeMap}. Compare only multisets with compatible backing maps.</p>
+     * <p>Elements are looked up in both backing maps using each map's key equivalence, and occurrence
+     * counts are compared by value. Comparing in both directions preserves symmetry when the maps use
+     * different key equivalences. As with {@link TreeMap}, a comparator inconsistent with {@code equals}
+     * can still cause multisets that compare equal to report different hash codes. For the full equality
+     * contract, use compatible backing maps whose equivalent keys have equal hash codes.</p>
      *
      * @param obj the object to be compared with this Multiset for equality.
      * @return {@code true} if the specified object is equal to this Multiset, {@code false} otherwise.
      */
     @Override
     public boolean equals(final Object obj) {
-        return obj == this || (obj instanceof Multiset && backingMap.equals(((Multiset<?>) obj).backingMap));
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Multiset<?> other) || backingMap.size() != other.backingMap.size()) {
+            return false;
+        }
+
+        try {
+            // Compare count values rather than their MutableInt identities, including for identity map wrappers.
+            // Both lookups are needed when the two maps disagree about which keys are equivalent.
+            return hasSameCounts(backingMap, other.backingMap) && hasSameCounts(other.backingMap, backingMap);
+        } catch (final ClassCastException | NullPointerException e) {
+            return false;
+        }
+    }
+
+    private static boolean hasSameCounts(final Map<?, MutableInt> first, final Map<?, MutableInt> second) {
+        for (final Map.Entry<?, MutableInt> entry : first.entrySet()) {
+            final MutableInt count = second.get(entry.getKey());
+
+            if (count == null || count.intValue() != entry.getValue().intValue()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

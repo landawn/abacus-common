@@ -93,7 +93,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *
      * @param enumClassName the fully qualified class name of the enum type
      * @throws IllegalArgumentException if {@code enumClassName} is {@code null}, names no loadable class, or names a class that
-     *         is neither an enum nor enclosed by an enum; if the enum's value/creator annotations are invalid; or if
+     *         is neither an enum nor an enum constant's body class; if the enum's value/creator annotations are invalid; or if
      *         JSON/XML names or creator-less {@code @JsonValue} values are ambiguous between constants.
      */
     EnumType(final String enumClassName) throws IllegalArgumentException {
@@ -105,11 +105,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * This constructor is called by the TypeFactory to create enum type instances.
      *
      * @param className the fully qualified class name of the enum type, or of a constant's body class (which
-     *                  resolves to, and is named after, its enclosing enum)
+     *                  resolves to, and is named after, its enum)
      * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
      *                           if {@code null}, defaults to {@code NAME}
      * @throws IllegalArgumentException if {@code className} is {@code null}, names no loadable class, or names a class that is
-     *         neither an enum nor enclosed by an enum; if the enum's value/creator annotations are invalid; or if numeric codes,
+     *         neither an enum nor an enum constant's body class; if the enum's value/creator annotations are invalid; or if numeric codes,
      *         JSON/XML names or creator-less {@code @JsonValue} values are ambiguous between constants.
      * @throws RuntimeException if {@code CODE} representation is configured but the enum class has no
      *         public {@code int code()} or {@code int intValue()} method.
@@ -138,6 +138,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 throw new RuntimeException(
                         "No method: public int code() (or public int intValue()) found in enum class: " + ClassUtil.getCanonicalClassName(typeClass));
             }
+
+            // The method is public, but a non-public enum (e.g. a private nested enum) still denies reflective access
+            // from this library, so open it (as SingleValueType/NumberType do for their detected members).
+            ClassUtil.setAccessibleQuietly(getCodeMethod, true);
 
             for (final T enumConstant : typeClass.getEnumConstants()) {
                 int code = ClassUtil.invokeMethod(enumConstant, getCodeMethod);
@@ -391,9 +395,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
      *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
-     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or
-     *       through the reverse map of the constants' values when the enum has no creator</li>
+     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or,
+     *       when the enum has no creator, reads the column's string form and matches it against the
+     *       constants' values, names and aliases</li>
      * </ul>
+     * <p>An enum is expected to be stored either as a {@code String} (its name or annotated value) in a
+     * variable-length character column, or as an {@code int} (ordinal, code or annotated value) in an integer
+     * column; both forms read back exactly. A blank-padded {@code CHAR(n)} column, or an annotated {@code int}
+     * value stored in a {@code DECIMAL} column with a scale, can return text that matches no constant. Annotated
+     * values of other types (timestamps, binary, booleans whose text is also a constant name) are not supported
+     * by a creator-less enum; declare a creator for them.</p>
      *
      * @param rs          the {@link ResultSet} containing the data
      * @param columnIndex the 1-based column index of the enum value
@@ -419,7 +430,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return valueOf(rs.getString(columnIndex));
             }
         } else if (jsonValueEnumMap != null) {
-            // The reverse map is keyed by the value's stringOf form, which is what getString yields for a numeric column too.
+            // Enums are stored as a String or an int in practice. The reverse map is keyed by the value's stringOf
+            // form, which is exactly what getString yields for a character column and for an integer column too.
+            // Other annotated value types (timestamp, binary, boolean...) are deliberately not special-cased here:
+            // their driver text need not match stringOf, so such an enum should declare a creator instead.
             return valueOf(rs.getString(columnIndex));
         } else {
             return super.get(rs, columnIndex);
@@ -432,9 +446,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: reads the column as an integer and maps it to the enum constant</li>
      *   <li>NAME: reads the column as a string and maps it to the enum constant by name</li>
-     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or
-     *       through the reverse map of the constants' values when the enum has no creator</li>
+     *   <li>annotated value member: reads the column as the value type and maps it through the creator, or,
+     *       when the enum has no creator, reads the column's string form and matches it against the
+     *       constants' values, names and aliases</li>
      * </ul>
+     * <p>An enum is expected to be stored either as a {@code String} (its name or annotated value) in a
+     * variable-length character column, or as an {@code int} (ordinal, code or annotated value) in an integer
+     * column; both forms read back exactly. A blank-padded {@code CHAR(n)} column, or an annotated {@code int}
+     * value stored in a {@code DECIMAL} column with a scale, can return text that matches no constant. Annotated
+     * values of other types (timestamps, binary, booleans whose text is also a constant name) are not supported
+     * by a creator-less enum; declare a creator for them.</p>
      *
      * @param rs         the {@link ResultSet} containing the data
      * @param columnName the label of the column containing the enum value
@@ -460,6 +481,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
                 return valueOf(rs.getString(columnName));
             }
         } else if (jsonValueEnumMap != null) {
+            // String or int storage expected; see get(ResultSet, int).
             return valueOf(rs.getString(columnName));
         } else {
             return super.get(rs, columnName);
@@ -588,7 +610,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     /**
      * Builds the handler name from the RESOLVED enum class: a constant body class ({@code E$1}) must not leak its
      * synthetic binary name into the type name, or two handlers for the same enum compare unequal.
-     * @throws IllegalArgumentException if {@code className} resolves to neither an enum class nor a class enclosed by an enum
+     * @throws IllegalArgumentException if {@code className} resolves to neither an enum class nor an enum constant's body class
      */
     private static String enumTypeName(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) throws IllegalArgumentException {
         final Class<?> requested = ClassUtil.forName(className);
@@ -672,23 +694,24 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
 
     /**
      * Returns the enum class for the given class.
-     * If the class is itself an enum, it is returned directly. If the class is an inner class
-     * whose enclosing class is an enum (e.g., an anonymous subclass of an enum constant),
-     * the enclosing class is returned. Otherwise an exception is thrown.
+     * If the class is itself an enum, it is returned directly. For an anonymous subclass
+     * implementing an enum constant's class body, its enum superclass is returned.
+     * Otherwise an exception is thrown.
      *
      * @param targetClass the class to resolve as an enum class
      * @return the enum class
-     * @throws IllegalArgumentException if {@code targetClass} is not an enum and has no enclosing enum class.
+     * @throws IllegalArgumentException if {@code targetClass} is not an enum or an enum constant's subclass
      */
     private static Class<?> getEnumClass(final Class<?> targetClass) throws IllegalArgumentException {
         if (targetClass.isEnum()) {
             return targetClass;
         }
 
-        final Class<?> enclosing = targetClass.getEnclosingClass();
+        final Class<?> superclass = targetClass.getSuperclass();
 
-        if (enclosing != null && enclosing.isEnum()) {
-            return enclosing;
+        // Constant-specific class bodies extend the enum; unrelated helper classes can also be enclosed by it.
+        if (superclass != null && superclass.isEnum()) {
+            return superclass;
         }
 
         throw new IllegalArgumentException("Not an enum class: " + targetClass);

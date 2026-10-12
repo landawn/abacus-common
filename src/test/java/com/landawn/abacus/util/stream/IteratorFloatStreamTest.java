@@ -25,7 +25,7 @@ public class IteratorFloatStreamTest extends TestBase {
     public void testGroupToRejectsNullDownstreamBeforeInvokingMapFactory() {
         for (final boolean arrayBacked : new boolean[] { true, false }) {
             for (final boolean empty : new boolean[] { true, false }) {
-                final float[] values = empty ? new float[0] : new float[] { (float) 1 };
+                final float[] values = empty ? new float[0] : new float[] { 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
                 try (final FloatStream stream = arrayBacked ? FloatStream.of(values) : FloatStream.of(com.landawn.abacus.util.FloatIterator.of(values))) {
                     org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
@@ -47,7 +47,7 @@ public class IteratorFloatStreamTest extends TestBase {
                 if (attempts.getAndIncrement() == 1) {
                     throw new IllegalStateException("second attempt");
                 }
-                return (float) delivered.getAndIncrement();
+                return delivered.getAndIncrement();
             }).limit(4).skip(2)) {
                 final FloatIteratorEx iterator = stream.iteratorEx();
                 assertThrows(IllegalStateException.class, () -> {
@@ -61,8 +61,8 @@ public class IteratorFloatStreamTest extends TestBase {
                     }
                 });
                 assertTrue(iterator.hasNext());
-                assertEquals((float) 2, iterator.nextFloat());
-                assertEquals((float) 3, iterator.nextFloat());
+                assertEquals(2, iterator.nextFloat());
+                assertEquals(3, iterator.nextFloat());
                 assertFalse(iterator.hasNext());
                 assertEquals(5, attempts.get());
                 assertEquals(4, delivered.get());
@@ -78,12 +78,12 @@ public class IteratorFloatStreamTest extends TestBase {
             if (attempts.getAndIncrement() == 1) {
                 throw new IllegalStateException("second attempt");
             }
-            return (float) delivered.getAndIncrement();
+            return delivered.getAndIncrement();
         }).limit(2)) {
             final FloatIteratorEx iterator = stream.iteratorEx();
             assertThrows(IllegalStateException.class, () -> iterator.advance(2));
             assertTrue(iterator.hasNext());
-            assertEquals((float) 1, iterator.nextFloat());
+            assertEquals(1, iterator.nextFloat());
             assertFalse(iterator.hasNext());
             assertThrows(java.util.NoSuchElementException.class, iterator::nextFloat);
             assertEquals(3, attempts.get());

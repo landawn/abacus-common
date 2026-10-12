@@ -168,11 +168,18 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
+     * <p>Each element is the compact JSON text form of {@code stringOf}: an element enclosed in a matching pair of double or
+     * single quotes is read by its content with its JSON escapes decoded once, so {@code ["1", 2]} yields {@code {1, 2}},
+     * as {@link com.landawn.abacus.parser.JsonParser} reads the array; an empty quoted element is rejected as a malformed
+     * number rather than read as the default; and the unquoted literal {@code null} is the element default {@code 0},
+     * because a primitive array cannot hold {@code null}.</p>
+     *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed short array, or {@code null} if the input string is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
      * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws NumberFormatException if an element, read by its content when quoted, is not a valid integer literal (an
+     *         empty quoted element included)
      * @throws ArithmeticException if an element is outside the {@code short} range
      * @see #valueOf(Object)
      * @see #stringOf(short[])
@@ -186,13 +193,21 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
             return N.EMPTY_SHORT_ARRAY;
         }
 
+        final short[] decimalArray = (short[]) parseNumericArray(str, elementType, short.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] strs = split(str);
         final int len = strs.length;
         final short[] a = new short[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                a[i] = elementType.valueOf(strs[i]);
+                // Compact JSON text form: quoted numbers, escapes and null defaults come through
+                // jsonElementContent (split preserves quotes), as PrimitiveLongArrayType already did by hand.
+                a[i] = elementType.valueOf(jsonElementContent(strs[i]));
             }
         }
 

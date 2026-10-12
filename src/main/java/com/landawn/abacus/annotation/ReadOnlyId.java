@@ -27,6 +27,10 @@ import java.lang.annotation.Target;
  * that is managed by the database and must not be written by the application. Combines the
  * semantics of {@link Id} and {@link ReadOnly}.
  *
+ * <p>Type-level declarations are resolved through the framework's superclass and interface
+ * hierarchy. A declaration on a subclass overrides an ancestor's {@code @ReadOnlyId}; {@link Id}
+ * is resolved separately and does not by itself make its properties read-only.</p>
+ *
  * <p><b>How the framework consumes it:</b> the reflection layer
  * ({@code com.landawn.abacus.parser.ParserUtil}) flags a property as {@code isMarkedAsReadOnlyId}
  * when ANY of the following is true:</p>

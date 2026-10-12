@@ -295,8 +295,7 @@ public class HttpErrorTest extends TestBase {
             assertEquals(404, assertThrows(HttpResponseException.class, () -> HttpClient.create(url).get(byte[].class)).statusCode());
             assertEquals(404, assertThrows(HttpResponseException.class, () -> HttpClient.create(url).post("payload", String.class)).statusCode());
             final ByteArrayOutputStream output = new ByteArrayOutputStream();
-            assertEquals(404,
-                    assertThrows(HttpResponseException.class, () -> HttpClient.create(url).execute(HttpMethod.GET, null, null, output)).statusCode());
+            assertEquals(404, assertThrows(HttpResponseException.class, () -> HttpClient.create(url).execute(HttpMethod.GET, null, null, output)).statusCode());
             assertEquals(0, output.size());
             // A one-way request never reads the body and keeps returning null.
             assertEquals(null, HttpClient.create(url).get(HttpSettings.create().setOneWayRequest(true), HttpResponse.class));

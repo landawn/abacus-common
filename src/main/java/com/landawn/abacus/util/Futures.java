@@ -1457,7 +1457,7 @@ public final class Futures {
 
         /**
          * {@inheritDoc}
-         * @throws TimeoutException if the input is still pending when the timed get's budget runs out - thrown as
+         * @implNote Throws {@link TimeoutException} if the input is still pending when the timed get's budget runs out - thrown as
          *         itself although {@code Future.get()} cannot declare it, because the composite's timed get
          *         propagates exactly this exception
          */
@@ -2523,12 +2523,12 @@ public final class Futures {
                 if (allDone) {
                     return true; // Do not run a lazy mapper when all inputs already report done.
                 }
+                // The same poll as get(0, NANOSECONDS), without the TimeoutException that get builds for a pending
+                // aggregate: filling in its stack trace made every pending isDone() cost microseconds, only for this
+                // method to discard it. A published outcome of either kind means done, as before.
                 try {
-                    get(0, TimeUnit.NANOSECONDS);
-                    return true;
-                } catch (final TimeoutException pending) {
-                    return false;
-                } catch (final ExecutionException | CancellationException completed) {
+                    return terminal.isDone() || pollInputs(new ArrayList<>());
+                } catch (final CancellationException completed) {
                     return true;
                 } catch (final InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
@@ -2578,28 +2578,7 @@ public final class Futures {
                 // Poll inputs directly: newly submitted relays need not have run yet. A timed get(0)
                 // avoids an unbounded read, though a lazy mapper can itself ignore the input deadline.
                 final List<Exception> observedFailures = new ArrayList<>();
-                for (final Future<? extends T> future : futureList) {
-                    if (future.isDone()) {
-                        final T value;
-                        try {
-                            value = future.get(0, TimeUnit.NANOSECONDS);
-                        } catch (final TimeoutException pending) {
-                            continue;
-                        } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt(); // as in await(): the status is restored before propagating
-                            throw e;
-                        } catch (final Exception | Error e) {
-                            observedFailures.add(convertException(e));
-                            continue;
-                        }
-                        finish(Result.success(value));
-                        return terminalValue();
-                    }
-                }
-                if (observedFailures.size() == futureList.size()) {
-                    fail(observedFailures);
-                }
-                if (terminal.isDone()) {
+                if (pollInputs(observedFailures)) {
                     return terminalValue();
                 }
                 // Same contract as the blocking path: the caller's own timeout carries the input failures observed so
@@ -2610,6 +2589,47 @@ public final class Futures {
                 }
                 addSuppressedFailures(expired, observedFailures);
                 throw expired;
+            }
+
+            /**
+             * One non-blocking pass over the inputs, shared by the non-positive-timeout {@code get} and {@code isDone()}:
+             * publishes the first success read from a done input, or the aggregated failure when every input failed in
+             * this pass.
+             *
+             * @param observedFailures collects the failures met by this pass, in input order
+             * @return {@code true} if the aggregate has a terminal outcome, {@code false} if it is still pending
+             * @throws InterruptedException if polling an input throws it; the interrupt status is restored and the failures
+             *         observed so far are attached to it as suppressed exceptions
+             */
+            private boolean pollInputs(final List<Exception> observedFailures) throws InterruptedException {
+                for (final Future<? extends T> future : futureList) {
+                    if (future.isDone()) {
+                        final T value;
+                        try {
+                            value = future.get(0, TimeUnit.NANOSECONDS);
+                        } catch (final TimeoutException pending) {
+                            continue;
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt(); // as in await(): the status is restored before propagating
+                            // The caller's interruption carries both earlier relay observations and this poll's
+                            // failures, just like its timeout. The shared helper avoids duplicates and self-suppression.
+                            synchronized (this) {
+                                addSuppressedFailures(e, failures);
+                            }
+                            addSuppressedFailures(e, observedFailures);
+                            throw e;
+                        } catch (final Exception | Error e) {
+                            observedFailures.add(convertException(e));
+                            continue;
+                        }
+                        finish(Result.success(value));
+                        return true;
+                    }
+                }
+                if (observedFailures.size() == futureList.size()) {
+                    fail(observedFailures);
+                }
+                return terminal.isDone();
             }
         });
     }
@@ -2988,6 +3008,9 @@ public final class Futures {
 
         final int futureCount = futureList.size();
         final IterationCompletion<T> complete = new IterationCompletion<>(completedResults, startTimeInNanos, totalTimeoutForAllInNanos);
+        // Pending inputs must not keep an abandoned iterator's queued outcomes alive.
+        // The iterator owns the strong reference while its results can still be consumed.
+        final WeakReference<IterationCompletion<T>> completionRef = new WeakReference<>(complete);
 
         // Track every submitted wrapper task so we can cancel still-running ones when
         // the global timeout fires or the consumer is interrupted. Without this, blocked
@@ -3009,7 +3032,10 @@ public final class Futures {
             for (final Future<? extends T> future : futureList) {
                 if (future instanceof CompletableFuture<? extends T> completableFuture) {
                     completableFuture.whenComplete((value, error) -> {
-                        complete.accept(error == null ? Result.of(value, null) : Result.of(null, convertException(error)));
+                        final IterationCompletion<T> completion = completionRef.get();
+                        if (completion != null) {
+                            completion.accept(error == null ? Result.of(value, null) : Result.of(null, convertException(error)));
+                        }
                     });
                 } else if (hasInstantOutcome(future)) {
                     // No relay thread needed: the outcome is available now and get() will not block.
@@ -3020,10 +3046,16 @@ public final class Futures {
                     alreadyDone.add(future);
                 } else {
                     final FutureTask<Void> submittedTask = new FutureTask<>(() -> {
+                        Result<T, Exception> outcome;
                         try {
-                            complete.accept(Result.of(future.get(), null));
+                            outcome = Result.of(future.get(), null);
                         } catch (final Exception | Error e) { // A broken/custom Future may throw an Error directly; never leave the consumer waiting forever.
-                            complete.accept(Result.of(null, convertException(e)));
+                            outcome = Result.of(null, convertException(e));
+                        }
+                        // Do not acquire a strong reference before the potentially blocking get().
+                        final IterationCompletion<T> completion = completionRef.get();
+                        if (completion != null) {
+                            completion.accept(outcome);
                         }
                     }, null);
 
@@ -3139,12 +3171,18 @@ public final class Futures {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
+                final Result<T, Exception> result = nextResult;
+                nextResult = null;
                 resultReady = false;
-                return resultHandler.apply(nextResult);
+                return resultHandler.apply(result);
             }
 
             @Override
             void cancelPending() {
+                complete.abandon();
+                nextResult = null;
+                resultReady = false;
+                noMore = true;
                 for (final Future<?> f : submitted) {
                     if (!f.isDone()) {
                         // Best-effort interrupt-and-cancel of the wrapper task. The underlying
@@ -3158,7 +3196,7 @@ public final class Futures {
 
     /**
      * Publishes in-budget results while allowing failed registration to release its abandoned queue.
-     * Pending callbacks retain this small holder, whose queue reference is detached on abandonment.
+     * Pending callbacks refer weakly to this holder, whose queue reference is detached on explicit abandonment.
      * Publication and detachment share a monitor so no callback can enqueue after the queue is cleared.
      *
      * @param <T> the result type of the input futures

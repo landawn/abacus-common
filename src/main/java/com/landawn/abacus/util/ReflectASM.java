@@ -15,6 +15,13 @@
 package com.landawn.abacus.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.esotericsoftware.reflectasm.ConstructorAccess;
 import com.esotericsoftware.reflectasm.FieldAccess;
@@ -31,9 +38,9 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * ReflectASM-backed fast path and is not part of the public API. Application code should use
  * {@link Reflection}, which carries the equivalent public entry points. Its {@code get}/{@code set} fall
  * back to standard reflection whenever the generated accessor rejects the field or fails to link, so a
- * field ReflectASM cannot reach is still read and written; its {@code invoke}/{@code call} fall back only
- * for members {@code canInvoke} reports as unresolvable, so a member that resolves but that the generated
- * accessor is then refused access to propagates an {@link IllegalAccessError} instead. The examples below
+ * field ReflectASM cannot reach is still read and written. Its {@code invoke}/{@code call} select reflection
+ * before invocation for members {@code canInvoke} rejects, including known visibility and module restrictions.
+ * An {@link IllegalAccessError} from an accepted invocation is propagated without retrying the target. The examples below
  * illustrate this internal API and compile only from within {@code com.landawn.abacus.util}.</p>
  *
  * <p>ReflectASM uses the EsotericSoftware's ReflectASM library internally, which generates bytecode
@@ -117,6 +124,139 @@ final class ReflectASM<T> {
             return MethodAccess.get(type);
         }
     };
+
+    /**
+     * The positions, in ascending order, at which each method name occurs in the class's {@link MethodAccess}
+     * table. {@link #invocableMethodIndex} runs on every {@code Reflection.invoke}/{@code call} and has to count
+     * the table entries that match a name and an arity; comparing the name with every entry was most of the cost
+     * of a fast-path call, growing with the size of the class. Built from the class's own method table, so its
+     * size is bounded by the class's methods, whatever names callers look up.
+     */
+    private static final ClassValue<Map<String, int[]>> METHOD_INDEXES_BY_NAME = new ClassValue<>() {
+        @Override
+        protected Map<String, int[]> computeValue(final Class<?> type) {
+            final String[] methodNames = METHOD_ACCESS_CACHE.get(type).getMethodNames();
+            final Map<String, int[]> result = new HashMap<>();
+
+            for (int i = 0, n = methodNames.length; i < n; i++) {
+                final int[] indexes = result.get(methodNames[i]);
+
+                if (indexes == null) {
+                    result.put(methodNames[i], new int[] { i });
+                } else {
+                    final int[] newIndexes = Arrays.copyOf(indexes, indexes.length + 1);
+                    newIndexes[indexes.length] = i;
+                    result.put(methodNames[i], newIndexes);
+                }
+            }
+
+            return result;
+        }
+    };
+
+    /**
+     * Name/arity pairs that also occur outside ReflectASM's method table or require reflective access.
+     * Such a method can be more specific than its sole visible overload, or make a null argument ambiguous. Cache only
+     * class metadata, never runtime argument types, so unrelated argument class loaders are not retained.
+     * An {@code Object} method that the class hierarchy overrides with the same signature is not hidden:
+     * the override is the method ReflectASM sees, so the fast path stays available for it.
+     *
+     * <p>A public method is hidden too when its declaring class or a parameter type is inaccessible to the generated
+     * accessor. Its argument casts must satisfy both Java visibility and module exports; otherwise they fail with
+     * {@link IllegalAccessError} before the method is reached.</p>
+     */
+    private static final ClassValue<Map<String, Set<Integer>>> HIDDEN_METHOD_ARITIES = new ClassValue<>() {
+        @Override
+        protected Map<String, Set<Integer>> computeValue(final Class<?> type) {
+            final Map<String, Set<Integer>> result = new HashMap<>();
+
+            for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+                for (final Method method : current.getDeclaredMethods()) {
+                    if (current == Object.class ? !isOverriddenBelowObject(type, method)
+                            : !Modifier.isPublic(method.getModifiers()) || !isAsmAccessibleType(current) || !hasAsmAccessibleParameterTypes(method)) {
+                        result.computeIfAbsent(method.getName(), k -> new HashSet<>()).add(method.getParameterCount());
+                    }
+                }
+            }
+
+            for (final Method method : type.getMethods()) {
+                if (method.getDeclaringClass().isInterface()) {
+                    result.computeIfAbsent(method.getName(), k -> new HashSet<>()).add(method.getParameterCount());
+                }
+            }
+
+            return result;
+        }
+    };
+
+    /**
+     * Whether every parameter type of {@code method} is accessible to an accessor generated in another runtime
+     * package and module, including the ultimate component type of an array parameter.
+     *
+     * @param method the method to check
+     * @return {@code true} if every parameter type can be used by the generated accessor
+     */
+    private static boolean hasAsmAccessibleParameterTypes(final Method method) {
+        for (final Class<?> parameterType : method.getParameterTypes()) {
+            if (!isAsmAccessibleType(parameterType)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static final ClassValue<Boolean> ASM_ACCESSIBLE_TYPES = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(Class<?> type) {
+            while (type.isArray()) {
+                type = type.getComponentType();
+            }
+
+            // Accessors may live in a separate unnamed module. Exports to the library's module alone do not
+            // grant them access, so qualified exports (including ALL-UNNAMED) conservatively use reflection.
+            // isExported also accepts packages opened unconditionally, which are exported at runtime.
+            return type.isPrimitive() || Modifier.isPublic(type.getModifiers()) && type.getModule().isExported(type.getPackageName());
+        }
+    };
+
+    /**
+     * Whether {@code type} (the ultimate component type, for an array) is primitive or public and exported to all
+     * modules at runtime. The metadata is cached so repeated field and method access does not inspect module
+     * exports. If an export is added later, a cached rejection merely retains the safe reflection fallback.
+     *
+     * @param type the type to check
+     * @return {@code true} if the generated accessor can use the type without package or qualified module access
+     */
+    static boolean isAsmAccessibleType(final Class<?> type) {
+        return ASM_ACCESSIBLE_TYPES.get(type);
+    }
+
+    /**
+     * Whether a class between {@code type} and {@code Object} declares a non-private instance method with the same
+     * signature as {@code objectMethod} ({@code toString()}, {@code equals(Object)}, {@code hashCode()} and so on).
+     * Such an override is the only method of that name and parameter list ReflectASM can dispatch to, so it is not a
+     * hidden competitor; an {@code Object} method that is not overridden (or cannot be, like {@code getClass()}) is.
+     *
+     * @param type the class whose method table is being described
+     * @param objectMethod a method declared by {@code Object}
+     * @return {@code true} if the hierarchy below {@code Object} overrides it
+     */
+    private static boolean isOverriddenBelowObject(final Class<?> type, final Method objectMethod) {
+        for (Class<?> current = type; current != null && current != Object.class; current = current.getSuperclass()) {
+            try {
+                final Method declared = current.getDeclaredMethod(objectMethod.getName(), objectMethod.getParameterTypes());
+
+                if (!Modifier.isPrivate(declared.getModifiers()) && !Modifier.isStatic(declared.getModifiers())) {
+                    return true;
+                }
+            } catch (final NoSuchMethodException e) {
+                // not declared at this level
+            }
+        }
+
+        return false;
+    }
 
     private final Class<T> cls;
 
@@ -596,34 +736,99 @@ final class ReflectASM<T> {
      * @param arguments the arguments the method would be invoked with; both the count and the runtime
      *        types are used to make sure ReflectASM would dispatch to the same overload that
      *        standard, type-aware reflection would
-     * @return {@code true} if exactly one visible method matches the name and argument count and its
-     *         parameter types are compatible with the given arguments, {@code false} otherwise
+     * @return {@code true} if exactly one visible method matches the name and argument count, its
+     *         parameter types are compatible with the given arguments, and no hidden method shares
+     *         that name and arity; {@code false} otherwise (always {@code false} for an interface or an inaccessible
+     *         owner, declaring class or parameter type, including a type in a package not exported to all modules)
      */
     boolean canInvoke(final String methodName, final Object... arguments) {
+        return invocableMethodIndex(methodName, arguments) >= 0;
+    }
+
+    /**
+     * Performs the check of {@link #canInvoke(String, Object...)} and returns the position of the accepted method
+     * in the class's {@link MethodAccess} table, so that the caller can invoke it with
+     * {@link #invokeMethodAt(int, Object...)} instead of having {@code MethodAccess} look the name up again.
+     *
+     * @param methodName the name of the method to look up
+     * @param arguments the arguments the method would be invoked with
+     * @return the table index of the single method {@code canInvoke} accepts, or {@code -1} where it returns
+     *         {@code false}
+     */
+    int invocableMethodIndex(final String methodName, final Object... arguments) {
+        // MethodAccess emits an instance call (invokeinterface) for every method of an interface type, so
+        // a static interface method fails to link with IncompatibleClassChangeError when invoked. Standard
+        // reflection gives the same results for the other methods of an interface type (the abstract and
+        // default ones of an instance created by newInstance()), so leave the whole type to it.
+        // Generated accessors can live in a different runtime package and module. Select reflection before
+        // invoking inaccessible members; retrying an IllegalAccessError could repeat user side effects.
+        if (cls.isInterface() || !isAsmAccessibleType(cls)) {
+            return -1;
+        }
+
         try {
-            final MethodAccess methodAccess = getMethodAccess(cls);
             final int argCount = arguments == null ? 0 : arguments.length;
-            final String[] methodNames = methodAccess.getMethodNames();
-            final Class<?>[][] parameterTypes = methodAccess.getParameterTypes();
+            final Set<Integer> hiddenArities = HIDDEN_METHOD_ARITIES.get(cls).get(methodName);
+
+            if (hiddenArities != null && hiddenArities.contains(argCount)) {
+                // Leave all competing signatures to Reflection's type-aware resolver, including hidden
+                // overloads that happen to be incompatible with this particular argument. The class-scoped
+                // lookup avoids a reflective hierarchy scan on every invocation of an uncomplicated method.
+                return -1;
+            }
+
+            // Only the table entries carrying this name can match; the lookup also builds the table on first use.
+            final int[] nameIndexes = METHOD_INDEXES_BY_NAME.get(cls).get(methodName);
+
+            if (nameIndexes == null) {
+                return -1;
+            }
+
+            final Class<?>[][] parameterTypes = getMethodAccess(cls).getParameterTypes();
 
             int matchCount = 0;
             int matchIndex = -1;
 
-            for (int i = 0, n = methodNames.length; i < n; i++) {
-                if (methodNames[i].equals(methodName) && parameterTypes[i].length == argCount) {
+            for (final int i : nameIndexes) {
+                if (parameterTypes[i].length == argCount) {
                     matchCount++;
                     matchIndex = i;
                 }
             }
 
-            return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], arguments);
+            return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], arguments) ? matchIndex : -1;
         } catch (final RuntimeException | LinkageError e) {
             // MethodAccess generation failed for this class; let the caller use standard reflection.
             // LinkageError is included because an incomplete ReflectASM deployment (for example one whose
             // shaded com.esotericsoftware.asm classes are missing) makes the generation throw
             // NoClassDefFoundError, which must disable the optional fast path rather than reach the caller.
             // This probe resolves nothing but the method table, so it runs no application code.
-            return false;
+            return -1;
+        }
+    }
+
+    /**
+     * Invokes the method at {@code methodIndex} of the class's {@link MethodAccess} table, as returned by
+     * {@link #invocableMethodIndex(String, Object...)}. Because that method is the only table entry with its name
+     * and argument count, this is exactly what {@link #invoke(String, Object...)} does after its own name lookup,
+     * with the same exceptions.
+     *
+     * @param <V> the expected return type of the method
+     * @param methodIndex the table index of the method to invoke
+     * @param arguments the arguments to pass to the method
+     * @return the return value of the method cast to {@code V}, or {@code null} for {@code void} methods
+     */
+    @SuppressWarnings("unchecked")
+    <V> V invokeMethodAt(final int methodIndex, final Object... arguments) {
+        final MethodAccess methodAccess = getMethodAccess(cls);
+
+        try {
+            return (V) methodAccess.invoke(instance, methodIndex, arguments);
+        } catch (final RuntimeException e) {
+            throw e;
+        } catch (final Exception e) {
+            // Generated invocation can propagate checked exceptions without a throws declaration.
+            throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 

@@ -1024,6 +1024,7 @@ public class ImmutableSetTest extends TestBase {
         assertEquals(0, ImmutableSet.empty().hashCode());
         assertThrows(UnsupportedOperationException.class, () -> ImmutableSet.<String> empty().add("a"));
     }
+
     // ---- deep review 2026-09-25 G045 end ----
     // ---- perf review 2026-09-26 G045 begin ----
     // G045-01: of(...) now fills a presized LinkedHashSet element by element; pin order, first-wins de-duplication and nulls.

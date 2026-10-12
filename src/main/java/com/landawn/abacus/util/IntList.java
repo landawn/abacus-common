@@ -1175,13 +1175,20 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             }
 
         } else {
-            // Membership only: the kept order comes from the in-place compaction, so a plain HashSet suffices.
-            final Set<Integer> set = N.newHashSet(size);
-            set.add(elementData[0]);
+            // Values whose range fits in 8 bits per element take a bit set instead (see removeDuplicatesInNarrowRange).
+            final int lastKept = removeDuplicatesInNarrowRange();
 
-            for (int i = 1; i < size; i++) {
-                if (set.add(elementData[i])) {
-                    elementData[++idx] = elementData[i];
+            if (lastKept >= 0) {
+                idx = lastKept;
+            } else {
+                // Membership only: the kept order comes from the in-place compaction, so a plain HashSet suffices.
+                final Set<Integer> set = N.newHashSet(size);
+                set.add(elementData[0]);
+
+                for (int i = 1; i < size; i++) {
+                    if (set.add(elementData[i])) {
+                        elementData[++idx] = elementData[i];
+                    }
                 }
             }
         }
@@ -1194,6 +1201,52 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
             size = idx + 1;
             return true;
         }
+    }
+
+    /**
+     * Removes duplicates in place, keeping first occurrences, when the values' range {@code [min, max]} fits in 8 bits per
+     * element (ids, codes, small values): such values are tracked in a bit set over that range, with no boxing and far less
+     * work than a hash set. The range scan stops as soon as the range is wider, so other values pay only a few comparisons.
+     *
+     * @return the index of the last kept element, or {@code -1} if the range is wider (nothing has been changed then)
+     */
+    private int removeDuplicatesInNarrowRange() {
+        final int[] a = elementData;
+        final int len = size;
+        final long rangeLimit = (long) len << 3;
+        int min = a[0];
+        int max = min;
+
+        for (int i = 1; i < len; i++) {
+            final int e = a[i];
+
+            if (e < min) {
+                min = e;
+            } else if (e > max) {
+                max = e;
+            } else {
+                continue;
+            }
+
+            if ((long) max - min >= rangeLimit) {
+                return -1;
+            }
+        }
+
+        final long[] seen = new long[(int) (((long) max - min + 64) >>> 6)];
+        int idx = -1;
+
+        for (int i = 0; i < len; i++) {
+            final int e = a[i];
+            final int offset = e - min; // in [0, max - min], read as unsigned
+
+            if ((seen[offset >>> 6] & (1L << offset)) == 0) {
+                seen[offset >>> 6] |= 1L << offset;
+                a[++idx] = e;
+            }
+        }
+
+        return idx;
     }
 
     /**

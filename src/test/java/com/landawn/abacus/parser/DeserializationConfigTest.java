@@ -879,7 +879,8 @@ public class DeserializationConfigTest extends TestBase {
         map.put(null, 1);
         map.put("name", "n");
         final String json = jp.serialize(map, new JsonSerConfig().setQuoteMapKey(false));
-        final Map<String, Object> read = jp.deserialize(json, new JsonDeserConfig().setValueTypesByBeanClass(Named.class), Type.ofMap(String.class, Object.class));
+        final Map<String, Object> read = jp.deserialize(json, new JsonDeserConfig().setValueTypesByBeanClass(Named.class),
+                Type.ofMap(String.class, Object.class));
         assertEquals(map, read);
     }
     // ---- deep review 2026-09-25 G007 end ----

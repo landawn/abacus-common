@@ -52,7 +52,8 @@ import testfixtures.dates.CountingCreatorTypes.CountingDate;
  *       default zone.</li>
  *   <li><b>B4</b> &mdash; {@code toZoneId}'s fixed-offset fast path recognised only
  *       {@code SimpleTimeZone}; any other fixed-offset {@code TimeZone} subclass with an unregistered ID
- *       was rejected as having daylight-saving rules.</li>
+ *       was rejected as having daylight-saving rules. The later conservative policy retains rejection
+ *       for unverified subclasses: no current DST cannot prove their complete historical rules.</li>
  *   <li><b>B5</b> &mdash; auto-detection accepted the compact {@code +HHmm} offset only when the text had
  *       no fraction.</li>
  *   <li><b>D2</b> &mdash; the {@code truncated*} comparisons built two result objects through the creator
@@ -344,44 +345,54 @@ public class DatesXmlJulianAndCustomZoneTest extends TestBase {
         // with auto-detection the 'Z' the text carries is data and wins over the fallback zone (2026-09-02)
         assertEquals(Instant.ofEpochMilli(MODERN), Dates.parseToInstant("2025-01-15T10:30:45.123Z", null, NEW_YORK));
 
-        // UTC-equivalent zones of every spelling are accepted, including a fixed zero offset under any ID
+        // Verified UTC-equivalent zones of every spelling are accepted, including plain fixed zones under any ID.
         for (final TimeZone utcLike : new TimeZone[] { UTC, TimeZone.getTimeZone("GMT"), TimeZone.getTimeZone("Etc/UTC"), new SimpleTimeZone(0, "Any"),
-                fixedOffsetSubclass(0, "Also/Any", false) }) {
+                new SimpleTimeZone(0, "Also/Any") }) {
             assertEquals(Instant.ofEpochMilli(MODERN), DTF.ISO_8601_TIMESTAMP.parseToInstant("2025-01-15T10:30:45.123Z", utcLike), utcLike.getID());
             assertEquals(MODERN, DTF.ISO_8601_TIMESTAMP.parseToCalendar("2025-01-15T10:30:45.123Z", utcLike).getTimeInMillis(), utcLike.getID());
         }
+        assertThrows(IllegalArgumentException.class,
+                () -> DTF.ISO_8601_TIMESTAMP.parseToInstant("2025-01-15T10:30:45.123Z", fixedOffsetSubclass(0, "Also/Any", false)));
 
         // and a null zone is never a conflict
         assertEquals(Instant.ofEpochMilli(MODERN), DTF.ISO_8601_TIMESTAMP.parseToInstant("2025-01-15T10:30:45.123Z", (TimeZone) null));
     }
 
     // ---------------------------------------------------------------------------------------------
-    // B4 - any fixed-offset TimeZone is a fixed offset, whatever its class or ID
+    // B4 - plain fixed zones remain supported; arbitrary subclasses require conservative rejection.
     // ---------------------------------------------------------------------------------------------
 
     @Test
-    public void fixedOffsetTimeZoneSubclass_isAcceptedAsAFixedOffset() {
+    public void fixedOffsetTimeZoneSubclass_isUnverifiedButLegacyCalendarStillSupportsIt() {
         final TimeZone subclass = fixedOffsetSubclass(3_600_000, "My/Fixed", false);
         final TimeZone simple = new SimpleTimeZone(3_600_000, "My/Fixed");
         final Date value = new Date(MODERN);
 
-        assertTrue(Dates.isSameDay(value, value, subclass));
-        assertEquals(Dates.format(value, Dates.ISO_ZONED_DATE_TIME_FORMAT, simple), Dates.format(value, Dates.ISO_ZONED_DATE_TIME_FORMAT, subclass));
-        assertEquals(Dates.format(Dates.createCalendar(MODERN, simple)), Dates.format(Dates.createCalendar(MODERN, subclass)));
-        assertEquals(Dates.truncate(Dates.createCalendar(MODERN, simple), Calendar.DATE).getTimeInMillis(),
-                Dates.truncate(Dates.createCalendar(MODERN, subclass), Calendar.DATE).getTimeInMillis());
-        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), Dates.parseToInstant("2025-01-15 10:30:45", null, subclass));
-        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), DTF.LOCAL_DATE_TIME.parseToInstant("2025-01-15 10:30:45", subclass));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(value, value, subclass));
+        assertThrows(IllegalArgumentException.class, () -> Dates.format(value, Dates.ISO_ZONED_DATE_TIME_FORMAT, subclass));
+        assertThrows(IllegalArgumentException.class, () -> Dates.format(Dates.createCalendar(MODERN, subclass)));
+        assertThrows(IllegalArgumentException.class, () -> Dates.truncate(Dates.createCalendar(MODERN, subclass), Calendar.DATE));
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToInstant("2025-01-15 10:30:45", null, subclass));
+        assertThrows(IllegalArgumentException.class, () -> DTF.LOCAL_DATE_TIME.parseToInstant("2025-01-15 10:30:45", subclass));
+        assertTrue(Dates.isSameDay(value, value, simple));
+        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), Dates.parseToInstant("2025-01-15 10:30:45", null, simple));
+        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), DTF.LOCAL_DATE_TIME.parseToInstant("2025-01-15 10:30:45", simple));
         assertEquals(Instant.parse("2025-01-15T09:30:45Z").toEpochMilli(), Dates.parseToJUDate("2025-01-15 10:30:45", null, subclass).getTime());
         assertEquals(Instant.parse("2025-01-15T09:30:45Z").toEpochMilli(), Dates.parseToTimestamp("2025-01-15 10:30:45.000", null, subclass).getTime());
 
         // a subclass with daylight-saving rules is still rejected, and the message says why
         final IllegalArgumentException rejected = assertThrows(IllegalArgumentException.class,
                 () -> Dates.isSameDay(value, value, fixedOffsetSubclass(3_600_000, "My/Dst", true)));
-        assertTrue(rejected.getMessage().contains("daylight-saving rules under an ID java.time does not know"), rejected.getMessage());
+        assertTrue(rejected.getMessage().contains("unverified rules under an ID java.time does not know"), rejected.getMessage());
 
-        // as is a fixed-offset subclass that reuses a registered ID whose rules differ
-        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(value, value, fixedOffsetSubclass(-5 * 3_600_000, "America/New_York", false)));
+        // A borrowed ID does not make an arbitrary implementation verifiable; the plain fixed control works.
+        final TimeZone fixedNewYorkId = fixedOffsetSubclass(-5 * 3_600_000, "America/New_York", false);
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(value, value, fixedNewYorkId));
+        final Date summerBefore = Date.from(Instant.parse("2025-07-01T04:30:00Z"));
+        final Date summerAfter = Date.from(Instant.parse("2025-07-01T05:30:00Z"));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(summerBefore, summerAfter, fixedNewYorkId));
+        assertFalse(Dates.isSameDay(summerBefore, summerAfter, new SimpleTimeZone(-5 * 3_600_000, "America/New_York")));
+        assertTrue(Dates.isSameDay(summerBefore, summerAfter, NEW_YORK)); // 00:30 then 01:30 under regional DST
 
         // and a sub-second fixed offset cannot become a ZoneOffset either way
         assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(value, value, fixedOffsetSubclass(3_600_500, "My/Odd", false)));
@@ -389,7 +400,7 @@ public class DatesXmlJulianAndCustomZoneTest extends TestBase {
     }
 
     @Test
-    public void fixedOffsetDefaultZone_isAcceptedEverywhereWhateverItsId() {
+    public void fixedOffsetDefaultZone_requiresVerifiableRulesForJavaTime() {
         TimeZone.setDefault(new SimpleTimeZone(3_600_000, "Made/Up"));
         final Date value = new Date(MODERN);
 
@@ -405,9 +416,10 @@ public class DatesXmlJulianAndCustomZoneTest extends TestBase {
         assertEquals("2025-01-15T11:30:45+01:00", Dates.format(value, null, TimeZone.getDefault()));
 
         TimeZone.setDefault(fixedOffsetSubclass(3_600_000, "Made/Up/Too", false));
-        assertTrue(Dates.isSameDay(value, value));
-        assertEquals(Instant.parse("2025-01-14T23:00:00Z").toEpochMilli(), Dates.truncate(value, Calendar.DATE).getTime());
-        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), Dates.parseToInstant("2025-01-15 10:30:45"));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(value, value));
+        assertThrows(IllegalArgumentException.class, () -> Dates.truncate(value, Calendar.DATE));
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToInstant("2025-01-15 10:30:45"));
+        assertEquals(Instant.parse("2025-01-15T09:30:45Z"), Dates.parseToJUDate("2025-01-15 10:30:45").toInstant());
     }
 
     // ---------------------------------------------------------------------------------------------

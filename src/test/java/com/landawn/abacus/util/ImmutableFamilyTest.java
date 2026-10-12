@@ -188,7 +188,7 @@ public class ImmutableFamilyTest extends TestBase {
 
         @Test
         public void list_removeFirstLast_onDerivedViews() {
-            final ImmutableList<Integer> reversedEmpty = (ImmutableList<Integer>) ImmutableList.wrap(new ArrayList<Integer>()).reversed();
+            final ImmutableList<Integer> reversedEmpty = ImmutableList.wrap(new ArrayList<Integer>()).reversed();
             assertThrows(UnsupportedOperationException.class, reversedEmpty::removeFirst);
             assertThrows(UnsupportedOperationException.class, reversedEmpty::removeLast);
 
@@ -719,7 +719,7 @@ public class ImmutableFamilyTest extends TestBase {
         @Test
         public void bothDirectionsOfAListAgree() {
             final ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3);
-            final ImmutableList<Integer> reversed = (ImmutableList<Integer>) forward.reversed();
+            final ImmutableList<Integer> reversed = forward.reversed();
 
             assertThrows(IllegalArgumentException.class, () -> forward.subList(2, 1));
             assertThrows(IllegalArgumentException.class, () -> reversed.subList(2, 1));

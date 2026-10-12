@@ -645,9 +645,9 @@ public class CsvParser {
                 } else if (c == separator && !inQuotes(inQuotes)) {
                     if (!quoted && ignoreLeadingWhitespace) {
                         if (isOutputNull) {
-                            tokensOnThisLine.add(Strings.strip(sb.toString()));
+                            tokensOnThisLine.add(stripToString(sb));
                         } else {
-                            output[idx++] = Strings.strip(sb.toString());
+                            output[idx++] = stripToString(sb);
                         }
                     } else {
                         if (isOutputNull) {
@@ -670,7 +670,24 @@ public class CsvParser {
                     inQuotes = false;
                 } else {
                     if (!strictQuotes || inQuotes(inQuotes)) {
-                        sb.append(c);
+                        // Copy the whole run of ordinary characters at once: every character up to the next
+                        // escape, quote or (unquoted) separator takes this same branch with the same state.
+                        final boolean separatorIsData = inQuotes(inQuotes);
+                        int j = i + 1;
+
+                        while (j < len) {
+                            final char d = nextLine.charAt(j);
+
+                            if ((escape != NULL_CHARACTER && d == escape) || (quoteChar != NULL_CHARACTER && d == quoteChar)
+                                    || (d == separator && !separatorIsData)) {
+                                break;
+                            }
+
+                            j++;
+                        }
+
+                        sb.append(nextLine, i, j);
+                        i = j - 1;
                     }
                 }
             }
@@ -682,9 +699,9 @@ public class CsvParser {
 
             if (!quoted && ignoreLeadingWhitespace) {
                 if (isOutputNull) {
-                    tokensOnThisLine.add(Strings.strip(sb.toString()));
+                    tokensOnThisLine.add(stripToString(sb));
                 } else {
-                    output[idx++] = Strings.strip(sb.toString());
+                    output[idx++] = stripToString(sb);
                 }
             } else {
                 if (isOutputNull) {
@@ -698,6 +715,32 @@ public class CsvParser {
         }
 
         return tokensOnThisLine;
+    }
+
+    /**
+     * Returns the content of {@code sb} without leading and trailing whitespace (as defined by
+     * {@link Character#isWhitespace(char)}), equal to {@code Strings.strip(sb.toString())}.
+     *
+     * <p>The stripped range is taken from the builder directly, so a field with surrounding
+     * whitespace builds one {@code String} instead of a full copy followed by a trimmed one.</p>
+     *
+     * @param sb the builder holding the current field
+     * @return the stripped field value
+     */
+    private static String stripToString(final StringBuilder sb) {
+        final int len = sb.length();
+        int start = 0;
+        int end = len;
+
+        while (start < end && Character.isWhitespace(sb.charAt(start))) {
+            start++;
+        }
+
+        while (end > start && Character.isWhitespace(sb.charAt(end - 1))) {
+            end--;
+        }
+
+        return start == 0 && end == len ? sb.toString() : sb.substring(start, end);
     }
 
     /**

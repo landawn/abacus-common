@@ -2440,4 +2440,131 @@ public class MapsTest extends MapsTestSupport {
         assertEquals(Arrays.asList("x"), inverted.get(2));
         assertTrue(inverted.containsValue(Arrays.asList("x")));
     }
+
+    // ---- bug review 2026-09-30 G053 begin ----
+    // Recreating this anonymous class used to rerun its initializer and reintroduce removed entries.
+    // Maps.newTargetMap now falls back without constructing the anonymous class.
+    private Map<String, Integer> g053DoubleBraceMapWithXRemoved() {
+        final Map<String, Integer> m = new LinkedHashMap<>() {
+            {
+                put("x", 1);
+                put("y", 2);
+            }
+        };
+
+        m.remove("x");
+        m.put("z", 3);
+        return m;
+    }
+
+    // G053-01: newTargetMap returned a pre-filled map for a double-brace source; filter results gained "x".
+    @Test
+    public void testFilter_prefilledAnonymousSourceClass() {
+        final Map<String, Integer> m = g053DoubleBraceMapWithXRemoved();
+
+        assertEquals(CommonUtil.asMap("y", 2, "z", 3), Maps.filter(m, (k, v) -> true));
+        assertEquals(CommonUtil.asMap("z", 3), Maps.filterByValue(m, v -> v > 2));
+        assertEquals(CommonUtil.asMap("y", 2, "z", 3), Maps.intersection(m, new HashMap<>(m)));
+        assertEquals(2, Maps.difference(m, new HashMap<>()).size());
+    }
+
+    // G053-01: replaceKeys used the pre-filled scratch map as "faithful" and wrote its stray entries into the caller's map.
+    @Test
+    public void testReplaceKeys_prefilledAnonymousSourceClass() {
+        final Map<String, Integer> m = g053DoubleBraceMapWithXRemoved();
+        Maps.replaceKeys(m, k -> k.toUpperCase());
+        assertEquals(CommonUtil.asMap("Y", 2, "Z", 3), m);
+
+        final Map<String, Integer> m2 = g053DoubleBraceMapWithXRemoved();
+        Maps.replaceKeys(m2, k -> k.toUpperCase(), Integer::sum);
+        assertEquals(CommonUtil.asMap("Y", 2, "Z", 3), m2);
+    }
+    // ---- bug review 2026-09-30 G053 end ----
+
+    // ---- bug review 2026-09-30 verify G117 begin ----
+    // A named class whose constructor puts an entry: its reflective new instance is pre-filled like a double-brace map's.
+    public static class G117PrefillingMap extends HashMap<String, Integer> {
+        private static final long serialVersionUID = 1L;
+
+        public G117PrefillingMap() {
+            put("dflt", 0);
+        }
+    }
+
+    // Pre-filled template: symmetricDifference, transpose rows and a named pre-filling class get an empty target map too.
+    @Test
+    public void testNewTargetMap_prefilledTemplate_otherCallers() {
+        final Map<String, Integer> m = g053DoubleBraceMapWithXRemoved();
+        assertEquals(CommonUtil.asSet("z", "w"), Maps.symmetricDifference(m, CommonUtil.asMap("y", 2, "w", 9)).keySet());
+
+        final Map<String, List<Integer>> rows = new LinkedHashMap<>() {
+            private static final long serialVersionUID = 1L;
+
+            {
+                put("q", Arrays.asList(9));
+            }
+        };
+        rows.remove("q");
+        rows.put("a", Arrays.asList(1, 2));
+        rows.put("b", Arrays.asList(3));
+        assertEquals(Arrays.asList(CommonUtil.asMap("a", 1, "b", 3), CommonUtil.asMap("a", 2)), Maps.transpose(rows));
+
+        final G117PrefillingMap named = new G117PrefillingMap();
+        named.remove("dflt");
+        named.put("y", 2);
+        assertEquals(CommonUtil.asMap("y", 2), Maps.filter(named, (k, v) -> true));
+        Maps.replaceKeys(named, k -> k.toUpperCase());
+        assertEquals(CommonUtil.asMap("Y", 2), named);
+    }
+
+    // Empty anonymous maps also use a fallback; sorted maps still keep their comparator.
+    @Test
+    public void testNewTargetMap_anonymousFallbackAndSortedComparator() {
+        final Map<String, Integer> m = new LinkedHashMap<>() {
+            private static final long serialVersionUID = 1L;
+        };
+        m.put("y", 2);
+        m.put("z", 3);
+
+        final Map<String, Integer> filtered = Maps.filter(m, (k, v) -> v > 2);
+        assertSame(LinkedHashMap.class, filtered.getClass());
+        assertEquals(CommonUtil.asMap("z", 3), filtered);
+        Maps.replaceKeys(m, k -> k.toUpperCase());
+        assertEquals("{Y=2, Z=3}", m.toString());
+
+        final TreeMap<String, Integer> sorted = new TreeMap<>(Comparator.reverseOrder());
+        sorted.put("a", 1);
+        sorted.put("b", 2);
+        final Map<String, Integer> sortedResult = Maps.filter(sorted, (k, v) -> true);
+        assertSame(TreeMap.class, sortedResult.getClass());
+        assertSame(sorted.comparator(), ((TreeMap<String, Integer>) sortedResult).comparator());
+        assertEquals("{b=2, a=1}", sortedResult.toString());
+    }
+    // ---- bug review 2026-09-30 verify G117 end ----
+
+    // ---- bug review 2026-09-30 G142 begin ----
+    static final class G142NoDefaultOuter {
+        G142NoDefaultOuter(final int ignored) {
+        }
+
+        java.util.Map<String, Integer> doubleBrace() {
+            return new java.util.HashMap<>() {
+                {
+                    put("a", 1);
+                }
+            };
+        }
+    }
+
+    // Anonymous maps use a LinkedHashMap fallback even when their enclosing class cannot be constructed.
+    @Test
+    public void testFilter_anonymousMapWhoseEnclosingClassCannotBeConstructed() {
+        final java.util.Map<String, Integer> m = new G142NoDefaultOuter(0).doubleBrace();
+        final java.util.Map<String, Integer> filtered = Maps.filter(m, (k, v) -> true);
+
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.LinkedHashMap.class, filtered.getClass());
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Map.of("a", 1), filtered);
+    }
+    // ---- bug review 2026-09-30 G142 end ----
+
 }

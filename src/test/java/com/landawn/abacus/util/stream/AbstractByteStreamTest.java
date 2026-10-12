@@ -1922,22 +1922,22 @@ public class AbstractByteStreamTest extends TestBase {
     @Test
     public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
         // reversed(): count() must consume all remaining elements
-        ByteIteratorEx revIter = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        ByteIteratorEx revIter = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
         assertEquals(5L, revIter.count());
         assertFalse(revIter.hasNext());
 
         // rotated(): count() must consume all remaining elements
-        ByteIteratorEx rotIter = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
+        ByteIteratorEx rotIter = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
         assertEquals(5L, rotIter.count());
         assertFalse(rotIter.hasNext());
 
         // reverseSorted(): count() must consume all remaining elements
-        ByteIteratorEx rsIter = (ByteIteratorEx) createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
+        ByteIteratorEx rsIter = createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
         assertEquals(5L, rsIter.count());
         assertFalse(rsIter.hasNext());
 
         // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
-        ByteIteratorEx revIter2 = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        ByteIteratorEx revIter2 = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
         revIter2.nextByte();
         revIter2.nextByte();
         assertEquals(3L, revIter2.count());
@@ -1946,18 +1946,18 @@ public class AbstractByteStreamTest extends TestBase {
 
     @Test
     public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
-        ByteIteratorEx reversed = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
+        ByteIteratorEx reversed = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reversed().iteratorEx();
         assertEquals(5, reversed.toArray().length);
         assertFalse(reversed.hasNext());
         assertEquals(0, reversed.toArray().length);
 
-        ByteIteratorEx rotated = (ByteIteratorEx) createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
+        ByteIteratorEx rotated = createAbstractStream((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).rotated(2).iteratorEx();
         rotated.nextByte();
         assertEquals(4, rotated.toArray().length);
         assertFalse(rotated.hasNext());
         assertEquals(0, rotated.toArray().length);
 
-        ByteIteratorEx reverseSorted = (ByteIteratorEx) createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
+        ByteIteratorEx reverseSorted = createAbstractStream((byte) 3, (byte) 1, (byte) 4, (byte) 1, (byte) 5).reverseSorted().iteratorEx();
         reverseSorted.nextByte();
         reverseSorted.nextByte();
         assertEquals(3, reverseSorted.toArray().length);
@@ -2003,6 +2003,7 @@ public class AbstractByteStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createAbstractStream((byte) 1, (byte) 2, (byte) 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+
     // ---- perf review 2026-09-26 G085 begin ----
     // G085-01: rotated() nextX()/toArray() replaced the per-element modulo with a conditional subtraction and two bulk copies.
     @Test
@@ -2029,14 +2030,13 @@ public class AbstractByteStreamTest extends TestBase {
                     final byte[] copy = Arrays.copyOfRange(backing, from, from + len);
 
                     // full toArray()
-                    assertArrayEquals(expected, (source == 0 ? ByteStream.of(backing, from, from + len) : ByteStream.of(ByteIterator.of(copy))).rotated(distance).toArray(),
-                            msg);
+                    assertArrayEquals(expected,
+                            (source == 0 ? ByteStream.of(backing, from, from + len) : ByteStream.of(ByteIterator.of(copy))).rotated(distance).toArray(), msg);
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final ByteIteratorEx byNext = (ByteIteratorEx) (source == 0 ? ByteStream.of(backing, from, from + len) : ByteStream.of(ByteIterator.of(copy)))
-                                .rotated(distance)
-                                .iteratorEx();
+                        final ByteIteratorEx byNext = (source == 0 ? ByteStream.of(backing, from, from + len)
+                                : ByteStream.of(ByteIterator.of(copy))).rotated(distance).iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextByte(), msg + ", k=" + k + ", j=" + j);
@@ -2045,7 +2045,7 @@ public class AbstractByteStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final ByteIteratorEx byAdvance = (ByteIteratorEx) (source == 0 ? ByteStream.of(backing, from, from + len)
+                        final ByteIteratorEx byAdvance = (source == 0 ? ByteStream.of(backing, from, from + len)
                                 : ByteStream.of(ByteIterator.of(copy))).rotated(distance).iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);

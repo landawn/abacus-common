@@ -33,7 +33,6 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ByteList;
 import com.landawn.abacus.util.ByteSummaryStatistics;
-import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -440,6 +439,12 @@ class ArrayByteStream extends AbstractByteStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                // advance(n) is O(1) index arithmetic and runs no callbacks, so a downstream skip()/limit() may call it in bulk.
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -626,15 +631,35 @@ class ArrayByteStream extends AbstractByteStream {
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private int cursor = fromIndex;
             private ByteIterator cur = null;
-            private ByteStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final ByteStream s = mapper.apply(elements[cursor++]);
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -645,7 +670,7 @@ class ArrayByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -661,15 +686,15 @@ class ArrayByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -795,15 +820,35 @@ class ArrayByteStream extends AbstractByteStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final IntStream s = mapper.apply(elements[cursor++]);
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -814,7 +859,7 @@ class ArrayByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -830,15 +875,15 @@ class ArrayByteStream extends AbstractByteStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -863,18 +908,37 @@ class ArrayByteStream extends AbstractByteStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<T> iter = new SequentialFlatMapObjIterator<>() {
             private int cursor = fromIndex;
             private Iterator<? extends T> cur = null;
-            private Stream<? extends T> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final Stream<? extends T> s = mapper.apply(elements[cursor++]);
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -885,7 +949,7 @@ class ArrayByteStream extends AbstractByteStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -899,17 +963,12 @@ class ArrayByteStream extends AbstractByteStream {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -2074,6 +2133,12 @@ class ArrayByteStream extends AbstractByteStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                // advance(n) is O(1) index arithmetic and runs no callbacks, so a downstream skip()/limit() may call it in bulk.
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0 || cursor >= toIndex) {
                     return;
@@ -2129,7 +2194,7 @@ class ArrayByteStream extends AbstractByteStream {
         checkArgNotNull(supplier, cs.supplier);
 
         if (fromIndex == toIndex) {
-            final Holder<ByteStream> holder = new Holder<>();
+            final MappedStreamHolder holder = new MappedStreamHolder();
 
             return newStream(new ByteIteratorEx() { //NOSONAR
                 private ByteIteratorEx iter;
@@ -2180,14 +2245,17 @@ class ArrayByteStream extends AbstractByteStream {
                         final ByteStream s = supplier.get();
                         try {
                             iter = s == null ? ByteIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = ByteIteratorEx.empty();
+                        }
                     }
                 }
-            }, false).onClose(() -> close(holder));
+            }, false).onClose(holder::close);
         } else {
             return this;
         }

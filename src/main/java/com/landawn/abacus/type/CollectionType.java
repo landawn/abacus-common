@@ -28,6 +28,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
@@ -64,6 +66,9 @@ import com.landawn.abacus.util.Strings;
  */
 @SuppressWarnings("java:S2160")
 public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> {
+
+    /** Compact embedded JSON configuration retaining XML's present-null rejection. */
+    private static final JsonSerConfig XML_JSON_CONFIG = new XmlEmbeddedJsonConfig();
 
     private final String declaringName;
 
@@ -449,9 +454,10 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * as a quoted {@code stringOf} string per element ({@code ["1", "a", ...]}). Under a {@link JsonSerConfig} the JSON
      * parser writes that form, handed the {@code writer} directly only when it is a JSON writer; on any other writer
      * (XML, CSV) the JSON text is written as escaped character content instead of raw JSON. Under any other
-     * configuration &mdash; an XML configuration in practice &mdash; the {@code stringOf} text of the whole collection
-     * is written as escaped character content, which is what {@code Object[]} already does and the only form
-     * {@link #valueOf(String)} can read back. That embedded JSON is always written compactly: {@code prettyFormat} is
+     * configuration &mdash; an XML configuration in practice &mdash; the JSON text of the whole collection
+     * is written as escaped character content, retaining XML's rejection of present-null {@code Nullable} values at
+     * any nested depth. This is the form {@link #valueOf(String)} can read back.
+     * That embedded JSON is always written compactly: {@code prettyFormat} is
      * not propagated to it, because this handler is not told the caller's current indentation and a pretty embedded
      * collection would restart at the left margin. With no config at all the elements are written element by element
      * without quotation, as before.
@@ -499,7 +505,8 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
                     writer.writeCharacter(Utils.jsonParser.serialize(x, embeddedConfig));
                 }
             } else {
-                writer.writeCharacter(stringOf(x));
+                // stringOf uses ordinary JSON settings and would lose XML's present-null guard inside nested values.
+                writer.writeCharacter(config instanceof XmlSerConfig ? Utils.jsonParser.serialize(x, XML_JSON_CONFIG) : stringOf(x));
             }
         } else {
             writer.write(SK._BRACKET_L);

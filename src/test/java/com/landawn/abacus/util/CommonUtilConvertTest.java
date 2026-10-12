@@ -35,14 +35,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
 
 public class CommonUtilConvertTest extends CommonUtilTestSupport {
     @Test
@@ -59,7 +60,12 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertFalse(CommonUtil.convert("false", Boolean.class));
         assertFalse(CommonUtil.convert("FALSE", Boolean.class));
         assertFalse(CommonUtil.convert("False", Boolean.class));
-        assertFalse(CommonUtil.convert("anything else", Boolean.class));
+        assertTrue(CommonUtil.convert("Y", Boolean.class));
+        assertFalse(CommonUtil.convert("n", Boolean.class));
+        assertFalse(CommonUtil.convert("-1", Boolean.class));
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert("anything else", Boolean.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert("1.0", Boolean.class));
     }
 
     @Test
@@ -84,22 +90,29 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
 
     @Test
     public void testConvertNumberToBoolean() {
+        // Only an Integer, Short or Byte is read: 1 is true, 0 and -1 are false.
         assertTrue(CommonUtil.convert(1, Boolean.class));
-        assertTrue(CommonUtil.convert(123, Boolean.class));
-        assertTrue(CommonUtil.convert(-1, Boolean.class));
+        assertFalse(CommonUtil.convert(-1, Boolean.class));
         assertFalse(CommonUtil.convert(0, Boolean.class));
+        assertTrue(CommonUtil.convert((short) 1, Boolean.class));
+        assertFalse(CommonUtil.convert((byte) -1, Boolean.class));
 
-        assertTrue(CommonUtil.convert(1L, Boolean.class));
-        assertFalse(CommonUtil.convert(0L, Boolean.class));
+        // Any other Integer, Short or Byte value is rejected.
+        for (final Number number : new Number[] { 123, -2, (short) 2, (byte) -128 }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(number, Boolean.class),
+                    String.valueOf(number));
+            assertEquals("Cannot convert " + number.getClass().getSimpleName() + " value " + number
+                    + " to boolean: only 1 (true), 0 (false) and -1 (false) are accepted", e.getMessage());
+        }
 
-        assertTrue(CommonUtil.convert(1.5, Boolean.class));
-        assertFalse(CommonUtil.convert(0.0, Boolean.class));
-        assertTrue(CommonUtil.convert(0.9, Boolean.class));
-        assertTrue(CommonUtil.convert(new BigDecimal("1e-1000"), Boolean.class));
-        assertFalse(CommonUtil.convert(BigDecimal.ZERO, Boolean.class));
-        assertTrue(CommonUtil.convert(BigInteger.valueOf(-1), Boolean.class));
-        assertFalse(CommonUtil.convert(Double.NaN, Boolean.class));
-        assertTrue(CommonUtil.convert(Double.POSITIVE_INFINITY, Boolean.class));
+        // Any other Number class is rejected whatever its value, 1, 0 and -1 included.
+        for (final Number number : new Number[] { 1L, 0L, -2L, 1.0, 0.0, -0.0, 1.5, Double.NaN, Double.POSITIVE_INFINITY, 1.0f, new BigDecimal("1.000"),
+                BigDecimal.ZERO, BigInteger.valueOf(-1), BigInteger.ONE.shiftLeft(64).add(BigInteger.ONE) }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(number, Boolean.class),
+                    String.valueOf(number));
+            assertEquals("Cannot convert " + number.getClass().getName() + " value " + number
+                    + " to boolean: only Integer, Short and Byte values 1 (true), 0 (false) and -1 (false) are accepted", e.getMessage());
+        }
     }
 
     @Test
@@ -558,7 +571,10 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
 
         assertEquals(true, CommonUtil.convert(1, boolean.class));
         assertEquals(false, CommonUtil.convert(0, boolean.class));
-        assertEquals(true, CommonUtil.convert(5L, Boolean.class));
+        // Only an Integer, Short or Byte 1, 0 or -1 is a boolean value; a Long is rejected whatever its value
+        // (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(1L, Boolean.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(5, Boolean.class));
 
         assertEquals(Character.valueOf('A'), CommonUtil.convert(65, Character.class));
         assertEquals(Integer.valueOf(65), CommonUtil.convert('A', Integer.class));
@@ -841,7 +857,8 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         map.put("key", "value");
 
         assertThrows(RuntimeException.class, () -> CommonUtil.convert(map, Integer.class));
-        assertFalse(CommonUtil.convert(map, Boolean.class));
+        // A map's string form is not boolean text (code review 2026-10-05; it used to be false).
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(map, Boolean.class));
 
         List<Map<String, Object>> complexList = new ArrayList<>();
         complexList.add(new HashMap<>());
@@ -912,27 +929,31 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
     // Fix pass 2026-09-08 (G01)
     // ---------------------------------------------------------------------------------------------------------
 
-    // G01-24: convert applied its own documented rule ("a Number is true iff it is non-zero") only when the
-    // SOURCE TYPE was classified as a number. A Number whose handler is not a number type - AtomicInteger and
-    // AtomicLong are the plain-JDK cases - fell through to Type<Boolean>.valueOf and its separately documented
-    // "> 0" rule, so this one method answered true for -1 and false for an AtomicInteger holding -1.
+    // G01-24: convert applied its own documented rule only when the SOURCE TYPE was classified as a number. A Number
+    // whose handler is not a number type - AtomicInteger and AtomicLong are the plain-JDK cases - fell through to
+    // Type<Boolean>.valueOf, so this one method answered differently for -1 and for an AtomicInteger holding -1.
+    // Code review 2026-10-05: every number-to-boolean conversion now uses one rule, AbstractType.booleanOf.
     @Test
-    public void fixG01_convertReadsEveryNumberAsNonZeroTruthiness() {
-        assertTrue(CommonUtil.convert(-1, Boolean.class));
-        assertTrue(CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(-1), Boolean.class));
-        assertTrue(CommonUtil.convert(new java.util.concurrent.atomic.AtomicLong(-7L), Boolean.class));
-        assertTrue(CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(1), Boolean.class));
-        assertFalse(CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(0), Boolean.class));
-        assertFalse(CommonUtil.convert(new java.util.concurrent.atomic.AtomicLong(0L), Boolean.class));
+    public void fixG01_convertReadsEveryNumberWithTheBooleanNumberRule() {
+        // Every Number reaches the boolean handler's one number rule, whatever its own handler: an Integer, Short or
+        // Byte 1, 0 or -1 is read; any other Number class - AtomicInteger and AtomicLong included - is rejected.
+        assertFalse(CommonUtil.convert(-1, Boolean.class));
+        assertTrue(CommonUtil.convert(1, Boolean.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(-1), Boolean.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(1), Boolean.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new java.util.concurrent.atomic.AtomicLong(0L), Boolean.class));
 
         final Type<Boolean> primitiveBoolean = TypeFactory.getType(boolean.class);
-        assertTrue(CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(-1), primitiveBoolean));
-        assertFalse(CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(0), primitiveBoolean));
+        assertFalse(CommonUtil.convert(0, primitiveBoolean));
+        assertTrue(CommonUtil.convert((short) 1, primitiveBoolean));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(2, primitiveBoolean));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new java.util.concurrent.atomic.AtomicInteger(1), primitiveBoolean));
 
-        // the Type<Boolean> handlers keep their own, separately documented "> 0" rule (JDBC and JSON/XML reads)
+        // the Type<Boolean> handlers apply the same rule (JSON/XML reads)
         final Type<Boolean> boxedBoolean = TypeFactory.getType(Boolean.class);
-        assertFalse(boxedBoolean.valueOf((Object) Integer.valueOf(-1)));
-        assertFalse(boxedBoolean.valueOf((Object) new java.util.concurrent.atomic.AtomicInteger(-1)));
+        assertFalse(boxedBoolean.valueOf(Integer.valueOf(-1)));
+        assertThrows(IllegalArgumentException.class, () -> boxedBoolean.valueOf(new java.util.concurrent.atomic.AtomicInteger(-1)));
+        assertThrows(IllegalArgumentException.class, () -> boxedBoolean.valueOf(Double.valueOf(0.5)));
     }
 
     /** A {@code Reader} that records whether it was closed, and can report whether anything is left to read. */
@@ -1046,7 +1067,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertTrue(blank.closed);
     }
 
-
     @Test
     public void testConvertZeroLengthBlobToByteArray() throws SQLException {
         final SerialBlob blob = new SerialBlob(new byte[0]);
@@ -1109,4 +1129,227 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals('\uffff', (char) CommonUtil.convert(65535.0, char.class));
     }
     // ---- bug review 2026-09-27 verify G120 end ----
+
+    // ---- bug review 2026-10-02 G116 begin ----
+    // G116-01: a Long converted to a raw List/Collection is wrapped as is (it was re-parsed from "5" into an Integer element)
+    @Test
+    public void testConvert_longToRawListWrapsLongElement() {
+        for (final long value : new long[] { 0L, 1L, -1L, 5L, 1600000000123L, Long.MIN_VALUE, Long.MAX_VALUE }) {
+            final List<?> list = CommonUtil.convert(value, List.class);
+            assertEquals(ArrayList.class, list.getClass());
+            assertEquals(1, list.size());
+            assertEquals(Long.valueOf(value), list.get(0), "value " + value);
+
+            final Collection<?> collection = CommonUtil.convert(value, Collection.class);
+            assertEquals(Long.valueOf(value), collection.iterator().next(), "value " + value);
+            assertEquals(Long.valueOf(value), CommonUtil.convert(value, ArrayList.class).get(0), "value " + value);
+        }
+
+        assertEquals(Arrays.asList(5L), CommonUtil.convert(5L, Type.<List<Number>> of("List<Number>")));
+    }
+
+    // G116-01: a target of exactly Set is a LinkedHashSet holding the Long itself (it was a HashSet with an Integer element)
+    @Test
+    public void testConvert_longToRawSetWrapsLongInLinkedHashSet() {
+        final Set<?> set = CommonUtil.convert(5L, Set.class);
+        assertEquals(LinkedHashSet.class, set.getClass());
+        assertEquals(1, set.size());
+        assertEquals(Long.class, set.iterator().next().getClass());
+        assertTrue(set.contains(5L));
+
+        final Set<?> objectSet = CommonUtil.convert(Long.MAX_VALUE, Type.<Set<Object>> of("Set<Object>"));
+        assertEquals(LinkedHashSet.class, objectSet.getClass());
+        assertTrue(objectSet.contains(Long.MAX_VALUE));
+    }
+
+    // G116-01: the Immutable* stand-in path wraps the Long too (the reason an earlier version of this fix was rolled back)
+    @Test
+    public void testConvert_longToImmutableListAndSetWrapsLongElement() {
+        final ImmutableList<?> list = CommonUtil.convert(5L, ImmutableList.class);
+        assertEquals(1, list.size());
+        assertEquals(Long.class, list.get(0).getClass());
+        assertEquals(Long.valueOf(5L), list.get(0));
+
+        final ImmutableSet<?> set = CommonUtil.convert(5L, ImmutableSet.class);
+        assertEquals(1, set.size());
+        assertEquals(Long.class, set.iterator().next().getClass());
+
+        final ImmutableSortedSet<?> sortedSet = CommonUtil.convert(-1L, ImmutableSortedSet.class);
+        assertEquals(Long.class, sortedSet.first().getClass());
+
+        final ImmutableCollection<?> collection = CommonUtil.convert(1L, ImmutableCollection.class);
+        assertEquals(Long.class, collection.iterator().next().getClass());
+
+    }
+
+    // G116-01: a Long converted to an Object[]/Number[] target is wrapped as is
+    @Test
+    public void testConvert_longToObjectArrayWrapsLongElement() {
+        final Object[] objects = CommonUtil.convert(5L, Object[].class);
+        assertEquals(1, objects.length);
+        assertEquals(Long.class, objects[0].getClass());
+
+        final Number[] numbers = CommonUtil.convert(0L, Number[].class);
+        assertEquals(Number[].class, numbers.getClass());
+        assertEquals(Long.valueOf(0L), numbers[0]);
+    }
+
+    // G116-01: pins - Long targets the fall-through does not wrap keep their previous results
+    @Test
+    public void testConvert_longToNonWrapTargetsUnchanged() {
+        assertArrayEquals(new Long[] { 5L }, CommonUtil.convert(5L, Long[].class));
+        assertArrayEquals(new long[] { 5L }, CommonUtil.convert(5L, long[].class));
+        assertEquals(Arrays.asList(5L), CommonUtil.convert(5L, Type.<List<Long>> of("List<Long>")));
+        assertEquals(Arrays.asList("5"), CommonUtil.convert(5L, Type.<List<String>> of("List<String>")));
+        assertEquals(Arrays.asList(5), CommonUtil.convert(5L, Type.<List<Integer>> of("List<Integer>")));
+        assertEquals(new Date(5L), CommonUtil.convert(5L, Date.class));
+        assertEquals(new java.sql.Timestamp(1600000000123L), CommonUtil.convert(1600000000123L, java.sql.Timestamp.class));
+        assertEquals("5", CommonUtil.convert(5L, String.class));
+        assertEquals(Integer.valueOf(5), (Integer) CommonUtil.convert(5L, Integer.class));
+        assertEquals(5L, CommonUtil.convert(5L, java.util.concurrent.atomic.AtomicLong.class).get());
+        assertEquals(LongList.of(5L), CommonUtil.convert(5L, LongList.class));
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> CommonUtil.convert(5L, Map.class));
+    }
+    // ---- bug review 2026-10-02 G116 end ----
+
+    // ---- bug review 2026-10-02 verify G123 begin ----
+    // G123-02: a Long reaches the same single-value wrap as an Integer - including a raw ArrayBlockingQueue, which the Long branch
+    // used to reject ("No default constructor") - and only the element type differs
+    @Test
+    public void testConvert_longWrapsLikeIntegerForQueueTargets() {
+        for (final Class<?> target : new Class<?>[] { java.util.concurrent.ArrayBlockingQueue.class, java.util.Queue.class, java.util.Deque.class,
+                java.util.PriorityQueue.class, java.util.concurrent.LinkedBlockingQueue.class, java.util.SortedSet.class }) {
+            final Collection<?> fromLong = (Collection<?>) CommonUtil.convert(5L, target);
+            final Collection<?> fromInteger = (Collection<?>) CommonUtil.convert(5, target);
+
+            assertEquals(fromInteger.getClass(), fromLong.getClass(), target.getName());
+            assertEquals(Arrays.asList(5L), new ArrayList<>(fromLong), target.getName());
+            assertEquals(Arrays.asList(5), new ArrayList<>(fromInteger), target.getName());
+        }
+
+        final Collection<?> viaType = CommonUtil.convert(Long.MAX_VALUE, Type.of(java.util.concurrent.ArrayBlockingQueue.class));
+        assertEquals(Arrays.asList(Long.MAX_VALUE), new ArrayList<>(viaType));
+    }
+
+    // ---- bug review 2026-10-02 verify G123 end ----
+    // ---- bug review 2026-10-02 G124 begin ----
+    // G124-01: handlers with a byte[] javaType but no element type (Bytes, Base64Encoded) threw NullPointerException from the
+    // container-constraint check: a byte[] is returned as is and text is Base64-decoded.
+    @Test
+    public void testConvert_bytesHandlerWithoutElementType_instanceAndText() throws SQLException {
+        for (final String typeName : new String[] { "Bytes", "Base64Encoded" }) {
+            final Type<byte[]> type = TypeFactory.getType(typeName);
+            final byte[] bytes = { 1, 2, 3 };
+
+            assertSame(bytes, CommonUtil.convert(bytes, type), typeName);
+            assertArrayEquals(bytes, CommonUtil.convert("AQID", type), typeName);
+            assertArrayEquals(bytes, CommonUtil.convert(new ByteArrayInputStream(bytes), type), typeName);
+            assertArrayEquals(bytes, CommonUtil.convert(new SerialBlob(bytes), type), typeName);
+        }
+    }
+
+    // G124-01: a container source is converted element by element to the array's component class, the same as for byte[].
+    @Test
+    public void testConvert_bytesHandlerWithoutElementType_containerSource() {
+        final Type<byte[]> plain = TypeFactory.getType(byte[].class);
+
+        for (final String typeName : new String[] { "Bytes", "Base64Encoded" }) {
+            final Type<byte[]> type = TypeFactory.getType(typeName);
+
+            for (final Object source : new Object[] { new int[] { 1, 2 }, new Byte[] { 1, 2 }, List.of(1, 2), new String[] { "1", "2" } }) {
+                assertArrayEquals(new byte[] { 1, 2 }, CommonUtil.convert(source, type), typeName);
+                assertArrayEquals(CommonUtil.convert(source, plain), CommonUtil.convert(source, type), typeName);
+            }
+        }
+    }
+
+    // G124-01 neighbours (unchanged): ordinary array targets.
+    @Test
+    public void testConvert_arrayTargetsWithElementType_unchanged() {
+        final byte[] bytes = { 1, 2 };
+        assertSame(bytes, CommonUtil.convert(bytes, TypeFactory.getType(byte[].class)));
+        final int[] ints = { 1, 2 };
+        assertSame(ints, CommonUtil.convert(ints, TypeFactory.getType(int[].class)));
+        final String[] strings = { "a", "b" };
+        assertSame(strings, CommonUtil.convert(strings, TypeFactory.getType(String[].class)));
+
+        assertArrayEquals(new int[] { 1, 2 }, CommonUtil.convert(List.of(1L, 2L), TypeFactory.getType(int[].class)));
+        assertArrayEquals(new String[] { "1", "b" }, CommonUtil.convert(new Object[] { 1, "b" }, TypeFactory.getType(String[].class)));
+        final List<?>[] lists = CommonUtil.convert(new Object[] { List.of("1") }, TypeFactory.<List<?>[]> getType("List<Integer>[]"));
+        assertEquals(List.of(1), lists[0]);
+    }
+    // ---- bug review 2026-10-02 G124 end ----
+
+    // ---- bug review 2026-10-02 verify G125 begin ----
+    // G124-01: JSON<T[]>/XML<T[]> also have an array javaType and no element type: an instance is returned as is, a container
+    // source is converted element by element and text goes through the handler (each threw NullPointerException).
+    @Test
+    public void testConvert_jsonXmlArrayHandlersWithoutElementType() {
+        final int[] ints = { 1, 2 };
+        assertSame(ints, CommonUtil.convert(ints, TypeFactory.<int[]> getType("XML<int[]>")));
+        assertArrayEquals(new int[] { 1, 2 }, CommonUtil.convert(List.of(1, 2), TypeFactory.<int[]> getType("XML<int[]>")));
+        assertArrayEquals(new int[] { 1, 2 }, CommonUtil.convert(List.of(1L, 2L), TypeFactory.<int[]> getType("JSON<int[]>")));
+        assertArrayEquals(new int[] { 1, 2 }, CommonUtil.convert("[1, 2]", TypeFactory.<int[]> getType("JSON<int[]>")));
+
+        final String[] strings = { "a", "b" };
+        assertSame(strings, CommonUtil.convert(strings, TypeFactory.<String[]> getType("JSON<String[]>")));
+        assertArrayEquals(new String[] { "1", "b" }, CommonUtil.convert(new Object[] { 1, "b" }, TypeFactory.<String[]> getType("JSON<String[]>")));
+        assertArrayEquals(new String[] { "1", "2" }, CommonUtil.convert(List.of(1, 2), TypeFactory.<String[]> getType("XML<String[]>")));
+    }
+
+    // G124-01: Bytes as the element/value type of a container (each element went through the null element-type check)
+    @Test
+    public void testConvert_bytesHandlerAsContainerElementType() {
+        final List<byte[]> list = CommonUtil.convert(List.of("AQID"), TypeFactory.<List<byte[]>> getType("List<Bytes>"));
+        assertEquals(1, list.size());
+        assertArrayEquals(new byte[] { 1, 2, 3 }, list.get(0));
+
+        final byte[][] arrays = CommonUtil.convert(new String[] { "AQID" }, TypeFactory.<byte[][]> getType("Bytes[]"));
+        assertArrayEquals(new byte[] { 1, 2, 3 }, arrays[0]);
+
+        final Map<String, byte[]> map = CommonUtil.convert(Map.of("k", "AQID"), TypeFactory.<Map<String, byte[]>> getType("Map<String, Bytes>"));
+        assertArrayEquals(new byte[] { 1, 2, 3 }, map.get("k"));
+    }
+
+    // G124-01: text follows the target handler - Bytes Base64-decodes it (it threw NullPointerException), while a byte[] target
+    // still parses an array literal (so Base64 text fails there, and "[1, 2]" is not valid Base64 for Bytes)
+    @Test
+    public void testConvert_textToBytesHandlerVersusByteArrayClass() {
+        assertArrayEquals(new byte[] { 1, 2, 3 }, CommonUtil.convert("AQID", TypeFactory.<byte[]> getType("Bytes")));
+        assertThrows(NumberFormatException.class, () -> CommonUtil.convert("AQID", byte[].class));
+        assertArrayEquals(new byte[] { 1, 2 }, CommonUtil.convert("[1, 2]", byte[].class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert("[1, 2]", TypeFactory.<byte[]> getType("Bytes")));
+    }
+    // ---- bug review 2026-10-02 verify G125 end ----
+
+    // ---- bug review 2026-10-02 external review #3 begin ----
+    // JSON<T[]>/XML<T[]> with a PARAMETERIZED component convert each element with T's own parameters, exactly like the plain T[]
+    // type: the erased component class (List) kept "1" as a String, which failed with ClassCastException when read as Integer.
+    @Test
+    public void testConvert_jsonXmlArrayHandlersKeepParameterizedComponentType() {
+        for (final String wrapper : new String[] { "JSON", "XML" }) {
+            final Object[] fromArray = CommonUtil.convert(new Object[] { List.of("1", "2") }, TypeFactory.<Object[]> getType(wrapper + "<List<Integer>[]>"));
+            assertEquals(List.of(1, 2), fromArray[0], wrapper);
+            assertEquals(Integer.class, ((List<?>) fromArray[0]).get(0).getClass(), wrapper);
+
+            final Object[] fromList = CommonUtil.convert(List.of(List.of("3")), TypeFactory.<Object[]> getType(wrapper + "<List<Integer>[]>"));
+            assertEquals(List.of(3), fromList[0], wrapper);
+
+            final Object[] maps = CommonUtil.convert(new Object[] { Map.of("a", "1") }, TypeFactory.<Object[]> getType(wrapper + "<Map<String, Integer>[]>"));
+            assertEquals(Map.of("a", 1), maps[0], wrapper);
+
+            // an instance of the array class whose elements do not fit the element type is converted too, as for List<Integer>[]
+            final List<?>[] instance = { new ArrayList<>(List.of("4")) };
+            final Object[] converted = CommonUtil.convert(instance, TypeFactory.<Object[]> getType(wrapper + "<List<Integer>[]>"));
+            assertEquals(List.of(4), converted[0], wrapper);
+            assertArrayEquals(CommonUtil.convert(instance, TypeFactory.<Object[]> getType("List<Integer>[]")), converted, wrapper);
+        }
+
+        // scalar components are unchanged: an instance is still returned as is
+        final String[] strings = { "a" };
+        assertSame(strings, CommonUtil.convert(strings, TypeFactory.<String[]> getType("JSON<String[]>")));
+        final List<?>[] rawLists = { new ArrayList<>(List.of("x")) };
+        assertSame(rawLists, CommonUtil.convert(rawLists, TypeFactory.<Object[]> getType("JSON<List[]>")));
+    }
+    // ---- bug review 2026-10-02 external review #3 end ----
 }

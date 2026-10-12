@@ -501,11 +501,14 @@ public class SeqReview20260924cTest extends TestBase {
         }
 
         final IllegalStateException ise = new IllegalStateException("ise");
-        assertSame(ise, assertThrows(IllegalStateException.class,
-                () -> Seq.<Integer, Exception> of(1, 2).map(x -> { throw ise; }).stream().toList()));
+        assertSame(ise, assertThrows(IllegalStateException.class, () -> Seq.<Integer, Exception> of(1, 2).map(x -> {
+            throw ise;
+        }).stream().toList()));
 
         final AssertionError error = new AssertionError("error");
-        assertSame(error, assertThrows(AssertionError.class, () -> Seq.<Integer, Exception> of(1, 2).map(x -> { throw error; }).stream().toList()));
+        assertSame(error, assertThrows(AssertionError.class, () -> Seq.<Integer, Exception> of(1, 2).map(x -> {
+            throw error;
+        }).stream().toList()));
     }
 
     // ------------------------------------------------------------------------------------------------------
@@ -530,7 +533,7 @@ public class SeqReview20260924cTest extends TestBase {
 
             assertEquals(Arrays.asList(first.getName()), eager.map(File::getName).toList());
             assertEquals(Arrays.asList(first.getName()), eager2.map(File::getName).toList());
-            assertEquals(N.asSet(first.getName(), second.getName()), lazy.map(File::getName).toSet());
+            assertEquals(CommonUtil.asSet(first.getName(), second.getName()), lazy.map(File::getName).toSet());
 
             // a regular file (not a directory) yields an empty sequence, never an IOException
             assertEquals(0, Seq.listFiles(first).count());
@@ -563,9 +566,9 @@ public class SeqReview20260924cTest extends TestBase {
     /** Every path that must be transparent for a failure raised by the source sequence itself. */
     private static <X extends Exception> List<Throwables.Function<Seq<Integer, X>, List<Integer>, X>> transparentPaths(final ExecutorService executor) {
         return Arrays.asList(Seq::toList, s -> s.buffered().toList(), s -> s.buffered(1).toList(), s -> s.buffered(100_000).toList(),
-                s -> s.sps(st -> st.map(x -> x)).toList(), s -> s.sps(3, st -> st.map(x -> x)).toList(),
-                s -> s.sps(3, executor, st -> st.map(x -> x)).toList(), s -> s.transformViaStream(st -> st.map(x -> x)).toList(),
-                s -> s.transformViaStream(st -> st.map(x -> x), true).toList(), s -> s.transformViaStream(st -> st.filter(x -> true).skip(0)).toList());
+                s -> s.sps(st -> st.map(x -> x)).toList(), s -> s.sps(3, st -> st.map(x -> x)).toList(), s -> s.sps(3, executor, st -> st.map(x -> x)).toList(),
+                s -> s.transformViaStream(st -> st.map(x -> x)).toList(), s -> s.transformViaStream(st -> st.map(x -> x), true).toList(),
+                s -> s.transformViaStream(st -> st.filter(x -> true).skip(0)).toList());
     }
 
     private static <X extends Exception> void assertSameFailureOnEveryPath(final java.util.function.Supplier<Seq<Integer, X>> seqs, final Throwable expected,
@@ -626,14 +629,13 @@ public class SeqReview20260924cTest extends TestBase {
         assertEquals(IOException.class, viaSps.getClass());
         assertEquals("stage", viaSps.getMessage());
 
-        final Exception viaTransform = assertThrows(Exception.class,
-                () -> Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(st -> st.map(x -> {
-                    if (x == 2) {
-                        throw new UncheckedSQLException(new SQLException("stage sql"));
-                    }
+        final Exception viaTransform = assertThrows(Exception.class, () -> Seq.<Integer, SQLException> of(1, 2, 3).transformViaStream(st -> st.map(x -> {
+            if (x == 2) {
+                throw new UncheckedSQLException(new SQLException("stage sql"));
+            }
 
-                    return x;
-                })).toList());
+            return x;
+        })).toList());
         assertEquals(SQLException.class, viaTransform.getClass());
 
         // the stage itself still sees the documented stream() conversion of a source failure

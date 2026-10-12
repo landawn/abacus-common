@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -255,4 +256,15 @@ public class PrimitiveFloatArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
+    // 2026-10-05: the compact JSON text form. Quoted content is decoded exactly once, a bare null is the element default,
+    // and an empty or textual quoted element is still malformed.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new float[] { 1f, -2f, 0f, 3f }, type.valueOf("[\"1\", '-2', null, \"\\u0033\"]"), 0f);
+        assertArrayEquals(new float[] { 0f, 0f }, type.valueOf("[null,null]"), 0f);
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
+    }
 }

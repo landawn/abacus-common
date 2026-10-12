@@ -3,6 +3,7 @@ package com.landawn.abacus.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -628,5 +631,67 @@ public class HttpSettingsTest extends TestBase {
 
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> request.headers("X-First", "v", null, "w"));
         assertTrue(e.getMessage().contains("'name2'"), e.getMessage());
+    }
+
+    @Test
+    public void testCopyKeepsTheHeaderIterationOrder() {
+        final List<String> names = new ArrayList<>(List.of("Accept", "Authorization", "Content-Type", "User-Agent", "X-Request-Id", "Cache-Control", "Cookie",
+                "Host", "Accept-Encoding", "Accept-Language", "If-None-Match", "X-Trace"));
+
+        for (int i = 0; i < 40; i++) {
+            names.add("X-Header-" + i);
+        }
+
+        for (int count = 1; count <= names.size(); count++) {
+            final HttpSettings settings = HttpSettings.create();
+
+            for (int i = 0; i < count; i++) {
+                settings.header(names.get(i), "v" + i);
+            }
+
+            final HttpSettings copy = settings.copy();
+
+            assertNotSame(settings.headers(), copy.headers());
+            assertEquals(settings.headers(), copy.headers());
+            assertEquals(new ArrayList<>(settings.headers().headerNames()), new ArrayList<>(copy.headers().headerNames()), "header count " + count);
+        }
+    }
+
+    @Test
+    public void testHeadersKeepTheOrderInWhichTheyWereFirstAdded() {
+        final List<String> names = new ArrayList<>();
+
+        for (int i = 40; i > 0; i--) {
+            names.add("X-Header-" + i);
+        }
+
+        names.add(2, "Content-Type");
+        names.add("Accept");
+
+        final HttpSettings settings = HttpSettings.create();
+
+        for (final String name : names) {
+            settings.header(name, name + "-value");
+        }
+
+        assertEquals(names, new ArrayList<>(settings.headers().headerNames()));
+
+        // Replacing a value, under any letter case, keeps the position; removing and adding again moves it to the end.
+        settings.header("content-type", "application/xml");
+        settings.header("X-HEADER-40", "replaced");
+        assertEquals(names, new ArrayList<>(settings.headers().headerNames()));
+        assertEquals("application/xml", settings.headers().get("Content-Type"));
+
+        settings.headers().remove("X-Header-39");
+        settings.header("X-Header-39", "again");
+        final List<String> moved = new ArrayList<>(names);
+        moved.remove("X-Header-39");
+        moved.add("X-Header-39");
+        assertEquals(moved, new ArrayList<>(settings.headers().headerNames()));
+
+        // copy() and setHeaders(..) keep the order of their source.
+        assertEquals(moved, new ArrayList<>(settings.copy().headers().headerNames()));
+        assertEquals(moved, new ArrayList<>(HttpSettings.create().setHeaders(settings.headers()).headers().headerNames()));
+        assertEquals(moved, new ArrayList<>(HttpSettings.create().header("Accept", "first").setHeaders(settings.headers()).headers().headerNames()));
     }
 }

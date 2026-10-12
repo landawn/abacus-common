@@ -8,6 +8,9 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -624,6 +627,100 @@ public class PropInfoTest extends TestBase {
         Assertions.assertEquals(JsonXmlField.Direction.BOTH, recordInfo.getPropInfo("first").jsonXmlExpose);
         ComputedRecord record = N.fromJson("{\"first\": \"A\", \"last\": \"B\"}", ComputedRecord.class);
         Assertions.assertEquals("A B", record.fullName());
+    }
+
+    @com.landawn.abacus.annotation.Entity
+    public static class ComputedHolder {
+        private Computed child;
+
+        public Computed getChild() {
+            return child;
+        }
+
+        public void setChild(Computed child) {
+            this.child = child;
+        }
+
+        /** Computed: getter only, no field, no setter - a read-only intermediate for nested paths. */
+        public Computed getChildView() {
+            return child;
+        }
+    }
+
+    /**
+     * A nested path ending in a read-only property follows the plain-name rule: skipped when unmatched
+     * properties are ignored, IllegalArgumentException otherwise. It used to throw UnsupportedOperationException
+     * either way, after creating and attaching any missing intermediate bean.
+     */
+    @Test
+    public void bugFix20260930_nestedPathToReadOnlyPropertyHonoursIgnoreFlag() {
+        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(ComputedHolder.class);
+
+        // Missing intermediate: nothing is created, for either flag value.
+        ComputedHolder holder = new ComputedHolder();
+        Assertions.assertFalse(beanInfo.setPropValue(holder, "child.fullName", "x", true));
+        Assertions.assertNull(holder.getChild());
+        IllegalArgumentException iae = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> beanInfo.setPropValue(holder, "child.fullName", "x", false));
+        Assertions.assertTrue(iae.getMessage().contains("child.fullName") && iae.getMessage().contains("read-only"), iae.getMessage());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> beanInfo.setPropValue(holder, "child.fullName", "x"));
+        Assertions.assertNull(holder.getChild());
+
+        // Existing intermediate: left untouched.
+        Computed child = new Computed();
+        child.setFirst("Ada");
+        child.setLast("Lovelace");
+        holder.setChild(child);
+        Assertions.assertFalse(beanInfo.setPropValue(holder, "child.fullName", "x", true));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> beanInfo.setPropValue(holder, "child.fullName", "x", false));
+        Assertions.assertSame(child, holder.getChild());
+        Assertions.assertEquals("Ada Lovelace", child.getFullName());
+
+        // A writable last property is still set, creating the intermediate as before.
+        ComputedHolder fresh = new ComputedHolder();
+        Assertions.assertTrue(beanInfo.setPropValue(fresh, "child.first", "Grace", false));
+        Assertions.assertEquals("Grace", fresh.getChild().getFirst());
+
+        // Tolerant mapToBean reaches the same branch: the read-only key is skipped, the writable one applied.
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("child.fullName", "x");
+        map.put("child.first", "Grace");
+        ComputedHolder mapped = Beans.mapToBean(map, true, ComputedHolder.class);
+        Assertions.assertEquals("Grace", mapped.getChild().getFirst());
+
+        // Unchanged: a read-only INTERMEDIATE is walked through when its value exists, and cannot receive a new
+        // instance when it is null.
+        Assertions.assertTrue(beanInfo.getPropInfo("childView").isReadOnlyProperty);
+        Assertions.assertTrue(beanInfo.setPropValue(holder, "childView.first", "Grace", true));
+        Assertions.assertEquals("Grace", child.getFirst());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> beanInfo.setPropValue(new ComputedHolder(), "childView.first", "Grace", true));
+    }
+
+    /**
+     * A selected dot-separated name ending in a read-only property is rejected up front, like a selected plain
+     * read-only name - whether or not the map holds the key, and before anything is written. It used to pass the
+     * selection check and fail (or not) depending on the data.
+     */
+    @Test
+    public void bugFix20260930_selectedNestedPathToReadOnlyPropertyIsRejectedUpFront() {
+        final List<String> select = List.of("child.first", "child.fullName");
+
+        Map<String, Object> withKey = new LinkedHashMap<>();
+        withKey.put("child.first", "Grace");
+        withKey.put("child.fullName", "x");
+        IllegalArgumentException iae = Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(withKey, select, ComputedHolder.class));
+        Assertions.assertTrue(iae.getMessage().contains("child.fullName") && iae.getMessage().contains("read-only"), iae.getMessage());
+
+        Map<String, Object> withoutKey = new LinkedHashMap<>();
+        withoutKey.put("child.first", "Grace");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(withoutKey, select, ComputedHolder.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean((Map<String, Object>) null, select, ComputedHolder.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(List.of(withoutKey), select, ComputedHolder.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(List.of(), select, ComputedHolder.class));
+
+        // A plain read-only name is rejected the same way, and a writable nested name is still applied.
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(withoutKey, List.of("childView"), ComputedHolder.class));
+        Assertions.assertEquals("Grace", Beans.mapToBean(withKey, List.of("child.first"), ComputedHolder.class).getChild().getFirst());
     }
 
     // ===================================== a builder-based bean whose builder omits a property

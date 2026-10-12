@@ -92,6 +92,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with the specified capacity
      * @throws IllegalArgumentException if capacity is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) throws IllegalArgumentException, IllegalStateException {
         return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
@@ -119,6 +120,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with the specified capacity and eviction delay
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis)
             throws IllegalArgumentException, IllegalStateException {
@@ -149,6 +151,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with the specified configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
             throws IllegalArgumentException, IllegalStateException {
@@ -184,6 +187,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with memory constraints
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
@@ -223,6 +227,7 @@ public final class PoolFactory { //NOSONAR
      * @throws IllegalArgumentException if capacity or eviction delay is negative;
      *         if balanceFactor is non-finite or outside [0, 1].
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
@@ -261,6 +266,7 @@ public final class PoolFactory { //NOSONAR
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
      *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
@@ -297,6 +303,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with the specified capacity
      * @throws IllegalArgumentException if capacity is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity)
             throws IllegalArgumentException, IllegalStateException {
@@ -326,6 +333,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis)
             throws IllegalArgumentException, IllegalStateException {
@@ -357,6 +365,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with the specified configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy) throws IllegalArgumentException, IllegalStateException {
@@ -394,6 +403,7 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with memory constraints
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
@@ -435,6 +445,7 @@ public final class PoolFactory { //NOSONAR
      * @throws IllegalArgumentException if capacity or eviction delay is negative;
      *         if balanceFactor is non-finite or outside [0, 1].
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
@@ -476,6 +487,7 @@ public final class PoolFactory { //NOSONAR
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
      *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
      * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
+     * @throws SecurityException if a security manager denies registering the pool's shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,

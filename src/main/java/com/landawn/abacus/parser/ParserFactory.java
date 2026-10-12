@@ -32,7 +32,8 @@ import com.landawn.abacus.util.cs;
  * including JSON, XML, Avro, and Kryo. It also manages parser availability checks
  * and Kryo class registration.
  *
- * <p>The factory performs availability checks for optional dependencies at class loading time:</p>
+ * <p>The factory performs each optional dependency check when its availability method is first called,
+ * and caches that result independently. Creating a JSON parser does not initialize other formats:</p>
  * <ul>
  *   <li>Abacus XML support (requires XML processing libraries)</li>
  *   <li>Standard XML support (requires JAXP)</li>
@@ -70,23 +71,10 @@ import com.landawn.abacus.util.cs;
 @SuppressWarnings("unused")
 public final class ParserFactory {
 
-    /** Whether the Abacus XML parser is available. */
-    private static final boolean isAbacusXmlParserAvailable;
+    private static final class AbacusXmlAvailability {
+        static final boolean AVAILABLE;
 
-    /** Whether the standard XML parser is available. */
-    private static final boolean isXmlParserAvailable;
-
-    /** Whether the Apache Avro parser is available. */
-    private static final boolean isAvroParserAvailable;
-
-    /** Whether the Kryo parser is available. */
-    private static final boolean isKryoParserAvailable;
-
-    /** Whether the JAXB parser is available. */
-    private static final boolean isJaxbParserAvailable;
-
-    static {
-        {
+        static {
             boolean isAvailable = false;
 
             try {
@@ -96,11 +84,14 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isAbacusXmlParserAvailable = isAvailable;
+            AVAILABLE = isAvailable;
         }
+    }
 
-        {
+    private static final class XmlAvailability {
+        static final boolean AVAILABLE;
 
+        static {
             boolean isAvailable = false;
 
             try {
@@ -110,10 +101,14 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isXmlParserAvailable = isAvailable;
+            AVAILABLE = isAvailable;
         }
+    }
 
-        {
+    private static final class AvroAvailability {
+        static final boolean AVAILABLE;
+
+        static {
             boolean isAvailable = false;
 
             try {
@@ -134,10 +129,14 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isAvroParserAvailable = isAvailable;
+            AVAILABLE = isAvailable;
         }
+    }
 
-        {
+    private static final class KryoAvailability {
+        static final boolean AVAILABLE;
+
+        static {
             boolean isAvailable = false;
 
             try {
@@ -148,10 +147,14 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isKryoParserAvailable = isAvailable;
+            AVAILABLE = isAvailable;
         }
+    }
 
-        {
+    private static final class JaxbAvailability {
+        static final boolean AVAILABLE;
+
+        static {
             boolean isAvailable = false;
 
             try {
@@ -165,12 +168,12 @@ public final class ParserFactory {
                 // ignore;
             }
 
-            isJaxbParserAvailable = isAvailable;
+            AVAILABLE = isAvailable;
         }
     }
 
     /**
-     * Minimal JAXB-annotated type used only to probe JAXB runtime availability in the static initializer.
+     * Minimal JAXB-annotated type used only when probing JAXB runtime availability.
      * Declared {@code public} with a public no-arg constructor so that any JAXB runtime implementation can
      * build a {@code JAXBContext} for it without accessibility issues (which would otherwise cause a
      * false-negative availability result).
@@ -221,7 +224,7 @@ public final class ParserFactory {
      * @return {@code true} if abacus-common XML parser is available, {@code false} otherwise
      */
     public static boolean isAbacusXmlParserAvailable() {
-        return isAbacusXmlParserAvailable;
+        return AbacusXmlAvailability.AVAILABLE;
     }
 
     /**
@@ -238,7 +241,7 @@ public final class ParserFactory {
      * @return {@code true} if XML parser is available, {@code false} otherwise
      */
     public static boolean isXmlParserAvailable() {
-        return isXmlParserAvailable;
+        return XmlAvailability.AVAILABLE;
     }
 
     /**
@@ -255,7 +258,7 @@ public final class ParserFactory {
      * @return {@code true} if Avro parser is available, {@code false} otherwise
      */
     public static boolean isAvroParserAvailable() {
-        return isAvroParserAvailable;
+        return AvroAvailability.AVAILABLE;
     }
 
     /**
@@ -272,7 +275,7 @@ public final class ParserFactory {
      * @return {@code true} if Kryo parser is available, {@code false} otherwise
      */
     public static boolean isKryoParserAvailable() {
-        return isKryoParserAvailable;
+        return KryoAvailability.AVAILABLE;
     }
 
     /**
@@ -290,7 +293,7 @@ public final class ParserFactory {
      * @return {@code true} if the JAXB parser is available, {@code false} otherwise
      */
     public static boolean isJaxbParserAvailable() {
-        return isJaxbParserAvailable;
+        return JaxbAvailability.AVAILABLE;
     }
 
     /**

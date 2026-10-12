@@ -322,16 +322,7 @@ public class TypeBean extends TestBase {
                 || !Arrays.equals(doubleArrayType, other.doubleArrayType)) {
             return false;
         }
-        if (!Objects.equals(doubleListType, other.doubleListType)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(doubleType) != Double.doubleToLongBits(other.doubleType)) {
-            return false;
-        }
-        if (!Arrays.equals(floatArrayType, other.floatArrayType)) {
-            return false;
-        }
-        if (!Objects.equals(floatListType, other.floatListType)) {
+        if (!Objects.equals(doubleListType, other.doubleListType) || (Double.doubleToLongBits(doubleType) != Double.doubleToLongBits(other.doubleType)) || !Arrays.equals(floatArrayType, other.floatArrayType) || !Objects.equals(floatListType, other.floatListType)) {
             return false;
         }
         if (Float.floatToIntBits(floatType) != Float.floatToIntBits(other.floatType)) {

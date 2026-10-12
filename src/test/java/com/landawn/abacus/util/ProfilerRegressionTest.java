@@ -475,7 +475,7 @@ public class ProfilerRegressionTest extends TestBase {
         final Profiler.SingleLoopStatistics ghost = new Profiler.SingleLoopStatistics() {
             @Override
             public List<String> getMethodNameList() {
-                return N.asList("ghost");
+                return CommonUtil.asList("ghost");
             }
         };
 

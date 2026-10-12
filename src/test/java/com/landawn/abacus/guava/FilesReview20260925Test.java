@@ -177,8 +177,7 @@ public class FilesReview20260925Test extends TestBase {
         final File missing = file("m_order.dat");
 
         // a negative size is Guava's own first check (checkArgument before checkNotNull): reported before a null argument
-        assertEquals("size (-1) may not be negative",
-                assertThrows(IllegalArgumentException.class, () -> Files.map(null, MapMode.READ_WRITE, -1)).getMessage());
+        assertEquals("size (-1) may not be negative", assertThrows(IllegalArgumentException.class, () -> Files.map(null, MapMode.READ_WRITE, -1)).getMessage());
         assertEquals("size (-1) may not be negative", assertThrows(IllegalArgumentException.class, () -> Files.map(missing, null, -1)).getMessage());
         assertThrows(IllegalArgumentException.class, () -> Files.map(null, null, Long.MIN_VALUE));
 

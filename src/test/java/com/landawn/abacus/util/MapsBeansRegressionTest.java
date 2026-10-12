@@ -26,6 +26,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 
 /**
  * Regression tests for the iterative {@code Maps}/{@code Beans} review of 2026-09-01 (2nd pass of the day).
@@ -478,6 +479,9 @@ public class MapsBeansRegressionTest extends TestBase {
     // D1 - one getter invocation per selected property, not per accepted spelling
     // ---------------------------------------------------------------------------------------------------
 
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static class CountingBean {
         static int firstNameReads = 0;
 

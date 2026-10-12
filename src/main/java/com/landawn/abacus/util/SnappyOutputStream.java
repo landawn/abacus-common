@@ -159,6 +159,8 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void write(final byte[] b, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException, IOException {
+        N.requireNonNull(b, cs.b);
+
         // Enforce OutputStream.write(byte[], int, int) contract: org.xerial.snappy.SnappyOutputStream
         // does not validate bounds and silently no-ops for negative len, so we validate here.
         if (off < 0 || length < 0 || length > b.length - off) {

@@ -508,4 +508,126 @@ public class ObjIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    // ---- bug review 2026-09-30 G123 begin ----
+    // G123: ObjIteratorEx.defer has the same guards as ObjIterator.defer - a supplier returning the deferred iterator
+    // itself, or using it while it is being initialized, fails with IllegalStateException instead of StackOverflowError.
+    @Test
+    public void testDefer_selfReferenceFailsFast() {
+        @SuppressWarnings("unchecked")
+        final ObjIteratorEx<Object>[] self = new ObjIteratorEx[1];
+        self[0] = ObjIteratorEx.defer(() -> self[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].hasNext());
+
+        @SuppressWarnings("unchecked")
+        final ObjIteratorEx<Object>[] recursive = new ObjIteratorEx[1];
+        recursive[0] = ObjIteratorEx.defer(() -> {
+            recursive[0].hasNext();
+            return java.util.List.of("a").iterator();
+        });
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> recursive[0].hasNext());
+
+        // unchanged
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of("a", "b"),
+                com.landawn.abacus.util.stream.Stream.of(ObjIteratorEx.defer(() -> java.util.List.of("a", "b").iterator())).toList());
+    }
+    // ---- bug review 2026-09-30 G123 end ----
+
+    // ---- bug review 2026-09-30 verify2 G129 begin ----
+    // Recursive-access failure is kept (as in ObjIterator.defer) even if the supplier catches it and throws something else.
+    @Test
+    public void testDefer_recursiveAccessFailureWinsOverSupplierRethrow() {
+        @SuppressWarnings("unchecked")
+        final ObjIteratorEx<Object>[] iter = new ObjIteratorEx[1];
+        iter[0] = ObjIteratorEx.defer(() -> {
+            try {
+                iter[0].hasNext();
+            } catch (final IllegalStateException e) {
+                throw new IllegalArgumentException("wrapped", e);
+            }
+            return List.<Object> of("a").iterator();
+        });
+
+        final IllegalStateException first = Assertions.assertThrows(IllegalStateException.class, () -> iter[0].hasNext());
+        Assertions.assertEquals("Recursive initialization of deferred iterator", first.getMessage());
+        Assertions.assertSame(first, Assertions.assertThrows(IllegalStateException.class, () -> iter[0].next()));
+        Assertions.assertSame(first, Assertions.assertThrows(IllegalStateException.class, () -> iter[0].count()));
+    }
+
+    // Recursive-access failure swallowed by the supplier still fails the traversal; the iterator is not used.
+    @Test
+    public void testDefer_recursiveAccessFailureSwallowedBySupplierStillFails() {
+        @SuppressWarnings("unchecked")
+        final ObjIteratorEx<Object>[] iter = new ObjIteratorEx[1];
+        iter[0] = ObjIteratorEx.defer(() -> {
+            try {
+                iter[0].hasNext();
+            } catch (final IllegalStateException e) {
+                // ignored on purpose
+            }
+            return List.<Object> of("a").iterator();
+        });
+
+        Assertions.assertThrows(IllegalStateException.class, () -> iter[0].hasNext());
+        Assertions.assertThrows(IllegalStateException.class, () -> iter[0].next());
+    }
+
+    // A self-returning deferred iterator fails on every traversal path; closeResource stays a safe no-op.
+    @Test
+    public void testDefer_selfReferenceFailsOnEveryTraversalPath() {
+        @SuppressWarnings("unchecked")
+        final ObjIteratorEx<Object>[] self = new ObjIteratorEx[1];
+        self[0] = ObjIteratorEx.defer(() -> self[0]);
+
+        final IllegalStateException first = Assertions.assertThrows(IllegalStateException.class, () -> self[0].next());
+        Assertions.assertEquals("Iterator supplier returned the deferred iterator itself", first.getMessage());
+        Assertions.assertSame(first, Assertions.assertThrows(IllegalStateException.class, () -> self[0].count()));
+        Assertions.assertSame(first, Assertions.assertThrows(IllegalStateException.class, () -> self[0].advance(1)));
+        assertDoesNotThrow(() -> self[0].closeResource());
+    }
+
+    // Concurrent first traversal: the supplier runs once and every element is delivered exactly once.
+    @Test
+    public void testDefer_concurrentFirstTraversalInvokesSupplierOnce() throws Exception {
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        final List<Integer> source = new java.util.ArrayList<>();
+        for (int i = 0; i < 2000; i++) {
+            source.add(i);
+        }
+        final ObjIteratorEx<Integer> iter = ObjIteratorEx.defer(() -> {
+            calls.incrementAndGet();
+            return source.iterator();
+        });
+
+        final java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(8);
+        try {
+            final java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            final java.util.concurrent.atomic.AtomicInteger received = new java.util.concurrent.atomic.AtomicInteger();
+            final List<java.util.concurrent.Future<?>> futures = new java.util.ArrayList<>();
+            for (int t = 0; t < 8; t++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    while (true) {
+                        synchronized (iter) {
+                            if (!iter.hasNext()) {
+                                break;
+                            }
+                            iter.next();
+                        }
+                        received.incrementAndGet();
+                    }
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (final java.util.concurrent.Future<?> future : futures) {
+                future.get(60, java.util.concurrent.TimeUnit.SECONDS);
+            }
+            Assertions.assertEquals(1, calls.get());
+            Assertions.assertEquals(2000, received.get());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+    // ---- bug review 2026-09-30 verify2 G129 end ----
+
 }

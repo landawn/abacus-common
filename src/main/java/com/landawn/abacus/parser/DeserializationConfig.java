@@ -15,7 +15,6 @@
 package com.landawn.abacus.parser;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -52,6 +51,8 @@ import com.landawn.abacus.util.cs;
  * <p>Type lookups during deserialization use the immediate property or map-key name at each
  * nesting level. Register the local name (e.g. {@code "city"}) to affect any property or key
  * with that name, at any depth. For example:</p>
+ * <p>For JSON bean properties, a configured JSON name takes precedence over the resolved Java property name;
+ * the Java name is used as a fallback when the JSON spelling has no configured type.</p>
  * <pre>{@code
  * config.setValueType("city", String.class);   // applies to a property/key named "city" at any level
  * config.setValueType("model", String.class);  // applies to a property/key named "model" at any level
@@ -506,7 +507,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         N.checkArgNotNull(type, cs.type);
 
         if (valueTypeMap == null) {
-            valueTypeMap = new HashMap<>();
+            valueTypeMap = newConfigMap();
         }
 
         valueTypeMap.put(keyName, type);
@@ -630,10 +631,16 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         final C copy = super.copy();
 
         if (valueTypeMap != null) {
-            copy.valueTypeMap = new HashMap<>(valueTypeMap);
+            copy.valueTypeMap = copyConfigMap(valueTypeMap);
         }
 
         return copy;
+    }
+
+    // BeanInfo equality identifies the raw class; configurations must also distinguish its generic
+    // arguments because Box<String> and Box<Integer> produce different values for the same property.
+    final java.lang.reflect.Type beanTypeForValueTypes() {
+        return beanInfoForValueTypes == null ? null : beanInfoForValueTypes.javaType;
     }
 
     /**
@@ -651,7 +658,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
         h = 31 * h + N.hashCode(mapKeyType);
         h = 31 * h + N.hashCode(mapValueType);
         h = 31 * h + N.hashCode(valueTypeMap);
-        return 31 * h + N.hashCode(beanInfoForValueTypes);
+        return 31 * h + N.hashCode(beanTypeForValueTypes());
     }
 
     /**
@@ -679,7 +686,7 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
 
         return N.equals(getIgnoredPropNames(), other.getIgnoredPropNames()) && N.equals(ignoreUnmatchedProperty, other.ignoreUnmatchedProperty)
                 && N.equals(elementType, other.elementType) && N.equals(mapKeyType, other.mapKeyType) && N.equals(mapValueType, other.mapValueType)
-                && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanInfoForValueTypes, other.beanInfoForValueTypes);
+                && N.equals(valueTypeMap, other.valueTypeMap) && N.equals(beanTypeForValueTypes(), other.beanTypeForValueTypes());
     }
 
     /**

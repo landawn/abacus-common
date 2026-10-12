@@ -379,8 +379,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testSlidingMap_BiFunction_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 20; i++)
+        for (int i = 1; i <= 20; i++) {
             bigData.add(i);
+        }
         List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b) -> a + (b == null ? 0 : b)).sorted().toList();
         assertEquals(19, result.size());
         assertTrue(result.contains(3)); // 1+2
@@ -390,8 +391,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testSlidingMap_TriFunction_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 20; i++)
+        for (int i = 1; i <= 20; i++) {
             bigData.add(i);
+        }
         List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b, c) -> a + (b == null ? 0 : b) + (c == null ? 0 : c))
                 .sorted()
                 .toList();
@@ -402,8 +404,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testSlidingMap_BiFunction_MultiThread_v2() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 20; i++)
+        for (int i = 1; i <= 20; i++) {
             bigData.add(i);
+        }
         List<Integer> result = createIteratorParallelStream(bigData).slidingMap(1, false, (a, b) -> a + (b == null ? 0 : b)).sorted().toList();
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -556,8 +559,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatMap_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         List<Integer> result = createIteratorParallelStream(bigData).flatMap(n -> Stream.of(n, n * 10)).toList();
         assertEquals(100, result.size());
     }
@@ -610,8 +614,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatMapToChar_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 65; i <= 90; i++)
+        for (int i = 65; i <= 90; i++) {
             bigData.add(i);
+        }
         long count = createIteratorParallelStream(bigData).flatMapToChar(n -> CharStream.of((char) n.intValue())).count();
         assertEquals(26, count);
     }
@@ -636,8 +641,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatMapToByte_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         long count = createIteratorParallelStream(bigData).flatMapToByte(n -> ByteStream.of((byte) n.intValue())).count();
         assertEquals(50, count);
     }
@@ -652,8 +658,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatMapToShort_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         long count = createIteratorParallelStream(bigData).flatMapToShort(n -> ShortStream.of((short) n.intValue())).count();
         assertEquals(50, count);
     }
@@ -726,8 +733,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatMapToFloat_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         long count = createIteratorParallelStream(bigData).flatMapToFloat(n -> FloatStream.of((float) n.intValue())).count();
         assertEquals(50, count);
     }
@@ -981,8 +989,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testToMap_WithMergeAndSupplier_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         java.util.TreeMap<Integer, Integer> result = createIteratorParallelStream(bigData).toMap(n -> n % 5, n -> n, Integer::sum, java.util.TreeMap::new);
         assertNotNull(result);
         assertEquals(5, result.size()); // 0..4 mod 5
@@ -1061,8 +1070,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testGroupTo_WithCollectorAndSupplier_MultiThread() throws Exception {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         java.util.TreeMap<Integer, Long> result = createIteratorParallelStream(bigData).groupTo(n -> n % 5, n -> n, Collectors.counting(),
                 java.util.TreeMap::new);
         assertNotNull(result);
@@ -1112,8 +1122,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testFlatGroupTo_WithCollectorAndSupplier_MultiThread() throws Exception {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         java.util.TreeMap<Integer, Long> result = createIteratorParallelStream(bigData).flatGroupTo(n -> Arrays.asList(n % 5), (k, v) -> v,
                 Collectors.counting(), java.util.TreeMap::new);
         assertNotNull(result);
@@ -1132,8 +1143,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testToMultimap_WithSupplier_MultiThread() throws Exception {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         // Use 2-arg toMultimap(keyMapper, valueMapper) that returns ListMultimap
         com.landawn.abacus.util.ListMultimap<Integer, Integer> result = createIteratorParallelStream(bigData).toMultimap(n -> n % 5, n -> n);
         assertNotNull(result);
@@ -1158,8 +1170,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testReduce_BinaryOperator_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 100; i++)
+        for (int i = 1; i <= 100; i++) {
             bigData.add(i);
+        }
         u.Optional<Integer> result = createIteratorParallelStream(bigData).reduce(Integer::sum);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(5050), result.get());
@@ -1168,8 +1181,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testReduce_WithCombiner_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 100; i++)
+        for (int i = 1; i <= 100; i++) {
             bigData.add(i);
+        }
         Integer result = createIteratorParallelStream(bigData).reduce(0, (acc, t) -> acc + t, Integer::sum);
         assertEquals(Integer.valueOf(5050), result);
     }
@@ -1229,8 +1243,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testCollect_WithCollector_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 100; i++)
+        for (int i = 1; i <= 100; i++) {
             bigData.add(i);
+        }
         java.util.Set<Integer> result = createIteratorParallelStream(bigData).collect(Collectors.toSet());
         assertEquals(100, result.size());
     }
@@ -1275,8 +1290,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testMin_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 100; i++)
+        for (int i = 1; i <= 100; i++) {
             bigData.add(i);
+        }
         u.Optional<Integer> result = createIteratorParallelStream(bigData).min(Integer::compare);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(1), result.get());
@@ -1293,8 +1309,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testMax_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 100; i++)
+        for (int i = 1; i <= 100; i++) {
             bigData.add(i);
+        }
         u.Optional<Integer> result = createIteratorParallelStream(bigData).max(Integer::compare);
         assertTrue(result.isPresent());
         assertEquals(Integer.valueOf(100), result.get());
@@ -1636,8 +1653,9 @@ public class ParallelIteratorStreamTest extends TestBase {
     @Test
     public void testSequential_MultiThread() {
         List<Integer> bigData = new java.util.ArrayList<>();
-        for (int i = 1; i <= 50; i++)
+        for (int i = 1; i <= 50; i++) {
             bigData.add(i);
+        }
         Stream<Integer> parallelS = createIteratorParallelStream(bigData);
         assertTrue(parallelS.isParallel());
         Stream<Integer> seqStream = parallelS.sequential();

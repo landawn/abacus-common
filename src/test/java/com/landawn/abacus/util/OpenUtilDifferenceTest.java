@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +29,7 @@ public class OpenUtilDifferenceTest extends TestBase {
                     final AtomicInteger comparisons = new AtomicInteger();
                     final var diff = Difference.BeanDifference.ofByProps(a, b, null, (name, x, y) -> {
                         comparisons.incrementAndGet();
-                        return N.equals(x, y);
+                        return CommonUtil.equals(x, y);
                     });
                     assertTrue(diff.areEqual());
                     assertTrue(diff.common().isEmpty());
@@ -43,10 +44,10 @@ public class OpenUtilDifferenceTest extends TestBase {
                 left.failOnRead = false;
                 right.failOnRead = false;
                 final var selected = Difference.BeanDifference.of(left, right, List.of("username"));
-                assertEquals(N.equals(other, value), selected.areEqual());
+                assertEquals(CommonUtil.equals(other, value), selected.areEqual());
                 assertEquals(1, selected.common().size() + selected.differentValues().size());
                 final var reverseSelected = Difference.BeanDifference.of(right, left, List.of("userName"));
-                assertEquals(N.equals(other, value), reverseSelected.areEqual());
+                assertEquals(CommonUtil.equals(other, value), reverseSelected.areEqual());
                 assertEquals(1, reverseSelected.common().size() + reverseSelected.differentValues().size());
             }
         }
@@ -64,8 +65,9 @@ public class OpenUtilDifferenceTest extends TestBase {
         }
 
         public String getUsername() {
-            if (failOnRead)
+            if (failOnRead) {
                 throw new AssertionError("excluded getter");
+            }
             return username;
         }
 
@@ -87,8 +89,9 @@ public class OpenUtilDifferenceTest extends TestBase {
         }
 
         public String getUserName() {
-            if (failOnRead)
+            if (failOnRead) {
                 throw new AssertionError("excluded getter");
+            }
             return userName;
         }
 

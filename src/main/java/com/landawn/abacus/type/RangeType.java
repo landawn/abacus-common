@@ -340,9 +340,9 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * config (a {@code null} config means no surrounding quotation). It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
-     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
-     * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
-     * quoting or escaping.
+     * <b>serializeTo vs. appendTo:</b> {@code serializeTo} writes the bracket notation of {@link #stringOf(Range)} as a
+     * JSON/XML string value (quoted and escaped), whereas {@link #appendTo(Appendable, Range)} appends that same
+     * bracket notation as is (its endpoints keep their serialized, e.g. JSON-quoted, form).
      *
      * @param writer the CharacterWriter to write to
      * @param x the Range to write

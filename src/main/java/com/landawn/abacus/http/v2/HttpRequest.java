@@ -15,8 +15,11 @@
 package com.landawn.abacus.http.v2;
 
 import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.net.Authenticator;
 import java.net.URI;
 import java.net.URL;
@@ -33,6 +36,7 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,8 +93,9 @@ import com.landawn.abacus.util.cs;
  * cleanup responsibilities. Caller-owned clients are left open. An {@code InputStream} obtained through a
  * result {@code Class} ({@code get(InputStream.class)}, {@code asyncGet(InputStream.class)}, or a supertype
  * such as {@code Object.class}) is delivered <i>decoded</i>: a {@code Content-Encoding} the library
- * understands (gzip, br, snappy, lz4) is removed lazily on the first read, so a corrupt encoding surfaces
- * from that read rather than from the call that returned the stream. Such streams must still be closed.</p>
+ * understands (gzip, br, snappy, lz4) is removed lazily on the first read or positive skip, so a corrupt encoding surfaces
+ * from that operation rather than from the call that returned the stream. Before decoding starts, {@code available()}
+ * returns zero; zero-length reads and nonpositive skips do not initialize the decoder. Such streams must still be closed.</p>
  *
  * <p><b>Client reuse:</b> {@code url(..)} requests share one default client. Requests with a connect
  * timeout (the timeout-taking {@code url(..)} factories, or {@link #connectTimeout(Duration)} with no other
@@ -1213,7 +1218,7 @@ public final class HttpRequest {
      * This method automatically handles JSON/XML deserialization based on the response content type.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      * For {@code InputStream.class} (or a supertype of it) the body is returned as a stream that is
-     * decoded lazily on the first read, see the class documentation.
+     * decoded lazily on the first read or positive skip, see the class documentation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2487,6 +2492,12 @@ public final class HttpRequest {
      * This is a generic async execution method that automatically handles JSON/XML deserialization in the background.
      * An exception is thrown if the response status code indicates an error (not 2xx).
      *
+     * <p>A structured (JSON, XML or Kryo) body is parsed while it is still arriving, on the default asynchronous executor of
+     * {@link CompletableFuture} (normally {@link java.util.concurrent.ForkJoinPool#commonPool()}), so a slow response keeps one
+     * of that pool's threads reading for the length of its transfer. The JDK's response stream waits through managed blocking,
+     * which lets the common pool add compensating workers instead of starving other tasks. {@code String}, {@code byte[]} and
+     * results without a structured content format are received completely before they are converted.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CompletableFuture<User> future =
@@ -2693,7 +2704,8 @@ public final class HttpRequest {
     private <T> HttpResponse<T> prepareResponseForClientCleanup(final HttpResponse<T> response, final T responseBody, final HttpClient httpClientUsed) {
         if (responseBody instanceof InputStream inputStream) {
             @SuppressWarnings("unchecked")
-            final T body = (T) new CleanupInputStream(inputStream, () -> doAfterExecutionPropagatingUnchecked(httpClientUsed));
+            final T body = (T) new CleanupInputStream(inputStream, inputStream instanceof ParsedBodyInputStream ? () -> doAfterExecution(httpClientUsed)
+                    : () -> doAfterExecutionPropagatingUnchecked(httpClientUsed));
 
             return new DelegatingHttpResponse<>(response, body);
         }
@@ -2711,7 +2723,8 @@ public final class HttpRequest {
 
         if (responseBody instanceof InputStream inputStream) {
             @SuppressWarnings("unchecked")
-            final T body = (T) new CleanupInputStream(inputStream, clientCleanup::propagateUnchecked);
+            final T body = (T) new CleanupInputStream(inputStream,
+                    inputStream instanceof ParsedBodyInputStream ? clientCleanup::bestEffort : clientCleanup::propagateUnchecked);
 
             return new DelegatingHttpResponse<>(response, body);
         }
@@ -2776,7 +2789,7 @@ public final class HttpRequest {
 
     private static final class CleanupInputStream extends InputStream {
         private final InputStream inputStream;
-        private final Runnable cleanup;
+        private Runnable cleanup;
         private final AtomicBoolean closed = new AtomicBoolean();
 
         private CleanupInputStream(final InputStream inputStream, final Runnable cleanup) {
@@ -2815,11 +2828,16 @@ public final class HttpRequest {
                 return;
             }
 
+            // The callback can capture the request and its upload body. Only the winning close
+            // needs it, including when either close step fails.
+            final Runnable cleanupAction = cleanup;
+            cleanup = null;
+
             try {
                 inputStream.close();
             } catch (final IOException | RuntimeException | Error e) {
                 try {
-                    cleanup.run();
+                    cleanupAction.run();
                 } catch (final RuntimeException | Error cleanupFailure) {
                     if (cleanupFailure != e) {
                         e.addSuppressed(cleanupFailure);
@@ -2829,7 +2847,7 @@ public final class HttpRequest {
                 throw e;
             }
 
-            cleanup.run();
+            cleanupAction.run();
         }
 
         @Override
@@ -2864,11 +2882,24 @@ public final class HttpRequest {
             } else if (resultClass.isAssignableFrom(InputStream.class)) { // Intentional support for supertypes of InputStream.
                 subscriber = BodySubscribers.ofInputStream();
             } else {
-                subscriber = BodySubscribers.ofByteArray();
+                final ContentFormat format = HttpUtil.getContentFormat(responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null),
+                        responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null));
+                // Parsers can consume a bounded-buffer Reader directly. Explicit text/byte results and
+                // conversions without a known structured format still need the complete value.
+                subscriber = !String.class.equals(resultClass) && !byte[].class.equals(resultClass) && format != null && format != ContentFormat.NONE
+                        && format != ContentFormat.FORM_URL_ENCODED ? BodySubscribers.mapping(BodySubscribers.ofInputStream(), ParsedBodyInputStream::new)
+                                : BodySubscribers.ofByteArray();
             }
             // Only adapt the subscriber's type here; blocking body reads must happen after delivery.
             return BodySubscribers.mapping(subscriber, body -> body);
         };
+    }
+
+    // Marks a stream consumed internally, whose client cleanup retains the buffered-result policy.
+    private static final class ParsedBodyInputStream extends FilterInputStream {
+        private ParsedBodyInputStream(final InputStream input) {
+            super(input);
+        }
     }
 
     /**
@@ -2948,30 +2979,34 @@ public final class HttpRequest {
 
         final Object body = httpResponse.body();
 
+        if (body instanceof InputStream stream && !resultClass.isAssignableFrom(InputStream.class)) {
+            try (PushbackInputStream input = new PushbackInputStream(new LazyDecodingInputStream(stream, responseContentFormat), 1)) {
+                if (responseContentFormat == null || responseContentFormat == ContentFormat.NONE || responseContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                    // HEAD/204/205 ignore format headers and retain the original direct String conversion.
+                    return convertDecodedBody(IOUtil.readAllBytes(input), responseContentFormat, responseCharset, resultClass);
+                }
+
+                final int firstByte = input.read();
+                if (firstByte < 0) {
+                    // Empty String and empty Reader parsing differ for XML. Peek after decoding so a
+                    // compressed empty body also retains the original String-parser default values.
+                    return convertDecodedBody(N.EMPTY_BYTE_ARRAY, responseContentFormat, responseCharset, resultClass);
+                }
+                input.unread(firstByte);
+
+                final T result = responseContentFormat == ContentFormat.KRYO ? HttpUtil.getParser(responseContentFormat).deserialize(input, resultClass)
+                        : HttpUtil.getParser(responseContentFormat).deserialize(IOUtil.newInputStreamReader(input, responseCharset), resultClass);
+                // The former byte-array subscriber consumed the complete response before returning.
+                // Drain unread trailing bytes, including compression trailers, without retaining them.
+                input.transferTo(OutputStream.nullOutputStream());
+                return result;
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
         if (body instanceof byte[] rawBytes) {
-            final byte[] bytes = decompress(rawBytes, responseContentFormat);
-
-            if (byte[].class.equals(resultClass)) {
-                return (T) bytes;
-            }
-
-            if (String.class.equals(resultClass)) {
-                return (T) new String(bytes, responseCharset);
-            }
-
-            if (responseContentFormat == ContentFormat.KRYO) {
-                return HttpUtil.getParser(responseContentFormat).deserialize(new ByteArrayInputStream(bytes), resultClass);
-            }
-
-            final String bodyStr = new String(bytes, responseCharset);
-
-            if (responseContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                return URLEncodedUtil.decode(bodyStr, responseCharset, resultClass);
-            } else if (responseContentFormat != null && responseContentFormat != ContentFormat.NONE) {
-                return HttpUtil.getParser(responseContentFormat).deserialize(bodyStr, resultClass);
-            }
-
-            return N.convert(bodyStr, resultClass);
+            return convertDecodedBody(decompress(rawBytes, responseContentFormat), responseContentFormat, responseCharset, resultClass);
         }
 
         if (body instanceof InputStream stream && Strings.isNotEmpty(HttpUtil.getContentEncoding(responseContentFormat))) {
@@ -2984,8 +3019,31 @@ public final class HttpRequest {
         return N.convert(body, resultClass);
     }
 
+    private static <T> T convertDecodedBody(final byte[] bytes, final ContentFormat contentFormat, final Charset charset, final Class<T> resultClass) {
+        if (byte[].class.equals(resultClass)) {
+            return (T) bytes;
+        }
+
+        if (String.class.equals(resultClass)) {
+            return (T) new String(bytes, charset);
+        }
+
+        if (contentFormat == ContentFormat.KRYO) {
+            return HttpUtil.getParser(contentFormat).deserialize(new ByteArrayInputStream(bytes), resultClass);
+        }
+
+        final String text = new String(bytes, charset);
+        if (contentFormat == ContentFormat.FORM_URL_ENCODED) {
+            return URLEncodedUtil.decode(text, charset, resultClass);
+        } else if (contentFormat != null && contentFormat != ContentFormat.NONE) {
+            return HttpUtil.getParser(contentFormat).deserialize(text, resultClass);
+        }
+
+        return N.convert(text, resultClass);
+    }
+
     /**
-     * Removes a response {@code Content-Encoding} from an {@code InputStream} result on first use. The raw
+     * Removes a response {@code Content-Encoding} from an {@code InputStream} result on its first read or positive skip. The raw
      * stream is the deferred-cleanup stream, so closing this one (directly, or through the decoder, which
      * closes what it wraps) releases an owned client exactly once. If wrapping fails - a corrupt or empty
      * compressed body - the raw stream is closed before the failure propagates.
@@ -3002,15 +3060,13 @@ public final class HttpRequest {
         }
 
         /**
-         * @throws IOException if this stream was closed before its decoder was initialized
+         * @throws IOException if this stream is closed
          * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
         private InputStream decoded() throws IOException, UncheckedIOException {
-            if (decoded == null) {
-                if (closed.get()) {
-                    throw new IOException("Stream closed");
-                }
+            ensureOpen();
 
+            if (decoded == null) {
                 try {
                     decoded = HttpUtil.wrapInputStream(rawStream, contentFormat);
                 } catch (final RuntimeException | Error e) {
@@ -3033,7 +3089,18 @@ public final class HttpRequest {
         }
 
         /**
-         * @throws IOException if this stream was closed before its decoder was initialized, or if reading decoded response bytes fails
+         * Verifies that operations may still use this response stream.
+         *
+         * @throws IOException if this stream is closed
+         */
+        private void ensureOpen() throws IOException {
+            if (closed.get()) {
+                throw new IOException("Stream closed");
+            }
+        }
+
+        /**
+         * @throws IOException if this stream is closed, or if reading decoded response bytes fails
          * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
         @Override
@@ -3042,30 +3109,48 @@ public final class HttpRequest {
         }
 
         /**
-         * @throws IOException if this stream was closed before its decoder was initialized, or if reading decoded response bytes fails
+         * @throws NullPointerException if {@code b} is null
+         * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds {@code b}
+         * @throws IOException if this stream is closed, or if reading decoded response bytes fails
          * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
         @Override
         public int read(final byte[] b, final int off, final int length) throws IOException, UncheckedIOException {
+            Objects.checkFromIndexSize(off, length, b.length);
+            ensureOpen();
+
+            // Decoder construction can consume a header and block, so validate/no-op before initializing it.
+            if (length == 0) {
+                return 0;
+            }
+
             return decoded().read(b, off, length);
         }
 
         /**
-         * @throws IOException if this stream was closed before its decoder was initialized, or if skipping decoded response bytes fails
+         * @throws IOException if this stream is closed, or if skipping decoded response bytes fails
          * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
         @Override
         public long skip(final long n) throws IOException, UncheckedIOException {
+            ensureOpen();
+
+            if (n <= 0) {
+                return 0;
+            }
+
             return decoded().skip(n);
         }
 
         /**
-         * @throws IOException if this stream was closed before its decoder was initialized, or if querying the decoded response stream fails
-         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
+         * @throws IOException if this stream is closed, or if querying the decoded response stream fails
          */
         @Override
         public int available() throws IOException, UncheckedIOException {
-            return decoded().available();
+            ensureOpen();
+
+            // Encoded-byte availability cannot predict decoded bytes; probing must not read a decoder header.
+            return decoded == null ? 0 : decoded.available();
         }
 
         @Override

@@ -115,6 +115,60 @@ public class StructuralConversionTest extends TestBase {
     }
 
     @Test
+    void beanToTypedMapRejectsSelfReferentialCollectionProperties() {
+        final List<Object> values = new ArrayList<>();
+        values.add(values);
+
+        assertCyclicBeanMapConversionRejected(values);
+        assertSame(values, values.get(0));
+    }
+
+    @Test
+    void beanToTypedMapRejectsSelfReferentialMapProperties() {
+        final Map<String, Object> values = new LinkedHashMap<>();
+        values.put("self", values);
+
+        assertCyclicBeanMapConversionRejected(values);
+        assertSame(values, values.get("self"));
+    }
+
+    @Test
+    void beanToTypedMapRejectsSelfReferentialArrayProperties() {
+        final Object[] values = new Object[1];
+        values[0] = values;
+
+        assertCyclicBeanMapConversionRejected(values);
+        assertSame(values, values[0]);
+    }
+
+    private static void assertCyclicBeanMapConversionRejected(final Object value) {
+        final ContainerBean bean = new ContainerBean();
+        bean.setValue(value);
+        final Type<Map<String, Object>> target = new TypeReference<Map<String, Object>>() {
+        }.type();
+
+        assertSame(value, CommonUtil.convert(bean, Map.class).get("value"));
+        final IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(bean, target));
+        assertEquals("Cyclic container conversion is not supported", error.getMessage());
+    }
+
+    @Test
+    void beanToTypedMapAcceptsSharedAcyclicContainerProperties() {
+        final List<String> shared = new ArrayList<>(List.of("item"));
+        final Map<String, Object> values = Map.of("first", shared, "second", shared);
+        final ContainerBean bean = new ContainerBean();
+        bean.setValue(values);
+
+        final Map<String, Object> result = CommonUtil.convert(bean, new TypeReference<Map<String, Object>>() {
+        }.type());
+
+        assertEquals(Map.of("value", values), result);
+        assertSame(values, result.get("value"));
+        assertSame(shared, values.get("first"));
+        assertSame(shared, values.get("second"));
+    }
+
+    @Test
     void convertedMapKeysFollowTargetEqualityAndCollisionsAreRejected() {
         Map<String, String> source = new LinkedHashMap<>();
         source.put("1", "a");
@@ -187,6 +241,18 @@ public class StructuralConversionTest extends TestBase {
         assertEquals(1, chars.closes);
         byte[] bytes = { 0, -1, 127 };
         assertArrayEquals(bytes, CommonUtil.convert(new java.io.ByteArrayInputStream(bytes), CommonUtil.typeOf(byte[].class)));
+    }
+
+    public static class ContainerBean {
+        private Object value;
+
+        public Object getValue() {
+            return value;
+        }
+
+        public void setValue(final Object value) {
+            this.value = value;
+        }
     }
 
     private static final class ClosingReader extends StringReader {

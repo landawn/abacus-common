@@ -257,7 +257,7 @@ public class JodaMutableDateTimeTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_T904_valueOfObjectCopiesZoneAndChronology() {
         final MutableDateTime kolkata = new MutableDateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        final MutableDateTime result = mutableDateTimeType.valueOf((Object) kolkata);
+        final MutableDateTime result = mutableDateTimeType.valueOf(kolkata);
         assertNotSame(kolkata, result);
         assertEquals(kolkata, result);
         assertEquals(DateTimeZone.forID("Asia/Kolkata"), result.getZone());
@@ -268,21 +268,21 @@ public class JodaMutableDateTimeTypeTest extends TestBase {
         assertEquals(1700000000123L, kolkata.getMillis());
 
         final DateTime buddhist = new DateTime(1700000000123L, BuddhistChronology.getInstance(DateTimeZone.forID("Asia/Bangkok")));
-        final MutableDateTime buddhistResult = mutableDateTimeType.valueOf((Object) buddhist);
+        final MutableDateTime buddhistResult = mutableDateTimeType.valueOf(buddhist);
         assertEquals(buddhist.getChronology(), buddhistResult.getChronology());
         assertEquals(1700000000123L, buddhistResult.getMillis());
 
         // a DateTime source (cross-type) keeps its zone
         final DateTime dtKolkata = new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        assertEquals(DateTimeZone.forID("Asia/Kolkata"), mutableDateTimeType.valueOf((Object) dtKolkata).getZone());
+        assertEquals(DateTimeZone.forID("Asia/Kolkata"), mutableDateTimeType.valueOf(dtKolkata).getZone());
 
         // a Joda Instant has no zone: default-zone result, like the Number / Date branches
-        final MutableDateTime fromInstant = mutableDateTimeType.valueOf((Object) new Instant(1700000000123L));
+        final MutableDateTime fromInstant = mutableDateTimeType.valueOf(new Instant(1700000000123L));
         assertEquals(new MutableDateTime(1700000000123L), fromInstant);
         assertEquals(DateTimeZone.getDefault(), fromInstant.getZone());
 
         assertNull(mutableDateTimeType.valueOf((Object) null));
-        assertEquals(new MutableDateTime(1700000000123L), mutableDateTimeType.valueOf((Object) 1700000000123L));
-        assertEquals(new MutableDateTime(1700000000123L), mutableDateTimeType.valueOf((Object) new Date(1700000000123L)));
+        assertEquals(new MutableDateTime(1700000000123L), mutableDateTimeType.valueOf(1700000000123L));
+        assertEquals(new MutableDateTime(1700000000123L), mutableDateTimeType.valueOf(new Date(1700000000123L)));
     }
 }

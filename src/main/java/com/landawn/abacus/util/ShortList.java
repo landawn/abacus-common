@@ -326,6 +326,12 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     private static final int COUNT_TABLE_THRESHOLD = 1024;
 
     /**
+     * Above this many elements in the probed list, occurrence counting uses the same table even when the counted operand is
+     * small: every probed element would otherwise be boxed and hashed, which from this size on costs more than the table.
+     */
+    private static final int PROBED_COUNT_TABLE_THRESHOLD = BOUND;
+
+    /**
      * The array buffer into which the elements of the ShortList are stored.
      */
     private short[] elementData = N.EMPTY_SHORT_ARRAY;
@@ -1824,19 +1830,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final ShortList result = new ShortList(N.min(9, size(), b.size()));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final int key = elementData[i] & 0xFFFF;
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    result.add(elementData[i]);
-                }
-            }
-
-            return result;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return intersectionByCountTable(b, result);
         }
 
         final Multiset<Short> bOccurrences = b.toMultiset();
@@ -1929,20 +1924,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final ShortList result = new ShortList(N.min(size(), N.max(9, size() - b.size())));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final int key = elementData[i] & 0xFFFF;
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                } else {
-                    result.add(elementData[i]);
-                }
-            }
-
-            return result;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return differenceByCountTable(b, result);
         }
 
         final Multiset<Short> bOccurrences = b.toMultiset();
@@ -2046,33 +2029,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
         final ShortList result = new ShortList(N.max(9, Math.abs(size() - b.size())));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-            // Multiset.isEmpty() of the boxed path below is "no occurrence of b left", i.e. remainingOccurrences == 0.
-            int remainingOccurrences = b.size();
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final int key = elementData[i] & 0xFFFF;
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    remainingOccurrences--;
-                } else {
-                    result.add(elementData[i]);
-                }
-            }
-
-            for (int i = 0, len = b.size(); i < len && remainingOccurrences > 0; i++) {
-                final int key = b.elementData[i] & 0xFFFF;
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    remainingOccurrences--;
-                    result.add(b.elementData[i]);
-                }
-            }
-
-            return result;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return symmetricDifferenceByCountTable(b, result);
         }
 
         final Multiset<Short> bOccurrences = b.toMultiset();
@@ -3421,6 +3379,97 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         }
 
         return occurrences;
+    }
+
+    /*
+     * The count-table loops of intersection/difference/symmetricDifference are kept out of the public methods on purpose: a
+     * separate method gets its own JIT profile. While the loops were part of the public methods, a JVM that had warmed a
+     * method up on the Multiset path only compiled the table loop later without inlining its per-element add (low call-site
+     * frequency in the stale profile), and the loop then ran several times slower than normal, slower even than the Multiset path.
+     */
+
+    /**
+     * Count-table path of {@link #intersection(ShortList)}: appends to {@code result} each element of this list that still has
+     * an unmatched occurrence in {@code b}.
+     *
+     * @param b the list whose occurrences are counted
+     * @param result the result list to append to
+     * @return {@code result}
+     */
+    private ShortList intersectionByCountTable(final ShortList b, final ShortList result) {
+        final int[] bOccurrences = occurrenceTable(b);
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final int key = elementData[i] & 0xFFFF;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                result.add(elementData[i]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Count-table path of {@link #difference(ShortList)}: appends to {@code result} each element of this list that has no
+     * unmatched occurrence left in {@code b}.
+     *
+     * @param b the list whose occurrences are counted
+     * @param result the result list to append to
+     * @return {@code result}
+     */
+    private ShortList differenceByCountTable(final ShortList b, final ShortList result) {
+        final int[] bOccurrences = occurrenceTable(b);
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final int key = elementData[i] & 0xFFFF;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+            } else {
+                result.add(elementData[i]);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Count-table path of {@link #symmetricDifference(ShortList)}: appends the unmatched elements of this list, then the
+     * unmatched occurrences of {@code b} in index order.
+     *
+     * @param b the list whose occurrences are counted
+     * @param result the result list to append to
+     * @return {@code result}
+     */
+    private ShortList symmetricDifferenceByCountTable(final ShortList b, final ShortList result) {
+        final int[] bOccurrences = occurrenceTable(b);
+        // Multiset.isEmpty() of the boxed path in symmetricDifference is "no occurrence of b left", i.e. remainingOccurrences == 0.
+        int remainingOccurrences = b.size();
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final int key = elementData[i] & 0xFFFF;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
+            } else {
+                result.add(elementData[i]);
+            }
+        }
+
+        for (int i = 0, len = b.size(); i < len && remainingOccurrences > 0; i++) {
+            final int key = b.elementData[i] & 0xFFFF;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
+                result.add(b.elementData[i]);
+            }
+        }
+
+        return result;
     }
 
 }

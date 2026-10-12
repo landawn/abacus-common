@@ -1221,8 +1221,9 @@ public final class EscapeUtil {
 
                 // Compare the remaining length to avoid overflowing a valid offset near Integer.MAX_VALUE.
                 if (input.length() - index - i >= 4) {
-                    // Get 4 hex digits
-                    final CharSequence unicode = input.subSequence(index + i, index + i + 4);
+                    // The 4 hex digits are input[start, start + 4); they are read in place, and a subsequence is built
+                    // only for the error message, so a valid escape allocates nothing here.
+                    final int start = index + i;
 
                     // Deliberately not Integer#parseInt(CharSequence, int): it reads every character through
                     // Character#digit, which accepts non-ASCII digits - "\\u0660\\u0660\\u0664\\u0661"
@@ -1232,7 +1233,7 @@ public final class EscapeUtil {
                     int value = 0;
 
                     for (int k = 0; k < 4; k++) {
-                        final char ch = unicode.charAt(k);
+                        final char ch = input.charAt(start + k);
                         final int digit;
 
                         if (ch >= '0' && ch <= '9') {
@@ -1242,7 +1243,7 @@ public final class EscapeUtil {
                         } else if (ch >= 'a' && ch <= 'f') {
                             digit = ch - 'a' + 10;
                         } else {
-                            throw new IllegalArgumentException("Unable to parse unicode value: " + unicode);
+                            throw new IllegalArgumentException("Unable to parse unicode value: " + input.subSequence(start, start + 4));
                         }
 
                         value = (value << 4) + digit;
@@ -1420,24 +1421,25 @@ public final class EscapeUtil {
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
             final int remaining = input.length() - index - 1; // how many characters left, ignoring the first \
-            final StringBuilder builder = new StringBuilder();
             if (input.charAt(index) == '\\' && remaining > 0 && isOctalDigit(input.charAt(index + 1))) {
-                final int next = index + 1;
-                final int next2 = index + 2;
-                final int next3 = index + 3;
+                final char first = input.charAt(index + 1);
+                int value = first - '0';
+                int consumed = 2;
 
-                // we know this is good as we checked it in the if block above
-                builder.append(input.charAt(next));
+                // Java permits a third octal digit only after 0-3. Accumulate directly so the
+                // translator creates no temporary builder or String while scanning each code point.
+                if (remaining > 1 && isOctalDigit(input.charAt(index + 2))) {
+                    value = (value << 3) + input.charAt(index + 2) - '0';
+                    consumed++;
 
-                if (remaining > 1 && isOctalDigit(input.charAt(next2))) {
-                    builder.append(input.charAt(next2));
-                    if (remaining > 2 && isZeroToThree(input.charAt(next)) && isOctalDigit(input.charAt(next3))) {
-                        builder.append(input.charAt(next3));
+                    if (remaining > 2 && isZeroToThree(first) && isOctalDigit(input.charAt(index + 3))) {
+                        value = (value << 3) + input.charAt(index + 3) - '0';
+                        consumed++;
                     }
                 }
 
-                out.write(Integer.parseInt(builder.toString(), 8));
-                return 1 + builder.length();
+                out.write(value);
+                return consumed;
             }
             return 0;
         }
@@ -1627,6 +1629,18 @@ public final class EscapeUtil {
         private final int longest;
 
         /**
+         * The sorted keys of a table whose keys are all one char long, or {@code null} for any other table. With
+         * {@code singleCharValues} it lets {@code translate} find a replacement without allocating a one-char key
+         * {@code String} for every match.
+         */
+        private final char[] singleCharKeys;
+
+        /**
+         * The replacements of {@code singleCharKeys}, each at the position of its key, or {@code null} for any other table.
+         */
+        private final String[] singleCharValues;
+
+        /**
          * Defines the lookup table to be used in translation.
          *
          * <p>Each entry in {@code lookup} must be a two-element array where the first element
@@ -1667,6 +1681,31 @@ public final class EscapeUtil {
             suffixSet = suffixes.equals(prefixSet) ? prefixSet : suffixes;
             shortest = _shortest;
             longest = _longest;
+
+            if (_longest == 1) {
+                // Every key is one char long (all the escape tables): keep the keys sorted, with each replacement at the
+                // position of its key, so that translate finds a match by binary search instead of building a one-char
+                // String per escaped char just to probe lookupMap.
+                final char[] keys = new char[lookupMap.size()];
+                int count = 0;
+
+                for (final Map.Entry<String, String> entry : lookupMap.entrySet()) {
+                    if (entry.getKey().length() == 1 && entry.getValue() != null) {
+                        keys[count++] = entry.getKey().charAt(0);
+                    }
+                }
+
+                singleCharKeys = count == keys.length ? keys : Arrays.copyOf(keys, count);
+                Arrays.sort(singleCharKeys);
+                singleCharValues = new String[count];
+
+                for (int i = 0; i < count; i++) {
+                    singleCharValues[i] = lookupMap.get(String.valueOf(singleCharKeys[i]));
+                }
+            } else {
+                singleCharKeys = null;
+                singleCharValues = null;
+            }
         }
 
         /**
@@ -1682,8 +1721,20 @@ public final class EscapeUtil {
          */
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
+            final char first = input.charAt(index);
+
             // check if translation exists for the input at position index
-            if (prefixSet.get(input.charAt(index))) {
+            if (prefixSet.get(first)) {
+                if (singleCharKeys != null) {
+                    // One-char keys only: the greedy loop below could only match the key equal to 'first'.
+                    final int keyIndex = Arrays.binarySearch(singleCharKeys, first);
+
+                    if (keyIndex >= 0) {
+                        out.write(singleCharValues[keyIndex]);
+                        return 1; // one char, hence one code point
+                    }
+                }
+
                 final int max = Math.min(longest, input.length() - index);
                 // implement greedy algorithm by trying maximum match first
                 for (int i = max; i >= shortest; i--) {

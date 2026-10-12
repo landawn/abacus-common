@@ -30,6 +30,10 @@ import com.landawn.abacus.type.Type;
  * This interface provides XML-specific serialization and deserialization methods,
  * including support for DOM nodes and node class mappings.
  *
+ * <p>Deserializing into an anonymous collection or map class throws {@link IllegalArgumentException} (see
+ * {@link com.landawn.abacus.util.N#newInstance(Class)}); use a named class. Factories registered with Suppliers or
+ * IntFunctions for such a concrete class are not used here. Serializing such a container is unaffected.</p>
+ *
  * <p>The XmlParser supports:</p>
  * <ul>
  *   <li>Serialization of Java objects to XML format</li>
@@ -249,7 +253,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @throws IllegalArgumentException if {@code source} is null or is a directory that cannot be opened.
      * @throws UncheckedIOException if opening {@code source} fails, or the selected XML backend reports an {@code IOException} while
      *         reading the XML file
-     * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
+     * @throws ParsingException if no matching type is found in {@code nodeTypes}, the XML is malformed, or the root element
+     *         cannot be read as the mapped type
      * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
     <T> T deserialize(File source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)
@@ -286,7 +291,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} is {@code null}
-     * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
+     * @throws ParsingException if no matching type is found in {@code nodeTypes}, the XML is malformed, or the root element
+     *         cannot be read as the mapped type
      * @throws UncheckedIOException if the selected XML backend reports an {@code IOException} while reading XML from {@code source}
      * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
@@ -328,7 +334,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} is {@code null} and the parser uses the StAX backend (a DOM or SAX
      *         backend reports a {@code null} reader as an {@code UncheckedIOException})
-     * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
+     * @throws ParsingException if no matching type is found in {@code nodeTypes}, the XML is malformed, or the root element
+     *         cannot be read as the mapped type
      * @throws UncheckedIOException if the selected XML backend reports an {@code IOException} while reading XML from {@code source}
      * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
@@ -372,7 +379,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} is null.
-     * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML structure is invalid
+     * @throws ParsingException if no matching type is found in {@code nodeTypes}, the XML structure is invalid, or the root
+     *         element cannot be read as the mapped type
      * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
     <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)

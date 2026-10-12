@@ -246,4 +246,35 @@ public class TimedTypeTest extends TestBase {
     public static class ReviewFixesTimedBean {
         public Timed<String> tm = Timed.of("v", Long.MAX_VALUE);
     }
+
+    // ---- bug review 2026-09-30 G139 begin ----
+    // G139: an empty or blank quoted timestamp is rejected (it was read as timestamp 0), as for IndexedType; a JSON null
+    // timestamp still means 0.
+    @Test
+    public void testValueOf_emptyQuotedTimestampRejected() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> timedType.valueOf("[\"\", \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> timedType.valueOf("[\"  \", \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> timedType.valueOf("['', \"a\"]"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, timedType.valueOf("[null, \"a\"]").timestamp());
+        org.junit.jupiter.api.Assertions.assertEquals(3, timedType.valueOf("[\"3\", \"a\"]").timestamp());
+        org.junit.jupiter.api.Assertions.assertEquals(-5, timedType.valueOf("[-5, \"a\"]").timestamp());
+        org.junit.jupiter.api.Assertions.assertEquals("a", timedType.valueOf("[5, \"a\"]").value());
+    }
+    // ---- bug review 2026-09-30 G139 end ----
+
+    // ---- bug review 2026-09-30 G149 begin ----
+    // G149: the blank metadata text the message quotes is escaped (a tab was embedded raw), on the valueOf and the JSON paths.
+    @Test
+    public void testValueOf_blankMetadataMessageIsEscaped() {
+        final NumberFormatException e = org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> timedType.valueOf("[\"\\t\", \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertTrue(e.getMessage().startsWith("Timestamp of ") && e.getMessage().endsWith("but was: \"\\t\""), e.getMessage());
+        org.junit.jupiter.api.Assertions.assertFalse(e.getMessage().contains("\t"), e.getMessage());
+
+        final NumberFormatException e2 = org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> com.landawn.abacus.util.N
+                .fromJson("{\"v\": [\"\\t\", \"a\"]}", com.landawn.abacus.parser.JsonDeserConfig.create().setValueType("v", timedType), java.util.Map.class));
+        org.junit.jupiter.api.Assertions.assertTrue(e2.getMessage().endsWith("but was: \"\\t\""), e2.getMessage());
+    }
+    // ---- bug review 2026-09-30 G149 end ----
+
 }

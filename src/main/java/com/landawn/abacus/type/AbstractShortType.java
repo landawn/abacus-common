@@ -114,6 +114,35 @@ public abstract class AbstractShortType extends NumberType<Number> {
             return (Short) defaultValue();
         }
 
+        // Numbers.toShort accepts exactly the text Numbers.parseIntOrElse accepts with a value in the short range;
+        // parseIntOrElse constructs no exception or other object for the rest. Rejected text (MIN_VALUE marks it, and
+        // it is outside the short range) goes to parseRejected, which keeps the suffix recovery and every failure
+        // diagnostic off this common path.
+        final int value = Numbers.parseIntOrElse(str, Integer.MIN_VALUE);
+
+        return value >= Short.MIN_VALUE && value <= Short.MAX_VALUE ? (short) value : parseRejected(str);
+    }
+
+    /**
+     * Parses text that {@link Numbers#parseIntOrElse(String, int)} did not accept as a {@code short}, with the
+     * single-suffix recovery and the failures documented on {@link #valueOf(String)}.
+     *
+     * @param str the non-empty text to parse
+     * @return the parsed value
+     * @throws NumberFormatException if the text is not a valid integer literal, with or without its single suffix
+     * @throws ArithmeticException if the text is a well-formed integer outside the {@code short} range
+     */
+    private static short parseRejected(final String str) throws NumberFormatException, ArithmeticException {
+        // Decimal text with an F/f/D/d suffix is accepted below only once the suffix is removed. Parse that form
+        // directly instead of first constructing the exception Numbers.toShort reports for it.
+        if (hasDecimalFloatingSuffix(str)) {
+            final int value = Numbers.parseIntOrElse(str.substring(0, str.length() - 1), Integer.MIN_VALUE);
+
+            if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+                return (short) value;
+            }
+        }
+
         try {
             return Numbers.toShort(str);
         } catch (final NumberFormatException e) {

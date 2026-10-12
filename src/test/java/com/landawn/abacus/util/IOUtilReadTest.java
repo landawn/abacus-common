@@ -1146,6 +1146,7 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         assertEquals(0, IOUtil.readLines(resumableReaderG043("a\n", null, "b\n"), 2, 1).size());
         assertEquals(0, IOUtil.readLines(new java.io.BufferedReader(resumableReaderG043("a\n", null, "b\n")), 2, 1).size());
     }
+
     // ---- deep review 2026-09-25 G043 end ----
     // ---- perf review 2026-09-26 G043 begin ----
     private static byte[] patternBytesG043(final int size) {
@@ -1174,8 +1175,8 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         final int bufferSize = Objectory.BUFFER_SIZE;
         final byte[] data = patternBytesG043(bufferSize * 5 + 123);
 
-        for (final int maxLength : new int[] { bufferSize - 1, bufferSize, bufferSize + 1, bufferSize * 2, bufferSize * 3 + 17, data.length - 1,
-                data.length, data.length + 1, Integer.MAX_VALUE }) {
+        for (final int maxLength : new int[] { bufferSize - 1, bufferSize, bufferSize + 1, bufferSize * 2, bufferSize * 3 + 17, data.length - 1, data.length,
+                data.length + 1, Integer.MAX_VALUE }) {
             for (final long offset : new long[] { 0, 1, bufferSize, data.length - 5, data.length, data.length + 1L }) {
                 final int from = (int) Math.min(offset, data.length);
                 final int to = (int) Math.min((long) from + maxLength, data.length);

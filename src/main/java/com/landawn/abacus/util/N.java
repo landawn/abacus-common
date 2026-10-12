@@ -5535,7 +5535,7 @@ public final class N extends CommonUtil {
         final int size = a.size();
 
         if (size == 0) {
-            return new RowDataset(newColumnNameList, newColumnList);
+            return RowDataset.fromOwnedColumns(newColumnNameList, newColumnList);
         }
 
         final int commonColumnCount = keyColumnNames.size();
@@ -5628,7 +5628,7 @@ public final class N extends CommonUtil {
             }
         }
 
-        return new RowDataset(newColumnNameList, newColumnList);
+        return RowDataset.fromOwnedColumns(newColumnNameList, newColumnList);
     }
 
     /**
@@ -5666,7 +5666,9 @@ public final class N extends CommonUtil {
         final List<String> columnNameListB = b.columnNames();
 
         final List<String> commonColumnNameList = new ArrayList<>(columnNameListA);
-        commonColumnNameList.retainAll(columnNameListB);
+        // A hash lookup in b's column index, not retainAll(columnNameListB): columnNames() is a view without an
+        // indexed contains, so retainAll scanned b's names once per column of a (quadratic for wide Datasets).
+        commonColumnNameList.removeIf(columnName -> !b.containsColumn(columnName));
 
         if (N.isEmpty(commonColumnNameList)) {
             throw new IllegalArgumentException("These two Datasets do not have any common column names: " + columnNameListA + ", " + columnNameListB);
@@ -13159,6 +13161,13 @@ public final class N extends CommonUtil {
      * permits and {@link #retainAll(Collection, Collection)} has always done. Wrap the values in a
      * {@code new HashSet<>(..)} to have them matched by {@code equals}/{@code hashCode} and absorbed instead.</p>
      *
+     * <p>A receiver that is neither a {@code List} nor a {@code Set} and hands out a new instance for the same element
+     * on each traversal (a transforming view such as Guava's {@code Collections2.transform}) loses exactly its matches
+     * when {@code valuesToRemove} is not a {@code Set}, or is an exact {@code HashSet}, {@code LinkedHashSet},
+     * {@code TreeSet}, {@code ConcurrentSkipListSet} or {@link IdentityHashSet}. With any other {@code Set} such a
+     * receiver may keep some matches, and one that also reorders or regroups its elements when they are removed may lose
+     * a non-matching element instead; wrap the values in a {@code new HashSet<>(..)} for such a receiver.</p>
+     *
      * <p>A {@code null} or empty receiver, or {@code null} or empty {@code valuesToRemove}, returns {@code false}
      * without attempting removal. Other calls invoke the receiver's removal operations and propagate any
      * {@link UnsupportedOperationException}; depending on the receiver, that exception may be thrown even when
@@ -13208,6 +13217,15 @@ public final class N extends CommonUtil {
      * before applying any removal: by position for a {@code List} (whose {@code removeIf} visits each element once, in
      * order), by identity for any other receiver, so that an equal-but-distinct sibling is left alone either way.</p>
      *
+     * <p>A receiver that is neither a {@code List} nor a {@code Set} may be a view that hands out a new instance for the
+     * same element on each traversal, or that reorders or regroups its elements when one is removed, so neither the
+     * instances nor the positions met in the first pass reliably identify a doomed element again. When the
+     * {@code Set} argument's membership rule is known exactly - an exact {@code HashSet} or {@code LinkedHashSet}
+     * ({@code equals}/{@code hashCode}), {@code TreeSet} or {@code ConcurrentSkipListSet} (its comparator) or
+     * {@link IdentityHashSet} (identity) - the matched elements are recorded under that same rule and the receiver
+     * removes whatever the rule matches, in its own traversal. Any other {@code Set} argument keeps the identity rule
+     * with its all-or-nothing positional fallback.</p>
+     *
      * @param c the non-empty collection to remove from
      * @param valuesToRemove the values to remove
      * @param valuesAreIndependent {@code true} if {@code valuesToRemove} is already a private copy that cannot be
@@ -13247,6 +13265,29 @@ public final class N extends CommonUtil {
             // everything. Recording the verdicts first, as the branch below must, costs an identity-map entry
             // per removed element - measured at about 10x this loop for a 400k-element `c`.
             return c.removeIf(probe::contains);
+        }
+
+        // A receiver that is neither a List nor a Set may hand out a NEW instance for the same element on every traversal (a
+        // Collections2.transform view re-applies its function) and may reorder or regroup its elements as they are removed (a
+        // PriorityQueue backing re-heapifies, a Multiset visits each distinct element once), so neither the instances nor the
+        // positions met in a first pass reliably identify the doomed elements again. When the argument's membership rule is
+        // known exactly, the matched elements are recorded under that same rule (still reading `probe` only, before any
+        // removal) and the receiver removes whatever that rule matches - each element equal under the rule to a matched one
+        // is itself a match. Memory is proportional to the matches, not to the argument.
+        if (!(c instanceof List)) {
+            final Set<Object> matched = newSetWithSameMembershipRule(valuesToRemove);
+
+            if (matched != null) {
+                for (final Object e : c) {
+                    //noinspection SuspiciousMethodCalls
+                    if (probe.contains(e)) {
+                        matched.add(e);
+                    }
+                }
+
+                // Not short-circuited on an empty `matched`: `removeIf` is attempted either way, as below.
+                return c.removeIf(matched::contains);
+            }
         }
 
         // Phase 1 only reads both collections, so `probe` may still be a view backed by `c`. The doomed positions are
@@ -13300,6 +13341,29 @@ public final class N extends CommonUtil {
         final int[] cursor = { 0 };
 
         return c.removeIf(e -> doomedPositions.get(cursor[0]++));
+    }
+
+    // A new empty Set with exactly the membership rule of `set`, or null if that rule is not known exactly. Only these exact
+    // classes qualify: a subclass may override contains, and a Set such as Collections.newSetFromMap(..) or a key-set view
+    // decides membership through a backing map whose rule cannot be told from its class. A sub-set view of a TreeSet or
+    // ConcurrentSkipListSet is an exact class too; its range need not be copied, as only elements it contains are recorded.
+    @SuppressWarnings("unchecked")
+    private static Set<Object> newSetWithSameMembershipRule(final Collection<?> set) {
+        final Class<?> cls = set.getClass();
+
+        if (cls == HashSet.class || cls == LinkedHashSet.class) {
+            return new HashSet<>();
+        }
+
+        if (cls == java.util.TreeSet.class || cls == java.util.concurrent.ConcurrentSkipListSet.class) {
+            return new java.util.TreeSet<>((Comparator<Object>) ((java.util.SortedSet<?>) set).comparator());
+        }
+
+        if (cls == IdentityHashSet.class) {
+            return new IdentityHashSet<>();
+        }
+
+        return null;
     }
 
     /**
@@ -13871,7 +13935,8 @@ public final class N extends CommonUtil {
      * <ul>
      *   <li>If {@code isSorted} is true: Uses optimized sequential comparison - O(n) time, O(n) space</li>
      *   <li>If {@code isSorted} is false: Keeps the first occurrence of each value using a fixed 8 KB bitmap of the 65536
-     *       possible {@code char} values - O(n) time, where {@code n} is the size of the requested range
+     *       possible {@code char} values (a range of at most 32 elements is compared with the values kept so far
+     *       instead) - O(n) time, where {@code n} is the size of the requested range
      *       ({@code toIndex - fromIndex}), not the length of the whole array</li>
      * </ul>
      *
@@ -13924,10 +13989,15 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
+            final int len = toIndex - fromIndex;
+
+            if (len <= DISTINCT_SCAN_LIMIT) {
+                return removeDuplicatesByScan(a, fromIndex, toIndex);
+            }
+
             // A char has only 65536 possible values: a bitmap replaces the boxed LinkedHashSet that used to be pre-sized to
             // the whole range (10-100x slower), and the scan stops once every value has been seen.
             final long[] seen = new long[1024]; // one bit per possible value
-            final int len = toIndex - fromIndex;
             final char[] result = new char[Math.min(len, 65536)];
             int n = 0;
 
@@ -13940,12 +14010,40 @@ public final class N extends CommonUtil {
                 }
             }
 
-            if (n == len) {
-                return (fromIndex == 0 && toIndex == a.length) ? a.clone() : copyOfRange(a, fromIndex, toIndex);
-            }
-
+            // All distinct (n == len) leaves `result` equal to the range already, so it is returned as is.
             return n == result.length ? result : copyOfRange(result, 0, n);
         }
+    }
+
+    /**
+     * Largest range for which the unsorted {@code char}/{@code short} duplicate removal scans the values kept so far
+     * instead of clearing its 8 KB bitmap.
+     */
+    private static final int DISTINCT_SCAN_LIMIT = 32;
+
+    /**
+     * Unsorted duplicate removal for a short range ({@code toIndex - fromIndex <= DISTINCT_SCAN_LIMIT}): each element is
+     * compared with the values kept so far, which is cheaper than allocating and clearing the 8 KB bitmap of the general
+     * path. Keeps the first occurrence of each value, in encounter order.
+     */
+    private static char[] removeDuplicatesByScan(final char[] a, final int fromIndex, final int toIndex) {
+        final char[] result = new char[toIndex - fromIndex];
+        int n = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            final char e = a[i];
+            int j = 0;
+
+            while (j < n && result[j] != e) {
+                j++;
+            }
+
+            if (j == n) {
+                result[n++] = e;
+            }
+        }
+
+        return n == result.length ? result : copyOfRange(result, 0, n);
     }
 
     /**
@@ -14063,10 +14161,7 @@ public final class N extends CommonUtil {
                 }
             }
 
-            if (n == len) {
-                return (fromIndex == 0 && toIndex == a.length) ? a.clone() : copyOfRange(a, fromIndex, toIndex);
-            }
-
+            // All distinct (n == len) leaves `result` equal to the range already, so it is returned as is.
             return n == result.length ? result : copyOfRange(result, 0, n);
         }
     }
@@ -14170,10 +14265,15 @@ public final class N extends CommonUtil {
 
             return idx == b.length ? b : copyOfRange(b, 0, idx);
         } else {
+            final int len = toIndex - fromIndex;
+
+            if (len <= DISTINCT_SCAN_LIMIT) {
+                return removeDuplicatesByScan(a, fromIndex, toIndex);
+            }
+
             // A short has only 65536 possible values: a bitmap replaces the boxed LinkedHashSet that used to be pre-sized to
             // the whole range (10-100x slower), and the scan stops once every value has been seen.
             final long[] seen = new long[1024]; // one bit per possible value
-            final int len = toIndex - fromIndex;
             final short[] result = new short[Math.min(len, 65536)];
             int n = 0;
 
@@ -14186,12 +14286,32 @@ public final class N extends CommonUtil {
                 }
             }
 
-            if (n == len) {
-                return (fromIndex == 0 && toIndex == a.length) ? a.clone() : copyOfRange(a, fromIndex, toIndex);
-            }
-
+            // All distinct (n == len) leaves `result` equal to the range already, so it is returned as is.
             return n == result.length ? result : copyOfRange(result, 0, n);
         }
+    }
+
+    /**
+     * {@code short} twin of {@link #removeDuplicatesByScan(char[], int, int)}.
+     */
+    private static short[] removeDuplicatesByScan(final short[] a, final int fromIndex, final int toIndex) {
+        final short[] result = new short[toIndex - fromIndex];
+        int n = 0;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            final short e = a[i];
+            int j = 0;
+
+            while (j < n && result[j] != e) {
+                j++;
+            }
+
+            if (j == n) {
+                result[n++] = e;
+            }
+        }
+
+        return n == result.length ? result : copyOfRange(result, 0, n);
     }
 
     /**
@@ -14990,22 +15110,43 @@ public final class N extends CommonUtil {
             // path ran ~100x slower than the unsorted one), removal-only (the unsorted clear() + addAll() rebuild
             // EMPTIED a list that supports removal but not add), and nothing changes before the first removal fails.
             // Both predicates are stateful: every List's removeIf visits each element once, in order.
-            if (isSorted || c.size() == 2) {
-                // Adjacent duplicates: `previous` advances only on a kept element. Two elements are always adjacent.
-                final Object[] previous = { NO_PREVIOUS_ELEMENT };
+            final boolean adjacentOnly = isSorted || c.size() == 2;
+            final boolean[] matched = { false };
 
-                return c.removeIf(e -> {
-                    if (previous[0] != NO_PREVIOUS_ELEMENT && duplicateEquals(e, previous[0])) {
+            try {
+                if (adjacentOnly) {
+                    // Adjacent duplicates: `previous` advances only on a kept element. Two elements are always adjacent.
+                    final Object[] previous = { NO_PREVIOUS_ELEMENT };
+
+                    return c.removeIf(e -> {
+                        if (previous[0] != NO_PREVIOUS_ELEMENT && duplicateEquals(e, previous[0])) {
+                            matched[0] = true;
+                            return true;
+                        }
+
+                        previous[0] = e;
+                        return false;
+                    });
+                } else {
+                    final Set<Object> seen = newHashSet(c.size());
+
+                    return c.removeIf(e -> {
+                        if (seen.add(hashKey(e))) {
+                            return false;
+                        }
+
+                        matched[0] = true;
                         return true;
-                    }
+                    });
+                }
+            } catch (final UnsupportedOperationException e) {
+                // An unmodifiable List (List.of, N.asList, Collections.unmodifiableList) rejects removeIf before testing a
+                // single element: a duplicate-free one reports false, like a Set or non-List receiver, instead of failing.
+                if (matched[0] || containsDuplicatesToRemove(c, adjacentOnly)) {
+                    throw e;
+                }
 
-                    previous[0] = e;
-                    return false;
-                });
-            } else {
-                final Set<Object> seen = newHashSet(c.size());
-
-                return c.removeIf(e -> !seen.add(hashKey(e)));
+                return false;
             }
         }
 
@@ -15063,6 +15204,36 @@ public final class N extends CommonUtil {
         }
 
         return containsDuplicates;
+    }
+
+    /**
+     * Read-only check whether {@link #removeDuplicates(Collection, boolean)} would remove anything from {@code c}: an
+     * adjacent pair equal under {@code duplicateEquals} when {@code adjacentOnly}, otherwise any repeated element.
+     */
+    private static boolean containsDuplicatesToRemove(final Collection<?> c, final boolean adjacentOnly) {
+        if (adjacentOnly) {
+            Object previous = NO_PREVIOUS_ELEMENT;
+
+            for (final Object e : c) {
+                if (previous != NO_PREVIOUS_ELEMENT && duplicateEquals(e, previous)) {
+                    return true;
+                }
+
+                previous = e;
+            }
+
+            return false;
+        }
+
+        final Set<Object> seen = newHashSet(c.size());
+
+        for (final Object e : c) {
+            if (!seen.add(hashKey(e))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -15518,13 +15689,14 @@ public final class N extends CommonUtil {
             return false;
         }
 
-        if (c instanceof LinkedList || toIndex - fromIndex <= 3) {
+        if (c.getClass() == ArrayList.class || c instanceof LinkedList || toIndex - fromIndex <= 3) {
             c.subList(fromIndex, toIndex).clear();
         } else {
-            // The gate above is deliberately unchanged: routing every List through subList().clear() would go
-            // quadratic on an AbstractList that does not override removeRange. The linear alternative used to rebuild
-            // the list with clear() + addAll(), which EMPTIED a list that supports removal but not add (a
-            // Lists.transform view). A positional removeIf needs removal only; it visits each element once, in order.
+            // Exact ArrayList has a bulk removeRange; subclasses keep their own removal behavior. Routing every
+            // List through subList().clear() would go quadratic on an AbstractList that does not override removeRange.
+            // The linear alternative used to rebuild the list with clear() + addAll(), which EMPTIED a list that
+            // supports removal but not add (a Lists.transform view). A positional removeIf needs removal only; it
+            // visits each element once, in order.
             final int[] position = { 0 };
 
             c.removeIf(e -> {
@@ -17171,6 +17343,8 @@ public final class N extends CommonUtil {
             }
         } else if (toIndex - fromIndex > 65536) {
             return true; // pigeonhole: a char has only 65536 possible values
+        } else if (toIndex - fromIndex <= MAX_PAIRWISE_DUPLICATE_SCAN_LENGTH) {
+            return containsDuplicatesPairwise(a, fromIndex, toIndex);
         } else {
             final long[] seen = new long[1024]; // one bit per possible value
 
@@ -17353,6 +17527,8 @@ public final class N extends CommonUtil {
             }
         } else if (toIndex - fromIndex > 65536) {
             return true; // pigeonhole: a short has only 65536 possible values
+        } else if (toIndex - fromIndex <= MAX_PAIRWISE_DUPLICATE_SCAN_LENGTH) {
+            return containsDuplicatesPairwise(a, fromIndex, toIndex);
         } else {
             final long[] seen = new long[1024]; // one bit per possible value
 
@@ -17366,6 +17542,56 @@ public final class N extends CommonUtil {
                 seen[k >>> 6] |= 1L << k;
             }
         }
+        return false;
+    }
+
+    /**
+     * Longest range that the unsorted {@code char}/{@code short} duplicate scans compare pairwise. Up to this length the
+     * at most {@code n * (n - 1) / 2} comparisons cost less than allocating and zeroing the 8 KB bitmap of the general path.
+     */
+    private static final int MAX_PAIRWISE_DUPLICATE_SCAN_LENGTH = 32;
+
+    /**
+     * Compares every pair of elements in {@code a[fromIndex, toIndex)}, stopping at the first repeated value.
+     *
+     * @param a the array to scan
+     * @param fromIndex the start index (inclusive) of the range
+     * @param toIndex the end index (exclusive) of the range
+     * @return {@code true} if a value occurs more than once in the range
+     */
+    private static boolean containsDuplicatesPairwise(final char[] a, final int fromIndex, final int toIndex) {
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            final char e = a[i];
+
+            for (int j = fromIndex; j < i; j++) {
+                if (a[j] == e) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Compares every pair of elements in {@code a[fromIndex, toIndex)}, stopping at the first repeated value.
+     *
+     * @param a the array to scan
+     * @param fromIndex the start index (inclusive) of the range
+     * @param toIndex the end index (exclusive) of the range
+     * @return {@code true} if a value occurs more than once in the range
+     */
+    private static boolean containsDuplicatesPairwise(final short[] a, final int fromIndex, final int toIndex) {
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            final short e = a[i];
+
+            for (int j = fromIndex; j < i; j++) {
+                if (a[j] == e) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -18009,18 +18235,35 @@ public final class N extends CommonUtil {
      */
     private static final int MAX_KEY_SET_BITS = 30;
 
+    // Probe limits of IntKeySet/LongKeySet. One add, or one rehash placement, may probe KEY_SET_FREE_PROBES occupied slots
+    // without charge; every further probe is charged to a budget of one probe per stored key plus KEY_SET_PROBE_SLACK, and
+    // exhausting that budget moves the keys to a boxed HashSet. A fixed cap of 64 probes per insertion switched on
+    // ordinary inputs, because a table at most half full has single probe runs that long once it is large (55-64 near 2^25
+    // random keys; whole-number doubles reach 64 at a million keys). Total probing stays linear, at most the free probes
+    // per operation plus the budget, so a colliding cluster still falls back after about 110 keys. The common path only
+    // counts probes in a local variable.
+    private static final int KEY_SET_FREE_PROBES = 64;
+
+    private static final int KEY_SET_PROBE_SLACK = 1024;
+
     /**
      * Minimal open-addressing (linear-probing) hash set of {@code int} keys, compared with {@code ==}.
      *
      * <p>Used by the unsorted primitive duplicate scans instead of a {@code HashSet<Integer>}, which boxed every element
-     * and allocated a map entry per distinct value. The table doubles when it becomes half full; if it would outgrow
-     * {@link #MAX_KEY_SET_BITS} the keys move to a boxed {@code HashSet}, so the set never runs out of room.</p>
+     * and allocated a map entry per distinct value. The table doubles when it becomes half full. If probes beyond
+     * {@link #KEY_SET_FREE_PROBES} per operation exceed one per stored key plus {@link #KEY_SET_PROBE_SLACK}, or the table
+     * would outgrow {@link #MAX_KEY_SET_BITS}, keys move to a boxed {@code HashSet}. Keys that collide in this table
+     * normally spread out again under {@link Integer#hashCode()}, and {@code HashMap} keeps a bucket of keys that collide
+     * there as well as a balanced tree, so adversarial collisions cannot make a scan quadratic. A {@code TreeSet} gave the
+     * same bound but cost several times more per key once the colliding keys arrive in random order.</p>
      */
     private static final class IntKeySet {
         private int[] keys;
         private boolean[] used;
         private int shift;
         private int size;
+        // Probes charged beyond KEY_SET_FREE_PROBES per operation.
+        private int chargedProbes;
         private Set<Integer> boxed;
 
         IntKeySet(final int expectedSize) {
@@ -18047,10 +18290,16 @@ public final class N extends CommonUtil {
 
             final int mask = keys.length - 1;
             int slot = (key * 0x9E3779B9) >>> shift;
+            int probes = 0;
 
             while (used[slot]) {
                 if (keys[slot] == key) {
                     return false;
+                }
+
+                if (++probes > KEY_SET_FREE_PROBES && ++chargedProbes > size + KEY_SET_PROBE_SLACK) {
+                    moveToBoxed(keys, used);
+                    return boxed.add(key);
                 }
 
                 slot = (slot + 1) & mask;
@@ -18072,16 +18321,7 @@ public final class N extends CommonUtil {
             final int bits = 33 - shift;
 
             if (bits > MAX_KEY_SET_BITS) {
-                boxed = new HashSet<>(size * 2);
-
-                for (int i = 0; i < oldKeys.length; i++) {
-                    if (oldUsed[i]) {
-                        boxed.add(oldKeys[i]);
-                    }
-                }
-
-                keys = null;
-                used = null;
+                moveToBoxed(oldKeys, oldUsed);
                 return;
             }
 
@@ -18091,8 +18331,15 @@ public final class N extends CommonUtil {
             for (int i = 0; i < oldKeys.length; i++) {
                 if (oldUsed[i]) {
                     int slot = (oldKeys[i] * 0x9E3779B9) >>> shift;
+                    int probes = 0;
 
                     while (used[slot]) {
+                        if (++probes > KEY_SET_FREE_PROBES && ++chargedProbes > size + KEY_SET_PROBE_SLACK) {
+                            // Migrate the complete old table, not the partially rehashed new table.
+                            moveToBoxed(oldKeys, oldUsed);
+                            return;
+                        }
+
                         slot = (slot + 1) & mask;
                     }
 
@@ -18100,6 +18347,19 @@ public final class N extends CommonUtil {
                     keys[slot] = oldKeys[i];
                 }
             }
+        }
+
+        private void moveToBoxed(final int[] oldKeys, final boolean[] oldUsed) {
+            boxed = newHashSet(size);
+
+            for (int i = 0; i < oldKeys.length; i++) {
+                if (oldUsed[i]) {
+                    boxed.add(oldKeys[i]);
+                }
+            }
+
+            keys = null;
+            used = null;
         }
     }
 
@@ -18111,6 +18371,8 @@ public final class N extends CommonUtil {
         private boolean[] used;
         private int shift;
         private int size;
+        // Probes charged beyond KEY_SET_FREE_PROBES per operation.
+        private int chargedProbes;
         private Set<Long> boxed;
 
         LongKeySet(final int expectedSize) {
@@ -18137,10 +18399,16 @@ public final class N extends CommonUtil {
 
             final int mask = keys.length - 1;
             int slot = (int) ((key * 0x9E3779B97F4A7C15L) >>> shift);
+            int probes = 0;
 
             while (used[slot]) {
                 if (keys[slot] == key) {
                     return false;
+                }
+
+                if (++probes > KEY_SET_FREE_PROBES && ++chargedProbes > size + KEY_SET_PROBE_SLACK) {
+                    moveToBoxed(keys, used);
+                    return boxed.add(key);
                 }
 
                 slot = (slot + 1) & mask;
@@ -18162,16 +18430,7 @@ public final class N extends CommonUtil {
             final int bits = 65 - shift;
 
             if (bits > MAX_KEY_SET_BITS) {
-                boxed = new HashSet<>(size * 2);
-
-                for (int i = 0; i < oldKeys.length; i++) {
-                    if (oldUsed[i]) {
-                        boxed.add(oldKeys[i]);
-                    }
-                }
-
-                keys = null;
-                used = null;
+                moveToBoxed(oldKeys, oldUsed);
                 return;
             }
 
@@ -18181,8 +18440,15 @@ public final class N extends CommonUtil {
             for (int i = 0; i < oldKeys.length; i++) {
                 if (oldUsed[i]) {
                     int slot = (int) ((oldKeys[i] * 0x9E3779B97F4A7C15L) >>> shift);
+                    int probes = 0;
 
                     while (used[slot]) {
+                        if (++probes > KEY_SET_FREE_PROBES && ++chargedProbes > size + KEY_SET_PROBE_SLACK) {
+                            // Migrate the complete old table, not the partially rehashed new table.
+                            moveToBoxed(oldKeys, oldUsed);
+                            return;
+                        }
+
                         slot = (slot + 1) & mask;
                     }
 
@@ -18190,6 +18456,19 @@ public final class N extends CommonUtil {
                     keys[slot] = oldKeys[i];
                 }
             }
+        }
+
+        private void moveToBoxed(final long[] oldKeys, final boolean[] oldUsed) {
+            boxed = newHashSet(size);
+
+            for (int i = 0; i < oldKeys.length; i++) {
+                if (oldUsed[i]) {
+                    boxed.add(oldKeys[i]);
+                }
+            }
+
+            keys = null;
+            used = null;
         }
     }
 
@@ -18874,7 +19153,7 @@ public final class N extends CommonUtil {
      * Kahan summation for the {@code double} {@code sum}/{@code sumDouble} family, plus the overflow-safe total that
      * {@link KahanSummation#average()} already uses: once the running sum of <i>finite</i> values leaves the
      * {@code double} range, the remaining values are also accumulated exactly (a {@code BigDecimal} seeded with the
-     * compensated sum so far), and {@link #sum()} returns that total rounded once. So {@code sum(1e308, 1e308, -1e308,
+     * sum and correction so far, without intermediate binary64 rounding), and {@link #sum()} returns that total rounded once. So {@code sum(1e308, 1e308, -1e308,
      * -1e308, 5)} is {@code 5.0}, not {@code Infinity}; the result is infinite only when the true total is outside the
      * {@code double} range, or when an input is itself infinite or {@code NaN} (IEEE 754 propagation).
      *
@@ -18883,37 +19162,13 @@ public final class N extends CommonUtil {
      */
     static final class OverflowSafeDoubleSum {
         private final KahanSummation kahan = new KahanSummation();
-        private double simpleSum;
-        private BigDecimal exactSum;
-        private boolean finiteValuesOnly = true;
 
         void add(final double value) {
-            if (finiteValuesOnly) {
-                if (!Double.isFinite(value)) {
-                    finiteValuesOnly = false;
-                    exactSum = null;
-                } else if (exactSum != null) {
-                    exactSum = exactSum.add(new BigDecimal(value));
-                } else if (!Double.isFinite(simpleSum + value)) {
-                    final double sumSoFar = kahan.sum();
-                    exactSum = new BigDecimal(Double.isFinite(sumSoFar) ? sumSoFar : simpleSum).add(new BigDecimal(value));
-                }
-            }
-
-            simpleSum += value;
             kahan.add(value);
         }
 
         double sum() {
-            final double result = kahan.sum();
-
-            if (Double.isFinite(result) || !finiteValuesOnly) {
-                return result;
-            } else if (exactSum != null) {
-                return exactSum.doubleValue(); // infinite again only for a true overflow
-            } else {
-                return Double.isFinite(simpleSum) ? simpleSum : result;
-            }
+            return kahan.sumWithFiniteOverflow();
         }
     }
 
@@ -22978,8 +23233,8 @@ public final class N extends CommonUtil {
      * {@link #min(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23025,8 +23280,8 @@ public final class N extends CommonUtil {
      * {@link #min(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23072,8 +23327,8 @@ public final class N extends CommonUtil {
      * {@link #min(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23109,8 +23364,9 @@ public final class N extends CommonUtil {
      * remembers the keys of the two elements it compared last. The scans in {@code min}/{@code max} compare each
      * new element with the current candidate, which is always one of the previous call's two elements, so every
      * element's key is extracted at most once per position - at most {@code n} calls for {@code n >= 2} elements (fewer
-     * when the same instance recurs, since the cache is keyed by identity; none for a single element), instead of
-     * {@code 2(n - 1)} - and the candidate is always compared under the key it won with.
+     * when an element is the same instance as the one before it or as the current candidate, since the cache is keyed
+     * by identity; none for a single element), instead of {@code 2(n - 1)} - and the candidate is always compared
+     * under the key it won with.
      */
     @SuppressWarnings("rawtypes")
     private static <T> Comparator<T> keyCachingComparator(final Function<? super T, ? extends Comparable> keyExtractor, final Comparator<Comparable> keyCmp) {
@@ -23123,7 +23379,9 @@ public final class N extends CommonUtil {
             @Override
             public int compare(final T first, final T second) {
                 final Comparable firstKey = first == element1 ? key1 : (first == element2 ? key2 : keyExtractor.apply(first));
-                final Comparable secondKey = second == element1 ? key1 : (second == element2 ? key2 : keyExtractor.apply(second));
+                // Repeated identities must share one key, including before either cache slot has been populated.
+                final Comparable secondKey = first == second ? firstKey
+                        : (second == element1 ? key1 : (second == element2 ? key2 : keyExtractor.apply(second)));
 
                 element1 = first;
                 key1 = firstKey;
@@ -25433,8 +25691,8 @@ public final class N extends CommonUtil {
      * {@link #max(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -25480,8 +25738,8 @@ public final class N extends CommonUtil {
      * {@link #max(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -25527,8 +25785,8 @@ public final class N extends CommonUtil {
      * {@link #max(Comparable[])}.
      *
      * <p>{@code keyExtractor} is applied at most once per element position (at most {@code n} calls for {@code n >= 2}
-     * elements - fewer when the same instance occurs at several positions - and none for a single element), and the
-     * current candidate is always compared under the key it was selected with.</p>
+     * elements - fewer when an element is the same instance as the one before it or as the current candidate - and
+     * none for a single element), and the current candidate is always compared under the key it was selected with.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27088,7 +27346,7 @@ public final class N extends CommonUtil {
      * @param a the array to rearrange
      * @param targetIndex the index whose sorted value is selected
      */
-    private static void selectInPlace(final int[] a, final int targetIndex) {
+    static void selectInPlace(final int[] a, final int targetIndex) {
         int ascendingPrefix = 1;
 
         while (ascendingPrefix < a.length && a[ascendingPrefix - 1] <= a[ascendingPrefix]) {
@@ -27152,7 +27410,7 @@ public final class N extends CommonUtil {
      * @param a the array to rearrange
      * @param targetIndex the index whose sorted value is selected
      */
-    private static void selectInPlace(final long[] a, final int targetIndex) {
+    static void selectInPlace(final long[] a, final int targetIndex) {
         int ascendingPrefix = 1;
 
         while (ascendingPrefix < a.length && a[ascendingPrefix - 1] <= a[ascendingPrefix]) {
@@ -27220,7 +27478,7 @@ public final class N extends CommonUtil {
      * @param a the array to rearrange
      * @param targetIndex the index whose sorted value is selected
      */
-    private static void selectInPlace(final float[] a, final int targetIndex) {
+    static void selectInPlace(final float[] a, final int targetIndex) {
         for (final float e : a) {
             if (Float.isNaN(e) || (e == 0 && Float.floatToRawIntBits(e) != 0)) {
                 Arrays.sort(a);
@@ -27295,7 +27553,7 @@ public final class N extends CommonUtil {
      * @param a the array to rearrange
      * @param targetIndex the index whose sorted value is selected
      */
-    private static void selectInPlace(final double[] a, final int targetIndex) {
+    static void selectInPlace(final double[] a, final int targetIndex) {
         for (final double e : a) {
             if (Double.isNaN(e) || (e == 0 && Double.doubleToRawLongBits(e) != 0L)) {
                 Arrays.sort(a);
@@ -31194,6 +31452,41 @@ public final class N extends CommonUtil {
         return (int) Math.min((long) length * millionths / 1_000_000L, length - 1L);
     }
 
+    // Next scratch capacity of the primitive filters, called when the buffer is full and the current input matched.
+    // Until max(64, range / 128) inputs have been tested the buffer only doubles, so a short dense prefix (e.g. the first
+    // 17 of a million inputs) cannot reserve storage proportional to the input. After that, the final count is projected
+    // from the match rate since the previous growth (which follows rising density, e.g. the tail of sorted input) and
+    // from the rate over all completed inputs, and the projection is reserved directly, at most half the range or a
+    // doubling. An exact projection (e.g. periodic matches) leaves no trimming copy; otherwise a small margin makes
+    // another near-final growth unlikely. Reserving the whole range only once a quarter of it had matched made 25-50%
+    // filters allocate up to four times the result. The price of projecting early: a dense run that ends soon after
+    // the evidence threshold (roughly 1-10% of the range) can leave up to half the range unused, where plain doubling
+    // would have stayed within twice the result. Capacity never exceeds what the rest of the range can still add; long
+    // arithmetic avoids overflow.
+    //
+    // len: full capacity, i.e. the accepted count before the current input; lastLen: capacity before the previous
+    // growth; window: inputs since the previous growth; completed: inputs before the current one; remaining: inputs from
+    // the current one to the end of the range.
+    private static int filterCapacity(final int len, final int lastLen, final int window, final int completed, final int remaining) {
+        if (len == 0) {
+            return Math.min(16, remaining);
+        }
+
+        final long upper = (long) len + remaining;
+        final int range = completed + remaining;
+
+        if (completed < 64 || completed < range >>> 7) {
+            return (int) Math.min(2L * len, upper);
+        }
+
+        final long recent = len + Math.ceilDiv((long) remaining * (len - lastLen), window);
+        final long overall = len + Math.ceilDiv((long) remaining * len, completed);
+        final long reserved = Math.min(Math.max(recent, overall), Math.max(2L * len, range >>> 1));
+        final long target = recent == overall ? reserved : reserved + 16 + (reserved >>> 6);
+
+        return (int) Math.min(upper, Math.max(target, len + (len >>> 3)));
+    }
+
     /**
      * Returns a new array containing only elements that match the given predicate.
      *
@@ -31249,14 +31542,20 @@ public final class N extends CommonUtil {
             return EMPTY_BOOLEAN_ARRAY;
         }
 
-        boolean[] result = new boolean[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        boolean[] result = EMPTY_BOOLEAN_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31322,14 +31621,20 @@ public final class N extends CommonUtil {
             return EMPTY_CHAR_ARRAY;
         }
 
-        char[] result = new char[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        char[] result = EMPTY_CHAR_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31395,14 +31700,20 @@ public final class N extends CommonUtil {
             return EMPTY_BYTE_ARRAY;
         }
 
-        byte[] result = new byte[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        byte[] result = EMPTY_BYTE_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31468,14 +31779,20 @@ public final class N extends CommonUtil {
             return EMPTY_SHORT_ARRAY;
         }
 
-        short[] result = new short[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        short[] result = EMPTY_SHORT_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31541,14 +31858,20 @@ public final class N extends CommonUtil {
             return EMPTY_INT_ARRAY;
         }
 
-        int[] result = new int[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        int[] result = EMPTY_INT_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31614,14 +31937,20 @@ public final class N extends CommonUtil {
             return EMPTY_LONG_ARRAY;
         }
 
-        long[] result = new long[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        long[] result = EMPTY_LONG_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31687,14 +32016,20 @@ public final class N extends CommonUtil {
             return EMPTY_FLOAT_ARRAY;
         }
 
-        float[] result = new float[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        float[] result = EMPTY_FLOAT_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -31760,14 +32095,20 @@ public final class N extends CommonUtil {
             return EMPTY_DOUBLE_ARRAY;
         }
 
-        double[] result = new double[(toIndex - fromIndex) / 2];
-        int len = result.length;
+        double[] result = EMPTY_DOUBLE_ARRAY;
+        int len = 0;
         int count = 0;
+        int lastGrowth = fromIndex;
+        int lastLen = 0;
 
         for (int i = fromIndex; i < toIndex; i++) {
             if (filter.test(a[i])) {
                 if (count == len) {
-                    result = copyOf(result, toIndex - fromIndex);
+                    // Allocate only after a match; filterCapacity sizes the scratch from the matches seen so far.
+                    final int capacity = filterCapacity(len, lastLen, i - lastGrowth, i - fromIndex, toIndex - i);
+                    lastGrowth = i;
+                    lastLen = len;
+                    result = copyOf(result, capacity);
                     len = result.length;
                 }
 
@@ -35092,13 +35433,16 @@ public final class N extends CommonUtil {
             return new ArrayList<>(0);
         }
 
-        final List<T> result = new ArrayList<>(min(9, len(a)));
         final int len = a.length;
         int idx = 0;
 
         while (idx < len && filter.test(a[idx])) {
             idx++;
         }
+
+        // The result size is known once the prefix is dropped: growing the list from a small capacity allocated about
+        // three times the final backing array and could leave up to a third of it unused.
+        final List<T> result = new ArrayList<>(len - idx);
 
         while (idx < len) {
             result.add(a[idx++]);
@@ -35217,13 +35561,15 @@ public final class N extends CommonUtil {
             return new ArrayList<>(0);
         }
 
-        final List<T> result = new ArrayList<>(min(9, len(a)));
         final int len = a.length;
         int idx = 0;
 
         while (idx < len && !filter.test(a[idx])) {
             idx++;
         }
+
+        // The result size is known once the prefix is skipped (see dropWhile(Object[], Predicate)).
+        final List<T> result = new ArrayList<>(len - idx);
 
         while (idx < len) {
             result.add(a[idx++]);
@@ -40461,6 +40807,12 @@ public final class N extends CommonUtil {
     /**
      * Returns the JSON string representation of the object.
      *
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, Integer> data = new LinkedHashMap<>();
@@ -40484,6 +40836,12 @@ public final class N extends CommonUtil {
 
     /**
      * Returns the JSON string representation of the object with optional pretty formatting.
+     *
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40509,6 +40867,16 @@ public final class N extends CommonUtil {
     /**
      * Returns the JSON string representation of the object using the specified configuration.
      *
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
+     *
+     * <p>A top-level scalar written as raw text ignores the configuration (for example its {@code stringQuotation} and date
+     * format); a top-level enum written as a JSON string is quoted with the configured {@code stringQuotation}. Values nested in
+     * an array, collection, map or bean are written with the configuration.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig().setPrettyFormat(true);
@@ -40532,8 +40900,14 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified file.
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
+     *
+     * <p>A {@code null} {@code obj} writes nothing: the file is created or truncated to empty. No JSON {@code null} token is written;
+     * deserializing the empty output depends on the target type and configuration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40561,8 +40935,18 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified file using the given configuration.
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
+     *
+     * <p>A top-level scalar written as raw text ignores the configuration (for example its {@code stringQuotation} and date
+     * format); a top-level enum written as a JSON string is quoted with the configured {@code stringQuotation}. Values nested in
+     * an array, collection, map or bean are written with the configuration.</p>
+     *
+     * <p>A {@code null} {@code obj} writes nothing: the file is created or truncated to empty. No JSON {@code null} token is written;
+     * deserializing the empty output depends on the target type and configuration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40592,10 +40976,16 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified output stream.
      *
-     * <p>Note: The stream is not closed by this method.</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>A {@code null} {@code obj} writes nothing to the stream, and no JSON {@code null} token is written.
+     * Deserializing the empty output depends on the target type and configuration.</p>
+     *
+     * <p>Note: The stream is not closed by this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40621,10 +41011,20 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified output stream using the given configuration.
      *
-     * <p>Note: The stream is not closed by this method.</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>A top-level scalar written as raw text ignores the configuration (for example its {@code stringQuotation} and date
+     * format); a top-level enum written as a JSON string is quoted with the configured {@code stringQuotation}. Values nested in
+     * an array, collection, map or bean are written with the configuration.</p>
+     *
+     * <p>A {@code null} {@code obj} writes nothing to the stream, and no JSON {@code null} token is written.
+     * Deserializing the empty output depends on the target type and configuration.</p>
+     *
+     * <p>Note: The stream is not closed by this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40653,10 +41053,13 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified writer.
      *
-     * <p>Note: The writer is not closed by this method.</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>Note: The writer is not closed by this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40682,10 +41085,17 @@ public final class N extends CommonUtil {
     /**
      * Writes the JSON representation of the object to the specified writer using the given configuration.
      *
-     * <p>Note: The writer is not closed by this method.</p>
+     * <p>A top-level scalar ({@code String}, {@code Character}, number, date/time, optional wrapper, ...) is written as its
+     * raw text, not as a JSON string literal: {@code N.toJson("abc")} returns {@code abc}, which {@link #fromJson(String, Class)}
+     * reads back. An enum is written as a JSON string by default; its type handler or annotated value accessor can select
+     * another representation. For example, an enum with a Jackson {@code @JsonValue} accessor returning {@code int} is written
+     * as a JSON number, not a quoted string. A scalar nested in an array, collection, map or bean is written as a JSON value.</p>
      *
-     * <p>A {@code null} {@code obj} writes nothing: a file is created or truncated to empty, and nothing is written to a
-     * stream or writer (reading it back yields no {@code null}).</p>
+     * <p>A top-level scalar written as raw text ignores the configuration (for example its {@code stringQuotation} and date
+     * format); a top-level enum written as a JSON string is quoted with the configured {@code stringQuotation}. Values nested in
+     * an array, collection, map or bean are written with the configuration.</p>
+     *
+     * <p>Note: The writer is not closed by this method.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40724,7 +41134,9 @@ public final class N extends CommonUtil {
      * @param <T> the type of the returned object
      * @param json the JSON string to deserialize
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if {@code json} is {@code null}; the JSON literal {@code null} is converted according to the target type and does not necessarily yield {@code null})
+     * @return the deserialized object (the target type's default value if {@code json} is {@code null}: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type; the JSON literal {@code null} is converted according to
+     *         the target type and does not necessarily yield {@code null})
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
@@ -40752,7 +41164,9 @@ public final class N extends CommonUtil {
      * @param <T> the type of the returned object
      * @param json the JSON string to deserialize
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if {@code json} is {@code null}; the JSON literal {@code null} is converted according to the target type and does not necessarily yield {@code null})
+     * @return the deserialized object (the target type's default value if {@code json} is {@code null}: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type; the JSON literal {@code null} is converted according to
+     *         the target type and does not necessarily yield {@code null})
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
@@ -40856,7 +41270,10 @@ public final class N extends CommonUtil {
      * @param json the JSON string to deserialize
      * @param config the deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if {@code json} is {@code null}; the JSON literal {@code null} is converted according to the target type and does not necessarily yield {@code null})
+     * @return the deserialized object (the target type's default value if {@code json} is {@code null}: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type - or an empty collection, map, array or string when
+     *         {@code config} enables {@code readNullToEmpty}; the JSON literal {@code null} is converted according to the target type and does
+     *         not necessarily yield {@code null})
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
@@ -40895,7 +41312,10 @@ public final class N extends CommonUtil {
      * @param json the JSON string to deserialize
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
-     * @return the deserialized object ({@code null} if {@code json} is {@code null}; the JSON literal {@code null} is converted according to the target type and does not necessarily yield {@code null})
+     * @return the deserialized object (the target type's default value if {@code json} is {@code null}: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type - or an empty collection, map, array or string when
+     *         {@code config} enables {@code readNullToEmpty}; the JSON literal {@code null} is converted according to the target type and does
+     *         not necessarily yield {@code null})
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
@@ -41781,7 +42201,8 @@ public final class N extends CommonUtil {
      *
      * @param json the JSON string to format
      * @param transferType the type for deserialization
-     * @return the formatted JSON string (an empty string if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code null} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
@@ -41811,7 +42232,8 @@ public final class N extends CommonUtil {
      *
      * @param json the JSON string to format
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
-     * @return the formatted JSON string (an empty string if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code null} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
@@ -41905,7 +42327,8 @@ public final class N extends CommonUtil {
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
-     * @return the formatted JSON string (an empty string if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code null} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
@@ -41940,7 +42363,8 @@ public final class N extends CommonUtil {
      * @param json the JSON string to format
      * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the type for deserialization
-     * @return the formatted JSON string (an empty string if input is {@code null})
+     * @return the formatted JSON string (an empty string if input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code null} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
@@ -42196,7 +42620,8 @@ public final class N extends CommonUtil {
      * @param <T> the type of the returned object
      * @param xml the XML string to deserialize
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if the input represents null)
+     * @return the deserialized object (the target type's default value if {@code xml} is {@code null} or empty: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type)
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
@@ -42223,7 +42648,8 @@ public final class N extends CommonUtil {
      * @param <T> the type of the returned object
      * @param xml the XML string to deserialize
      * @param targetType the target Type with generic information
-     * @return the deserialized object ({@code null} if the input represents null)
+     * @return the deserialized object (the target type's default value if {@code xml} is {@code null} or empty: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type)
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
@@ -42320,7 +42746,8 @@ public final class N extends CommonUtil {
      * @param xml the XML string to deserialize
      * @param config the XML deserialization configuration
      * @param targetType the target class type
-     * @return the deserialized object ({@code null} if the input represents null)
+     * @return the deserialized object (the target type's default value if {@code xml} is {@code null} or empty: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type)
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
@@ -42356,7 +42783,8 @@ public final class N extends CommonUtil {
      * @param xml the XML string to deserialize
      * @param config the XML deserialization configuration
      * @param targetType the target Type with generic information
-     * @return the deserialized object ({@code null} if the input represents null)
+     * @return the deserialized object (the target type's default value if {@code xml} is {@code null} or empty: {@code null}, except {@code 0}/{@code false}
+     *         for a primitive type and an empty instance for an optional or holder type)
      * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
@@ -42738,7 +43166,8 @@ public final class N extends CommonUtil {
      * is kept. An element whose children are elements, comments or processing instructions gets one child per line;
      * text-only and mixed content (and any element with {@code xml:space="preserve"}) is written exactly as parsed.
      * Text between elements made only of XML whitespace (space, tab, CR, LF) is replaced by the indentation;
-     * text of any other character, including other Unicode whitespace such as U+3000, is content and kept verbatim. The XML declaration is not reproduced,
+     * text of any other character, including other Unicode whitespace such as U+3000, is content and kept verbatim. The XML 1.0 declaration is omitted;
+     * XML 1.1 output retains a version declaration and uses character references where needed to preserve its parsed content,
      * attributes may be reordered, and entities are written in their escaped form. A {@code DOCTYPE} is rejected (as a
      * safeguard against external entities).</p>
      *
@@ -42781,7 +43210,8 @@ public final class N extends CommonUtil {
      *
      * @param xml the XML string to format
      * @param transferType the type for deserialization during formatting
-     * @return the formatted XML string (an empty string if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code "null"} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
@@ -42813,7 +43243,8 @@ public final class N extends CommonUtil {
      *
      * @param xml the XML string to format
      * @param transferType the Type for deserialization during formatting with generic information
-     * @return the formatted XML string (an empty string if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code "null"} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
@@ -42832,7 +43263,8 @@ public final class N extends CommonUtil {
      * is kept. An element whose children are elements, comments or processing instructions gets one child per line;
      * text-only and mixed content (and any element with {@code xml:space="preserve"}) is written exactly as parsed.
      * Text between elements made only of XML whitespace (space, tab, CR, LF) is replaced by the indentation;
-     * text of any other character, including other Unicode whitespace such as U+3000, is content and kept verbatim. The XML declaration is not reproduced,
+     * text of any other character, including other Unicode whitespace such as U+3000, is content and kept verbatim. The XML 1.0 declaration is omitted;
+     * XML 1.1 output retains a version declaration and uses character references where needed to preserve its parsed content,
      * attributes may be reordered, and entities are written in their escaped form. A {@code DOCTYPE} is rejected (as a
      * safeguard against external entities).</p>
      *
@@ -42881,6 +43313,11 @@ public final class N extends CommonUtil {
         final StringBuilder sb = new StringBuilder(xml.length() * 2);
         final org.w3c.dom.NodeList topLevel = doc.getChildNodes();
 
+        // XML 1.1 requires its declaration; without it even escaped low controls are invalid XML 1.0.
+        if ("1.1".equals(doc.getXmlVersion())) {
+            sb.append("<?xml version=\"1.1\"?>");
+        }
+
         for (int i = 0, len = topLevel.getLength(); i < len; i++) {
             final org.w3c.dom.Node node = topLevel.item(i);
 
@@ -42927,10 +43364,12 @@ public final class N extends CommonUtil {
             return;
         }
 
-        final org.w3c.dom.NodeList children = node.getChildNodes();
-        final int len = children.getLength();
+        // Children are walked by sibling links, not NodeList.item(i): the JDK DOM serves item(i) from a per-document
+        // cache that visiting a child element takes over, after which item(i) walks from the first child again, so an
+        // element with n children cost O(n^2).
+        final org.w3c.dom.Node firstChild = node.getFirstChild();
 
-        if (len == 0) {
+        if (firstChild == null) {
             writeXmlVerbatim(node, sb);
             return;
         }
@@ -42938,9 +43377,7 @@ public final class N extends CommonUtil {
         boolean hasStructure = false;
         boolean hasText = false;
 
-        for (int i = 0; i < len; i++) {
-            final org.w3c.dom.Node child = children.item(i);
-
+        for (org.w3c.dom.Node child = firstChild; child != null; child = child.getNextSibling()) {
             switch (child.getNodeType()) {
                 case org.w3c.dom.Node.ELEMENT_NODE, org.w3c.dom.Node.COMMENT_NODE, org.w3c.dom.Node.PROCESSING_INSTRUCTION_NODE -> hasStructure = true;
                 // XML whitespace only - Strings.isBlank also accepts Character.isWhitespace code points
@@ -42960,9 +43397,7 @@ public final class N extends CommonUtil {
         writeXmlStartTag(node, sb);
         sb.append('>');
 
-        for (int i = 0; i < len; i++) {
-            final org.w3c.dom.Node child = children.item(i);
-
+        for (org.w3c.dom.Node child = firstChild; child != null; child = child.getNextSibling()) {
             if (child.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
                 continue; // whitespace between elements: replaced by the indentation
             }
@@ -43006,11 +43441,12 @@ public final class N extends CommonUtil {
         sb.append('<').append(element.getNodeName());
 
         final org.w3c.dom.NamedNodeMap attrs = element.getAttributes();
+        final boolean xml11 = "1.1".equals(element.getOwnerDocument().getXmlVersion());
 
         for (int i = 0, len = attrs.getLength(); i < len; i++) {
             final org.w3c.dom.Node attr = attrs.item(i);
             sb.append(' ').append(attr.getNodeName()).append("=\"");
-            appendXmlEscaped(attr.getNodeValue(), true, sb);
+            appendXmlEscaped(attr.getNodeValue(), true, xml11, sb);
             sb.append('"');
         }
     }
@@ -43020,22 +43456,22 @@ public final class N extends CommonUtil {
             case org.w3c.dom.Node.ELEMENT_NODE -> {
                 writeXmlStartTag(node, sb);
 
-                final org.w3c.dom.NodeList children = node.getChildNodes();
-                final int len = children.getLength();
+                // Sibling links, not NodeList.item(i) - see writeXmlNode.
+                final org.w3c.dom.Node firstChild = node.getFirstChild();
 
-                if (len == 0) {
+                if (firstChild == null) {
                     sb.append("/>");
                 } else {
                     sb.append('>');
 
-                    for (int i = 0; i < len; i++) {
-                        writeXmlVerbatim(children.item(i), sb);
+                    for (org.w3c.dom.Node child = firstChild; child != null; child = child.getNextSibling()) {
+                        writeXmlVerbatim(child, sb);
                     }
 
                     sb.append("</").append(node.getNodeName()).append('>');
                 }
             }
-            case org.w3c.dom.Node.TEXT_NODE -> appendXmlEscaped(node.getNodeValue(), false, sb);
+            case org.w3c.dom.Node.TEXT_NODE -> appendXmlEscaped(node.getNodeValue(), false, "1.1".equals(node.getOwnerDocument().getXmlVersion()), sb);
             case org.w3c.dom.Node.CDATA_SECTION_NODE -> sb.append("<![CDATA[").append(node.getNodeValue()).append("]]>");
             case org.w3c.dom.Node.COMMENT_NODE -> sb.append("<!--").append(node.getNodeValue()).append("-->");
             case org.w3c.dom.Node.PROCESSING_INSTRUCTION_NODE -> {
@@ -43055,7 +43491,18 @@ public final class N extends CommonUtil {
         }
     }
 
-    private static void appendXmlEscaped(final String value, final boolean inAttribute, final StringBuilder sb) {
+    /**
+     * Escapes parsed text or an attribute without changing its value when the result is parsed again.
+     * XML 1.1 restricted characters require references, as do NEL and LS to avoid line-end normalization.
+     *
+     * @param value the parsed character content
+     * @param inAttribute whether the content is an attribute value
+     * @param xml11 whether the document uses XML 1.1 character rules
+     * @param sb the output buffer
+     * @see <a href="https://www.w3.org/TR/xml11/#charsets">XML 1.1 character grammar</a>
+     * @see <a href="https://www.w3.org/TR/xml11/#sec-line-ends">XML 1.1 line-end normalization</a>
+     */
+    private static void appendXmlEscaped(final String value, final boolean inAttribute, final boolean xml11, final StringBuilder sb) {
         for (int i = 0, len = value.length(); i < len; i++) {
             final char ch = value.charAt(i);
 
@@ -43067,7 +43514,14 @@ public final class N extends CommonUtil {
                 case '\r' -> sb.append("&#13;");
                 case '\n' -> sb.append(inAttribute ? "&#10;" : "\n");
                 case '\t' -> sb.append(inAttribute ? "&#9;" : "\t");
-                default -> sb.append(ch);
+                default -> {
+                    // Tab, LF and CR were handled above. C1 controls include NEL here deliberately.
+                    if (xml11 && (ch < 0x20 || ch >= 0x7F && ch <= 0x9F || ch == 0x2028)) {
+                        sb.append("&#").append((int) ch).append(';');
+                    } else {
+                        sb.append(ch);
+                    }
+                }
             }
         }
     }
@@ -43094,7 +43548,8 @@ public final class N extends CommonUtil {
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the type for deserialization during formatting
-     * @return the formatted XML string (an empty string if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code "null"} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
@@ -43131,7 +43586,8 @@ public final class N extends CommonUtil {
      * @param xml the XML string to format
      * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the Type for deserialization during formatting with generic information
-     * @return the formatted XML string (an empty string if the input is {@code null})
+     * @return the formatted XML string (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or holder
+     *         type: its default value is formatted instead - for example {@code "0"} for {@code int.class}, and {@code "null"} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
@@ -43190,7 +43646,8 @@ public final class N extends CommonUtil {
      *
      * @param xml the XML string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
-     * @return the JSON string representation (an empty string if the input is {@code null})
+     * @return the JSON string representation (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or
+     *         holder type: its default value is converted instead - for example {@code "0"} for {@code int.class}, and {@code null} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
@@ -43236,7 +43693,8 @@ public final class N extends CommonUtil {
      *
      * @param json the JSON string to convert
      * @param transferType the intermediate type for parsing during conversion (must be Bean or Map type)
-     * @return the XML string representation (an empty string if the input is {@code null})
+     * @return the XML string representation (an empty string if the input is {@code null}, unless {@code transferType} is a primitive, optional or
+     *         holder type: its default value is converted instead - for example {@code "0"} for {@code int.class}, and {@code "null"} for an empty optional or holder)
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the JSON,
@@ -47363,8 +47821,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47429,8 +47887,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47507,8 +47965,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47594,8 +48052,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47691,8 +48149,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47741,8 +48199,8 @@ public final class N extends CommonUtil {
      * <p>The executor controls where submitted commands run. A direct executor can run them synchronously on the calling thread.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47840,8 +48298,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -47913,8 +48371,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -48000,8 +48458,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -48099,8 +48557,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -48206,8 +48664,8 @@ public final class N extends CommonUtil {
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has
@@ -48258,8 +48716,8 @@ public final class N extends CommonUtil {
      * <p>The executor controls where submitted commands run. A direct executor can run them synchronously on the calling thread.</p>
      *
      * <p><b>Do not call this method from a task that runs on the same bounded executor</b> (a nested parallel call): the
-     * calling thread only waits, doing none of the work itself, so once every thread of the pool is such a waiting
-     * caller, nothing is left to run the submitted work and the call never returns.</p>
+     * calling thread runs only the first command and then waits for the others, so once every thread of the pool is such
+     * a waiting caller, nothing is left to run the submitted work and the call never returns.</p>
      *
      * <p><b>Failures are observed in argument order.</b> The commands' results are awaited one after another, so a
      * failure is seen - and the commands that have not started yet are cancelled - only once every earlier command has

@@ -104,4 +104,18 @@ public class PatternType extends AbstractType<Pattern> {
     public Pattern valueOf(final String str) throws PatternSyntaxException {
         return str == null ? null : Pattern.compile(str);
     }
+
+    /**
+     * Converts an object to a pattern, retaining the flags of an existing immutable pattern.
+     *
+     * @param obj the object to convert, or {@code null}
+     * @return the original pattern, a pattern compiled from the object's text, or {@code null}
+     * @throws PatternSyntaxException if the text is not a valid regular expression
+     */
+    @Override
+    public Pattern valueOf(final Object obj) throws PatternSyntaxException {
+        // Pattern.toString() omits flags supplied to compile(String, int), so a text round trip
+        // changes matching behavior even though the source is already the requested type.
+        return obj instanceof Pattern pattern ? pattern : super.valueOf(obj);
+    }
 }

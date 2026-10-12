@@ -1710,7 +1710,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this row, while mutable cell objects remain shared.</p>
      *
      * @param rowKey the key of the row to be set
      * @param row the collection of values to set in the row; must match the number of columns, or be {@code null} or empty
@@ -1773,7 +1774,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this row, while mutable cell objects remain shared.</p>
      *
      * @param rowKey the unique key for the new row; must not be {@code null} and must not already exist in the Sheet
      * @param row the collection of values for the new row; must match the number of columns, or be {@code null} or empty
@@ -1844,7 +1846,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this row, while mutable cell objects remain shared.</p>
      *
      * @param rowIndex the zero-based index where the row should be inserted; must be &gt;= 0 and &lt;= rowCount()
      * @param rowKey the unique key for the new row; must not be {@code null} and must not already exist in the Sheet
@@ -2469,7 +2472,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this column, while mutable cell objects remain shared.</p>
      *
      * @param columnKey the key of the column to be set
      * @param column the collection of values to set in the column; must match the number of rows, or be {@code null} or empty
@@ -2536,7 +2540,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this column, while mutable cell objects remain shared.</p>
      *
      * @param columnKey the unique key for the new column; must not be {@code null} and must not already exist in this Sheet
      * @param column the collection of values for the new column; must match the number of rows, or be {@code null} or empty
@@ -2593,7 +2598,8 @@ public final class Sheet<R, C, V> implements Cloneable {
      * }</pre>
      *
      * <p>Supplied values are snapshotted before any cells or keys change, so this Sheet's live
-     * row/column views can be used as inputs.</p>
+     * row/column views can be used as inputs. The snapshot copies the collection, not its cell values;
+     * later changes to the supplied collection do not affect this column, while mutable cell objects remain shared.</p>
      *
      * @param columnIndex the zero-based index where the column should be inserted; must be &gt;= 0 and &lt;= columnCount()
      * @param columnKey the unique key for the new column; must not be {@code null} and must not already exist in this Sheet
@@ -5691,6 +5697,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a stream containing all cell values, ordered row by row. Includes {@code null} values
      * from empty or uninitialized cells.
      * </p>
+     * <p>Cell values are read when the stream is consumed, including when the first value write occurs
+     * after the stream was created. The row and column counts are fixed when the stream is created;
+     * structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5719,6 +5728,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a stream containing values from the specified row range [fromRowIndex, toRowIndex),
      * ordered row by row. The toRowIndex is exclusive. Includes {@code null} values from empty or uninitialized cells.
      * </p>
+     * <p>Cell values are read when the stream is consumed, including when the first value write occurs
+     * after the stream was created. The row and column counts are fixed when the stream is created;
+     * structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5752,6 +5764,13 @@ public final class Sheet<R, C, V> implements Cloneable {
             private final int columnLength = columnCount();
             private final long toIndex = (long) toRowIndex * columnLength;
             private long cursor = (long) fromRowIndex * columnLength;
+            // (cellRowIndex, cellColumnIndex) is the cell at position cellCursor. next() steps it along with cursor
+            // instead of dividing cursor by columnLength for every element - a 64-bit division and remainder that cost
+            // more than the two list reads they addressed. It is re-derived only when cursor has moved without it:
+            // after advance(long), or after elements were returned while this Sheet had no storage.
+            private long cellCursor = cursor;
+            private int cellRowIndex = fromRowIndex;
+            private int cellColumnIndex = 0;
 
             @Override
             public boolean hasNext() {
@@ -5769,11 +5788,31 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
 
                 if (_isInitialized) {
-                    return _columnList.get((int) (cursor % columnLength)).get((int) (cursor++ / columnLength));
+                    if (cellCursor != cursor) {
+                        moveCellToCursor();
+                    }
+
+                    // As before, the column is read before the cursor moves on and the cell after it.
+                    final List<V> column = _columnList.get(cellColumnIndex);
+                    final int rowIndex = cellRowIndex;
+
+                    cellCursor = ++cursor;
+
+                    if (++cellColumnIndex == columnLength) {
+                        cellColumnIndex = 0;
+                        cellRowIndex++;
+                    }
+
+                    return column.get(rowIndex);
                 } else {
                     cursor++;
                     return null;
                 }
+            }
+
+            private void moveCellToCursor() {
+                cellRowIndex = (int) (cursor / columnLength);
+                cellColumnIndex = (int) (cursor % columnLength);
             }
 
             @Override
@@ -5800,6 +5839,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a stream containing all cell values, ordered column by column. Includes {@code null} values
      * from empty or uninitialized cells.
      * </p>
+     * <p>Cell values are read when the stream is consumed, including when the first value write occurs
+     * after the stream was created. The row and column counts are fixed when the stream is created;
+     * structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5828,6 +5870,9 @@ public final class Sheet<R, C, V> implements Cloneable {
      * Creates a stream containing values from the specified column range [fromColumnIndex, toColumnIndex),
      * ordered column by column. The toColumnIndex is exclusive. Includes {@code null} values from empty or uninitialized cells.
      * </p>
+     * <p>Cell values are read when the stream is consumed, including when the first value write occurs
+     * after the stream was created. The row and column counts are fixed when the stream is created;
+     * structural mutations during traversal remain unsupported.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5861,6 +5906,11 @@ public final class Sheet<R, C, V> implements Cloneable {
             private final int rowLength = rowCount();
             private final long toIndex = (long) toColumnIndex * rowLength;
             private long cursor = (long) fromColumnIndex * rowLength;
+            // (cellRowIndex, cellColumnIndex) is the cell at position cellCursor, stepped along with cursor instead of
+            // being divided out of it for every element - see rowMajorStream(int, int).
+            private long cellCursor = cursor;
+            private int cellRowIndex = 0;
+            private int cellColumnIndex = fromColumnIndex;
 
             @Override
             public boolean hasNext() {
@@ -5878,11 +5928,31 @@ public final class Sheet<R, C, V> implements Cloneable {
                 }
 
                 if (_isInitialized) {
-                    return _columnList.get((int) (cursor / rowLength)).get((int) (cursor++ % rowLength));
+                    if (cellCursor != cursor) {
+                        moveCellToCursor();
+                    }
+
+                    // As before, the column is read before the cursor moves on and the cell after it.
+                    final List<V> column = _columnList.get(cellColumnIndex);
+                    final int rowIndex = cellRowIndex;
+
+                    cellCursor = ++cursor;
+
+                    if (++cellRowIndex == rowLength) {
+                        cellRowIndex = 0;
+                        cellColumnIndex++;
+                    }
+
+                    return column.get(rowIndex);
                 } else {
                     cursor++;
                     return null;
                 }
+            }
+
+            private void moveCellToCursor() {
+                cellRowIndex = (int) (cursor % rowLength);
+                cellColumnIndex = (int) (cursor / rowLength);
             }
 
             @Override

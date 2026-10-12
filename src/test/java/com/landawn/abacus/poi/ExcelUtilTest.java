@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -14,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +43,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedException;
@@ -672,6 +675,25 @@ public class ExcelUtilTest extends TestBase {
     }
 
     @Test
+    public void testExportSheetToCsv_DirectoryOrMissingFileReportsTheStreamOpeningFailure(@TempDir final Path tempDir) throws Exception {
+        final File directory = tempDir.toFile();
+        final File missing = new File(directory, "missing.xlsx");
+
+        for (final File file : Arrays.asList(directory, missing)) {
+            final FileNotFoundException expected = assertThrows(FileNotFoundException.class, () -> new FileInputStream(file).close());
+
+            final UncheckedException byIndex = assertThrows(UncheckedException.class, () -> ExcelUtil.exportSheetToCsv(file, 0, null, new StringWriter()));
+            final UncheckedException byName = assertThrows(UncheckedException.class,
+                    () -> ExcelUtil.exportSheetToCsv(file, "Sheet1", null, new StringWriter()));
+
+            for (final UncheckedException e : Arrays.asList(byIndex, byName)) {
+                assertInstanceOf(FileNotFoundException.class, e.getCause(), file.getName());
+                assertEquals(expected.getMessage(), e.getCause().getMessage());
+            }
+        }
+    }
+
+    @Test
     public void testSheetCreateOptions() {
         SheetCreateOptions defaults = new SheetCreateOptions();
         assertFalse(defaults.isAutoSizeColumn());
@@ -854,8 +876,7 @@ public class ExcelUtilTest extends TestBase {
                         () -> ExcelUtil.readRowsFromSheet(excelPath, (String) null, false, RowMappers.DEFAULT),
                         () -> ExcelUtil.streamRowsFromSheet(excel, (String) null, false),
                         () -> ExcelUtil.streamRowsFromSheet(new ByteArrayInputStream(bytes), (String) null, false),
-                        () -> ExcelUtil.streamRowsFromSheet(excelPath, (String) null, false),
-                        () -> ExcelUtil.exportSheetToCsv(excel, (String) null, csv),
+                        () -> ExcelUtil.streamRowsFromSheet(excelPath, (String) null, false), () -> ExcelUtil.exportSheetToCsv(excel, (String) null, csv),
                         () -> ExcelUtil.exportSheetToCsv(excel, (String) null, null, new StringWriter()));
 
                 for (final org.junit.jupiter.api.function.Executable operation : operations) {

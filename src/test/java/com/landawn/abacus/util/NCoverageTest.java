@@ -159,12 +159,12 @@ public class NCoverageTest extends NTestSupport {
         assertEquals(1, N.minIntOrDefaultIfEmpty(words, String::length, -1));
         assertEquals(1, N.minIntOrDefaultIfEmpty(words.iterator(), String::length, -1));
         assertEquals(-1, N.minIntOrDefaultIfEmpty((Iterator<String>) null, String::length, -1));
-        assertEquals(-1, N.minIntOrDefaultIfEmpty(N.<String> emptyList(), String::length, -1));
+        assertEquals(-1, N.minIntOrDefaultIfEmpty(CommonUtil.<String> emptyList(), String::length, -1));
 
         assertEquals(3, N.maxIntOrDefaultIfEmpty(words, String::length, -1));
         assertEquals(3, N.maxIntOrDefaultIfEmpty(words.iterator(), String::length, -1));
         assertEquals(-1, N.maxIntOrDefaultIfEmpty((Iterator<String>) null, String::length, -1));
-        assertEquals(-1, N.maxIntOrDefaultIfEmpty(N.<String> emptyList(), String::length, -1));
+        assertEquals(-1, N.maxIntOrDefaultIfEmpty(CommonUtil.<String> emptyList(), String::length, -1));
 
         assertEquals(1L, N.minLongOrDefaultIfEmpty(words.iterator(), s -> (long) s.length(), -1L));
         assertEquals(-1L, N.minLongOrDefaultIfEmpty((Iterator<String>) null, s -> (long) s.length(), -1L));
@@ -177,7 +177,7 @@ public class NCoverageTest extends NTestSupport {
         assertEquals(3d, N.maxDoubleOrDefaultIfEmpty(words, s -> (double) s.length(), -1d), DELTA);
         assertEquals(3d, N.maxDoubleOrDefaultIfEmpty(words.iterator(), s -> (double) s.length(), -1d), DELTA);
         assertEquals(-1d, N.maxDoubleOrDefaultIfEmpty((Iterator<String>) null, s -> (double) s.length(), -1d), DELTA);
-        assertEquals(-1d, N.maxDoubleOrDefaultIfEmpty(N.<String> emptyList(), s -> (double) s.length(), -1d), DELTA);
+        assertEquals(-1d, N.maxDoubleOrDefaultIfEmpty(CommonUtil.<String> emptyList(), s -> (double) s.length(), -1d), DELTA);
     }
 
     @Test
@@ -275,17 +275,17 @@ public class NCoverageTest extends NTestSupport {
     @Test
     public void testFromJsonAndXml_readerOverloads() {
         assertEquals(Integer.valueOf(1), N.fromJson(new StringReader("1"), Integer.class));
-        assertEquals(Integer.valueOf(2), N.fromJson(new StringReader("2"), N.typeOf(Integer.class)));
+        assertEquals(Integer.valueOf(2), N.fromJson(new StringReader("2"), CommonUtil.typeOf(Integer.class)));
         assertEquals(Integer.valueOf(3), N.fromJson(new StringReader("3"), JsonDeserConfig.create(), Integer.class));
 
         @SuppressWarnings("unchecked")
-        final Type<List<Integer>> listType = (Type<List<Integer>>) (Type<?>) N.typeOf("List<Integer>");
+        final Type<List<Integer>> listType = (Type<List<Integer>>) (Type<?>) CommonUtil.typeOf("List<Integer>");
         assertEquals(Arrays.asList(1, 2, 3), N.fromJson(new StringReader("[1,2,3]"), JsonDeserConfig.create(), listType));
 
         final String xml = "<map><e><k>a</k><v>1</v></e></map>";
         assertTrue(N.fromXml(new StringReader(xml), Map.class) instanceof Map);
-        assertTrue(N.fromXml(new StringReader(xml), N.typeOf(Map.class)) instanceof Map);
-        assertTrue(N.fromXml(new StringReader(xml), XmlDeserConfig.create(), N.typeOf(Map.class)) instanceof Map);
+        assertTrue(N.fromXml(new StringReader(xml), CommonUtil.typeOf(Map.class)) instanceof Map);
+        assertTrue(N.fromXml(new StringReader(xml), XmlDeserConfig.create(), CommonUtil.typeOf(Map.class)) instanceof Map);
     }
 
     @Test

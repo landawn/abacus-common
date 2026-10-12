@@ -691,13 +691,12 @@ public class MultisetRemoveTest extends MultisetTestSupport {
         assertThrows(NullPointerException.class, () -> multiset.removeIf(null));
     }
 
-
     @Test
     public void testRemoveOccurrencesNullCollectionIsNoOp() {
         final Multiset<String> values = Multiset.of("a", "a", "b");
 
         assertFalse(values.removeOccurrences(null, 2));
-        assertFalse(values.removeOccurrences(new ArrayList<String>(), 2));
+        assertFalse(values.removeOccurrences(new ArrayList<>(), 2));
         assertEquals(2, values.getCount("a"));
         assertEquals(1, values.getCount("b"));
         assertThrows(IllegalArgumentException.class, () -> values.removeOccurrences(null, -1));

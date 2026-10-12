@@ -1,6 +1,8 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -114,8 +116,9 @@ class SeqRevisionContractTest extends TestBase {
                 return stream;
             }, true)) {
                 assertEquals(0, calls.get());
-                if (consume)
+                if (consume) {
                     assertEquals(empty ? List.of() : List.of(1, 2), result.toList());
+                }
             }
             assertEquals(consume ? 1 : 0, calls.get());
             assertEquals(1, closes.get());

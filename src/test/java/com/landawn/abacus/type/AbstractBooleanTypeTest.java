@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,7 +98,8 @@ public class AbstractBooleanTypeTest extends TestBase {
     public void testValueOf_CharSequence_Other() {
         assertEquals(Boolean.FALSE, type.valueOf((Object) "N"));
         assertEquals(Boolean.FALSE, type.valueOf((Object) "0"));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) "abc"));
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf((Object) "abc"));
     }
 
     @Test
@@ -124,8 +127,10 @@ public class AbstractBooleanTypeTest extends TestBase {
         char[] cbuf = "false".toCharArray();
         assertEquals(Boolean.FALSE, type.valueOf(cbuf, 0, 5));
 
-        cbuf = "xyz".toCharArray();
-        assertEquals(Boolean.FALSE, type.valueOf(cbuf, 0, 3));
+        assertEquals(Boolean.FALSE, type.valueOf("N".toCharArray(), 0, 1));
+        assertEquals(Boolean.FALSE, type.valueOf("-1".toCharArray(), 0, 2));
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("xyz".toCharArray(), 0, 3));
     }
 
     @Test
@@ -143,21 +148,32 @@ public class AbstractBooleanTypeTest extends TestBase {
     @Test
     public void testValueOf_PositiveNumber() {
         assertEquals(Boolean.TRUE, type.valueOf(1));
-        assertEquals(Boolean.TRUE, type.valueOf(100L));
-        assertEquals(Boolean.FALSE, type.valueOf(0.1));
+        assertEquals(Boolean.TRUE, type.valueOf((short) 1));
+        assertEquals(Boolean.TRUE, type.valueOf((byte) 1));
+        // Only an Integer, Short or Byte 1, 0 or -1 is a boolean value: any other value, and any other Number class
+        // (1L, 1.0), is rejected.
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(100));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(1L));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(1.0));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(0.1));
     }
 
     @Test
     public void testValueOf_ZeroNumber() {
         assertEquals(Boolean.FALSE, type.valueOf(0));
-        assertEquals(Boolean.FALSE, type.valueOf(0L));
-        assertEquals(Boolean.FALSE, type.valueOf(0.0));
+        assertEquals(Boolean.FALSE, type.valueOf((short) 0));
+        assertEquals(Boolean.FALSE, type.valueOf((byte) 0));
+        // A Long or Double zero is a Number of another class, rejected whatever its value.
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(0L));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(0.0));
     }
 
     @Test
     public void testValueOf_NegativeNumber() {
         assertEquals(Boolean.FALSE, type.valueOf(-1));
-        assertEquals(Boolean.FALSE, type.valueOf(-100L));
+        assertEquals(Boolean.FALSE, type.valueOf((short) -1));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(-100));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(-1L));
     }
 
     @Test
@@ -317,23 +333,24 @@ public class AbstractBooleanTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_objectPath_trimsAndReadsCharacterAsOneCharString() {
         assertEquals(Boolean.TRUE, type.valueOf((Object) " Y"));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) new StringBuilder(" true ")));
+        assertEquals(Boolean.TRUE, type.valueOf(new StringBuilder(" true ")));
         assertEquals(Boolean.TRUE, type.valueOf((Object) "TRUE "));
         assertEquals(Boolean.TRUE, type.valueOf((Object) "\tY\n"));
         assertEquals(Boolean.TRUE, type.valueOf((Object) " 1 "));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) 'Y'));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) 'y'));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) '1'));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) 'N'));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) ' '));
+        assertEquals(Boolean.TRUE, type.valueOf('Y'));
+        assertEquals(Boolean.TRUE, type.valueOf('y'));
+        assertEquals(Boolean.TRUE, type.valueOf('1'));
+        assertEquals(Boolean.FALSE, type.valueOf('N'));
+        assertEquals(Boolean.FALSE, type.valueOf(' '));
         assertEquals(Boolean.FALSE, type.valueOf((Object) " false "));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) "t rue"));
+        // interior padding is not removed, and the result is not boolean text (code review 2026-10-05)
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf((Object) "t rue"));
         // G05-113: a full-width space (U+3000) is padding here too, as it is to the blank test
         assertEquals(Boolean.TRUE, type.valueOf((Object) "　Y"));
         // the documented "empty CharSequence -> FALSE, not the default" special case is kept and covers blank text
         assertEquals(Boolean.FALSE, type.valueOf((Object) ""));
         assertEquals(Boolean.FALSE, type.valueOf((Object) "   "));
-        assertEquals(Boolean.FALSE, type.valueOf((Object) new StringBuilder()));
+        assertEquals(Boolean.FALSE, type.valueOf(new StringBuilder()));
         assertNull(type.valueOf((Object) null));
     }
 
@@ -349,7 +366,8 @@ public class AbstractBooleanTypeTest extends TestBase {
         assertEquals(Boolean.TRUE, type.valueOf("xxtrueyy".toCharArray(), 2, 4));
         assertEquals(Boolean.TRUE, type.valueOf("Y".toCharArray(), 0, 1));
         assertEquals(Boolean.FALSE, type.valueOf(" false ".toCharArray(), 0, 7));
-        assertEquals(Boolean.FALSE, type.valueOf("t rue".toCharArray(), 0, 5));
+        // interior padding is not removed, and the result is not boolean text (code review 2026-10-05)
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("t rue".toCharArray(), 0, 5));
         // G05-113: U+3000 is padding on this path too, and the String overload answers the same
         assertEquals(Boolean.TRUE, type.valueOf("　Y".toCharArray(), 0, 2));
         // R11: a whitespace-only region is blank at EVERY length -> the default (null here), as valueOf(String)
@@ -360,12 +378,14 @@ public class AbstractBooleanTypeTest extends TestBase {
         assertNull(type.valueOf("x y".toCharArray(), 1, 1));
         assertNull(type.valueOf("   ".toCharArray(), 0, 3));
         assertEquals(type.defaultValue(), type.valueOf("   ".toCharArray(), 0, 3));
-        // a lone non-whitespace character that is not Y/y/1 is still FALSE
+        // a lone 'N', 'n' or '0' is FALSE; any other lone non-whitespace character is rejected
         assertEquals(Boolean.FALSE, type.valueOf("N".toCharArray(), 0, 1));
         assertEquals(Boolean.FALSE, type.valueOf("0".toCharArray(), 0, 1));
-        // a non-breaking space (U+00A0) is neither <= ' ' nor Java whitespace, so it stays FALSE on both paths
-        assertEquals(Boolean.FALSE, type.valueOf(new char[] { (char) 0x00a0 }, 0, 1));
-        assertEquals(Boolean.FALSE, type.valueOf(String.valueOf((char) 0x00a0)));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("x".toCharArray(), 0, 1));
+        // a non-breaking space (U+00A0) is neither <= ' ' nor Java whitespace, so it is not padding: both paths reject
+        // it as text that is not boolean text
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(new char[] { (char) 0x00a0 }, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(String.valueOf((char) 0x00a0)));
         assertNull(type.valueOf((char[]) null, 0, 0));
         assertNull(type.valueOf(new char[0], 0, 0));
     }
@@ -395,11 +415,12 @@ public class AbstractBooleanTypeTest extends TestBase {
         assertEquals(type.valueOf(String.valueOf(startOfHeading) + 'Y'), type.valueOf(new char[] { startOfHeading, 'Y' }, 0, 2));
 
         // R04 review 2026-09-08: the two halves of isPadding do NOT land on the same answer for a lone padding
-        // character - a Unicode space is blank text (the default value), a C0 control is stripped to "" and read
-        // by Boolean.valueOf (FALSE). Deferring to valueOf(String) is what keeps both paths on the same one.
+        // character - a Unicode space is blank text (the default value), a C0 control is stripped to "", which is not
+        // boolean text and is rejected (code review 2026-10-05). Deferring to valueOf(String) keeps both paths on the
+        // same answer.
         assertNull(type.valueOf(String.valueOf(ideographicSpace)));
-        assertEquals(Boolean.FALSE, type.valueOf(String.valueOf(startOfHeading)));
-        assertEquals(Boolean.FALSE, type.valueOf(new char[] { startOfHeading }, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(String.valueOf(startOfHeading)));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(new char[] { startOfHeading }, 0, 1));
 
         // the invariant in general: for every char, the char[] overload must answer exactly what the String
         // overload answers for the same text, at every region length the fast paths care about
@@ -437,13 +458,13 @@ public class AbstractBooleanTypeTest extends TestBase {
         // blank text (of either kind) still yields the default value, and interior padding is still not removed
         assertNull(type.valueOf(ideographicSpace));
         assertNull(type.valueOf(ideographicSpace + " " + ideographicSpace));
-        assertEquals(Boolean.FALSE, type.valueOf("tr" + ideographicSpace + "ue"));
-        // a non-breaking space is neither <= ' ' nor Character.isWhitespace: not padding
-        assertEquals(Boolean.FALSE, type.valueOf((char) 0x00a0 + "true"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("tr" + ideographicSpace + "ue"));
+        // a non-breaking space is neither <= ' ' nor Character.isWhitespace: not padding, so the text is rejected
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf((char) 0x00a0 + "true"));
 
         // valueOf(Object) reads a CharSequence by the same rule (blank stays the documented FALSE)
         assertEquals(Boolean.TRUE, type.valueOf((Object) (ideographicSpace + "true")));
-        assertEquals(Boolean.TRUE, type.valueOf((Object) new StringBuilder(ideographicSpace + "Y")));
+        assertEquals(Boolean.TRUE, type.valueOf(new StringBuilder(ideographicSpace + "Y")));
         assertEquals(Boolean.FALSE, type.valueOf((Object) ideographicSpace));
 
         // the strip lives in the shared AbstractType.parseBoolean, so the other boolean handlers agree
@@ -460,7 +481,17 @@ public class AbstractBooleanTypeTest extends TestBase {
         // read the region out of a larger buffer so the offset/len handling is exercised as well
         final char[] region = ("[" + str + "]").toCharArray();
 
-        assertEquals(type.valueOf(str), type.valueOf(region, 1, cbuf.length), () -> "char[] and String disagree on " + toEscapedString(str));
+        // A digit 2-9 is a number other than 1, 0 and -1 (code review 2026-10-05): both overloads must reject it alike.
+        assertEquals(outcome(() -> type.valueOf(str)), outcome(() -> type.valueOf(region, 1, cbuf.length)),
+                () -> "char[] and String disagree on " + toEscapedString(str));
+    }
+
+    private static Object outcome(final Supplier<Boolean> call) {
+        try {
+            return call.get();
+        } catch (final IllegalArgumentException e) {
+            return e.getClass().getName() + ": " + e.getMessage();
+        }
     }
 
     private static String toEscapedString(final String str) {

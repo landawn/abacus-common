@@ -1429,6 +1429,7 @@ public final class Fn {
      * (for example a {@code SecurityException}), the exception propagates to the caller of {@code run()} and the
      * next {@code run()} calls {@code shutdown()} again. This differs from {@link #close(AutoCloseable)} and the
      * other {@code close*} runnables, which never retry a failed close.</p>
+     * <p>A reentrant invocation from the service's shutdown or termination hook returns without starting another shutdown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1449,6 +1450,7 @@ public final class Fn {
             // Same reason memoizeWithExpiration and memoize(Function) use their own locks.
             private final Object lock = new Object();
             private volatile boolean isClosed = false;
+            private boolean shuttingDown = false;
 
             @Override
             public void run() {
@@ -1457,12 +1459,19 @@ public final class Fn {
                 }
 
                 synchronized (lock) {
-                    if (isClosed) {
+                    if (isClosed || shuttingDown) {
                         return;
                     }
 
-                    service.shutdown();
-                    isClosed = true;
+                    // A termination hook can reenter this runnable before shutdown returns. Keep the
+                    // in-progress guard separate so a failed shutdown remains retryable.
+                    shuttingDown = true;
+                    try {
+                        service.shutdown();
+                        isClosed = true;
+                    } finally {
+                        shuttingDown = false;
+                    }
                 }
             }
         };
@@ -1473,13 +1482,15 @@ public final class Fn {
      * The returned Runnable ensures the service is shut down only once, even if called multiple times.
      *
      * <p>Only the invocation that actually performs the shutdown waits for termination. Any later or
-     * concurrent invocation returns immediately without waiting.</p>
+     * concurrent invocation skips that wait; a concurrent call may first wait for an in-progress
+     * {@code shutdown()} call to return.</p>
      *
      * <p>Only a {@link ExecutorService#shutdown()} call that returns normally is recorded. If it throws
      * (for example a {@code SecurityException}), the exception propagates to the caller of {@code run()} without
      * waiting for termination, and the next {@code run()} calls {@code shutdown()} again (and waits if that call
      * succeeds). This differs from {@link #close(AutoCloseable)} and the other {@code close*} runnables, which never
      * retry a failed close.</p>
+     * <p>A reentrant invocation from the service's shutdown or termination hook returns without starting another shutdown or wait.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1506,6 +1517,7 @@ public final class Fn {
             // Same reason memoizeWithExpiration and memoize(Function) use their own locks.
             private final Object lock = new Object();
             private volatile boolean isClosed = false;
+            private boolean shuttingDown = false;
 
             @Override
             public void run() {
@@ -1514,12 +1526,18 @@ public final class Fn {
                 }
 
                 synchronized (lock) {
-                    if (isClosed) {
+                    if (isClosed || shuttingDown) {
                         return;
                     }
 
-                    service.shutdown();
-                    isClosed = true;
+                    // Reentrant hooks must not shut down or await their own termination again.
+                    shuttingDown = true;
+                    try {
+                        service.shutdown();
+                        isClosed = true;
+                    } finally {
+                        shuttingDown = false;
+                    }
                 }
 
                 try {

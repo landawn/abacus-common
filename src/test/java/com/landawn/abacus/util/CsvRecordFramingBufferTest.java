@@ -171,8 +171,8 @@ public class CsvRecordFramingBufferTest extends TestBase {
     @Test
     public void testDefaultLineParserFieldRulesMatchCsvParser() {
         final String[] lines = { "a,b,c", " a , b ,c ", "\"a\",\"b\"", " \"a\" , \"b\" ", "\"a,b\",c", "\"a\"\"b\",c", "\"\"\"\"\"\"", "\"\",\"\",",
-                "\"ab\"cd,e", "\"ab\" cd ,e", "\"ab\"  \"cd\",e", "ab\"cd\"e,f", "a\"b,c", "\"a\"\"\" x,y", ",,", " , , ", "", "   ",
-                "\u00A0a\u00A0,\u2003b", "\"line\r\nbreak\",\"cr\ronly\"", "\"\" x", "x\"", "\"a\"\t", "q,\"\"" };
+                "\"ab\"cd,e", "\"ab\" cd ,e", "\"ab\"  \"cd\",e", "ab\"cd\"e,f", "a\"b,c", "\"a\"\"\" x,y", ",,", " , , ", "", "   ", "\u00A0a\u00A0,\u2003b",
+                "\"line\r\nbreak\",\"cr\ronly\"", "\"\" x", "x\"", "\"a\"\t", "q,\"\"" };
 
         for (final String line : lines) {
             final String[] expected = new CsvParser().parseLineToArray(line);
@@ -204,8 +204,8 @@ public class CsvRecordFramingBufferTest extends TestBase {
 
         // Skipped records are framed but not parsed, so a ragged record before the offset is not an error.
         assertEquals("c", CsvUtil.load(new StringReader("h\na,b\nc"), null, 1, Long.MAX_VALUE).get(0, 0));
-        assertEquals(List.of("c"), CsvUtil.stream(new StringReader("h\na,b\nc"), null, 1, Long.MAX_VALUE, it -> true, (names, row) -> row.get(0), false)
-                .toList());
+        assertEquals(List.of("c"),
+                CsvUtil.stream(new StringReader("h\na,b\nc"), null, 1, Long.MAX_VALUE, it -> true, (names, row) -> row.get(0), false).toList());
     }
 
     /** The retention limit of CsvRecordReader's reusable buffers (MAX_RETAINED_RECORD_CAPACITY). */
@@ -241,8 +241,7 @@ public class CsvRecordFramingBufferTest extends TestBase {
             assertEquals("r49", data.get(52, 0));
             assertEquals("q\"49", data.get(52, 1));
 
-            final List<String> streamed = CsvUtil.stream(source.apply(csv), null, 2, Long.MAX_VALUE, it -> true, (names, row) -> row.get(1), false)
-                    .toList();
+            final List<String> streamed = CsvUtil.stream(source.apply(csv), null, 2, Long.MAX_VALUE, it -> true, (names, row) -> row.get(1), false).toList();
             assertEquals(51, streamed.size());
             assertEquals("suffix", streamed.get(0));
             assertEquals("q\"49", streamed.get(50));

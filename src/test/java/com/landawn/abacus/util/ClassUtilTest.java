@@ -15,6 +15,10 @@ import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -27,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.tools.ToolProvider;
+
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -34,11 +40,6 @@ import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.util.function.Predicate;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import javax.tools.ToolProvider;
 
 public class ClassUtilTest extends TestBase {
 
@@ -1821,7 +1822,7 @@ public class ClassUtilTest extends TestBase {
         final Method virtualMethod = Base.class.getDeclaredMethod("value");
         final MethodHandle virtualHandle = ClassUtil.createMethodHandle(virtualMethod);
 
-        assertEquals("derived", (String) virtualHandle.invokeExact((Base) new Derived()));
+        assertEquals("derived", virtualHandle.invokeExact((Base) new Derived()));
     }
 
     @Test
@@ -2144,7 +2145,6 @@ public class ClassUtilTest extends TestBase {
         assertFalse(field.isAccessible());
     }
 
-
     @Test
     public void testFindClassesInPackageSkipsPackageInfoInJar() {
         // Guava (provided scope) annotates com.google.common.base in package-info.java, so its jar holds a
@@ -2224,9 +2224,10 @@ public class ClassUtilTest extends TestBase {
         Files.writeString(pkg.resolve("Outer.java"), "package g025probe;\npublic class Outer extends Missing {\n    public static class Inner {}\n}\n");
         Files.writeString(pkg.resolve("Plain.java"), "package g025probe;\npublic class Plain {}\n");
 
-        assertEquals(0, ToolProvider.getSystemJavaCompiler()
-                .run(null, null, null, "-proc:none", "-d", root.toString(), pkg.resolve("Missing.java").toString(), pkg.resolve("Outer.java").toString(),
-                        pkg.resolve("Plain.java").toString()));
+        assertEquals(0,
+                ToolProvider.getSystemJavaCompiler()
+                        .run(null, null, null, "-proc:none", "-d", root.toString(), pkg.resolve("Missing.java").toString(),
+                                pkg.resolve("Outer.java").toString(), pkg.resolve("Plain.java").toString()));
         assertTrue(Files.exists(pkg.resolve("Outer$Inner.class")));
         Files.delete(pkg.resolve("Missing.class"));
 

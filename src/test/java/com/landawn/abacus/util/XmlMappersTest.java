@@ -685,8 +685,7 @@ public class XmlMappersTest extends TestBase {
         final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
                 () -> XmlMappers.fromXml(missing, missingType, (DeserializationConfig) null));
         assertTrue(e2.getMessage().contains("targetType"), e2.getMessage());
-        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class,
-                () -> XmlMappers.wrap(new XmlMapper()).fromXml(missing, missingType));
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () -> XmlMappers.wrap(new XmlMapper()).fromXml(missing, missingType));
         assertTrue(e3.getMessage().contains("targetType"), e3.getMessage());
     }
 }

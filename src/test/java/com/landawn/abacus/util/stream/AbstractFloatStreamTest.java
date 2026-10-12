@@ -50,13 +50,13 @@ public class AbstractFloatStreamTest extends TestBase {
             return value;
         }).scan((left, right) -> {
             accumulatorCalls.incrementAndGet();
-            return (float) (left + right);
+            return left + right;
         })) {
             final com.landawn.abacus.util.FloatIterator iter = stream.iterator();
             org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextFloat));
-            org.junit.jupiter.api.Assertions.assertEquals((float) 2, iter.nextFloat());
+            org.junit.jupiter.api.Assertions.assertEquals(2, iter.nextFloat());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
-            org.junit.jupiter.api.Assertions.assertEquals((float) 5, iter.nextFloat());
+            org.junit.jupiter.api.Assertions.assertEquals(5, iter.nextFloat());
             org.junit.jupiter.api.Assertions.assertEquals(1, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
         }
@@ -653,18 +653,18 @@ public class AbstractFloatStreamTest extends TestBase {
 
     @Test
     public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
-        FloatIteratorEx reversed = (FloatIteratorEx) createFloatStream(new float[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        FloatIteratorEx reversed = createFloatStream(new float[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         assertEquals(5, reversed.toArray().length);
         assertFalse(reversed.hasNext());
         assertEquals(0, reversed.toArray().length);
 
-        FloatIteratorEx rotated = (FloatIteratorEx) createFloatStream(new float[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        FloatIteratorEx rotated = createFloatStream(new float[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
         rotated.nextFloat();
         assertEquals(4, rotated.toArray().length);
         assertFalse(rotated.hasNext());
         assertEquals(0, rotated.toArray().length);
 
-        FloatIteratorEx reverseSorted = (FloatIteratorEx) createFloatStream(new float[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        FloatIteratorEx reverseSorted = createFloatStream(new float[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
         reverseSorted.nextFloat();
         reverseSorted.nextFloat();
         assertEquals(3, reverseSorted.toArray().length);
@@ -712,6 +712,7 @@ public class AbstractFloatStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createFloatStream(new float[] { 1.0f, 2.0f, 3.0f }).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+
     // ---- perf review 2026-09-26 G085 begin ----
     // G085-01: rotated() nextX()/toArray() replaced the per-element modulo with a conditional subtraction and two bulk copies.
     @Test
@@ -738,14 +739,14 @@ public class AbstractFloatStreamTest extends TestBase {
                     final float[] copy = Arrays.copyOfRange(backing, from, from + len);
 
                     // full toArray()
-                    assertArrayEquals(expected, (source == 0 ? FloatStream.of(backing, from, from + len) : FloatStream.of(FloatIterator.of(copy))).rotated(distance).toArray(),
+                    assertArrayEquals(expected,
+                            (source == 0 ? FloatStream.of(backing, from, from + len) : FloatStream.of(FloatIterator.of(copy))).rotated(distance).toArray(),
                             msg);
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final FloatIteratorEx byNext = (FloatIteratorEx) (source == 0 ? FloatStream.of(backing, from, from + len) : FloatStream.of(FloatIterator.of(copy)))
-                                .rotated(distance)
-                                .iteratorEx();
+                        final FloatIteratorEx byNext = (source == 0 ? FloatStream.of(backing, from, from + len)
+                                : FloatStream.of(FloatIterator.of(copy))).rotated(distance).iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextFloat(), msg + ", k=" + k + ", j=" + j);
@@ -754,7 +755,7 @@ public class AbstractFloatStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final FloatIteratorEx byAdvance = (FloatIteratorEx) (source == 0 ? FloatStream.of(backing, from, from + len)
+                        final FloatIteratorEx byAdvance = (source == 0 ? FloatStream.of(backing, from, from + len)
                                 : FloatStream.of(FloatIterator.of(copy))).rotated(distance).iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);

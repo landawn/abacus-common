@@ -997,7 +997,6 @@ public class DatesTest extends TestBase {
         }
     }
 
-
     @Test
     public void testCivilFieldQueriesAcceptFixedOffsetDefaultZoneWithUnrecognizedId() {
         final TimeZone previous = TimeZone.getDefault();
@@ -1098,6 +1097,7 @@ public class DatesTest extends TestBase {
         assertEquals(expectedPacific, named.getTimeInMillis());
         assertEquals(-8 * 60 * 60 * 1000, named.getTimeZone().getOffset(expectedPacific));
     }
+
     // G035-02: the default UTC fast path renders every runtime type and boundary exactly.
     @Test
     public void testFormat_defaultFastPathShapesAndBoundaries() {

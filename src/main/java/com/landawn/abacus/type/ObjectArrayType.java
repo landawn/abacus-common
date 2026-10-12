@@ -26,6 +26,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -70,6 +72,9 @@ import com.landawn.abacus.util.cs;
  * @param <T> the component type of the array
  */
 public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
+
+    /** Compact embedded JSON configuration retaining XML's present-null rejection. */
+    private static final JsonSerConfig XML_JSON_CONFIG = new XmlEmbeddedJsonConfig();
 
     /** The array class handled by this type (e.g., {@code String[].class}). */
     protected final Class<T[]> typeClass;
@@ -247,13 +252,19 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * parsed {@code List}/{@code Map}; for any other element type the element type's own parse failure is propagated
      * (for example {@code NumberFormatException} for {@code Integer[]}).</p>
      *
+     * <p>The surrounding brackets are optional, as for the JSON parser's array reader: unbracketed text is read as the
+     * element list, so {@code "a, b"} yields {@code {"a", "b"}}, a single bare value such as {@code "abc"} yields a
+     * one-element array, and the bare literal {@code "null"} yields {@code {null}} (a one-element array holding
+     * {@code null}), not {@code null}.</p>
+     *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form produced by
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse
      * @return the parsed array, {@code null} if input is {@code null}, empty, or blank, or an empty array for the "[]" representation
-     * @throws ParsingException if {@code str} is not a valid JSON array text
+     * @throws ParsingException if {@code str} is not well-formed JSON array content (for example an unclosed bracket or
+     *         text after the closing bracket)
      * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Object[])
@@ -386,7 +397,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
      * {@link com.landawn.abacus.parser.JsonSerConfig} the JSON parser writes real JSON (a number stays a number, a
      * bean becomes an object, so {@code new Object[] {1, "a", null, bean}} becomes
      * {@code [1, "a", null, {"name": "z", "age": 3}]}), and under an XML configuration the JSON text of the array is
-     * written as escaped character content. A {@code null} config writes the elements element by element without
+     * written as escaped character content, retaining XML's rejection of present-null {@code Nullable} values at
+     * any nested depth. A {@code null} config writes the elements element by element without
      * quotation, as before. That embedded JSON is always written compactly: {@code prettyFormat} is not propagated to
      * it, because this handler is not told the caller's current indentation and a pretty embedded array would restart
      * at the left margin.
@@ -421,7 +433,8 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
                     writer.writeCharacter(Utils.jsonParser.serialize(x, embeddedConfig));
                 }
             } else {
-                writer.writeCharacter(stringOf(x));
+                // stringOf uses ordinary JSON settings and would lose XML's present-null guard inside nested values.
+                writer.writeCharacter(config instanceof XmlSerConfig ? Utils.jsonParser.serialize(x, XML_JSON_CONFIG) : stringOf(x));
             }
         } else {
             writer.write(SK._BRACKET_L);

@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Strings;
 
 /**
  * Type handler for {@link Boolean} values that are stored as single-character strings
@@ -33,6 +34,13 @@ import com.landawn.abacus.util.CharacterWriter;
  * <p>JDBC mapping: values are read and written as {@code VARCHAR} strings
  * ({@link java.sql.Types#VARCHAR}). A {@code null} value is bound as SQL {@code NULL}, while SQL
  * {@code NULL} values are read back as {@code Boolean.FALSE}.</p>
+ *
+ * <p>Reading follows the library-wide rule, which includes the {@code Y}/{@code N} convention: an {@code Integer},
+ * {@code Short} or {@code Byte} {@code 1} and the texts {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any
+ * case) are {@code true}; an {@code Integer}, {@code Short} or {@code Byte} {@code 0} or {@code -1} and the texts
+ * {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) are {@code false}; any other
+ * number, a {@code Number} of any other class ({@code 1L}, {@code 1.0}), and any other text are rejected with an
+ * {@link IllegalArgumentException}.</p>
  */
 @SuppressWarnings("java:S2160")
 public final class BooleanCharType extends AbstractType<Boolean> {
@@ -100,37 +108,42 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Parses a string to a {@link Boolean} using the {@code Y}/{@code N} convention.
-     * The comparison is case-insensitive; {@code "Y"} or {@code "y"} yields {@code true}.
-     * Any other value (including {@code null}) yields {@code false}.
+     * Parses a string to a {@link Boolean} with the library-wide rule for text, which includes the {@code Y}/{@code N}
+     * convention: {@code "Y"}, {@code "y"}, {@code "1"} and {@code "true"} (any case) yield {@code true}; {@code "N"},
+     * {@code "n"}, {@code "0"}, {@code "-1"} and {@code "false"} (any case) yield {@code false}; surrounding padding is
+     * removed first; any other text is rejected. {@code null} and blank text yield {@code false}, the default value.
      *
      * <p>This method parses strings produced by {@code stringOf} back into values of this type. Non-null boolean
      * values round-trip exactly; the {@code "N"} produced for {@code null} decodes as {@link Boolean#FALSE}. Strings
      * produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}
-     * @return {@link Boolean#TRUE} if {@code str} equals {@code "Y"} (case-insensitive),
-     *         {@link Boolean#FALSE} otherwise
+     * @return the parsed value, or {@link Boolean#FALSE} if {@code str} is {@code null} or blank
+     * @throws IllegalArgumentException if {@code str} is not blank and, without its padding, is none of the accepted texts
      * @see #valueOf(Object)
      * @see #stringOf(Boolean)
      */
     @Override
-    public Boolean valueOf(final String str) {
-        return Y.equalsIgnoreCase(str) ? Boolean.TRUE : Boolean.FALSE;
+    public Boolean valueOf(final String str) throws IllegalArgumentException {
+        return Strings.isBlank(str) ? Boolean.FALSE : parseBoolean(str);
     }
 
     /**
      * Converts an object to a {@link Boolean} value.
-     * Booleans are returned as-is. Numbers return {@code true} when {@link Number#longValue()}
-     * is positive; fractional values are truncated and wide integer values may overflow during that
-     * conversion. Other objects use their string form with the {@code Y}/{@code N} convention.
+     * Booleans are returned as-is. An {@code Integer}, {@code Short} or {@code Byte} returns {@code true} when its
+     * value is {@code 1} and {@code false} when it is {@code 0} or {@code -1}; any other value ({@code 2}), and a
+     * {@code Number} of any other class ({@code 1L}, {@code 1.0}, {@code BigDecimal}), is rejected. Other objects use their
+     * string form, read by {@link #valueOf(String)}.
      *
      * @param obj the object to convert; may be {@code null}
      * @return the Boolean value, or {@code false} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if {@code obj} is an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, or an object whose string form is
+     *         not blank and is none of the texts {@link #valueOf(String)} accepts
      * @see #valueOf(String)
      */
     @Override
-    public Boolean valueOf(final Object obj) {
+    public Boolean valueOf(final Object obj) throws IllegalArgumentException {
         // Without this override the inherited valueOf(Object) stringified a Boolean to
         // "true"/"false", which the Y/N parser mapped to FALSE - even for Boolean.TRUE.
         if (obj == null) {
@@ -138,7 +151,7 @@ public final class BooleanCharType extends AbstractType<Boolean> {
         } else if (obj instanceof Boolean b) {
             return b;
         } else if (obj instanceof Number n) {
-            return n.longValue() > 0;
+            return booleanOf(n);
         }
 
         return valueOf(obj.toString());
@@ -155,21 +168,26 @@ public final class BooleanCharType extends AbstractType<Boolean> {
     }
 
     /**
-     * Parses a character array sub-sequence to a {@link Boolean}.
-     * Returns {@link Boolean#TRUE} only if {@code length} is {@code 1} and the character at
-     * {@code cbuf[offset]} is {@code 'Y'} or {@code 'y'}; returns {@link Boolean#FALSE} otherwise,
-     * including when {@code cbuf} is {@code null} or {@code length} is {@code 0}.
+     * Parses a character array sub-sequence to a {@link Boolean}, exactly as {@link #valueOf(String)} parses the same
+     * text; a {@code null} {@code cbuf} or a {@code length} of {@code 0} yields {@link Boolean#FALSE}.
      *
      * @param cbuf the character array; may be {@code null}
      * @param offset the 0-based start position within {@code cbuf}
      * @param length the number of characters to examine
-     * @return {@link Boolean#TRUE} if the single character is {@code 'Y'} or {@code 'y'},
-     *         {@link Boolean#FALSE} otherwise
-     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code length} is one, and {@code offset} is outside the array.
+     * @return the parsed value, or {@link Boolean#FALSE} if the region is empty or blank
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code length} is positive, and the region is outside the array.
+     * @throws IllegalArgumentException if the region is not blank and, without its padding, is none of the accepted texts
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
-        return (cbuf == null || length == 0) ? Boolean.FALSE : ((length == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
+    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if (cbuf == null || length == 0) {
+            return Boolean.FALSE;
+        }
+
+        final Boolean token = booleanToken(cbuf, offset, length);
+
+        // Padded, blank or unrecognized text is read by valueOf(String); "Y" and "N" are read in place.
+        return token != null ? token : valueOf(new String(cbuf, offset, length));
     }
 
     /**
@@ -179,13 +197,14 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the Y/N value
-     * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
-     *         {@link Boolean#FALSE} for any other value including SQL NULL
+     * @return the column value read by {@link #valueOf(String)} ({@code "Y"} is {@code true}, {@code "N"} is
+     *         {@code false}), or {@link Boolean#FALSE} for SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column value is not blank and is none of the texts {@link #valueOf(String)} accepts
      */
     @Override
-    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, IllegalArgumentException {
         return valueOf(rs.getString(columnIndex));
     }
 
@@ -196,13 +215,14 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
-     * @return {@link Boolean#TRUE} if the column value is {@code "Y"} (case-insensitive),
-     *         {@link Boolean#FALSE} for any other value including SQL NULL
+     * @return the column value read by {@link #valueOf(String)} ({@code "Y"} is {@code true}, {@code "N"} is
+     *         {@code false}), or {@link Boolean#FALSE} for SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column value is not blank and is none of the texts {@link #valueOf(String)} accepts
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
+    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, IllegalArgumentException {
         return valueOf(rs.getString(columnName));
     }
 

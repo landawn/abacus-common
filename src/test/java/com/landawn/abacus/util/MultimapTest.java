@@ -45,7 +45,7 @@ public class MultimapTest extends MultimapTestSupport {
     @Test
     public void testRemoveValuesStagesSharedLiveCollections() {
         for (final boolean useSubList : new boolean[] { false, true }) {
-            ListMultimap<String, Integer> target = N.newListMultimap();
+            ListMultimap<String, Integer> target = CommonUtil.newListMultimap();
             target.putValues("a", Arrays.asList(1, 3));
             target.putValues("b", Arrays.asList(1, 2, 3));
             Collection<Integer> live = useSubList ? target.get("a").subList(0, 1) : target.get("a");
@@ -57,7 +57,7 @@ public class MultimapTest extends MultimapTestSupport {
             assertEquals(useSubList ? List.of(2, 3) : List.of(2), target.get("b"));
         }
 
-        ListMultimap<String, Integer> target = N.newListMultimap();
+        ListMultimap<String, Integer> target = CommonUtil.newListMultimap();
         target.put("a", 1);
         target.putValues("b", List.of(1, 2));
         Map<String, List<Integer>> removalMap = new LinkedHashMap<>();
@@ -75,13 +75,13 @@ public class MultimapTest extends MultimapTestSupport {
         // compacts in place while a sublist view of that same list keeps reading it, so values the argument never
         // matched used to be dropped silently. Only removeValues(Map)/removeValues(Multimap) and removeValuesIf
         // pinned this shape before.
-        ListMultimap<String, Integer> viaSubList = N.newListMultimap();
+        ListMultimap<String, Integer> viaSubList = CommonUtil.newListMultimap();
         viaSubList.putValues("a", Arrays.asList(1, 2, 3, 4));
         assertTrue(viaSubList.removeValues("a", viaSubList.get("a").subList(0, 2)));
         assertEquals(List.of(3, 4), viaSubList.get("a"));
 
         // the whole live collection: every stored value matches, so the key goes with it
-        ListMultimap<String, Integer> viaWholeCollection = N.newListMultimap();
+        ListMultimap<String, Integer> viaWholeCollection = CommonUtil.newListMultimap();
         viaWholeCollection.putValues("a", Arrays.asList(1, 2, 3, 4));
         viaWholeCollection.put("b", 1);
         assertTrue(viaWholeCollection.removeValues("a", viaWholeCollection.get("a")));
@@ -89,7 +89,7 @@ public class MultimapTest extends MultimapTestSupport {
         assertEquals(List.of(1), viaWholeCollection.get("b"));
 
         // a Set value collection too, where Collection.removeAll would have picked an equivalence by size
-        SetMultimap<String, Integer> setValued = N.newSetMultimap();
+        SetMultimap<String, Integer> setValued = CommonUtil.newSetMultimap();
         setValued.putValues("a", Arrays.asList(1, 2, 3));
         assertTrue(setValued.removeValues("a", setValued.get("a")));
         assertNull(setValued.get("a"));
@@ -99,7 +99,7 @@ public class MultimapTest extends MultimapTestSupport {
     public void testRemoveValuesPreservesOriginalMembershipRules() {
         String selected = new String("same");
         String equalButDistinct = new String("same");
-        ListMultimap<String, String> identityTarget = N.newListMultimap();
+        ListMultimap<String, String> identityTarget = CommonUtil.newListMultimap();
         identityTarget.putValues("a", List.of(selected, equalButDistinct));
         Set<String> identityRemoval = new IdentityHashSet<>();
         identityRemoval.add(selected);
@@ -107,7 +107,7 @@ public class MultimapTest extends MultimapTestSupport {
         assertEquals(1, identityTarget.get("a").size());
         assertSame(equalButDistinct, identityTarget.get("a").get(0));
 
-        ListMultimap<String, String> comparatorTarget = N.newListMultimap();
+        ListMultimap<String, String> comparatorTarget = CommonUtil.newListMultimap();
         comparatorTarget.putValues("a", List.of("UPPER", "keep"));
         Set<String> comparatorRemoval = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         comparatorRemoval.add("upper");

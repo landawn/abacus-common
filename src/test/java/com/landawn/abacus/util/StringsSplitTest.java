@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringsSplitTest extends StringsTestSupport {
 
@@ -275,7 +275,6 @@ public class StringsSplitTest extends StringsTestSupport {
         assertEquals(0, Strings.splitToLines("", false, true).length);
         assertEquals(0, Strings.splitToLines(null, false, true).length);
     }
-
 
     @Test
     public void testSplit_delimiterValidatedBeforeMax() {

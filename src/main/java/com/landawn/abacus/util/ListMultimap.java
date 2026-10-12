@@ -566,7 +566,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * <p>This method converts a regular Map into a ListMultimap where each key is associated with a list containing a single value.
      * The returned ListMultimap uses a compatible independent backing map. Common concrete map types are preserved
      * (for example, a LinkedHashMap source retains insertion order), sorted-map comparators are preserved, and an
-     * uninstantiable runtime wrapper type falls back to LinkedHashMap. A {@link BiMap} source also yields a
+     * uninstantiable runtime type (a wrapper or an anonymous map class, for example) falls back to an IdentityHashMap,
+     * WeakHashMap or ConcurrentHashMap for a map of that family, and to a LinkedHashMap otherwise. A {@link BiMap} source also yields a
      * LinkedHashMap, because a BiMap backing map would require the value lists of different keys to be unequal.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1120,7 +1121,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * <p>Every key of this ListMultimap appears in the copy, including a key whose value list is empty
      * (which normal mutators never leave behind, but a caller can create by emptying a list obtained from
-     * {@link #get(Object)}), so {@code copy().equals(this)} always holds.
+     * {@link #get(Object)}), so such a key never makes {@code copy().equals(this)} false.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1143,7 +1144,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      */
     @Override
     public ListMultimap<K, E> copy() throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
-        final ListMultimap<K, E> copy = new ListMultimap<>(mapSupplier, valueSupplier);
+        final ListMultimap<K, E> copy = mapSupplier == null ? new ListMultimap<>(Maps.newTargetMap(backingMap), valueSupplier)
+                : new ListMultimap<>(mapSupplier, valueSupplier);
 
         copyInto(copy);
 

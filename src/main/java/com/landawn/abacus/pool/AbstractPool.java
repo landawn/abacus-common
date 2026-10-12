@@ -268,6 +268,7 @@ public abstract class AbstractPool implements Pool {
      *
      * @throws IllegalStateException if JVM shutdown has begun
      * @throws IllegalArgumentException if this pool's hook was already registered or started
+     * @throws SecurityException if a security manager denies registering the shutdown hook
      */
     protected final void registerShutdownHook() throws IllegalStateException, IllegalArgumentException {
         Runtime.getRuntime().addShutdownHook(shutdownHook);

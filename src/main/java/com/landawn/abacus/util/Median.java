@@ -31,9 +31,9 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 /**
  * Finds the median element (or the two middle elements) of an array, a collection, or a range of either, without
- * modifying the input. Ranges of four or more elements are copied and the copy is sorted, costing O(n log n) time
- * and O(n) auxiliary space; shorter ranges use specialized selection paths (see <b>Algorithm</b> below). The caller's data is
- * never touched either way.
+ * modifying the input. Ranges of four or more elements use a defensive copy with O(n) auxiliary space.
+ * The int, long, float and double overloads select in expected O(n) time, with an O(n log n) worst-case sorting
+ * fallback; the other overloads sort the copy. Shorter ranges use specialized paths (see <b>Algorithm</b> below).
  *
  * <p><b>What is returned.</b> A {@link Pair}. For an odd number of elements, {@code left} is the single median and
  * {@code right} is empty. For an even number, {@code left} is the lower median and {@code right} the upper - which may
@@ -60,7 +60,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  * {@code 0.0} sorts above {@code -0.0}. No arithmetic is performed on the input, so nothing overflows and no precision
  * is lost.
  *
- * <p><b>Algorithm.</b> Ranges of four or more elements are copied and sorted, then read at the middle position(s).
+ * <p><b>Algorithm.</b> The int, long, float and double overloads select the upper middle on their copy and, for
+ * even lengths, find the lower middle by scanning the lower partition. Selection has a bounded work budget and
+ * falls back to sorting; floating-point arrays containing NaN or negative zero are fully sorted to preserve
+ * their exact ordering and NaN payload selection. Other overloads sort their copy and read the middle position(s).
  * Shorter ranges have specialized paths: primitive overloads select directly without a working array, while
  * the object overloads delegate their three-element case to {@link N#lowerMedian}, which selects through a small
  * bounded heap (falling back to copy-and-sort when the range contains {@code null}) and so does allocate. Collection
@@ -429,7 +432,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
-     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
+     * copy is selected in expected O(n) time (O(n log n) worst case); shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -465,7 +468,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and selected in expected O(n) time (O(n log n) worst case);
      * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
@@ -516,12 +519,23 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalInt.empty());
         } else {
-            // Copy and sort rather than retain a bounded min-heap of len/2+1 *boxed* values: sorting a
-            // primitive copy allocates less, runs faster, and orders by the same total ordering.
             final int[] copy = N.copyOfRange(source, fromIndex, toIndex);
-            N.sort(copy);
+            final int middle = len / 2;
+            N.selectInPlace(copy, middle);
 
-            return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], OptionalInt.of(copy[len / 2])) : Pair.of(copy[len / 2], OptionalInt.empty());
+            if (len % 2 != 0) {
+                return Pair.of(copy[middle], OptionalInt.empty());
+            }
+
+            // The lower partition holds the middle smallest values, so the lower median is its maximum.
+            int lower = copy[0];
+            for (int i = 1; i < middle; i++) {
+                if (copy[i] >= lower) {
+                    lower = copy[i];
+                }
+            }
+
+            return Pair.of(lower, OptionalInt.of(copy[middle]));
         }
     }
 
@@ -530,7 +544,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
-     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
+     * copy is selected in expected O(n) time (O(n log n) worst case); shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -566,7 +580,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and selected in expected O(n) time (O(n log n) worst case);
      * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
@@ -617,12 +631,23 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalLong.empty());
         } else {
-            // Copy and sort rather than retain a bounded min-heap of len/2+1 *boxed* values: sorting a
-            // primitive copy allocates less, runs faster, and orders by the same total ordering.
             final long[] copy = N.copyOfRange(source, fromIndex, toIndex);
-            N.sort(copy);
+            final int middle = len / 2;
+            N.selectInPlace(copy, middle);
 
-            return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], OptionalLong.of(copy[len / 2])) : Pair.of(copy[len / 2], OptionalLong.empty());
+            if (len % 2 != 0) {
+                return Pair.of(copy[middle], OptionalLong.empty());
+            }
+
+            // The lower partition holds the middle smallest values, so the lower median is its maximum.
+            long lower = copy[0];
+            for (int i = 1; i < middle; i++) {
+                if (copy[i] >= lower) {
+                    lower = copy[i];
+                }
+            }
+
+            return Pair.of(lower, OptionalLong.of(copy[middle]));
         }
     }
 
@@ -631,7 +656,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
-     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.
+     * copy is selected in expected O(n) time (O(n log n) worst case); shorter arrays are selected directly. The input is not modified.
      * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
      *
@@ -668,7 +693,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and selected in expected O(n) time (O(n log n) worst case);
      * shorter ranges are selected directly. The input is not modified.
      * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
@@ -721,12 +746,24 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalFloat.empty());
         } else {
-            // Copy and sort rather than retain a bounded min-heap of len/2+1 *boxed* values: sorting a
-            // primitive copy allocates less, runs faster, and orders by the same total ordering.
             final float[] copy = N.copyOfRange(source, fromIndex, toIndex);
-            N.sort(copy);
+            final int middle = len / 2;
+            N.selectInPlace(copy, middle);
 
-            return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], OptionalFloat.of(copy[len / 2])) : Pair.of(copy[len / 2], OptionalFloat.empty());
+            if (len % 2 != 0) {
+                return Pair.of(copy[middle], OptionalFloat.empty());
+            }
+
+            // The lower partition contains the middle smallest values. Keep the last maximum
+            // so the full-sort fallback also preserves floating-point NaN payload selection.
+            float lower = copy[0];
+            for (int i = 1; i < middle; i++) {
+                if (Float.compare(copy[i], lower) >= 0) {
+                    lower = copy[i];
+                }
+            }
+
+            return Pair.of(lower, OptionalFloat.of(copy[middle]));
         }
     }
 
@@ -735,7 +772,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
-     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.
+     * copy is selected in expected O(n) time (O(n log n) worst case); shorter arrays are selected directly. The input is not modified.
      * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
      * considered greater than {@code -0.0d}.</p>
@@ -774,7 +811,7 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and selected in expected O(n) time (O(n log n) worst case);
      * shorter ranges are selected directly. The input is not modified.
      * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
@@ -828,12 +865,24 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.lowerMedian(source, fromIndex, toIndex), OptionalDouble.empty());
         } else {
-            // Copy and sort rather than retain a bounded min-heap of len/2+1 *boxed* values: sorting a
-            // primitive copy allocates less, runs faster, and orders by the same total ordering.
             final double[] copy = N.copyOfRange(source, fromIndex, toIndex);
-            N.sort(copy);
+            final int middle = len / 2;
+            N.selectInPlace(copy, middle);
 
-            return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], OptionalDouble.of(copy[len / 2])) : Pair.of(copy[len / 2], OptionalDouble.empty());
+            if (len % 2 != 0) {
+                return Pair.of(copy[middle], OptionalDouble.empty());
+            }
+
+            // The lower partition contains the middle smallest values. Keep the last maximum
+            // so the full-sort fallback also preserves floating-point NaN payload selection.
+            double lower = copy[0];
+            for (int i = 1; i < middle; i++) {
+                if (Double.compare(copy[i], lower) >= 0) {
+                    lower = copy[i];
+                }
+            }
+
+            return Pair.of(lower, OptionalDouble.of(copy[middle]));
         }
     }
 

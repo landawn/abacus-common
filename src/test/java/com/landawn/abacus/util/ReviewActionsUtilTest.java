@@ -1,6 +1,12 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -15,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 
@@ -101,8 +108,9 @@ public class ReviewActionsUtilTest extends TestBase {
 
         @com.fasterxml.jackson.annotation.JsonCreator
         public static EmptyCreator from(String value) {
-            if ("".equals(value))
+            if ("".equals(value)) {
                 return EMPTY;
+            }
             throw new IllegalArgumentException(value);
         }
     }

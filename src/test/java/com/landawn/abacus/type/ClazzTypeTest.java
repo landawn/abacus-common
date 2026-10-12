@@ -186,14 +186,14 @@ public class ClazzTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_valueOfObjectAcceptsAClassInstance() {
         // Before the fix: IllegalArgumentException "No class found by name: class java.lang.Integer".
-        assertEquals(Integer.class, type.valueOf((Object) Integer.class));
-        assertEquals(int[].class, type.valueOf((Object) int[].class));
-        assertEquals(java.util.Map.Entry.class, type.valueOf((Object) java.util.Map.Entry.class));
+        assertEquals(Integer.class, type.valueOf(Integer.class));
+        assertEquals(int[].class, type.valueOf(int[].class));
+        assertEquals(java.util.Map.Entry.class, type.valueOf(java.util.Map.Entry.class));
         // Non-Class arguments still go through the string form.
         assertEquals(int[].class, type.valueOf((Object) "int[]"));
         Assertions.assertNull(type.valueOf((Object) null));
         // The pool-registered handler behaves the same.
-        assertEquals(Integer.class, ((Type<Class>) createType("Clazz<Object>")).valueOf((Object) Integer.class));
+        assertEquals(Integer.class, ((Type<Class>) createType("Clazz<Object>")).valueOf(Integer.class));
     }
 
     // ---- T2-13: documented limits of the class-name round trip ----

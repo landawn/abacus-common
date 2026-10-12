@@ -22,6 +22,7 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
@@ -140,7 +141,8 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * precision and scale, including nested generic values.</p>
      * <p>The first slot must use integer notation and fit in a {@code long} (or be null, interpreted
      * as zero); fractional, scientific-notation, and out-of-range metadata is rejected, including
-     * when quoted. Quoted integer text is JSON-decoded before validation.</p>
+     * when quoted, and so is an empty or blank quoted index ({@code ["", "a"]}). Quoted integer text is
+     * JSON-decoded before validation.</p>
      *
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
      * @return the deserialized indexed value, or {@code null} if {@code str} is {@code null} or empty (a blank,
@@ -149,8 +151,8 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      *         blank string, unbalanced brackets and trailing text), or if the index is negative (which
      *         {@link Indexed#of(Object, long)} rejects)
      * @throws ParsingException if the value token is not valid JSON for the declared value type
-     * @throws NumberFormatException if the index slot is not an integer literal (fractional or scientific notation),
-     *         or a value token cannot be converted to the declared value type
+     * @throws NumberFormatException if the index slot is not an integer literal (fractional or scientific notation, or an
+     *         empty or blank string), or a value token cannot be converted to the declared value type
      * @throws ArithmeticException if the index does not fit in a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)
@@ -165,6 +167,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
 
         // Keep the decoded metadata text: ordinary numeric payload coercion may truncate a fraction.
         final Object[] a = Utils.parseTupleElements(str, name(), List.of(TypeFactory.getType(String.class), valueType));
+
+        // Only a JSON null index means zero; the Long parser would read "" as null (blank text gets the same message here).
+        if (a[0] != null && Strings.isBlank((String) a[0])) {
+            throw new NumberFormatException("Index of " + name() + " must be an integer, but was: \"" + EscapeUtil.escapeJava((String) a[0]) + "\"");
+        }
+
         final Long parsedIndex = (Long) TypeFactory.getType(Long.class).valueOf((String) a[0]);
         final long index = parsedIndex == null ? 0 : parsedIndex;
         final T value = (T) a[1];

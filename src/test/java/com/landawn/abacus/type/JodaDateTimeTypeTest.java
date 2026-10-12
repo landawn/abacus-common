@@ -283,32 +283,32 @@ public class JodaDateTimeTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_T904_valueOfObjectKeepsZoneAndChronology() {
         final DateTime kolkata = new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        final DateTime result = dateTimeType.valueOf((Object) kolkata);
+        final DateTime result = dateTimeType.valueOf(kolkata);
         assertEquals(kolkata, result);
         assertEquals(DateTimeZone.forID("Asia/Kolkata"), result.getZone());
         assertEquals(1700000000123L, result.getMillis());
 
         // non-ISO chronology: the instant used to shift by 543 years through the Buddhist-year text
         final DateTime buddhist = new DateTime(1700000000123L, BuddhistChronology.getInstance(DateTimeZone.forID("Asia/Bangkok")));
-        final DateTime buddhistResult = dateTimeType.valueOf((Object) buddhist);
+        final DateTime buddhistResult = dateTimeType.valueOf(buddhist);
         assertEquals(buddhist, buddhistResult);
         assertEquals(buddhist.getChronology(), buddhistResult.getChronology());
         assertEquals(1700000000123L, buddhistResult.getMillis());
 
         // cross-type: a MutableDateTime source keeps its zone too
         final MutableDateTime mutableKolkata = new MutableDateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        final DateTime fromMutable = dateTimeType.valueOf((Object) mutableKolkata);
+        final DateTime fromMutable = dateTimeType.valueOf(mutableKolkata);
         assertEquals(DateTimeZone.forID("Asia/Kolkata"), fromMutable.getZone());
         assertEquals(1700000000123L, fromMutable.getMillis());
 
         // a Joda Instant has no zone: stays on the default-zone path (not UTC)
-        final DateTime fromInstant = dateTimeType.valueOf((Object) new Instant(1700000000123L));
+        final DateTime fromInstant = dateTimeType.valueOf(new Instant(1700000000123L));
         assertEquals(new DateTime(1700000000123L), fromInstant);
         assertEquals(DateTimeZone.getDefault(), fromInstant.getZone());
 
         // unchanged branches
         assertNull(dateTimeType.valueOf((Object) null));
-        assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf((Object) 1700000000123L));
-        assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf((Object) new Date(1700000000123L)));
+        assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf(1700000000123L));
+        assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf(new Date(1700000000123L)));
     }
 }

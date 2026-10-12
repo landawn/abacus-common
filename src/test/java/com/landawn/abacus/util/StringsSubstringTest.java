@@ -1262,7 +1262,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertNull(Strings.substringAfterLast("test", ".", -1));
     }
 
-
     @Test
     public void testSubstringAfter_StringWithEndIndex_DelimiterEndBeyondEndIndex() {
         // The delimiter starts before the end index but ends after it.
@@ -1272,7 +1271,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertEquals("", Strings.substringAfter("abcdef", "cde", 5));
         assertEquals("f", Strings.substringAfter("abcdef", "cde", 6));
     }
-
 
     @Test
     public void testStrUtilSubstringBetween_delimiterAndEndFunction_receivesContentStart() {

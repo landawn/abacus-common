@@ -3105,7 +3105,6 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("[]", Strings.wrapIfMissing("", "[", "]"));
     }
 
-
     @Test
     public void testLengthOfCommonPrefix_DoesNotSplitSurrogatePair() {
         final String grinning = new String(Character.toChars(0x1F600));
@@ -3151,9 +3150,9 @@ public class StringsTest extends StringsTestSupport {
     // G072-01: UTF-8 strict encoding equals the reporting CharsetEncoder for well-formed input (incl. surrogate pairs)
     @Test
     public void testGetBytesUtf8Strict_matchesReportingEncoder() throws Exception {
-        final String[] inputs = { "a", "?", "???", "\u0000", "abc 123 ~\u007F", "caf\u00E9", "\u00FF\u0100", "\u4E2D\u6587\u5B57",
-                "\uD83D\uDE00", "x\uD83D\uDE00y\uD801\uDC00", "\uFFFD", "\uFFFF\uFFFE", "\u07FF\u0800", "The quick brown fox".repeat(500),
-                "\u4E2D".repeat(3000) + "a", "a?\uD83D\uDE00", "?".repeat(50) + "\u00E9" };
+        final String[] inputs = { "a", "?", "???", "\u0000", "abc 123 ~\u007F", "caf\u00E9", "\u00FF\u0100", "\u4E2D\u6587\u5B57", "\uD83D\uDE00",
+                "x\uD83D\uDE00y\uD801\uDC00", "\uFFFD", "\uFFFF\uFFFE", "\u07FF\u0800", "The quick brown fox".repeat(500), "\u4E2D".repeat(3000) + "a",
+                "a?\uD83D\uDE00", "?".repeat(50) + "\u00E9" };
 
         for (final String input : inputs) {
             final byte[] expected = g072ReportingUtf8Encode(input);
@@ -3243,7 +3242,7 @@ public class StringsTest extends StringsTestSupport {
             assertArrayEquals(input.toCharArray(), Strings.toCharArray(java.nio.CharBuffer.wrap(input)));
         }
 
-        assertTrue(N.EMPTY_CHAR_ARRAY == Strings.toCharArray(new StringBuilder()));
+        assertTrue(CommonUtil.EMPTY_CHAR_ARRAY == Strings.toCharArray(new StringBuilder()));
         assertNull(Strings.toCharArray(null));
     }
 
@@ -3260,8 +3259,8 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("o\u03C3\u03C2 \u03C3", Strings.swapCase("O\u03A3\u03A3 \u03A3"));
         assertEquals("\u00E9\u4E2D", Strings.swapCase("\u00C9\u4E2D"));
 
-        final int[] pool = { 'a', 'Z', '5', ' ', 0x00e9, 0x00c9, 0x00df, 0x0130, 0x01c5, 0x4e2d, 0x3000, 0x10400, 0x10428, 0x1f600, 0xd800, 0xdc00,
-                0xfb00, 0x0149, 0x0390 };
+        final int[] pool = { 'a', 'Z', '5', ' ', 0x00e9, 0x00c9, 0x00df, 0x0130, 0x01c5, 0x4e2d, 0x3000, 0x10400, 0x10428, 0x1f600, 0xd800, 0xdc00, 0xfb00,
+                0x0149, 0x0390 };
         final Random random = new Random(20260926L);
 
         for (int round = 0; round < 2000; round++) {
@@ -3471,6 +3470,7 @@ public class StringsTest extends StringsTestSupport {
         assertEquals(3, Strings.minIndexOfAll(longStr, 'd', 'z', 'x'));
         assertEquals(1, Strings.minIndexOfAll(longStr, 'd', 'z', 'b'));
     }
+
     // ---- perf review 2026-09-26 G073 end ----
     // ---- perf review 2026-09-26 G075 begin ----
     // G075-01: the East Asian display-width shortcut must agree with the Unicode 17 property tables it bypasses.
@@ -3527,7 +3527,8 @@ public class StringsTest extends StringsTestSupport {
             assertEquals(expected[i], Strings.displayWidth(value), message);
             assertEquals(expected[i], Strings.displayWidth(value, Strings.DisplayWidthPolicy.CJK), message);
             // An emoji takes the policy's emoji width; everything else here is policy-independent.
-            assertEquals(expected[i] - (value.codePoints().anyMatch(codePoint -> codePoint >= 0x1F000 && codePoint <= 0x1FAFF) ? 1 : 0), Strings.displayWidth(value, narrow), message);
+            assertEquals(expected[i] - (value.codePoints().anyMatch(codePoint -> codePoint >= 0x1F000 && codePoint <= 0x1FAFF) ? 1 : 0),
+                    Strings.displayWidth(value, narrow), message);
 
             final String padding = expected[i] < 8 ? Strings.repeat(' ', 8 - expected[i]) : "";
             assertEquals(value + padding, Strings.padEndToDisplayWidth(value, 8), message);

@@ -368,7 +368,6 @@ public class AbstractTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("1234567890123456789x".toCharArray(), 0, 20));
     }
 
-
     // ---- bug review 2026-09-27 G114 begin ----
 
     // G114-05: a malformed token ending in a type-suffix letter reported only that letter ("null" -> "l").
@@ -378,10 +377,12 @@ public class AbstractTypeTest extends TestBase {
                 assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("[null]".toCharArray(), 1, 4)).getMessage());
         assertEquals("Invalid numeric String: \"12aL\"",
                 assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("12aL".toCharArray(), 0, 4)).getMessage());
-        assertEquals("Invalid numeric String: \"L\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("L".toCharArray(), 0, 1)).getMessage());
+        assertEquals("Invalid numeric String: \"L\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("L".toCharArray(), 0, 1)).getMessage());
         assertEquals("Invalid numeric String: \"null\"",
                 assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("[null]".toCharArray(), 1, 4)).getMessage());
-        assertEquals("Invalid numeric String: \"-d\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("-d".toCharArray(), 0, 2)).getMessage());
+        assertEquals("Invalid numeric String: \"-d\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("-d".toCharArray(), 0, 2)).getMessage());
     }
 
     // ---- bug review 2026-09-27 G114 end ----
@@ -391,11 +392,14 @@ public class AbstractTypeTest extends TestBase {
     // parseInt/parseLong(char[]): a suffixed token rejected by the digit loop also names the whole token; unsuffixed tokens unchanged.
     @Test
     public void testParseIntAndParseLong_suffixedTokenRejectedInDigitLoopNamesWholeToken() {
-        assertEquals("Invalid numeric String: \"a1L\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("a1L".toCharArray(), 0, 3)).getMessage());
+        assertEquals("Invalid numeric String: \"a1L\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("a1L".toCharArray(), 0, 3)).getMessage());
         assertEquals("Invalid numeric String: \"1-2d\"",
                 assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("[1-2d]".toCharArray(), 1, 4)).getMessage());
-        assertEquals("Invalid numeric String: \"x1\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("x1".toCharArray(), 0, 2)).getMessage());
-        assertEquals("Invalid numeric String: \"x\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("x".toCharArray(), 0, 1)).getMessage());
+        assertEquals("Invalid numeric String: \"x1\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("x1".toCharArray(), 0, 2)).getMessage());
+        assertEquals("Invalid numeric String: \"x\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("x".toCharArray(), 0, 1)).getMessage());
     }
 
     // parseInt/parseLong(char[]): valid tokens, with or without a suffix, at an offset and on the long fallback path, still parse.

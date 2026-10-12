@@ -4973,8 +4973,14 @@ public final class Iterables {
      * Returns a reversed view of the specified list. For example, {@code
      * asReversed(Arrays.asList(1, 2, 3))} returns a list containing {@code 3, 2, 1}. The returned
      * list is backed by the input list, so changes in the returned list are reflected in the input list, and
-     * vice versa. The returned list supports all the optional list operations supported by the input
-     * list.
+     * vice versa. The returned list supports the optional list operations supported by the input
+     * list, with one caveat: the operations it performs through a list iterator - {@code remove(Object)},
+     * {@code removeAll}, {@code retainAll}, {@code removeIf}, {@code replaceAll}, {@code sort}, and
+     * {@code remove}/{@code set}/{@code add} on its own iterators - write through the input list's
+     * {@link ListIterator}, so they throw {@link UnsupportedOperationException} when that iterator is read-only,
+     * even if the input list supports the operation itself. A {@link java.util.concurrent.CopyOnWriteArrayList}
+     * is such a list: its reversed view supports {@code set(int, E)}, {@code add(int, E)}, {@code remove(int)}
+     * and {@code clear()}, but not {@code remove(Object)} of a present element or {@code replaceAll}.
      *
      * <p>The returned list is random-access if the specified list is random access, with one exception:
      * the reversed <i>view</i> of an {@link ImmutableList} never implements {@link RandomAccess}
@@ -5547,7 +5553,8 @@ public final class Iterables {
 
                 @Override
                 public int size() {
-                    int size = set1.size();
+                    // Collection.size() must saturate when the live view exceeds the int range.
+                    long size = set1.size();
 
                     for (final T e : set2) {
                         if (!set1.contains(e)) {
@@ -5555,7 +5562,7 @@ public final class Iterables {
                         }
                     }
 
-                    return size;
+                    return Numbers.saturatedCastToInt(size);
                 }
 
                 @Override
@@ -5981,7 +5988,8 @@ public final class Iterables {
 
                 @Override
                 public int size() {
-                    int size = 0;
+                    // Count in long so two individually valid sets cannot overflow this view's size.
+                    long size = 0;
 
                     for (final T e : set1) {
                         if (!set2.contains(e)) {
@@ -5995,7 +6003,7 @@ public final class Iterables {
                         }
                     }
 
-                    return size;
+                    return Numbers.saturatedCastToInt(size);
                 }
 
                 @Override
@@ -6245,8 +6253,9 @@ public final class Iterables {
      * have to implement {@link Comparable}.
      *
      * <p>If elements compare equal but are not equal by {@code equals}, {@code contains} checks the actual
-     * generated arrangements. That check can traverse every distinct permutation; with an ordering consistent
-     * with {@code equals}, membership instead uses a sorted comparison.</p>
+     * generated arrangements. That check can traverse every distinct permutation; when all input values that
+     * compare equal are also equal by {@code equals}, membership instead compares element multiplicities by
+     * {@code equals}, regardless of the candidate elements' ordering keys.</p>
      *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
@@ -6329,8 +6338,9 @@ public final class Iterables {
      * are created by swapping them.
      *
      * <p>If elements compare equal but are not equal by {@code equals}, {@code contains} checks the actual
-     * generated arrangements. That check can traverse every distinct permutation; with an ordering consistent
-     * with {@code equals}, membership instead uses a sorted comparison.</p>
+     * generated arrangements. That check can traverse every distinct permutation; when all input values that
+     * compare equal are also equal by {@code equals}, membership instead compares element multiplicities by
+     * {@code equals}, regardless of the candidate elements' ordering keys.</p>
      *
      * <p>An empty collection has only one permutation, which is an empty list.
      *
@@ -6503,9 +6513,9 @@ public final class Iterables {
      * the two hold the same elements with the same multiplicities.
      *
      * <p>This is the right membership test for {@code PermutationCollection}, which permutes by position and so does
-     * yield every arrangement of the input. {@code OrderedPermutationCollection} must not use it - it collapses
-     * comparator-equal elements and therefore yields only some arrangements; see
-     * {@code OrderedPermutationCollection.isOrderedPermutation}.</p>
+     * yield every arrangement of the input. It also suffices for {@code OrderedPermutationCollection} when
+     * comparator-equal input elements are equal by {@code equals}; otherwise that collection yields only some
+     * arrangements and additionally checks them in {@code OrderedPermutationCollection.isOrderedPermutation}.</p>
      *
      * @param a the first collection.
      * @param b the second collection.
@@ -6844,13 +6854,12 @@ public final class Iterables {
         /**
          * Tests membership among the actual arrangements yielded by this collection.
          *
-         * <p>A sorted comparison suffices when comparator-equal input values are also equal by {@code equals}.
-         * Otherwise membership must account for the particular representatives emitted by the iterator.</p>
+         * <p>An equals-based multiset comparison suffices when comparator-equal input values are also equal by
+         * {@code equals}. Otherwise membership must account for the particular representatives emitted by the iterator.</p>
          *
          * @param candidate the list to test for membership.
          * @return {@code true} if {@code candidate} is one of the permutations this collection yields.
          */
-        @SuppressWarnings("unchecked")
         private boolean isOrderedPermutation(final List<?> candidate) {
             if (candidate.size() != inputList.size()) {
                 return false;
@@ -6871,24 +6880,9 @@ public final class Iterables {
                 return false;
             }
 
-            final List<T> sorted = new ArrayList<>((Collection<? extends T>) candidate);
-
-            try {
-                N.sort(sorted, comparator);
-            } catch (final ClassCastException | NullPointerException e) {
-                // The candidate holds elements this comparator cannot order, so it cannot be one of the permutations
-                // of inputList. Report absence rather than propagating - Collection.contains(Object) is expected to
-                // answer, not throw, for a foreign argument, and the previous equals-based test never threw either.
-                return false;
-            }
-
-            for (int i = 0, len = sorted.size(); i < len; i++) {
-                if (!N.equals(sorted.get(i), inputList.get(i))) {
-                    return false;
-                }
-            }
-
-            return true;
+            // Every arrangement of equals-equivalent input values is represented here. Sorting the candidate
+            // would incorrectly reject equal replacements whose ordering keys (or comparator-compatible types) differ.
+            return isPermutations(inputList, candidate);
         }
 
         @Override

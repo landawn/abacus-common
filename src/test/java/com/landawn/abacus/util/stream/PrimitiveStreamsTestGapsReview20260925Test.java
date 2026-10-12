@@ -574,8 +574,9 @@ public class PrimitiveStreamsTestGapsReview20260925Test extends TestBase {
         assertEquals(6, closed.get(), f.name + ": every non-null source closed once");
 
         assertEquals(Arrays.asList(1, 2, 4, 5, 7, 8, 11, 12, 14, 15, 17, 18),
-                values(f.mergeAscending.apply(Arrays.asList(null, f.of.apply(new int[] { 1, 11 }), f.of.apply(new int[] { 2, 12 }), null,
-                        f.of.apply(new int[] { 4, 14 }), f.of.apply(new int[] { 5, 15 }), null, f.of.apply(new int[] { 7, 17 }), f.of.apply(new int[] { 8, 18 })))),
+                values(f.mergeAscending
+                        .apply(Arrays.asList(null, f.of.apply(new int[] { 1, 11 }), f.of.apply(new int[] { 2, 12 }), null, f.of.apply(new int[] { 4, 14 }),
+                                f.of.apply(new int[] { 5, 15 }), null, f.of.apply(new int[] { 7, 17 }), f.of.apply(new int[] { 8, 18 })))),
                 f.name);
         assertEquals(0, f.mergeAscending.apply(Collections.<S> emptyList()).count(), f.name);
         assertEquals(0, f.mergeAscending.apply(Arrays.asList(null, null, null)).count(), f.name + ": all-null collection");

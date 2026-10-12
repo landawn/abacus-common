@@ -219,18 +219,19 @@ public class ArrayTest extends ArrayTestSupport {
         }
         assertEquals(-1, tailOr);
     }
+
     // ---- perf review 2026-09-26 G018 end ----
     // ---- perf review 2026-09-26 G115 begin ----
     // G115-01: the random-value helpers use ThreadLocalRandom.current(); no class keeps a shared static generator field.
     @Test
     public void testRandom_noSharedStaticGenerator() throws Exception {
         final String[] classNames = { "com.landawn.abacus.util.CommonUtil", "com.landawn.abacus.util.N", "com.landawn.abacus.util.BooleanList",
-                "com.landawn.abacus.util.ByteList", "com.landawn.abacus.util.CharList", "com.landawn.abacus.util.ShortList",
-                "com.landawn.abacus.util.IntList", "com.landawn.abacus.util.LongList", "com.landawn.abacus.util.FloatList",
-                "com.landawn.abacus.util.DoubleList", "com.landawn.abacus.util.stream.StreamBase", "com.landawn.abacus.util.stream.Stream",
-                "com.landawn.abacus.util.stream.ByteStream", "com.landawn.abacus.util.stream.CharStream", "com.landawn.abacus.util.stream.ShortStream",
-                "com.landawn.abacus.util.stream.IntStream", "com.landawn.abacus.util.stream.LongStream", "com.landawn.abacus.util.stream.FloatStream",
-                "com.landawn.abacus.util.stream.DoubleStream", "com.landawn.abacus.util.function.Util" };
+                "com.landawn.abacus.util.ByteList", "com.landawn.abacus.util.CharList", "com.landawn.abacus.util.ShortList", "com.landawn.abacus.util.IntList",
+                "com.landawn.abacus.util.LongList", "com.landawn.abacus.util.FloatList", "com.landawn.abacus.util.DoubleList",
+                "com.landawn.abacus.util.stream.StreamBase", "com.landawn.abacus.util.stream.Stream", "com.landawn.abacus.util.stream.ByteStream",
+                "com.landawn.abacus.util.stream.CharStream", "com.landawn.abacus.util.stream.ShortStream", "com.landawn.abacus.util.stream.IntStream",
+                "com.landawn.abacus.util.stream.LongStream", "com.landawn.abacus.util.stream.FloatStream", "com.landawn.abacus.util.stream.DoubleStream",
+                "com.landawn.abacus.util.function.Util" };
 
         for (final String className : classNames) {
             for (final java.lang.reflect.Field field : Class.forName(className).getDeclaredFields()) {

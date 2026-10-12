@@ -141,31 +141,66 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      *
      * result = type.valueOf("  ");
      * // Returns: OptionalBoolean.empty()
+     *
+     * result = type.valueOf("Y");
+     * // Returns: OptionalBoolean.of(true)
+     *
+     * type.valueOf("yes");
+     * // Throws IllegalArgumentException
      * }</pre>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
-     * @param str the string to convert ("true", "false", or parseable boolean strings); surrounding padding is removed
-     *            first ({@linkplain Character#isWhitespace(char) Unicode whitespace} such as {@code U+3000}, or any
-     *            character {@code <= ' '})
+     * @param str the string to convert: {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) are
+     *            {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) are
+     *            {@code false}; surrounding padding is removed first ({@linkplain Character#isWhitespace(char) Unicode
+     *            whitespace} such as {@code U+3000}, or any character {@code <= ' '})
      * @return an OptionalBoolean containing the parsed boolean value, or empty if the input is {@code null}, empty, or
      *         blank (whitespace only) - the boolean handlers treat a blank string as absent, unlike the numeric
      *         handlers which reject it
+     * @throws IllegalArgumentException if {@code str} is not blank and, without its padding, is none of the accepted texts
      * @see #valueOf(Object)
      * @see #stringOf(OptionalBoolean)
      */
     @Override
-    public OptionalBoolean valueOf(final String str) {
+    public OptionalBoolean valueOf(final String str) throws IllegalArgumentException {
         // parseBoolean already strips padding with the same definition Strings.isBlank uses (plus every
         // character <= ' '), so an outer String.trim() here would be a no-op that only reads narrower.
         return Strings.isBlank(str) ? OptionalBoolean.empty() : OptionalBoolean.of(parseBoolean(str));
     }
 
     /**
+     * Converts an object to {@code OptionalBoolean}. A {@link Number} is read as the {@code Boolean} handler reads it: an
+     * {@code Integer}, {@code Short} or {@code Byte} {@code 1} is {@code true}, {@code 0} and {@code -1} are
+     * {@code false}, and any other value ({@code 2}), or a {@code Number} of any other class ({@code 1L}, {@code 1.0}),
+     * is rejected. Any other object is converted through its string form, read by {@link #valueOf(String)}.
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the converted value, or {@code OptionalBoolean.empty()} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if {@code obj} is an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, or an object whose string form is
+     *         not blank and is none of the texts {@link #valueOf(String)} accepts
+     */
+    @Override
+    public OptionalBoolean valueOf(final Object obj) throws IllegalArgumentException {
+        if (obj instanceof Number number) {
+            // Read the Number itself, as Boolean does: through its string form a Long 1 would pass as the text "1",
+            // though Boolean rejects a Long, and every rejection would be reported as text.
+            return OptionalBoolean.of(booleanOf(number));
+        }
+
+        return super.valueOf(obj);
+    }
+
+    /**
      * Retrieves a boolean value from a ResultSet at the specified column index and wraps it in an {@link OptionalBoolean}.
-     * Handles type conversion if the database column is not a boolean type.
+     * Handles type conversion if the database column is not a boolean type: the value is converted with
+     * {@link N#convert(Object, Class)} - an {@code Integer}, {@code Short} or {@code Byte} {@code 1} and the texts
+     * {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} are {@code true}; an {@code Integer}, {@code Short} or
+     * {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and
+     * {@code "false"} are {@code false}. A {@code Long} or {@code BigDecimal} column value is rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -188,9 +223,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column holds any other value, a number of any class other than
+     *         {@code Integer}, {@code Short} or {@code Byte} included (blank text reads as {@code false})
      */
     @Override
-    public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
+    public OptionalBoolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, IllegalArgumentException {
         final Object result = rs.getObject(columnIndex);
 
         return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
@@ -198,7 +235,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
 
     /**
      * Retrieves a boolean value from a ResultSet using the specified column label and wraps it in an {@link OptionalBoolean}.
-     * Handles type conversion if the database column is not a boolean type.
+     * Handles type conversion if the database column is not a boolean type: the value is converted with
+     * {@link N#convert(Object, Class)} - an {@code Integer}, {@code Short} or {@code Byte} {@code 1} and the texts
+     * {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} are {@code true}; an {@code Integer}, {@code Short} or
+     * {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and
+     * {@code "false"} are {@code false}. A {@code Long} or {@code BigDecimal} column value is rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -221,9 +262,11 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * @return an OptionalBoolean containing the boolean value, or empty if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column holds any other value, a number of any class other than
+     *         {@code Integer}, {@code Short} or {@code Byte} included (blank text reads as {@code false})
      */
     @Override
-    public OptionalBoolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
+    public OptionalBoolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, IllegalArgumentException {
         final Object result = rs.getObject(columnName);
 
         return result == null ? OptionalBoolean.empty() : OptionalBoolean.of(result instanceof Boolean b ? b : N.convert(result, Boolean.class));
@@ -327,6 +370,10 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * Writes the character representation of an {@link OptionalBoolean} to a CharacterWriter.
      * This method is typically used for JSON/XML serialization.
      * <p>
+     * A {@code null} or empty optional is written as {@code null} unless {@code config.isWriteNullBooleanAsFalse()} is
+     * set, in which case {@code false} is written; a substituted value reads back as a <i>present</i>
+     * {@code OptionalBoolean.of(false)}.
+     * <p>
      * This method is specifically designed for JSON/XML serialization: it writes this type's literal form to the
      * {@code CharacterWriter}. String quotation/escaping config is ignored.
      * <p>
@@ -336,7 +383,7 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      *
      * @param writer the CharacterWriter to write to
      * @param x the OptionalBoolean value to write
-     * @param config the serialization configuration
+     * @param config the serialization configuration; only {@code writeNullBooleanAsFalse} is consulted, may be {@code null}
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */

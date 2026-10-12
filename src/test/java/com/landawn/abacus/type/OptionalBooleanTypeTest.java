@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -80,14 +81,17 @@ public class OptionalBooleanTypeTest extends TestBase {
         assertTrue(optionalBooleanType.valueOf("TRUE").get());
         assertTrue(optionalBooleanType.valueOf("True").get());
         assertTrue(optionalBooleanType.valueOf("1").get());
-        assertFalse(optionalBooleanType.valueOf("yes").get());
+        // "yes" and "no" are not boolean text (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> optionalBooleanType.valueOf("yes"));
         assertTrue(optionalBooleanType.valueOf("Y").get());
         assertTrue(optionalBooleanType.valueOf("y").get());
 
         assertFalse(optionalBooleanType.valueOf("FALSE").get());
         assertFalse(optionalBooleanType.valueOf("False").get());
         assertFalse(optionalBooleanType.valueOf("0").get());
-        assertFalse(optionalBooleanType.valueOf("no").get());
+        assertThrows(IllegalArgumentException.class, () -> optionalBooleanType.valueOf("no"));
+        assertFalse(optionalBooleanType.valueOf("-1").get());
+        assertFalse(optionalBooleanType.valueOf("n").get());
         assertFalse(optionalBooleanType.valueOf("N").get());
     }
 
@@ -309,6 +313,7 @@ public class OptionalBooleanTypeTest extends TestBase {
         assertTrue(optionalBooleanType.valueOf((String) null).isEmpty());
         assertTrue(optionalBooleanType.valueOf(" true ").get());
         assertTrue(optionalBooleanType.valueOf(" Y ").get());
-        assertFalse(optionalBooleanType.valueOf(" no ").get());
+        assertFalse(optionalBooleanType.valueOf(" n ").get());
+        assertThrows(IllegalArgumentException.class, () -> optionalBooleanType.valueOf(" no "));
     }
 }

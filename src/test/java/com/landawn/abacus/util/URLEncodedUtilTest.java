@@ -1135,24 +1135,24 @@ public class URLEncodedUtilTest extends AbstractTest {
     public void testEncodeStringifiesAnyOtherParameterShape() {
         // documented catch-all: a value that is not a Map, bean, Object[] or CharSequence is converted with
         // N.stringOf(..) into ONE valueless form field instead of being split into name/value pairs
-        assertEquals("%5B1%2C+2%5D", URLEncodedUtil.encode((Object) new int[] { 1, 2 }));
-        assertEquals("a=1", URLEncodedUtil.encode((Object) new String[] { "a", "1" }));
+        assertEquals("%5B1%2C+2%5D", URLEncodedUtil.encode(new int[] { 1, 2 }));
+        assertEquals("a=1", URLEncodedUtil.encode(new String[] { "a", "1" }));
         assertEquals("%5B%22a%22%2C+%22b%22%5D", URLEncodedUtil.encode((Object) List.of("a", "b")));
-        assertEquals("42", URLEncodedUtil.encode((Object) 42));
-        assertEquals("http://x/p?%5B1%2C+2%5D", URLEncodedUtil.encode("http://x/p", (Object) new int[] { 1, 2 }));
+        assertEquals("42", URLEncodedUtil.encode(42));
+        assertEquals("http://x/p?%5B1%2C+2%5D", URLEncodedUtil.encode("http://x/p", new int[] { 1, 2 }));
 
-        final Map<String, String> roundTripped = URLEncodedUtil.decode(URLEncodedUtil.encode((Object) new int[] { 1, 2 }));
+        final Map<String, String> roundTripped = URLEncodedUtil.decode(URLEncodedUtil.encode(new int[] { 1, 2 }));
         assertTrue(roundTripped.containsKey("[1, 2]"));
         assertNull(roundTripped.get("[1, 2]"));
 
         // ... so an EMPTY Collection or empty primitive array is not one of the @return empty cases: it still
         // encodes, as the text "[]". Only an empty Map/CharSequence/Object[] (and null) leave the URL untouched.
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new java.util.ArrayList<>()));
-        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new int[0]));
+        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new int[0]));
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new java.util.ArrayList<>(), StandardCharsets.UTF_8));
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new int[0], StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
-        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new Object[0]));
-        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) ""));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", new Object[0]));
+        assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", ""));
         assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new LinkedHashMap<>()));
         assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) null));
     }
@@ -1166,7 +1166,7 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue)).getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode("http://x", emptyNameNullValue)).getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, new StringBuilder())).getMessage());
-        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode((Object) new Object[] { "", null })).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(new Object[] { "", null })).getMessage());
 
         // the @throws sentence now stands on every encode overload, so all nine are covered here
         assertEquals(message,

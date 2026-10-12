@@ -527,8 +527,8 @@ public class ImmutableNavigableMapTest extends TestBase {
     public void testOf_nonComparableKeySelectsInheritedUnsortedFactory() {
         // of(...) requires K extends Comparable. A non-Comparable key is not applicable to
         // ImmutableNavigableMap.of, so the call binds to ImmutableMap.of and returns an unsorted map.
-        final ImmutableMap<NotComparableNM, Integer> one = ImmutableNavigableMap.of(new NotComparableNM("z"), 1);
-        final ImmutableMap<NotComparableNM, Integer> two = ImmutableNavigableMap.of(new NotComparableNM("z"), 1, new NotComparableNM("a"), 2);
+        final ImmutableMap<NotComparableNM, Integer> one = ImmutableMap.of(new NotComparableNM("z"), 1);
+        final ImmutableMap<NotComparableNM, Integer> two = ImmutableMap.of(new NotComparableNM("z"), 1, new NotComparableNM("a"), 2);
         Assertions.assertFalse(one instanceof SortedMap);
         Assertions.assertFalse(two instanceof SortedMap);
         Assertions.assertEquals(1, one.size());

@@ -26,6 +26,15 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.BigDecimalType;
+import com.landawn.abacus.type.DoubleType;
+import com.landawn.abacus.type.FloatType;
+import com.landawn.abacus.type.IntegerType;
+import com.landawn.abacus.type.LongType;
+import com.landawn.abacus.type.PrimitiveDoubleType;
+import com.landawn.abacus.type.PrimitiveFloatType;
+import com.landawn.abacus.type.PrimitiveIntType;
+import com.landawn.abacus.type.PrimitiveLongType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
@@ -147,9 +156,21 @@ class JsonStringReader extends AbstractJsonReader {
      * @param cbuf the character buffer to use for parsing
      * @throws IllegalArgumentException if the requested string range is invalid, or {@code cbuf} is {@code null}.
      */
-    @SuppressWarnings("deprecation")
     JsonStringReader(final String str, final int beginIndex, final int toIndex, final char[] cbuf) throws IllegalArgumentException {
-        this(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly(str), beginIndex, toIndex, cbuf, null);
+        this(copyRange(str, beginIndex, toIndex), 0, toIndex - beginIndex, cbuf, null);
+    }
+
+    private static char[] copyRange(final String str, final int beginIndex, final int toIndex) {
+        final int length = str == null ? 0 : str.length();
+        if (beginIndex < 0 || toIndex < beginIndex || toIndex > length) {
+            throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
+        }
+
+        final char[] result = new char[toIndex - beginIndex];
+        if (result.length > 0) {
+            str.getChars(beginIndex, toIndex, result, 0);
+        }
+        return result;
     }
 
     /**
@@ -642,12 +663,8 @@ class JsonStringReader extends AbstractJsonReader {
     protected void saveToBuffer() throws ParsingException {
         endIndexForText = strBeginIndex - 1;
 
-        // Loop, not if: a single grow only multiplies cbuf by ~1.75. For tokens much larger than
-        // cbufLen (long quoted values containing an escape near the end) one grow is not enough
-        // and N.copy below would overflow the buffer.
-        while (endIndexForText - startIndexForText + 1 >= cbufLen) {
-            enlargeCharBuffer();
-        }
+        // The entire prefix is still in strValue. Reserve it and the decoded escape in one allocation.
+        ensureCharBufferCapacity((long) endIndexForText - startIndexForText + 1);
 
         N.copy(strValue, startIndexForText, cbuf, 0, endIndexForText - startIndexForText);
 
@@ -704,6 +721,56 @@ class JsonStringReader extends AbstractJsonReader {
     public <T> T readValue(final Type<? extends T> type) {
         if (nextEvent != END_DOUBLE_QUOTE && nextEvent != END_SINGLE_QUOTE) {
             if (numValue != null) {
+                if (type.getClass() == BigDecimalType.class && text == null) {
+                    final char[] numberChars = nextChar > 0 ? cbuf : strValue;
+                    final int offset = nextChar > 0 ? 0 : startIndexForText;
+                    int length = nextChar > 0 ? nextChar : endIndexForText - startIndexForText;
+
+                    if (length > 0) {
+                        final char suffix = numberChars[offset + length - 1];
+                        if (suffix == 'l' || suffix == 'L' || suffix == 'f' || suffix == 'F' || suffix == 'd' || suffix == 'D') {
+                            length--;
+                        }
+                    }
+
+                    try {
+                        return type.valueOf(numberChars, offset, length);
+                    } catch (final NumberFormatException e) {
+                        return (T) Numbers.convert(numValue, (Type<Number>) type);
+                    }
+                }
+
+                // A built-in int/long/float/double slot usually receives the value the number fast path already
+                // cached for it (an integral token with an int hint is cached as a Long). Handing that value back
+                // directly skips the generic conversion table below, which looks the same wrapper up twice per
+                // element. Only the exact built-in handlers and the values they would return unchanged (or narrow
+                // without a range failure) take this route; everything else still goes through the full cascade.
+                final Class<?> typeClass = type.getClass();
+
+                if (numValue instanceof Long) {
+                    if (typeClass == PrimitiveIntType.class || typeClass == IntegerType.class) {
+                        final long longValue = (Long) numValue;
+
+                        if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                            return (T) Integer.valueOf((int) longValue);
+                        }
+                    } else if (typeClass == PrimitiveLongType.class || typeClass == LongType.class) {
+                        return (T) numValue;
+                    }
+                } else if (numValue instanceof Double) {
+                    if (typeClass == PrimitiveDoubleType.class || typeClass == DoubleType.class) {
+                        return (T) numValue;
+                    }
+                } else if (numValue instanceof Integer) {
+                    if (typeClass == PrimitiveIntType.class || typeClass == IntegerType.class) {
+                        return (T) numValue;
+                    }
+                } else if (numValue instanceof Float) {
+                    if (typeClass == PrimitiveFloatType.class || typeClass == FloatType.class) {
+                        return (T) numValue;
+                    }
+                }
+
                 // The final target may only become known after nextToken() cached a floating value.
                 // Reusing that approximation would lose BigDecimal digits/scale or round a float twice.
                 if (type.javaType() == BigDecimal.class || type.javaType() == BigInteger.class
@@ -767,8 +834,7 @@ class JsonStringReader extends AbstractJsonReader {
             }
 
             if (type.isObject()) {
-                final String numberText = String
-                        .valueOf(nextChar > 0 ? N.copyOfRange(cbuf, 0, nextChar) : N.copyOfRange(strValue, startIndexForText, endIndexForText));
+                final String numberText = getText();
 
                 if (Strings.isEmpty(numberText)) {
                     return (T) numberText;
@@ -895,7 +961,25 @@ class JsonStringReader extends AbstractJsonReader {
      *         has been reached)
      */
     void enlargeCharBuffer() throws ParsingException {
-        final long newCapacityLong = Math.max((long) cbufLen + 1, (long) (cbufLen * 1.75));
+        ensureCharBufferCapacity((long) cbufLen + 1);
+    }
+
+    /**
+     * Ensures room for known token text without copying through intermediate geometric capacities.
+     *
+     * @param requiredCapacity minimum number of characters needed; a long allows overflow to be detected before narrowing
+     * @throws ParsingException if the required capacity exceeds the maximum Java array length
+     */
+    protected void ensureCharBufferCapacity(final long requiredCapacity) throws ParsingException {
+        if (requiredCapacity <= cbufLen) {
+            return;
+        }
+
+        if (requiredCapacity > Integer.MAX_VALUE) {
+            throw new ParsingException("Character buffer size exceeded maximum capacity");
+        }
+
+        final long newCapacityLong = Math.max(requiredCapacity, (long) (cbufLen * 1.75));
         final int newCapacity = (int) Math.min(newCapacityLong, Integer.MAX_VALUE);
 
         if (newCapacity <= cbufLen) {

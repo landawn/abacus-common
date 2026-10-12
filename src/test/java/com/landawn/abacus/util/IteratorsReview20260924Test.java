@@ -221,8 +221,7 @@ public class IteratorsReview20260924Test extends TestBase {
 
     @Test
     public void testC322_repeatElementsToSizeBoundariesAndUnicode() {
-        assertEquals(Arrays.asList("α", "α", "α", "😀", "😀"),
-                drain(Iterators.repeatElementsToSize(Arrays.asList("α", "😀"), 5)));
+        assertEquals(Arrays.asList("α", "α", "α", "😀", "😀"), drain(Iterators.repeatElementsToSize(Arrays.asList("α", "😀"), 5)));
         // size smaller than the source: n == 0, only the first 'size' elements once each
         assertEquals(Arrays.asList("a", "b"), drain(Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), 2)));
         assertEquals(Arrays.asList("a"), drain(Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), 1)));

@@ -133,14 +133,17 @@ final class LazyInitializer<T> implements com.landawn.abacus.util.function.Suppl
                     initializing = true;
 
                     try {
-                        value = supplier.get();
+                        final T computed = supplier.get();
 
                         // A supplier may catch the recursive-access exception. Do not publish a value
-                        // from an initialization attempt that already violated the invariant.
+                        // from an initialization attempt that already violated the invariant, and do not
+                        // even store it: the rejected object would otherwise stay reachable from this
+                        // initializer until some later attempt succeeded (forever, if none does).
                         if (recursiveFailure != null) {
                             throw recursiveFailure;
                         }
 
+                        value = computed;
                         supplier = null;
                         initialized = true;
                     } finally {

@@ -1823,23 +1823,15 @@ public class TypeFactoryTest extends TestBase {
     }
 
     @Test
-    public void selfReview20260907_lowerBoundedWildcardArraysStayArrays() {
-        // T1-03 follow-up: the "?" / "? super X" branch returns before the shared trailing-"[]" step at the
-        // tail of getType, so it has to build the array itself. Without that, "? super Integer[]" degraded
-        // from an Object[] handler (r9485) to a scalar ObjectType that parses a JSON array as a raw String.
-        final Type<Object[]> lower = TypeFactory.getType("? super Integer[]");
-        assertTrue(lower.isArray());
-        assertEquals(Object[].class, lower.javaType());
+    public void selfReview20260907_lowerBoundedWildcardArraysStayObjectCapable() {
+        final Type<Object> lower = TypeFactory.getType("? super Integer[]");
+        assertFalse(lower.isArray());
+        assertEquals(Object.class, lower.javaType());
         assertEquals("? super Integer[]", lower.name());
-        assertEquals("? super Integer", lower.elementType().name());
-
-        final Object[] parsed = lower.valueOf("[1, 2]");
-        assertEquals(Object[].class, parsed.getClass());
-        assertEquals(2, parsed.length);
+        assertEquals(TypeFactory.getType("? super Integer").valueOf("[1, 2]"), lower.valueOf("[1, 2]"));
         assertEquals("[1, 2]", lower.stringOf(new Integer[] { 1, 2 }));
-        assertEquals(Object[].class, TypeFactory.<List<?>> getType("List<? super Integer[]>").valueOf("[[1, 2]]").get(0).getClass());
+        assertEquals(List.of("scalar", 1, List.of(2, 3)), TypeFactory.<List<?>> getType("List<? super Integer[]>").valueOf("[\"scalar\", 1, [2, 3]]"));
 
-        // The scalar spellings are unchanged, and "?[]" (which does not enter that branch) still agrees.
         assertFalse(TypeFactory.getType("? super Integer").isArray());
         assertEquals(Object.class, TypeFactory.getType("? super Integer").javaType());
         assertFalse(TypeFactory.getType("?").isArray());
@@ -2166,6 +2158,7 @@ public class TypeFactoryTest extends TestBase {
         final Object value = ((G017Box<?>) type.valueOf("[5]")).value();
         assertEquals(List.of(5L), value);
     }
+
     // G017-03: a nested java.lang class in a generic argument was named "Thread.State" (java.lang. stripped), which no
     // lookup resolves, so List<Thread.State> fell back to Object elements and read the constants as Strings.
     @Test
@@ -2401,8 +2394,7 @@ public class TypeFactoryTest extends TestBase {
         assertEquals(payload, fromJson);
         assertEquals(Long.class, ((List<?>) fromJson.get(0)).get(0).getClass());
 
-        final Type<Object> narrower = TypeFactory
-                .getType("com.landawn.abacus.type.TypeFactoryTest.G130ArrayListNestedBox<? extends List<XML<List<Long>>>>");
+        final Type<Object> narrower = TypeFactory.getType("com.landawn.abacus.type.TypeFactoryTest.G130ArrayListNestedBox<? extends List<XML<List<Long>>>>");
         final List<?> fromNarrower = ((G130ArrayListNestedBox<?>) narrower.valueOf(text)).value();
         assertEquals(payload, fromNarrower);
         assertEquals(java.util.ArrayList.class, fromNarrower.getClass());

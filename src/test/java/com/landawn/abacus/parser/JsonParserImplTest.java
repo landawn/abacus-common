@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -52,7 +53,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.io.InputStream;
 
 public class JsonParserImplTest extends TestBase {
 
@@ -3314,7 +3314,7 @@ public class JsonParserImplTest extends TestBase {
         }
 
         // a real target type is still accepted
-        assertEquals(1, (int) parser.parse("{\"a\":1}", null, Type.of(Map.class)).size());
+        assertEquals(1, parser.parse("{\"a\":1}", null, Type.of(Map.class)).size());
     }
 
     // G08-53: writeLongAsString is honoured by AbstractLongType, AtomicLongType and MutableLongType, but the
@@ -3458,8 +3458,7 @@ public class JsonParserImplTest extends TestBase {
     @Test
     public void testStreamNullFileSourceMessageNamesSource() {
         final JsonParserImpl impl = new JsonParserImpl();
-        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> impl.stream((File) null, null, Type.of(Map.class)));
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> impl.stream((File) null, null, Type.of(Map.class)));
         assertTrue(e.getMessage().contains("source"), e.getMessage());
     }
 
@@ -3470,7 +3469,6 @@ public class JsonParserImplTest extends TestBase {
                 () -> impl.stream((InputStream) null, true, null, Type.of(Map.class)));
         assertTrue(e.getMessage().contains("source"), e.getMessage());
     }
-
 
     @Test
     public void testDeserializeRowOrientedDatasetRejectsMissingCommaOrColonInRow() {
@@ -3572,13 +3570,14 @@ public class JsonParserImplTest extends TestBase {
     // G007-03: 'columnTypes' shorter than the column list is an invalid document, not an IndexOutOfBoundsException
     @Test
     public void testDeserialize_datasetAndSheetColumnTypesTooShort() {
-        final ParsingException dsError = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(
-                "{\"columnNames\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}", Dataset.class));
+        final ParsingException dsError = Assertions.assertThrows(ParsingException.class,
+                () -> parser.deserialize("{\"columnNames\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}", Dataset.class));
         assertTrue(dsError.getMessage().contains("columnTypes"), dsError.getMessage());
 
-        final ParsingException sheetError = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(
-                "{\"rowKeySet\":[\"r\"],\"columnKeySet\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}",
-                Sheet.class));
+        final ParsingException sheetError = Assertions.assertThrows(ParsingException.class,
+                () -> parser.deserialize(
+                        "{\"rowKeySet\":[\"r\"],\"columnKeySet\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}",
+                        Sheet.class));
         assertTrue(sheetError.getMessage().contains("columnTypes"), sheetError.getMessage());
 
         // a complete columnTypes list still applies
@@ -3634,8 +3633,8 @@ public class JsonParserImplTest extends TestBase {
         final Type<List<com.landawn.abacus.util.Pair<String, Integer>>> type = Type.of("List<Pair<String, Integer>>");
         final String expected = "Invalid Pair<String, Integer> format: expected exactly 2 elements";
 
-        for (final String json : new String[] { "[[\"a\", 1, 2]]", "[[\"a\"]]", "[[\"a\", 1, [3]]]", "[[\"a\", 1, {}]]", "[[\"a\", 1, \"b\"]]",
-                "[[\"a\" 1]]", "[[,]]", "[[]]", "[[\"a\" \"b\"]]", "[[\"a\", 1], [1, 2, 3]]" }) {
+        for (final String json : new String[] { "[[\"a\", 1, 2]]", "[[\"a\"]]", "[[\"a\", 1, [3]]]", "[[\"a\", 1, {}]]", "[[\"a\", 1, \"b\"]]", "[[\"a\" 1]]",
+                "[[,]]", "[[]]", "[[\"a\" \"b\"]]", "[[\"a\", 1], [1, 2, 3]]" }) {
             final ParsingException e = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, null, type), json);
             assertEquals(expected, e.getMessage(), json);
         }
@@ -3645,7 +3644,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("Invalid Tuple3<String, Integer, Long> format: expected exactly 3 elements", e.getMessage());
     }
     // ---- perf review 2026-09-26 G007 end ----
-
 
     // ---- bug review 2026-09-27 G007 begin ----
     // G007-01: stream() silently dropped unquoted text directly before a structured element ([1 {"a":1}] -> [{a=1}])
@@ -3686,7 +3684,9 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(N.asMap("7", 1), parser.deserialize(mutableLongJson, Type.of("Map<String, Integer>")));
 
         final java.util.Date date = new java.util.Date(0);
-        final JsonSerConfig isoDates = JsonSerConfig.create().setStringQuotation('\'').setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_DATE_TIME);
+        final JsonSerConfig isoDates = JsonSerConfig.create()
+                .setStringQuotation('\'')
+                .setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_DATE_TIME);
         final String dateJson = parser.serialize(N.asMap(date, 1), isoDates);
         assertFalse(dateJson.contains("\"'"), dateJson);
         assertEquals(N.asMap(date, 1), parser.deserialize(dateJson, Type.of("Map<Date, Integer>")));
@@ -3716,7 +3716,8 @@ public class JsonParserImplTest extends TestBase {
 
         Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1] 2, [3]]", Type.of(List.class)).toList());
 
-        for (final String json : new String[] { "[{\"a\":1} , {\"b\":2}]", "[{\"a\":1}\n,\t{\"b\":2}]", "[{\"a\":1},null,{\"b\":2}]", "[{\"a\":1},,{\"b\":2}]" }) {
+        for (final String json : new String[] { "[{\"a\":1} , {\"b\":2}]", "[{\"a\":1}\n,\t{\"b\":2}]", "[{\"a\":1},null,{\"b\":2}]",
+                "[{\"a\":1},,{\"b\":2}]" }) {
             assertEquals(parser.deserialize(json, listOfMap), parser.stream(json, mapType).toList(), json);
             assertEquals(parser.deserialize(json, listOfMap), parser.stream(new StringReader(json), true, mapType).toList(), json);
             assertEquals(parser.deserialize(json, ignoreNull, listOfMap), parser.stream(json, ignoreNull, mapType).toList(), json);
@@ -3732,7 +3733,8 @@ public class JsonParserImplTest extends TestBase {
         final JsonSerConfig single = JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true);
         assertEquals("{'5': 1}", parser.serialize(N.asMap(5L, 1), single));
         assertEquals("{'7': 1}", parser.serialize(N.asMap(new java.util.concurrent.atomic.AtomicLong(7), 1), single));
-        assertEquals("{'5': 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
+        assertEquals("{'5': 1}",
+                parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
 
         assertEquals("{\"5\": 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation('"').setWriteLongAsString(true)));
         assertEquals("{\"5\": 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true)));
@@ -3744,11 +3746,14 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(N.asMap("'x'", 1), parser.deserialize(parser.serialize(N.asMap("'x'", 1), single), Type.of("Map<String, Integer>")));
 
         final java.time.LocalDateTime ldt = java.time.LocalDateTime.of(2020, 9, 13, 12, 26, 40, 123000000);
-        final JsonSerConfig singleIso = JsonSerConfig.create().setStringQuotation('\'').setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_TIMESTAMP);
+        final JsonSerConfig singleIso = JsonSerConfig.create()
+                .setStringQuotation('\'')
+                .setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_TIMESTAMP);
         final String ldtJson = parser.serialize(N.asMap(ldt, 1), singleIso);
         assertEquals("{'2020-09-13T12:26:40.123': 1}", ldtJson);
         assertEquals(N.asMap(ldt, 1), parser.deserialize(ldtJson, Type.of("Map<LocalDateTime, Integer>")));
     }
+
     // ---- bug review 2026-09-27 verify G117 end ----
     // ---- bug review 2026-09-27 verify G124 begin ----
     // Text after an EMPTY structured element and before the comma ([{} 1,{}], [{} null,{}]) is rejected by every stream
@@ -3771,4 +3776,748 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(parser.deserialize("[{},{}]", listOfMap), parser.stream(new StringReader("[{},{}]"), true, mapType).toList());
     }
     // ---- bug review 2026-09-27 verify G124 end ----
+
+    // ---- bug review 2026-09-30 G007 begin ----
+    // G007-01: a quoted element in stream() was handed to the Collection/array reader as if it were '[', which then swallowed the
+    // following elements and the root's closing bracket: stream("[\"a\",\"b\"]", List<String>).first() -> [a, b] (one element), and
+    // limit(2) of [["x"],"a","b"] -> [[x], [a, b]] silently. deserialize reads each quoted element as a scalar: [[a], [b]].
+    @Test
+    public void testStream_quotedElementIsReadAsScalarLikeDeserialize() {
+        final Type<Object> listType = Type.of("List<String>");
+        final Type<List<Object>> listOfList = Type.of("List<List<String>>");
+
+        assertEquals(Arrays.asList("a"), parser.stream("[\"a\",\"b\"]", listType).first().get());
+        assertEquals(Arrays.asList(Arrays.asList("x"), Arrays.asList("a")), parser.stream("[[\"x\"],\"a\",\"b\"]", listType).limit(2).toList());
+
+        for (final String json : new String[] { "[\"a\",\"b\"]", "[[\"x\"],\"a\",\"b\"]", "['a','b']", "[\"a\",null]", "[null,\"a\"]", "[\"a\",[1]]",
+                "[ \"x\" ]", "[\"a\",,\"b\"]" }) {
+            final List<Object> expected = parser.deserialize(json, listOfList);
+            assertEquals(expected, parser.stream(json, listType).toList(), json);
+            assertEquals(expected, parser.stream(new StringReader(json), true, listType).toList(), json);
+            assertEquals(expected, parser.stream(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)), true, listType).toList(),
+                    json);
+        }
+
+        // a quoted element for a Map element type is converted exactly as deserialize converts it
+        assertEquals(parser.deserialize("[\"{\\\"a\\\":1}\"]", Type.of("List<Map<String, Object>>")),
+                parser.stream("[\"{\\\"a\\\":1}\"]", Type.of("Map<String, Object>")).toList());
+
+        // malformed documents around a quoted element are still rejected
+        for (final String json : new String[] { "[\"a\"]]", "[\"a\" \"b\"]", "[\"a\" x]", "[x \"a\"]", "[\"a\"", "[\"a", "[\"a\"] x", "[\"a\":1]" }) {
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, listOfList), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(json, listType).toList(), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(new StringReader(json), true, listType).toList(), json);
+        }
+    }
+    // ---- bug review 2026-09-30 G007 end ----
+
+    // ---- bug review 2026-09-30 verify G115 begin ----
+    private static String g115Deep(final List<?> list) {
+        final List<String> result = new ArrayList<>();
+
+        for (final Object e : list) {
+            result.add(e instanceof Object[] ? Arrays.deepToString((Object[]) e) : String.valueOf(e));
+        }
+
+        return result.toString();
+    }
+
+    // G007-01: quoted elements under ARRAY and Set element types, and quoted empty elements under ignoreNullOrEmpty/readNullToEmpty,
+    // stream exactly as deserialize reads them (before the fix each quoted element swallowed the rest of the array).
+    @Test
+    public void testStream_quotedElementUnderArraySetAndNullOrEmptyConfigs() {
+        final JsonDeserConfig[] configs = { JsonDeserConfig.create(), JsonDeserConfig.create().setIgnoreNullOrEmpty(true),
+                JsonDeserConfig.create().setReadNullToEmpty(true) };
+        final String[][] typeNames = { { "String[]", "List<String[]>" }, { "Object[]", "List<Object[]>" }, { "Set<String>", "List<Set<String>>" } };
+
+        for (final String[] typeName : typeNames) {
+            final Type<Object> elementType = Type.of(typeName[0]);
+            final Type<List<Object>> listType = Type.of(typeName[1]);
+
+            for (final JsonDeserConfig config : configs) {
+                for (final String json : new String[] { "[\"a\",\"b\"]", "[\"\",null,\"\"]", "['x', \"{\\\"k\\\":1}\"]" }) {
+                    final String expected = g115Deep(parser.deserialize(json, config, listType));
+                    final String message = typeName[0] + " " + json;
+
+                    assertEquals(expected, g115Deep(parser.stream(json, config, elementType).toList()), message);
+                    assertEquals(expected, g115Deep(parser.stream(new StringReader(json), true, config, elementType).toList()), message);
+                }
+            }
+        }
+
+        assertEquals("[a]", Arrays.toString((Object[]) parser.stream("[\"a\",\"b\"]", Type.of("String[]")).first().get()));
+        assertEquals("[[a], [b]]", g115Deep(parser.stream("[\"a\",\"b\"]", Type.of("String[]")).toList()));
+    }
+
+    // G007-01: a quoted JSON object under a bean element type is converted as deserialize converts it; a quoted empty element
+    // is null, and dropped with ignoreNullOrEmpty (before the fix both streams threw ParsingException).
+    @Test
+    public void testStream_quotedElementUnderBeanElementType() {
+        final String json = "[\"{\\\"name\\\":\\\"x\\\",\\\"age\\\":2}\",\"\"]";
+        final Type<Person> personType = Type.of(Person.class);
+
+        assertEquals(parser.deserialize(json, Type.of(new TypeReference<List<Person>>() {
+        })), parser.stream(json, personType).toList());
+        assertEquals(Arrays.asList(new Person("x", 2), null), parser.stream(json, personType).toList());
+        assertEquals(Arrays.asList(new Person("x", 2)), parser.stream(json, JsonDeserConfig.create().setIgnoreNullOrEmpty(true), personType).toList());
+    }
+    // ---- bug review 2026-09-30 verify G115 end ----
+
+    // ---- bug review 2026-09-30 G122 begin ----
+    // G122: a top-level primitive list is written through the JSON writer like the matching primitive array (it was written
+    // as its raw stringOf text: configuration ignored, CharList single-quoted).
+    @Test
+    public void testSerialize_topLevelPrimitiveListMatchesPrimitiveArray() throws IOException {
+        final Object[][] listAndArray = { //
+                { com.landawn.abacus.util.BooleanList.of(true, false), new boolean[] { true, false } },
+                { com.landawn.abacus.util.CharList.of('a', '"', '\''), new char[] { 'a', '"', '\'' } },
+                { com.landawn.abacus.util.ByteList.of((byte) 1, (byte) -2), new byte[] { 1, -2 } },
+                { com.landawn.abacus.util.ShortList.of((short) 1, (short) -2), new short[] { 1, -2 } },
+                { com.landawn.abacus.util.IntList.of(1, -2), new int[] { 1, -2 } },
+                { com.landawn.abacus.util.LongList.of(1L, Long.MIN_VALUE), new long[] { 1L, Long.MIN_VALUE } },
+                { com.landawn.abacus.util.FloatList.of(1.5f, -0.0f), new float[] { 1.5f, -0.0f } },
+                { com.landawn.abacus.util.DoubleList.of(1.5d, -2d), new double[] { 1.5d, -2d } } };
+        final JsonSerConfig[] configs = { JsonSerConfig.create(), JsonSerConfig.create().setWriteLongAsString(true),
+                JsonSerConfig.create().setPrettyFormat(true) };
+
+        for (final Object[] pair : listAndArray) {
+            for (final JsonSerConfig config : configs) {
+                final String expected = parser.serialize(pair[1], config);
+                assertEquals(expected, parser.serialize(pair[0], config), pair[0].getClass().getSimpleName());
+
+                final StringWriter writer = new StringWriter();
+                parser.serialize(pair[0], config, writer);
+                assertEquals(expected, writer.toString());
+
+                final ByteArrayOutputStream os = new ByteArrayOutputStream();
+                parser.serialize(pair[0], config, os);
+                assertEquals(expected, os.toString(java.nio.charset.StandardCharsets.UTF_8));
+
+                final File file = tempDir.resolve("g122.json").toFile();
+                parser.serialize(pair[0], config, file);
+                assertEquals(expected, Files.readString(file.toPath()));
+            }
+
+            // reads back
+            assertEquals(pair[0], parser.deserialize(parser.serialize(pair[0]), pair[0].getClass()));
+        }
+
+        assertEquals("[\"1\", \"2\"]", N.toJson(com.landawn.abacus.util.LongList.of(1, 2), JsonSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("[\"a\", \"\\\"\", \"'\"]", N.toJson(com.landawn.abacus.util.CharList.of('a', '"', '\'')));
+    }
+
+    // G122: unchanged - a top-level scalar is still written as its raw text and the configuration does not apply to it.
+    @Test
+    public void testSerialize_topLevelScalarStillRawText() {
+        assertEquals("abc", N.toJson("abc"));
+        assertEquals("a\"b", N.toJson("a\"b"));
+        assertEquals("1", N.toJson(1L, JsonSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("\"", N.toJson(com.landawn.abacus.util.u.OptionalChar.of('"')));
+    }
+
+    // G122: N.toJson of a primitive list equals N.toJson of its toArray() - default, pretty and writeLongAsString configs.
+    @Test
+    public void testToJson_primitiveListEqualsToArray() {
+        final com.landawn.abacus.util.PrimitiveList<?, ?, ?>[] lists = { com.landawn.abacus.util.BooleanList.of(true, false),
+                com.landawn.abacus.util.CharList.of('a', '"', '\'', '\\'), com.landawn.abacus.util.ByteList.of((byte) 1, (byte) -2),
+                com.landawn.abacus.util.ShortList.of((short) 1, (short) -2), com.landawn.abacus.util.IntList.of(1, -2, Integer.MIN_VALUE),
+                com.landawn.abacus.util.LongList.of(1L, Long.MIN_VALUE), com.landawn.abacus.util.FloatList.of(1.5f, -0.0f, Float.NaN),
+                com.landawn.abacus.util.DoubleList.of(1.5d, -2d, Double.POSITIVE_INFINITY), com.landawn.abacus.util.IntList.of() };
+        final JsonSerConfig longAsString = JsonSerConfig.create().setWriteLongAsString(true);
+
+        for (final com.landawn.abacus.util.PrimitiveList<?, ?, ?> list : lists) {
+            final Object array = list.toArray();
+            final String name = list.getClass().getSimpleName();
+            assertEquals(N.toJson(array), N.toJson(list), name);
+            assertEquals(N.toJson(array, true), N.toJson(list, true), name);
+            assertEquals(N.toJson(array, longAsString), N.toJson(list, longAsString), name);
+        }
+    }
+    // ---- bug review 2026-09-30 G122 end ----
+
+    // ---- bug review 2026-09-30 verify2 G125 begin ----
+    public static class G125RawBean {
+        @com.landawn.abacus.annotation.JsonXmlField(isJsonRawValue = true)
+        private Object raw;
+        @com.landawn.abacus.annotation.JsonXmlField(isJsonRawValue = true)
+        private com.landawn.abacus.util.CharList chars;
+
+        public Object getRaw() {
+            return raw;
+        }
+
+        public void setRaw(final Object raw) {
+            this.raw = raw;
+        }
+
+        public com.landawn.abacus.util.CharList getChars() {
+            return chars;
+        }
+
+        public void setChars(final com.landawn.abacus.util.CharList chars) {
+            this.chars = chars;
+        }
+    }
+
+    // G125: a raw-value (isJsonRawValue) primitive list property is written like a top-level one (JSON writer, configuration applied);
+    // it was written as its stringOf text (CharList single-quoted, writeLongAsString ignored). A raw String / array value is unchanged.
+    @Test
+    public void testSerialize_rawValuePrimitiveListPropertyWrittenAsJson() {
+        final G125RawBean bean = new G125RawBean();
+        bean.setChars(com.landawn.abacus.util.CharList.of('a', '"', '\''));
+        bean.setRaw(com.landawn.abacus.util.LongList.of(1L, 2L));
+
+        assertEquals("{\"raw\": [1, 2], \"chars\": [\"a\", \"\\\"\", \"'\"]}", parser.serialize(bean));
+        assertEquals("{\"raw\": [\"1\", \"2\"], \"chars\": [\"a\", \"\\\"\", \"'\"]}",
+                parser.serialize(bean, JsonSerConfig.create().setWriteLongAsString(true)));
+        assertEquals(com.landawn.abacus.util.CharList.of('a', '"', '\''), parser.deserialize(parser.serialize(bean), G125RawBean.class).getChars());
+
+        // unchanged neighbours: a raw String is written verbatim, a raw array through the JSON writer
+        bean.setChars(null);
+        bean.setRaw("{\"k\": 1}");
+        assertEquals("{\"raw\": {\"k\": 1}}", parser.serialize(bean));
+        bean.setRaw(new long[] { 1L });
+        assertEquals("{\"raw\": [\"1\"]}", parser.serialize(bean, JsonSerConfig.create().setWriteLongAsString(true)));
+    }
+
+    // G122 neighbours: a top-level CharList follows the configured char quotation exactly as char[] does, and a top-level value written
+    // by its own type handler (Pair, Multiset) or an enum is unchanged (raw text without configuration, enum as a JSON string).
+    @Test
+    public void testSerialize_topLevelPrimitiveListCharQuotationAndOtherValueTypesUnchanged() {
+        final JsonSerConfig singleQuoted = JsonSerConfig.create().setCharQuotation('\'');
+        assertEquals(parser.serialize(new char[] { 'a', '\'' }, singleQuoted), parser.serialize(com.landawn.abacus.util.CharList.of('a', '\''), singleQuoted));
+        assertEquals("['a', '\\'']", parser.serialize(com.landawn.abacus.util.CharList.of('a', '\''), singleQuoted));
+
+        final JsonSerConfig prettyLong = JsonSerConfig.create().setPrettyFormat(true).setWriteLongAsString(true);
+        assertEquals("[1, \"a\"]", parser.serialize(com.landawn.abacus.util.Pair.of(1L, "a"), prettyLong));
+        final com.landawn.abacus.util.Multiset<String> multiset = new com.landawn.abacus.util.Multiset<>();
+        multiset.add("x");
+        multiset.add("x");
+        assertEquals("{\"x\": 2}", parser.serialize(multiset, prettyLong));
+        assertEquals("\"RED\"", parser.serialize(G125Color.RED, prettyLong));
+    }
+
+    public enum G125Color {
+        RED
+    }
+
+    public static class G125IndexedBean {
+        private com.landawn.abacus.util.Indexed<String> idx;
+
+        public com.landawn.abacus.util.Indexed<String> getIdx() {
+            return idx;
+        }
+
+        public void setIdx(final com.landawn.abacus.util.Indexed<String> idx) {
+            this.idx = idx;
+        }
+    }
+
+    // G125: a blank quoted Indexed index inside a bean property or a list element was read as index 0, although IndexedType.valueOf
+    // (the root path) rejects it; only a JSON null index means 0. String and Reader sources; null / quoted / bare integers unchanged.
+    @Test
+    public void testDeserialize_nestedIndexedBlankQuotedIndexRejected() {
+        final Type<List<com.landawn.abacus.util.Indexed<String>>> listType = Type.of("List<Indexed<String>>");
+
+        for (final String slot : new String[] { "\"\"", "''" }) {
+            final String array = "[" + slot + ", \"a\"]";
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("{\"idx\": " + array + "}", G125IndexedBean.class), slot);
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[" + array + "]", listType), slot);
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(new StringReader("[" + array + "]"), null, listType), slot);
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(array, Type.of("Indexed<String>")), slot);
+        }
+
+        assertEquals(com.landawn.abacus.util.Indexed.of("a", 0), parser.deserialize("{\"idx\": [null, \"a\"]}", G125IndexedBean.class).getIdx());
+        assertEquals(com.landawn.abacus.util.Indexed.of("a", 3), parser.deserialize("{\"idx\": [\"3\", \"a\"]}", G125IndexedBean.class).getIdx());
+        assertEquals(List.of(com.landawn.abacus.util.Indexed.of("a", 3)), parser.deserialize("[[3, \"a\"]]", listType));
+        assertEquals(List.of(com.landawn.abacus.util.Indexed.of("a", 0)), parser.deserialize(new StringReader("[[null, \"a\"]]"), null, listType));
+    }
+    // ---- bug review 2026-09-30 verify2 G125 end ----
+
+    // ---- bug review 2026-09-30 G136 begin ----
+    // G136: with bracketRootValue=false a top-level primitive list drops its brackets like the matching primitive array
+    // (LongList + writeLongAsString gave ["1", "2"] while long[] gave "1", "2").
+    @Test
+    public void testSerialize_topLevelPrimitiveListWithoutRootBrackets() throws IOException {
+        final Object[][] listAndArray = { //
+                { com.landawn.abacus.util.BooleanList.of(true, false), new boolean[] { true, false } },
+                { com.landawn.abacus.util.CharList.of('a', '"'), new char[] { 'a', '"' } },
+                { com.landawn.abacus.util.ByteList.of((byte) 1, (byte) -2), new byte[] { 1, -2 } },
+                { com.landawn.abacus.util.ShortList.of((short) 1, (short) -2), new short[] { 1, -2 } },
+                { com.landawn.abacus.util.IntList.of(1, -2), new int[] { 1, -2 } }, { com.landawn.abacus.util.LongList.of(1L, 2L), new long[] { 1L, 2L } },
+                { com.landawn.abacus.util.FloatList.of(1.5f), new float[] { 1.5f } }, { com.landawn.abacus.util.DoubleList.of(), new double[0] } };
+        final JsonSerConfig[] configs = { JsonSerConfig.create().setBracketRootValue(false),
+                JsonSerConfig.create().setBracketRootValue(false).setWriteLongAsString(true),
+                JsonSerConfig.create().setBracketRootValue(false).setPrettyFormat(true) };
+
+        for (final Object[] pair : listAndArray) {
+            for (final JsonSerConfig config : configs) {
+                final String expected = parser.serialize(pair[1], config);
+                org.junit.jupiter.api.Assertions.assertEquals(expected, parser.serialize(pair[0], config), pair[0].getClass().getSimpleName());
+
+                final StringWriter writer = new StringWriter();
+                parser.serialize(pair[0], config, writer);
+                org.junit.jupiter.api.Assertions.assertEquals(expected, writer.toString());
+            }
+        }
+
+        org.junit.jupiter.api.Assertions.assertEquals("\"1\", \"2\"",
+                N.toJson(com.landawn.abacus.util.LongList.of(1, 2), JsonSerConfig.create().setBracketRootValue(false).setWriteLongAsString(true)));
+    }
+    // ---- bug review 2026-09-30 G136 end ----
+
+    // ---- bug review 2026-09-30 G139 begin ----
+    public static class G139TimedBean {
+        private com.landawn.abacus.util.Timed<String> timed;
+
+        public com.landawn.abacus.util.Timed<String> getTimed() {
+            return timed;
+        }
+
+        public void setTimed(final com.landawn.abacus.util.Timed<String> timed) {
+            this.timed = timed;
+        }
+    }
+
+    // G139: a blank quoted Timed timestamp (root, bean property, list element; String and Reader sources) is rejected like an
+    // Indexed index - it was read as timestamp 0; null / quoted / bare integers unchanged.
+    @Test
+    public void testDeserialize_timedBlankQuotedTimestampRejected() {
+        final Type<List<com.landawn.abacus.util.Timed<String>>> listType = Type.of("List<Timed<String>>");
+
+        for (final String slot : new String[] { "\"\"", "''", "\" \"" }) {
+            final String array = "[" + slot + ", \"a\"]";
+            org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class,
+                    () -> parser.deserialize("{\"timed\": " + array + "}", G139TimedBean.class), slot);
+            org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[" + array + "]", listType), slot);
+            org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class,
+                    () -> parser.deserialize(new StringReader("[" + array + "]"), null, listType), slot);
+            org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(array, Type.of("Timed<String>")), slot);
+        }
+
+        org.junit.jupiter.api.Assertions.assertEquals(com.landawn.abacus.util.Timed.of("a", 0),
+                parser.deserialize("{\"timed\": [null, \"a\"]}", G139TimedBean.class).getTimed());
+        org.junit.jupiter.api.Assertions.assertEquals(com.landawn.abacus.util.Timed.of("a", 3),
+                parser.deserialize("{\"timed\": [\"3\", \"a\"]}", G139TimedBean.class).getTimed());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(com.landawn.abacus.util.Timed.of("a", 7)), parser.deserialize("[[7, \"a\"]]", listType));
+        org.junit.jupiter.api.Assertions.assertEquals(List.of(com.landawn.abacus.util.Timed.of("a", 0)),
+                parser.deserialize(new StringReader("[[null, \"a\"]]"), null, listType));
+    }
+    // ---- bug review 2026-09-30 G139 end ----
+
+    // ---- bug review 2026-09-30 G144 begin ----
+    // G144: the OutputStream overload writes a top-level primitive list without root brackets like the matching array (the
+    // flush after the primitive-list branch).
+    @Test
+    public void testSerialize_topLevelPrimitiveListWithoutRootBracketsToOutputStream() {
+        final JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false).setWriteLongAsString(true);
+        final Object[][] listAndArray = { { com.landawn.abacus.util.LongList.of(1L, 2L), new long[] { 1L, 2L } },
+                { com.landawn.abacus.util.CharList.of('a'), new char[] { 'a' } }, { com.landawn.abacus.util.IntList.of(), new int[0] } };
+
+        for (final Object[] pair : listAndArray) {
+            final java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            parser.serialize(pair[0], config, out);
+            org.junit.jupiter.api.Assertions.assertEquals(parser.serialize(pair[1], config), out.toString(java.nio.charset.StandardCharsets.UTF_8));
+        }
+    }
+    // ---- bug review 2026-09-30 G144 end ----
+
+    // ---- bug review 2026-09-30 G145 begin ----
+    public static class G145NoDefaultList extends java.util.ArrayList<Object> {
+        private static final long serialVersionUID = 1L;
+
+        public G145NoDefaultList(final String unused) {
+        }
+    }
+
+    // G145 (documented): stream(..) returns before any element is read, so an element class that cannot be instantiated fails
+    // when the stream is consumed, and an empty array never does.
+    @Test
+    public void testStream_uninstantiableElementClassFailsOnConsumption() {
+        final java.util.stream.Stream<?> stream = parser.stream("[[1, 2]]", null, Type.of(G145NoDefaultList.class)).toJdkStream();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, stream::toList);
+        org.junit.jupiter.api.Assertions.assertEquals(0, parser.stream("[]", null, Type.of(G145NoDefaultList.class)).count());
+    }
+    // ---- bug review 2026-09-30 G145 end ----
+
+    public static class PrimitiveListValueHolder {
+        public Object value;
+    }
+
+    private void assertPrimitiveListOutcome(final String json, final Class<?> type, final Object expected, final Class<? extends RuntimeException> failureType,
+            final JsonDeserConfig config, final Path directory) throws IOException {
+        final Path file = directory.resolve("primitive-list.json");
+        Files.writeString(file, json);
+        final List<java.util.function.Supplier<Object>> reads = new ArrayList<>(List.of(() -> parser.parse(json, config, type),
+                () -> parser.deserialize(json, config, type), () -> parser.deserialize("x" + json + "y", 1, json.length() + 1, config, type),
+                () -> parser.deserialize(new StringReader(json), config, type),
+                () -> parser.deserialize(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)), config, type),
+                () -> parser.deserialize(file.toFile(), config, type)));
+
+        if (json.startsWith("[") && (failureType == null || failureType == NumberFormatException.class)) {
+            final JsonDeserConfig nestedConfig = config.copy().setValueType("value", type);
+            final Class<?> arrayType = java.lang.reflect.Array.newInstance(type, 0).getClass();
+            reads.add(() -> parser.deserialize("{\"value\":" + json + "}", nestedConfig, PrimitiveListValueHolder.class).value);
+            reads.add(() -> parser.deserialize("{\"value\":" + json + "}", nestedConfig, Map.class).get("value"));
+            reads.add(() -> ((Object[]) parser.deserialize("[" + json + "]", config, arrayType))[0]);
+            // Streams accept structured item types; exercise the primitive list inside a supported bean item.
+            reads.add(() -> parser.stream("[{\"value\":" + json + "}]", nestedConfig, Type.of(PrimitiveListValueHolder.class)).toList().get(0).value);
+        }
+
+        for (int source = 0; source < reads.size(); source++) {
+            final java.util.function.Supplier<Object> read = reads.get(source);
+            final String message = type.getSimpleName() + " " + json + " source " + source;
+            if (failureType == null) {
+                assertEquals(expected, read.get(), message);
+            } else {
+                Assertions.assertThrows(failureType, read::get, message);
+            }
+        }
+    }
+
+    // Explicit values pin compatibility. Comparing only with primitive arrays hid CharList/BooleanList value changes.
+    @Test
+    public void testPrimitiveListConversionsMatchAtRootAndNested(@TempDir final Path directory) throws IOException {
+        final Object[][] cases = { { com.landawn.abacus.util.CharList.class, "[1,2]", com.landawn.abacus.util.CharList.of('1', '2') },
+                { com.landawn.abacus.util.CharList.class, "[97]", com.landawn.abacus.util.CharList.of('a') },
+                { com.landawn.abacus.util.CharList.class, "[\"1\",\"2\"]", com.landawn.abacus.util.CharList.of('1', '2') },
+                { com.landawn.abacus.util.CharList.class, "['a',\"\\\"\"]", com.landawn.abacus.util.CharList.of('a', '"') },
+                // Boolean text, quoted or not: 1, Y and true are true; 0, -1, n and false are false (code review 2026-10-05).
+                { com.landawn.abacus.util.BooleanList.class, "[1,0]", com.landawn.abacus.util.BooleanList.of(true, false) },
+                { com.landawn.abacus.util.BooleanList.class, "[true,-1]", com.landawn.abacus.util.BooleanList.of(true, false) },
+                { com.landawn.abacus.util.BooleanList.class, "[\"Y\",\"n\"]", com.landawn.abacus.util.BooleanList.of(true, false) },
+                { com.landawn.abacus.util.BooleanList.class, "[\"1\",\"0\"]", com.landawn.abacus.util.BooleanList.of(true, false) },
+                { com.landawn.abacus.util.BooleanList.class, "[0,-1,\"-1\"]", com.landawn.abacus.util.BooleanList.of(false, false, false) },
+                { com.landawn.abacus.util.BooleanList.class, "[1,null]", com.landawn.abacus.util.BooleanList.of(true, false) },
+                { com.landawn.abacus.util.ByteList.class, "[1,2]", com.landawn.abacus.util.ByteList.of((byte) 1, (byte) 2) },
+                { com.landawn.abacus.util.ShortList.class, "[1,2]", com.landawn.abacus.util.ShortList.of((short) 1, (short) 2) },
+                { com.landawn.abacus.util.IntList.class, "[1,2]", com.landawn.abacus.util.IntList.of(1, 2) },
+                { com.landawn.abacus.util.LongList.class, "[1,9223372036854775807]", com.landawn.abacus.util.LongList.of(1, Long.MAX_VALUE) },
+                { com.landawn.abacus.util.FloatList.class, "[1.5,-0.0]", com.landawn.abacus.util.FloatList.of(1.5f, -0.0f) },
+                { com.landawn.abacus.util.DoubleList.class, "[1.5,-0.0]", com.landawn.abacus.util.DoubleList.of(1.5, -0.0) } };
+        for (final Object[] testCase : cases) {
+            // These settings affect surrounding containers, not a primitive list's own element conversions.
+            for (final boolean readNullToEmpty : new boolean[] { false, true }) {
+                for (final boolean ignoreNullOrEmpty : new boolean[] { false, true }) {
+                    for (final boolean elementHint : new boolean[] { false, true }) {
+                        final JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(readNullToEmpty).setIgnoreNullOrEmpty(ignoreNullOrEmpty);
+                        if (elementHint) {
+                            config.setElementType(String.class);
+                        }
+                        assertPrimitiveListOutcome((String) testCase[1], (Class<?>) testCase[0], testCase[2], null, config, directory);
+                    }
+                }
+            }
+        }
+
+        assertPrimitiveListOutcome("[1.5]", com.landawn.abacus.util.IntList.class, null, NumberFormatException.class, JsonDeserConfig.create(), directory);
+        // 2026-10-05: the array codecs read a quoted element by its decoded content and an unquoted null as the element default;
+        // an unbracketed null root is a one-element list, as a null root reads into int[] as {0}.
+        assertPrimitiveListOutcome("null", com.landawn.abacus.util.IntList.class, com.landawn.abacus.util.IntList.of(0), null, JsonDeserConfig.create(),
+                directory);
+        assertPrimitiveListOutcome("[1,null]", com.landawn.abacus.util.IntList.class, com.landawn.abacus.util.IntList.of(1, 0), null, JsonDeserConfig.create(),
+                directory);
+        assertPrimitiveListOutcome("[\"1\",\"2\"]", com.landawn.abacus.util.IntList.class, com.landawn.abacus.util.IntList.of(1, 2), null,
+                JsonDeserConfig.create(), directory);
+        assertPrimitiveListOutcome("[1,null]", com.landawn.abacus.util.CharList.class, com.landawn.abacus.util.CharList.of('1', '\0'), null,
+                JsonDeserConfig.create(), directory);
+        // Any other text, quoted or not, is not a boolean value; text is never parsed as a number.
+        for (final String json : new String[] { "[1,2]", "[1.5]", "[1.0]", "[97]", "[\"1\",\"2\"]", "[0,-1,\"-2\"]", "[\"yes\"]" }) {
+            assertPrimitiveListOutcome(json, com.landawn.abacus.util.BooleanList.class, null, IllegalArgumentException.class, JsonDeserConfig.create(),
+                    directory);
+        }
+        assertPrimitiveListOutcome("null", com.landawn.abacus.util.BooleanList.class, com.landawn.abacus.util.BooleanList.of(false), null,
+                JsonDeserConfig.create(), directory);
+    }
+
+    @Test
+    public void testPrimitiveListStructureAndUnbracketedRoots(@TempDir final Path directory) throws IOException {
+        for (final Class<?> type : new Class<?>[] { com.landawn.abacus.util.CharList.class, com.landawn.abacus.util.BooleanList.class,
+                com.landawn.abacus.util.ByteList.class, com.landawn.abacus.util.ShortList.class, com.landawn.abacus.util.IntList.class,
+                com.landawn.abacus.util.LongList.class, com.landawn.abacus.util.FloatList.class, com.landawn.abacus.util.DoubleList.class }) {
+            // The elements are 1 and 0, valid for every element type (a boolean rejects 2), so only the structure is wrong.
+            for (final String bad : new String[] { "[1,0] x", "[1,0]]", "[1,0] [1]", "x[1]", "[1,0", "[[1]]", "[{}]", "[\"1\" \"0\"]" }) {
+                assertPrimitiveListOutcome(bad, type, null, ParsingException.class, JsonDeserConfig.create(), directory);
+            }
+        }
+        assertPrimitiveListOutcome("\uFEFF[1,2]", com.landawn.abacus.util.CharList.class, com.landawn.abacus.util.CharList.of('1', '2'), null,
+                JsonDeserConfig.create(), directory);
+        assertPrimitiveListOutcome("1,2", com.landawn.abacus.util.IntList.class, com.landawn.abacus.util.IntList.of(1, 2), null, JsonDeserConfig.create(),
+                directory);
+        assertPrimitiveListOutcome("1,0", com.landawn.abacus.util.BooleanList.class, com.landawn.abacus.util.BooleanList.of(true, false), null,
+                JsonDeserConfig.create(), directory);
+        assertPrimitiveListOutcome("1,2", com.landawn.abacus.util.BooleanList.class, null, IllegalArgumentException.class, JsonDeserConfig.create(), directory);
+
+        for (final Object list : new Object[] { com.landawn.abacus.util.LongList.of(1, Long.MAX_VALUE), com.landawn.abacus.util.CharList.of('a', '"'),
+                com.landawn.abacus.util.BooleanList.of(true, false), com.landawn.abacus.util.DoubleList.of(1.5, -0.0) }) {
+            for (final boolean bracket : new boolean[] { true, false }) {
+                final String json = parser.serialize(list, JsonSerConfig.create().setBracketRootValue(bracket));
+                assertPrimitiveListOutcome(json, list.getClass(), list, null, JsonDeserConfig.create(), directory);
+            }
+        }
+    }
+
+    @Test
+    public void testPrimitiveListBlankInputRemainsNullWithReadNullToEmpty(@TempDir final Path directory) throws IOException {
+        final Class<?>[] types = { com.landawn.abacus.util.BooleanList.class, com.landawn.abacus.util.ByteList.class, com.landawn.abacus.util.ShortList.class,
+                com.landawn.abacus.util.CharList.class, com.landawn.abacus.util.IntList.class, com.landawn.abacus.util.LongList.class,
+                com.landawn.abacus.util.FloatList.class, com.landawn.abacus.util.DoubleList.class };
+
+        for (final Class<?> type : types) {
+            for (final boolean readNullToEmpty : new boolean[] { false, true }) {
+                final JsonDeserConfig config = JsonDeserConfig.create().setReadNullToEmpty(readNullToEmpty);
+                final String message = type.getSimpleName() + ": readNullToEmpty=" + readNullToEmpty;
+
+                // Primitive lists retain their existing null/blank semantics; [] explicitly represents an empty list.
+                for (final String json : new String[] { null, "", " ", "\t\r\n" }) {
+                    Assertions.assertNull(parser.parse(json, config, type), message);
+                    Assertions.assertNull(parser.deserialize(json, config, type), message);
+                    if (json != null) {
+                        assertPrimitiveListOutcome(json, type, null, null, config, directory);
+                    }
+                }
+
+                final Object empty = parser.deserialize("[]", config, type);
+                assertEquals(type, empty.getClass(), message);
+                assertEquals(0, ((com.landawn.abacus.util.PrimitiveList<?, ?, ?>) empty).size(), message);
+                assertPrimitiveListOutcome("[]", type, empty, null, config, directory);
+            }
+        }
+    }
+
+    private static final IOException CONSTRUCTOR_IO_FAILURE = new IOException("container constructor");
+    private static final ReflectiveOperationException CONSTRUCTOR_CHECKED_FAILURE = new ReflectiveOperationException("container constructor");
+
+    public static class CheckedFailureMap extends HashMap<String, Object> {
+        private static final long serialVersionUID = 1L;
+
+        public CheckedFailureMap() throws IOException {
+            throw CONSTRUCTOR_IO_FAILURE;
+        }
+    }
+
+    public static class CheckedFailureList extends ArrayList<Object> {
+        private static final long serialVersionUID = 1L;
+
+        public CheckedFailureList() throws IOException {
+            throw CONSTRUCTOR_IO_FAILURE;
+        }
+    }
+
+    public static class OtherCheckedFailureMap extends HashMap<String, Object> {
+        private static final long serialVersionUID = 1L;
+
+        public OtherCheckedFailureMap() throws ReflectiveOperationException {
+            throw CONSTRUCTOR_CHECKED_FAILURE;
+        }
+    }
+
+    public static class OtherCheckedFailureList extends ArrayList<Object> {
+        private static final long serialVersionUID = 1L;
+
+        public OtherCheckedFailureList() throws ReflectiveOperationException {
+            throw CONSTRUCTOR_CHECKED_FAILURE;
+        }
+    }
+
+    @Test
+    public void testContainerCheckedConstructorFailureIsWrapped(@TempDir final Path directory) throws IOException {
+        for (final Class<?> type : new Class<?>[] { CheckedFailureMap.class, CheckedFailureList.class, OtherCheckedFailureMap.class,
+                OtherCheckedFailureList.class }) {
+            final boolean ioFailure = type == CheckedFailureMap.class || type == CheckedFailureList.class;
+            final Class<? extends RuntimeException> failureType = ioFailure ? UncheckedIOException.class
+                    : com.landawn.abacus.exception.UncheckedException.class;
+            final String json = Map.class.isAssignableFrom(type) ? "{}" : "[]";
+            final Path file = directory.resolve(type.getSimpleName() + ".json");
+            Files.writeString(file, json);
+
+            // Reflection unwraps InvocationTargetException, then converts the checked cause to a runtime exception.
+            final List<org.junit.jupiter.api.function.Executable> reads = List.of(() -> parser.parse(json, null, type), () -> parser.deserialize(json, type),
+                    () -> parser.deserialize(new StringReader(json), type),
+                    () -> parser.deserialize(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)), type),
+                    () -> parser.deserialize(file.toFile(), type), () -> parser.stream("[" + json + "]", Type.of(type)).toList());
+
+            for (final org.junit.jupiter.api.function.Executable read : reads) {
+                final RuntimeException failure = Assertions.assertThrows(failureType, read, type.getName());
+                Assertions.assertSame(ioFailure ? CONSTRUCTOR_IO_FAILURE : CONSTRUCTOR_CHECKED_FAILURE, failure.getCause());
+            }
+        }
+    }
+
+    // ---- perf review 2026-10-07 G02 begin ----
+
+    // G02-01: maps with boxed-primitive keys read the same values (scalar, braced and bracketed entries, unquoted and
+    // null keys, String and Reader sources) whether or not the per-entry key name is materialized.
+    @Test
+    public void testReadMap_boxedPrimitiveKeys_resultsPinned() {
+        assertEquals(N.asMap(1, 10, 2, 20), parser.deserialize("{\"1\": 10, \"2\": 20}", Type.of("Map<Integer, Integer>")));
+        assertEquals(N.asMap(1L, "a", 2L, "b"), parser.deserialize("{\"1\": \"a\", \"2\": \"b\"}", Type.of("Map<Long, String>")));
+        assertEquals(N.asMap(1.5d, 1, -0.0d, 2), parser.deserialize("{\"1.5\": 1, \"-0.0\": 2}", Type.of("Map<Double, Integer>")));
+        assertEquals(N.asMap(1.5f, 1), parser.deserialize("{\"1.5\": 1}", Type.of("Map<Float, Integer>")));
+        assertEquals(N.asMap((short) 7, 1), parser.deserialize("{\"7\": 1}", Type.of("Map<Short, Integer>")));
+        assertEquals(N.asMap((byte) 7, 1), parser.deserialize("{\"7\": 1}", Type.of("Map<Byte, Integer>")));
+        assertEquals(N.asMap(true, 1, false, 2), parser.deserialize("{\"true\": 1, \"false\": 2}", Type.of("Map<Boolean, Integer>")));
+        assertEquals(N.asMap('a', 1), parser.deserialize("{\"a\": 1}", Type.of("Map<Character, Integer>")));
+
+        // Unquoted keys, nested values under boxed keys, a null key, and the Reader source.
+        assertEquals(N.asMap(1, N.asList(1, 2), 2, N.asList(3)), parser.deserialize("{1: [1, 2], 2: [3]}", Type.of("Map<Integer, List<Integer>>")));
+        assertEquals(N.asMap(1, N.asMap("a", 1)), parser.deserialize("{\"1\": {\"a\": 1}}", Type.of("Map<Integer, Map<String, Integer>>")));
+        assertEquals(N.asMap(1, N.asMap(2, N.asList(3L))), parser.deserialize("{\"1\": {\"2\": [3]}}", Type.of("Map<Integer, Map<Integer, List<Long>>>")));
+        final Map<Integer, Integer> withNullKey = new HashMap<>();
+        withNullKey.put(null, 1);
+        withNullKey.put(2, 2);
+        assertEquals(withNullKey, parser.deserialize("{null: 1, \"2\": 2}", Type.of("Map<Integer, Integer>")));
+        assertEquals(N.asMap(1, 10, 2, 20),
+                parser.deserialize(new StringReader("{\"1\": 10, \"2\": 20}"), (JsonDeserConfig) null, Type.of("Map<Integer, Integer>")));
+        assertEquals(new HashMap<>(), parser.deserialize("{}", Type.of("Map<Integer, Integer>")));
+
+        // An Integer key that is not a number still fails the same way.
+        Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("{\"x\": 1}", Type.of("Map<Integer, Integer>")));
+    }
+
+    // G02-01: per-key value types and ignored names still see the key name of a boxed-primitive key.
+    @Test
+    public void testReadMap_boxedPrimitiveKeys_valueTypesAndIgnoredNamesStillApply() {
+        final JsonDeserConfig valueTypes = JsonDeserConfig.create().setValueType("1", Type.of(Long.class)).setValueType("3", Type.of("List<Long>"));
+        final Map<Integer, Object> typed = parser.deserialize("{\"1\": 5, \"2\": 6, \"3\": [7], \"4\": [8]}", valueTypes, Type.of("Map<Integer, Object>"));
+        assertEquals(Long.valueOf(5), typed.get(1));
+        assertEquals(Integer.valueOf(6), typed.get(2));
+        assertEquals(N.asList(7L), typed.get(3));
+        assertEquals(N.asList(8), typed.get(4));
+
+        final JsonDeserConfig ignored = JsonDeserConfig.create().setIgnoredPropNames(Map.class, N.asSet("1"));
+        assertEquals(N.asMap(2, 2), parser.deserialize("{\"1\": 1, \"2\": 2}", ignored, Type.of("Map<Integer, Integer>")));
+        assertEquals(N.asMap(2, N.asMap("b", 2)),
+                parser.deserialize("{\"1\": {\"a\": 1}, \"2\": {\"b\": 2}}", ignored, Type.of("Map<Integer, Map<String, Integer>>")));
+        assertEquals(N.asMap(2, N.asList(2)), parser.deserialize("{\"1\": [1], \"2\": [2]}", ignored, Type.of("Map<Integer, List<Integer>>")));
+        assertEquals(N.asMap(2L, 2), parser.deserialize("{\"1\": 1, \"2\": 2}", ignored, Type.of("Map<Long, Integer>")));
+    }
+
+    // ---- perf review 2026-10-07 G02 end ----
+    // ---- perf review 2026-10-07 G03 begin ----
+    // G03-01: readTupleValue reads the Indexed/Timed metadata slot's token text once; every outcome of that slot (unquoted,
+    // quoted, null, suffixed, extreme, blank-quoted, non-integer, overflow) and the value-slot shapes are pinned on the String
+    // and Reader paths.
+    @Test
+    public void testReadTupleValue_metadataSlotReadOnce_pins() {
+        final Type<List<com.landawn.abacus.util.Indexed<Integer>>> indexedType = Type.of("List<Indexed<Integer>>");
+        final String indexedJson = "[[0, 1], [5, null], [null, 7], [\"12\", 3], ['13', 4], [9223372036854775807, 5], [12L, 8]]";
+        final List<com.landawn.abacus.util.Indexed<Integer>> expectedIndexed = List.of(com.landawn.abacus.util.Indexed.of(1, 0),
+                com.landawn.abacus.util.Indexed.of((Integer) null, 5), com.landawn.abacus.util.Indexed.of(7, 0), com.landawn.abacus.util.Indexed.of(3, 12),
+                com.landawn.abacus.util.Indexed.of(4, 13), com.landawn.abacus.util.Indexed.of(5, Long.MAX_VALUE), com.landawn.abacus.util.Indexed.of(8, 12));
+
+        assertEquals(expectedIndexed, parser.deserialize(indexedJson, indexedType));
+        assertEquals(expectedIndexed, parser.deserialize(new StringReader(indexedJson), null, indexedType));
+
+        final Type<List<com.landawn.abacus.util.Timed<String>>> timedType = Type.of("List<Timed<String>>");
+        final String timedJson = "[[1700000000000, \"a\"], [\"7\", null], [null, \"b\"]]";
+        final List<com.landawn.abacus.util.Timed<String>> expectedTimed = List.of(com.landawn.abacus.util.Timed.of("a", 1700000000000L),
+                com.landawn.abacus.util.Timed.of((String) null, 7), com.landawn.abacus.util.Timed.of("b", 0));
+
+        assertEquals(expectedTimed, parser.deserialize(timedJson, timedType));
+        assertEquals(expectedTimed, parser.deserialize(new StringReader(timedJson), null, timedType));
+
+        // structured value slots after the metadata slot
+        final List<com.landawn.abacus.util.Indexed<List<Integer>>> lists = parser.deserialize("[[2, [1, 2]], [3, []], [4, null]]",
+                Type.of("List<Indexed<List<Integer>>>"));
+        assertEquals(List.of(com.landawn.abacus.util.Indexed.of(List.of(1, 2), 2), com.landawn.abacus.util.Indexed.of(List.of(), 3),
+                com.landawn.abacus.util.Indexed.of((List<Integer>) null, 4)), lists);
+
+        final List<com.landawn.abacus.util.Indexed<Map<String, Integer>>> maps = parser.deserialize("[[4, {\"a\": 1}], [5, {}]]",
+                Type.of("List<Indexed<Map<String, Integer>>>"));
+        assertEquals(List.of(com.landawn.abacus.util.Indexed.of(Map.of("a", 1), 4), com.landawn.abacus.util.Indexed.of(Map.of(), 5)), maps);
+
+        // a non-integer, blank or overflowing metadata slot still fails with the same exception and message on both paths
+        final Type<List<com.landawn.abacus.util.Indexed<String>>> indexedStringType = Type.of("List<Indexed<String>>");
+
+        for (final String json : new String[] { "[[1.5, \"a\"]]", "[[\"x1\", \"a\"]]", "[[\" \", \"a\"]]", "[['', \"a\"]]" }) {
+            final NumberFormatException fromString = Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(json, indexedStringType),
+                    json);
+            final NumberFormatException fromReader = Assertions.assertThrows(NumberFormatException.class,
+                    () -> parser.deserialize(new StringReader(json), null, indexedStringType), json);
+            assertEquals(fromString.getMessage(), fromReader.getMessage(), json);
+        }
+
+        assertEquals("1.5 is not a valid Long.",
+                Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[[1.5, \"a\"]]", indexedStringType)).getMessage());
+        assertEquals("Index of com.landawn.abacus.util.Indexed<String> must be an integer, but was: \" \"",
+                Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[[\" \", \"a\"]]", indexedStringType)).getMessage());
+        assertEquals("Timestamp of com.landawn.abacus.util.Timed<String> must be an integer, but was: \"\\t\"",
+                Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[[\"\\t\", \"a\"]]", timedType)).getMessage());
+        Assertions.assertThrows(ArithmeticException.class, () -> parser.deserialize("[[9223372036854775808, \"a\"]]", indexedStringType));
+    }
+
+    // G03-02: readBracketedValue returns the untyped collection directly (the tuple-converter lookup after the tuple dispatch
+    // could never match); untyped nested arrays stay fresh ArrayLists and tuple/wrapper targets are still converted.
+    @Test
+    public void testReadBracketedValue_untypedNestedArrays_pins() {
+        final Map<String, Object> map = parser.deserialize("{\"a\": [1, [2, 3], {\"b\": [4, []]}], \"c\": [], \"d\": [[]]}", Type.of("Map<String, Object>"));
+        assertEquals(List.of(1, List.of(2, 3), Map.of("b", List.of(4, List.of()))), map.get("a"));
+        assertEquals(java.util.ArrayList.class, map.get("a").getClass());
+        assertEquals(List.of(), map.get("c"));
+        assertEquals(List.of(List.of()), map.get("d"));
+
+        final Type<List<Object>> listType = Type.of("List<Object>");
+        final List<Object> fromString = parser.deserialize("[[1, 2], [[3]], [], [null]]", listType);
+        final List<Object> fromReader = parser.deserialize(new StringReader("[[1, 2], [[3]], [], [null]]"), null, listType);
+
+        for (final List<Object> list : List.of(fromString, fromReader)) {
+            assertEquals(4, list.size());
+            assertEquals(List.of(1, 2), list.get(0));
+            assertEquals(List.of(List.of(3)), list.get(1));
+            assertEquals(List.of(), list.get(2));
+            assertEquals(java.util.Collections.singletonList(null), list.get(3));
+            assertEquals(java.util.ArrayList.class, list.get(0).getClass());
+        }
+
+        assertEquals(List.of(List.of(1, 2), 3), parser.deserialize("[[1, 2], 3]", Type.of("Object")));
+
+        final List<com.landawn.abacus.util.Pair<Object, Object>> pairs = parser.deserialize("[[[1, 2], [3]]]", Type.of("List<Pair<Object, Object>>"));
+        assertEquals(com.landawn.abacus.util.Pair.of(List.of(1, 2), List.of(3)), pairs.get(0));
+
+        final List<com.landawn.abacus.util.Tuple.Tuple3<Long, List<Integer>, Map<String, Integer>>> tuples = parser.deserialize("[[1, [2], {\"k\": 3}]]",
+                Type.of("List<Tuple3<Long, List<Integer>, Map<String, Integer>>>"));
+        assertEquals(com.landawn.abacus.util.Tuple.of(1L, List.of(2), Map.of("k", 3)), tuples.get(0));
+
+        final List<?> optionals = parser.deserialize("[[1, 2], null]", Type.of("List<Optional<List<Integer>>>"));
+        assertEquals("[Optional[[1, 2]], Optional.empty]", String.valueOf(optionals));
+        assertEquals(optionals.get(0).getClass(), optionals.get(1).getClass());
+    }
+
+    // G03-03: readValue tests the null literal of wrapper and single-value slots with the shared Object type (no per-token
+    // type lookup); the null literal, values and the Reader path are pinned for every wrapper kind.
+    @Test
+    public void testReadValue_nullLiteralInWrapperSlots_pins() {
+        final Type<List<?>> optionalType = Type.of("List<Optional<Integer>>");
+        final List<?> fromString = parser.deserialize("[null, 1, null, 2]", optionalType);
+        final List<?> fromReader = parser.deserialize(new StringReader("[null, 1, null, 2]"), null, optionalType);
+
+        for (final List<?> list : List.of(fromString, fromReader)) {
+            assertEquals("[Optional.empty, Optional[1], Optional.empty, Optional[2]]", String.valueOf(list));
+            assertEquals(list.get(0).getClass(), list.get(1).getClass());
+        }
+
+        assertEquals(List.of(java.util.Optional.empty(), java.util.Optional.of(3L)),
+                parser.deserialize("[null, 3]", Type.of("List<java.util.Optional<Long>>")));
+        assertEquals("[Nullable.empty, Nullable[4]]", String.valueOf((Object) parser.deserialize("[null, 4]", Type.of("List<Nullable<Integer>>"))));
+
+        final List<com.landawn.abacus.util.Holder<Integer>> holders = parser.deserialize("[null, 5]", Type.of("List<Holder<Integer>>"));
+        assertEquals(2, holders.size());
+        Assertions.assertNull(holders.get(0));
+        assertEquals(Integer.valueOf(5), holders.get(1).value());
+
+        final Map<String, ?> map = parser.deserialize("{\"a\": null, \"b\": 6}", Type.of("Map<String, Optional<Integer>>"));
+        assertEquals("Optional.empty", String.valueOf(map.get("a")));
+        assertEquals("Optional[6]", String.valueOf(map.get("b")));
+
+        // a single-value slot (a class without a dedicated Type) keeps the null literal as null on both paths
+        assertEquals(java.util.Arrays.asList(null, null), parser.deserialize("[null, null]", Type.of("List<Runnable>")));
+        assertEquals(java.util.Arrays.asList(null, null), parser.deserialize(new StringReader("[null, null]"), null, Type.of("List<Runnable>")));
+
+        // readNullToEmpty leaves a wrapper slot's null literal as the empty wrapper
+        assertEquals("[Optional.empty, Optional[7]]",
+                String.valueOf((Object) parser.deserialize("[null, 7]", JsonDeserConfig.create().setReadNullToEmpty(true), optionalType)));
+    }
+    // ---- perf review 2026-10-07 G03 end ----
+
 }

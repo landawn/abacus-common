@@ -107,6 +107,12 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
             return N.EMPTY_FLOAT_OBJ_ARRAY;
         }
 
+        final Float[] decimalArray = (Float[]) parseNumericArray(str, elementType, Float.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Float[] array = new Float[len];

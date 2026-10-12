@@ -286,9 +286,9 @@ public class EntryStreamReview20260924Test extends TestBase {
     public void testPrependAppendEmptyMapReturnsThisStream() {
         final EntryStream<String, Integer> es = EntryStream.of("a", 1);
 
-        assertSame(es, es.prepend(new HashMap<String, Integer>()));
-        assertSame(es, es.append(new HashMap<String, Integer>()));
-        assertSame(es, es.appendIfEmpty(new HashMap<String, Integer>()));
+        assertSame(es, es.prepend(new HashMap<>()));
+        assertSame(es, es.append(new HashMap<>()));
+        assertSame(es, es.appendIfEmpty(new HashMap<>()));
         assertSame(es, es.prepend((Map<String, Integer>) null));
         assertSame(es, es.append((Map<String, Integer>) null));
         assertSame(es, es.appendIfEmpty((Map<String, Integer>) null));

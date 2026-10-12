@@ -1,15 +1,22 @@
 package com.landawn.abacus.util.stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.Field;
 import java.lang.reflect.Array;
-import java.util.Iterator;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,11 +24,12 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.Seq;
 
 @Tag("unit")
-public class PerformanceStreamRegressionTest {
+public class PerformanceStreamRegressionTest extends TestBase {
     private static Object field(final Object object, final String name) throws Exception {
         final Field field = object.getClass().getDeclaredField(name);
         field.setAccessible(true);
@@ -58,13 +66,24 @@ public class PerformanceStreamRegressionTest {
     public void closeOrderLateUpstreamHandlersAndFlatSuppressionArePreserved() {
         final List<String> order = new ArrayList<>();
         final RuntimeException a = new RuntimeException("a"), b = new RuntimeException("b"), c = new RuntimeException("c");
-        final Stream<Integer> root = Stream.of(1).onClose(() -> { order.add("a"); throw a; });
-        final Stream<Integer> middle = root.map(v -> v).onClose(() -> { order.add("b"); throw b; });
-        final Stream<Integer> last = middle.map(v -> v).onClose(() -> { order.add("c"); throw c; });
+        final Stream<Integer> root = Stream.of(1).onClose(() -> {
+            order.add("a");
+            throw a;
+        });
+        final Stream<Integer> middle = root.map(v -> v).onClose(() -> {
+            order.add("b");
+            throw b;
+        });
+        final Stream<Integer> last = middle.map(v -> v).onClose(() -> {
+            order.add("c");
+            throw c;
+        });
         assertSame(a, assertThrows(RuntimeException.class, last::close));
         assertArrayEquals(new Throwable[] { b, c }, a.getSuppressed());
         assertEquals(List.of("a", "b", "c"), order);
-        last.close(); root.close(); middle.close();
+        last.close();
+        root.close();
+        middle.close();
         assertEquals(3, order.size());
 
         order.clear();
@@ -79,7 +98,11 @@ public class PerformanceStreamRegressionTest {
     public void directUpstreamAndReentrantClosureKeepOnceOnlyOrder() {
         final List<String> order = new ArrayList<>();
         final Stream<Integer> upstream = Stream.of(1);
-        upstream.onClose(() -> { order.add("start"); upstream.close(); order.add("end"); });
+        upstream.onClose(() -> {
+            order.add("start");
+            upstream.close();
+            order.add("end");
+        });
         upstream.onClose(() -> order.add("second"));
         final Stream<Integer> derived = upstream.map(v -> v).onClose(() -> order.add("derived"));
         derived.close();
@@ -97,9 +120,18 @@ public class PerformanceStreamRegressionTest {
     public void seqCloseGroupsPreserveFailuresAndLateHandlers() {
         final List<String> order = new ArrayList<>();
         final RuntimeException first = new RuntimeException("first"), second = new RuntimeException("second"), third = new RuntimeException("third");
-        final Seq<Integer, RuntimeException> root = Seq.<Integer, RuntimeException> of(1).onClose(() -> { order.add("first"); throw first; });
-        final Seq<Integer, RuntimeException> middle = root.map(v -> v).onClose(() -> { order.add("second"); throw second; });
-        final Seq<Integer, RuntimeException> end = middle.map(v -> v).onClose(() -> { order.add("third"); throw third; });
+        final Seq<Integer, RuntimeException> root = Seq.<Integer, RuntimeException> of(1).onClose(() -> {
+            order.add("first");
+            throw first;
+        });
+        final Seq<Integer, RuntimeException> middle = root.map(v -> v).onClose(() -> {
+            order.add("second");
+            throw second;
+        });
+        final Seq<Integer, RuntimeException> end = middle.map(v -> v).onClose(() -> {
+            order.add("third");
+            throw third;
+        });
         assertSame(first, assertThrows(RuntimeException.class, end::close));
         assertArrayEquals(new Throwable[] { second, third }, first.getSuppressed());
         assertEquals(List.of("first", "second", "third"), order);
@@ -110,8 +142,16 @@ public class PerformanceStreamRegressionTest {
     public void cycleDropsTheAccumulationBufferAfterTheFirstPass() throws Exception {
         final IntStream stream = IntStream.range(0, 100).filter(v -> true).cycled(3);
         final IntIteratorEx iterator = stream.iteratorEx();
-        for (int i = 0; i <= 100; i++) assertEquals(i % 100, iterator.nextInt());
-        final Object underlying = field(iterator, "val$values");
+        for (int i = 0; i <= 100; i++) {
+            assertEquals(i % 100, iterator.nextInt());
+        }
+        // Locate the wrapped iterator by type; its compiler-generated capture name is not a contract.
+        final Field wrappedIterator = Arrays.stream(iterator.getClass().getDeclaredFields())
+                .filter(candidate -> IntIterator.class.isAssignableFrom(candidate.getType()))
+                .findFirst()
+                .orElseThrow();
+        wrappedIterator.setAccessible(true);
+        final Object underlying = wrappedIterator.get(iterator);
         assertNull(field(underlying, "list"));
         assertEquals(100, ((int[]) field(underlying, "a")).length);
         stream.close();
@@ -147,44 +187,86 @@ public class PerformanceStreamRegressionTest {
         // The failed pull exhausts the source, so later values cannot hide a discarded candidate.
         final FailedFinalPull shorts = new FailedFinalPull();
         try (ShortStream stream = new IteratorShortStream(new com.landawn.abacus.util.ShortIterator() {
-            @Override public boolean hasNext() { return shorts.hasNext(); }
-            @Override public short nextShort() { return (short) shorts.next(); }
+            @Override
+            public boolean hasNext() {
+                return shorts.hasNext();
+            }
+
+            @Override
+            public short nextShort() {
+                return (short) shorts.next();
+            }
         }, true, null).top(3)) {
             assertRetainedAfterFailure(stream.iteratorEx(), shorts, List.of((short) 0, (short) 1, (short) 2));
         }
         final FailedFinalPull ints = new FailedFinalPull();
         try (IntStream stream = new IteratorIntStream(new IntIterator() {
-            @Override public boolean hasNext() { return ints.hasNext(); }
-            @Override public int nextInt() { return ints.next(); }
+            @Override
+            public boolean hasNext() {
+                return ints.hasNext();
+            }
+
+            @Override
+            public int nextInt() {
+                return ints.next();
+            }
         }, true, null).top(3)) {
             assertRetainedAfterFailure(stream.iteratorEx(), ints, List.of(0, 1, 2));
         }
         final FailedFinalPull longs = new FailedFinalPull();
         try (LongStream stream = new IteratorLongStream(new com.landawn.abacus.util.LongIterator() {
-            @Override public boolean hasNext() { return longs.hasNext(); }
-            @Override public long nextLong() { return longs.next(); }
+            @Override
+            public boolean hasNext() {
+                return longs.hasNext();
+            }
+
+            @Override
+            public long nextLong() {
+                return longs.next();
+            }
         }, true, null).top(3)) {
             assertRetainedAfterFailure(stream.iteratorEx(), longs, List.of(0L, 1L, 2L));
         }
         final FailedFinalPull floats = new FailedFinalPull();
         try (FloatStream stream = new IteratorFloatStream(new com.landawn.abacus.util.FloatIterator() {
-            @Override public boolean hasNext() { return floats.hasNext(); }
-            @Override public float nextFloat() { return floats.next(); }
+            @Override
+            public boolean hasNext() {
+                return floats.hasNext();
+            }
+
+            @Override
+            public float nextFloat() {
+                return floats.next();
+            }
         }, true, null).top(3)) {
             assertRetainedAfterFailure(stream.iteratorEx(), floats, List.of(0f, 1f, 2f));
         }
         final FailedFinalPull doubles = new FailedFinalPull();
         try (DoubleStream stream = new IteratorDoubleStream(new com.landawn.abacus.util.DoubleIterator() {
-            @Override public boolean hasNext() { return doubles.hasNext(); }
-            @Override public double nextDouble() { return doubles.next(); }
+            @Override
+            public boolean hasNext() {
+                return doubles.hasNext();
+            }
+
+            @Override
+            public double nextDouble() {
+                return doubles.next();
+            }
         }, true, null).top(3)) {
             assertRetainedAfterFailure(stream.iteratorEx(), doubles, List.of(0d, 1d, 2d));
         }
         final FailedFinalPull objects = new FailedFinalPull();
         final Comparator<Integer> comparator = Comparator.naturalOrder();
-        try (Stream<Integer> stream = new IteratorStream<Integer>(new Iterator<>() {
-            @Override public boolean hasNext() { return objects.hasNext(); }
-            @Override public Integer next() { return objects.next(); }
+        try (Stream<Integer> stream = new IteratorStream<>(new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return objects.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                return objects.next();
+            }
         }, true, comparator, null).top(3, comparator)) {
             assertRetainedAfterFailure(stream.iteratorEx(), objects, List.of(0, 1, 2));
         }
@@ -194,9 +276,16 @@ public class PerformanceStreamRegressionTest {
         private int value;
         private boolean failed;
         private final RuntimeException failure = new RuntimeException("last pull");
-        private boolean hasNext() { return !failed; }
+
+        private boolean hasNext() {
+            return !failed;
+        }
+
         private int next() {
-            if (value == 3) { failed = true; throw failure; }
+            if (value == 3) {
+                failed = true;
+                throw failure;
+            }
             return value++;
         }
     }
@@ -214,7 +303,9 @@ public class PerformanceStreamRegressionTest {
         final com.sun.management.ThreadMXBean bean = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();
         Assumptions.assumeTrue(bean.isThreadAllocatedMemorySupported());
         bean.setThreadAllocatedMemoryEnabled(true);
-        for (int i = 0; i < 10; i++) IntStream.range(1000, 101000).top(10).toArray();
+        for (int i = 0; i < 10; i++) {
+            IntStream.range(1000, 101000).top(10).toArray();
+        }
         final long thread = Thread.currentThread().threadId();
         final long before = bean.getThreadAllocatedBytes(thread);
         final int[] result = IntStream.range(1000, 1001000).top(10).toArray();
@@ -246,9 +337,20 @@ public class PerformanceStreamRegressionTest {
         final java.util.function.Supplier<ObjIteratorEx<Integer>> factory = () -> {
             factoryCalls.incrementAndGet();
             return new ObjIteratorEx<>() {
-                @Override public boolean hasNext() { return false; }
-                @Override public Integer next() { throw new java.util.NoSuchElementException(); }
-                @Override public void closeResource() { closes.incrementAndGet(); }
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public Integer next() {
+                    throw new java.util.NoSuchElementException();
+                }
+
+                @Override
+                public void closeResource() {
+                    closes.incrementAndGet();
+                }
             };
         };
         final ObjIteratorEx<Integer> iterator = ObjIteratorEx.defer(factory);
@@ -259,7 +361,9 @@ public class PerformanceStreamRegressionTest {
             f.setAccessible(true);
             final Object value = f.get(iterator);
             assertNotSame(factory, value);
-            if (value instanceof com.landawn.abacus.util.Holder<?> holder) assertNull(holder.value());
+            if (value instanceof com.landawn.abacus.util.Holder<?> holder) {
+                assertNull(holder.value());
+            }
         }
         iterator.closeResource();
         assertEquals(1, factoryCalls.get());
@@ -269,8 +373,8 @@ public class PerformanceStreamRegressionTest {
     @Test
     public void everyPrimitiveCycleHandlesSnapshotsRoundsAndEmptySources() throws Exception {
         final String[] names = { "Byte", "Char", "Short", "Int", "Long", "Float", "Double" };
-        final Object[] arrays = { new byte[] { 1, 2 }, new char[] { 'a', 'b' }, new short[] { 1, 2 }, new int[] { 1, 2 },
-                new long[] { 1, 2 }, new float[] { -0f, Float.NaN }, new double[] { -0d, Double.NaN } };
+        final Object[] arrays = { new byte[] { 1, 2 }, new char[] { 'a', 'b' }, new short[] { 1, 2 }, new int[] { 1, 2 }, new long[] { 1, 2 },
+                new float[] { -0f, Float.NaN }, new double[] { -0d, Double.NaN } };
         for (int i = 0; i < names.length; i++) {
             final Class<?> iteratorType = Class.forName("com.landawn.abacus.util." + names[i] + "Iterator");
             final Class<?> streamType = Class.forName("com.landawn.abacus.util.stream." + names[i] + "Stream");
@@ -283,7 +387,9 @@ public class PerformanceStreamRegressionTest {
                 final Object result = streamType.getMethod("toArray").invoke(bounded);
                 final int expectedLength = rounds < 0 ? 5 : (int) rounds * 2;
                 assertEquals(expectedLength, Array.getLength(result), names[i]);
-                for (int j = 0; j < expectedLength; j++) assertEquals(Array.get(arrays[i], j % 2), Array.get(result, j), names[i]);
+                for (int j = 0; j < expectedLength; j++) {
+                    assertEquals(Array.get(arrays[i], j % 2), Array.get(result, j), names[i]);
+                }
             }
             final Object empty = iteratorType.getMethod("empty").invoke(null);
             final Object upstream = streamType.getMethod("of", iteratorType).invoke(null, empty);
@@ -297,8 +403,8 @@ public class PerformanceStreamRegressionTest {
     @Test
     public void everySortedPrimitiveWindowHandlesZeroOneWrapAndOversizedLimits() throws Exception {
         final String[] names = { "Short", "Int", "Long", "Float", "Double" };
-        final Object[] arrays = { new short[] { 0, 1, 2, 3, 4 }, new int[] { 0, 1, 2, 3, 4 }, new long[] { 0, 1, 2, 3, 4 },
-                new float[] { 0, 1, 2, 3, 4 }, new double[] { 0, 1, 2, 3, 4 } };
+        final Object[] arrays = { new short[] { 0, 1, 2, 3, 4 }, new int[] { 0, 1, 2, 3, 4 }, new long[] { 0, 1, 2, 3, 4 }, new float[] { 0, 1, 2, 3, 4 },
+                new double[] { 0, 1, 2, 3, 4 } };
         for (int i = 0; i < names.length; i++) {
             final Class<?> iteratorType = Class.forName("com.landawn.abacus.util." + names[i] + "Iterator");
             final Class<?> streamType = Class.forName("com.landawn.abacus.util.stream." + names[i] + "Stream");
@@ -310,7 +416,9 @@ public class PerformanceStreamRegressionTest {
                 final Object result = streamType.getMethod("toArray").invoke(top);
                 final int expectedLength = Math.min(n, 5);
                 assertEquals(expectedLength, Array.getLength(result), names[i]);
-                for (int j = 0; j < expectedLength; j++) assertEquals(Array.get(arrays[i], 5 - expectedLength + j), Array.get(result, j), names[i]);
+                for (int j = 0; j < expectedLength; j++) {
+                    assertEquals(Array.get(arrays[i], 5 - expectedLength + j), Array.get(result, j), names[i]);
+                }
             }
         }
         final Comparator<Integer> comparator = Comparator.nullsFirst(Comparator.naturalOrder());
@@ -319,8 +427,12 @@ public class PerformanceStreamRegressionTest {
             final List<Integer> expected = values.subList(5 - Math.min(n, 5), 5);
             assertEquals(expected, Stream.of(values.iterator()).sorted(comparator).top(n, comparator).toList());
             assertEquals(expected, Seq.of(values).sorted(comparator).top(n, comparator).toList());
-            if (n > 0 && n <= 5) assertEquals(values.get(5 - n), Seq.of(values).sorted(comparator).kthLargest(n, comparator).get());
-            if (n > 5) assertTrue(Seq.of(values).sorted(comparator).kthLargest(n, comparator).isEmpty());
+            if (n > 0 && n <= 5) {
+                assertEquals(values.get(5 - n), Seq.of(values).sorted(comparator).kthLargest(n, comparator).get());
+            }
+            if (n > 5) {
+                assertTrue(Seq.of(values).sorted(comparator).kthLargest(n, comparator).isEmpty());
+            }
         }
     }
 
@@ -328,13 +440,18 @@ public class PerformanceStreamRegressionTest {
     public void sequenceCloseGroupsKeepReentrantOrderAndLateHandlerFailures() {
         final List<String> order = new ArrayList<>();
         final Seq<Integer, RuntimeException> parent = Seq.of(1);
-        parent.onClose(() -> { order.add("start"); parent.close(); order.add("end"); });
+        parent.onClose(() -> {
+            order.add("start");
+            parent.close();
+            order.add("end");
+        });
         parent.onClose(() -> order.add("second"));
         final Seq<Integer, RuntimeException> child = parent.map(v -> v).onClose(() -> order.add("child"));
         parent.onClose(() -> order.add("late"));
         child.close();
         assertEquals(List.of("start", "second", "late", "end", "child"), order);
-        parent.close(); child.close();
+        parent.close();
+        child.close();
         assertEquals(5, order.size());
     }
 
@@ -342,7 +459,10 @@ public class PerformanceStreamRegressionTest {
     public void extendedDeferredIteratorCachesErrorAndReleasesFailingFactory() throws Exception {
         final AtomicInteger calls = new AtomicInteger();
         final AssertionError failure = new AssertionError("factory");
-        final java.util.function.Supplier<Iterator<Integer>> factory = () -> { calls.incrementAndGet(); throw failure; };
+        final java.util.function.Supplier<Iterator<Integer>> factory = () -> {
+            calls.incrementAndGet();
+            throw failure;
+        };
         final ObjIteratorEx<Integer> iterator = ObjIteratorEx.defer(factory);
         assertSame(failure, assertThrows(AssertionError.class, iterator::hasNext));
         assertSame(failure, assertThrows(AssertionError.class, iterator::next));
@@ -352,7 +472,9 @@ public class PerformanceStreamRegressionTest {
             f.setAccessible(true);
             final Object value = f.get(iterator);
             assertNotSame(factory, value);
-            if (value instanceof com.landawn.abacus.util.Holder<?> holder) assertNull(holder.value());
+            if (value instanceof com.landawn.abacus.util.Holder<?> holder) {
+                assertNull(holder.value());
+            }
         }
     }
 }

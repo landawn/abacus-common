@@ -262,8 +262,8 @@ public class NumbersReviewFixes20260924bTest extends TestBase {
 
     @Test
     public void c018_decodeBigIntegerRejectionsAreUnchangedAndCarryTheSharedCause() {
-        for (final String text : new String[] { "123L", "0xFFL", "+-1", "--1", "0x-1", "0x", "#", " ", " 1", "1 ", "abc", "08", "1-", "١٢٣",
-                "1_000", "0x" + "F".repeat(40) + "L", "1\n2" }) {
+        for (final String text : new String[] { "123L", "0xFFL", "+-1", "--1", "0x-1", "0x", "#", " ", " 1", "1 ", "abc", "08", "1-", "١٢٣", "1_000",
+                "0x" + "F".repeat(40) + "L", "1\n2" }) {
             final NumberFormatException e = assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger(text), text);
             assertTrue(e.getMessage().endsWith(" is not a valid BigInteger."), e.getMessage());
             assertNotNull(e.getCause(), text);
@@ -271,8 +271,7 @@ public class NumbersReviewFixes20260924bTest extends TestBase {
 
         assertEquals("invalid character 'L' at index 4 of 0xFFL",
                 assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("0xFFL")).getCause().getMessage());
-        assertEquals("no digits in integer token 0x",
-                assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("0x")).getCause().getMessage());
+        assertEquals("no digits in integer token 0x", assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("0x")).getCause().getMessage());
         assertEquals("invalid character '-' at index 1 of +-1",
                 assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("+-1")).getCause().getMessage());
         assertEquals("invalid character '8' at index 1 of 08",

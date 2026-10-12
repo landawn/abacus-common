@@ -1391,11 +1391,9 @@ public final class TypeFactory {
                 final Type<?> publishedType = typePool.putIfAbsent(typeName, wildcardType);
                 return (Type<T>) (publishedType == null ? wildcardType : publishedType);
             } else if (typeName.equals("?") || typeName.startsWith("? super ")) {
-                // Only an upper bound constrains a value; "?" / "? super X" stay Object-capable. A trailing
-                // "[]" still makes it an array of those: this branch returns before the shared "[]" step at
-                // the tail, so "? super X[]" would otherwise lose isArray()/Object[] and read as a String.
-                type = typeName.endsWith("[]") ? new ObjectArrayType<>(getType(typeName.substring(0, typeName.length() - 2)))
-                        : new ObjectType<>(typeName, Object.class);
+                // A lower bound does not restrict the values to arrays: in "? super Integer[]", the
+                // brackets belong to the bound, and the wildcard's upper bound is still Object.
+                type = new ObjectType<>(typeName, Object.class);
                 final Type<?> publishedType = typePool.putIfAbsent(typeName, type);
                 return publishedType == null ? type : (Type<T>) publishedType;
             }
@@ -2254,7 +2252,7 @@ public final class TypeFactory {
      *   <li>Special types: "JSON&lt;Person&gt;", "XML&lt;Order&gt;", "Type&lt;String&gt;"</li>
      *   <li>Optional types: "Optional&lt;String&gt;", "Nullable&lt;Integer&gt;"</li>
      *   <li>Collection types: "Set&lt;String&gt;", "List&lt;Person&gt;", "ImmutableList&lt;String&gt;"</li>
-     *   <li>Map types: "Map&lt;String,Person&gt;", "Multimap&lt;String,Integer&gt;"</li>
+     *   <li>Map types: "Map&lt;String,Person&gt;", "Multimap&lt;String,List&lt;Integer&gt;&gt;"</li>
      *   <li>Tuple types: "Pair&lt;String,Integer&gt;", "Triple&lt;String,Integer,Boolean&gt;"</li>
      *   <li>Enum with parameters: "Color(NAME)", "Color(ORDINAL)", "Color(CODE)" - selects the enum representation strategy</li>
      *   <li>Wildcard type arguments as reflection renders them: "List&lt;? extends Person&gt;" reads its elements as
@@ -2368,9 +2366,11 @@ public final class TypeFactory {
      *         {@code null}, if {@code targetClass} has a built-in type, if a type has already been resolved and
      *         cached for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization),
      *         or if a type is already registered under the new type's name (as returned by {@link Type#name()}).
-     *         The new type is named after the canonical class name, so a fallback that an earlier lookup by that
-     *         name ({@code getType("com.example.Foo")}) cached also makes this method throw; to supersede such a
-     *         fallback, use {@link #registerType(Class, Type)} with a differently named type or
+     *         The new type is named after the canonical class name (shortened to the simple name, e.g. {@code "Year"}
+     *         for {@code java.time.Year}, when the class is in {@code java.lang}, {@code java.util}, {@code java.time}
+     *         or {@code com.landawn.abacus} and resolvable by that simple name), so a fallback that an earlier lookup by
+     *         that name ({@code getType("com.example.Foo")}, {@code getType("Year")}) cached also makes this method
+     *         throw; to supersede such a fallback, use {@link #registerType(Class, Type)} with a differently named type or
      *         {@link #registerType(String, Class, BiFunction, BiFunction)}.
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
@@ -2423,9 +2423,11 @@ public final class TypeFactory {
      *         {@code null}, if {@code targetClass} has a built-in type, if a type has already been resolved and cached
      *         for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization),
      *         or if a type is already registered under the new type's name (as returned by {@link Type#name()}).
-     *         The new type is named after the canonical class name, so a fallback that an earlier lookup by that
-     *         name ({@code getType("com.example.Foo")}) cached also makes this method throw; to supersede such a
-     *         fallback, use {@link #registerType(Class, Type)} with a differently named type or
+     *         The new type is named after the canonical class name (shortened to the simple name, e.g. {@code "Year"}
+     *         for {@code java.time.Year}, when the class is in {@code java.lang}, {@code java.util}, {@code java.time}
+     *         or {@code com.landawn.abacus} and resolvable by that simple name), so a fallback that an earlier lookup by
+     *         that name ({@code getType("com.example.Foo")}, {@code getType("Year")}) cached also makes this method
+     *         throw; to supersede such a fallback, use {@link #registerType(Class, Type)} with a differently named type or
      *         {@link #registerType(String, Class, Function, Function)}.
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
@@ -2528,10 +2530,16 @@ public final class TypeFactory {
             throw new IllegalArgumentException("A type has already registered with class: " + targetClass);
         }
 
-        if (pooledType != null) {
-            // The class slot is won: retire the fallback that an earlier canonical-name lookup cached
-            // (that instance only), otherwise List<cls> fields keep resolving to it.
-            typePool.replace(canonicalName, pooledType, type);
+        try {
+            if (!publishCanonicalClassType(targetClass, canonicalName, type)) {
+                throw new IllegalArgumentException("A type has already registered with class: " + targetClass);
+            }
+        } catch (final RuntimeException | Error e) {
+            // Classification can call an application handler. A failure or a concurrent explicit
+            // canonical registration must not leave this rejected type reachable by class or name.
+            javaType2TypeCache.remove(targetClass, type);
+            typePool.remove(registeredTypeName, type);
+            throw e;
         }
     }
 
@@ -2595,7 +2603,13 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        bindTypeToClassIfUnclaimed(targetClass, type);
+        try {
+            bindTypeToClassIfUnclaimed(targetClass, type);
+        } catch (final RuntimeException | Error e) {
+            typePool.remove(typeName, type);
+            typePool.remove(type.name(), type);
+            throw e;
+        }
     }
 
     /**
@@ -2657,7 +2671,13 @@ public final class TypeFactory {
 
         registerType(typeName, type);
 
-        bindTypeToClassIfUnclaimed(targetClass, type);
+        try {
+            bindTypeToClassIfUnclaimed(targetClass, type);
+        } catch (final RuntimeException | Error e) {
+            typePool.remove(typeName, type);
+            typePool.remove(type.name(), type);
+            throw e;
+        }
     }
 
     /**
@@ -2684,10 +2704,44 @@ public final class TypeFactory {
             return;
         }
 
-        if (javaType2TypeCache.putIfAbsent(targetClass, type) == null && pooledType != null) {
-            // The class slot is won: retire the fallback an earlier canonical-name lookup fabricated (that
-            // instance only), otherwise List<targetClass> fields keep resolving to it.
-            typePool.replace(canonicalName, pooledType, type);
+        if (javaType2TypeCache.putIfAbsent(targetClass, type) == null) {
+            try {
+                if (!publishCanonicalClassType(targetClass, canonicalName, type)) {
+                    javaType2TypeCache.remove(targetClass, type);
+                }
+            } catch (final RuntimeException | Error e) {
+                javaType2TypeCache.remove(targetClass, type);
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Publishes a won class mapping under its canonical name, replacing only a fabricated fallback.
+     * A lookup may have passed the class-cache check before registration and publish that fallback
+     * afterward, so the current canonical entry must be reconciled even when the initial entry was absent.
+     * Application handler classification occurs outside the map's atomic update; no callback lock is held.
+     *
+     * @param targetClass the class whose cache slot was won
+     * @param canonicalName the canonical class-name key
+     * @param type the newly registered handler
+     * @return {@code true} if the canonical key names this handler; {@code false} if an explicit handler won it
+     */
+    private static boolean publishCanonicalClassType(final Class<?> targetClass, final String canonicalName, final Type<?> type) {
+        while (true) {
+            final Type<?> current = typePool.get(canonicalName);
+
+            if (current == type) {
+                return true;
+            } else if (current == null) {
+                if (typePool.putIfAbsent(canonicalName, type) == null) {
+                    return true;
+                }
+            } else if (!isFabricatedType(current, targetClass)) {
+                return false;
+            } else if (typePool.replace(canonicalName, current, type)) {
+                return true;
+            }
         }
     }
 

@@ -223,12 +223,9 @@ public class ParserWhitespaceTest extends TestBase {
     @Test
     public void existingEmptyAndNullConventionsRemainStable() {
         for (XmlParser parser : streamParsers()) {
-            String empty = parser.deserialize("<TextBean><text/></TextBean>", TextBean.class).getText();
-            if (parser instanceof XmlParserImpl) {
-                assertNull(empty);
-            } else {
-                assertEquals("", empty);
-            }
+            // An empty String element is the empty string on every backend (2026-10-06: the standard StAX reader used to
+            // yield the property default, null).
+            assertEquals("", parser.deserialize("<TextBean><text/></TextBean>", TextBean.class).getText());
             assertNull(parser.deserialize("<TextBean><text isNull=\"true\"/></TextBean>", TextBean.class).getText());
             assertNull(parser.deserialize("<TextBean/>", TextBean.class).getText());
         }

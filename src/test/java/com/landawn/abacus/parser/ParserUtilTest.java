@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.landawn.abacus.AbstractTest;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Column;
 import com.landawn.abacus.annotation.Id;
 import com.landawn.abacus.annotation.JsonXmlConfig;
@@ -2904,7 +2905,11 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(everywhere.type.name().contains("ORDINAL"), everywhere.type.name());
         assertTrue(everywhere.dbType.name().contains("ORDINAL"), everywhere.dbType.name());
     }
+
     // ---- deep review 2026-09-25 G009 begin ----
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static class G009ValidatingSetterBean {
         static final java.util.concurrent.atomic.AtomicInteger SET_NAME_CALLS = new java.util.concurrent.atomic.AtomicInteger();
 
@@ -3151,4 +3156,493 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(new Date(0), copy.getCreatedOn());
     }
     // ---- bug review 2026-09-27 verify G118 end ----
+
+    // ---- bug review 2026-09-30 G009 begin ----
+    public static class G009AffixNumberBean {
+        @JsonXmlField(numberFormat = "'<'0.00")
+        private Double lt;
+        @JsonXmlField(numberFormat = "'R&D '0")
+        private Integer amp;
+
+        public Double getLt() {
+            return lt;
+        }
+
+        public void setLt(final Double lt) {
+            this.lt = lt;
+        }
+
+        public Integer getAmp() {
+            return amp;
+        }
+
+        public void setAmp(final Integer amp) {
+            this.amp = amp;
+        }
+    }
+
+    public static class G009Box<T> {
+        private T value;
+
+        public T getValue() {
+            return value;
+        }
+
+        public void setValue(final T value) {
+            this.value = value;
+        }
+    }
+
+    public static class G009BoxHolder {
+        private G009Box<String> box;
+
+        public G009Box<String> getBox() {
+            return box;
+        }
+
+        public void setBox(final G009Box<String> box) {
+            this.box = box;
+        }
+    }
+
+    // G009-01: a numberFormat affix holding XML markup characters was written raw, producing XML no reader accepts.
+    @Test
+    public void testWritePropValue_xmlNumberFormatAffixIsEscaped() {
+        final G009AffixNumberBean bean = new G009AffixNumberBean();
+        bean.setLt(1.5);
+        bean.setAmp(7);
+
+        for (final XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            final String xml = xmlParser.serialize(bean);
+            assertTrue(xml.contains("&lt;1.50"), xml);
+            assertTrue(xml.contains("R&amp;D 7"), xml);
+
+            final G009AffixNumberBean copy = xmlParser.deserialize(xml, G009AffixNumberBean.class);
+            assertEquals(1.5, copy.getLt());
+            assertEquals(Integer.valueOf(7), copy.getAmp());
+        }
+    }
+
+    // G009-02: refreshBeanPropInfo(Class) left the BeanInfo cached for a parameterized use of the class (Box<String>) stale.
+    @Test
+    public void testRefreshBeanPropInfo_evictsParameterizedTypeBeanInfo() throws Exception {
+        final java.lang.reflect.Type parameterized = G009BoxHolder.class.getDeclaredField("box").getGenericType();
+        final BeanInfo before = ParserUtil.getBeanInfo(parameterized);
+        assertSame(before, ParserUtil.getBeanInfo(parameterized));
+
+        ParserUtil.refreshBeanPropInfo(G009Box.class);
+
+        assertNotSame(before, ParserUtil.getBeanInfo(parameterized));
+    }
+    // ---- bug review 2026-09-30 G009 end ----
+
+    // ---- bug review 2026-09-30 verify G116 begin ----
+    public static class G116Pair<T> {
+        private T first;
+
+        public T getFirst() {
+            return first;
+        }
+
+        public void setFirst(final T first) {
+            this.first = first;
+        }
+    }
+
+    public static class G116PairHolder {
+        private G116Pair<String> pair;
+
+        public G116Pair<String> getPair() {
+            return pair;
+        }
+
+        public void setPair(final G116Pair<String> pair) {
+            this.pair = pair;
+        }
+    }
+
+    // G009-02 neighbours: refreshing a class still evicts its raw-class BeanInfo, but keeps the BeanInfos of other classes' parameterized types.
+    @Test
+    public void testRefreshBeanPropInfo_keepsOtherClassesParameterizedBeanInfo() throws Exception {
+        final java.lang.reflect.Type otherParameterized = G116PairHolder.class.getDeclaredField("pair").getGenericType();
+        final BeanInfo otherBefore = ParserUtil.getBeanInfo(otherParameterized);
+        final BeanInfo rawBefore = ParserUtil.getBeanInfo(G009Box.class);
+
+        ParserUtil.refreshBeanPropInfo(G009Box.class);
+
+        assertSame(otherBefore, ParserUtil.getBeanInfo(otherParameterized));
+        assertNotSame(rawBefore, ParserUtil.getBeanInfo(G009Box.class));
+    }
+    // ---- bug review 2026-09-30 verify G116 end ----
+
+    public static class ExceptionWithProperties extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        public String code;
+    }
+
+    // Both public metadata lookups and the internal ASM/reflective test entry point reject non-beans.
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testGetBeanInfoRejectsThrowableClasses() {
+        for (final Class<?> type : java.util.List.of(Throwable.class, Exception.class, Error.class, ExceptionWithProperties.class)) {
+            final String expected = "Not a bean class: " + type.getCanonicalName() + " - Throwable subclasses are never treated as beans";
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((java.lang.reflect.Type) type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testInternalBeanInfoLookupRejectsOtherNonBeans() {
+        for (final Class<?> type : java.util.List.of(String.class, java.util.HashMap.class)) {
+            final String expected = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage();
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
+        }
+    }
+
+    // ---- bug review 2026-10-02 G009 begin ----
+    public static class G009AmPmDateBean {
+        @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa", timeZone = "UTC")
+        public Date date;
+        @JsonXmlField(dateFormat = "dd MMMMMM yyyy", timeZone = "UTC")
+        public java.util.Calendar calendar;
+    }
+
+    public static class G009AmPmJodaBean {
+        @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa", timeZone = "UTC")
+        public org.joda.time.DateTime dateTime;
+    }
+
+    public static class G009BadPatternDateBean {
+        @JsonXmlField(dateFormat = "yyyy-bb-dd", timeZone = "UTC")
+        public Date date;
+    }
+
+    public static class G009AmPmLocalDateTimeBean {
+        @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa")
+        public LocalDateTime dateTime;
+    }
+
+    // G009-01: a legacy date/time property uses SimpleDateFormat pattern syntax (JsonXmlField.dateFormat), but the
+    // BeanInfo build rejected SimpleDateFormat patterns java.time does not accept ("Too many pattern letters").
+    @Test
+    public void testGetBeanInfo_legacyDatePropertyAcceptsSimpleDateFormatOnlyPattern() {
+        final G009AmPmDateBean bean = new G009AmPmDateBean();
+        bean.date = new Date(1672671845000L); // 2023-01-02T15:04:05Z
+        bean.calendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        bean.calendar.setTimeInMillis(1672617600000L); // 2023-01-02T00:00:00Z
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009AmPmDateBean.class);
+        assertNull(beanInfo.getPropInfo("date").dateTimeFormatter);
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
+        assertTrue(json.contains("\"02 January 2023\""), json);
+
+        final G009AmPmDateBean fromJson = N.fromJson(json, G009AmPmDateBean.class);
+        assertEquals(1672671845000L, fromJson.date.getTime());
+        assertEquals(1672617600000L, fromJson.calendar.getTimeInMillis());
+
+        final G009AmPmDateBean fromXml = N.fromXml(N.toXml(bean), G009AmPmDateBean.class);
+        assertEquals(1672671845000L, fromXml.date.getTime());
+        assertEquals(1672617600000L, fromXml.calendar.getTimeInMillis());
+    }
+
+    // G009-01: the same for a Joda-Time property, whose pattern syntax is Joda's DateTimeFormat.
+    @Test
+    public void testGetBeanInfo_jodaDatePropertyAcceptsJodaOnlyPattern() {
+        final G009AmPmJodaBean bean = new G009AmPmJodaBean();
+        bean.dateTime = new org.joda.time.DateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
+        assertEquals(1672671845000L, N.fromJson(json, G009AmPmJodaBean.class).dateTime.getMillis());
+    }
+
+    // G009-01 guard: a pattern invalid in the property's own syntax, and a java.time-only rejection on a java.time
+    // property, are still rejected when the BeanInfo is built.
+    @Test
+    public void testGetBeanInfo_invalidDatePatternStillRejected() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009BadPatternDateBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009AmPmLocalDateTimeBean.class));
+    }
+    // ---- bug review 2026-10-02 G009 end ----
+
+    // ---- bug review 2026-10-02 verify G120 begin ----
+    public static class G120VSqlDateBean {
+        @JsonXmlField(dateFormat = "dd MMMMMM yyyy", timeZone = "UTC")
+        public java.sql.Date date;
+    }
+
+    public static class G120VSqlTimeBean {
+        @JsonXmlField(dateFormat = "hh:mm:ss aa", timeZone = "UTC")
+        public java.sql.Time time;
+    }
+
+    public static class G120VGregorianCalendarBean {
+        @JsonXmlField(dateFormat = "dd MMMMMM yyyy", timeZone = "UTC")
+        public java.util.GregorianCalendar calendar;
+    }
+
+    public static class G120VTimestampBean {
+        @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa", timeZone = "UTC")
+        public java.sql.Timestamp timestamp;
+        @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa", timeZone = "UTC")
+        public org.joda.time.MutableDateTime mutableDateTime;
+    }
+
+    public static class G120VBothSyntaxesBean {
+        @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
+        public Date date;
+    }
+
+    // G120 verify of G009-01: java.sql.Date/Time read their pattern with java.time syntax (Dates.parseToLocalDate/LocalTime),
+    // so a pattern java.time rejects can never be read back; such a property is still rejected when the BeanInfo is built,
+    // and so is a type outside the exact legacy/Joda list (GregorianCalendar).
+    @Test
+    public void testGetBeanInfo_sqlDateAndTimePatternRejectedByJavaTimeStillRejected() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlDateBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlTimeBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VGregorianCalendarBean.class));
+    }
+
+    // G120 verify of G009-01: java.sql.Timestamp (SimpleDateFormat syntax) and Joda MutableDateTime (Joda syntax) accept a
+    // pattern java.time rejects and round-trip through JSON and XML.
+    @Test
+    public void testGetBeanInfo_timestampAndMutableDateTimeAcceptOwnSyntaxPattern() {
+        final G120VTimestampBean bean = new G120VTimestampBean();
+        bean.timestamp = new java.sql.Timestamp(1672671845000L); // 2023-01-02T15:04:05Z
+        bean.mutableDateTime = new org.joda.time.MutableDateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
+
+        final String json = N.toJson(bean);
+        assertEquals("{\"timestamp\": \"01/02/2023 03:04:05 PM\", \"mutableDateTime\": \"01/02/2023 03:04:05 PM\"}", json);
+
+        final G120VTimestampBean fromJson = N.fromJson(json, G120VTimestampBean.class);
+        assertEquals(1672671845000L, fromJson.timestamp.getTime());
+        assertEquals(1672671845000L, fromJson.mutableDateTime.getMillis());
+
+        final G120VTimestampBean fromXml = N.fromXml(N.toXml(bean), G120VTimestampBean.class);
+        assertEquals(1672671845000L, fromXml.timestamp.getTime());
+        assertEquals(1672671845000L, fromXml.mutableDateTime.getMillis());
+    }
+
+    // G120 verify of G009-01 guard: a pattern valid in both syntaxes still builds the java.time formatter and formats as before.
+    @Test
+    public void testGetBeanInfo_patternValidInBothSyntaxesKeepsJavaTimeFormatter() {
+        assertNotNull(ParserUtil.getBeanInfo(G120VBothSyntaxesBean.class).getPropInfo("date").dateTimeFormatter);
+
+        final G120VBothSyntaxesBean bean = new G120VBothSyntaxesBean();
+        bean.date = new Date(1672671845000L);
+        assertEquals("{\"date\": \"2023-01-02 15:04:05\"}", N.toJson(bean));
+        assertEquals(1672671845000L, N.fromJson(N.toJson(bean), G120VBothSyntaxesBean.class).date.getTime());
+    }
+    // ---- bug review 2026-10-02 verify G120 end ----
+
+    // ---- perf review 2026-10-07 G07 begin ----
+
+    public static class G07PlainBean {
+        static int constructions;
+        static boolean failConstruction;
+        static boolean failConstructionChecked;
+
+        private int count;
+
+        public G07PlainBean() throws java.io.IOException {
+            constructions++;
+
+            if (failConstruction) {
+                throw new IllegalStateException("boom");
+            }
+
+            if (failConstructionChecked) {
+                throw new java.io.IOException("checked boom");
+            }
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(final int count) {
+            this.count = count;
+        }
+    }
+
+    public static class G07PrivateConstructorBean {
+        private String name;
+
+        private G07PrivateConstructorBean() {
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class G07NoDefaultConstructorBean {
+        private String name;
+
+        public G07NoDefaultConstructorBean(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    /** A non-static member class: N.newInstance creates it through an enclosing instance of the test class. */
+    public class G07InnerBean {
+        private int count;
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(final int count) {
+            this.count = count;
+        }
+    }
+
+    private static Class<?> g07LocalBeanClass() {
+        class G07LocalBean {
+            private int count;
+
+            @SuppressWarnings("unused")
+            public int getCount() {
+                return count;
+            }
+
+            @SuppressWarnings("unused")
+            public void setCount(final int count) {
+                this.count = count;
+            }
+        }
+
+        return G07LocalBean.class;
+    }
+
+    // G07-01: createBeanResult() for a plain mutable bean (top-level, static nested, local class in a static context, private
+    // no-args constructor) invokes the no-args constructor exactly once per call and returns a fresh instance of the class.
+    @Test
+    public void testCreateBeanResult_plainMutableBeanInvokesNoArgsConstructorOncePerCall() {
+        final BeanInfo topLevel = ParserUtil.getBeanInfo(Account.class);
+        final Object first = topLevel.createBeanResult();
+        final Object second = topLevel.createBeanResult();
+        assertSame(Account.class, first.getClass());
+        assertSame(Account.class, second.getClass());
+        assertNotSame(first, second);
+        assertSame(first, topLevel.finishBeanResult(first));
+        assertNull(((Account) first).getFirstName());
+        assertEquals(0L, ((Account) first).getId());
+
+        final BeanInfo nested = ParserUtil.getBeanInfo(G07PlainBean.class);
+        assertFalse(nested.isImmutable);
+        G07PlainBean.constructions = 0;
+        final Object bean = nested.createBeanResult();
+        assertEquals(1, G07PlainBean.constructions);
+        assertSame(G07PlainBean.class, bean.getClass());
+        assertEquals(0, ((G07PlainBean) bean).getCount());
+        assertNotSame(bean, nested.createBeanResult());
+        assertEquals(2, G07PlainBean.constructions);
+
+        // through the JSON reader, which creates every mutable bean with createBeanResult()
+        G07PlainBean.constructions = 0;
+        final G07PlainBean fromJson = N.fromJson("{\"count\": 3}", G07PlainBean.class);
+        assertEquals(3, fromJson.getCount());
+        assertEquals(1, G07PlainBean.constructions);
+
+        final Class<?> localClass = g07LocalBeanClass();
+        final BeanInfo local = ParserUtil.getBeanInfo(localClass);
+        assertFalse(local.isImmutable);
+        assertSame(localClass, local.createBeanResult().getClass());
+        assertNotSame(local.createBeanResult(), local.createBeanResult());
+
+        final BeanInfo privateConstructor = ParserUtil.getBeanInfo(G07PrivateConstructorBean.class);
+        assertFalse(privateConstructor.isImmutable);
+        assertSame(G07PrivateConstructorBean.class, privateConstructor.createBeanResult().getClass());
+        assertNotSame(privateConstructor.createBeanResult(), privateConstructor.createBeanResult());
+    }
+
+    // G07-01: an exception thrown by the no-args constructor reaches the caller exactly as N.newInstance(clazz) delivered it:
+    // a RuntimeException as the same instance, a checked exception wrapped by ExceptionUtil.toRuntimeException.
+    @Test
+    public void testCreateBeanResult_constructorExceptionsKeepNewInstanceWrapping() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G07PlainBean.class);
+        assertFalse(beanInfo.isImmutable);
+
+        G07PlainBean.failConstruction = true;
+
+        try {
+            final IllegalStateException e = assertThrows(IllegalStateException.class, beanInfo::createBeanResult);
+            assertEquals("boom", e.getMessage());
+            assertEquals(IllegalStateException.class, e.getClass());
+        } finally {
+            G07PlainBean.failConstruction = false;
+        }
+
+        G07PlainBean.failConstructionChecked = true;
+
+        try {
+            final RuntimeException e = assertThrows(RuntimeException.class, beanInfo::createBeanResult);
+            assertEquals(com.landawn.abacus.exception.UncheckedIOException.class, e.getClass());
+            assertEquals(java.io.IOException.class, e.getCause().getClass());
+            assertEquals("checked boom", e.getCause().getMessage());
+        } finally {
+            G07PlainBean.failConstructionChecked = false;
+        }
+
+        assertSame(G07PlainBean.class, beanInfo.createBeanResult().getClass());
+    }
+
+    // G07-01: classes N.newInstance(clazz) does not create through a plain no-args constructor keep their previous path and
+    // result: a non-static member class and an anonymous class are created through an enclosing instance; a class
+    // without a no-args constructor is classified immutable and gets its constructor-argument array.
+    @Test
+    public void testCreateBeanResult_nonPlainClassesKeepNewInstancePath() throws Exception {
+        final BeanInfo inner = ParserUtil.getBeanInfo(G07InnerBean.class);
+        assertFalse(inner.isImmutable);
+        final Object innerBean = inner.createBeanResult();
+        assertSame(G07InnerBean.class, innerBean.getClass());
+        assertNotSame(innerBean, inner.createBeanResult());
+        assertEquals(0, ((G07InnerBean) innerBean).getCount());
+
+        final Class<?> anonymousClass = new G07PlainBean() {
+            @Override
+            public int getCount() {
+                return super.getCount() + 100;
+            }
+        }.getClass();
+        assertTrue(anonymousClass.isAnonymousClass());
+        final BeanInfo anonymous = ParserUtil.getBeanInfo(anonymousClass);
+        assertFalse(anonymous.isImmutable);
+        final Object anonymousBean = anonymous.createBeanResult();
+        assertSame(anonymousClass, anonymousBean.getClass());
+        assertEquals(100, ((G07PlainBean) anonymousBean).getCount());
+        assertNotSame(anonymousBean, anonymous.createBeanResult());
+
+        final BeanInfo noDefault = ParserUtil.getBeanInfo(G07NoDefaultConstructorBean.class);
+        assertTrue(noDefault.isImmutable);
+        final Object args = noDefault.createBeanResult();
+        assertTrue(args instanceof Object[]);
+        assertEquals(1, ((Object[]) args).length);
+        assertNull(((Object[]) args)[0]);
+        assertNotSame(args, noDefault.createBeanResult());
+        final G07NoDefaultConstructorBean finished = noDefault.finishBeanResult(args);
+        assertNull(finished.getName());
+    }
+
+    // ---- perf review 2026-10-07 G07 end ----
+
 }

@@ -47,7 +47,6 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
 import com.landawn.abacus.util.FloatIterator;
-import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.Multiset;
@@ -490,15 +489,35 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
-            private DoubleStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextDouble());
+                        final DoubleStream s = mapper.apply(elements.nextDouble());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -509,7 +528,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -525,15 +544,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -650,15 +669,35 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextDouble());
+                        final IntStream s = mapper.apply(elements.nextDouble());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -669,7 +708,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -685,15 +724,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -718,15 +757,35 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
-            private LongStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextDouble());
+                        final LongStream s = mapper.apply(elements.nextDouble());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -737,7 +796,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -753,15 +812,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -786,15 +845,35 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
-            private FloatStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextDouble());
+                        final FloatStream s = mapper.apply(elements.nextDouble());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -805,7 +884,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -821,15 +900,15 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -853,17 +932,36 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<T> iter = new SequentialFlatMapObjIterator<>() {
             private Iterator<? extends T> cur = null;
-            private Stream<? extends T> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.nextDouble());
+                        final Stream<? extends T> s = mapper.apply(elements.nextDouble());
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -874,7 +972,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -888,17 +986,12 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -2193,7 +2286,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         checkArgNotNull(supplier, cs.supplier);
 
-        final Holder<DoubleStream> holder = new Holder<>();
+        final MappedStreamHolder holder = new MappedStreamHolder();
 
         return newStream(new DoubleIteratorEx() { //NOSONAR
             private DoubleIteratorEx iter;
@@ -2247,15 +2340,18 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         final DoubleStream s = supplier.get();
                         try {
                             iter = s == null ? DoubleIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = DoubleIteratorEx.empty();
+                        }
                     }
                 }
             }
-        }, false).onClose(() -> close(holder));
+        }, false).onClose(holder::close);
     }
 
     /**

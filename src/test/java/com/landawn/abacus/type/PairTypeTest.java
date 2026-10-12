@@ -300,7 +300,7 @@ public class PairTypeTest extends TestBase {
     @SuppressWarnings("unchecked")
     @Test
     public void reviewFixes20260906_objectSlotsUseRuntimeTypeAndEmbeddedJson() throws IOException {
-        final Type<Object> type = (Type<Object>) createType("Pair<Object, Object>");
+        final Type<Object> type = createType("Pair<Object, Object>");
         final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
 
         assertEquals("[1, \"a\"]", reviewFixes20260906_ser(type, Pair.of(1, "a"), jsc));

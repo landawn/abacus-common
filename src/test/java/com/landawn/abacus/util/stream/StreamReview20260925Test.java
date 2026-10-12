@@ -74,15 +74,18 @@ public class StreamReview20260925Test extends TestBase {
 
     @Test
     public void testU1801_groupJoinStreamB_primaryFailureWinsOverFailingCloseOfB_sequential() {
+        assertGroupJoinPrimaryWins(b -> Stream.of(1, 2).groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, (l, r) -> l + "=" + r),
+                "4-arg array");
         assertGroupJoinPrimaryWins(
-                b -> Stream.of(1, 2).groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, (l, r) -> l + "=" + r), "4-arg array");
-        assertGroupJoinPrimaryWins(b -> Stream.of(1, 2)
-                .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
+                b -> Stream.of(1, 2)
+                        .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
                 "5-arg array");
-        assertGroupJoinPrimaryWins(b -> Stream.of(Arrays.asList(1, 2).iterator())
-                .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, (l, r) -> l + "=" + r), "4-arg iterator");
-        assertGroupJoinPrimaryWins(b -> Stream.of(Arrays.asList(1, 2).iterator())
-                .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
+        assertGroupJoinPrimaryWins(
+                b -> Stream.of(Arrays.asList(1, 2).iterator()).groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, (l, r) -> l + "=" + r),
+                "4-arg iterator");
+        assertGroupJoinPrimaryWins(
+                b -> Stream.of(Arrays.asList(1, 2).iterator())
+                        .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
                 "5-arg iterator");
     }
 
@@ -92,9 +95,10 @@ public class StreamReview20260925Test extends TestBase {
         // reaches the (synchronized) build first; the parallel path is still the one taken (isParallel() -> true).
         assertGroupJoinPrimaryWins(b -> Stream.of(1).parallel(2).groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, (l, r) -> l + "=" + r),
                 "4-arg parallel");
-        assertGroupJoinPrimaryWins(b -> Stream.of(1)
-                .parallel(2)
-                .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
+        assertGroupJoinPrimaryWins(
+                b -> Stream.of(1)
+                        .parallel(2)
+                        .groupJoin(b, x -> x, StreamReview20260925Test::rightKeyFailingOn2, java.util.stream.Collectors.counting(), (l, r) -> l + "=" + r),
                 "5-arg parallel");
         assertGroupJoinPrimaryWins(b -> Stream.of(Arrays.asList(1).iterator())
                 .parallel(2)

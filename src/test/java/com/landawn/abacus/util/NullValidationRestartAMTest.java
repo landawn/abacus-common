@@ -1,6 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -75,19 +80,19 @@ public class NullValidationRestartAMTest extends TestBase {
             assertDoesNotThrow(() -> shuffleAll.invoke(null, empty, unusedRandom));
         }
         final List<Integer> list = Arrays.asList(1, 2);
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(list, null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle(list, null));
         assertEquals(Arrays.asList(1, 2), list);
         final Collection<Integer> collection = new LinkedHashSet<>(list);
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(collection, null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle(collection, null));
         assertEquals(new LinkedHashSet<>(list), collection);
         // Both overloads validate rnd before an empty or singleton no-op.
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((List<?>) null, null));
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(Collections.emptyList(), null));
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(Collections.singletonList(1), null));
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) null, null));
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) Collections.emptyList(), null));
-        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) Collections.singletonList(1), null));
-        assertDoesNotThrow(() -> N.shuffle((Collection<?>) Collections.singletonList(1), unusedRandom));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle((List<?>) null, null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle(Collections.emptyList(), null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle(Collections.singletonList(1), null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle((Collection<?>) null, null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle((Collection<?>) Collections.emptyList(), null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtil.shuffle((Collection<?>) Collections.singletonList(1), null));
+        assertDoesNotThrow(() -> CommonUtil.shuffle((Collection<?>) Collections.singletonList(1), unusedRandom));
         final Object[] primitiveLists = { new BooleanList(), new ByteList(), new CharList(), new DoubleList(), new FloatList(), new IntList(), new LongList() };
         for (Object primitiveList : primitiveLists) {
             final Method shuffle = primitiveList.getClass().getMethod("shuffle", java.util.Random.class);
@@ -136,7 +141,7 @@ public class NullValidationRestartAMTest extends TestBase {
         final Method instanceMethod = String.class.getMethod("length");
         assertThrows(NullPointerException.class, () -> ClassUtil.invokeMethod(instanceMethod));
         assertThrows(IllegalArgumentException.class, () -> Array.newInstance(String.class, (int[]) null));
-        assertThrows(IllegalArgumentException.class, () -> N.newArray(String.class, (int[]) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newArray(String.class, (int[]) null));
         assertThrows(NullPointerException.class, () -> Array.get(null, 0));
     }
 

@@ -228,7 +228,7 @@ public class BeansReview20260925Test extends TestBase {
         assertEquals("firstName", Beans.getPropField(Plain.class, "First_Name").getName());
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(Plain.class);
         assertEquals("firstName", beanInfo.getPropInfo("first_name").name);
-        assertEquals("w", Beans.mapToBean(N.asMap("first_name", "w"), true, Plain.class).getFirstName());
+        assertEquals("w", Beans.mapToBean(CommonUtil.asMap("first_name", "w"), true, Plain.class).getFirstName());
         assertNull(Beans.getPropValue(new Plain(), "first_name", true));
         assertEquals("j", N.fromJson("{\"first_name\":\"j\"}", tolerant, Plain.class).getFirstName());
 
@@ -251,7 +251,7 @@ public class BeansReview20260925Test extends TestBase {
             assertNull(Beans.getPropField(Plain.class, name), name);
             assertNull(beanInfo.getPropInfo(name), name);
             assertNull(Beans.getPropValue(new Plain(), name, true), name);
-            assertNull(Beans.mapToBean(N.asMap(name, 1), true, Plain.class).getFirstName(), name);
+            assertNull(Beans.mapToBean(CommonUtil.asMap(name, 1), true, Plain.class).getFirstName(), name);
             assertNull(N.fromJson("{\"" + name + "\":1}", tolerant, Plain.class).getFirstName(), name);
         }
 

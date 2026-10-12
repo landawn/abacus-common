@@ -94,14 +94,14 @@ public class SQLArrayTypeTest extends TestBase {
     public void reviewFixes20260908_valueOfObjectReturnsSameInstanceOrNull() {
         final Array value = mock(Array.class);
 
-        assertSame(value, sqlArrayType.valueOf((Object) value));
+        assertSame(value, sqlArrayType.valueOf(value));
         assertNull(sqlArrayType.valueOf((Object) null));
     }
 
     @Test
     public void reviewFixes20260908_valueOfObjectRejectsForeignValues() {
         assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf((Object) "x"));
-        assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf((Object) 42));
+        assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf(42));
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf("x"));
     }

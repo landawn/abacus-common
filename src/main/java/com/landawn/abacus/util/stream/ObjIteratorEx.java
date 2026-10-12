@@ -352,9 +352,10 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * <p>Calling {@link #closeResource()} before any traversal request is a no-op and does not invoke the supplier.</p>
      *
      * <p>On first traversal, the returned iterator throws {@link IllegalStateException} if the
-     * supplier returns {@code null}. A runtime exception or error from initialization is cached
-     * and rethrown on each subsequent traversal attempt. These failures do not occur when this
-     * factory creates the deferred iterator.</p>
+     * supplier returns {@code null} or this deferred iterator itself, or accesses this iterator while it
+     * is being initialized. A runtime exception or error from initialization is cached
+     * and rethrown on each subsequent traversal attempt; a recursive-access failure is kept even if the
+     * supplier catches it. These failures do not occur when this factory creates the deferred iterator.</p>
      *
      * @param <T> the type of elements
      * @param iteratorSupplier the supplier that provides the iterator
@@ -371,6 +372,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             private Iterator<? extends T> iter = null;
             private IteratorEx<? extends T> iterEx = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -436,7 +438,8 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
             /**
              * Initializes the supplied iterator once and rethrows a cached initialization failure.
              *
-             * @throws IllegalStateException if the iterator supplier returned {@code null} during initialization
+             * @throws IllegalStateException if the iterator supplier returned {@code null} or this iterator, or accessed this
+             *         iterator during initialization
              * @throws RuntimeException if the supplier throws during initialization; the cached failure is rethrown
              * @throws Error if the supplier throws an error during initialization; the cached failure is rethrown
              */
@@ -444,6 +447,18 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            // Same guards as ObjIterator.defer: a supplier that uses this iterator (re-enters init on the
+                            // same thread - the lock is reentrant) or returns it recursed until StackOverflowError.
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = supplierHolder.value().get();
 
@@ -451,11 +466,18 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
 
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
+
                                 iterEx = iter instanceof IteratorEx ? (IteratorEx<T>) iter : null;
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
                                 supplierHolder.setValue(null);
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }

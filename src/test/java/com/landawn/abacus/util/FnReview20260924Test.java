@@ -97,7 +97,8 @@ public class FnReview20260924Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Fn.and(new ArrayList<java.util.function.Predicate<String>>()));
         assertThrows(IllegalArgumentException.class, () -> Fn.or((Collection<java.util.function.Predicate<String>>) null));
 
-        final BiPredicate<String, Integer> bAnd = Fn.and(Arrays.<java.util.function.BiPredicate<String, Integer>> asList((s, n) -> s.length() == n, (s, n) -> n > 0));
+        final BiPredicate<String, Integer> bAnd = Fn
+                .and(Arrays.<java.util.function.BiPredicate<String, Integer>> asList((s, n) -> s.length() == n, (s, n) -> n > 0));
         assertTrue(bAnd.test("ab", 2));
         assertFalse(bAnd.test("", 0));
     }

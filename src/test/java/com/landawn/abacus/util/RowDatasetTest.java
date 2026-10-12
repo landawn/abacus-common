@@ -2588,7 +2588,7 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertTrue(e.getMessage().contains("'output'"), e.getMessage());
 
         // an empty column selection already named 'output'
-        e = assertThrows(IllegalArgumentException.class, () -> ds.toJson(0, 1, new ArrayList<String>(), (java.io.Writer) null));
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toJson(0, 1, new ArrayList<>(), (java.io.Writer) null));
         assertTrue(e.getMessage().contains("'output'"), e.getMessage());
     }
 
@@ -2596,8 +2596,7 @@ public class RowDatasetTest extends RowDatasetTestSupport {
     public void testToMergedEntitiesNullIdPropNameNamesIdPropNameParameter() {
         final Dataset ds = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "x" } });
 
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> ds.toMergedEntities((String) null, RowDatasetTestSupport.Person.class));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ds.toMergedEntities((String) null, RowDatasetTestSupport.Person.class));
         assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
 
         e = assertThrows(IllegalArgumentException.class,
@@ -2605,7 +2604,7 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
 
         e = assertThrows(IllegalArgumentException.class,
-                () -> ds.toMergedEntities((String) null, new HashMap<String, String>(), RowDatasetTestSupport.Person.class));
+                () -> ds.toMergedEntities((String) null, new HashMap<>(), RowDatasetTestSupport.Person.class));
         assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
     }
 
@@ -2944,9 +2943,8 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         Assertions.assertNotSame(parents.get(0), parents.get(1));
         Assertions.assertNotSame(parents.get(0).getChild(), parents.get(1).getChild());
 
-        final Dataset rows = new RowDataset(Arrays.asList("id", "children.id", "children.name"),
-                Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 1, 2)), new ArrayList<>(Arrays.asList(10, 20, 10, 10)),
-                        new ArrayList<>(Arrays.asList("a", "b", "a2", "c"))));
+        final Dataset rows = new RowDataset(Arrays.asList("id", "children.id", "children.name"), Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 1, 2)),
+                new ArrayList<>(Arrays.asList(10, 20, 10, 10)), new ArrayList<>(Arrays.asList("a", "b", "a2", "c"))));
 
         final List<G065Parent> merged = rows.toMergedEntities("id", G065Parent.class);
         assertEquals(2, merged.size());
@@ -3107,8 +3105,7 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
         final Dataset leftColl = left.leftJoin(right, on2, "rr", List.class, supplier);
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), leftColl.copyColumn("id"));
-        assertEquals(Arrays.asList(Arrays.asList(r1, r2), null, null, Arrays.asList(r1, r2), Arrays.asList(r4), Arrays.asList(r4)),
-                leftColl.copyColumn("rr"));
+        assertEquals(Arrays.asList(Arrays.asList(r1, r2), null, null, Arrays.asList(r1, r2), Arrays.asList(r4), Arrays.asList(r4)), leftColl.copyColumn("rr"));
 
         final Dataset rightColl = left.rightJoin(right, on2, "rr", List.class, supplier);
         assertEquals(Arrays.asList(1, 4, null, 5, 6), rightColl.copyColumn("id"));
@@ -3168,4 +3165,233 @@ public class RowDatasetTest extends RowDatasetTestSupport {
     }
 
     // ---- perf review 2026-09-26 G113 end ----
+
+    // ---- bug review 2026-10-02 G067 begin ----
+
+    // G067-01: toMergedEntities read a nested collection back from a builder-based immutable bean's BUILDER through the bean's
+    // property accessor -> ClassCastException (records and mutable beans were fine; toList on the same bean was fine).
+    @Test
+    public void testToMergedEntities_builderBeanWithNestedCollection() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "name", "children.id", "children.name"),
+                new Object[][] { { 1, "p1", 10, "c10" }, { 1, "p1", 11, "c11" }, { 2, "p2", 20, "c20" }, { 1, "p1", 10, "c10" } });
+
+        final List<G067BuilderParent> merged = ds.toMergedEntities(G067BuilderParent.class);
+
+        assertEquals(2, merged.size());
+        assertEquals(1, merged.get(0).getId());
+        assertEquals("p1", merged.get(0).getName());
+        assertEquals(Arrays.asList(10, 11), merged.get(0).getChildren().stream().map(G067Child::getId).toList());
+        assertEquals(Arrays.asList("c10", "c11"), merged.get(0).getChildren().stream().map(G067Child::getName).toList());
+        assertEquals(2, merged.get(1).getId());
+        assertEquals(Arrays.asList(20), merged.get(1).getChildren().stream().map(G067Child::getId).toList());
+
+        // toList is unchanged: one parent per row, each holding only its own row's child
+        final List<G067BuilderParent> perRow = ds.toList(G067BuilderParent.class);
+        assertEquals(4, perRow.size());
+        assertEquals(Arrays.asList(11), perRow.get(1).getChildren().stream().map(G067Child::getId).toList());
+    }
+
+    public static final class G067Child {
+        @com.landawn.abacus.annotation.Id
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static final class G067BuilderParent {
+        @com.landawn.abacus.annotation.Id
+        private final int id;
+        private final String name;
+        private final List<G067Child> children;
+
+        private G067BuilderParent(final int id, final String name, final List<G067Child> children) {
+            this.id = id;
+            this.name = name;
+            this.children = children;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<G067Child> getChildren() {
+            return children;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private int id;
+            private String name;
+            private List<G067Child> children;
+
+            public Builder id(final int id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder children(final List<G067Child> children) {
+                this.children = children;
+                return this;
+            }
+
+            public G067BuilderParent build() {
+                return new G067BuilderParent(id, name, children);
+            }
+        }
+    }
+
+    // ---- bug review 2026-10-02 G067 end ----
+
+    // ---- bug review 2026-10-02 verify G120 begin ----
+
+    // G120 verify of G067-01: a builder may copy (or append) the collection it is given, so the merged collection is handed to
+    // each builder once, complete; setting it empty and filling it afterwards left such beans with empty lists.
+    @Test
+    public void testToMergedEntities_builderCopyingOrAppendingItsCollection() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "children.id", "children.name"),
+                new Object[][] { { 1, 10, "c10" }, { 1, 11, "c11" }, { 2, 20, "c20" } });
+
+        final List<G120VCopyingParent> copied = ds.toMergedEntities(G120VCopyingParent.class);
+        assertEquals(2, copied.size());
+        assertEquals(Arrays.asList(10, 11), copied.get(0).getChildren().stream().map(G067Child::getId).toList());
+        assertEquals(Arrays.asList(20), copied.get(1).getChildren().stream().map(G067Child::getId).toList());
+
+        final List<G120VAppendingParent> appended = ds.toMergedEntities(G120VAppendingParent.class);
+        assertEquals(2, appended.size());
+        assertEquals(Arrays.asList(10, 11), appended.get(0).getChildren().stream().map(G067Child::getId).toList());
+        assertEquals(Arrays.asList(20), appended.get(1).getChildren().stream().map(G067Child::getId).toList());
+    }
+
+    public static final class G120VCopyingParent {
+        @com.landawn.abacus.annotation.Id
+        private final int id;
+        private final List<G067Child> children;
+
+        private G120VCopyingParent(final int id, final List<G067Child> children) {
+            this.id = id;
+            this.children = children;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public List<G067Child> getChildren() {
+            return children;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private int id;
+            private List<G067Child> children = new ArrayList<>();
+
+            public Builder id(final int id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder children(final List<G067Child> children) {
+                this.children = new ArrayList<>(children);
+                return this;
+            }
+
+            public G120VCopyingParent build() {
+                return new G120VCopyingParent(id, children);
+            }
+        }
+    }
+
+    public static final class G120VAppendingParent {
+        @com.landawn.abacus.annotation.Id
+        private final int id;
+        private final List<G067Child> children;
+
+        private G120VAppendingParent(final int id, final List<G067Child> children) {
+            this.id = id;
+            this.children = children;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public List<G067Child> getChildren() {
+            return children;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private int id;
+            private final List<G067Child> children = new ArrayList<>();
+
+            public Builder id(final int id) {
+                this.id = id;
+                return this;
+            }
+
+            public Builder children(final List<G067Child> children) {
+                this.children.addAll(children);
+                return this;
+            }
+
+            public G120VAppendingParent build() {
+                return new G120VAppendingParent(id, children);
+            }
+        }
+    }
+    // ---- bug review 2026-10-02 verify G120 end ----
+
+    // ---- bug review 2026-10-02 final G130 begin ----
+
+    // toMergedEntities of a record parent (Object[] intermediate, read back directly, not deferred like a builder) still merges
+    // its nested collection.
+    @Test
+    public void testToMergedEntities_recordParentWithNestedCollection() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "children.id", "children.name"),
+                new Object[][] { { 1, 10, "c10" }, { 1, 11, "c11" }, { 2, 20, "c20" }, { 1, 10, "c10" } });
+
+        final List<G130RecordParent> merged = ds.toMergedEntities(G130RecordParent.class);
+
+        assertEquals(2, merged.size());
+        assertEquals(Arrays.asList(10, 11), merged.get(0).children().stream().map(G067Child::getId).toList());
+        assertEquals(Arrays.asList(20), merged.get(1).children().stream().map(G067Child::getId).toList());
+    }
+
+    public record G130RecordParent(@com.landawn.abacus.annotation.Id int id, List<G067Child> children) {
+    }
+
+    // ---- bug review 2026-10-02 final G130 end ----
 }

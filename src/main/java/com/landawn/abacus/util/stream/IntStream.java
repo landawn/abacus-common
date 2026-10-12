@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.IntSummaryStatistics;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
@@ -55,6 +56,7 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BiConsumers;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FI;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IndexedInt;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.IntList;
@@ -1260,6 +1262,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * }</pre>
      *
      * <p>This is an intermediate operation.
+     *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported};
      * buffers the values emitted for one input element before exposing them downstream.
@@ -3367,11 +3372,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Returns an IntStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
      * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
      * the supplier so the supplied stream can be closed.
      *
-     * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToInt(it -> it.get())}.
+     * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
+     * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
+     * not detected (see {@link Stream#defer(Supplier)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3401,10 +3410,22 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<IntStream> s = Fn.memoize(supplier);
-        return IntStream.of(IntIterator.defer(() -> {
+        // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
+        final Holder<IntStream> deferred = new Holder<>();
+
+        final IntStream result = IntStream.of(IntIterator.defer(() -> {
             final IntStream source = s.get();
+
+            if (source != null && source == deferred.value()) {
+                throw new IllegalStateException("Stream supplier returned the deferred stream itself");
+            }
+
             return source == null ? IntIterator.empty() : source.iteratorEx();
         })).onClose(newCloseHandler(s));
+
+        deferred.setValue(result);
+
+        return result;
     }
 
     /**
@@ -3944,9 +3965,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 @Override
                 public void advance(long n) {
                     if (n > 0) {
-                        while (n-- > 0 && cursor < totalSize) {
-                            cursor = cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize;
-                        }
+                        cnt += (int) Math.min(n, count - cnt);
+                        // The skipped prefix has at most two chunk sizes; jump directly to its end without invoking the mapper.
+                        cursor = Math.min(cnt, smallerCount) * smallerSize + Math.max(0, cnt - smallerCount) * biggerSize;
                     }
                 }
 
@@ -3985,9 +4006,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 @Override
                 public void advance(long n) {
                     if (n > 0) {
-                        while (n-- > 0 && cursor < totalSize) {
-                            cursor = cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize;
-                        }
+                        cnt += (int) Math.min(n, count - cnt);
+                        // The skipped prefix has at most two chunk sizes; jump directly to its end without invoking the mapper.
+                        cursor = Math.min(cnt, biggerCount) * biggerSize + Math.max(0, cnt - biggerCount) * smallerSize;
                     }
                 }
 
@@ -5686,7 +5707,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         final List<? extends IntStream> sources = new ArrayList<>(streams);
 
         return new IteratorIntStream(new IntIteratorEx() { //NOSONAR
-            private final Iterator<? extends IntStream> iterators = sources.iterator();
+            private final ListIterator<? extends IntStream> iterators = sources.listIterator();
             private IntStream cur;
             private IntIterator iter;
 
@@ -5694,7 +5715,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             public boolean hasNext() {
                 while ((iter == null || !iter.hasNext()) && iterators.hasNext()) {
                     if (cur != null) {
+                        // The slot is taken before close(): a close handler that re-enters this iterator moves it on.
+                        final int index = iterators.previousIndex();
                         cur.close();
+                        // Drop the closed input from the private snapshot (the close handler skips a closed stream anyway):
+                        // otherwise it keeps whatever the exhausted input still references, such as the array of a
+                        // sorted() input, reachable until this stream itself is unreachable.
+                        sources.set(index, null);
                     }
 
                     cur = iterators.next();
@@ -6543,7 +6570,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
             @Override
             public boolean hasNext() {
-                return iterA.hasNext() || iterB.hasNext() || hasNextA || hasNextB;
+                // A buffered head already proves availability; probing its source can evaluate an unneeded tail.
+                return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
             @Override

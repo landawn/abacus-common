@@ -1318,10 +1318,10 @@ public class IteratorsForTest extends IteratorsTestSupport {
 
         assertEquals(0, consumed.get());
 
-        Iterators.forEach(Arrays.asList(null, Arrays.asList(1, 2).iterator(), null), value -> consumed.addAndGet((Integer) value));
+        Iterators.forEach(Arrays.asList(null, Arrays.asList(1, 2).iterator(), null), value -> consumed.addAndGet(value));
         assertEquals(3, consumed.get());
 
-        Iterators.forEach(Arrays.asList(null, Arrays.asList(1, 2, 3).iterator(), null), 1L, 10L, value -> consumed.addAndGet((Integer) value));
+        Iterators.forEach(Arrays.asList(null, Arrays.asList(1, 2, 3).iterator(), null), 1L, 10L, value -> consumed.addAndGet(value));
         assertEquals(8, consumed.get());
     }
 }

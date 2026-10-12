@@ -121,6 +121,15 @@ public abstract class AbstractFloatType extends NumberType<Number> {
         }
 
         final String trimmedStr = str.trim();
+
+        if (hasDecimalLongSuffix(trimmedStr)) {
+            try {
+                return Float.valueOf(trimmedStr.substring(0, trimmedStr.length() - 1));
+            } catch (final NumberFormatException e) {
+                // Preserve the original failure path for decimal forms the JDK parser cannot accept.
+            }
+        }
+
         try {
             return Float.valueOf(trimmedStr);
         } catch (final NumberFormatException e) {

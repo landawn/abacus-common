@@ -74,8 +74,10 @@ public class BooleanCharTypeTest extends TestBase {
 
     @Test
     public void testValueOf_Other() {
-        Boolean result = type.valueOf("X");
-        assertEquals(Boolean.FALSE, result);
+        // Every accepted text is read, not only Y/N; anything else is rejected (code review 2026-10-05).
+        assertEquals(Boolean.TRUE, type.valueOf("1"));
+        assertEquals(Boolean.FALSE, type.valueOf("false"));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("X"));
     }
 
     @Test
@@ -141,8 +143,10 @@ public class BooleanCharTypeTest extends TestBase {
     @Test
     public void testValueOf_CharArray_MultipleChars() {
         char[] chars = { 'Y', 'E', 'S' };
-        Boolean result = type.valueOf(chars, 0, 3);
-        assertEquals(Boolean.FALSE, result);
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05).
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf(chars, 0, 3));
+        assertEquals(Boolean.TRUE, type.valueOf("TRUE".toCharArray(), 0, 4));
+        assertEquals(Boolean.FALSE, type.valueOf("-1".toCharArray(), 0, 2));
     }
 
     @Test
@@ -317,7 +321,10 @@ public class BooleanCharTypeTest extends TestBase {
 
         final BooleanIntType intType = (BooleanIntType) createType("BooleanInt");
         org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, intType.valueOf(Boolean.TRUE));
-        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, intType.valueOf(2)); // matches get(ResultSet): value > 0
+        org.junit.jupiter.api.Assertions.assertEquals(Boolean.TRUE, intType.valueOf(1));
+        // Only 1, 0 and -1 are boolean values (code review 2026-10-05).
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> intType.valueOf(2));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf(2));
         org.junit.jupiter.api.Assertions.assertEquals(Boolean.FALSE, intType.valueOf(0));
         org.junit.jupiter.api.Assertions.assertTrue(intType.isComparable());
     }

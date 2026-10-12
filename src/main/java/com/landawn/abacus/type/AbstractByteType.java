@@ -112,6 +112,35 @@ public abstract class AbstractByteType extends NumberType<Number> {
             return (Byte) defaultValue();
         }
 
+        // Numbers.toByte accepts exactly the text Numbers.parseIntOrElse accepts with a value in the byte range;
+        // parseIntOrElse constructs no exception or other object for the rest. Rejected text (MIN_VALUE marks it, and
+        // it is outside the byte range) goes to parseRejected, which keeps the suffix recovery and every failure
+        // diagnostic off this common path.
+        final int value = Numbers.parseIntOrElse(str, Integer.MIN_VALUE);
+
+        return value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE ? (byte) value : parseRejected(str);
+    }
+
+    /**
+     * Parses text that {@link Numbers#parseIntOrElse(String, int)} did not accept as a {@code byte}, with the
+     * single-suffix recovery and the failures documented on {@link #valueOf(String)}.
+     *
+     * @param str the non-empty text to parse
+     * @return the parsed value
+     * @throws NumberFormatException if the text is not a valid integer literal, with or without its single suffix
+     * @throws ArithmeticException if the text is a well-formed integer outside the {@code byte} range
+     */
+    private static byte parseRejected(final String str) throws NumberFormatException, ArithmeticException {
+        // Decimal text with an F/f/D/d suffix is accepted below only once the suffix is removed. Parse that form
+        // directly instead of first constructing the exception Numbers.toByte reports for it.
+        if (hasDecimalFloatingSuffix(str)) {
+            final int value = Numbers.parseIntOrElse(str.substring(0, str.length() - 1), Integer.MIN_VALUE);
+
+            if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+                return (byte) value;
+            }
+        }
+
         try {
             return Numbers.toByte(str);
         } catch (final NumberFormatException e) {

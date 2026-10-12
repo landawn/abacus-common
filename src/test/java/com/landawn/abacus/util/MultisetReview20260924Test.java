@@ -351,7 +351,7 @@ public class MultisetReview20260924Test extends TestBase {
         assertEquals(9, dst.getCount("ß"));
 
         assertFalse(dst.addAll(src, 0));
-        assertFalse(dst.addAll(new Multiset<String>()));
+        assertFalse(dst.addAll(new Multiset<>()));
         assertFalse(dst.addAll((Multiset<String>) null));
         assertEquals(19, dst.size());
     }

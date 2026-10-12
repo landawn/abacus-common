@@ -138,8 +138,11 @@ import lombok.Data;
  * header row's width is retained under synthesized column names. Missing data cells become
  * {@code null}; a sheet with no cells yields an empty Dataset.
  *
+ * <p>{@code File}/{@code Path} sources are opened as read-only workbooks: changes a callback makes to
+ * a {@code Row} or its cells are never written back to the file.
+ *
  * <p>Streams returned by {@code streamRowsFromSheet} carry an {@code onClose()} handler that closes
- * the underlying workbook (and, for {@code File}/{@code Path} sources, the underlying input stream);
+ * the underlying workbook, which for {@code File}/{@code Path} sources also releases the file;
  * always use them in a try-with-resources block. CSV overloads that accept a {@link Writer} flush
  * the writer but leave closing it to the caller.
  *
@@ -332,8 +335,8 @@ public final class ExcelUtil {
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
      *         or the workbook has no sheet at index 0,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final File excelFile) throws IllegalArgumentException, UncheckedException {
         return readDatasetFromSheet(excelFile, 0, RowExtractors.DEFAULT);
@@ -367,16 +370,16 @@ public final class ExcelUtil {
      * @throws IllegalArgumentException if {@code excelFile} or {@code rowExtractor} is {@code null},
      *         or the sheet index is out of bounds,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
         N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
-        try (InputStream is = new FileInputStream(excelFile)) {
-            return readDatasetFromSheet(is, sheetIndex, rowExtractor);
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
+            return readDatasetFromSheet(workbook.getSheetAt(sheetIndex), rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -425,7 +428,7 @@ public final class ExcelUtil {
      *         or the sheet index is out of bounds,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
-     *         workbook or an owned input stream fails with an {@code IOException}
+     *         workbook fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final int sheetIndex,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
@@ -461,8 +464,8 @@ public final class ExcelUtil {
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code rowExtractor} is {@code null},
      *         or the sheet name is not found in the workbook,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final File excelFile, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
@@ -470,8 +473,8 @@ public final class ExcelUtil {
         N.checkArgNotNull(sheetName, cs.sheetName);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
-        try (InputStream is = new FileInputStream(excelFile)) {
-            return readDatasetFromSheet(is, sheetName, rowExtractor);
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
+            return readDatasetFromSheet(getRequiredSheet(workbook, sheetName), rowExtractor);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -521,7 +524,7 @@ public final class ExcelUtil {
      *         or the sheet name is not found in the workbook,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
-     *         workbook or an owned input stream fails with an {@code IOException}
+     *         workbook fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final Path excelPath, final String sheetName,
             final TriConsumer<? super String[], ? super Row, ? super Object[]> rowExtractor) throws IllegalArgumentException, UncheckedException {
@@ -647,8 +650,8 @@ public final class ExcelUtil {
      * @return a list of rows, where each row is a list of cell values with preserved types.
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
      *         or the workbook has no sheet at index 0.
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static List<List<Object>> readRowsFromSheet(final File excelFile) throws IllegalArgumentException, UncheckedException {
         return readRowsFromSheet(excelFile, 0, false, RowMappers.DEFAULT);
@@ -688,16 +691,16 @@ public final class ExcelUtil {
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelFile} or {@code rowMapper} is {@code null},
      *         or the sheet index is out of bounds.
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
         N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
-        try (InputStream is = new FileInputStream(excelFile)) {
-            return readRowsFromSheet(is, sheetIndex, skipFirstRow, rowMapper);
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
+            return readRowsFromSheet(workbook.getSheetAt(sheetIndex), skipFirstRow, rowMapper);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -748,7 +751,7 @@ public final class ExcelUtil {
      * @throws IllegalArgumentException if {@code excelPath} or {@code rowMapper} is {@code null},
      *         or the sheet index is out of bounds.
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
-     *         workbook or an owned input stream fails with an {@code IOException}
+     *         workbook fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
@@ -789,8 +792,8 @@ public final class ExcelUtil {
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code rowMapper} is {@code null},
      *         or the sheet name is not found in the workbook.
-     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
-     *         input stream fails with an {@code IOException}
+     * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
+     *         workbook fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
@@ -798,8 +801,8 @@ public final class ExcelUtil {
         N.checkArgNotNull(sheetName, cs.sheetName);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
-        try (InputStream is = new FileInputStream(excelFile)) {
-            return readRowsFromSheet(is, sheetName, skipFirstRow, rowMapper);
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
+            return readRowsFromSheet(getRequiredSheet(workbook, sheetName), skipFirstRow, rowMapper);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
@@ -852,7 +855,7 @@ public final class ExcelUtil {
      * @throws IllegalArgumentException if {@code excelPath}, {@code sheetName} or {@code rowMapper} is {@code null},
      *         or the sheet name is not found in the workbook.
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
-     *         workbook or an owned input stream fails with an {@code IOException}
+     *         workbook fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow,
             final Function<? super Row, ? extends T> rowMapper) throws IllegalArgumentException, UncheckedException {
@@ -913,21 +916,7 @@ public final class ExcelUtil {
             throws IllegalArgumentException, UncheckedException {
         N.checkArgNotNull(excelFile, cs.excelFile);
 
-        InputStream is = null;
-        Stream<Row> result = null;
-
-        try {
-            is = new FileInputStream(excelFile);
-            // streamFromSource takes ownership of the FileInputStream and closes it via onClose.
-            result = streamFromSource(is, true, sheetIndex, null, skipFirstRow);
-            return result;
-        } catch (IOException e) {
-            throw new UncheckedException(e);
-        } finally {
-            if (result == null) {
-                IOUtil.closeQuietly(is);
-            }
-        }
+        return streamFromFile(excelFile, sheetIndex, null, skipFirstRow);
     }
 
     /**
@@ -959,7 +948,7 @@ public final class ExcelUtil {
             throws IllegalArgumentException, UncheckedException {
         N.checkArgNotNull(excelInputStream, cs.excelInputStream);
 
-        return streamFromSource(excelInputStream, false, sheetIndex, null, skipFirstRow);
+        return streamFromSource(excelInputStream, sheetIndex, null, skipFirstRow);
     }
 
     /**
@@ -1020,21 +1009,7 @@ public final class ExcelUtil {
         N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(sheetName, cs.sheetName);
 
-        InputStream is = null;
-        Stream<Row> result = null;
-
-        try {
-            is = new FileInputStream(excelFile);
-            // streamFromSource takes ownership of the FileInputStream and closes it via onClose.
-            result = streamFromSource(is, true, -1, sheetName, skipFirstRow);
-            return result;
-        } catch (IOException e) {
-            throw new UncheckedException(e);
-        } finally {
-            if (result == null) {
-                IOUtil.closeQuietly(is);
-            }
-        }
+        return streamFromFile(excelFile, -1, sheetName, skipFirstRow);
     }
 
     /**
@@ -1063,7 +1038,7 @@ public final class ExcelUtil {
         N.checkArgNotNull(excelInputStream, cs.excelInputStream);
         N.checkArgNotNull(sheetName, cs.sheetName);
 
-        return streamFromSource(excelInputStream, false, -1, sheetName, skipFirstRow);
+        return streamFromSource(excelInputStream, -1, sheetName, skipFirstRow);
     }
 
     /**
@@ -1088,52 +1063,40 @@ public final class ExcelUtil {
         return streamRowsFromSheet(excelPath.toFile(), sheetName, skipFirstRow);
     }
 
-    /**
-     * Shared worker that opens a workbook from the given input stream and returns a row Stream whose
-     * {@code onClose} handler closes the workbook (and, when {@code closeInputStream} is {@code true},
-     * the supplied input stream as well). Exactly one of {@code sheetIndex >= 0} or {@code sheetName != null}
-     * selects the sheet. If wiring fails before the Stream is created, this method closes the workbook
-     * before rethrowing; it never closes {@code is} itself; a caller that owns {@code is} is responsible
-     * for closing it on that path (see the {@code finally} blocks in the {@code File}-based callers).
-     *
-     * @param is the workbook source; never closed by this method itself
-     * @param closeInputStream whether the returned Stream's {@code onClose} should also close {@code is}
-     * @param sheetIndex the zero-based sheet index, or a negative value to select by {@code sheetName}
-     * @param sheetName the sheet name, or {@code null} to select by {@code sheetIndex}
-     * @param skipFirstRow whether to drop the first row, typically the header
-     * @return a lazy Stream of the selected sheet's rows, closing the workbook when closed
-     * @throws IllegalArgumentException if {@code sheetIndex} is outside the workbook range, or the named sheet does not exist
-     * @throws UncheckedException if opening or reading the Excel workbook fails
-     */
-    private static Stream<Row> streamFromSource(final InputStream is, final boolean closeInputStream, final int sheetIndex, final String sheetName,
-            final boolean skipFirstRow) throws IllegalArgumentException, UncheckedException {
-        Workbook workbook = null;
+    private static Stream<Row> streamFromSource(final InputStream is, final int sheetIndex, final String sheetName, final boolean skipFirstRow) {
+        try {
+            return streamFromWorkbook(WorkbookFactory.create(closeShield(is)), sheetIndex, sheetName, skipFirstRow);
+        } catch (IOException e) {
+            throw new UncheckedException(e);
+        }
+    }
+
+    private static Stream<Row> streamFromFile(final File file, final int sheetIndex, final String sheetName, final boolean skipFirstRow) {
+        try {
+            return streamFromWorkbook(openReadOnlyWorkbook(file), sheetIndex, sheetName, skipFirstRow);
+        } catch (IOException e) {
+            throw new UncheckedException(e);
+        }
+    }
+
+    private static Stream<Row> streamFromWorkbook(final Workbook workbook, final int sheetIndex, final String sheetName, final boolean skipFirstRow) {
         Stream<Row> result = null;
 
         try {
-            workbook = WorkbookFactory.create(closeShield(is));
-            final Sheet sheet = sheetName != null ? getRequiredSheet(workbook, sheetName) : workbook.getSheetAt(sheetIndex);
-            final Workbook workbookToClose = workbook;
-
+            final Sheet sheet = sheetName == null ? workbook.getSheetAt(sheetIndex) : getRequiredSheet(workbook, sheetName);
+            // Ownership transfers only after sheet selection and close-handler registration succeed.
+            // This also releases the file-backed package when a sheet is missing or iteration stops early.
             result = Stream.of(sheet.rowIterator()).skip(skipFirstRow ? 1 : 0).onClose(() -> {
                 try {
-                    workbookToClose.close();
+                    workbook.close();
                 } catch (IOException e) {
                     throw new UncheckedException(e);
-                } finally {
-                    if (closeInputStream) {
-                        IOUtil.closeQuietly(is);
-                    }
                 }
             });
-
             return result;
-        } catch (IOException e) {
-            throw new UncheckedException(e);
         } finally {
             if (result == null) {
                 IOUtil.closeQuietly(workbook);
-                // Note: the caller's finally closes the input stream when it owns it.
             }
         }
     }
@@ -1406,12 +1369,11 @@ public final class ExcelUtil {
             final Sheet sheet = workbook.createSheet(sheetName);
             final TemporalCellStyles styles = new TemporalCellStyles(workbook, dateFormat, dateTimeFormat);
 
-            final int columnCount = headers.size();
-
             final Row headerRow = sheet.createRow(0);
+            int columnIndex = 0;
 
-            for (int i = 0; i < columnCount; i++) {
-                headerRow.createCell(i).setCellValue(N.stringOf(headers.get(i)));
+            for (final Object header : headers) {
+                headerRow.createCell(columnIndex++).setCellValue(N.stringOf(header));
             }
 
             int rowNum = 1;
@@ -1420,7 +1382,7 @@ public final class ExcelUtil {
                 final Row row = sheet.createRow(rowNum++);
                 final Iterator<?> iter = rowData.iterator();
 
-                for (int i = 0; i < rowData.size(); i++) {
+                for (int i = 0; iter.hasNext(); i++) {
                     setCellValue(row.createCell(i), iter.next(), styles);
                 }
             }
@@ -2076,8 +2038,7 @@ public final class ExcelUtil {
         N.checkArgNotNull(excelFile, cs.excelFile);
         N.checkArgNotNull(outputWriter, cs.outputWriter);
 
-        try (InputStream is = new FileInputStream(excelFile); //
-             Workbook workbook = WorkbookFactory.create(is)) {
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
             final Sheet sheet = workbook.getSheetAt(sheetIndex);
 
             exportSheetToCsv(sheet, csvHeaders, outputWriter);
@@ -2130,14 +2091,35 @@ public final class ExcelUtil {
         N.checkArgNotNull(sheetName, cs.sheetName);
         N.checkArgNotNull(outputWriter, cs.outputWriter);
 
-        try (InputStream is = new FileInputStream(excelFile); //
-             Workbook workbook = WorkbookFactory.create(is)) {
+        try (Workbook workbook = openReadOnlyWorkbook(excelFile)) {
             final Sheet sheet = getRequiredSheet(workbook, sheetName);
 
             exportSheetToCsv(sheet, csvHeaders, outputWriter);
         } catch (IOException e) {
             throw new UncheckedException(e);
         }
+    }
+
+    /**
+     * Opens {@code excelFile} as a read-only, file-backed workbook: POI can then read XLSX package parts from the
+     * file on demand rather than buffering every ZIP entry (pictures included) in memory, and closing the workbook
+     * never writes to the source.
+     *
+     * <p>A path that is not a regular file is first opened as a stream, which reports a missing path, a directory
+     * or an unreadable path with the same {@link java.io.FileNotFoundException} the stream-based reader always
+     * reported. POI's {@code File} overload would report a missing file without the platform's reason, and a
+     * directory whose {@link File#length()} is {@code 0} (as on Windows) as an empty file.</p>
+     *
+     * @param excelFile the Excel file to open
+     * @return the opened workbook; the caller must close it
+     * @throws IOException if the file cannot be opened or read as a workbook
+     */
+    private static Workbook openReadOnlyWorkbook(final File excelFile) throws IOException {
+        if (!excelFile.isFile()) {
+            new FileInputStream(excelFile).close(); // NOSONAR - opened only for the exception it reports
+        }
+
+        return WorkbookFactory.create(excelFile, null, true);
     }
 
     /**

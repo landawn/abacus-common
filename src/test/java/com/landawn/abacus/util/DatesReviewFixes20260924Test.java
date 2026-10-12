@@ -105,8 +105,7 @@ public class DatesReviewFixes20260924Test extends TestBase {
 
     @Test
     public void c014_explicitFormatIsStillNamedOnceWithoutTheDtfPattern() {
-        final String named = messageOf(
-                () -> Dates.parseToJUDate("2025-01-15T10:30:45+01:00[Asia/Kolkata]", Dates.ISO_ZONED_DATE_TIME_FORMAT, NEW_YORK));
+        final String named = messageOf(() -> Dates.parseToJUDate("2025-01-15T10:30:45+01:00[Asia/Kolkata]", Dates.ISO_ZONED_DATE_TIME_FORMAT, NEW_YORK));
 
         assertTrue(named.contains("with format '" + Dates.ISO_ZONED_DATE_TIME_FORMAT + "'"), named);
         assertFalse(named.contains("with pattern"), named);
@@ -179,8 +178,7 @@ public class DatesReviewFixes20260924Test extends TestBase {
 
     @Test
     public void c017_dateOverloadsUseTheRegisteredRulesButCalendarOverloadsRejectACustomizedKnownId() {
-        final SimpleTimeZone customized = new SimpleTimeZone(-5 * 3600000, "America/New_York", Calendar.MARCH, 1, 0, 0, Calendar.OCTOBER, 1, 0, 0,
-                3600000);
+        final SimpleTimeZone customized = new SimpleTimeZone(-5 * 3600000, "America/New_York", Calendar.MARCH, 1, 0, 0, Calendar.OCTOBER, 1, 0, 0, 3600000);
         final java.util.Date d1 = new java.util.Date(1736937045000L);
         final java.util.Date d2 = new java.util.Date(1736937045000L + 3600000L);
         final TimeZone saved = TimeZone.getDefault();
@@ -238,7 +236,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
                 DTF.LOCAL_DATE_TIME.parseToOffsetDateTime("2023-12-25 14:30:45", KOLKATA));
         assertEquals(OffsetDateTime.of(2023, 12, 25, 14, 30, 45, 0, ZoneOffset.ofHoursMinutes(5, 30)),
                 DTF.ISO_OFFSET_DATE_TIME.parseToOffsetDateTime("2023-12-25T14:30:45+05:30", UTC));
-        assertEquals(ZonedDateTime.of(2023, 12, 25, 14, 30, 45, 0, KOLKATA.toZoneId()), DTF.LOCAL_DATE_TIME.parseToZonedDateTime("2023-12-25 14:30:45", KOLKATA));
+        assertEquals(ZonedDateTime.of(2023, 12, 25, 14, 30, 45, 0, KOLKATA.toZoneId()),
+                DTF.LOCAL_DATE_TIME.parseToZonedDateTime("2023-12-25 14:30:45", KOLKATA));
         assertEquals(ZonedDateTime.of(2023, 12, 25, 14, 30, 45, 0, KOLKATA.toZoneId()),
                 DTF.ISO_ZONED_DATE_TIME.parseToZonedDateTime("2023-12-25T14:30:45+05:30[Asia/Kolkata]", UTC));
         assertEquals(1703514645000L, DTF.LOCAL_DATE_TIME.parseToInstant("2023-12-25 14:30:45", UTC).toEpochMilli());
@@ -364,7 +363,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
                 messageOf(() -> Dates.parseToJUDate("0000-01-15 10:30:45.123", Dates.LOCAL_TIMESTAMP_FORMAT, UTC)));
 
         for (final Executable call : new Executable[] { () -> Dates.parseToTimestamp("0000-01-15 10:30:45"),
-                () -> Dates.parseToTimestamp("0000-01-15 10:30:45.5"), () -> Dates.parseToTimestamp("0000-01-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC) }) {
+                () -> Dates.parseToTimestamp("0000-01-15 10:30:45.5"),
+                () -> Dates.parseToTimestamp("0000-01-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC) }) {
             assertFalse(messageOf(call).contains("JDBC timestamp year"));
         }
 
@@ -374,7 +374,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
         assertEquals(-62134349355000L, Dates.parseToTimestamp("0001-01-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC).getTime());
         assertEquals(1736937045000L, Dates.parseToTimestamp("2025-01-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC).getTime());
         assertEquals(1736937045500L, Dates.parseToTimestamp("2025-01-15 10:30:45.5", null, UTC).getTime());
-        assertEquals(Instant.parse("9999-12-31T10:30:45Z").toEpochMilli(), Dates.parseToTimestamp("9999-12-31 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC).getTime());
+        assertEquals(Instant.parse("9999-12-31T10:30:45Z").toEpochMilli(),
+                Dates.parseToTimestamp("9999-12-31 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, UTC).getTime());
         assertNull(Dates.parseToTimestamp((String) null, Dates.LOCAL_DATE_TIME_FORMAT, UTC));
         assertTrue(messageOf(() -> Dates.parseToTimestamp("", Dates.LOCAL_DATE_TIME_FORMAT, UTC)).contains("empty"));
     }
@@ -408,7 +409,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
     @Test
     public void c052_dtfParseFailurePrintsTheErrorIndexOnce() {
         final String compact = messageOf(() -> DTF.of("uuuu-MM-dd'T'HH:mm:ssXXXXX").parseToOffsetDateTime("2023-12-25T14:30:45+0530"));
-        assertEquals("Cannot parse \"2023-12-25T14:30:45+0530\" with pattern 'uuuu-MM-dd'T'HH:mm:ssXXXXX': Text '2023-12-25T14:30:45+0530' could not be parsed at index 19",
+        assertEquals(
+                "Cannot parse \"2023-12-25T14:30:45+0530\" with pattern 'uuuu-MM-dd'T'HH:mm:ssXXXXX': Text '2023-12-25T14:30:45+0530' could not be parsed at index 19",
                 compact);
         assertEquals(1, count(compact, "at index 19"), compact);
 
@@ -484,7 +486,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
 
         // A zone-less shape resolved in the fallback zone still names it.
         assertTrue(messageOf(() -> Dates.parseToJUDate("2025-13-15 10:30:45.5", null, NEW_YORK)).contains("in time zone America/New_York"));
-        assertTrue(messageOf(() -> Dates.parseToJUDate("2025-13-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, NEW_YORK)).contains("in time zone America/New_York"));
+        assertTrue(
+                messageOf(() -> Dates.parseToJUDate("2025-13-15 10:30:45", Dates.LOCAL_DATE_TIME_FORMAT, NEW_YORK)).contains("in time zone America/New_York"));
 
         // Success is unchanged.
         assertEquals(Instant.parse("2025-01-15T05:00:45Z").toEpochMilli(),
@@ -569,7 +572,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
 
     @Test
     public void c083_calendarRangeChecksRejectANonLenientCalendarWithInvalidFields() {
-        final Calendar c1 = Dates.createCalendar(1000L), c5 = Dates.createCalendar(5000L), c10 = Dates.createCalendar(10000L), c15 = Dates.createCalendar(15000L);
+        final Calendar c1 = Dates.createCalendar(1000L), c5 = Dates.createCalendar(5000L), c10 = Dates.createCalendar(10000L),
+                c15 = Dates.createCalendar(15000L);
         final GregorianCalendar bad = new GregorianCalendar(UTC);
         bad.setLenient(false);
         bad.setTimeInMillis(1000L);
@@ -609,29 +613,34 @@ public class DatesReviewFixes20260924Test extends TestBase {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // C-119: a same-ID rules mismatch names the two classes instead of repeating the ID
+    // C-119 revised 2026-10-04: distinguish unverifiable custom rules from supported but different rules.
     // ---------------------------------------------------------------------------------------------
 
     @Test
-    public void c119_sameIdDifferentRulesMessageNamesTheClasses() {
-        final SimpleTimeZone customized = new SimpleTimeZone(-5 * 3600000, "America/New_York", Calendar.MARCH, 1, 0, 0, Calendar.OCTOBER, 1, 0, 0,
-                3600000);
+    public void c119_diagnosticsDistinguishUnverifiableFromDifferentRules() {
+        final SimpleTimeZone customized = new SimpleTimeZone(-5 * 3600000, "America/New_York", Calendar.MARCH, 1, 0, 0, Calendar.OCTOBER, 1, 0, 0, 3600000);
         final Calendar custom = Calendar.getInstance(customized);
         custom.setTimeInMillis(1736937045000L);
         final Calendar registered = Calendar.getInstance(NEW_YORK);
         registered.setTimeInMillis(1736937045000L);
 
         final String sameId = messageOf(() -> Dates.isSameDay(custom, registered));
-        assertEquals("Calendars must share equivalent time-zone rules to compare civil fields; both named 'America/New_York' (java.util.SimpleTimeZone vs "
-                + NEW_YORK.getClass().getName() + ") but with different rules. Pass an explicit ZoneId or TimeZone to compare both instants in one zone.",
-                sameId);
+        assertEquals("Time zone 'America/New_York' carries rules that cannot be verified against the registered java.time zone with the same ID", sameId);
         assertEquals(sameId, messageOf(() -> Dates.isSameMonth(custom, registered)));
         assertEquals(sameId, messageOf(() -> Dates.isSameYear(custom, registered)));
+        assertEquals(sameId, messageOf(() -> Dates.isSameDay(registered, custom)));
+        assertEquals(sameId, messageOf(() -> Dates.isSameDay(custom, custom)));
+
+        final Calendar fixed = Calendar.getInstance(new SimpleTimeZone(0, "same"));
+        final Calendar shifted = Calendar.getInstance(new SimpleTimeZone(3600000, "same"));
+        assertTrue(messageOf(() -> Dates.isSameDay(fixed, shifted)).contains("but with different rules"));
 
         final Calendar kolkata = Calendar.getInstance(KOLKATA);
         kolkata.setTimeInMillis(1736937045000L);
-        assertEquals("Calendars must share equivalent time-zone rules to compare civil fields; got 'America/New_York' and 'Asia/Kolkata'."
-                + " Pass an explicit ZoneId or TimeZone to compare both instants in one zone.", messageOf(() -> Dates.isSameMonth(registered, kolkata)));
+        assertEquals(
+                "Calendars must share equivalent time-zone rules to compare civil fields; got 'America/New_York' and 'Asia/Kolkata'."
+                        + " Pass an explicit ZoneId or TimeZone to compare both instants in one zone.",
+                messageOf(() -> Dates.isSameMonth(registered, kolkata)));
 
         // Same ID, same rules, different classes: still equivalent; so are two registered zones.
         final Calendar simpleUtc = Calendar.getInstance(new SimpleTimeZone(0, "UTC"));
@@ -808,7 +817,8 @@ public class DatesReviewFixes20260924Test extends TestBase {
         for (final Executable call : new Executable[] { () -> Dates.parseToInstant("2025-01-15T10:30:45+5:30"),
                 () -> Dates.parseToOffsetDateTime("2025-01-15T10:30:45+5:30"), () -> Dates.parseToZonedDateTime("2025-01-15T10:30:45+5:30"),
                 () -> Dates.parseToLocalDateTime("2025-01-15T10:30:45+5:30"), () -> Dates.parseToLocalDate("2025-01-15T10:30:45+5:30"),
-                () -> Dates.parseToLocalTime("2025-01-15T10:30:45+5:30"), () -> Dates.parseToInstant("2025-01-15T10:30:45+5:30", Dates.ISO_OFFSET_DATE_TIME_FORMAT) }) {
+                () -> Dates.parseToLocalTime("2025-01-15T10:30:45+5:30"),
+                () -> Dates.parseToInstant("2025-01-15T10:30:45+5:30", Dates.ISO_OFFSET_DATE_TIME_FORMAT) }) {
             assertEquals(shape, messageOf(call));
         }
 

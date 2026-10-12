@@ -93,7 +93,7 @@ public final class BufferedCsvWriter extends CharacterWriter {
     static final char[][] REPLACEMENT_CHARS_BACK_SLASH;
 
     static {
-        final int length = 10000;
+        final int length = 128;
         REPLACEMENT_CHARS = new char[length][];
 
         // A CSV parser does not decode Unicode escapes. Preserve character data and escape only quotes.

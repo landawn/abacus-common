@@ -12,12 +12,13 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
+
+import javax.xml.datatype.DatatypeFactory;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import java.util.TimeZone;
-import javax.xml.datatype.DatatypeFactory;
 
 public class BufferedWriterTest extends TestBase {
 
@@ -602,7 +603,6 @@ public class BufferedWriterTest extends TestBase {
     public void testClassStructure() {
         assertTrue(BufferedWriter.class.isSealed());
     }
-
 
     @Test
     public void testWriteCalendarUsesZonedIsoDefaultWithZoneId() throws Exception {

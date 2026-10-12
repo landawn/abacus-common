@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -165,7 +166,7 @@ public class BooleanTypeTest extends TestBase {
     @Test
     public void testGet_ResultSet_String_Number() throws SQLException {
         ResultSet rs = mock(ResultSet.class);
-        when(rs.getObject("columnName")).thenReturn(0L);
+        when(rs.getObject("columnName")).thenReturn(0);
 
         Boolean result = type.get(rs, "columnName");
 
@@ -229,9 +230,12 @@ public class BooleanTypeTest extends TestBase {
         assertEquals(Boolean.TRUE, type.valueOf(Boolean.TRUE));
         assertEquals(Boolean.FALSE, type.valueOf(Boolean.FALSE));
 
-        // Number input - positive
+        // Number input - an Integer, Short or Byte 1; any other value, and any other Number class, is rejected
+        // (code review 2026-10-05)
         assertEquals(Boolean.TRUE, type.valueOf(1));
-        assertEquals(Boolean.TRUE, type.valueOf(100L));
+        assertEquals(Boolean.TRUE, type.valueOf((short) 1));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(100));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(1L));
 
         // Number input - zero and negative
         assertEquals(Boolean.FALSE, type.valueOf(0));

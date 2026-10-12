@@ -3085,7 +3085,8 @@ public final class Profiler {
          *   <li>All timing values in milliseconds with three decimal places</li>
          *   <li>Consistent element naming and structure across all test runs</li>
          *   <li>Percentile elements use underscore prefix (e.g., {@code <_0.99>})</li>
-         *   <li>Method names included as XML attributes for easy filtering</li>
+         *   <li>Method names included as XML attributes for easy filtering; tabs, line feeds and carriage returns
+         *       are written as character references to preserve them when the attributes are parsed</li>
          *   <li>Error details formatted as text content within error elements</li>
          * </ul>
          *
@@ -3196,7 +3197,13 @@ public final class Profiler {
             final List<String> methodNameList = getMethodNameList();
             for (final String methodName : methodNameList) {
                 final MethodSummary summary = summarize(methodName, getMethodStatisticsList(methodName));
-                output.println("<method name=\"" + EscapeUtil.escapeXml10(methodName) + "\">");
+                // Literal XML attribute whitespace is normalized to spaces during parsing. Escape it only
+                // after markup escaping so the character references preserve the original method label.
+                final String escapedMethodName = String.valueOf(EscapeUtil.escapeXml10(methodName))
+                        .replace("\t", "&#9;")
+                        .replace("\n", "&#10;")
+                        .replace("\r", "&#13;");
+                output.println("<method name=\"" + escapedMethodName + "\">");
                 output.println("<avgTime>" + elapsedTimeFormat.get().format(summary.avgTime()) + "</avgTime>");
                 output.println("<minTime>" + elapsedTimeFormat.get().format(summary.minTime()) + "</minTime>");
                 output.println("<maxTime>" + elapsedTimeFormat.get().format(summary.maxTime()) + "</maxTime>");

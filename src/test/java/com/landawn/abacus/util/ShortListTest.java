@@ -2372,8 +2372,7 @@ public class ShortListTest extends ShortListTestSupport {
             for (final int lengthB : lengths) {
                 for (final int range : ranges) {
                     final short[] a = randomShortsG071(random, lengthA, range);
-                    final short[] b = random.nextInt(4) == 0 && lengthA > 0 && lengthB > 0
-                            ? java.util.Arrays.copyOfRange(a, 0, Math.min(lengthA, lengthB)) // contained case
+                    final short[] b = random.nextInt(4) == 0 && lengthA > 0 && lengthB > 0 ? java.util.Arrays.copyOfRange(a, 0, Math.min(lengthA, lengthB)) // contained case
                             : randomShortsG071(random, lengthB, range);
                     final String msg = "a=" + lengthA + ", b=" + lengthB + ", range=" + range;
                     final java.util.Set<Short> setA = boxedSetG071(a);

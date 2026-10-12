@@ -278,14 +278,14 @@ public class JodaInstantTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_T904_valueOfObjectFromJodaValues() {
         final Instant instant = new Instant(1700000000123L);
-        assertEquals(instant, instantType.valueOf((Object) instant));
+        assertEquals(instant, instantType.valueOf(instant));
 
         // a Buddhist-chronology DateTime used to be stringified with its Buddhist year and re-read 543 years off
         final DateTime buddhist = new DateTime(1700000000123L, BuddhistChronology.getInstance(DateTimeZone.forID("Asia/Bangkok")));
-        assertEquals(1700000000123L, instantType.valueOf((Object) buddhist).getMillis());
+        assertEquals(1700000000123L, instantType.valueOf(buddhist).getMillis());
 
         final DateTime kolkata = new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        assertEquals(1700000000123L, instantType.valueOf((Object) kolkata).getMillis());
+        assertEquals(1700000000123L, instantType.valueOf(kolkata).getMillis());
 
         assertNull(instantType.valueOf((Object) null));
     }
@@ -314,9 +314,9 @@ public class JodaInstantTypeTest extends TestBase {
         final Type<Instant> type = TypeFactory.getType("JodaInstant");
 
         // a plain java.util.Date used to go through its second-precision text form and lose the milliseconds
-        assertEquals(1700000000123L, type.valueOf((Object) new java.util.Date(1700000000123L)).getMillis());
-        assertEquals(1700000000123L, type.valueOf((Object) new java.sql.Date(1700000000123L)).getMillis());
-        assertEquals(1700000000123L, type.valueOf((Object) new Timestamp(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf(new java.util.Date(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf(new java.sql.Date(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf(new Timestamp(1700000000123L)).getMillis());
         assertEquals(1700000000123L, N.convert(new java.util.Date(1700000000123L), Instant.class).getMillis());
     }
 
@@ -325,15 +325,15 @@ public class JodaInstantTypeTest extends TestBase {
         final Type<Instant> type = TypeFactory.getType("JodaInstant");
 
         // a short Number used to be rejected as ambiguous date text instead of being read as epoch milliseconds
-        assertEquals(1234L, type.valueOf((Object) 1234L).getMillis());
-        assertEquals(5L, type.valueOf((Object) 5).getMillis());
-        assertEquals(-1L, type.valueOf((Object) (-1L)).getMillis());
-        assertEquals(1700000000123L, type.valueOf((Object) 1700000000123L).getMillis());
+        assertEquals(1234L, type.valueOf(1234L).getMillis());
+        assertEquals(5L, type.valueOf(5).getMillis());
+        assertEquals(-1L, type.valueOf(-1L).getMillis());
+        assertEquals(1700000000123L, type.valueOf(1700000000123L).getMillis());
         assertEquals(1234L, N.convert(1234L, Instant.class).getMillis());
 
         // unchanged: other values still go through their own type handler's text form
         final DateTime dateTime = new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
-        assertEquals(1700000000123L, type.valueOf((Object) dateTime).getMillis());
+        assertEquals(1700000000123L, type.valueOf(dateTime).getMillis());
         assertNull(type.valueOf((Object) null));
     }
 }

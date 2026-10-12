@@ -762,7 +762,7 @@ public class ImmutableBiMapTest extends TestBase {
         // derives the value map from the source, so whether a null key is permitted depends on the source
         assertNull(ImmutableBiMap.of("one", 1).getByValue(null));
         assertNull(ImmutableBiMap.<String, Integer> empty().getByValue(null));
-        assertNull(ImmutableBiMap.copyOf(N.asMap("one", 1)).getByValue(null));
+        assertNull(ImmutableBiMap.copyOf(CommonUtil.asMap("one", 1)).getByValue(null));
 
         // wrap(BiMap)/copyOf(BiMap) keep the caller's value map; a TreeMap one rejects a null key
         final BiMap<String, Integer> treeValued = new BiMap<>(java.util.LinkedHashMap::new, java.util.TreeMap::new);

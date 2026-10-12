@@ -124,14 +124,6 @@ public final class Objectory {
 
     private static final Queue<List<?>> listPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
 
-    private static final Queue<Set<?>> setPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
-
-    private static final Queue<Set<?>> linkedHashSetPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
-
-    private static final Queue<Map<?, ?>> mapPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
-
-    private static final Queue<Map<?, ?>> linkedHashMapPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_COLLECTION);
-
     private static final Queue<StringBuilder> stringBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
 
     private static final Queue<char[]> charArrayBufferPool = new ArrayBlockingQueue<>(POOL_SIZE_FOR_BUFFER);
@@ -189,7 +181,7 @@ public final class Objectory {
     }
 
     /**
-     * Creates or retrieves a Set from the object pool.
+     * Creates a new Set.
      * The returned set is empty and ready for use.
      *
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
@@ -205,21 +197,18 @@ public final class Objectory {
      * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @return an empty {@link java.util.HashSet} obtained from the pool, or a
-     *         new instance if the pool is empty
+     * @return a new empty {@link java.util.HashSet}; hash collections are not pooled
+     *         because their retained capacity cannot be bounded from their size
      * @deprecated for internal use only
      * @see #recycle(Set)
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <T> Set<T> createSet() {
-        final Set<T> set = (Set<T>) setPool.poll();
-
-        return (set == null) ? N.newHashSet() : set;
+        return N.newHashSet();
     }
 
     /**
-     * Creates or retrieves a LinkedHashSet from the object pool.
+     * Creates a new LinkedHashSet.
      * The returned set is empty and ready for use, maintaining insertion order.
      *
      * <p>After use, the set should be recycled using {@link #recycle(Set)}.</p>
@@ -235,21 +224,18 @@ public final class Objectory {
      * }</pre>
      *
      * @param <T> the type of elements in the set
-     * @return an empty {@link LinkedHashSet} obtained from the pool, or a new
-     *         instance if the pool is empty
+     * @return a new empty {@link LinkedHashSet}; hash collections are not pooled
+     *         because their retained capacity cannot be bounded from their size
      * @deprecated for internal use only
      * @see #recycle(Set)
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <T> Set<T> createLinkedHashSet() {
-        final Set<T> set = (Set<T>) linkedHashSetPool.poll();
-
-        return (set == null) ? N.newLinkedHashSet() : set;
+        return N.newLinkedHashSet();
     }
 
     /**
-     * Creates or retrieves a Map from the object pool.
+     * Creates a new Map.
      * The returned map is empty and ready for use.
      *
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
@@ -266,21 +252,18 @@ public final class Objectory {
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @return an empty {@link java.util.HashMap} obtained from the pool, or a
-     *         new instance if the pool is empty
+     * @return a new empty {@link java.util.HashMap}; hash collections are not pooled
+     *         because their retained capacity cannot be bounded from their size
      * @deprecated for internal use only
      * @see #recycle(Map)
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createMap() {
-        final Map<K, V> map = (Map<K, V>) mapPool.poll();
-
-        return (map == null) ? N.newHashMap() : map;
+        return N.newHashMap();
     }
 
     /**
-     * Creates or retrieves a LinkedHashMap from the object pool.
+     * Creates a new LinkedHashMap.
      * The returned map is empty and ready for use, maintaining insertion order.
      *
      * <p>After use, the map should be recycled using {@link #recycle(Map)}.</p>
@@ -297,17 +280,14 @@ public final class Objectory {
      *
      * @param <K> the type of keys in the map
      * @param <V> the type of values in the map
-     * @return an empty {@link LinkedHashMap} obtained from the pool, or a new
-     *         instance if the pool is empty
+     * @return a new empty {@link LinkedHashMap}; hash collections are not pooled
+     *         because their retained capacity cannot be bounded from their size
      * @deprecated for internal use only
      * @see #recycle(Map)
      */
     @Deprecated
-    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> createLinkedHashMap() {
-        final Map<K, V> linkedHashMap = (Map<K, V>) linkedHashMapPool.poll();
-
-        return (linkedHashMap == null) ? N.newLinkedHashMap() : linkedHashMap;
+        return N.newLinkedHashMap();
     }
 
     /**
@@ -1267,7 +1247,11 @@ public final class Objectory {
 
     /**
      * Returns a {@code List} to the object pool for reuse.
-     * The list is cleared before being added to the pool. A {@code null} list,
+     * The list is cleared before being added to the pool. A list that is already empty also releases its
+     * backing array, so an emptied list, or a preallocated one never filled, cannot keep a large array pooled; a non-empty list
+     * keeps its capacity, so reusing it for a similar size allocates nothing. Current size does not bound that capacity:
+     * a non-empty list that was preallocated or previously held more elements can retain a larger backing array.
+     * A {@code null} list,
      * a list whose size exceeds the internal poolable-size limit, or a list
      * offered when the pool is already full is silently ignored (not pooled).
      * Only an exact {@link ArrayList} instance, as produced by {@link #createList()},
@@ -1297,18 +1281,26 @@ public final class Objectory {
         }
 
         if (listPool.size() < POOL_SIZE_FOR_COLLECTION) {
-            list.clear();
+            if (list.isEmpty()) {
+                // Releases the backing array without copying: trimming an empty ArrayList allocates nothing.
+                ((ArrayList<?>) list).trimToSize();
+            } else {
+                // Trimming here would copy the elements into a new array only to clear it, on every recycle of a
+                // list whose capacity exceeds its size. Keep that capacity for reuse; the current size alone
+                // cannot reveal a larger allocation made before elements were removed or through ensureCapacity.
+                list.clear();
+            }
+
             listPool.offer(list);
         }
     }
 
     /**
-     * Returns a {@code Set} to the object pool for reuse.
-     * The set is cleared before being added to the pool. A {@code null} set, a
-     * set whose size exceeds the internal poolable-size limit, or a set offered
-     * when the relevant pool is already full is silently ignored (not pooled).
-     * Exact {@link LinkedHashSet} instances are pooled separately from exact
-     * {@link HashSet} instances. Other {@code Set} implementations are left unchanged.
+     * Clears an eligible {@code Set} without retaining it in a pool.
+     * A {@code null} set or a set whose size exceeds the internal poolable-size limit is ignored.
+     * Only exact {@link HashSet} and {@link LinkedHashSet} instances are cleared;
+     * other implementations are left unchanged. Hash collections are no longer pooled because
+     * clearing them does not release their backing tables and their capacity is not exposed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1331,26 +1323,15 @@ public final class Objectory {
             return;
         }
 
-        if (set.getClass() == LinkedHashSet.class) {
-            if (linkedHashSetPool.size() < POOL_SIZE_FOR_COLLECTION) {
-                set.clear();
-                linkedHashSetPool.offer(set);
-            }
-        } else {
-            if (setPool.size() < POOL_SIZE_FOR_COLLECTION) {
-                set.clear();
-                setPool.offer(set);
-            }
-        }
+        set.clear();
     }
 
     /**
-     * Returns a {@code Map} to the object pool for reuse.
-     * The map is cleared before being added to the pool. A {@code null} map, a
-     * map whose size exceeds the internal poolable-size limit, or a map offered
-     * when the relevant pool is already full is silently ignored (not pooled).
-     * Exact {@link LinkedHashMap} instances are pooled separately from exact
-     * {@link HashMap} instances. Other {@code Map} implementations are left unchanged.
+     * Clears an eligible {@code Map} without retaining it in a pool.
+     * A {@code null} map or a map whose size exceeds the internal poolable-size limit is ignored.
+     * Only exact {@link HashMap} and {@link LinkedHashMap} instances are cleared;
+     * other implementations are left unchanged. Hash collections are no longer pooled because
+     * clearing them does not release their backing tables and their capacity is not exposed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1374,17 +1355,7 @@ public final class Objectory {
             return;
         }
 
-        if (map.getClass() == LinkedHashMap.class) {
-            if (linkedHashMapPool.size() < POOL_SIZE_FOR_COLLECTION) {
-                map.clear();
-                linkedHashMapPool.offer(map);
-            }
-        } else {
-            if (mapPool.size() < POOL_SIZE_FOR_COLLECTION) {
-                map.clear();
-                mapPool.offer(map);
-            }
-        }
+        map.clear();
     }
 
     /**

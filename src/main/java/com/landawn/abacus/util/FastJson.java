@@ -81,7 +81,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
  *
  * <p><b>Empty and blank input:</b> an empty {@code String}, an empty {@code byte[]}, a zero-length byte range
  * and an empty {@code Reader} all deserialize to {@code null}, as does the JSON literal {@code null}. Input
- * consisting only of whitespace is <i>not</i> empty and fails with a {@code JSONException}. Note that
+ * consisting only of whitespace is <i>not</i> empty and fails with a {@code JSONException}, except through
+ * the {@code Reader} overloads that take no {@code JSONReader.Context}: they return {@code null} for it. Note that
  * {@link JsonMappers} does not share this convention: it rejects empty input instead of returning
  * {@code null}.</p>
  *

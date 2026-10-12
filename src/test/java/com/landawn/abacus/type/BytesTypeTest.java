@@ -226,4 +226,22 @@ public class BytesTypeTest extends TestBase {
         assertEquals("[1, 2, 3]", Type.of(byte[].class).stringOf(new byte[] { 1, 2, 3 }));
     }
 
+    // ---- bug review 2026-10-02 G013 begin ----
+    // G013-01: a byte[] handed to valueOf(Object) was rendered as "[1, 2, 3]" and Base64-decoded -> IllegalArgumentException.
+    @Test
+    public void testValueOfObject_byteArrayReturnedAsIs() {
+        // Called through the Type interface (erased signature), as the parsers and converters do.
+        final Type<byte[]> bytesType = type;
+        final byte[] bytes = { 1, 2, 3 };
+
+        Assertions.assertSame(bytes, bytesType.valueOf(bytes));
+        Assertions.assertSame(bytes, Type.<byte[]> of("Bytes").valueOf(bytes));
+        Assertions.assertArrayEquals(new byte[0], bytesType.valueOf(new byte[0]));
+        // Other objects still go through their string form.
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, bytesType.valueOf((Object) "AQID"));
+        Assertions.assertNull(bytesType.valueOf((Object) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> bytesType.valueOf(new Byte[] { 1, 2, 3 }));
+    }
+    // ---- bug review 2026-10-02 G013 end ----
+
 }

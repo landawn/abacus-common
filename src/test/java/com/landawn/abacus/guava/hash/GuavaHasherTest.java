@@ -193,7 +193,8 @@ public class GuavaHasherTest extends TestBase {
                 assertEquals(expected.hash(), actual, function + " length " + length);
 
                 final char[] exact = java.util.Arrays.copyOfRange(chars, offset, offset + length);
-                assertEquals(function.hashUnencodedChars(new String(exact)), GuavaHasher.wrap(function.newHasher()).put(exact).hash(), function + " length " + length);
+                assertEquals(function.hashUnencodedChars(new String(exact)), GuavaHasher.wrap(function.newHasher()).put(exact).hash(),
+                        function + " length " + length);
             }
         }
     }

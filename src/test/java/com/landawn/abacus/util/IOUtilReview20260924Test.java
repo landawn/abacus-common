@@ -15,7 +15,6 @@
  */
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -271,7 +270,8 @@ public class IOUtilReview20260924Test extends TestBase {
                         "readLastLine " + label);
 
                 for (int i = 0; i <= expected.size(); i++) {
-                    assertEquals(i < expected.size() ? expected.get(i) : null, IOUtil.readLine(new ChunkReader(markable, shape), i), "readLine " + i + " " + label);
+                    assertEquals(i < expected.size() ? expected.get(i) : null, IOUtil.readLine(new ChunkReader(markable, shape), i),
+                            "readLine " + i + " " + label);
                 }
 
                 // forEachLine(Reader) reads through java.io.BufferedReader, whose fill() loops while a read returns 0:
@@ -642,7 +642,7 @@ public class IOUtilReview20260924Test extends TestBase {
     @Test
     public void testC049_twoArgWriteLinesAsksHasNextNoMoreThanNeeded() throws IOException {
         final AtomicInteger hasNextCalls = new AtomicInteger();
-        final Iterator<Object> one = new Iterator<Object>() {
+        final Iterator<Object> one = new Iterator<>() {
             private boolean done;
 
             @Override

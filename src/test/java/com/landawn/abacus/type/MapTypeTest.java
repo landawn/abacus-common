@@ -285,4 +285,32 @@ public class MapTypeTest extends TestBase {
         Assertions.assertNull(mapType.valueOf("   "));
         assertTrue(mapType.valueOf("{}").isEmpty());
     }
+
+    // ---- bug review 2026-10-02 G114 begin ----
+
+    // G114-04: valueOf("{}") short-cut to N.newMap(EnumMap.class), which returns a HashMap (EnumMap has no no-arg
+    // constructor), while every other text gives an EnumMap; the JSON empty-source / readNullToEmpty paths and
+    // N.convert reach the same shortcut.
+    @Test
+    public void testValueOf_emptyObjectEnumMapIsEnumMap() {
+        final Type<java.util.EnumMap<java.time.DayOfWeek, Integer>> type = Type.of("java.util.EnumMap<java.time.DayOfWeek, Integer>");
+
+        final Map<java.time.DayOfWeek, Integer> empty = type.valueOf("{}");
+        assertEquals(java.util.EnumMap.class, empty.getClass());
+        assertTrue(empty.isEmpty());
+        assertEquals(java.util.EnumMap.class, type.valueOf(" {}").getClass());
+
+        assertEquals(java.util.EnumMap.class, N.fromJson("", type).getClass());
+        assertEquals(java.util.EnumMap.class, N.convert("{}", type).getClass());
+        final List<java.util.EnumMap<java.time.DayOfWeek, Integer>> list = N.fromJson("[null]",
+                com.landawn.abacus.parser.JsonDeserConfig.create().setReadNullToEmpty(true),
+                Type.<List<java.util.EnumMap<java.time.DayOfWeek, Integer>>> of("List<java.util.EnumMap<java.time.DayOfWeek, Integer>>"));
+        assertEquals(java.util.EnumMap.class, list.get(0).getClass());
+
+        // other map classes keep the shortcut
+        assertEquals(HashMap.class, Type.of("HashMap<String, Integer>").valueOf("{}").getClass());
+        assertEquals(java.util.LinkedHashMap.class, Type.of("LinkedHashMap<String, Integer>").valueOf("{}").getClass());
+    }
+
+    // ---- bug review 2026-10-02 G114 end ----
 }

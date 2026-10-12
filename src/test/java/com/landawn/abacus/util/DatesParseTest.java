@@ -965,7 +965,6 @@ public class DatesParseTest extends TestBase {
         assertTrue(named.contains("with format "), () -> "an explicit format must still be named: " + named);
     }
 
-
     @Test
     public void testAutoDetectedSecondsPrecisionOffsetIsAcceptedByEveryTarget() {
         // Auto-detection accepts a seconds-precision +HH:mm:ss offset alongside +HH:mm and +HHmm,

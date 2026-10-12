@@ -575,7 +575,7 @@ public class MapEntityTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("k", java.time.DayOfWeek.class));
 
         // An absent property yields the target type's default, which is null for reference types.
-        assertEquals(0, (int) (Integer) new MapEntity("U").get("absent", int.class));
+        assertEquals(0, (int) new MapEntity("U").get("absent", int.class));
         assertNull(new MapEntity("U").get("absent", Integer.class));
         assertNull(new MapEntity("U").get("absent", String.class));
     }

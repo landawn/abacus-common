@@ -2,11 +2,11 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -31,6 +31,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.Test;
+
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 
 public class CommonUtilNewTest extends CommonUtilTestSupport {
 
@@ -477,6 +479,9 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
     }
 
     // ---- perf review 2026-09-26 G027 begin ----
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static class G027AltRowBean {
         static int nameReads;
         private String name;

@@ -1,6 +1,8 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
@@ -48,10 +50,12 @@ public class OpenUtilSourceGenerationTest extends TestBase {
                     CodeGenerationUtil.generatePropNameTableClass(entity, "Props", root.toString());
                     assertEquals(first, Files.readString(source), "regeneration must be byte-identical");
                     assertTrue(first.contains("String value = \"value\";"));
-                    if (original.contains("class Helper"))
+                    if (original.contains("class Helper")) {
                         assertTrue(first.endsWith("class Helper {" + newline + "}" + newline));
-                    if (original.endsWith("/*" + newline + "}" + newline + "*/" + newline))
+                    }
+                    if (original.endsWith("/*" + newline + "}" + newline + "*/" + newline)) {
                         assertTrue(first.endsWith("/*" + newline + "}" + newline + "*/" + newline));
+                    }
                     compile(source, classes);
                     try (URLClassLoader check = new URLClassLoader(new URL[] { classes.toUri().toURL() }, getClass().getClassLoader())) {
                         assertEquals("sample.Foo", check.loadClass("sample.Foo$Props").getDeclaringClass().getName());

@@ -51,8 +51,7 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("powExact(46341, 2) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(46341, 2)).getMessage());
         assertEquals("powExact(-3, 20) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(-3, 20)).getMessage());
         assertEquals("powExact(2, 31) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(2, 31)).getMessage());
-        assertEquals("powExact(-2147483648, 2) overflow",
-                assertThrows(ArithmeticException.class, () -> Numbers.powExact(Integer.MIN_VALUE, 2)).getMessage());
+        assertEquals("powExact(-2147483648, 2) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(Integer.MIN_VALUE, 2)).getMessage());
 
         // non-overflowing neighbours
         assertEquals(1000000000, Numbers.powExact(10, 9));
@@ -71,10 +70,8 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("powExact(10, 19) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(10L, 19)).getMessage());
         assertEquals("powExact(3, 40) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(3L, 40)).getMessage());
         assertEquals("powExact(-3, 40) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(-3L, 40)).getMessage());
-        assertEquals("powExact(3037000500, 2) overflow",
-                assertThrows(ArithmeticException.class, () -> Numbers.powExact(3037000500L, 2)).getMessage());
-        assertEquals("powExact(-3037000499, 3) overflow",
-                assertThrows(ArithmeticException.class, () -> Numbers.powExact(-3037000499L, 3)).getMessage());
+        assertEquals("powExact(3037000500, 2) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(3037000500L, 2)).getMessage());
+        assertEquals("powExact(-3037000499, 3) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(-3037000499L, 3)).getMessage());
         assertEquals("powExact(2, 63) overflow", assertThrows(ArithmeticException.class, () -> Numbers.powExact(2L, 63)).getMessage());
         assertEquals("powExact(-9223372036854775808, 2) overflow",
                 assertThrows(ArithmeticException.class, () -> Numbers.powExact(Long.MIN_VALUE, 2)).getMessage());
@@ -126,8 +123,7 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("/ by zero", assertThrows(ArithmeticException.class, () -> Numbers.divide(huge, BigInteger.ZERO, RoundingMode.DOWN)).getMessage());
         assertEquals("/ by zero",
                 assertThrows(ArithmeticException.class, () -> Numbers.divide(huge.negate(), BigInteger.ZERO, RoundingMode.HALF_EVEN)).getMessage());
-        assertEquals("/ by zero",
-                assertThrows(ArithmeticException.class, () -> Numbers.divide(huge, BigInteger.ZERO, RoundingMode.UNNECESSARY)).getMessage());
+        assertEquals("/ by zero", assertThrows(ArithmeticException.class, () -> Numbers.divide(huge, BigInteger.ZERO, RoundingMode.UNNECESSARY)).getMessage());
         assertEquals("/ by zero",
                 assertThrows(ArithmeticException.class, () -> Numbers.divide(BigInteger.ZERO, BigInteger.ZERO, RoundingMode.DOWN)).getMessage());
     }
@@ -514,7 +510,8 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals(UNNECESSARY_MESSAGE, assertThrows(ArithmeticException.class, () -> Numbers.round(1.5, 0, RoundingMode.UNNECESSARY)).getMessage());
         assertEquals(UNNECESSARY_MESSAGE, assertThrows(ArithmeticException.class, () -> Numbers.round(-0.5f, 0, RoundingMode.UNNECESSARY)).getMessage());
         assertEquals(UNNECESSARY_MESSAGE, assertThrows(ArithmeticException.class, () -> Numbers.round(1e300, -301, RoundingMode.UNNECESSARY)).getMessage());
-        assertEquals(UNNECESSARY_MESSAGE, assertThrows(ArithmeticException.class, () -> Numbers.round(1.0, Integer.MIN_VALUE, RoundingMode.UNNECESSARY)).getMessage());
+        assertEquals(UNNECESSARY_MESSAGE,
+                assertThrows(ArithmeticException.class, () -> Numbers.round(1.0, Integer.MIN_VALUE, RoundingMode.UNNECESSARY)).getMessage());
 
         // exact at the requested scale: no throw, value unchanged, signed zero kept
         assertEquals(3.14, Numbers.round(3.14, 2, RoundingMode.UNNECESSARY), 0.0);
@@ -614,8 +611,7 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("long overflow: 1e2147483648", assertThrows(ArithmeticException.class, () -> Numbers.toLong(unknown)).getMessage());
 
         // a BigDecimal source is unchanged: it is its own text
-        final ArithmeticException direct = assertThrows(ArithmeticException.class,
-                () -> Numbers.convert(new BigDecimal("1e2147483648"), BigInteger.class));
+        final ArithmeticException direct = assertThrows(ArithmeticException.class, () -> Numbers.convert(new BigDecimal("1e2147483648"), BigInteger.class));
         assertEquals("BigInteger overflow: 1E+2147483648", direct.getMessage());
         assertNotNull(direct.getCause());
         assertNull(direct.getCause().getCause());
@@ -697,7 +693,8 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("\"\\u200B1\" is not a valid Integer.", assertThrows(NumberFormatException.class, () -> Numbers.toInt("\u200B1")).getMessage());
         assertEquals("\"1\\u00AD\" is not a valid Integer.", assertThrows(NumberFormatException.class, () -> Numbers.toInt("1\u00AD")).getMessage());
         assertEquals("1\\u200B2 is not a valid Integer.", assertThrows(NumberFormatException.class, () -> Numbers.toInt("1\u200B2")).getMessage());
-        assertEquals("\"\\uFEFF1\" is not a valid BigDecimal.", assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("\uFEFF1")).getMessage());
+        assertEquals("\"\\uFEFF1\" is not a valid BigDecimal.",
+                assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("\uFEFF1")).getMessage());
         assertEquals("\"\\uFEFF1\" is not a valid Integer.", assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger("\uFEFF1")).getMessage());
         assertEquals("\"\\uFEFF1\" is not a valid Number.", assertThrows(NumberFormatException.class, () -> Numbers.createNumber("\uFEFF1")).getMessage());
         assertEquals("\"\\u20661\\u2069\" is not a valid Long.", assertThrows(NumberFormatException.class, () -> Numbers.toLong("\u20661\u2069")).getMessage());
@@ -752,7 +749,8 @@ public class NumbersReviewFixes20260924Test extends TestBase {
 
         // an ordinary invalid character is unchanged
         assertEquals("invalid character 'x' at index 2 of 12x", assertThrows(NumberFormatException.class, () -> Numbers.toByte("12x")).getCause().getMessage());
-        assertEquals("invalid character 'x' at index 2 of 12x", assertThrows(NumberFormatException.class, () -> Numbers.createNumber("12x")).getCause().getMessage());
+        assertEquals("invalid character 'x' at index 2 of 12x",
+                assertThrows(NumberFormatException.class, () -> Numbers.createNumber("12x")).getCause().getMessage());
     }
 
     // ===== C-147: a supplementary format character at an edge is quoted like a BMP one (code-point edge test) =====
@@ -774,7 +772,8 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("\"\\uDB40\\uDC015\" is not a valid Long.", assertThrows(NumberFormatException.class, () -> Numbers.toLong(tag + "5")).getMessage());
         assertEquals("\"\\uDB40\\uDC015\" is not a valid Integer.",
                 assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger(tag + "5")).getMessage());
-        assertEquals("\"\\uDB40\\uDC015\" is not a valid Number.", assertThrows(NumberFormatException.class, () -> Numbers.createNumber(tag + "5")).getMessage());
+        assertEquals("\"\\uDB40\\uDC015\" is not a valid Number.",
+                assertThrows(NumberFormatException.class, () -> Numbers.createNumber(tag + "5")).getMessage());
         assertEquals("\"\\uDB40\\uDC015\" is not a valid BigDecimal.",
                 assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal(tag + "5")).getMessage());
         final NumberFormatException f = assertThrows(NumberFormatException.class, () -> Numbers.toFloat(tag + "5"));
@@ -853,7 +852,7 @@ public class NumbersReviewFixes20260924Test extends TestBase {
             assertEquals("1.5 is not a valid AtomicInteger.", e.getMessage());
             assertEquals("1.5 is not a valid Integer.", e.getCause().getMessage());
 
-            e = assertThrows(NumberFormatException.class, () -> Numbers.convert(renderedAs(rendering, 1.5), N.typeOf(AtomicInteger.class)));
+            e = assertThrows(NumberFormatException.class, () -> Numbers.convert(renderedAs(rendering, 1.5), CommonUtil.typeOf(AtomicInteger.class)));
             assertEquals("1.5 is not a valid AtomicInteger.", e.getMessage());
             assertEquals("1.5 is not a valid Integer.", e.getCause().getMessage());
         }
@@ -862,7 +861,7 @@ public class NumbersReviewFixes20260924Test extends TestBase {
         assertEquals("2.5 is not a valid AtomicInteger.",
                 assertThrows(NumberFormatException.class, () -> Numbers.convert(renderedAs("2.5", 99), AtomicInteger.class)).getMessage());
         assertEquals(7, Numbers.convert(renderedAs("7", 0), AtomicInteger.class).get());
-        assertEquals(7, Numbers.convert(renderedAs("7", 0), N.typeOf(AtomicInteger.class)).get());
+        assertEquals(7, Numbers.convert(renderedAs("7", 0), CommonUtil.typeOf(AtomicInteger.class)).get());
     }
 
     // ===== C-149: the slice-based over-length failure uses the one notAValidNumber message template =====

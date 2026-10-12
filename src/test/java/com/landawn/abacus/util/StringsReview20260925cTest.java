@@ -544,8 +544,8 @@ public class StringsReview20260925cTest extends TestBase {
                 .contains("keyExtractor"));
         assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.joinEntries(noEntries, ",", "=", key, null)).getMessage()
                 .contains("valueExtractor"));
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.joinEntries(entries, ",", "=", null, null)).getMessage()
-                .contains("keyExtractor"));
+        assertTrue(
+                assertThrows(IllegalArgumentException.class, () -> Strings.joinEntries(entries, ",", "=", null, null)).getMessage().contains("keyExtractor"));
         assertEquals("a=1, b=2", Strings.joinEntries(entries, ", ", "=", key, value));
         assertEquals("", Strings.joinEntries(nullEntries, ", ", "=", key, value));
         assertEquals("", Strings.joinEntries(noEntries, ", ", "=", key, value));
@@ -811,7 +811,8 @@ public class StringsReview20260925cTest extends TestBase {
         // random NFC / NFD pairs over Indic, Thai, kana and Hangul material
         final String[] pool = { "\u0915", "\u093E", "\u094D", "\u0937", "\u0995", "\u09CB", "\u09CC", "\u0B92", "\u0B94", "\u0BCA", "\u0BCC", "\u0C95",
                 "\u0CC7", "\u0CCB", "\u0D15", "\u0D4A", "\u0D4C", "\u0DDA", "\u0DDD", "\u0E01", "\u0E33", "\u1B05", "\u1B06", "\u1B3B", "\uD55C", "\u304B",
-                "\u3099", "\u304C", "\uFF76", "\uFF9E", "a", "\u00E9", "\u0301", cp(0x1138E), cp(0x113C5), cp(0x11347), cp(0x1134B), "\u1B3A", "\u1B35", "\u1B3B", "\u1B11", "\u0BD7", "k" };
+                "\u3099", "\u304C", "\uFF76", "\uFF9E", "a", "\u00E9", "\u0301", cp(0x1138E), cp(0x113C5), cp(0x11347), cp(0x1134B), "\u1B3A", "\u1B35",
+                "\u1B3B", "\u1B11", "\u0BD7", "k" };
         final Random random = new Random(568L);
 
         for (int iteration = 0; iteration < 50_000; iteration++) {
@@ -872,8 +873,8 @@ public class StringsReview20260925cTest extends TestBase {
 
         // seeded fuzz over the code points whose clusters can absorb or add a column: the padded result is always
         // exactly the requested width (or the input's own width when that is larger)
-        final int[] pool = { 'a', ' ', 0x0915, 0x093E, 0x094D, 0x0937, 0x0E01, 0x0E33, 0x0EB3, 0x0B92, 0x0BD7, 0x1B05, 0x1B35, 0x1B44, 0x302E, 0x0D4E,
-                0x0600, 0xFF76, 0xFF9E, 0xFF9F, 0x0301, 0x200D, 0xFE0F, 0x2764, 0x1F600, 0x1F3FB, 0x4E2D, 0x1100, 0x1161, 0x11A8, 0x16FF0 };
+        final int[] pool = { 'a', ' ', 0x0915, 0x093E, 0x094D, 0x0937, 0x0E01, 0x0E33, 0x0EB3, 0x0B92, 0x0BD7, 0x1B05, 0x1B35, 0x1B44, 0x302E, 0x0D4E, 0x0600,
+                0xFF76, 0xFF9E, 0xFF9F, 0x0301, 0x200D, 0xFE0F, 0x2764, 0x1F600, 0x1F3FB, 0x4E2D, 0x1100, 0x1161, 0x11A8, 0x16FF0 };
         final Random random = new Random(5680L);
 
         for (int iteration = 0; iteration < 20_000; iteration++) {

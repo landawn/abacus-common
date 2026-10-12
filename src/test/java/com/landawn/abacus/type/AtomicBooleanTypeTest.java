@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,10 @@ public class AtomicBooleanTypeTest extends TestBase {
     public void test_valueOf_String() {
         assertEquals(true, type.valueOf("true").get());
         assertEquals(false, type.valueOf("false").get());
-        assertEquals(false, type.valueOf("anything").get());
+        assertEquals(true, type.valueOf("Y").get());
+        assertEquals(false, type.valueOf("n").get());
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("anything"));
         assertNull(type.valueOf((String) null));
         assertNull(type.valueOf(""));
     }

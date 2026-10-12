@@ -131,7 +131,8 @@ public class CommonUtilReview20260925Test extends TestBase {
         assertEquals("'delta' cannot be negative: -2.0",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(new double[] { 1 }, 0, new double[] { 1 }, 0, 1, -2d)).getMessage());
         assertEquals("'delta' cannot be NaN",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(new double[] { 1 }, 0, new double[] { 1 }, 0, 1, Double.NaN)).getMessage());
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(new double[] { 1 }, 0, new double[] { 1 }, 0, 1, Double.NaN))
+                        .getMessage());
 
         // delta is still checked before the arrays are looked at (null arrays, identical arrays)
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals((float[]) null, null, -1f));
@@ -184,8 +185,7 @@ public class CommonUtilReview20260925Test extends TestBase {
         assertArrayEquals(new String[] { "b", "c" }, CommonUtil.toArray(List.of("a", "b", "c"), 1, 3, String[]::new));
         assertArrayEquals(new String[] { "b", "c" }, CommonUtil.toArray(new LinkedHashSet<>(List.of("a", "b", "c")), 1, 3, String[]::new));
         assertArrayEquals(new String[] { "b", "c" }, CommonUtil.toArray(new LinkedHashSet<>(List.of("a", "b", "c")), 1, 3, n -> new String[0]));
-        assertArrayEquals(new String[] { "b", "c", null, null },
-                CommonUtil.toArray(new LinkedHashSet<>(List.of("a", "b", "c")), 1, 3, n -> new String[4]));
+        assertArrayEquals(new String[] { "b", "c", null, null }, CommonUtil.toArray(new LinkedHashSet<>(List.of("a", "b", "c")), 1, 3, n -> new String[4]));
     }
 
     // ============================================================ U05-03: integral values too large for a long parse as text (doc pin)
@@ -325,13 +325,12 @@ public class CommonUtilReview20260925Test extends TestBase {
         final Supplier<String> emptyS = () -> "";
         final Supplier<String> blankS = () -> " \t";
 
-        assertEquals("supplierForDefault returned null", assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfNull((String) null, nullS)).getMessage());
         assertEquals("supplierForDefault returned null",
-                assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfEmpty("", nullS)).getMessage());
+                assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfNull((String) null, nullS)).getMessage());
+        assertEquals("supplierForDefault returned null", assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfEmpty("", nullS)).getMessage());
         assertEquals("supplierForDefault returned empty",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty((String) null, emptyS)).getMessage());
-        assertEquals("supplierForDefault returned null",
-                assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfBlank(" ", nullS)).getMessage());
+        assertEquals("supplierForDefault returned null", assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfBlank(" ", nullS)).getMessage());
         assertEquals("supplierForDefault returned empty or blank",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank("", emptyS)).getMessage());
         assertEquals("supplierForDefault returned empty or blank",
@@ -357,6 +356,7 @@ public class CommonUtilReview20260925Test extends TestBase {
         assertEquals("d", CommonUtil.defaultIfBlank((String) null, d));
 
         // the Strings twins already followed the same style (L12/C-004)
-        assertEquals("defaultValueSupplier returned null", assertThrows(NullPointerException.class, () -> Strings.defaultIfNull((String) null, nullS)).getMessage());
+        assertEquals("defaultValueSupplier returned null",
+                assertThrows(NullPointerException.class, () -> Strings.defaultIfNull((String) null, nullS)).getMessage());
     }
 }

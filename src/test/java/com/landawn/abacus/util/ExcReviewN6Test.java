@@ -28,7 +28,7 @@ public class ExcReviewN6Test extends com.landawn.abacus.TestBase {
     @Test
     public void lowerMedian_range_emptyRangeReportedBeforeNullCmp() {
         assertEquals("The specified collection or range cannot be empty", msg(() -> N.lowerMedian(Arrays.asList(1, 2), 1, 1, null)));
-        assertEquals("The specified collection or range cannot be empty", msg(() -> N.lowerMedian(N.<Integer> emptyList(), 0, 0, null)));
+        assertEquals("The specified collection or range cannot be empty", msg(() -> N.lowerMedian(CommonUtil.<Integer> emptyList(), 0, 0, null)));
         // cmp alone still reported
         assertEquals("'comparator' cannot be null", msg(() -> N.lowerMedian(Arrays.asList(1, 2), 0, 2, null)));
         assertEquals(Integer.valueOf(1), N.lowerMedian(Arrays.asList(1, 2), 0, 2, CMP));

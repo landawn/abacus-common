@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -463,8 +464,10 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * into a key with a single-element set containing the value.
      *
      * <p>The returned SetMultimap attempts to use the input map's implementation for its backing
-     * storage (and preserves a sorted map's comparator), falling back to a {@link java.util.LinkedHashMap}
-     * that keeps the input map's encounter order when that implementation cannot be instantiated.
+     * storage (and preserves a sorted map's comparator). When that implementation cannot be instantiated (an
+     * anonymous map class, for one), it falls back to the matching JDK map family where one is known
+     * ({@code IdentityHashMap}, {@code WeakHashMap} or {@code ConcurrentHashMap}) and otherwise to a
+     * {@link java.util.LinkedHashMap} that keeps the input map's encounter order.
      * A {@link BiMap} source also yields a {@code LinkedHashMap}, because a BiMap backing map would require
      * the value sets of different keys to be unequal. Value collections use {@link HashSet}.
      *
@@ -971,7 +974,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      */
     @Override
     public SetMultimap<K, E> copy() throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
-        final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
+        final SetMultimap<K, E> copy = mapSupplier == null ? new SetMultimap<>(Maps.newTargetMap(backingMap), valueSupplier)
+                : new SetMultimap<>(mapSupplier, valueSupplier);
 
         copyInto(copy);
 
@@ -979,14 +983,16 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
     }
 
     /**
-     * The per-set copy policy shared by {@link #copy()}, {@link #toMap()} and {@link #toMap(IntFunction)}: a sorted
+     * The per-set copy policy shared by {@link #copy()}, {@link #toMap()} and {@link #toMap(IntFunction)} (and used by
+     * {@link #toImmutableMap()} for the sets an {@code equals}-based copy cannot reproduce): a sorted
      * set keeps its comparator in a new {@link java.util.TreeSet}; an {@link java.util.EnumSet}, an
      * {@link IdentityHashSet} and an exact {@link HashSet}/{@link LinkedHashSet} keep their own type (without calling
      * the value supplier); any other set is filled from the value supplier. A copy that holds fewer elements than its
      * source (the supplied set merged distinct elements) is rejected.
      *
      * @param source the value set to copy; never {@code null}
-     * @param seen every value set of this multimap and every copy made so far, by identity
+     * @param seen every value set of this multimap and every copy made so far, by identity; read only when the value
+     *        supplier is called (never for a sorted or identity source, for which it may be {@code null})
      * @return the copy; never {@code null}
      * @throws IllegalArgumentException if the value supplier returns a non-empty set or a set already
      *         in use, or the copy loses distinct source elements
@@ -1022,13 +1028,19 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * Converts this SetMultimap into an immutable map where each key is associated with an immutable set of values.
      *
      * <p>This method attempts to create a new map using the backing map's implementation (and
-     * preserves a sorted map's comparator), falling back to a {@link java.util.LinkedHashMap} that keeps
-     * the backing map's encounter order when necessary. It
+     * preserves a sorted map's comparator). When that implementation cannot be recreated (an anonymous map class, for
+     * one), it falls back to the matching JDK map family where one is known ({@code IdentityHashMap},
+     * {@code WeakHashMap} or {@code ConcurrentHashMap}) and otherwise to a {@link java.util.LinkedHashMap} that keeps
+     * the backing map's encounter order. It
      * converts each value set to an {@link ImmutableSet} and wraps the result in an {@link ImmutableMap}.
      * A {@link BiMap} backing map is not mirrored (the result uses a {@code LinkedHashMap}), because two keys'
      * value sets can become equal after the keys were added, which a {@code BiMap} would reject.
      *
-     * <p>The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
+     * <p>Each value set is copied in its iteration order into a set that compares elements with {@code equals}, except
+     * that, as in {@link #copy()}, a sorted set keeps its comparator and an {@link IdentityHashSet} keeps reference
+     * membership. Any other set holding elements that such a copy would merge is copied through the value supplier,
+     * which must keep them apart.
+     * The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1043,6 +1055,9 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key;
      *         an empty map if this multimap is empty
+     * @throws IllegalArgumentException if a value set cannot be copied independently or without losing distinct elements
+     * @throws NullPointerException if the value supplier returns {@code null}
+     * @throws UnsupportedOperationException if a supplied value set cannot be filled
      * @see #toImmutableMap(IntFunction)
      */
     @SuppressWarnings("unchecked")
@@ -1051,11 +1066,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         // b={2,1} after put("a", 2) and put("b", 1)) are accepted by the backing map but would make a BiMap copy throw.
         final Map<K, ImmutableSet<E>> map = backingMap instanceof BiMap ? N.newLinkedHashMap(backingMap.size()) : Maps.newTargetMap(backingMap);
 
-        for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
-        }
-
-        return ImmutableMap.wrap(map);
+        return copyIntoImmutableMap(map);
     }
 
     /**
@@ -1065,7 +1076,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The provided map supplier allows you to control the type of the underlying map in the returned ImmutableMap
      * (e.g., use a TreeMap for sorted keys, or a LinkedHashMap for insertion-order).
      *
-     * <p>The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
+     * <p>Each value set is copied in its iteration order into a set that compares elements with {@code equals}, except
+     * that, as in {@link #copy()}, a sorted set keeps its comparator and an {@link IdentityHashSet} keeps reference
+     * membership. Any other set holding elements that such a copy would merge is copied through the value supplier,
+     * which must keep them apart.
+     * The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1082,11 +1097,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      *                    and must not return {@code null}
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
-     * @throws NullPointerException if {@code mapSupplier} returns {@code null}, or a stored key is {@code null} and the
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or a value set cannot be copied
+     *         independently or without losing distinct elements
+     * @throws NullPointerException if {@code mapSupplier} or the value supplier returns {@code null}, or a stored key is {@code null} and the
      *         supplied map rejects null-key insertion
      * @throws ClassCastException if a stored key cannot be compared or inserted into the supplied map
-     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion
+     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion,
+     *         or a supplied value set cannot be filled
      * @see #toImmutableMap()
      */
     public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier)
@@ -1095,8 +1112,43 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
 
         final Map<K, ImmutableSet<E>> map = N.requireNonNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");
 
+        return copyIntoImmutableMap(map);
+    }
+
+    private ImmutableMap<K, ImmutableSet<E>> copyIntoImmutableMap(final Map<K, ImmutableSet<E>> map) {
+        Map<Set<E>, Boolean> seen = null;
+
         for (final Map.Entry<K, Set<E>> entry : backingMap.entrySet()) {
-            map.put(entry.getKey(), ImmutableSet.copyOf(entry.getValue()));
+            final Set<E> source = entry.getValue();
+            // ImmutableSet.copyOf keeps the encounter order but compares with equals: exact for an equals-based set, but a
+            // sorted or identity set would lose its membership rule and any elements that rule holds apart. Those sets, and
+            // any other set the equals-based copy shrinks, get an independent copy by the copy() policy, wrapped.
+            ImmutableSet<E> values = source instanceof java.util.SortedSet || source instanceof IdentityHashSet ? null : ImmutableSet.copyOf(source);
+
+            if (values == null || values.size() != N.size(source)) {
+                if (values == null) {
+                    // A sorted or identity set: copyValueCollection rebuilds it with its own constructor, never with the value
+                    // supplier, so it does not read `seen` (which may still be null); and a later supplier call cannot hand
+                    // back this copy, reachable only through its unmodifiable wrapper, so it is not registered. Indexing
+                    // every source and identity-hashing every fresh copy here about doubled the cost of such a snapshot.
+                    values = ImmutableSet.wrap(copyValueCollection(source, seen));
+                } else {
+                    if (seen == null) {
+                        // Reserve every source before the value supplier is first called: none may be handed back as a copy.
+                        seen = new IdentityHashMap<>((int) Math.min(2L * backingMap.size(), Integer.MAX_VALUE));
+
+                        for (final Set<E> value : backingMap.values()) {
+                            seen.put(value, Boolean.TRUE);
+                        }
+                    }
+
+                    final Set<E> copy = copyValueCollection(source, seen);
+                    seen.put(copy, Boolean.TRUE);
+                    values = ImmutableSet.wrap(copy);
+                }
+            }
+
+            map.put(entry.getKey(), values);
         }
 
         return ImmutableMap.wrap(map);

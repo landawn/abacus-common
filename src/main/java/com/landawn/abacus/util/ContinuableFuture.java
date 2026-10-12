@@ -890,7 +890,7 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Cancels this future and all distinct upstream futures in the dependency graph recursively. This method is useful
+     * Cancels this future and all distinct upstream futures in the dependency graph. This method is useful
      * when you have a chain of dependent futures and want to cancel the entire computation pipeline.
      *
      * <p>The method attempts to cancel all futures in the chain and returns {@code true} only if
@@ -925,20 +925,7 @@ public class ContinuableFuture<T> implements Future<T> {
             CANCELLATION_RESULTS.set(results);
         }
         try {
-            if (results.containsKey(this)) {
-                return results.get(this);
-            }
-            results.put(this, true);
-            boolean cancelled = cancel(mayInterruptIfRunning);
-            if (upFutures != null) {
-                for (final ContinuableFuture<?> previous : upFutures) {
-                    final boolean previousCancelled = results.containsKey(previous) ? results.get(previous) : previous.cancelAll(mayInterruptIfRunning);
-                    results.put(previous, previousCancelled);
-                    cancelled &= previousCancelled;
-                }
-            }
-            results.put(this, cancelled);
-            return cancelled;
+            return traverseCancellation(results, true, mayInterruptIfRunning);
         } finally {
             if (outermost) {
                 CANCELLATION_RESULTS.remove();
@@ -953,7 +940,7 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Checks if this task and all upstream futures in the chain have been cancelled. This method
-     * recursively checks each distinct future's cancellation status once per invocation.
+     * checks each distinct future's cancellation status once per invocation.
      *
      * <p>Returns {@code true} only if every future in the chain has been cancelled. If any future
      * in the chain is not cancelled, this method returns {@code false}.
@@ -982,27 +969,66 @@ public class ContinuableFuture<T> implements Future<T> {
             CANCELLATION_STATUS_RESULTS.set(results);
         }
         try {
-            if (results.containsKey(this)) {
-                return results.get(this);
-            }
-            results.put(this, true);
-            if (upFutures != null) {
-                for (final ContinuableFuture<?> previous : upFutures) {
-                    final boolean previousCancelled = results.containsKey(previous) ? results.get(previous) : previous.isAllCancelled();
-                    results.put(previous, previousCancelled);
-                    if (!previousCancelled) {
-                        results.put(this, false);
-                        return false;
-                    }
-                }
-            }
-            final boolean cancelled = isCancelled();
-            results.put(this, cancelled);
-            return cancelled;
+            return traverseCancellation(results, false, false);
         } finally {
             if (outermost) {
                 CANCELLATION_STATUS_RESULTS.remove();
             }
+        }
+    }
+
+    // Keep ordinary dependency chains on the heap instead of the Java call stack. Subclass
+    // boundaries still dispatch virtually, so custom cancellation and transparent wrappers retain
+    // their behavior and share the invocation's identity memoization with this traversal.
+    private boolean traverseCancellation(final IdentityHashMap<ContinuableFuture<?>, Boolean> results, final boolean cancel,
+            final boolean mayInterruptIfRunning) {
+        if (results.containsKey(this)) {
+            return results.get(this);
+        }
+
+        final ArrayDeque<CancellationFrame> pending = new ArrayDeque<>();
+        results.put(this, true);
+        pending.push(new CancellationFrame(this, !cancel || cancel(mayInterruptIfRunning)));
+
+        while (true) {
+            final CancellationFrame current = pending.peek();
+            final List<ContinuableFuture<?>> upstream = current.future.upFutures;
+
+            if ((cancel || current.cancelled) && upstream != null && current.nextIndex < upstream.size()) {
+                final ContinuableFuture<?> previous = upstream.get(current.nextIndex++);
+
+                if (results.containsKey(previous)) {
+                    current.cancelled &= results.get(previous);
+                } else if (previous.getClass() == ContinuableFuture.class) {
+                    results.put(previous, true);
+                    pending.push(new CancellationFrame(previous, !cancel || previous.cancel(mayInterruptIfRunning)));
+                } else {
+                    final boolean cancelled = cancel ? previous.cancelAll(mayInterruptIfRunning) : previous.isAllCancelled();
+                    results.put(previous, cancelled);
+                    current.cancelled &= cancelled;
+                }
+            } else {
+                final boolean cancelled = current.cancelled && (cancel || current.future.isCancelled());
+                results.put(current.future, cancelled);
+                pending.pop();
+
+                if (pending.isEmpty()) {
+                    return cancelled;
+                }
+
+                pending.peek().cancelled &= cancelled;
+            }
+        }
+    }
+
+    private static final class CancellationFrame {
+        private final ContinuableFuture<?> future;
+        private int nextIndex;
+        private boolean cancelled;
+
+        private CancellationFrame(final ContinuableFuture<?> future, final boolean cancelled) {
+            this.future = future;
+            this.cancelled = cancelled;
         }
     }
 

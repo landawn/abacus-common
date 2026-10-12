@@ -39,8 +39,8 @@ public class MultisetReview20260925Test extends TestBase {
         src.add("b", 4);
 
         assertTrue(dst.addAll(src));
-        assertEquals(5, dst.getCount("a"));   // existing element: in-place count update
-        assertEquals(4, dst.getCount("b"));   // new element: inserted
+        assertEquals(5, dst.getCount("a")); // existing element: in-place count update
+        assertEquals(4, dst.getCount("b")); // new element: inserted
         assertEquals(5, dst.getCount("c"));
         assertEquals(3, src.getCount("a"));
         assertEquals(4, src.getCount("b"));
@@ -51,7 +51,7 @@ public class MultisetReview20260925Test extends TestBase {
         assertEquals(12, dst.getCount("b"));
         assertEquals(5, dst.getCount("c"));
 
-        assertFalse(dst.addAll(new Multiset<String>()));
+        assertFalse(dst.addAll(new Multiset<>()));
         assertFalse(dst.addAll(src, 0));
         assertEquals(11, dst.getCount("a"));
     }
@@ -85,7 +85,7 @@ public class MultisetReview20260925Test extends TestBase {
         assertTrue(e.getMessage().contains("out of the bound of int"), e.getMessage());
         assertTrue(e.getMessage().contains("current=" + (Integer.MAX_VALUE - 1)), e.getMessage());
         assertEquals(Integer.MAX_VALUE - 1, big.getCount("x"));
-        assertEquals(0, big.getCount("y"));   // "x" failed first: nothing after it was added
+        assertEquals(0, big.getCount("y")); // "x" failed first: nothing after it was added
 
         // an exact fit is accepted
         final Multiset<String> one = new Multiset<>();

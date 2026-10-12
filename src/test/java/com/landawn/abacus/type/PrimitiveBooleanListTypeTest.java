@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyChar;
@@ -130,15 +131,17 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
 
     @Test
     public void testValueOfWithVariousFormats() {
-        BooleanList result = booleanListType.valueOf("[TRUE, FALSE, 1, 0, yes, no]");
+        BooleanList result = booleanListType.valueOf("[TRUE, FALSE, 1, 0, Y, n]");
         assertNotNull(result);
         assertEquals(6, result.size());
         assertTrue(result.get(0));
         assertFalse(result.get(1));
         assertTrue(result.get(2));
         assertFalse(result.get(3));
-        assertFalse(result.get(4));
+        assertTrue(result.get(4));
         assertFalse(result.get(5));
+        // "yes" and "no" are not boolean text (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> booleanListType.valueOf("[TRUE, yes]"));
     }
 
     @Test
@@ -209,7 +212,15 @@ public class PrimitiveBooleanListTypeTest extends TestBase {
         assertNull(booleanListType.valueOf((String) null));
         assertTrue(booleanListType.valueOf("[ ]").isEmpty());
         assertTrue(booleanListType.valueOf("[]").isEmpty());
-        // never throws: an unparseable token is false
-        assertEquals(com.landawn.abacus.util.BooleanList.of(true, false), booleanListType.valueOf("[true, abc]"));
+        // a token that is not boolean text is rejected (code review 2026-10-05; it used to be false)
+        assertThrows(IllegalArgumentException.class, () -> booleanListType.valueOf("[true, abc]"));
+    }
+
+    @Test
+    public void quotedBlankElementsUseThePrimitiveDefaultWithoutAcceptingMissingElements() {
+        // The list delegates to boolean[] parsing: quoted blank content is a value; a missing token is malformed.
+        assertEquals(BooleanList.of(false, false, false, false, true), booleanListType.valueOf("[null, \"\", '', \" \\t\", \"Y\"]"));
+        assertThrows(IllegalArgumentException.class, () -> booleanListType.valueOf("[true, , false]"));
+        assertThrows(IllegalArgumentException.class, () -> booleanListType.valueOf("[\"null\"]"));
     }
 }

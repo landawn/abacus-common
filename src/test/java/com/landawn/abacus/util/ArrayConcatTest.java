@@ -196,10 +196,10 @@ public class ArrayConcatTest extends ArrayTestSupport {
         final String[][] withNullRow = Array.concat2D(new String[][] { { "a" }, null }, (String[][]) null);
         assertNull(withNullRow[1]);
 
-        final String[] fixed = N.nullToEmpty(withNullRow[1], String[].class);
+        final String[] fixed = CommonUtil.nullToEmpty(withNullRow[1], String[].class);
         assertEquals(0, fixed.length);
         assertEquals(String.class, fixed.getClass().getComponentType());
 
-        assertEquals(Object.class, N.nullToEmpty((Object[]) null).getClass().getComponentType());
+        assertEquals(Object.class, CommonUtil.nullToEmpty((Object[]) null).getClass().getComponentType());
     }
 }

@@ -33,6 +33,9 @@ import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
@@ -40,6 +43,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.Tuple.Tuple4;
 import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.cs;
 
@@ -82,6 +86,9 @@ import com.landawn.abacus.util.cs;
  */
 abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
+    /** Compact embedded JSON configuration retaining XML's present-null rejection. */
+    private static final JsonSerConfig XML_JSON_CONFIG = new XmlEmbeddedJsonConfig();
+
     /** The class handled by this type. */
     final Class<T> typeClass;
 
@@ -110,7 +117,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      */
     final Type<Object> jsonValueType;
 
-    /** Cached result of {@link #isSerializable()}: {@code true} if the wrapped value's type is serializable. */
+    /** Cached result of {@link #isSerializable()}: {@code true} if the wrapped value can be serialized directly or through a parser. */
     final boolean isSerializable;
 
     /** The type handler for the auto-detected single value field, or {@code null} if none was detected. */
@@ -121,6 +128,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * factory method or single-argument constructor was found.
      */
     final Function<String, T> creator;
+
+    /** Auto-detected factory accepting the resolved value directly, preserving native JDBC values and their precision. */
+    final Function<Object, T> typedCreator;
 
     /** Auto-detected accessor that extracts the wrapped value, or {@code null} when none was found. */
     final Function<T, Object> valueExtractor;
@@ -313,7 +323,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         jsonValueType = localJsonValueMetadata != null ? resolver.valueType(localJsonValueMetadata) : null;
 
-        Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> creatorAndValueExtractor = null;
+        Tuple4<Type<Object>, Function<String, T>, Function<T, Object>, Function<Object, T>> creatorAndValueExtractor = null;
 
         if (jsonValueType == null && !typeClass.isEnum()) {
             creatorAndValueExtractor = getCreatorAndValueExtractor(typeClass, resolver);
@@ -322,8 +332,12 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         valueType = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._1;
         creator = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._2;
         valueExtractor = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._3;
+        typedCreator = creatorAndValueExtractor == null ? null : creatorAndValueExtractor._4;
 
-        isSerializable = jsonValueType != null ? jsonValueType.isSerializable() : (valueType != null && valueExtractor != null && valueType.isSerializable());
+        // A wrapped map/bean is writable through the parser even though its handler does not implement
+        // direct scalar serialization. Keep the wrapper on the value path instead of rejecting it as unknown.
+        final Type<?> wrappedType = jsonValueType != null ? jsonValueType : valueExtractor == null ? null : valueType;
+        isSerializable = wrappedType != null && (wrappedType.isSerializable() || wrappedType.serializationType() != SerializationType.UNKNOWN);
 
         isObjectType = jsonValueType == null && valueType == null && valueExtractor == null && !typeClass.isEnum();
     }
@@ -371,7 +385,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     /**
      * {@inheritDoc}
      * <p>A single-value type is serializable if its underlying JSON value type or value type
-     * (with a value extractor) is itself serializable.
+     * (with a value extractor) is directly serializable or has a supported parser serialization category,
+     * such as a map or bean.
      *
      * @return {@code true} if this type is serializable, {@code false} otherwise
      */
@@ -470,7 +485,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      * Retrieves a value of type T from the specified column in the ResultSet.
-     * Uses JSON creator if available, otherwise attempts string conversion or direct cast.
+     * Annotated and auto-detected creators receive the value read through the wrapped value type's JDBC codec,
+     * preserving binary data and timestamp precision. Object mode uses direct assignment or general conversion.
      *
      * @param rs the ResultSet containing the query results
      * @param columnIndex the index of the column to retrieve (1-based)
@@ -496,9 +512,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (creator != null) {
-            final String value = rs.getString(columnIndex);
+            final Object value = valueType.get(rs, columnIndex);
 
-            return value == null ? null : creator.apply(value);
+            return value == null || rs.wasNull() ? null : typedCreator.apply(value);
         } else {
             final Object obj = rs.getObject(columnIndex);
 
@@ -508,7 +524,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
     /**
      * Retrieves a value of type T from the specified column in the ResultSet.
-     * Uses JSON creator if available, otherwise attempts string conversion or direct cast.
+     * Annotated and auto-detected creators receive the value read through the wrapped value type's JDBC codec,
+     * preserving binary data and timestamp precision. Object mode uses direct assignment or general conversion.
      *
      * @param rs the ResultSet containing the query results
      * @param columnName the label of the column to retrieve
@@ -534,9 +551,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (creator != null) {
-            final String value = rs.getString(columnName);
+            final Object value = valueType.get(rs, columnName);
 
-            return value == null ? null : creator.apply(value);
+            return value == null || rs.wasNull() ? null : typedCreator.apply(value);
         } else {
             final Object obj = rs.getObject(columnName);
 
@@ -687,8 +704,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * a serializable runtime type (numbers, booleans, dates, primitive arrays, ...) writes its own JSON/XML form
      * honouring {@code config} (so {@code 5} is written as {@code 5}, not {@code "5"}); a structured runtime type
      * (map, bean, collection, {@code Object[]}) is written as structural JSON when {@code config} is a
-     * {@link com.landawn.abacus.parser.JsonSerConfig} and as its escaped {@code stringOf} text otherwise; a value
-     * whose runtime type is a plain {@link ObjectType} is written as its quoted, escaped {@code toString()}, and a
+     * {@link com.landawn.abacus.parser.JsonSerConfig} (as escaped character content when {@code writer} is not a JSON
+     * writer, e.g. an XML or CSV writer) and as escaped JSON text under an XML configuration, retaining XML's
+     * rejection of present-null {@code Nullable} values at any nested depth. Other configurations use escaped
+     * {@code stringOf} text; a value whose runtime type is a plain {@link ObjectType} is written as its quoted,
+     * escaped {@code toString()}, and a
      * handler with no serialization category at all (the JDBC locators) writes through its own {@code serializeTo}.
      * A {@code null} value writes the literal {@code null}.
      * <p>
@@ -711,7 +731,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param config the serialization configuration for formatting options
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the null literal or the selected wrapped/runtime value representation to {@code writer} fails
-     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped,
+     *         or the selected runtime serializer rejects a value (including a present-null Nullable under XML)
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
@@ -722,16 +743,18 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             if (jsonValueType != null) {
                 try {
                     if (jsonValueField != null) {
-                        jsonValueType.serializeTo(writer, jsonValueField.get(x), config);
+                        AbstractTupleType.serializeSlot(writer, jsonValueType, jsonValueField.get(x), config);
                     } else {
-                        jsonValueType.serializeTo(writer, jsonValueMethod.invoke(x), config);
+                        AbstractTupleType.serializeSlot(writer, jsonValueType, jsonValueMethod.invoke(x), config);
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     // Unwrap the reflective wrapper so the accessor's own exception reaches the caller.
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
             } else if (valueType != null && valueExtractor != null) {
-                valueType.serializeTo(writer, valueExtractor.apply(x), config);
+                // Structured wrapped values need the same JSON/XML dispatch as tuple and optional slots;
+                // their default Type.serializeTo would otherwise quote an entire map or bean as one string.
+                AbstractTupleType.serializeSlot(writer, valueType, valueExtractor.apply(x), config);
             } else {
                 // Object mode: dispatch on the runtime type like stringOf() does, so an Integer/Date/int[] held in an
                 // Object slot keeps its JSON shape and config. `instanceof ObjectType` (not isObject()) is the
@@ -766,9 +789,19 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                     // current indentation, so a pretty embedded structure would restart at the left margin and
                     // mis-align every one of its lines. Same rule as AbstractTupleType.serializeSlot,
                     // CollectionType.serializeTo and ObjectArrayType.serializeTo.
-                    Utils.jsonParser.serialize(x, jsc.isPrettyFormat() ? jsc.copy().setPrettyFormat(false) : jsc, writer);
+                    final JsonSerConfig embeddedConfig = jsc.isPrettyFormat() ? jsc.copy().setPrettyFormat(false) : jsc;
+
+                    if (writer instanceof BufferedJsonWriter) {
+                        Utils.jsonParser.serialize(x, embeddedConfig, writer);
+                    } else {
+                        // A JSON config can still arrive on an XML or CSV writer (Type.serializeTo is public API): the
+                        // parser would write raw JSON - unescaped ", < and & - into that format. Emit the text through
+                        // writeCharacter so it is escaped for the target format, as the three handlers named above do.
+                        writer.writeCharacter(Utils.jsonParser.serialize(x, embeddedConfig));
+                    }
                 } else {
-                    writer.writeCharacter(realType.stringOf(x));
+                    // Preserve the XML presence policy while the runtime structure is traversed as embedded JSON.
+                    writer.writeCharacter(config instanceof XmlSerConfig ? Utils.jsonParser.serialize(x, XML_JSON_CONFIG) : realType.stringOf(x));
                 }
             }
         }
@@ -815,11 +848,22 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass)
             throws IllegalArgumentException {
-        return getCreatorAndValueExtractor(typeClass, new ValueTypeResolver(typeClass, List.of()));
+        final Tuple4<Type<Object>, Function<String, T>, Function<T, Object>, Function<Object, T>> detected = getCreatorAndValueExtractor(typeClass,
+                new ValueTypeResolver(typeClass, List.of()));
+        return Tuple.of(detected._1, detected._2, detected._3);
     }
 
+    /**
+     * Discovers the value codec, text creator, extractor and typed creator while retaining resolved generic metadata.
+     *
+     * @param <T> the wrapper type
+     * @param typeClass the class to inspect
+     * @param resolver the declared generic context and creator compatibility checker
+     * @return the four detected components, or four nulls if no complete single-value pattern exists
+     * @throws IllegalArgumentException if the creator's declared types are incompatible with the wrapped value
+     */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass,
+    private static <T> Tuple4<Type<Object>, Function<String, T>, Function<T, Object>, Function<Object, T>> getCreatorAndValueExtractor(final Class<T> typeClass,
             final ValueTypeResolver resolver) {
         final Field[] fields = typeClass.getDeclaredFields();
         final Constructor<?>[] constructors = typeClass.getDeclaredConstructors();
@@ -843,7 +887,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
 
         // if no fields matched or more than one matched, return null.
         if (N.size(matchedFields) != 1) {
-            return Tuple.of(null, null, null);
+            return Tuple.of(null, null, null, null);
         }
 
         final Field valueField = matchedFields.get(0);
@@ -911,7 +955,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         // extractor would break the documented stringOf/valueOf round-trip (the value would serialize as
         // the single field but deserialize as a raw String). Treat such classes as plain object types.
         if (factoryMethod == null && constructor == null) {
-            return Tuple.of(null, null, null);
+            return Tuple.of(null, null, null, null);
         }
 
         Method getMethod = null;
@@ -951,7 +995,7 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
 
         if (getMethod == null && !Modifier.isPublic(valueField.getModifiers())) {
-            return Tuple.of(null, null, null);
+            return Tuple.of(null, null, null, null);
         }
 
         final Method fm = factoryMethod;
@@ -960,9 +1004,17 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         // Parse the declared value before calling a potentially broader Object/Collection creator.
         final Type<Object> parameterType = resolver.valueType(valueField.getGenericType());
 
-        final Function<String, T> creator = fm != null ? str -> (T) ClassUtil.invokeMethod(fm, parameterType == null ? str : parameterType.valueOf(str)) //
-                : (cons != null ? str -> (T) ClassUtil.invokeConstructor(cons, parameterType == null ? str : parameterType.valueOf(str)) //
-                        : null);
+        // The detected members are public, but a non-public declaring class (e.g. a private nested class) still
+        // denies reflective access from this library, so open them as the annotated JsonValue/JsonCreator path does.
+        ClassUtil.setAccessibleQuietly(fm, true);
+        ClassUtil.setAccessibleQuietly(cons, true);
+        ClassUtil.setAccessibleQuietly(getMethod != null ? getMethod : valueField, true);
+
+        // JDBC already supplies the declared value. Keep that path separate from text parsing: a driver string
+        // need not be the codec's representation, and stringOf can discard timestamp nanoseconds or stream identity.
+        final Function<Object, T> typedCreator = fm != null ? value -> (T) ClassUtil.invokeMethod(fm, value)
+                : value -> (T) ClassUtil.invokeConstructor(cons, value);
+        final Function<String, T> creator = str -> typedCreator.apply(parameterType == null ? str : parameterType.valueOf(str));
 
         final Method getter = getMethod;
 
@@ -974,6 +1026,6 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
             }
         };
 
-        return Tuple.of(parameterType, creator, valueExtractor);
+        return Tuple.of(parameterType, creator, valueExtractor, typedCreator);
     }
 }

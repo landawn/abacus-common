@@ -365,8 +365,8 @@ public final class Splitter {
 
     /**
      * Returns a new Splitter instance configured to split text by line separators.
-     * Splitting uses {@link RegExUtil#LINE_SEPARATOR}, that is the regex {@code \R}, so it recognizes every
-     * Unicode line terminator: {@code \n}, {@code \r}, {@code \r\n} (as a single separator), and also
+     * It splits exactly where {@link RegExUtil#LINE_SEPARATOR}, that is the regex {@code \R}, matches, so it recognizes
+     * every Unicode line terminator: {@code \n}, {@code \r}, {@code \r\n} (as a single separator), and also
      * the vertical tab {@code U+000B}, the form feed {@code U+000C}, the next-line character {@code U+0085},
      * the line separator {@code U+2028} and the paragraph separator {@code U+2029}.
      * Useful for splitting multi-line text into individual lines.
@@ -384,7 +384,37 @@ public final class Splitter {
      */
     @Beta
     public static Splitter forLines() {
-        return with(RegExUtil.LINE_SEPARATOR);
+        final Strategy patternStrategy = with(RegExUtil.LINE_SEPARATOR).strategy;
+
+        return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
+            if (!(source instanceof String)) {
+                return patternStrategy.split(source, omitEmptyStrings, trim, strip, limit);
+            }
+
+            return new SplitIterator(source, omitEmptyStrings, trim, strip, limit) {
+                /*
+                 * The separators \R matches, found by a plain char scan instead of the regex engine, which costs several
+                 * times more per character: "\r\n" as one separator, otherwise one of U+000A, U+000B, U+000C, U+000D,
+                 * U+0085, U+2028, U+2029. Only for a String, which cannot change between calls; any other CharSequence
+                 * keeps the pattern engine above.
+                 */
+                @Override
+                boolean nextSeparator() {
+                    for (int i = start; i < sourceLen; i++) {
+                        final char ch = source.charAt(i);
+
+                        if (ch <= '\r' ? ch >= '\n' : ch == 0x85 || ch == 0x2028 || ch == 0x2029) {
+                            separatorStart = i;
+                            separatorEnd = ch == '\r' && i + 1 < sourceLen && source.charAt(i + 1) == '\n' ? i + 2 : i + 1;
+
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+            };
+        });
     }
 
     /**
@@ -1488,7 +1518,7 @@ public final class Splitter {
 
             if (ClassUtil.isPrimitiveType(eleCls)) {
                 for (int i = 0, len = substrs.size(); i < len; i++) {
-                    Array.set(a, i, eleType.valueOf(substrs.get(i)));
+                    setPrimitiveArrayElement(a, i, eleType.valueOf(substrs.get(i)));
                 }
             } else {
                 final Object[] objArray = (Object[]) a;
@@ -1499,6 +1529,38 @@ public final class Splitter {
             }
 
             return (T) a;
+        }
+    }
+
+    /**
+     * Stores {@code element} at {@code index} of the primitive array {@code array}, as {@link Array#set(Object, int, Object)}
+     * does. An element whose class is exactly the array's wrapper type is unboxed directly, which avoids the native reflective
+     * call per element; anything else (including {@code null}) still goes through {@link Array#set(Object, int, Object)}, so
+     * widening and its exceptions are unchanged.
+     *
+     * @param array the primitive array
+     * @param index the index to store at
+     * @param element the value to store
+     */
+    private static void setPrimitiveArrayElement(final Object array, final int index, final Object element) {
+        if (array instanceof final int[] ints && element instanceof final Integer value) {
+            ints[index] = value;
+        } else if (array instanceof final long[] longs && element instanceof final Long value) {
+            longs[index] = value;
+        } else if (array instanceof final double[] doubles && element instanceof final Double value) {
+            doubles[index] = value;
+        } else if (array instanceof final boolean[] booleans && element instanceof final Boolean value) {
+            booleans[index] = value;
+        } else if (array instanceof final float[] floats && element instanceof final Float value) {
+            floats[index] = value;
+        } else if (array instanceof final char[] chars && element instanceof final Character value) {
+            chars[index] = value;
+        } else if (array instanceof final byte[] bytes && element instanceof final Byte value) {
+            bytes[index] = value;
+        } else if (array instanceof final short[] shorts && element instanceof final Short value) {
+            shorts[index] = value;
+        } else {
+            Array.set(array, index, element);
         }
     }
 
@@ -2751,6 +2813,14 @@ public final class Splitter {
         @Override
         public boolean hasNext() {
             while (next == null && !done) {
+                // When empty tokens are retained, the last result is already the entire remainder.
+                // Avoid searching it for a delimiter or allocating a first token that would be discarded.
+                if (!omitEmptyStrings && limit - cnt == 1) {
+                    next = substringFunc.substring(source, start, sourceLen);
+                    done = true;
+                    break;
+                }
+
                 final int tokenStart = start;
                 final int tokenEnd;
 

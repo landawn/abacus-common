@@ -242,7 +242,7 @@ public class ArrayLongStreamTest extends TestBase {
         OptionalDouble average = createStream(Long.MAX_VALUE, Long.MAX_VALUE).average();
 
         assertTrue(average.isPresent());
-        assertEquals((double) Long.MAX_VALUE, average.getAsDouble());
+        assertEquals(Long.MAX_VALUE, average.getAsDouble());
     }
 
     @Test

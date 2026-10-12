@@ -25,7 +25,7 @@ public class IteratorLongStreamTest extends TestBase {
     public void testGroupToRejectsNullDownstreamBeforeInvokingMapFactory() {
         for (final boolean arrayBacked : new boolean[] { true, false }) {
             for (final boolean empty : new boolean[] { true, false }) {
-                final long[] values = empty ? new long[0] : new long[] { (long) 1 };
+                final long[] values = empty ? new long[0] : new long[] { 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
                 try (final LongStream stream = arrayBacked ? LongStream.of(values) : LongStream.of(com.landawn.abacus.util.LongIterator.of(values))) {
                     org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
@@ -47,7 +47,7 @@ public class IteratorLongStreamTest extends TestBase {
                 if (attempts.getAndIncrement() == 1) {
                     throw new IllegalStateException("second attempt");
                 }
-                return (long) delivered.getAndIncrement();
+                return delivered.getAndIncrement();
             }).limit(4).skip(2)) {
                 final LongIteratorEx iterator = stream.iteratorEx();
                 assertThrows(IllegalStateException.class, () -> {
@@ -61,8 +61,8 @@ public class IteratorLongStreamTest extends TestBase {
                     }
                 });
                 assertTrue(iterator.hasNext());
-                assertEquals((long) 2, iterator.nextLong());
-                assertEquals((long) 3, iterator.nextLong());
+                assertEquals(2, iterator.nextLong());
+                assertEquals(3, iterator.nextLong());
                 assertFalse(iterator.hasNext());
                 assertEquals(5, attempts.get());
                 assertEquals(4, delivered.get());
@@ -78,12 +78,12 @@ public class IteratorLongStreamTest extends TestBase {
             if (attempts.getAndIncrement() == 1) {
                 throw new IllegalStateException("second attempt");
             }
-            return (long) delivered.getAndIncrement();
+            return delivered.getAndIncrement();
         }).limit(2)) {
             final LongIteratorEx iterator = stream.iteratorEx();
             assertThrows(IllegalStateException.class, () -> iterator.advance(2));
             assertTrue(iterator.hasNext());
-            assertEquals((long) 1, iterator.nextLong());
+            assertEquals(1, iterator.nextLong());
             assertFalse(iterator.hasNext());
             assertThrows(java.util.NoSuchElementException.class, iterator::nextLong);
             assertEquals(3, attempts.get());
@@ -475,7 +475,7 @@ public class IteratorLongStreamTest extends TestBase {
 
     @Test
     public void testAverageDoesNotOverflowItsRunningSum() {
-        assertEquals((double) Long.MAX_VALUE, iter(Long.MAX_VALUE, Long.MAX_VALUE).average().getAsDouble());
+        assertEquals(Long.MAX_VALUE, iter(Long.MAX_VALUE, Long.MAX_VALUE).average().getAsDouble());
         assertEquals(0d, iter(Long.MAX_VALUE, Long.MIN_VALUE, 1L).average().getAsDouble());
     }
 

@@ -3,7 +3,6 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -190,16 +189,18 @@ public class ParallelArrayCharStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             createCharStream(TEST_ARRAY).filter(c -> {
-                if (c == 'e')
+                if (c == 'e') {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
 
         assertThrows(RuntimeException.class, () -> {
             createCharStream(TEST_ARRAY).map(c -> {
-                if (c == 'g')
+                if (c == 'g') {
                     throw new RuntimeException("Test exception in map");
+                }
                 return c;
             }).toArray();
         });
@@ -1092,10 +1093,18 @@ public class ParallelArrayCharStreamTest extends TestBase {
             assertFalse(CharStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
             assertFalse(CharStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
 
-            assertEquals((char) 1100, new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
-            assertEquals((char) 2899, new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
-            assertFalse(new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
-            assertFalse(new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+            assertEquals((char) 1100,
+                    new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true)
+                            .get());
+            assertEquals((char) 2899,
+                    new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true)
+                            .get());
+            assertFalse(
+                    new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000)
+                            .isPresent());
+            assertFalse(
+                    new ParallelArrayCharStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999)
+                            .isPresent());
         }
     }
     // ---- perf review 2026-09-26 G101 end ----

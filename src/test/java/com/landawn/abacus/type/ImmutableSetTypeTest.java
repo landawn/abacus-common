@@ -140,7 +140,7 @@ public class ImmutableSetTypeTest extends TestBase {
         assertFalse(TypeFactory.getType("Set<String>").isImmutable());
         assertFalse(TypeFactory.getType("SortedSet<String>").isImmutable());
 
-        final ImmutableSet<String> parsed = (ImmutableSet<String>) type.valueOf("[\"a\", \"中\"]");
+        final ImmutableSet<String> parsed = type.valueOf("[\"a\", \"中\"]");
         org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> parsed.add("b"));
         assertNull(type.valueOf("   "));
     }

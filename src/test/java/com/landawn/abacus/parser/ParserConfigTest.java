@@ -371,4 +371,168 @@ public class ParserConfigTest extends TestBase {
         assertNull(config.getIgnoredPropNames(Integer.class));
     }
 
+    // ---- perf review 2026-10-07 G17 begin ----
+
+    // G17-01: ConfigMap.snapshot() no longer re-stores the shared flag once it is set; every copy-on-write
+    // transition around that flag is pinned: first snapshot, repeated snapshots of an already shared map,
+    // snapshot of a snapshot, writes (put/putAll/remove) on the source and on each copy, clear() re-arming
+    // the flag, and snapshots of a caller-owned map.
+    @Test
+    public void testCopyConfigMap_repeatedSnapshotsStayIsolated() {
+        final Map<String, Integer> source = ParserConfig.newConfigMap();
+        source.put("a", 1);
+        source.put("b", 2);
+
+        final Map<String, Integer> first = ParserConfig.copyConfigMap(source);
+        final Map<String, Integer> second = ParserConfig.copyConfigMap(source); // the source is already shared here
+        final Map<String, Integer> third = ParserConfig.copyConfigMap(first); // snapshot of a snapshot
+        assertEquals(source, first);
+        assertEquals(source, second);
+        assertEquals(source, third);
+        assertEquals(2, third.size());
+
+        source.put("a", 10); // the source detaches, the copies keep the old value
+        assertEquals(Integer.valueOf(10), source.get("a"));
+        assertEquals(Integer.valueOf(1), first.get("a"));
+        assertEquals(Integer.valueOf(1), second.get("a"));
+        assertEquals(Integer.valueOf(1), third.get("a"));
+
+        first.remove("b"); // the first copy detaches
+        assertNull(first.get("b"));
+        assertTrue(second.containsKey("b"));
+        assertEquals(Integer.valueOf(2), third.get("b"));
+        assertEquals(Integer.valueOf(2), source.get("b"));
+
+        final Map<String, Integer> more = new HashMap<>();
+        more.put("c", 3);
+        second.putAll(more); // the second copy detaches
+        assertEquals(Integer.valueOf(3), second.get("c"));
+        assertNull(third.get("c"));
+        assertNull(source.get("c"));
+        assertNull(first.get("c"));
+
+        third.put("d", 4); // the last holder of the original storage detaches too
+        assertEquals(Integer.valueOf(4), third.get("d"));
+        assertNull(source.get("d"));
+        assertNull(first.get("d"));
+        assertNull(second.get("d"));
+
+        final Map<String, Integer> fourth = ParserConfig.copyConfigMap(source); // the source shares again
+        source.put("e", 5);
+        assertNull(fourth.get("e"));
+        assertEquals(Integer.valueOf(5), source.get("e"));
+        fourth.put("f", 6);
+        assertNull(source.get("f"));
+        assertEquals(Integer.valueOf(10), fourth.get("a"));
+
+        source.clear(); // clear() re-arms the flag: the cleared map is private again
+        assertTrue(source.isEmpty());
+        assertEquals(Integer.valueOf(10), fourth.get("a"));
+        final Map<String, Integer> fifth = ParserConfig.copyConfigMap(source);
+        source.put("g", 7);
+        assertTrue(fifth.isEmpty());
+        assertEquals(1, source.size());
+        fifth.put("h", 8);
+        assertNull(source.get("h"));
+        assertEquals(Integer.valueOf(8), fifth.get("h"));
+
+        final Map<String, Integer> alias = new HashMap<>(); // a caller-owned map is really copied, both ways
+        alias.put("x", 1);
+        final Map<String, Integer> ofAlias = ParserConfig.copyConfigMap(alias);
+        alias.put("y", 2);
+        assertNull(ofAlias.get("y"));
+        ofAlias.put("z", 3);
+        assertNull(alias.get("z"));
+        final Map<String, Integer> ofOfAlias = ParserConfig.copyConfigMap(ofAlias);
+        ofAlias.put("x", 100);
+        assertEquals(Integer.valueOf(1), ofOfAlias.get("x"));
+        assertEquals(Integer.valueOf(100), ofAlias.get("x"));
+    }
+
+    // G17-01: the same transitions through the public configuration API (value types and property handlers
+    // of a JsonDeserConfig copied repeatedly, as the JSON reader does for every nested generic container).
+    @Test
+    public void testCopy_repeatedConfigCopiesStayIsolated() {
+        final com.landawn.abacus.util.function.BiConsumer<Collection<Object>, Object> firstHandler = Collection::add;
+        final com.landawn.abacus.util.function.BiConsumer<Collection<Object>, Object> secondHandler = (c, e) -> c.clear();
+        final JsonDeserConfig original = new JsonDeserConfig().setValueType("v", String.class).setPropHandler("h", firstHandler);
+
+        final JsonDeserConfig copy1 = original.copy();
+        final JsonDeserConfig copy2 = original.copy();
+        final JsonDeserConfig copy3 = copy1.copy();
+        assertEquals(original, copy1);
+        assertEquals(original, copy2);
+        assertEquals(original, copy3);
+
+        original.setValueType("v", Integer.class).setPropHandler("h", secondHandler);
+        copy1.setValueType("w", Long.class);
+        copy2.setPropHandler("i", secondHandler);
+
+        assertEquals(Integer.class, original.getValueType("v").javaType());
+        assertEquals(String.class, copy1.getValueType("v").javaType());
+        assertEquals(String.class, copy2.getValueType("v").javaType());
+        assertEquals(String.class, copy3.getValueType("v").javaType());
+        assertEquals(Long.class, copy1.getValueType("w").javaType());
+        assertNull(original.getValueType("w"));
+        assertNull(copy2.getValueType("w"));
+        assertNull(copy3.getValueType("w"));
+        assertSame(secondHandler, original.getPropHandler("h"));
+        assertSame(firstHandler, copy1.getPropHandler("h"));
+        assertSame(firstHandler, copy2.getPropHandler("h"));
+        assertSame(firstHandler, copy3.getPropHandler("h"));
+        assertSame(secondHandler, copy2.getPropHandler("i"));
+        assertNull(original.getPropHandler("i"));
+        assertNull(copy3.getPropHandler("i"));
+
+        final JsonDeserConfig copy4 = original.copy(); // copies taken after the original detached
+        final JsonDeserConfig copy5 = original.copy();
+        original.setValueType("v", Double.class);
+        copy4.setValueType("v", Float.class);
+        assertEquals(Double.class, original.getValueType("v").javaType());
+        assertEquals(Float.class, copy4.getValueType("v").javaType());
+        assertEquals(Integer.class, copy5.getValueType("v").javaType());
+        assertSame(secondHandler, copy5.getPropHandler("h"));
+    }
+
+    // G17-01: a configuration shared read-only by several parsing threads (each parse snapshots its maps for
+    // every nested container) keeps producing the configured results and is left unchanged.
+    @Test
+    public void testCopy_sharedConfigUnderConcurrentParsesStaysIntact() throws Exception {
+        final JsonDeserConfig shared = new JsonDeserConfig().setValueType("tags", "List<Integer>").setValueType("unused", String.class);
+        final JsonParser parser = ParserFactory.createJsonParser();
+        final String json = "{\"name\":\"n\",\"tags\":[1,2,3],\"nested\":{\"tags\":[4,5]}}";
+        final int threads = 4;
+        final int iterations = 500;
+        final Object[] results = new Object[threads];
+        final Thread[] workers = new Thread[threads];
+
+        for (int t = 0; t < threads; t++) {
+            final int slot = t;
+            workers[t] = new Thread(() -> {
+                Object last = null;
+                for (int i = 0; i < iterations; i++) {
+                    last = parser.deserialize(json, shared, Map.class);
+                }
+                results[slot] = last;
+            });
+            workers[t].start();
+        }
+
+        for (final Thread worker : workers) {
+            worker.join();
+        }
+
+        final Map<String, Object> expected = parser.deserialize(json, shared, Map.class);
+        assertEquals(java.util.List.of(1, 2, 3), expected.get("tags"));
+        assertEquals(java.util.List.of(4, 5), ((Map<?, ?>) expected.get("nested")).get("tags"));
+        for (final Object result : results) {
+            assertEquals(expected, result);
+        }
+        assertEquals(Integer.class, shared.getValueType("tags").elementType().javaType());
+        assertEquals(String.class, shared.getValueType("unused").javaType());
+        assertNull(shared.getValueType("name"));
+    }
+
+    // ---- perf review 2026-10-07 G17 end ----
+
 }

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -51,6 +52,9 @@ public class DatasetSheetTest extends TestBase {
     }
 
     /** A bean whose second getter throws, so serializing it fails after a partial value has been written. */
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static final class HalfSerializable {
         private String a = "aaa";
         private String b = "bbb";

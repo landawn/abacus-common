@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -78,4 +79,35 @@ public class AbstractArrayTypeTest extends TestBase {
         assertTrue(result.isEmpty());
     }
 
+    // 2026-10-05: the shared compact-JSON element normalization behind the array codecs' valueOf(String).
+    @Test
+    public void jsonElementContent20261005() {
+        assertNull(AbstractArrayType.jsonElementContent("null"));
+        assertEquals("NULL", AbstractArrayType.jsonElementContent("NULL"));
+        assertEquals("null", AbstractArrayType.jsonElementContent("\"null\""));
+        assertEquals("1", AbstractArrayType.jsonElementContent("1"));
+        assertEquals("1", AbstractArrayType.jsonElementContent("\"1\""));
+        assertEquals("-2", AbstractArrayType.jsonElementContent("'-2'"));
+        assertEquals("abc", AbstractArrayType.jsonElementContent("\"abc\""));
+        assertEquals("1", AbstractArrayType.jsonElementContent("\"\\u0031\""));
+        assertEquals("\t1", AbstractArrayType.jsonElementContent("'\\t1'"));
+        // decoded exactly once: a double-escaped sequence is the escaped text
+        assertEquals("\\u0031", AbstractArrayType.jsonElementContent("\"\\\\u0031\""));
+        // a malformed escape is rejected
+        assertThrows(IllegalArgumentException.class, () -> AbstractArrayType.jsonElementContent("\"\\u00\""));
+        // mismatched or lone quotes are not a quoted element
+        assertEquals("\"1'", AbstractArrayType.jsonElementContent("\"1'"));
+        assertEquals("\"1", AbstractArrayType.jsonElementContent("\"1"));
+        assertEquals("\"", AbstractArrayType.jsonElementContent("\""));
+        // an empty quoted element stays quoted for the numeric codecs and is its empty content for the boolean ones
+        assertEquals("\"\"", AbstractArrayType.jsonElementContent("\"\""));
+        assertEquals("''", AbstractArrayType.jsonElementContent("''"));
+        assertEquals("\"\"", AbstractArrayType.jsonElementContent("\"\"", false));
+        assertEquals("", AbstractArrayType.jsonElementContent("\"\"", true));
+        assertEquals("", AbstractArrayType.jsonElementContent("''", true));
+        assertEquals("Y", AbstractArrayType.jsonElementContent("'Y'", true));
+        assertEquals("1", AbstractArrayType.jsonElementContent("\"\\u0031\"", true));
+        assertNull(AbstractArrayType.jsonElementContent("null", true));
+        assertEquals("\"", AbstractArrayType.jsonElementContent("\"", true));
+    }
 }

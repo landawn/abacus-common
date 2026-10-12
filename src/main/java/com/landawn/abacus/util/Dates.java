@@ -177,9 +177,9 @@ import com.landawn.abacus.util.function.LongObjFunction;
  * {@code Calendar} overloads honor the calendar's own zone when no zone is supplied, falling back to
  * the live default zone for the rare {@code Calendar} implementation whose {@code getTimeZone()} returns
  * {@code null}. UTC-equivalence, wherever this class tests it (the fixed UTC/GMT formats, the
- * {@code Calendar} civil-field comparisons), is a property of a zone's rules and never of its ID or
- * class: {@code UTC}, {@code GMT}, {@code Etc/UTC} and a fixed zero-offset zone of any class under any
- * ID all qualify.</p>
+ * {@code Calendar} civil-field comparisons), requires verified fixed zero-offset rules:
+ * {@code UTC}, {@code GMT}, {@code Etc/UTC} and a plain {@code SimpleTimeZone} with fixed zero offset
+ * under any ID qualify. Arbitrary subclasses cannot establish this from their current DST flags.</p>
  *
  * <p><b>Default Formats:</b> with a {@code null} or empty format, {@code java.util.Date} and the SQL
  * types write the UTC {@code 'Z'} forms (see {@link #format(java.util.Date)}), or the offset-bearing
@@ -191,10 +191,12 @@ import com.landawn.abacus.util.function.LongObjFunction;
  * <p><b>A default zone {@code java.time} cannot express.</b> The live default may be a {@code TimeZone}
  * whose rules no {@link ZoneId} carries: its ID is unknown to {@code java.time} (a hand-built
  * {@link SimpleTimeZone} under a made-up name), or it reuses a registered region ID with different
- * rules. A whole-second fixed-offset zone is accepted everywhere, whatever its ID (a sub-second offset,
- * or one beyond -18:00 through +18:00, is rejected by the operations that resolve through a
- * {@link ZoneId}, listed below, and by the civil-field queries named next); for the two other
- * cases this class never substitutes rules silently, and each operation family behaves as its engine
+ * rules. A plain {@code SimpleTimeZone} with a whole-second fixed offset is accepted everywhere,
+ * whatever its ID (a sub-second offset, or one beyond -18:00 through +18:00, is rejected by the operations that resolve through a
+ * {@link ZoneId}, listed below, and by the civil-field queries named next). Strict conversion accepts
+ * registered zones only when the implementation and rules match the registered zone. Other custom
+ * subclasses, including subclasses of {@code SimpleTimeZone}, are rejected: no current DST does not
+ * prove an absence of historical transitions. Each operation family otherwise behaves as its engine
  * allows. Operations that resolve through {@code Calendar} &mdash; the legacy {@code parse*}/{@code format*}
  * overloads with a pattern, the {@code set*}/{@code add*} field arithmetic, and the
  * {@code createXMLGregorianCalendar} factories, which write the offset the custom rules give at the
@@ -206,16 +208,15 @@ import com.landawn.abacus.util.function.LongObjFunction;
  * that lands in a spring-forward gap resolves an hour before the gap. The {@code java.util.Date} overloads of the civil-field queries without a zone parameter ({@code isSameDay},
  * {@code isSameMonth}, {@code isSameYear}, {@code isLastDayOfMonth}, {@code isLastDayOfYear},
  * {@code lengthOfMonth}, {@code lengthOfYear}) use the rules registered for the ID when the default
- * carries daylight-saving rules of its own (a whole-second fixed-offset default is read as that offset,
- * whatever its ID, like everywhere else, and one {@link ZoneOffset} cannot express is rejected whatever
- * its ID), and reject an
- * unknown ID that carries daylight-saving rules; the {@code Calendar} overloads of {@code isSameDay},
+ * has custom rules (a plain fixed-offset {@code SimpleTimeZone} default is read as that offset,
+ * whatever its ID, and one {@link ZoneOffset} cannot express is rejected whatever its ID), and reject
+ * an unknown ID whose rules cannot be verified as fixed; the {@code Calendar} overloads of {@code isSameDay},
  * {@code isSameMonth} and {@code isSameYear} read the calendars' own zone strictly and reject such a
  * zone with {@code IllegalArgumentException}. Everything that resolves an instant through a
  * {@link ZoneId} &mdash; {@code round},
  * {@code truncate} and {@code ceiling} with {@code truncatedEquals} and {@code truncatedCompareTo}, the
  * {@code java.time} parse targets, the {@link DTF} class and
- * the ISO zoned default of {@code format} &mdash; rejects both cases with
+ * the ISO zoned default of {@code format} &mdash; rejects unverified rules with
  * {@code IllegalArgumentException} rather than produce an instant the custom rules would not have.
  * A zone or offset written in the text being parsed makes the fallback irrelevant and is never
  * subject to this. Pass an explicit zone to avoid the question entirely.</p>
@@ -464,7 +465,10 @@ import com.landawn.abacus.util.function.LongObjFunction;
  * {@code (long)} or no-arg constructor, in that order) that can be invoked, otherwise {@code clone()}
  * of the input. Cloning is what makes
  * subtypes with no usable constructor work, including the JDK's own {@code JapaneseImperialCalendar} and
- * {@code BuddhistCalendar}, which {@code Calendar.getInstance()} returns under some default locales.
+ * {@code BuddhistCalendar}, which {@code Calendar.getInstance()} returns under some default locales. An exact
+ * {@code GregorianCalendar} (not a subclass) cannot have a registered creator and always takes the clone path: its
+ * clone, set to the requested instant, keeps the time zone, cutover, leniency and week rules without building a
+ * second calendar.
  * They throw {@code IllegalStateException} when a creator, constructor, or {@code clone()} violates the
  * documented runtime-type, distinct-instance, settings, or requested-instant contract. See
  * {@link #registerDateCreator(Class, LongFunction)} and
@@ -1064,20 +1068,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static final Map<Class<? extends java.util.Calendar>, LongObjFunction<? super Calendar, ? extends java.util.Calendar>> calendarCreatorPool = new ConcurrentHashMap<>();
-
-    static {
-        calendarCreatorPool.put(java.util.GregorianCalendar.class, (millis, c) -> {
-            // Must be `new GregorianCalendar()`, not `Calendar.getInstance()`: under a default locale
-            // that selects a non-Gregorian calendar (e.g. ja-JP-u-ca-japanese), getInstance() returns a
-            // JapaneseImperialCalendar, which would ClassCastException at the GregorianCalendar caller.
-            final GregorianCalendar ret = new GregorianCalendar();
-
-            copyCalendarSettings(c, ret);
-            ret.setTimeInMillis(millis);
-
-            return ret;
-        });
-    }
 
     // Propagates the behavioral settings of the source/template calendar — not just the time zone —
     // so round/add/truncate-style operations don't silently reset leniency or week conventions.
@@ -3304,7 +3294,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
             final TimeZone effectiveZone = timeZone == null ? TimeZone.getDefault() : (TimeZone) timeZone.clone();
 
             try {
-                final LocalDateTime localDateTime = DTF.AUTO_ISO_LOCAL_TIMESTAMP.parseToLocalDateTime(text);
+                // The grammar runs only for text whose fields the direct read rejects, and reports them.
+                LocalDateTime localDateTime = fastIsoLocalDateTime(text, text.length());
+
+                if (localDateTime == null) {
+                    localDateTime = DTF.AUTO_ISO_LOCAL_TIMESTAMP.parseToLocalDateTime(text);
+                }
 
                 return Instant.ofEpochMilli(resolveLocalMillis(localDateTime.withNano(0), effectiveZone)).plusNanos(localDateTime.getNano());
             } catch (final DateTimeException | IllegalArgumentException e) {
@@ -3320,7 +3315,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
             // No fallback zone at all: the text's own 'Z' is the zone, and a designator the text carries
             // is data, not a caller-chosen fixed-zone pattern, so it wins over the supplied zone exactly
             // as a numeric offset does (see checkTimeZone's formatAutoDetected). Passing the zone would
-            // make the fixed-Z formatter treat it as a conflict.
+            // make the fixed-Z formatter treat it as a conflict. The fields before the 'Z' are read directly; the
+            // grammar runs only for text the direct read rejects, and reports it.
+            final LocalDateTime utcDateTime = fastIsoLocalDateTime(text, text.length() - 1);
+
+            if (utcDateTime != null) {
+                return utcDateTime.toInstant(ZoneOffset.UTC);
+            }
+
             try {
                 return DTF.AUTO_ISO_8601_TIMESTAMP.parseToInstant(text, null);
             } catch (final DateTimeException | IllegalArgumentException e) {
@@ -3332,6 +3334,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         if (isFractionalIsoOffsetDateTime(text)) {
             checkFixedFourDigitYearText(text, ISO_OFFSET_DATE_TIME_FORMAT);
+
+            // Read directly; the java.time grammar below runs only for a seconds-precision offset or for text the
+            // direct read rejects, and reports it.
+            final Instant direct = fastIsoOffsetTimestamp(text);
+
+            if (direct != null) {
+                return direct;
+            }
 
             try {
                 // The compact +HHmm offset is accepted without a fraction and by the explicit constants;
@@ -3405,6 +3415,101 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
+     * The local date-time {@code text} spells as {@code yyyy-MM-dd'T'HH:mm:ss}, followed, when {@code end} is not 19,
+     * by a {@code '.'} and a fraction of 1 to 9 digits that ends at {@code end} (the caller owns whatever follows), or
+     * {@code null} when that shape does not hold or a field is out of range.
+     *
+     * <p>The grammars that read this shape on the ISO-8601 parse paths - {@code java.time} formatters for the
+     * auto-detected timestamps, {@code SimpleDateFormat} for the two {@code 'Z'} constants - cost several times the
+     * rest of the parse. This direct read accepts exactly the text they accept in the shape (ASCII digits, a Common
+     * Era year, every field in its range, proleptic Gregorian dates) and yields the same value, the fraction read as
+     * a fraction of a second; for {@code null} the caller runs the grammar, which reports the failure.</p>
+     */
+    @MayReturnNull
+    private static LocalDateTime fastIsoLocalDateTime(final String text, final int end) {
+        final boolean hasFraction = end != 19;
+        final int fractionDigits = end - 20;
+
+        if ((hasFraction && (fractionDigits < 1 || fractionDigits > 9 || text.charAt(19) != '.')) || text.charAt(4) != '-' || text.charAt(7) != '-'
+                || text.charAt(10) != 'T' || text.charAt(13) != ':' || text.charAt(16) != ':') {
+            return null;
+        }
+
+        final int year = parseInt(text, 0, 4);
+        final int month = parseInt(text, 5, 7);
+        final int day = parseInt(text, 8, 10);
+        final int hour = parseInt(text, 11, 13);
+        final int minute = parseInt(text, 14, 16);
+        final int second = parseInt(text, 17, 19);
+        int nano = hasFraction ? parseInt(text, 20, end) : 0;
+
+        if (year < 1 || month < 1 || month > 12 || day < 1 || day > java.time.Month.of(month).length(java.time.Year.isLeap(year)) || hour < 0 || hour > 23
+                || minute < 0 || minute > 59 || second < 0 || second > 59 || nano < 0) {
+            return null;
+        }
+
+        if (hasFraction) {
+            for (int digits = fractionDigits; digits < 9; digits++) {
+                nano *= 10;
+            }
+        }
+
+        return LocalDateTime.of(year, month, day, hour, minute, second, nano);
+    }
+
+    /**
+     * The instant of canonical {@link #ISO_8601_DATE_TIME_FORMAT} or {@link #ISO_8601_TIMESTAMP_FORMAT} text (exactly
+     * three fraction digits) read directly, or {@code null} when the text is not in that exact shape or a field is out
+     * of range. For text of that shape the non-lenient, proleptic, UTC {@code SimpleDateFormat} these constants are
+     * parsed with accepts exactly the valid civil date-times and yields their UTC instant.
+     */
+    @MayReturnNull
+    private static java.util.Date fastUtcConstantParse(final String text, final String format) {
+        final int zuluIndex = ISO_8601_TIMESTAMP_FORMAT.equals(format) ? 23 : 19;
+
+        if (text.length() != zuluIndex + 1 || text.charAt(zuluIndex) != 'Z') {
+            return null;
+        }
+
+        final LocalDateTime localDateTime = fastIsoLocalDateTime(text, zuluIndex);
+
+        return localDateTime == null ? null : new java.util.Date(localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
+    }
+
+    /**
+     * The instant of text {@link #isFractionalIsoOffsetDateTime} accepts when its offset is {@code +HH:mm} or the
+     * compact {@code +HHmm}, read directly; {@code null} for a seconds-precision offset or an out-of-range field,
+     * which the caller leaves to {@code DateTimeFormatter.ISO_OFFSET_DATE_TIME}. Within that shape it accepts
+     * exactly what that formatter accepts (offsets from -18:00 through +18:00) and yields the same instant.
+     */
+    @MayReturnNull
+    private static Instant fastIsoOffsetTimestamp(final String text) {
+        int offsetIndex = text.indexOf('+', 20);
+
+        if (offsetIndex < 0) {
+            offsetIndex = text.indexOf('-', 20);
+        }
+
+        final int tailLength = text.length() - offsetIndex - 1;
+
+        if (offsetIndex < 0 || (tailLength != 4 && (tailLength != 5 || text.charAt(offsetIndex + 3) != ':'))) {
+            return null;
+        }
+
+        final LocalDateTime localDateTime = fastIsoLocalDateTime(text, offsetIndex);
+        final int hours = parseInt(text, offsetIndex + 1, offsetIndex + 3);
+        final int minutes = parseInt(text, text.length() - 2, text.length());
+
+        if (localDateTime == null || hours < 0 || hours > 18 || minutes < 0 || minutes > 59 || (hours == 18 && minutes != 0)) {
+            return null;
+        }
+
+        final int offsetSeconds = hours * 3600 + minutes * 60;
+
+        return localDateTime.toInstant(ZoneOffset.ofTotalSeconds(text.charAt(offsetIndex) == '-' ? -offsetSeconds : offsetSeconds));
+    }
+
+    /**
      * Resolves a local date-time without the adjustment performed by {@link LocalDateTime#atZone(ZoneId)}.
      * A gap has no valid offset and an overlap has two; both are rejected unless the input supplied a
      * valid preferred offset that disambiguates the overlap.
@@ -3443,20 +3548,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Converts a legacy {@link TimeZone} only when its actual rules can be represented faithfully by
      * {@link ZoneId}. The ID is never trusted by itself: a custom zone may reuse a registered ID while
-     * carrying completely different rules.
+     * carrying completely different rules. Only a plain fixed-offset {@link SimpleTimeZone}, or the
+     * registered implementation with matching rules, supplies enough information to verify conversion.
      *
-     * @throws IllegalArgumentException if {@code timeZone} is {@code null}, its rules cannot be represented by a {@code ZoneId}, or its fixed offset is
+     * @param timeZone the legacy zone to verify and convert
+     * @return the verified fixed offset or registered region
+     * @throws IllegalArgumentException if {@code timeZone} is {@code null}, its rules cannot be verified as representable by a {@code ZoneId}, or its fixed offset is
      *         sub-second or outside the supported range.
      */
     private static ZoneId toZoneId(final TimeZone timeZone) throws IllegalArgumentException {
         N.checkArgNotNull(timeZone, cs.timeZone);
 
         final int rawOffsetMillis = timeZone.getRawOffset();
-        final TimeZone fixedOffsetZone = new SimpleTimeZone(rawOffsetMillis, "fixed-offset");
-
-        // Check the rules before consulting the ID. This preserves a manually-created fixed zone even
-        // when it deliberately or accidentally reuses a registered region ID.
-        if (timeZone.hasSameRules(fixedOffsetZone) && fixedOffsetZone.hasSameRules(timeZone)) {
+        // Only the plain implementation guarantees no historical overrides. A subclass can report no
+        // current DST, and even inherit hasSameRules, while getOffset still carries historical transitions.
+        if (timeZone.getClass() == SimpleTimeZone.class && !timeZone.useDaylightTime()) {
             return toZoneOffset(timeZone, rawOffsetMillis);
         }
 
@@ -3465,26 +3571,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
         try {
             zoneId = timeZone.toZoneId();
         } catch (final DateTimeException originalException) {
-            // An ID java.time does not know. Only the rules matter, and a zone that observes no daylight
-            // saving is a plain fixed offset whatever it is called. The fast path above recognises that
-            // only for SimpleTimeZone (its hasSameRules is the one reciprocal with the probe); any other
-            // TimeZone subclass lands here, and useDaylightTime() is the same self-description the fast
-            // path trusts.
-            if (!timeZone.useDaylightTime() && timeZone.getDSTSavings() == 0) {
-                return toZoneOffset(timeZone, rawOffsetMillis);
-            }
-
             throw new IllegalArgumentException(
-                    "Time zone '" + timeZone.getID() + "' has daylight-saving rules under an ID java.time does not know, so no java.time.ZoneId can express it",
+                    "Time zone '" + timeZone.getID() + "' has unverified rules under an ID java.time does not know, so no java.time.ZoneId can express it",
                     originalException);
         }
 
         final TimeZone registeredZone = TimeZone.getTimeZone(zoneId);
 
-        // Use a reciprocal check because TimeZone subclasses are allowed to specialize hasSameRules.
-        if (!timeZone.hasSameRules(registeredZone) || !registeredZone.hasSameRules(timeZone)) {
+        // TimeZone's base hasSameRules compares only current raw offset and DST use; it cannot verify
+        // an arbitrary implementation's history, even when both operands report a match (for example UTC).
+        if (timeZone.getClass() != registeredZone.getClass() || !timeZone.hasSameRules(registeredZone) || !registeredZone.hasSameRules(timeZone)) {
             throw new IllegalArgumentException(
-                    "Time zone '" + timeZone.getID() + "' carries rules that differ from the registered java.time zone with the same ID");
+                    "Time zone '" + timeZone.getID() + "' carries rules that cannot be verified against the registered java.time zone with the same ID");
         }
 
         return zoneId;
@@ -5499,6 +5597,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
         final TimeZone effectiveTimeZone = checkTimeZone(dateTime, formatToUse, timeZone, zoneIsDefaultSnapshot, Strings.isEmpty(explicitFormat));
 
         if (Strings.isNotEmpty(explicitFormat) && (ISO_8601_DATE_TIME_FORMAT.equals(formatToUse) || ISO_8601_TIMESTAMP_FORMAT.equals(formatToUse))) {
+            // Canonical text is read directly; the pooled SimpleDateFormat, about ten times as expensive, parses only
+            // text the direct read rejects, and reports it.
+            final java.util.Date direct = fastUtcConstantParse(dateTime, formatToUse);
+
+            if (direct != null) {
+                return direct;
+            }
+
             final DateFormat sdf = getSDF(formatToUse, UTC_TIME_ZONE);
 
             try {
@@ -5615,6 +5721,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
         // ISO region IDs (VV) are not SimpleDateFormat syntax. Extended auto-detected offset forms
         // (fractional seconds or offset seconds) likewise need DateTimeFormatter's ISO grammar.
         if (ISO_ZONED_DATE_TIME_FORMAT.equals(formatToUse) || (extendedIsoAutoDetected && ISO_OFFSET_DATE_TIME_FORMAT.equals(formatToUse))) {
+            // Fractional text with a +HH:mm or +HHmm offset is read directly, as parseAutoTimestampToInstant reads it;
+            // the grammar runs only for text the direct read rejects (an offset with seconds, an out-of-range field),
+            // and reports it. The fallback zone plays no part in either.
+            final Instant direct = ISO_OFFSET_DATE_TIME_FORMAT.equals(formatToUse) && dateTime.charAt(19) == '.' ? fastIsoOffsetTimestamp(dateTime) : null;
+
+            if (direct != null) {
+                return direct.toEpochMilli();
+            }
+
             try {
                 return dtfForParsing(formatToUse, extendedIsoAutoDetected).parseToInstant(normalizeCompactIsoOffsetText(dateTime, formatToUse), timezone)
                         .toEpochMilli();
@@ -5652,7 +5767,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
             final TimeZone effectiveZone = timezone == null ? TimeZone.getDefault() : (TimeZone) timezone.clone();
 
             try {
-                final LocalDateTime localDateTime = dtfForParsing(formatToUse, true).parseToLocalDateTime(dateTime);
+                // Read directly, as parseAutoTimestampToInstant reads this shape; the grammar runs only for text whose
+                // fields the direct read rejects, and reports them.
+                LocalDateTime localDateTime = fastIsoLocalDateTime(dateTime, dateTime.length());
+
+                if (localDateTime == null) {
+                    localDateTime = dtfForParsing(formatToUse, true).parseToLocalDateTime(dateTime);
+                }
+
                 return resolveLocalMillis(localDateTime.withNano(0), effectiveZone) + localDateTime.getNano() / 1_000_000;
             } catch (final DateTimeException | IllegalArgumentException e) {
                 // As above: an empty format must be reported as "the auto-detected format".
@@ -7182,6 +7304,22 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
                 }
+            }
+
+            return str;
+        }
+
+        final boolean utcTimestampFormat = ISO_8601_TIMESTAMP_FORMAT.equals(format);
+
+        if (utcTimestampFormat || ISO_8601_DATE_TIME_FORMAT.equals(format)) {
+            // The two fixed-'Z' constants are exactly the shapes the default format writes: checkTimeZone has fixed
+            // the zone to UTC and checkFixedFourDigitYear has held the year to 0001-9999, so the character writer of
+            // fastDateFormat yields the text the pooled SimpleDateFormat would, without a formatter or pool round trip.
+            // The text still reaches the Appendable as one append(String), as on the SimpleDateFormat path.
+            final String str = fastDateFormat(null, date.getTime(), utcTimestampFormat);
+
+            if (appendable != null) {
+                appendFormattedText(appendable, str);
             }
 
             return str;
@@ -9611,7 +9749,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field;
      *         an exact tie rounds up to the later boundary (see <i>Rounding semantics</i> above).
      * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the rounded
      *         epoch-millisecond value overflows.
@@ -9706,7 +9844,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field;
      *         an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
      * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
-     *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the rounded
      *         epoch-millisecond value overflows.
      * @throws IllegalStateException if the registered creator, declared constructor, or {@link java.util.Date#clone()}
@@ -9792,7 +9930,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the
      *         field; an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
      * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -9876,7 +10014,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the
      *         field; an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
      * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
-     *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
      *         as well as the largest).
@@ -9955,7 +10093,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new date object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -10029,7 +10167,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the CalendarField to which the date is to be truncated.
      * @return a new date object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
-     *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
      *         as well as the largest).
@@ -10104,7 +10242,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new calendar object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -10175,7 +10313,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the CalendarField to which the calendar is to be truncated.
      * @return a new calendar object of type T, truncated to the specified field.
      * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
-     *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
      *         as well as the largest).
@@ -10254,7 +10392,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new date object of type T, adjusted to the ceiling of the specified field.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the ceiling
      *         epoch-millisecond value overflows.
@@ -10330,7 +10468,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the CalendarField to which the date is to be adjusted.
      * @return a new date object of type T, adjusted to the nearest future unit as specified by the field.
      * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
-     *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the ceiling
      *         epoch-millisecond value overflows.
      * @throws IllegalStateException if the registered creator, declared constructor, or {@link java.util.Date#clone()}
@@ -10406,7 +10544,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field.
      * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
-     *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
+     *         zone carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is not a whole number of
      *         seconds, or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -10473,7 +10611,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the field to be used for the ceiling operation, as a CalendarField.
      * @return a new calendar object representing the adjusted time.
      * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
-     *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         carries custom rules that cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
      *         as well as the largest).
@@ -10889,8 +11027,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the finest retained field when truncating the values for comparison.
      * @return {@code true} if cal1 and cal2 are equal up to the specified field; {@code false} otherwise.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(Calendar, CalendarField)
      * @see #truncatedEquals(java.util.Date, java.util.Date, CalendarField)
@@ -10939,8 +11077,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return {@code true} if equal; otherwise {@code false}.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(Calendar, int)
      * @see #truncatedEquals(java.util.Date, java.util.Date, int)
@@ -10986,8 +11124,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the finest retained field when truncating the values for comparison.
      * @return {@code true} if date1 and date2 are equal up to the specified field; {@code false} otherwise.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(java.util.Date, CalendarField)
      * @see #truncatedEquals(Calendar, Calendar, CalendarField)
@@ -11036,8 +11174,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return {@code true} if equal; otherwise {@code false}.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(java.util.Date, int)
      * @see #truncatedEquals(Calendar, Calendar, int)
@@ -11083,8 +11221,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the finest retained field when truncating the values for comparison.
      * @return a negative integer, zero, or a positive integer as the first Calendar is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      *         A non-lenient calendar holding an invalid field combination throws its own
      *         {@code IllegalArgumentException} (the rejection {@code Calendar} itself raises).
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
@@ -11139,8 +11277,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a negative integer, zero, or a positive integer as the first
      * calendar is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      *         A non-lenient calendar holding an invalid field combination throws its own
      *         {@code IllegalArgumentException} (the rejection {@code Calendar} itself raises).
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
@@ -11191,8 +11329,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the finest retained field when truncating the values for comparison.
      * @return a negative integer, zero, or a positive integer as the first Date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(java.util.Date, CalendarField)
      * @see #truncatedCompareTo(Calendar, Calendar, CalendarField)
@@ -11245,8 +11383,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return a negative integer, zero, or a positive integer as the first
      * date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
-     *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
-     *         no {@link ZoneId} can represent, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
+     *         supported field, or if the evaluating time zone carries custom rules that
+     *         cannot be verified against a {@link ZoneId}, or a fixed offset that is sub-second or beyond -18:00 through +18:00.
      * @throws ArithmeticException if the year magnitude exceeds 280 million.
      * @see #truncate(java.util.Date, int)
      * @see #truncatedCompareTo(Calendar, Calendar, int)
@@ -12011,11 +12149,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same civil day in the live default time zone.
      * @throws IllegalArgumentException if either date is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      * @see #isSameDay(java.util.Date, java.util.Date, ZoneId)
      */
     public static boolean isSameDay(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
@@ -12124,9 +12261,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static boolean isSameDay(final Calendar calendar1, final Calendar calendar2) throws IllegalArgumentException {
         N.checkArgNotNull(calendar1, cs.calendar1);
         N.checkArgNotNull(calendar2, cs.calendar2);
-        requireCompatibleTimeZones(calendar1, calendar2);
-
-        return isSameDay(calendar1, calendar2, toZoneId(zoneOf(calendar1)));
+        return isSameDay(calendar1, calendar2, requireCompatibleTimeZones(calendar1, calendar2));
     }
 
     /**
@@ -12217,11 +12352,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same month of the same year in the live default time zone.
      * @throws IllegalArgumentException if either date is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      * @see #isSameMonth(java.util.Date, java.util.Date, ZoneId)
      */
     public static boolean isSameMonth(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
@@ -12329,9 +12463,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static boolean isSameMonth(final Calendar calendar1, final Calendar calendar2) throws IllegalArgumentException {
         N.checkArgNotNull(calendar1, cs.calendar1);
         N.checkArgNotNull(calendar2, cs.calendar2);
-        requireCompatibleTimeZones(calendar1, calendar2);
-
-        return isSameMonth(calendar1, calendar2, toZoneId(zoneOf(calendar1)));
+        return isSameMonth(calendar1, calendar2, requireCompatibleTimeZones(calendar1, calendar2));
     }
 
     /**
@@ -12422,11 +12554,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date2 the second date, not altered, not {@code null}.
      * @return {@code true} if they represent the same civil year in the live default time zone.
      * @throws IllegalArgumentException if either date is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      * @see #isSameYear(java.util.Date, java.util.Date, ZoneId)
      */
     public static boolean isSameYear(final java.util.Date date1, final java.util.Date date2) throws IllegalArgumentException {
@@ -12534,9 +12665,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static boolean isSameYear(final Calendar calendar1, final Calendar calendar2) throws IllegalArgumentException {
         N.checkArgNotNull(calendar1, cs.calendar1);
         N.checkArgNotNull(calendar2, cs.calendar2);
-        requireCompatibleTimeZones(calendar1, calendar2);
-
-        return isSameYear(calendar1, calendar2, toZoneId(zoneOf(calendar1)));
+        return isSameYear(calendar1, calendar2, requireCompatibleTimeZones(calendar1, calendar2));
     }
 
     /**
@@ -12609,9 +12738,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * The implicit zone of the civil-field queries that deliberately accept ID-derived rules for a default
-     * zone whose daylight-saving rules no {@link ZoneId} can express.
+     * zone whose custom rules cannot be verified against a {@link ZoneId}.
      *
-     * <p>A whole-second fixed-offset default is read as that offset whatever its ID, exactly as
+     * <p>A plain {@link SimpleTimeZone} with a whole-second fixed offset is read as that offset whatever its ID, exactly as
      * {@link #toZoneId(TimeZone)} reads it: it is expressible, so there is nothing to approximate, and reading
      * {@code new SimpleTimeZone(0, "America/New_York")} through New York's rules made {@code isSameDay(a, b)}
      * disagree with {@code isSameDay(a, b, TimeZone.getDefault())}, {@code truncatedEquals} and
@@ -12623,19 +12752,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * rejection in this class is an {@code IllegalArgumentException}, and these methods document that,
      * so translate rather than leak a second exception type out of one class.</p>
      *
-     * @throws IllegalArgumentException if the default time-zone ID is not recognized by java.time and it carries daylight-saving rules, or its
-     *         fixed offset is sub-second or outside the {@code ZoneOffset} range
+     * @throws IllegalArgumentException if the default time-zone ID is not recognized by java.time and its rules cannot be verified as fixed, or a
+     *         plain {@code SimpleTimeZone} has a fixed offset that is sub-second or outside the {@code ZoneOffset} range
      */
     private static ZoneId defaultZoneId() throws IllegalArgumentException {
         // One read of the default: ZoneId.systemDefault() is TimeZone.getDefault().toZoneId(), so reading
         // it again for the message could name a zone other than the one that failed.
         final TimeZone defaultTimeZone = TimeZone.getDefault();
         final int rawOffsetMillis = defaultTimeZone.getRawOffset();
-        final TimeZone fixedOffsetZone = new SimpleTimeZone(rawOffsetMillis, "fixed-offset");
-
-        // Rules before ID, as in toZoneId: only a SimpleTimeZone answers this reciprocal probe, so a
-        // registered ZoneInfo default (even UTC) takes the ID path below as before.
-        if (defaultTimeZone.hasSameRules(fixedOffsetZone) && fixedOffsetZone.hasSameRules(defaultTimeZone)) {
+        // As in toZoneId, a subclass's present-day flags cannot prove an absence of historical rules.
+        if (defaultTimeZone.getClass() == SimpleTimeZone.class && !defaultTimeZone.useDaylightTime()) {
             return toZoneOffset(defaultTimeZone, rawOffsetMillis);
         }
 
@@ -12644,26 +12770,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
         try {
             zoneId = defaultTimeZone.toZoneId();
         } catch (final DateTimeException e) {
-            // A fixed offset of another TimeZone subclass under an unknown ID: a fixed offset is a fixed
-            // offset whatever it is called, and the class-level policy accepts one everywhere.
-            if (!defaultTimeZone.useDaylightTime() && defaultTimeZone.getDSTSavings() == 0) {
-                return toZoneOffset(defaultTimeZone, rawOffsetMillis);
-            }
-
             throw new IllegalArgumentException("The default time zone '" + defaultTimeZone.getID() + "' has an ID that java.time does not recognize", e);
         }
 
-        // The same carve-out under a REGISTERED ID, as toZoneId's registered-rules check: a fixed offset of
-        // another TimeZone subclass that reuses a region ID (the probe above answers only a SimpleTimeZone) is
-        // that offset, not the region's rules. A default that carries daylight-saving rules of its own under
-        // such an ID keeps the ID's rules, as documented.
-        final TimeZone registeredZone = TimeZone.getTimeZone(zoneId);
-
-        if ((!defaultTimeZone.hasSameRules(registeredZone) || !registeredZone.hasSameRules(defaultTimeZone)) && !defaultTimeZone.useDaylightTime()
-                && defaultTimeZone.getDSTSavings() == 0) {
-            return toZoneOffset(defaultTimeZone, rawOffsetMillis);
-        }
-
+        // These implicit civil queries deliberately use the registered ID for an unverified custom
+        // default. Keep its regional history instead of guessing a fixed offset from current DST flags.
         return zoneId;
     }
 
@@ -12672,13 +12783,22 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code calendar1} and {@code calendar2} do not have equivalent time-zone rules
+     * @return the first calendar's validated zone, reused by the civil-field comparison
+     * @throws IllegalArgumentException if either zone is unsupported or the calendars have inequivalent time-zone rules
      */
-    private static void requireCompatibleTimeZones(final Calendar calendar1, final Calendar calendar2) throws IllegalArgumentException {
+    private static ZoneId requireCompatibleTimeZones(final Calendar calendar1, final Calendar calendar2) throws IllegalArgumentException {
         final TimeZone tz1 = zoneOf(calendar1);
+        if (calendar1 == calendar2) {
+            return toZoneId(tz1);
+        }
         final TimeZone tz2 = zoneOf(calendar2);
 
-        if (!haveSameRules(tz1, tz2)) {
+        // Validate each zone once. Unsupported rules retain toZoneId's diagnostic instead of being
+        // misreported as different rules; the caller reuses the validated first zone.
+        final ZoneId zone1 = toZoneId(tz1);
+        final ZoneId zone2 = tz1 == tz2 ? zone1 : toZoneId(tz2);
+
+        if (!zone1.getRules().equals(zone2.getRules())) {
             // Two zones under one ID differ only in their rules, and "got 'X' and 'X'" said nothing about
             // that; the classes are the visible hint (a hand-built SimpleTimeZone beside the registered one).
             final String got = tz1.getID().equals(tz2.getID())
@@ -12688,6 +12808,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
             throw new IllegalArgumentException("Calendars must share equivalent time-zone rules to compare civil fields; " + got
                     + ". Pass an explicit ZoneId or TimeZone to compare both instants in one zone.");
         }
+
+        return zone1;
     }
 
     /**
@@ -12699,28 +12821,6 @@ public abstract sealed class Dates permits Dates.DateUtil {
         final TimeZone zone = calendar.getTimeZone();
 
         return zone == null ? TimeZone.getDefault() : zone;
-    }
-
-    /**
-     * Whether two zones carry the same rules. The reciprocal {@code hasSameRules} check is kept as the
-     * cheap first answer, but it is class-dependent ({@code SimpleTimeZone.hasSameRules} is {@code false}
-     * for any operand that is not a {@code SimpleTimeZone}), so a calendar in {@code UTC} and one in
-     * {@code new SimpleTimeZone(0, "Any")} were reported as inequivalent although their rules are
-     * identical. When it says no, the {@link ZoneRules} the two zones convert to decide: those compare
-     * by content (a fixed offset equals the registered {@code UTC}/{@code Etc/UTC}/{@code GMT} rules,
-     * {@code Asia/Kolkata} equals {@code Asia/Calcutta}), and a zone whose rules no {@link ZoneId} can
-     * express is simply not equivalent to anything but itself.
-     */
-    private static boolean haveSameRules(final TimeZone tz1, final TimeZone tz2) {
-        if (tz1.hasSameRules(tz2) && tz2.hasSameRules(tz1)) {
-            return true;
-        }
-
-        try {
-            return toZoneId(tz1).getRules().equals(toZoneId(tz2).getRules());
-        } catch (final IllegalArgumentException e) {
-            return false;
-        }
     }
 
     //-----------------------------------------------------------------------
@@ -13540,25 +13640,20 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Whether {@code timeZone} names UTC under any spelling: a registered zone whose rules are a fixed
-     * zero offset ({@code UTC}, {@code GMT}, {@code Etc/UTC}, ...) or a fixed zero-offset zone of any
-     * class under any ID. This is the one UTC-equivalence test the class uses; {@link DTF#parseZoned}
+     * zero offset ({@code UTC}, {@code GMT}, {@code Etc/UTC}, ...) or a plain fixed zero-offset
+     * {@link SimpleTimeZone} under any ID. This is the one UTC-equivalence test the class uses; {@link DTF#parseZoned}
      * applies the same {@code normalized()} rule to the {@link ZoneId} it already holds.
      *
-     * <p>Not {@code timeZone.hasSameRules(UTC_TIME_ZONE)}: that test depends on the runtime class of the
-     * receiver. {@code SimpleTimeZone.hasSameRules} is {@code false} for any operand that is not itself a
-     * {@code SimpleTimeZone}, so {@code new SimpleTimeZone(0, "UTC")} was rejected as not UTC-equivalent,
-     * while {@code ZoneInfo} and the base {@code TimeZone} implementation compare raw offset and
-     * daylight-saving use and accepted the very same zone when the operands were swapped, and accepted a
-     * hand-written zero-offset {@code TimeZone} subclass outright. Whether a zone is UTC is a property of
-     * its rules, not of its class.</p>
+     * <p>{@code hasSameRules} alone is insufficient: the base implementation compares only the current
+     * raw offset and DST use. A custom subclass can pass that check while retaining historical
+     * transitions, so conversion must verify the implementation and rules first.</p>
      */
     private static boolean isUtcEquivalent(final TimeZone timeZone) {
         try {
             return ZoneOffset.UTC.equals(toZoneId(timeZone).normalized());
         } catch (final IllegalArgumentException e) {
-            // toZoneId refuses custom daylight-saving rules, a sub-second or out-of-range offset, and a
-            // fixed offset under an ID that names a registered region with different rules; none of those
-            // is a fixed zero offset, so the answer is no in every case.
+            // toZoneId refuses custom daylight-saving rules, a sub-second or out-of-range offset, and
+            // unverified or modified registered rules; none is accepted as a fixed zero offset.
             return false;
         }
     }
@@ -14044,6 +14139,35 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
+     * Whether a class declares a {@code (long)} constructor, resolved once per class for
+     * {@link #constructOrCloneDate} and {@link #constructOrCloneCalendar}. A class's declared constructors
+     * never change, but {@code ClassUtil.getDeclaredConstructor} caches only the signatures it finds, so for
+     * a class without one every lookup threw and caught a {@code NoSuchMethodException}, stack trace and
+     * all: several microseconds on each {@code add*}, {@code set*}, {@code truncate}, {@code round} or
+     * {@code ceiling} of such a value. No JDK calendar declares one (the {@code BuddhistCalendar} and
+     * {@code JapaneseImperialCalendar} some default locales select included), and neither do most custom
+     * calendar subclasses. {@code ClassValue}, so the entry lives on the class it describes and never keeps
+     * that class or its loader alive.
+     */
+    private static final ClassValue<Boolean> longConstructorDeclaredPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> type) {
+            return ClassUtil.getDeclaredConstructor(type, long.class) != null;
+        }
+    };
+
+    /**
+     * As {@link #longConstructorDeclaredPool}, for the no-arg constructor {@link #constructOrCloneCalendar}
+     * tries next.
+     */
+    private static final ClassValue<Boolean> noArgConstructorDeclaredPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> type) {
+            return ClassUtil.getDeclaredConstructor(type) != null;
+        }
+    };
+
+    /**
      * Builds another {@code targetClass} instance at {@code millis}: a declared {@code (long)} constructor when
      * one exists and can be invoked here, otherwise {@code clone()} of the source. Cloning is what makes
      * subclasses without a usable constructor work at all, and it carries state a fresh construction
@@ -14055,7 +14179,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     private static java.util.Date constructOrCloneDate(final Class<? extends java.util.Date> targetClass, final long millis, final java.util.Date source)
             throws IllegalStateException {
-        final Constructor<? extends java.util.Date> constructor = ClassUtil.getDeclaredConstructor(targetClass, long.class);
+        // A missing signature is known per class; only a declared one is looked up (cached by ClassUtil).
+        final Constructor<? extends java.util.Date> constructor = longConstructorDeclaredPool.get(targetClass)
+                ? ClassUtil.getDeclaredConstructor(targetClass, long.class)
+                : null;
 
         if (constructor != null) {
             try {
@@ -14095,6 +14222,16 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     private static <T extends Calendar> T createCalendar(final T source, final long millis) throws IllegalStateException {
         final Class<T> cls = (Class<T>) source.getClass();
+
+        if (cls == GregorianCalendar.class) {
+            // This built-in type cannot have a registered creator. Its clone already owns independent
+            // fields and time-zone state and retains the cutover, leniency and week conventions.
+            // Do not apply this to subclasses, whose construction and clone behavior may be customized.
+            final T result = (T) source.clone();
+            result.setTimeInMillis(millis);
+            return result;
+        }
+
         final LongObjFunction<? super Calendar, ? extends java.util.Calendar> creator = calendarCreatorPool.get(cls);
 
         if (creator != null) {
@@ -14152,7 +14289,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *         runtime class
      */
     private static <T extends Calendar> T constructOrCloneCalendar(final Class<T> targetClass, final long millis, final T source) throws IllegalStateException {
-        Constructor<T> constructor = ClassUtil.getDeclaredConstructor(targetClass, long.class);
+        // A missing signature is known per class; only a declared one is looked up (cached by ClassUtil).
+        Constructor<T> constructor = longConstructorDeclaredPool.get(targetClass) ? ClassUtil.getDeclaredConstructor(targetClass, long.class) : null;
 
         if (constructor != null) {
             try {
@@ -14163,7 +14301,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             }
         }
 
-        constructor = ClassUtil.getDeclaredConstructor(targetClass);
+        constructor = noArgConstructorDeclaredPool.get(targetClass) ? ClassUtil.getDeclaredConstructor(targetClass) : null;
 
         if (constructor != null) {
             try {
@@ -14215,11 +14353,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its month.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      */
     public static boolean isLastDayOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
@@ -14250,11 +14387,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its year.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      */
     public static boolean isLastDayOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
@@ -14280,11 +14416,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to be evaluated.
      * @return the number of days in the month of the given date.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      */
     public static int lengthOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
@@ -14309,11 +14444,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to be evaluated.
      * @return the number of days in the year of the given date.
      * @throws IllegalArgumentException if {@code date} is {@code null}, or the live default time zone is a
-     *         fixed offset {@link ZoneOffset} cannot express (a sub-second offset, or one beyond -18:00
-     *         through +18:00, whatever the zone's ID), or carries daylight-saving rules under an ID
-     *         {@link ZoneId} does not recognize. A whole-second fixed-offset default is read as that
-     *         offset whatever its ID; a default that customizes the daylight-saving rules of a known ID
-     *         is accepted, and the known ID's rules are used.
+     *         plain {@code SimpleTimeZone} with a sub-second fixed offset or one beyond -18:00 through +18:00,
+     *         or has unverified custom rules under an ID {@link ZoneId} does not recognize. A plain fixed-offset
+     *         {@code SimpleTimeZone} default is read as that offset whatever its ID; a default with other custom
+     *         rules under a known ID is accepted, and the known ID's rules are used.
      */
     public static int lengthOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
@@ -14609,10 +14743,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * compact {@code +HHmm} parsing extension), while {@link #ISO_OFFSET_DATE_TIME} uses {@code XXXXX}
      * so offset seconds can round-trip without loss.</p>
      *
-     * <p><b>Legacy time zones:</b> Methods accepting {@link TimeZone} support registered IDs and
-     * fixed-offset zones representable by {@link ZoneOffset}, whatever their ID. They reject a zone
-     * with daylight-saving rules under an unregistered ID, or one that reuses a registered ID with
-     * different rules, because those rules cannot be represented faithfully by a {@link ZoneId}. The
+     * <p><b>Legacy time zones:</b> Methods accepting {@link TimeZone} support verified registered zones and
+     * plain fixed-offset {@link SimpleTimeZone} instances representable by {@link ZoneOffset}, whatever
+     * their ID. Other custom subclasses or modified registered rules are rejected because their full
+     * history cannot be verified against a {@link ZoneId} from current offset and DST flags. The
      * fallback zone is consulted only for zone-less text: a zone or offset written in the text does
      * not require the fallback to be representable, and the fallback is not converted at all in that
      * case. Only the fixed-zone formatters ({@link #ISO_8601_DATE_TIME}, {@link #ISO_8601_TIMESTAMP},
@@ -15089,6 +15223,18 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *         {@link #HTTP_DATE}, or carries an offset that is not valid for its zone
          */
         private TemporalAccessor parseRaw(final CharSequence text) throws IllegalArgumentException {
+            return parseRaw(text, false);
+        }
+
+        /**
+         * As {@link #parseRaw(CharSequence)}; {@code zonedResolutionFollows} is {@code true} only for a caller
+         * that resolves the result through {@link #parseZoned(CharSequence, TimeZone, TemporalAccessor)}
+         * whenever it has a date. For dated text that resolution ends with exactly the strict check the
+         * offset/zone validation makes - same local date-time, zone and offset, no other check able to fail
+         * before it, the same failure wrapping - so the validation is not repeated here for it: doing it
+         * twice cost a second strict resolution, about a tenth of parsing region-zoned text.
+         */
+        private TemporalAccessor parseRaw(final CharSequence text, final boolean zonedResolutionFollows) throws IllegalArgumentException {
             final TemporalAccessor parsed;
 
             if (httpDateFormat && text.length() != 29) {
@@ -15103,7 +15249,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             }
 
             try {
-                validateOffsetAgainstZone(parsed);
+                validateOffsetAgainstZone(parsed, zonedResolutionFollows);
             } catch (final DateTimeException e) {
                 throw parseFailure(text, e);
             }
@@ -15130,11 +15276,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * parsed local date-time (e.g. {@code 12:00-08:00[America/Los_Angeles]} in July is rejected).
          * A missing time defaults to midnight and a missing date to 1970-01-01 for this validation (so a
          * daylight-saving offset in time-only text is rejected); instant-producing parsers separately require
-         * a complete date.
+         * a complete date. Dated text is left to the caller when {@code zonedResolutionFollows} (see
+         * {@link #parseRaw(CharSequence, boolean)}).
          *
          * @throws DateTimeException if the parsed offset is not valid for the parsed zone at the parsed local date-time
          */
-        private void validateOffsetAgainstZone(final TemporalAccessor parsed) throws DateTimeException {
+        private void validateOffsetAgainstZone(final TemporalAccessor parsed, final boolean zonedResolutionFollows) throws DateTimeException {
             if (!parsed.isSupported(ChronoField.OFFSET_SECONDS)) {
                 return;
             }
@@ -15146,6 +15293,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
             }
 
             final LocalDate date = parsed.query(TemporalQueries.localDate());
+
+            if (date != null && zonedResolutionFollows) {
+                return; // parseZoned repeats this very check (see parseRaw(CharSequence, boolean))
+            }
+
             final LocalTime time = parsed.query(TemporalQueries.localTime());
 
             if (date == null && time == null) {
@@ -15177,7 +15329,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         /**
          * Resolves {@code text} to a {@code ZonedDateTime}. Offset/zone information in the text always
-         * wins (their consistency was validated by {@link #parseRaw}); zone-less values are interpreted
+         * wins (their consistency is validated by {@link #parseRaw}, for dated text by the strict
+         * resolution that ends this parse); zone-less values are interpreted
          * in {@code zone}, or the live default zone when {@code zone} is {@code null}. A complete local
          * date is required (time-only input is rejected); a missing time defaults to midnight.
          * Nonexistent local times in a DST gap and ambiguous local times in an
@@ -15191,7 +15344,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *         date/time
          */
         private ZonedDateTime parseZoned(final CharSequence text, final TimeZone fallbackZone) throws IllegalArgumentException {
-            return parseZoned(text, fallbackZone, parseRaw(text));
+            return parseZoned(text, fallbackZone, parseRaw(text, true));
         }
 
         /**
@@ -16349,7 +16502,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
             // parseZoned rejects time-only text (no date to resolve an instant on); SQL Time wants exactly
             // the wall time, resolved on the 1970-01-01 epoch date in its written or fallback zone.
-            final TemporalAccessor parsed = parseRaw(text);
+            final TemporalAccessor parsed = parseRaw(text, true);
 
             if (!parsed.isSupported(ChronoField.EPOCH_DAY)) {
                 try {
@@ -16507,7 +16660,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             final TimeZone effectiveZone = noZoneSupplied ? TimeZone.getDefault() : (TimeZone) tz.clone();
             // A default snapshot is a display choice, never a conflict with a fixed-zone formatter.
             final TimeZone parsingZone = noZoneSupplied && (utcZFormat || httpDateFormat) ? null : effectiveZone;
-            final TemporalAccessor parsed = parseRaw(text);
+            final TemporalAccessor parsed = parseRaw(text, true);
             final ZonedDateTime zdt = parseZoned(text, parsingZone, parsed);
 
             // Locale week settings match Dates.parseToCalendar(..., locale) for this formatter's locale.

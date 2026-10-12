@@ -1,6 +1,14 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -281,8 +289,8 @@ public class ReviewFollowupParserTest extends TestBase {
                 assertSame(EmptyToken.OTHER, entity.get("other"));
             }
         }
-        // The StAX contract for an empty String property has not changed.
-        assertNull(new XmlParserImpl(XmlParserType.StAX).deserialize("<stringBean><value/></stringBean>", StringBean.class).getValue());
+        // An empty String property is the empty string (2026-10-06: the StAX reader used to yield the property default, null).
+        assertEquals("", new XmlParserImpl(XmlParserType.StAX).deserialize("<stringBean><value/></stringBean>", StringBean.class).getValue());
     }
 
     @Test
@@ -313,12 +321,15 @@ public class ReviewFollowupParserTest extends TestBase {
 
         @com.fasterxml.jackson.annotation.JsonCreator
         public static EmptyToken from(final String value) {
-            if (value.isEmpty())
+            if (value.isEmpty()) {
                 return EMPTY;
-            if (value.equals("other"))
+            }
+            if (value.equals("other")) {
                 return OTHER;
-            if (value.equals("absent"))
+            }
+            if (value.equals("absent")) {
                 return null; // A nonempty token may legitimately decode to null.
+            }
             throw new IllegalArgumentException(value);
         }
     }

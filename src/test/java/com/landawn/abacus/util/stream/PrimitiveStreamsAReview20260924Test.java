@@ -105,25 +105,24 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         for (final Supplier<IntStream> src : sources) {
             final AtomicInteger closed = new AtomicInteger();
             NullPointerException ex = assertThrows(NullPointerException.class,
-                    () -> src.get().onClose(closed::incrementAndGet).toCollection(() -> (List<Integer>) null));
+                    () -> src.get().onClose(closed::incrementAndGet).toCollection(() -> null));
             assertTrue(ex.getMessage().contains("supplier returned null"), ex.getMessage());
             ex = assertThrows(NullPointerException.class, () -> src.get().onClose(closed::incrementAndGet).toMultiset(() -> null));
             assertTrue(ex.getMessage().contains("supplier returned null"), ex.getMessage());
             assertEquals(2, closed.get());
         }
 
-        final List<Supplier<IntStream>> seqSources = List.of(() -> IntStream.empty(), () -> IntStream.of(1, 2, 2),
-                () -> IntStream.of(IntIterator.of(1, 2)), () -> IntStream.of(1, 2).skip(2));
+        final List<Supplier<IntStream>> seqSources = List.of(() -> IntStream.empty(), () -> IntStream.of(1, 2, 2), () -> IntStream.of(IntIterator.of(1, 2)),
+                () -> IntStream.of(1, 2).skip(2));
         for (final Supplier<IntStream> src : seqSources) {
             final AtomicInteger closed = new AtomicInteger();
             NullPointerException ex = assertThrows(NullPointerException.class,
-                    () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, () -> (Map<Integer, Integer>) null));
+                    () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, () -> null));
             assertTrue(ex.getMessage().contains("mapFactory returned null"), ex.getMessage());
             assertThrows(NullPointerException.class,
-                    () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, Integer::sum, () -> (Map<Integer, Integer>) null));
-            assertThrows(NullPointerException.class, () -> src.get()
-                    .onClose(closed::incrementAndGet)
-                    .groupTo(i -> i, java.util.stream.Collectors.counting(), () -> (Map<Integer, Long>) null));
+                    () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, Integer::sum, () -> null));
+            assertThrows(NullPointerException.class,
+                    () -> src.get().onClose(closed::incrementAndGet).groupTo(i -> i, java.util.stream.Collectors.counting(), () -> null));
             assertEquals(3, closed.get());
         }
 
@@ -160,20 +159,21 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         }
 
         final AtomicInteger closed = new AtomicInteger();
+        assertThrows(NullPointerException.class, () -> LongStream.of(1L).onClose(closed::incrementAndGet).toMap(x -> x, x -> x, () -> null));
         assertThrows(NullPointerException.class,
-                () -> LongStream.of(1L).onClose(closed::incrementAndGet).toMap(x -> x, x -> x, () -> (Map<Long, Long>) null));
+                () -> LongStream.empty().onClose(closed::incrementAndGet).toMap(x -> x, x -> x, Long::sum, () -> null));
         assertThrows(NullPointerException.class,
-                () -> LongStream.empty().onClose(closed::incrementAndGet).toMap(x -> x, x -> x, Long::sum, () -> (Map<Long, Long>) null));
-        assertThrows(NullPointerException.class, () -> CharStream.of(CharIterator.of('a'))
-                .onClose(closed::incrementAndGet)
-                .groupTo(c -> c, java.util.stream.Collectors.counting(), () -> (Map<Character, Long>) null));
+                () -> CharStream.of(CharIterator.of('a'))
+                        .onClose(closed::incrementAndGet)
+                        .groupTo(c -> c, java.util.stream.Collectors.counting(), () -> null));
         assertThrows(NullPointerException.class,
-                () -> CharStream.of('a').onClose(closed::incrementAndGet).toMap(c -> c, c -> c, () -> (Map<Character, Character>) null));
+                () -> CharStream.of('a').onClose(closed::incrementAndGet).toMap(c -> c, c -> c, () -> null));
         assertThrows(NullPointerException.class,
-                () -> ByteStream.of((byte) 1).onClose(closed::incrementAndGet).toMap(b -> b, b -> b, () -> (Map<Byte, Byte>) null));
-        assertThrows(NullPointerException.class, () -> ByteStream.empty()
-                .onClose(closed::incrementAndGet)
-                .groupTo(b -> b, java.util.stream.Collectors.counting(), () -> (Map<Byte, Long>) null));
+                () -> ByteStream.of((byte) 1).onClose(closed::incrementAndGet).toMap(b -> b, b -> b, () -> null));
+        assertThrows(NullPointerException.class,
+                () -> ByteStream.empty()
+                        .onClose(closed::incrementAndGet)
+                        .groupTo(b -> b, java.util.stream.Collectors.counting(), () -> null));
         assertEquals(6, closed.get());
     }
 
@@ -369,8 +369,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         assertArrayEquals(new int[] { 5, 3, 0 }, IntStream.ofIndices(source, source.length - 1, -1, (a, f) -> N.lastIndexOf(a, 1, f)).toArray());
 
         // forward direction still rejects a negative fromIndex; validation order unchanged
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> IntStream.ofIndices(source, -1, 1, (a, f) -> N.indexOf(a, 1, f)));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> IntStream.ofIndices(source, -1, 1, (a, f) -> N.indexOf(a, 1, f)));
         assertTrue(ex.getMessage().contains("fromIndex"), ex.getMessage());
         ex = assertThrows(IllegalArgumentException.class, () -> IntStream.ofIndices(new int[0], -1, null));
         assertTrue(ex.getMessage().contains("fromIndex"), ex.getMessage());
@@ -394,8 +393,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         assertThrows(NullPointerException.class,
                 () -> CharStream.zip(List.of(CharStream.of('a'), CharStream.of('b', 'c')), new char[] { 'x', 'y' }, cs -> null).toArray());
         assertThrows(NullPointerException.class, () -> ByteStream.zip(List.of(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), bs -> null).toArray());
-        assertThrows(NullPointerException.class,
-                () -> ByteStream.zip(List.of(ByteStream.of((byte) 1)), new byte[] { 0 }, bs -> null).toArray());
+        assertThrows(NullPointerException.class, () -> ByteStream.zip(List.of(ByteStream.of((byte) 1)), new byte[] { 0 }, bs -> null).toArray());
         assertThrows(NullPointerException.class, () -> IntStream.zip(List.of(IntStream.of(1), IntStream.of(2)), is -> null).toArray());
         assertThrows(NullPointerException.class, () -> IntStream.zip(List.of(IntStream.of(1)), new int[] { 0 }, is -> null).toArray());
         assertThrows(NullPointerException.class, () -> LongStream.zip(List.of(LongStream.of(1), LongStream.of(2)), ls -> null).toArray());
@@ -411,7 +409,8 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         assertArrayEquals(new char[] { 'x', 'z', '|' },
                 CharStream.zip(Arrays.asList(CharStream.of('a', 'b', 'c'), CharStream.of('x', 'y', 'z')), cs -> (char) (cs[0] + cs[1] - 'a')).toArray());
         assertArrayEquals(new int[] { 3, 5 }, IntStream.zip(List.of(IntStream.of(1, 2), IntStream.of(2, 3)), is -> is[0] + is[1]).toArray());
-        assertArrayEquals(new long[] { 3, 7 }, LongStream.zip(List.of(LongStream.of(1, 2), LongStream.of(2)), new long[] { 0, 5 }, ls -> ls[0] + ls[1]).toArray());
+        assertArrayEquals(new long[] { 3, 7 },
+                LongStream.zip(List.of(LongStream.of(1, 2), LongStream.of(2)), new long[] { 0, 5 }, ls -> ls[0] + ls[1]).toArray());
         assertArrayEquals(new byte[] { 3 }, ByteStream.zip(List.of(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), bs -> (byte) (bs[0] + bs[1])).toArray());
     }
 
@@ -426,8 +425,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
         assertEquals(1001, pulled.get());
 
         pulled.set(0);
-        assertArrayEquals(new int[] { 1 },
-                IntStream.generate(() -> (int) pulled.incrementAndGet()).step(1_000_000).limit(1).toArray());
+        assertArrayEquals(new int[] { 1 }, IntStream.generate(() -> (int) pulled.incrementAndGet()).step(1_000_000).limit(1).toArray());
         assertEquals(1, pulled.get());
 
         assertEquals(1, IntStream.of(1, 2, 3).map(x -> x == 2 ? 1 / 0 : x).step(2).first().getAsInt());

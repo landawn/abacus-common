@@ -256,7 +256,52 @@ abstract class AbstractFloatStream extends FloatStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return flatMapToObj(t -> Stream.of(mapper.apply(t)));
+        if (isParallel()) {
+            return flatMapToObj(t -> Stream.of(mapper.apply(t)));
+        }
+
+        // Sequential: read each mapped array in place instead of wrapping it in a Stream and an iterator per element.
+        // Same source/mapper call sequence as flatMapToObj(t -> Stream.of(mapper.apply(t))), and the same close handlers.
+        final FloatIteratorEx iter = iteratorEx();
+        final ObjIteratorEx<T> mappedIter = new ObjIteratorEx<>() {
+            private T[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                while (idx >= len) {
+                    if (iter.hasNext()) {
+                        cur = mapper.apply(iter.nextFloat());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            @Override
+            public T next() throws NoSuchElementException {
+                if (idx >= len && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return cur[idx++];
+            }
+
+            @Override
+            public void closeResource() {
+                cur = null;
+                len = 0;
+                idx = 0;
+            }
+        };
+
+        return newStream(mappedIter, false, null, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     @Override
@@ -1085,6 +1130,8 @@ abstract class AbstractFloatStream extends FloatStream {
         }), sorted);
     }
 
+    // Avoid wrappers or checks on each read solely to release a cycle's cache when it closes.
+    // Upstream close handlers still run; cached values follow normal iterator reachability.
     @Override
     public FloatStream cycled() throws IllegalStateException {
         assertNotClosed();
@@ -1570,8 +1617,15 @@ abstract class AbstractFloatStream extends FloatStream {
         assertNotClosed();
 
         try {
-            @SuppressWarnings("resource")
-            final float[] a = sorted().toArray();
+            final float[] a = toArray();
+
+            if (!isSorted()) {
+                if (isParallel()) {
+                    N.parallelSort(a);
+                } else {
+                    N.sort(a);
+                }
+            }
 
             if (a.length == 0) {
                 return Optional.empty();
@@ -1591,8 +1645,15 @@ abstract class AbstractFloatStream extends FloatStream {
         assertNotClosed();
 
         try {
-            @SuppressWarnings("resource")
-            final float[] a = sorted().toArray();
+            final float[] a = toArray();
+
+            if (!isSorted()) {
+                if (isParallel()) {
+                    N.parallelSort(a);
+                } else {
+                    N.sort(a);
+                }
+            }
 
             if (N.isEmpty(a)) {
                 return Pair.of(new FloatSummaryStatistics(), Optional.empty());

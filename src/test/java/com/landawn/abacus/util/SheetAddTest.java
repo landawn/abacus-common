@@ -394,6 +394,7 @@ public class SheetAddTest extends SheetTestSupport {
         assertEquals("[nope] are not all included in this sheet with row key set: [row1, row2, row3]",
                 assertThrows(IllegalArgumentException.class, () -> sheet.putAll(foreignPlain)).getMessage());
     }
+
     // ---- perf review 2026-09-26 G070 begin ----
     // G070-01: an all-null new column (null or empty argument) is presized; pin contents, order and later growth.
     @Test

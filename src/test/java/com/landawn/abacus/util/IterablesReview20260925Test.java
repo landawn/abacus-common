@@ -78,7 +78,7 @@ public class IterablesReview20260925Test extends TestBase {
         assertEquals(4L, Iterables.sumIntToLong(Arrays.<Number> asList(MutableInt.of(1), new AtomicInteger(3))).get());
         assertEquals(2.0, Iterables.averageInt(Arrays.<Number> asList(MutableInt.of(1), new AtomicInteger(3))).get());
         assertEquals(2.0, Iterables.averageLong(Arrays.<Number> asList(MutableLong.of(1), new AtomicLong(3))).get());
-        assertEquals((double) Long.MAX_VALUE, Iterables.averageLong(Arrays.<Number> asList(MutableLong.of(Long.MAX_VALUE))).get());
+        assertEquals(Long.MAX_VALUE, Iterables.averageLong(Arrays.<Number> asList(MutableLong.of(Long.MAX_VALUE))).get());
         assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.<Number> asList(MutableLong.of(3_000_000_000L))));
         assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.<Number> asList(3_000_000_000L)));
         assertThrows(ArithmeticException.class, () -> Iterables.averageInt(Arrays.<Number> asList(new AtomicLong(-3_000_000_000L))));

@@ -114,6 +114,34 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
             return (Integer) defaultValue();
         }
 
+        // Numbers.parseIntOrElse accepts exactly the text Numbers.toInt accepts, without constructing an exception
+        // or any other object for the rest. MIN_VALUE also marks rejected text, which parseRejected parses the
+        // original way, so the suffix recovery and every failure diagnostic stay off this common path.
+        final int value = Numbers.parseIntOrElse(str, Integer.MIN_VALUE);
+
+        return value != Integer.MIN_VALUE ? value : parseRejected(str);
+    }
+
+    /**
+     * Parses text that {@link Numbers#parseIntOrElse(String, int)} did not accept as a {@code int} (or that is the text of {@code Integer.MIN_VALUE}, the rejection marker), with the
+     * single-suffix recovery and the failures documented on {@link #valueOf(String)}.
+     *
+     * @param str the non-empty text to parse
+     * @return the parsed value
+     * @throws NumberFormatException if the text is not a valid integer literal, with or without its single suffix
+     * @throws ArithmeticException if the text is a well-formed integer outside the {@code int} range
+     */
+    private static int parseRejected(final String str) throws NumberFormatException, ArithmeticException {
+        // Decimal text with an F/f/D/d suffix is accepted below only once the suffix is removed. Parse that form
+        // directly instead of first constructing the exception Numbers.toInt reports for it.
+        if (hasDecimalFloatingSuffix(str)) {
+            final int value = Numbers.parseIntOrElse(str.substring(0, str.length() - 1), Integer.MIN_VALUE);
+
+            if (value != Integer.MIN_VALUE) {
+                return value;
+            }
+        }
+
         try {
             return Numbers.toInt(str);
         } catch (final NumberFormatException e) {

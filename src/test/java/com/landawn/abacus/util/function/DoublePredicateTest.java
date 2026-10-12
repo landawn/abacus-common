@@ -265,7 +265,6 @@ public class DoublePredicateTest extends TestBase {
         assertTrue(DoublePredicate.NOT_ZERO.test(-0.0d));
     }
 
-
     @Test
     public void testIsZeroAndNotZeroUseTotalOrderingForNegativeZeroAndNaN() {
         assertTrue(DoublePredicate.IS_ZERO.test(0.0));

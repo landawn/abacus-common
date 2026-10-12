@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,8 +24,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class CommonUtilEqualsTest extends CommonUtilTestSupport {
 
@@ -313,11 +313,11 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
 
     @Test
     public void rangeEquals_nullArrayAcceptedForEmptyRange() {
-        assertTrue(N.equals((int[]) null, 0, new int[] { 1 }, 1, 0));
-        assertTrue(N.equals((int[]) null, 0, (int[]) null, 0, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equals((int[]) null, 0, new int[] { 1 }, 0, 1));
-        assertTrue(N.equals((String[]) null, 0, new String[] { "a" }, 1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.equalsIgnoreCase((String[]) null, 0, new String[] { "a" }, 0, 1));
+        assertTrue(CommonUtil.equals((int[]) null, 0, new int[] { 1 }, 1, 0));
+        assertTrue(CommonUtil.equals((int[]) null, 0, (int[]) null, 0, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals((int[]) null, 0, new int[] { 1 }, 0, 1));
+        assertTrue(CommonUtil.equals((String[]) null, 0, new String[] { "a" }, 1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equalsIgnoreCase((String[]) null, 0, new String[] { "a" }, 0, 1));
     }
 
     @Test
@@ -371,14 +371,13 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertDoesNotThrow(() -> N.class.getMethod("mismatch", Collection.class, int.class, Collection.class, int.class, int.class));
 
         // the same offset+count families are reachable through the public N facade, not only through CommonUtil
-        assertDoesNotThrow(() -> N.checkFromIndexSize(1, 2, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.checkFromIndexSize(1, 3, 3));
+        assertDoesNotThrow(() -> CommonUtil.checkFromIndexSize(1, 2, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.checkFromIndexSize(1, 3, 3));
 
         final int[] viaN = new int[3];
-        N.copy(new int[] { 1, 2, 3 }, 1, viaN, 0, 2);
+        CommonUtil.copy(new int[] { 1, 2, 3 }, 1, viaN, 0, 2);
         assertArrayEquals(new int[] { 2, 3, 0 }, viaN);
     }
-
 
     @Test
     public void testEqualsByKeys_nullMapVersusEmptyAndNullValueVersusAbsentKey() {
@@ -394,7 +393,6 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertFalse(CommonUtil.equalsByKeys(empty, nullValued, Arrays.asList("k")));
         assertTrue(CommonUtil.equalsByKeys(empty, new HashMap<String, Integer>(), Arrays.asList("k")));
     }
-
 
     @Test
     public void testEqualsEverythingTreatsPathAsLeafValue() {

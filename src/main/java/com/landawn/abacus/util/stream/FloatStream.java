@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
@@ -47,6 +48,7 @@ import com.landawn.abacus.util.FloatList;
 import com.landawn.abacus.util.FloatSummaryStatistics;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FF;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
@@ -2630,11 +2632,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
     /**
      * Creates a new FloatStream that is supplied by the given supplier.
-     * The supplier's first successful result is memoized. If it throws, a later traversal or close may retry it.
+     * The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
      * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
      * the supplier so the supplied stream can be closed.
      *
-     * <p><b>Implementation Note:</b> it's equivalent to {@code Stream.just(supplier).flatMapToFloat(it -> it.get())}.
+     * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
+     * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
+     * not detected (see {@link Stream#defer(Supplier)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2661,10 +2667,22 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<FloatStream> s = Fn.memoize(supplier);
-        return FloatStream.of(FloatIterator.defer(() -> {
+        // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
+        final Holder<FloatStream> deferred = new Holder<>();
+
+        final FloatStream result = FloatStream.of(FloatIterator.defer(() -> {
             final FloatStream source = s.get();
+
+            if (source != null && source == deferred.value()) {
+                throw new IllegalStateException("Stream supplier returned the deferred stream itself");
+            }
+
             return source == null ? FloatIterator.empty() : source.iteratorEx();
         })).onClose(newCloseHandler(s));
+
+        deferred.setValue(result);
+
+        return result;
     }
 
     /**
@@ -3851,7 +3869,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         final List<? extends FloatStream> sources = new ArrayList<>(streams);
 
         return new IteratorFloatStream(new FloatIteratorEx() { //NOSONAR
-            private final Iterator<? extends FloatStream> iterators = sources.iterator();
+            private final ListIterator<? extends FloatStream> iterators = sources.listIterator();
             private FloatStream cur;
             private FloatIterator iter;
 
@@ -3859,7 +3877,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             public boolean hasNext() {
                 while ((iter == null || !iter.hasNext()) && iterators.hasNext()) {
                     if (cur != null) {
+                        // The slot is taken before close(): a close handler that re-enters this iterator moves it on.
+                        final int index = iterators.previousIndex();
                         cur.close();
+                        // Drop the closed input from the private snapshot (the close handler skips a closed stream anyway):
+                        // otherwise it keeps whatever the exhausted input still references, such as the array of a
+                        // sorted() input, reachable until this stream itself is unreachable.
+                        sources.set(index, null);
                     }
 
                     cur = iterators.next();
@@ -4646,7 +4670,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
             @Override
             public boolean hasNext() {
-                return iterA.hasNext() || iterB.hasNext() || hasNextA || hasNextB;
+                // A buffered head already proves availability; probing its source can evaluate an unneeded tail.
+                return hasNextA || hasNextB || iterA.hasNext() || iterB.hasNext();
             }
 
             @Override

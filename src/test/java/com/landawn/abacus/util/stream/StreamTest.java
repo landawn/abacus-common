@@ -51,6 +51,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -154,9 +155,6 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongTriFunction;
 import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Stream.WindowHandler;
-
-import com.landawn.abacus.TestBase;
-import java.util.concurrent.Executor;
 
 public class StreamTest extends AbstractTest {
 
@@ -6359,8 +6357,9 @@ public class StreamTest extends AbstractTest {
     public void testSpsFilterE() {
         Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
         Stream<Integer> filtered = stream.spsFilterE(n -> {
-            if (n == null)
+            if (n == null) {
                 throw new IllegalArgumentException("null value");
+            }
             return n % 2 == 0;
         });
         assertHaveSameElements(Arrays.asList(2, 4), filtered.toList());
@@ -6370,8 +6369,9 @@ public class StreamTest extends AbstractTest {
     public void testSpsMapE() {
         Stream<Integer> stream = Stream.of(1, 2, 3);
         Stream<String> mapped = stream.spsMapE(n -> {
-            if (n == null)
+            if (n == null) {
                 throw new IllegalArgumentException("null value");
+            }
             return String.valueOf(n * 2);
         });
         assertHaveSameElements(Arrays.asList("2", "4", "6"), mapped.toList());
@@ -6388,8 +6388,9 @@ public class StreamTest extends AbstractTest {
     public void testSpsFlatMapE() {
         Stream<Integer> stream = Stream.of(1, 2, 3);
         Stream<Integer> flatMapped = stream.spsFlatMapE(n -> {
-            if (n == null)
+            if (n == null) {
                 throw new IllegalArgumentException("null value");
+            }
             return Stream.of(n, n * 10);
         });
         List<Integer> result = flatMapped.toList();
@@ -12284,7 +12285,7 @@ public class StreamTest extends AbstractTest {
     @Test
     public void testParallelConcatRejectsDisposableAfterRegularElement() {
         NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
-        Stream<Object> source = Stream.of((Object) "safe", disposable);
+        Stream<Object> source = Stream.of("safe", disposable);
 
         assertThrows(IllegalStateException.class, () -> Stream.parallelConcat(Arrays.asList(source), 1, 8).count());
     }
@@ -16019,7 +16020,6 @@ public class StreamTest extends AbstractTest {
         assertEquals("element cannot be mapped to a null key", e.getMessage());
     }
 
-
     @Test
     public void testCombinationsNegativeLengthThrowsIllegalArgument() {
         // Array-backed, iterator-backed and parallel streams all reject a negative length with IllegalArgumentException.
@@ -16154,6 +16154,7 @@ public class StreamTest extends AbstractTest {
         assertEquals(Arrays.asList(111, 202, 300), Stream.zip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z).toList());
         assertEquals(3, closeCount.get());
     }
+
     // ---- perf review 2026-09-26 G108 begin ----
     // G108-01: pins the column-major order of flatten(T[][], true) for jagged input with null/empty/short rows and null elements
     @Test
@@ -16242,4 +16243,133 @@ public class StreamTest extends AbstractTest {
         assertEquals(0, Stream.flatten(new Integer[][] { null, {}, null }, true).count());
     }
     // ---- perf review 2026-09-26 G108 end ----
+
+    // ---- bug review 2026-09-30 G123 begin ----
+    // G123: Stream/EntryStream/primitive-stream defer reject a supplier that returns the deferred stream itself
+    // (IllegalStateException instead of StackOverflowError).
+    @Test
+    public void testDefer_supplierReturningTheDeferredStreamItselfFailsFast() {
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s = new Stream[1];
+        s[0] = Stream.defer(() -> s[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> s[0].count());
+
+        @SuppressWarnings("unchecked")
+        final EntryStream<Object, Object>[] es = new EntryStream[1];
+        es[0] = EntryStream.defer(() -> es[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> es[0].count());
+
+        final ByteStream[] b = new ByteStream[1];
+        b[0] = ByteStream.defer(() -> b[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> b[0].count());
+
+        final CharStream[] c = new CharStream[1];
+        c[0] = CharStream.defer(() -> c[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> c[0].count());
+
+        final ShortStream[] sh = new ShortStream[1];
+        sh[0] = ShortStream.defer(() -> sh[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> sh[0].count());
+
+        final IntStream[] i = new IntStream[1];
+        i[0] = IntStream.defer(() -> i[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> i[0].count());
+
+        final LongStream[] l = new LongStream[1];
+        l[0] = LongStream.defer(() -> l[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> l[0].count());
+
+        final FloatStream[] f = new FloatStream[1];
+        f[0] = FloatStream.defer(() -> f[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> f[0].count());
+
+        final DoubleStream[] d = new DoubleStream[1];
+        d[0] = DoubleStream.defer(() -> d[0]);
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> d[0].count());
+
+        // unchanged: a normal supplier, and a null result (empty)
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(1, 2), Stream.defer(() -> Stream.of(1, 2)).toList());
+        org.junit.jupiter.api.Assertions.assertEquals(0, Stream.defer(() -> null).count());
+        org.junit.jupiter.api.Assertions.assertEquals(3, LongStream.defer(() -> LongStream.of(1, 2, 3)).count());
+        org.junit.jupiter.api.Assertions.assertEquals(1, EntryStream.defer(() -> EntryStream.of("a", 1)).count());
+    }
+    // ---- bug review 2026-09-30 G123 end ----
+
+    // ---- bug review 2026-09-30 verify2 G129 begin ----
+    // Self-returning deferred stream fails fast on the iterator, skip/limit and parallel paths too, and the failure is cached.
+    @Test
+    public void testDefer_selfReturningStreamFailsOnIteratorSkipAndParallelPaths() {
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s1 = new Stream[1];
+        s1[0] = Stream.defer(() -> s1[0]);
+        final Iterator<Object> iter = s1[0].iterator();
+        final IllegalStateException first = assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals("Stream supplier returned the deferred stream itself", first.getMessage());
+        assertSame(first, assertThrows(IllegalStateException.class, iter::next));
+        s1[0].close();
+
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s2 = new Stream[1];
+        s2[0] = Stream.defer(() -> s2[0]);
+        assertThrows(IllegalStateException.class, () -> s2[0].skip(1).limit(2).toList());
+
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s3 = new Stream[1];
+        s3[0] = Stream.defer(() -> s3[0]);
+        assertThrows(IllegalStateException.class, () -> s3[0].parallel(4).map(x -> x).count());
+
+        final IntStream[] i1 = new IntStream[1];
+        i1[0] = IntStream.defer(() -> i1[0]);
+        assertThrows(IllegalStateException.class, () -> i1[0].iterator().hasNext());
+        i1[0].close();
+
+        final IntStream[] i2 = new IntStream[1];
+        i2[0] = IntStream.defer(() -> i2[0]);
+        assertThrows(IllegalStateException.class, () -> i2[0].parallel(4).boxed().toList());
+    }
+
+    // Closing a self-returning deferred stream, before or after a failed traversal, runs the supplier once, does not
+    // recurse, and runs the stream's own close handlers once.
+    @Test
+    public void testDefer_selfReturningStreamCloseIsSafe() {
+        final AtomicInteger calls = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s1 = new Stream[1];
+        s1[0] = Stream.defer(() -> {
+            calls.incrementAndGet();
+            return s1[0];
+        });
+        assertDoesNotThrow(() -> s1[0].close());
+        assertEquals(1, calls.get());
+
+        calls.set(0);
+        final AtomicInteger closes = new AtomicInteger();
+        @SuppressWarnings("unchecked")
+        final Stream<Object>[] s2 = new Stream[1];
+        s2[0] = Stream.defer(() -> {
+            calls.incrementAndGet();
+            return s2[0];
+        });
+        final Stream<Object> withHandler = s2[0].onClose(closes::incrementAndGet);
+        assertThrows(IllegalStateException.class, withHandler::count);
+        assertDoesNotThrow(() -> withHandler.close());
+        assertEquals(1, calls.get());
+        assertEquals(1, closes.get());
+    }
+
+    // Neighbours unchanged: a deferred stream that returns ANOTHER deferred stream, and the supplied stream is closed once.
+    @Test
+    public void testDefer_otherDeferredStreamAndInnerCloseUnchanged() {
+        final Stream<Integer> other = Stream.defer(() -> Stream.of(5, 6));
+        assertEquals(Arrays.asList(5, 6), Stream.defer(() -> other).toList());
+
+        final AtomicInteger innerCloses = new AtomicInteger();
+        assertEquals(Arrays.asList(1, 2, 3), Stream.defer(() -> Stream.of(1, 2, 3).onClose(innerCloses::incrementAndGet)).toList());
+        assertEquals(1, innerCloses.get());
+
+        assertEquals(6, IntStream.defer(() -> IntStream.of(1, 2, 3)).parallel(2).sum());
+        assertEquals(0, IntStream.defer(() -> null).count());
+    }
+    // ---- bug review 2026-09-30 verify2 G129 end ----
+
 }

@@ -236,8 +236,7 @@ public class StreamImplReview20260924cTest extends TestBase {
         final AtomicInteger connCloses = new AtomicInteger();
         assertOpenFailureWins(SQLException.class, s -> {
             try {
-                return s.persist(dataSource(connectionFailingOnPrepare(connCloses)), "insert into t values (?)", 10, 0,
-                        (x, stmt) -> stmt.setInt(1, x));
+                return s.persist(dataSource(connectionFailingOnPrepare(connCloses)), "insert into t values (?)", 10, 0, (x, stmt) -> stmt.setInt(1, x));
             } catch (final SQLException e) {
                 seen[0] = e;
                 throw e;
@@ -412,14 +411,12 @@ public class StreamImplReview20260924cTest extends TestBase {
         assertTrue(e.getMessage().startsWith(anon.getClass().getName() + " cannot be combined"), e.getMessage());
 
         // Canonical names are still used where they exist.
-        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
-                () -> combiner.accept(new AtomicInteger(), new AtomicInteger()));
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> combiner.accept(new AtomicInteger(), new AtomicInteger()));
         assertTrue(e2.getMessage().startsWith("java.util.concurrent.atomic.AtomicInteger cannot be combined"), e2.getMessage());
 
         // Through a parallel collect with an ad-hoc container.
-        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () -> Stream.of(range(0, 1000).toArray(new Integer[0]))
-                .parallel(4)
-                .collect(() -> new Object() {
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(range(0, 1000).toArray(new Integer[0])).parallel(4).collect(() -> new Object() {
                     int sum;
                 }, (a, x) -> a.sum += x));
         assertFalse(e3.getMessage().startsWith("null"), e3.getMessage());
@@ -544,7 +541,8 @@ public class StreamImplReview20260924cTest extends TestBase {
             final AtomicInteger emitted = new AtomicInteger();
             final boolean[] flagAfter = new boolean[1];
             final Thread consumer = new Thread(() -> {
-                final Stream<Integer> paced = v == 0 ? Stream.generate(() -> 1).delay(java.time.Duration.ofMillis(20)) : Stream.generate(() -> 1).rateLimited(50);
+                final Stream<Integer> paced = v == 0 ? Stream.generate(() -> 1).delay(java.time.Duration.ofMillis(20))
+                        : Stream.generate(() -> 1).rateLimited(50);
                 paced.takeWhile(x -> !Thread.currentThread().isInterrupted()).forEach(x -> emitted.incrementAndGet());
                 flagAfter[0] = Thread.currentThread().isInterrupted();
             });

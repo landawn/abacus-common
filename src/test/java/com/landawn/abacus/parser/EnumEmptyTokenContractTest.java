@@ -151,8 +151,9 @@ public class EnumEmptyTokenContractTest extends TestBase {
 
         @JsonCreator
         public static CreatorToken from(final String token) {
-            if ("value".equals(token))
+            if ("value".equals(token)) {
                 return VALUE;
+            }
             throw new IllegalArgumentException("Unsupported token: " + token);
         }
     }
@@ -167,8 +168,9 @@ public class EnumEmptyTokenContractTest extends TestBase {
 
         @JsonXmlCreator
         public static XmlCreatorToken from(final String token) {
-            if ("value".equals(token))
+            if ("value".equals(token)) {
                 return VALUE;
+            }
             throw new IllegalArgumentException("Unsupported token: " + token);
         }
     }
@@ -192,8 +194,9 @@ public class EnumEmptyTokenContractTest extends TestBase {
 
         @JsonCreator
         public static EmptyCreator from(final String token) {
-            if ("".equals(token))
+            if ("".equals(token)) {
                 return EMPTY;
+            }
             throw new IllegalArgumentException("Unsupported token: " + token);
         }
     }

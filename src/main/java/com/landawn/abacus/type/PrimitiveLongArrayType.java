@@ -170,7 +170,9 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      *
      * <p>An element may also be enclosed in a matching pair of double or single quotes (for example
      * {@code ["1", "2"]}), which is the form {@link #serializeTo(CharacterWriter, long[], JsonXmlSerConfig)} writes when
-     * {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed before the element is parsed.</p>
+     * {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed and the JSON escapes of the content are decoded once before the element is parsed, and an
+     * empty quoted element is rejected as a malformed number rather than read as the default. The unquoted literal
+     * {@code null} is the element default {@code 0L}, because a primitive array cannot hold {@code null}.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed long array, or {@code null} if the input string is {@code null}, empty, or blank.
@@ -190,22 +192,21 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
             return N.EMPTY_LONG_ARRAY;
         }
 
+        final long[] decimalArray = (long[]) parseNumericArray(str, elementType, long.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] strs = split(str);
         final int len = strs.length;
         final long[] a = new long[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                String element = strs[i];
-                final int elementLength = element.length();
-
-                // serializeTo quotes every value under writeLongAsString; read that form back. An empty quoted
-                // element is left as is so it fails as a malformed number instead of becoming the default 0.
-                if (elementLength > 2 && (element.charAt(0) == '"' || element.charAt(0) == '\'') && element.charAt(elementLength - 1) == element.charAt(0)) {
-                    element = element.substring(1, elementLength - 1);
-                }
-
-                a[i] = elementType.valueOf(element);
+                // Compact JSON text form: serializeTo quotes every value under writeLongAsString; read that form
+                // back, with escapes and null defaults handled by the shared jsonElementContent.
+                a[i] = elementType.valueOf(jsonElementContent(strs[i]));
             }
         }
 

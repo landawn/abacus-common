@@ -1528,15 +1528,16 @@ public class XmlParserImplTest extends TestBase {
     }
 
     /**
-     * P5-09 (documented, not changed): a named bean-property element with no text yields the property default
-     * with StAX and an empty String with DOM. This leaf-property convention is separate from the scalar
-     * {@code <e>} wrappers inside arrays/collections, which both backends convert from the empty string.
+     * P5-09: a named String property element with no text is the empty string on both backends (2026-10-06: StAX used
+     * to yield the property default, null, while DOM and the Abacus readers read the empty string the writer emits for
+     * one). Properties of other types keep their defaults; the scalar {@code <e>} wrappers inside arrays/collections
+     * convert from the empty string on both backends as before.
      */
     @Test
     public void reviewFixes20260906_emptyElementConventionIsBackendSpecific() {
         for (final String xml : new String[] { "<testBean><name/></testBean>", "<testBean><name></name></testBean>",
                 "<testBean><name isNull=\"false\"/></testBean>" }) {
-            Assertions.assertNull(staxParser.deserialize(xml, null, TestBean.class).getName(), xml);
+            Assertions.assertEquals("", staxParser.deserialize(xml, null, TestBean.class).getName(), xml);
             Assertions.assertEquals("", domParser.deserialize(xml, null, TestBean.class).getName(), xml);
         }
 
@@ -2094,12 +2095,10 @@ public class XmlParserImplTest extends TestBase {
 
         for (final XmlParserType parserType : XmlParserType.values()) {
             final XmlParserImpl parser = new XmlParserImpl(parserType);
-            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> parser.deserialize((File) null, null, nodeTypes));
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize((File) null, null, nodeTypes));
             Assertions.assertEquals("'source' cannot be null", e.getMessage());
         }
     }
-
 
     @Test
     public void testStaxEmptyCdataChunkDoesNotLeakTextIntoNextValue() {
@@ -2192,6 +2191,7 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
+
     @Data
     public static class G010Person {
         private String firstName;
@@ -2343,4 +2343,1099 @@ public class XmlParserImplTest extends TestBase {
     }
 
     // ---- bug review 2026-09-27 verify G116 end ----
+
+    // ---- bug review 2026-09-30 G010 begin ----
+
+    /** G010-01: a bean whose Object-typed property and Object-valued map can hold a repeated (circular) reference. */
+    @Data
+    public static class G010CircularObjectBean {
+        private String name;
+        private Object self;
+        private Map<String, Object> attrs;
+    }
+
+    // G010-01: with circularReferenceSupported a repeated object is written as an empty element, but pretty format put
+    // the closing line break + indentation into it, so an Object-typed value read back as that whitespace.
+    @Test
+    public void testSerialize_prettyCircularReferenceWritesEmptyElement() {
+        final G010CircularObjectBean bean = new G010CircularObjectBean();
+        bean.setName("n");
+        bean.setSelf(bean);
+        bean.setAttrs(new LinkedHashMap<>());
+        bean.getAttrs().put("loop", bean.getAttrs());
+        bean.getAttrs().put("k", "v");
+
+        final XmlSerConfig compact = new XmlSerConfig().setCircularReferenceSupported(true);
+        final XmlSerConfig pretty = new XmlSerConfig().setCircularReferenceSupported(true).setPrettyFormat(true);
+
+        final String prettyXml = staxParser.serialize(bean, pretty);
+        Assertions.assertEquals("<g010CircularObjectBean>\n    <name>n</name>\n    <self></self>\n    <attrs>\n        <map>\n            <loop></loop>\n"
+                + "            <k>v</k>\n        </map>\n    </attrs>\n</g010CircularObjectBean>", prettyXml);
+
+        final String compactXml = staxParser.serialize(bean, compact);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final G010CircularObjectBean fromCompact = parser.deserialize(compactXml, null, G010CircularObjectBean.class);
+            final G010CircularObjectBean fromPretty = parser.deserialize(prettyXml, null, G010CircularObjectBean.class);
+
+            Assertions.assertEquals(fromCompact.getSelf(), fromPretty.getSelf(), prettyXml);
+            Assertions.assertEquals(fromCompact.getAttrs(), fromPretty.getAttrs(), prettyXml);
+            Assertions.assertEquals("v", fromPretty.getAttrs().get("k"));
+        }
+    }
+
+    // ---- bug review 2026-09-30 G010 end ----
+    // ---- bug review 2026-09-30 G114 begin ----
+    // G114-04: DOM started the root with the configured element type as the declared type, so a List<Integer> element type
+    // was applied one level too deep: <list><list>[1, 2]</list></list> failed with NumberFormatException (StAX reads [[1, 2]]).
+    @Test
+    public void testDeserialize_domRootConfiguredContainerElementType() {
+        final XmlDeserConfig config = XmlDeserConfig.create().setElementType(Type.of("List<Integer>"));
+        final String listXml = staxParser.serialize(List.of(List.of(1, 2)));
+        final String arrayXml = staxParser.serialize(new Object[] { List.of(1, 2) });
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            Assertions.assertEquals(List.of(List.of(1, 2)), parser.deserialize(listXml, config, List.class), listXml);
+
+            final Object[] array = parser.deserialize(arrayXml, config, Object[].class);
+            Assertions.assertEquals(1, array.length, arrayXml);
+            Assertions.assertEquals(List.of(1, 2), array[0], arrayXml);
+        }
+    }
+    // ---- bug review 2026-09-30 G114 end ----
+
+    // ---- bug review 2026-09-30 verify G115 begin ----
+    // G114-04 completed for a map root: DOM took the key/value types of a configured Map<K, V> element type for the root map
+    // itself, overriding even an explicitly typed target (<map><a>1</a></map> read "1" as Integer, or failed on key "a").
+    @Test
+    public void testDeserialize_domRootMapIgnoresConfiguredMapElementType() {
+        final String xml = staxParser.serialize(new LinkedHashMap<>(Map.of("a", "1")));
+        final XmlDeserConfig stringIntegerElements = XmlDeserConfig.create().setElementType(Type.of("Map<String, Integer>"));
+        final XmlDeserConfig integerIntegerElements = XmlDeserConfig.create().setElementType(Type.of("Map<Integer, Integer>"));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            Assertions.assertEquals(Map.of("a", "1"), parser.deserialize(xml, stringIntegerElements, Map.class), xml);
+            Assertions.assertEquals(Map.of("a", "1"), parser.deserialize(xml, integerIntegerElements, Type.of("Map<String, String>")), xml);
+            // unchanged: without a configured element type the declared key/value types apply
+            Assertions.assertEquals(Map.of("a", 1), parser.deserialize(xml, Type.of("Map<String, Integer>")), xml);
+        }
+    }
+    // ---- bug review 2026-09-30 verify G115 end ----
+
+    // ---- bug review 2026-09-30 verify2 G124 begin ----
+    // G114-04/G115-02 completed for a MapEntity root (an Object or MapEntity target): DOM took the value type of a configured
+    // Map<K, V> element type for the root entity's own properties, so "x" failed with NumberFormatException and "1" became 1.
+    @Test
+    public void testDeserialize_domRootMapEntityIgnoresConfiguredMapElementType() {
+        final String xml = "<row><a>x</a><b>1</b></row>";
+        final XmlDeserConfig config = XmlDeserConfig.create().setElementType(Type.of("Map<String, Integer>"));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            for (final Class<?> targetClass : new Class<?>[] { Object.class, MapEntity.class }) {
+                final MapEntity entity = (MapEntity) parser.deserialize(xml, config, targetClass);
+                Assertions.assertEquals("row", entity.entityName(), xml);
+                Assertions.assertEquals("x", entity.get("a"), xml);
+                Assertions.assertEquals("1", entity.get("b"), xml);
+            }
+        }
+    }
+
+    // Neighbours of the root fixes that must stay unchanged: a configured map value type still types the root entity's values,
+    // and a non-container element type still types the elements of a root list/array.
+    @Test
+    public void testDeserialize_domRootStillAppliesMapValueTypeAndScalarElementType() {
+        final String entityXml = "<row><b>1</b><c>2</c></row>";
+        final XmlDeserConfig integerValues = XmlDeserConfig.create().setMapValueType(Integer.class);
+        final String listXml = staxParser.serialize(List.of("1", "2"));
+        final XmlDeserConfig integerElements = XmlDeserConfig.create().setElementType(Integer.class);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final MapEntity entity = parser.deserialize(entityXml, integerValues, MapEntity.class);
+            Assertions.assertEquals(Integer.valueOf(1), entity.get("b"), entityXml);
+            Assertions.assertEquals(Integer.valueOf(2), entity.get("c"), entityXml);
+
+            Assertions.assertEquals(List.of(1, 2), parser.deserialize(listXml, integerElements, List.class), listXml);
+        }
+    }
+    // ---- bug review 2026-09-30 verify2 G124 end ----
+
+    // ---- bug review 2026-10-02 G010 begin ----
+    @Data
+    public static class G010OptionalValueBean {
+        private Map<String, java.util.Optional<TestBean>> beans;
+        private Map<String, Optional<List<TestBean>>> lists;
+        private Map<String, Nullable<Map<String, TestBean>>> maps;
+    }
+
+    // G010-01: writeMap writes a present Optional/Nullable map value as the value it holds, so a bean, list or map arrives as nested
+    // elements. Both backends read those with the wrapper type itself and stored an ArrayList in the map (of empty beans for a list).
+    @Test
+    public void testDeserialize_optionalMapValueHoldingStructuredValue() {
+        final G010OptionalValueBean bean = new G010OptionalValueBean();
+        bean.setBeans(new LinkedHashMap<>(Map.of("b", java.util.Optional.of(new TestBean("x", 1)))));
+        bean.setLists(new LinkedHashMap<>(Map.of("l", Optional.of(new ArrayList<>(List.of(new TestBean("y", 2), new TestBean("z", 3)))))));
+        bean.setMaps(new LinkedHashMap<>(Map.of("m", Nullable.of(new LinkedHashMap<>(Map.of("k", new TestBean("w", 4)))))));
+
+        for (final boolean pretty : new boolean[] { false, true }) {
+            final String xml = staxParser.serialize(bean, XmlSerConfig.create().setPrettyFormat(pretty));
+
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                final G010OptionalValueBean back = parser.deserialize(xml, null, G010OptionalValueBean.class);
+
+                Assertions.assertEquals(java.util.Optional.of(new TestBean("x", 1)), back.getBeans().get("b"), xml);
+                Assertions.assertEquals(Optional.of(List.of(new TestBean("y", 2), new TestBean("z", 3))), back.getLists().get("l"), xml);
+                Assertions.assertEquals(Nullable.of(Map.of("k", new TestBean("w", 4))), back.getMaps().get("m"), xml);
+            }
+        }
+    }
+
+    // G010-01: the same for a MapEntity value whose configured value type is a wrapper (MAP_ENTITY branches).
+    @Test
+    public void testDeserialize_optionalMapEntityValueHoldingStructuredValue() {
+        final MapEntity entity = new MapEntity("acc");
+        entity.set("b", java.util.Optional.of(new TestBean("x", 1)));
+        entity.set("s", java.util.Optional.of("v"));
+
+        final String xml = staxParser.serialize(entity);
+        final XmlDeserConfig config = XmlDeserConfig.create().setValueType("b", Type.of(new TypeReference<java.util.Optional<TestBean>>() {
+        })).setValueType("s", Type.of(new TypeReference<java.util.Optional<String>>() {
+        }));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final MapEntity back = parser.deserialize(xml, config, MapEntity.class);
+
+            Assertions.assertEquals(java.util.Optional.of(new TestBean("x", 1)), back.get("b"), xml);
+            // unchanged: a scalar value is element text, read by the wrapper type itself
+            Assertions.assertEquals(java.util.Optional.of("v"), back.get("s"), xml);
+        }
+    }
+    // ---- bug review 2026-10-02 G010 end ----
+
+    // ---- bug review 2026-10-02 G115 begin ----
+    @Data
+    public static class G115EntryHolder {
+        private Map.Entry<String, String> entry;
+        private Map.Entry<Integer, String> intKeyEntry;
+        private java.util.Optional<Map.Entry<String, String>> optionalEntry;
+    }
+
+    // G115-01: a Map.Entry value was written through MapEntryType with the XML configuration, i.e. with unquoted String slots
+    // ({"a,b":c,d}), and N.fromXml failed on its own output; with writeTypeInfo its handler name became a type attribute the
+    // readers reject. It is now written as JSON text like Pair/Tuple (the JSON round trip of the same bean always worked).
+    @Test
+    public void testSerialize_mapEntryPropertyRoundTrip() {
+        final G115EntryHolder bean = new G115EntryHolder();
+        bean.setEntry(new java.util.AbstractMap.SimpleEntry<>("a,b", "c,d"));
+        bean.setIntKeyEntry(new java.util.AbstractMap.SimpleEntry<>(5, "x,y"));
+        bean.setOptionalEntry(java.util.Optional.of(new java.util.AbstractMap.SimpleEntry<>("k", "v,w")));
+        final Map<String, Map.Entry<String, String>> entries = new LinkedHashMap<>(Map.of("e", new java.util.AbstractMap.SimpleEntry<>("a b", "c,d")));
+        final Type<Map<String, Map.Entry<String, String>>> entriesType = Type.of("Map<String, Map.Entry<String, String>>");
+
+        final G115EntryHolder viaN = N.fromXml(N.toXml(bean), G115EntryHolder.class);
+        Assertions.assertEquals(Map.entry("a,b", "c,d"), viaN.getEntry());
+        Assertions.assertEquals(Map.entry(5, "x,y"), viaN.getIntKeyEntry());
+        Assertions.assertEquals(java.util.Optional.of(Map.entry("k", "v,w")), viaN.getOptionalEntry());
+        Assertions.assertEquals(Map.of("e", Map.entry("a b", "c,d")), N.fromXml(N.toXml(entries), entriesType));
+
+        final XmlParserImpl defaultDom = new XmlParserImpl(XmlParserType.DOM);
+        for (final XmlSerConfig config : new XmlSerConfig[] { XmlSerConfig.create(), XmlSerConfig.create().setWriteTypeInfo(true),
+                XmlSerConfig.create().setPrettyFormat(true).setTagByPropertyName(false) }) {
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser, defaultDom }) {
+                final String xml = parser.serialize(bean, config);
+                final G115EntryHolder back = parser.deserialize(xml, null, G115EntryHolder.class);
+
+                Assertions.assertEquals(Map.entry("a,b", "c,d"), back.getEntry(), xml);
+                Assertions.assertEquals(Map.entry(5, "x,y"), back.getIntKeyEntry(), xml);
+                Assertions.assertEquals(java.util.Optional.of(Map.entry("k", "v,w")), back.getOptionalEntry(), xml);
+
+                // a typed root map is read without type information here (a root type attribute replaces the declared root type)
+                final String entriesXml = parser.serialize(entries, config.isWriteTypeInfo() ? XmlSerConfig.create() : config);
+                Assertions.assertEquals(Map.of("e", Map.entry("a b", "c,d")), parser.deserialize(entriesXml, null, entriesType), entriesXml);
+            }
+        }
+    }
+
+    // G115-01 neighbours: the output of the tuple-like types that already round-tripped is unchanged.
+    @Test
+    public void testSerialize_tupleLikeOutputUnchangedByMapEntryFix() {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("p", Pair.of("a,b", "c,d"));
+        map.put("t", Tuple.of("a,b", "c,d"));
+
+        Assertions.assertEquals("<map><p>[&quot;a,b&quot;, &quot;c,d&quot;]</p><t>[&quot;a,b&quot;, &quot;c,d&quot;]</t></map>", staxParser.serialize(map));
+    }
+
+    @Data
+    public static class G115JdkOptionalHolder {
+        private Map<String, java.util.Optional<String>> optionals;
+        private List<java.util.Optional<String>> optionalList;
+        private Map<String, java.util.OptionalInt> optionalInts;
+        private Map<String, java.util.OptionalDouble> optionalDoubles;
+    }
+
+    // G115-02: with writeTypeInfo a property parameterized by a java.util optional type is written with the handler's name
+    // (type="Map<String, JdkOptional<String>>"), which both readers rejected ("XML type attribute is not allowed"). The writer's
+    // names for java.util.Optional/OptionalInt/OptionalLong/OptionalDouble - classes the readers already approve - are accepted.
+    @Test
+    public void testDeserialize_writeTypeInfoJdkOptionalTypeAttributeAccepted() {
+        final G115JdkOptionalHolder bean = new G115JdkOptionalHolder();
+        bean.setOptionals(new LinkedHashMap<>(Map.of("x", java.util.Optional.of("a,b"))));
+        bean.setOptionalList(new ArrayList<>(List.of(java.util.Optional.of("c"))));
+        bean.setOptionalInts(new LinkedHashMap<>(Map.of("i", java.util.OptionalInt.of(3))));
+        bean.setOptionalDoubles(new LinkedHashMap<>(Map.of("d", java.util.OptionalDouble.of(1.5))));
+
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { new XmlParserImpl(XmlParserType.StAX), new XmlParserImpl(XmlParserType.DOM), staxParser,
+                domParser }) {
+            final String xml = parser.serialize(bean, typeInfo);
+            Assertions.assertTrue(xml.contains("JdkOptional&lt;String&gt;"), xml);
+            Assertions.assertEquals(bean, parser.deserialize(xml, null, G115JdkOptionalHolder.class), xml);
+
+            // neighbour: an unapproved name in the same position is still rejected
+            final String unapproved = xml.replace("JdkOptional&lt;String&gt;", "not.approved.Type");
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(unapproved, null, G115JdkOptionalHolder.class));
+        }
+    }
+    // ---- bug review 2026-10-02 G115 end ----
+
+    // ---- bug review 2026-10-02 verify G119 begin ----
+    @Data
+    public static class G119DurationHolder {
+        private java.time.Duration duration;
+        private Map<String, java.time.Duration> durations;
+        private List<java.time.Duration> durationList;
+    }
+
+    // G119-01: with writeTypeInfo a java.time.Duration property is written with its handler's name (type="JdkDuration",
+    // type="Map<String, JdkDuration>"), which both readers rejected - the same defect as the JdkOptional names of G115-02.
+    @Test
+    public void testDeserialize_writeTypeInfoJdkDurationTypeAttributeAccepted() {
+        final G119DurationHolder bean = new G119DurationHolder();
+        bean.setDuration(java.time.Duration.ofSeconds(90));
+        bean.setDurations(new LinkedHashMap<>(Map.of("k", java.time.Duration.ofMillis(1500))));
+        bean.setDurationList(new ArrayList<>(List.of(java.time.Duration.ofSeconds(2))));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { new XmlParserImpl(XmlParserType.StAX), new XmlParserImpl(XmlParserType.DOM), staxParser,
+                domParser }) {
+            final String xml = parser.serialize(bean, XmlSerConfig.create().setWriteTypeInfo(true));
+            Assertions.assertTrue(xml.contains("type=\"JdkDuration\""), xml);
+            Assertions.assertEquals(bean, parser.deserialize(xml, null, G119DurationHolder.class), xml);
+
+            // neighbours: the output without type information reads as before; an unapproved name there is still rejected
+            Assertions.assertEquals(bean, parser.deserialize(parser.serialize(bean), null, G119DurationHolder.class));
+            final String unapproved = xml.replace("type=\"JdkDuration\"", "type=\"not.approved.Type\"");
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(unapproved, null, G119DurationHolder.class));
+        }
+    }
+
+    // G115-01 neighbour: Map.Entry text written before the fix (String slots unquoted) is read exactly as before, by both readers.
+    @Test
+    public void testDeserialize_mapEntryUnquotedTextOfOldOutputStillRead() {
+        final String oldXml = "<g115EntryHolder><entry>{\"a\":b}</entry><intKeyEntry>{\"5\":x}</intKeyEntry>"
+                + "<optionalEntry>{\"k\":v}</optionalEntry></g115EntryHolder>";
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final G115EntryHolder back = parser.deserialize(oldXml, null, G115EntryHolder.class);
+
+            Assertions.assertEquals(Map.entry("a", "b"), back.getEntry());
+            Assertions.assertEquals(Map.entry(5, "x"), back.getIntKeyEntry());
+            Assertions.assertEquals(java.util.Optional.of(Map.entry("k", "v")), back.getOptionalEntry());
+        }
+    }
+    // ---- bug review 2026-10-02 verify G119 end ----
+
+    // ---- bug review 2026-10-02 final G126 begin ----
+    @Data
+    public static class G126AttrsBean {
+        private Map<String, Object> attrs;
+    }
+
+    // G126-01: DOM let an untyped FIRST element of a root array/collection - <null isNull="true" />, or a tuple-like <e> written as its
+    // text - decide that the whole document carried no type information, so a typed bean or map after it was read as a list
+    // ([null, bean] written with writeTypeInfo -> [null, [{}]]). The typed-first order was already read correctly (neighbour).
+    @Test
+    public void testDeserialize_domTypedElementAfterUntypedFirstElement() {
+        final TestBean bean = new TestBean("x", 1);
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("n", null);
+        map.put("y", 5);
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+
+        final String listXml = staxParser.serialize(Arrays.asList(null, bean, map), typeInfo);
+        Assertions.assertEquals(Arrays.asList(null, bean, map), domParser.deserialize(listXml, null, List.class), listXml);
+
+        final String arrayXml = staxParser.serialize(new Object[] { Pair.of("a", "b"), bean }, typeInfo);
+        Assertions.assertArrayEquals(new Object[] { "[\"a\", \"b\"]", bean }, domParser.deserialize(arrayXml, null, Object[].class), arrayXml);
+
+        final String setXml = staxParser.serialize(new java.util.LinkedHashSet<>(Arrays.asList(null, bean)), typeInfo);
+        Assertions.assertEquals(new java.util.LinkedHashSet<>(Arrays.asList(null, bean)), domParser.deserialize(setXml, null, java.util.Set.class), setXml);
+
+        // neighbour: typed first element, unchanged
+        final String typedFirstXml = staxParser.serialize(Arrays.asList(bean, null), typeInfo);
+        Assertions.assertEquals(Arrays.asList(bean, null), domParser.deserialize(typedFirstXml, null, List.class), typedFirstXml);
+    }
+
+    // G126-01: the same for a root map whose first entry is a tuple-like value (written as text, without a type attribute): every later
+    // value - and everything inside it - was read without its type on DOM ({p=Pair, c=42} -> c="42"); StAX read it correctly.
+    @Test
+    public void testDeserialize_domTypedMapValueAfterUntypedFirstEntry() {
+        final Map<String, Object> inner = new LinkedHashMap<>();
+        inner.put("n", null);
+        inner.put("y", 5);
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("p", Pair.of("a", "b"));
+        map.put("c", 42);
+        map.put("m", inner);
+        map.put("b", new TestBean("x", 1));
+
+        final Map<String, Object> expected = new LinkedHashMap<>(map);
+        expected.put("p", "[\"a\", \"b\"]");
+
+        final String xml = staxParser.serialize(map, XmlSerConfig.create().setWriteTypeInfo(true));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            Assertions.assertEquals(expected, parser.deserialize(xml, null, Map.class), xml);
+        }
+    }
+
+    // G126-01 neighbours (unchanged): a bean element WITHOUT a type attribute still makes DOM ignore the type attributes below it (that
+    // decision is made by the bean element, not by a sibling); with a type attribute on the bean element they are used.
+    @Test
+    public void testDeserialize_domTypeInfoDecidedByBeanElementUnchanged() {
+        final String entries = "<attrs><map><n isNull=\"true\" /><a type=\"Integer\">1</a></map></attrs>";
+
+        Assertions.assertEquals("1", domParser.deserialize("<g126AttrsBean>" + entries + "</g126AttrsBean>", null, G126AttrsBean.class).getAttrs().get("a"));
+        Assertions.assertEquals(1,
+                domParser
+                        .deserialize("<g126AttrsBean type=\"" + G126AttrsBean.class.getCanonicalName() + "\">" + entries + "</g126AttrsBean>", null,
+                                G126AttrsBean.class)
+                        .getAttrs()
+                        .get("a"));
+    }
+    // ---- bug review 2026-10-02 final G126 end ----
+
+    // ---- bug review 2026-10-02 G134 begin ----
+    @Data
+    public static class G134OptionalBean {
+        private java.util.Optional<Object> any;
+    }
+
+    // A map subclass with another parameter layout than Map<K, V>: its key type is fixed, its only parameter is the value type.
+    public static class G134StringKeyMap<V> extends HashMap<String, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    private static final String G134_JDK_OPTIONAL = "java.util.Optional";
+    private static final String G134_U_OPTIONAL = "com.landawn.abacus.util.u.Optional";
+    private static final String G134_NULLABLE = "com.landawn.abacus.util.u.Nullable";
+
+    // Wraps a value in the wrapper named by its type name (one of the three constants above).
+    private static Object g134Wrap(final String wrapper, final Object value) {
+        return G134_JDK_OPTIONAL.equals(wrapper) ? java.util.Optional.of(value) : G134_U_OPTIONAL.equals(wrapper) ? Optional.of(value) : Nullable.of(value);
+    }
+
+    private String g134Name(final XmlParserImpl parser) {
+        return parser == staxParser ? "StAX" : "DOM";
+    }
+
+    private static Map<String, Object> g134Map(final Object... keysAndValues) {
+        final Map<String, Object> map = new LinkedHashMap<>();
+
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+
+        return map;
+    }
+
+    // G134-03: a present Optional/Nullable map value is written as the value it holds, a list of maps as one child element per item. Without
+    // type information the StAX reader read only the FIRST child of a declared Optional<Object> value and silently dropped the others; all
+    // of them are kept now, as a list. A single <map> child is the nested map on both readers (2026-10-05: the DOM reader used to wrap it in
+    // a one-element list). Bean properties and MapEntity values share the code path. Every child read is a consumed value, so its type
+    // attribute needs approval.
+    @Test
+    public void testDeserialize_untypedOptionalMapValueKeepsEverySibling() {
+        for (final String wrapper : new String[] { G134_JDK_OPTIONAL, G134_U_OPTIONAL, G134_NULLABLE }) {
+            final Map<String, Object> root = g134Map("k", g134Wrap(wrapper, List.of(Map.of("x", 1), Map.of("y", 2))), "j", g134Wrap(wrapper, Map.of("x", 1)));
+            final String xml = staxParser.serialize(root);
+            final Type<Map<String, Object>> type = Type.of("Map<String, " + wrapper + "<Object>>");
+
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                final Map<String, Object> back = parser.deserialize(xml, null, type);
+
+                Assertions.assertEquals(g134Wrap(wrapper, List.of(Map.of("x", "1"), Map.of("y", "2"))), back.get("k"), parser + " " + xml);
+                Assertions.assertEquals(g134Wrap(wrapper, Map.of("x", "1")), back.get("j"), parser + " " + xml);
+            }
+        }
+
+        final String beanXml = "<g134OptionalBean><any><map><x>1</x></map><map><y>2</y></map></any></g134OptionalBean>";
+        final MapEntity entity = new MapEntity("e");
+        entity.set("k", java.util.Optional.of(List.of(Map.of("x", 1), Map.of("y", 2))));
+        final String entityXml = staxParser.serialize(entity);
+        final XmlDeserConfig entityConfig = XmlDeserConfig.create().setValueType("k", Type.of("java.util.Optional<Object>"));
+        final String rejectedSibling = "<map><k><map><x>1</x></map><map type=\"not.approved.Type\"><y>2</y></map></k></map>";
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            Assertions.assertEquals(java.util.Optional.of(List.of(Map.of("x", "1"), Map.of("y", "2"))),
+                    parser.deserialize(beanXml, null, G134OptionalBean.class).getAny());
+            // (each child is read as a single child of a MapEntity value is: a MapEntity on StAX, a map on DOM)
+            final Object entityValue = parser.deserialize(entityXml, entityConfig, MapEntity.class).get("k");
+            Assertions.assertEquals(2, ((List<?>) ((java.util.Optional<?>) entityValue).orElseThrow()).size(), entityXml + " -> " + entityValue);
+            Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(rejectedSibling, null, Type.of("Map<String, java.util.Optional<Object>>")));
+        }
+    }
+
+    // G134-02: with type information the element of a present Optional/Nullable value carries the type attribute of the value it holds
+    // (type="ArrayList<Object>", type="Integer"); it names no wrapper, so it was dropped: StAX read a list as its first map, DOM read a map
+    // as a list, a scalar came back as its text. It is resolved against the wrapper's element type now and the whole value is read with it.
+    // The concrete root type isolates this from G134-01; with the interface root type DOM needs both fixes.
+    @Test
+    public void testDeserialize_optionalMapValueReadWithItsOwnTypeAttribute() {
+        // mutable values: an immutable JDK container is written with its own class name, which no reader can instantiate
+        final List<Object> values = List.of(g134Map("x", 1), new ArrayList<>(List.of(g134Map("x", 1))),
+                new ArrayList<>(List.of(g134Map("x", 1), g134Map("y", 2))), g134Map("x", 1, "y", 2), 5, "s", new ArrayList<>(List.of(1, 2)));
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+
+        for (final String wrapper : new String[] { G134_JDK_OPTIONAL, G134_U_OPTIONAL, G134_NULLABLE }) {
+            for (final Object value : values) {
+                final String xml = staxParser.serialize(g134Map("k", g134Wrap(wrapper, value)), typeInfo);
+
+                for (final String rootType : new String[] { "LinkedHashMap", "Map" }) {
+                    final Type<Map<String, Object>> type = Type.of(rootType + "<String, " + wrapper + "<Object>>");
+
+                    for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                        Assertions.assertEquals(g134Wrap(wrapper, value), parser.deserialize(xml, null, type).get("k"), parser + " " + type.name() + " " + xml);
+                    }
+                }
+            }
+        }
+    }
+
+    // G134-01: on DOM the root element's type attribute - the RAW runtime class, type="LinkedHashMap<Object, Object>" - replaced the
+    // declared root type, so every type argument below the root was lost (Map<String, Optional<Object>> came back without its wrappers,
+    // Map<String, List<Long>> with Integers, Map<String, Set<Integer>> with lists). The declared type stays the schema; the attribute's class
+    // is still the instance both readers fill (TreeMap, LinkedList below). A raw declaration still takes the attribute's type (neighbour).
+    @Test
+    public void testDeserialize_rootTypeAttributeKeepsDeclaredTypeArguments() {
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+        final String optionalXml = staxParser.serialize(g134Map("k", java.util.Optional.of("s"), "n", java.util.Optional.of(5)), typeInfo);
+        final Map<String, Object> lists = new java.util.TreeMap<>(g134Map("a", new ArrayList<>(List.of(1, 2)), "b", new ArrayList<>(List.of(3))));
+        final String listsXml = staxParser.serialize(lists, typeInfo);
+        final String linkedListXml = staxParser.serialize(new java.util.LinkedList<>(List.of(g134Map("x", 1))), typeInfo);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final Map<String, Object> optionals = parser.deserialize(optionalXml, null, Type.of("Map<String, java.util.Optional<Object>>"));
+            Assertions.assertEquals(g134Map("k", java.util.Optional.of("s"), "n", java.util.Optional.of(5)), optionals, optionalXml);
+
+            Assertions.assertEquals(g134Map("a", List.of(1, 2), "b", List.of(3)), parser.deserialize(listsXml, null, Type.of("Map<String, List<Integer>>")));
+            final Map<String, Object> longs = parser.deserialize(listsXml, null, Type.of("Map<String, List<Long>>"));
+            Assertions.assertEquals(g134Map("a", List.of(1L, 2L), "b", List.of(3L)), longs, listsXml);
+            Assertions.assertEquals(g134Map("a", java.util.Set.of(1, 2), "b", java.util.Set.of(3)),
+                    parser.deserialize(listsXml, null, Type.of("Map<String, Set<Integer>>")));
+            final List<Object> linked = parser.deserialize(linkedListXml, null, Type.of("List<Map<String, Long>>"));
+            Assertions.assertEquals(List.of(Map.of("x", 1L)), linked, linkedListXml);
+
+            Assertions.assertTrue(optionals instanceof LinkedHashMap, g134Name(parser) + " " + optionals.getClass().getName());
+            Assertions.assertTrue(longs instanceof java.util.TreeMap, g134Name(parser) + " " + longs.getClass().getName());
+            Assertions.assertTrue(linked instanceof java.util.LinkedList, g134Name(parser) + " " + linked.getClass().getName());
+
+            // neighbour (unchanged): a raw declaration takes the attribute's type
+            final Map<?, ?> raw = parser.deserialize(listsXml, null, Map.class);
+            Assertions.assertEquals(g134Map("a", List.of(1, 2), "b", List.of(3)), raw);
+            Assertions.assertTrue(raw instanceof java.util.TreeMap, raw.getClass().getName());
+        }
+    }
+
+    // G134-01: a collection's type attribute (type="LinkedHashSet<Object>", "ArrayList<Object>") must not erase a declared Optional/Nullable
+    // element type either, at the root or as a map value: the elements are written as the values they hold (<set>[1, 2]</set>), so
+    // without the declared wrapper they came back unwrapped ([1, 2] instead of [Optional[1], Optional[2]]). An Optional<Object> argument
+    // counts as information although its own argument is Object.
+    @Test
+    public void testDeserialize_collectionTypeAttributeKeepsDeclaredOptionalElements() {
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+        final String setXml = staxParser.serialize(new java.util.LinkedHashSet<>(List.of(java.util.Optional.of(1), java.util.Optional.of(2))), typeInfo);
+        final String listXml = staxParser.serialize(new ArrayList<>(List.of(java.util.Optional.of(5), java.util.Optional.of("s"))), typeInfo);
+        final String valueXml = staxParser.serialize(g134Map("k", new ArrayList<>(List.of(java.util.Optional.of(5), java.util.Optional.of("s")))), typeInfo);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final java.util.Set<Object> set = parser.deserialize(setXml, null, Type.of("Set<java.util.Optional<Object>>"));
+            Assertions.assertEquals(java.util.Set.of(java.util.Optional.of(1), java.util.Optional.of(2)), set, g134Name(parser) + " " + setXml);
+            Assertions.assertTrue(set instanceof java.util.LinkedHashSet, g134Name(parser) + " " + set.getClass().getName());
+
+            Assertions.assertEquals(List.of(Nullable.of(5), Nullable.of("s")),
+                    parser.deserialize(listXml, null, Type.of("List<" + G134_NULLABLE + "<Object>>")), g134Name(parser) + " " + listXml);
+            Assertions.assertEquals(Map.of("k", List.of(java.util.Optional.of(5), java.util.Optional.of("s"))),
+                    parser.deserialize(valueXml, null, Type.of("Map<String, List<java.util.Optional<Object>>>")), g134Name(parser) + " " + valueXml);
+        }
+    }
+
+    // G134-01: a root whose type attribute names a subclass with another parameter layout (G134StringKeyMap<V> extends HashMap<String, V>
+    // is written as type="...G134StringKeyMap<Object, Object>"): the declared Map<String, X> is the schema the content is read with and the
+    // subclass is only instantiated; no type argument is transplanted onto it.
+    @Test
+    public void testDeserialize_rootSubclassWithOtherParameterLayoutKeepsDeclaredSchema() {
+        final XmlSerConfig typeInfo = XmlSerConfig.create().setWriteTypeInfo(true);
+        final G134StringKeyMap<Object> lists = new G134StringKeyMap<>();
+        lists.put("a", new ArrayList<>(List.of(1, 2)));
+        final G134StringKeyMap<Object> optionals = new G134StringKeyMap<>();
+        optionals.put("k", java.util.Optional.of(new ArrayList<>(List.of(g134Map("x", 1), g134Map("y", 2)))));
+        final String listsXml = staxParser.serialize(lists, typeInfo);
+        final String optionalsXml = staxParser.serialize(optionals, typeInfo);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final Map<String, Object> longs = parser.deserialize(listsXml, null, Type.of("Map<String, List<Long>>"));
+            Assertions.assertEquals(Map.of("a", List.of(1L, 2L)), longs, listsXml);
+            final Map<String, Object> wrapped = parser.deserialize(optionalsXml, null, Type.of("Map<String, java.util.Optional<Object>>"));
+            Assertions.assertEquals(Map.of("k", java.util.Optional.of(List.of(Map.of("x", 1), Map.of("y", 2)))), wrapped, optionalsXml);
+            Assertions.assertTrue(longs instanceof G134StringKeyMap, g134Name(parser) + " " + longs.getClass().getName());
+            Assertions.assertTrue(wrapped instanceof G134StringKeyMap, g134Name(parser) + " " + wrapped.getClass().getName());
+        }
+    }
+
+    // G134-01/02: explicitly parameterized wrapped values (Optional<List<Map<String, Long>>> and the other wrappers) keep their declared
+    // element types with and without type information, under an interface and a concrete root type.
+    @Test
+    public void testDeserialize_explicitlyParameterizedOptionalMapValue() {
+        final Map<String, Object> root = g134Map("k", java.util.Optional.of(new ArrayList<>(List.of(g134Map("x", 1), g134Map("y", 2)))));
+
+        for (final XmlSerConfig config : new XmlSerConfig[] { XmlSerConfig.create(), XmlSerConfig.create().setWriteTypeInfo(true) }) {
+            final String xml = staxParser.serialize(root, config);
+
+            for (final String wrapper : new String[] { G134_JDK_OPTIONAL, G134_U_OPTIONAL, G134_NULLABLE }) {
+                for (final String rootType : new String[] { "Map", "LinkedHashMap" }) {
+                    final Type<Map<String, Object>> longType = Type.of(rootType + "<String, " + wrapper + "<List<Map<String, Long>>>>");
+                    final Type<Map<String, Object>> intType = Type.of(rootType + "<String, " + wrapper + "<List<Map<String, Integer>>>>");
+
+                    for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                        Assertions.assertEquals(g134Wrap(wrapper, List.of(Map.of("x", 1L), Map.of("y", 2L))), parser.deserialize(xml, null, longType).get("k"),
+                                parser + " " + longType.name() + " " + xml);
+                        Assertions.assertEquals(g134Wrap(wrapper, List.of(Map.of("x", 1), Map.of("y", 2))), parser.deserialize(xml, null, intType).get("k"),
+                                parser + " " + intType.name() + " " + xml);
+                    }
+                }
+            }
+        }
+    }
+
+    // G134 neighbours (unchanged): an empty wrapper (the isNull marker: Optional.empty on StAX, null on DOM - the open G010-03 decision), a
+    // configured value type taking precedence over the value's own type attribute (which is still approved), unapproved type attributes
+    // rejected inside a wrapper, and the rule for the unwrapped Object slot: several children are a list of all of them on both readers
+    // (2026-10-05: the StAX reader used to keep only the first child).
+    @Test
+    public void testDeserialize_optionalWrapperNeighboursUnchanged() {
+        final Type<Map<String, Object>> type = Type.of("LinkedHashMap<String, java.util.Optional<Object>>");
+
+        for (final XmlSerConfig config : new XmlSerConfig[] { XmlSerConfig.create(), XmlSerConfig.create().setWriteTypeInfo(true) }) {
+            final Map<String, Object> root = new LinkedHashMap<>();
+            root.put("k", java.util.Optional.empty());
+            root.put("j", java.util.Optional.of("z"));
+            final String xml = staxParser.serialize(root, config);
+
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                final Map<String, Object> back = parser.deserialize(xml, null, type);
+
+                Assertions.assertEquals(parser == staxParser ? java.util.Optional.empty() : null, back.get("k"), xml);
+                Assertions.assertEquals(java.util.Optional.of("z"), back.get("j"), xml);
+            }
+        }
+
+        final XmlDeserConfig configuredWrapper = XmlDeserConfig.create().setValueType("k", Type.of("java.util.Optional<String>"));
+        final XmlDeserConfig configuredPlain = XmlDeserConfig.create().setValueType("k", Type.of("String"));
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final Map<String, Object> nullMarker = parser.deserialize("<map><k type=\"Integer\" isNull=\"true\" /></map>", null, type);
+            Assertions.assertEquals(parser == staxParser ? java.util.Optional.empty() : null, nullMarker.get("k"));
+
+            Assertions.assertEquals(java.util.Optional.of("5"), parser.deserialize("<map><k type=\"Integer\">5</k></map>", configuredWrapper, type).get("k"));
+            Assertions.assertEquals("5", parser.deserialize("<map><k type=\"Integer\">5</k></map>", configuredPlain, type).get("k"));
+            Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize("<map><k type=\"not.approved.Type\">5</k></map>", configuredWrapper, type));
+
+            for (final String rejected : new String[] { "<map><k type=\"not.approved.Type\">5</k></map>",
+                    "<map><k type=\"java.lang.Runtime\"><map><x>1</x></map></k></map>", "<map><k><map type=\"not.approved.Type\"><x>1</x></map></k></map>" }) {
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(rejected, null, type), rejected);
+            }
+
+            final Map<String, Object> plain = parser.deserialize("<map><k><map><x>1</x></map><map><y>2</y></map></k></map>", null,
+                    Type.of("Map<String, Object>"));
+            Assertions.assertEquals(List.of(Map.of("x", "1"), Map.of("y", "2")), plain.get("k"), parser.toString());
+        }
+    }
+    // ---- bug review 2026-10-02 G134 end ----
+
+    // ---- perf review 2026-10-07 G09 begin ----
+
+    /** G09-01: a bean element makes an array/collection property non-JSON, so it is written element by element. */
+    @Data
+    public static class PerfG09Child {
+        private String id;
+    }
+
+    /** G09-01: collection and array properties taken through the element-by-element write path. */
+    @Data
+    public static class PerfG09Holder {
+        private String name;
+        private List<Object> items;
+        private Object[] values;
+    }
+
+    // G09-01: the XML and the XML-1.0 rejection messages of scalar elements inside element-by-element array/collection
+    // properties, map values and roots are unchanged (the property name is formatted into the message only on failure).
+    @Test
+    public void testWriteElement_propertyValueAndRootMessagesPinned() {
+        final PerfG09Child child = new PerfG09Child();
+        child.setId("c1");
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final PerfG09Holder legal = new PerfG09Holder();
+            legal.setName("h");
+            legal.setItems(new ArrayList<>(Arrays.asList(child, "s", 5, null, Optional.empty(), Optional.of("o"), Pair.of("a,b", "c"))));
+            legal.setValues(new Object[] { child, "s", 5, null, Optional.of(7) });
+            Assertions.assertEquals("<perfG09Holder><name>h</name><items><perfG09Child><id>c1</id></perfG09Child><e>s</e><e>5</e><null isNull=\"true\" />"
+                    + "<null isNull=\"true\" /><e>o</e><e>[&quot;a,b&quot;, &quot;c&quot;]</e></items><values><perfG09Child><id>c1</id></perfG09Child>"
+                    + "<e>s</e><e>5</e><null isNull=\"true\" /><e>7</e></values></perfG09Holder>", parser.serialize(legal));
+
+            final PerfG09Holder badList = new PerfG09Holder();
+            badList.setItems(new ArrayList<>(Arrays.asList(child, "bad" + (char) 1)));
+            Assertions.assertEquals("Property 'items' contains U+0001, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(badList)).getMessage());
+
+            final PerfG09Holder badArray = new PerfG09Holder();
+            badArray.setValues(new Object[] { child, "bad" + (char) 2 });
+            Assertions.assertEquals("Property 'values' contains U+0002, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(badArray)).getMessage());
+
+            // a present optional element is unwrapped first and then checked like a bare scalar element
+            final PerfG09Holder badOptional = new PerfG09Holder();
+            badOptional.setItems(new ArrayList<>(Arrays.asList(child, Optional.of("x" + (char) 0xFFFE))));
+            Assertions.assertEquals("Property 'items' contains U+FFFE, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(badOptional)).getMessage());
+
+            final PerfG09Holder badSurrogate = new PerfG09Holder();
+            badSurrogate.setValues(new Object[] { child, String.valueOf((char) 0xD800) });
+            Assertions.assertEquals("Property 'values' contains U+D800, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(badSurrogate)).getMessage());
+
+            // a map value has no property: the message names it "Value"
+            final Map<String, Object> map = new LinkedHashMap<>();
+            map.put("k", new ArrayList<>(Arrays.asList(child, "bad" + (char) 3)));
+            Assertions.assertEquals("Value contains U+0003, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(map)).getMessage());
+            map.put("k", new Object[] { child, "bad" + (char) 4 });
+            Assertions.assertEquals("Value contains U+0004, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(map)).getMessage());
+
+            // a root collection or array element has neither
+            Assertions.assertEquals("Collection element contains U+0005, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(new ArrayList<>(Arrays.asList(child, "bad" + (char) 5))))
+                            .getMessage());
+            Assertions.assertEquals("Array element contains U+0006, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(new Object[] { child, "bad" + (char) 6 })).getMessage());
+            Assertions.assertEquals("<list><perfG09Child><id>c1</id></perfG09Child><e>s</e><e>o</e><e>[&quot;a,b&quot;, &quot;c&quot;]</e></list>",
+                    parser.serialize(new ArrayList<>(Arrays.asList(child, "s", Optional.of("o"), Pair.of("a,b", "c")))));
+        }
+    }
+
+    // ---- perf review 2026-10-07 G09 end ----
+    // ---- perf review 2026-10-07 G10 begin ----
+    /** G10-01: the nested bean of {@link G10SlotBean}. */
+    @Data
+    public static class G10SlotChild {
+        private String name;
+    }
+
+    /** G10-01: one slot of every kind the readers refine differently (scalar, Object, list, array, map, wrapper, bean, typed list). */
+    @Data
+    public static class G10SlotBean {
+        private String text;
+        private int number;
+        private Object open;
+        private List<Object> openList;
+        private Object[] openArray;
+        private Map<String, Object> openMap;
+        private java.util.Optional<List<Object>> wrappedList;
+        private G10SlotChild child;
+        private List<Long> typedList;
+    }
+
+    private static final String G10_SLOT_BODY = "<text>5</text><number>7</number><open>9</open><openList>[1, 2]</openList><openArray>[3]</openArray>"
+            + "<openMap>{\"k\": 4}</openMap><wrappedList>[6]</wrappedList><child><g10SlotChild><name>c</name></g10SlotChild></child><typedList>[8]</typedList>";
+
+    private static XmlDeserConfig g10PerKeyConfig() {
+        return XmlDeserConfig.create()
+                .setValueType("number", Type.of(Integer.class))
+                .setValueType("openList", Type.of("List<Object>"))
+                .setValueType("openArray", Type.of("Object[]"))
+                .setValueType("openMap", Type.of("Map<String, Object>"))
+                .setValueType("wrappedList", Type.of("java.util.Optional<List<Object>>"))
+                .setValueType("child", Type.of(G10SlotChild.class))
+                .setValueType("typedList", Type.of("List<Long>"));
+    }
+
+    private static XmlDeserConfig g10Global(final XmlDeserConfig config) {
+        return config.setElementType(Type.of(Long.class)).setMapKeyType(Type.of(String.class)).setMapValueType(Type.of(Long.class));
+    }
+
+    // G10-01: the readers skip refineSlot for scalar, bean and Object slots (it hands back the schema itself for them) and still
+    // refine container, array and wrapper slots. Pins every slot kind on the bean-property, map-entry and MapEntity-entry
+    // branches of both backends, with and without global element / map-type configuration and per-key value types.
+    @Test
+    public void testReadSlots_scalarAndRefinableSlotsOnEveryBranch() {
+        final String beanXml = "<g10SlotBean>" + G10_SLOT_BODY + "</g10SlotBean>";
+        final String mapXml = "<map>" + G10_SLOT_BODY + "</map>";
+        final String entityXml = "<slot>" + G10_SLOT_BODY + "</slot>";
+        final Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            // Bean properties: the global element type reaches the open list, array, map and wrapper slots only; a scalar, an
+            // Object and a bean slot keep their text / their own reader, with and without per-key value types.
+            for (final boolean global : new boolean[] { false, true }) {
+                for (final XmlDeserConfig config : new XmlDeserConfig[] { global ? g10Global(XmlDeserConfig.create()) : null,
+                        global ? g10Global(g10PerKeyConfig()) : g10PerKeyConfig() }) {
+                    final G10SlotBean bean = parser.deserialize(beanXml, config, G10SlotBean.class);
+                    Assertions.assertEquals("5", bean.getText(), parser.toString());
+                    Assertions.assertEquals(7, bean.getNumber());
+                    Assertions.assertEquals("9", bean.getOpen());
+                    Assertions.assertEquals(global ? List.of(1L, 2L) : List.of(1, 2), bean.getOpenList());
+                    Assertions.assertArrayEquals(global ? new Object[] { 3L } : new Object[] { 3 }, bean.getOpenArray());
+                    Assertions.assertEquals(global ? Map.of("k", 4L) : Map.of("k", 4), bean.getOpenMap());
+                    Assertions.assertEquals(java.util.Optional.of(global ? List.of(6L) : List.of(6)), bean.getWrappedList());
+                    Assertions.assertEquals("c", bean.getChild().getName());
+                    Assertions.assertEquals(List.of(8L), bean.getTypedList());
+                }
+            }
+
+            // Map and MapEntity entries without configuration: every value is its text, a nested element a map / a MapEntity.
+            final Map<String, Object> plain = parser.deserialize(mapXml, null, mapType);
+            Assertions.assertEquals("5", plain.get("text"), parser.toString());
+            Assertions.assertEquals("7", plain.get("number"));
+            Assertions.assertEquals("9", plain.get("open"));
+            Assertions.assertEquals("[1, 2]", plain.get("openList"));
+            Assertions.assertEquals("[3]", plain.get("openArray"));
+            Assertions.assertEquals("{\"k\": 4}", plain.get("openMap"));
+            Assertions.assertEquals("[6]", plain.get("wrappedList"));
+            Assertions.assertEquals(Map.of("name", "c"), plain.get("child"));
+            Assertions.assertEquals("[8]", plain.get("typedList"));
+            final MapEntity plainEntity = parser.deserialize(entityXml, null, MapEntity.class);
+            Assertions.assertEquals("slot", plainEntity.entityName());
+            Assertions.assertEquals("5", plainEntity.props().get("text"));
+            Assertions.assertEquals("[1, 2]", plainEntity.props().get("openList"));
+            final MapEntity childEntity = (MapEntity) plainEntity.props().get("child");
+            Assertions.assertEquals("g10SlotChild", childEntity.entityName());
+            Assertions.assertEquals("c", childEntity.props().get("name"));
+
+            // A global map value type on untyped entries: scalar text converts, and container text does not fit a Long.
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(mapXml, g10Global(XmlDeserConfig.create()), mapType));
+            Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize(entityXml, g10Global(XmlDeserConfig.create()), MapEntity.class));
+
+            // Per-key value types, alone and under the global types: a configured scalar key keeps its own type, an open scalar
+            // key takes the global map value type, and the container, array, wrapper and bean keys read their payload.
+            for (final boolean global : new boolean[] { false, true }) {
+                final XmlDeserConfig config = global ? g10Global(g10PerKeyConfig()) : g10PerKeyConfig();
+                final Map<String, Object> map = parser.deserialize(mapXml, config, mapType);
+                final MapEntity entity = parser.deserialize(entityXml, config, MapEntity.class);
+                Assertions.assertEquals("slot", entity.entityName());
+                for (final Map<String, Object> values : List.of(map, entity.props())) {
+                    Assertions.assertEquals(global ? 5L : "5", values.get("text"), parser.toString());
+                    Assertions.assertEquals(7, values.get("number"));
+                    Assertions.assertEquals(global ? 9L : "9", values.get("open"));
+                    Assertions.assertEquals(global ? List.of(1L, 2L) : List.of(1, 2), values.get("openList"));
+                    Assertions.assertArrayEquals(global ? new Object[] { 3L } : new Object[] { 3 }, (Object[]) values.get("openArray"));
+                    Assertions.assertEquals(global ? Map.of("k", 4L) : Map.of("k", 4), values.get("openMap"));
+                    Assertions.assertEquals(java.util.Optional.of(global ? List.of(6L) : List.of(6)), values.get("wrappedList"));
+                    Assertions.assertEquals("c", ((G10SlotChild) values.get("child")).getName());
+                    Assertions.assertEquals(List.of(8L), values.get("typedList"));
+                }
+            }
+        }
+    }
+
+    // ---- perf review 2026-10-07 G10 end ----
+    // ---- perf review 2026-10-07 G11 begin ----
+    /** G11-01: a property-less class (an ObjectType, not a bean) written by AbstractXmlParser.writeEmptyObject. */
+    public static class PerfReviewMarker {
+    }
+
+    /** G11-01: a property-less class whose annotation selects the naming policy of its element name. */
+    @com.landawn.abacus.annotation.JsonXmlConfig(namingPolicy = NamingPolicy.SNAKE_CASE)
+    public static class PerfReviewAnnotatedMarker {
+    }
+
+    /** G11-01: a second property-less class, interleaved with the first one. */
+    public static class PerfReviewOtherMarker {
+    }
+
+    /** G11-01: a bean holding property-less values. */
+    public static class PerfReviewMarkerHolder {
+        private PerfReviewMarker first;
+        private PerfReviewMarker second;
+        private String tag;
+
+        public PerfReviewMarker getFirst() {
+            return first;
+        }
+
+        public void setFirst(final PerfReviewMarker first) {
+            this.first = first;
+        }
+
+        public PerfReviewMarker getSecond() {
+            return second;
+        }
+
+        public void setSecond(final PerfReviewMarker second) {
+            this.second = second;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(final String tag) {
+            this.tag = tag;
+        }
+    }
+
+    // G11-01: the empty element of a property-less class is pinned on both backends for the first write (the name tags
+    // are built) and the later ones (the tags are cached per class): root, list, map value and bean property, both tag
+    // styles, with type info, pretty format, and every way of choosing the naming policy
+    @Test
+    public void testWriteEmptyObject_pinnedOutputPerBackendAndConfig() {
+        final XmlSerConfig lenient = XmlSerConfig.create().setFailOnEmptyBean(false);
+        final String typeName = Type.of(PerfReviewMarker.class).name();
+        final PerfReviewMarkerHolder holder = new PerfReviewMarkerHolder();
+        holder.setFirst(new PerfReviewMarker());
+        holder.setTag("t");
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("m", new PerfReviewMarker());
+        map.put("n", "v");
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final String label = parser == staxParser ? "StAX" : "DOM";
+            for (int round = 0; round < 3; round++) {
+                Assertions.assertEquals("<perfReviewMarker></perfReviewMarker>", parser.serialize(new PerfReviewMarker(), lenient), label);
+                Assertions.assertEquals("<list><perfReviewMarker></perfReviewMarker><perfReviewMarker></perfReviewMarker></list>",
+                        parser.serialize(N.asList(new PerfReviewMarker(), new PerfReviewMarker()), lenient), label);
+                Assertions.assertEquals("<map><m><perfReviewMarker></perfReviewMarker></m><n>v</n></map>", parser.serialize(map, lenient), label);
+                Assertions.assertEquals("<perfReviewMarkerHolder><first><perfReviewMarker></perfReviewMarker></first><tag>t</tag></perfReviewMarkerHolder>",
+                        parser.serialize(holder, lenient), label);
+                Assertions.assertEquals("<perfReviewMarker type=\"" + typeName + "\"></perfReviewMarker>",
+                        parser.serialize(new PerfReviewMarker(), XmlSerConfig.create().setFailOnEmptyBean(false).setWriteTypeInfo(true)), label);
+                Assertions.assertEquals("<bean name=\"perfReviewMarker\"></bean>",
+                        parser.serialize(new PerfReviewMarker(), XmlSerConfig.create().setFailOnEmptyBean(false).setTagByPropertyName(false)), label);
+                Assertions.assertEquals("<bean name=\"perfReviewMarker\" type=\"" + typeName + "\"></bean>", parser.serialize(new PerfReviewMarker(),
+                        XmlSerConfig.create().setFailOnEmptyBean(false).setTagByPropertyName(false).setWriteTypeInfo(true)), label);
+                Assertions.assertEquals("<list>\n    <perfReviewMarker></perfReviewMarker>\n    <perfReviewMarker></perfReviewMarker>\n</list>",
+                        parser.serialize(N.asList(new PerfReviewMarker(), new PerfReviewMarker()),
+                                XmlSerConfig.create().setFailOnEmptyBean(false).setPrettyFormat(true)),
+                        label);
+                Assertions.assertEquals(
+                        "<perfReviewMarkerHolder>\n    <first>\n        <perfReviewMarker></perfReviewMarker>\n    </first>\n    <tag>t</tag>\n</perfReviewMarkerHolder>",
+                        parser.serialize(holder, XmlSerConfig.create().setFailOnEmptyBean(false).setPrettyFormat(true)), label);
+                // the naming policy of the configuration, of the annotation, and the configuration over the annotation
+                Assertions.assertEquals("<PERF_REVIEW_MARKER></PERF_REVIEW_MARKER>", parser.serialize(new PerfReviewMarker(),
+                        XmlSerConfig.create().setFailOnEmptyBean(false).setPropNamingPolicy(NamingPolicy.SCREAMING_SNAKE_CASE)), label);
+                Assertions.assertEquals("<perf-review-marker></perf-review-marker>",
+                        parser.serialize(new PerfReviewMarker(), XmlSerConfig.create().setFailOnEmptyBean(false).setPropNamingPolicy(NamingPolicy.KEBAB_CASE)),
+                        label);
+                Assertions.assertEquals("<PerfReviewMarker></PerfReviewMarker>", parser.serialize(new PerfReviewMarker(),
+                        XmlSerConfig.create().setFailOnEmptyBean(false).setPropNamingPolicy(NamingPolicy.UPPER_CAMEL_CASE)), label);
+                Assertions.assertEquals("<perf_review_annotated_marker></perf_review_annotated_marker>",
+                        parser.serialize(new PerfReviewAnnotatedMarker(), lenient), label);
+                Assertions.assertEquals("<PerfReviewAnnotatedMarker></PerfReviewAnnotatedMarker>", parser.serialize(new PerfReviewAnnotatedMarker(),
+                        XmlSerConfig.create().setFailOnEmptyBean(false).setPropNamingPolicy(NamingPolicy.UPPER_CAMEL_CASE)), label);
+                // the strict default still rejects the class, with the same message
+                final ParsingException strict = Assertions.assertThrows(ParsingException.class, () -> parser.serialize(new PerfReviewMarker()));
+                Assertions.assertTrue(strict.getMessage().startsWith("Unsupported class: "), strict.getMessage());
+            }
+        }
+    }
+
+    // G11-01: an anonymous class has an empty simple name: the element-name check fails on every write (a cached tag
+    // never suppresses the failure), while the attribute style still writes the empty name as before
+    @Test
+    public void testWriteEmptyObject_invalidNameIsRejectedOnEveryWrite() {
+        final XmlSerConfig lenient = XmlSerConfig.create().setFailOnEmptyBean(false);
+        final XmlSerConfig lenientAttributeStyle = XmlSerConfig.create().setFailOnEmptyBean(false).setTagByPropertyName(false);
+        final Object anonymous = new Object() {
+        };
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final String label = parser == staxParser ? "StAX" : "DOM";
+            for (int round = 0; round < 3; round++) {
+                final ParsingException ex = Assertions.assertThrows(ParsingException.class, () -> parser.serialize(anonymous, lenient), label);
+                Assertions.assertEquals("Class name '' is not a valid XML element name", ex.getMessage(), label);
+                final ParsingException nested = Assertions.assertThrows(ParsingException.class, () -> parser.serialize(N.asList(anonymous), lenient), label);
+                Assertions.assertEquals("Class name '' is not a valid XML element name", nested.getMessage(), label);
+                Assertions.assertEquals("<bean name=\"\"></bean>", parser.serialize(anonymous, lenientAttributeStyle), label);
+            }
+        }
+    }
+
+    // G11-01: two property-less classes written alternately each keep their own element name
+    @Test
+    public void testWriteEmptyObject_distinctClassesKeepTheirOwnTags() {
+        final XmlSerConfig lenient = XmlSerConfig.create().setFailOnEmptyBean(false);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final String label = parser == staxParser ? "StAX" : "DOM";
+            for (int round = 0; round < 3; round++) {
+                Assertions.assertEquals("<perfReviewMarker></perfReviewMarker>", parser.serialize(new PerfReviewMarker(), lenient), label);
+                Assertions.assertEquals("<perfReviewOtherMarker></perfReviewOtherMarker>", parser.serialize(new PerfReviewOtherMarker(), lenient), label);
+                Assertions.assertEquals("<list><perfReviewMarker></perfReviewMarker><perfReviewOtherMarker></perfReviewOtherMarker></list>",
+                        parser.serialize(N.asList(new PerfReviewMarker(), new PerfReviewOtherMarker()), lenient), label);
+            }
+        }
+    }
+    // ---- perf review 2026-10-07 G11 end ----
+    // ---- perf review 2026-10-07 G12 begin ----
+
+    // G12-01: isCompactMapText reads the first non-whitespace code unit in place instead of copying the stripped text; the
+    // decision is pinned for the whitespace String.strip()/isBlank() skip, for the characters they do not skip, for lone
+    // surrogates and for a supplementary first code point, and for blank and null text.
+    @Test
+    public void testIsCompactMapText_pinsFirstNonWhitespaceDecision() {
+        final String[] compact = { "{", "{}", "{\"a\":1}", "{]", " {\"a\":1} ", "\n\t {\"a\":1}\r\n", "\u2003{\"a\":1}\u2003", "\u3000{", "\u2028{", "\u2029{",
+                "\u1680{", "\u2000{", "\u2001{", "\u2002{", "\u2004{", "\u2005{", "\u2006{", "\u2008{", "\u2009{", "\u200A{", "\u205F{", "\u001C{", "\u001D{",
+                "\u001E{", "\u001F{", "\u000B{", "\u000C{", " \t\n\u000B\u000C\r\u001C\u001D\u001E\u001F\u2003{", "{\uD83D\uDE00", "{\uD800" };
+        for (int i = 0; i < compact.length; i++) {
+            Assertions.assertTrue(AbstractXmlParser.isCompactMapText(compact[i]), "compact[" + i + "]");
+        }
+
+        final String[] stray = { null, "", " ", "\n\t\r", "\u2003", "\u3000 \u2028", "\u000B\u000C\u001C\u001D\u001E\u001F", "\u00A0{\"a\":1}", "\u2007{",
+                "\u202F{", "\u0085{", "\u200B{", "\uFEFF{", "\u0000{", "[1]", " [1] ", "x{", "\"{\"", " \uD83D\uDE00{", "\uD83D\uDE00{", "\uD800{", "\uDC00{",
+                "\uDBFF\uDFFF{", "}", "}{", " \u00A0 {", "\u2003\u00A0{", "null", "true" };
+        for (int i = 0; i < stray.length; i++) {
+            Assertions.assertFalse(AbstractXmlParser.isCompactMapText(stray[i]), "stray[" + i + "]");
+        }
+    }
+
+    // G12-01: whitespace around compact map text (ASCII, Unicode spaces and line separators) still reads the same map at
+    // the root and inside a nested map element on both backends; blank text is still an empty map, and a leading
+    // no-break space, NEL or supplementary character (not whitespace to String.strip()) still keeps the text from being
+    // read as a compact map (the map stays empty, as before).
+    @Test
+    public void testIsCompactMapText_whitespaceAroundCompactMapTextStillReads() {
+        final Type<Map<String, Integer>> rootType = Type.of("Map<String, Integer>");
+        final Type<Map<String, Map<String, Integer>>> nestedType = Type.of("Map<String, Map<String, Integer>>");
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            for (final String padding : new String[] { "", " ", "\n    ", "\t\t", "\r\n", "&#x2003;", "&#x3000;", "&#x2028;", "&#x2029;", " &#x1680;\n" }) {
+                final String root = "<map>" + padding + "{\"a\":1}" + padding + "</map>";
+                Assertions.assertEquals(Map.of("a", 1), parser.deserialize(root, null, rootType), root);
+
+                final String nested = "<map><k><map>" + padding + "{\"a\":1}" + padding + "</map></k></map>";
+                Assertions.assertEquals(Map.of("k", Map.of("a", 1)), parser.deserialize(nested, null, nestedType), nested);
+            }
+
+            for (final String blank : new String[] { "", " ", "\n", "&#x2003;", "&#x3000;&#x2028;" }) {
+                final String root = "<map>" + blank + "</map>";
+                Assertions.assertEquals(Map.of(), parser.deserialize(root, null, rootType), root);
+            }
+
+            for (final String stray : new String[] { "&#xA0;", "&#x85;", "&#x1F600;", "&#x2007;", "&#x202F;", "&#x200B;" }) {
+                final String root = "<map>" + stray + "{\"a\":1}</map>";
+                Assertions.assertEquals(Map.of(), parser.deserialize(root, null, rootType), root);
+            }
+        }
+    }
+
+    // ---- perf review 2026-10-07 G12 end ----
+
+    // ---- perf review 2026-10-07 round 2 R2C begin ----
+
+    // R2C-03: the per-class cache of a property-less class's name tags serves the class's own Type; another Type instance
+    // describing the same class (a parameterized spelling, whose name differs) takes the rebuild branch and gets tags built
+    // for its own name, as before the cache, without replacing the cached entry of the class's Type
+    @Test
+    public void testWriteEmptyObject_otherTypeInstanceOfSameClassRebuildsTags() throws IOException {
+        final Type<?> raw = Type.of(PerfReviewMarker.class);
+        final Type<?> spelled = Type.of(PerfReviewMarker.class.getCanonicalName() + "<String>");
+        Assertions.assertNotSame(raw, spelled);
+        Assertions.assertSame(raw.javaType(), spelled.javaType());
+        Assertions.assertNotEquals(raw.name(), spelled.name());
+
+        final XmlSerConfig typed = XmlSerConfig.create().setFailOnEmptyBean(false).setWriteTypeInfo(true);
+        final XmlSerConfig named = XmlSerConfig.create().setFailOnEmptyBean(false).setWriteTypeInfo(true).setTagByPropertyName(false);
+        final String rawTyped = r2WriteEmptyObject(raw, typed);
+        final String rawNamed = r2WriteEmptyObject(raw, named);
+        Assertions.assertEquals("<perfReviewMarker type=\"" + raw.name() + "\"></perfReviewMarker>", rawTyped);
+        Assertions.assertTrue(rawNamed.contains("name=\"perfReviewMarker\"") && rawNamed.contains(raw.name()), rawNamed);
+
+        final String escapedRawName = raw.name().replace("<", "&lt;").replace(">", "&gt;");
+        final String escapedSpelledName = spelled.name().replace("<", "&lt;").replace(">", "&gt;");
+        for (int round = 0; round < 3; round++) {
+            Assertions.assertEquals(rawTyped.replace(escapedRawName, escapedSpelledName), r2WriteEmptyObject(spelled, typed), "round " + round);
+            Assertions.assertEquals(rawNamed.replace(escapedRawName, escapedSpelledName), r2WriteEmptyObject(spelled, named), "round " + round);
+            Assertions.assertEquals(rawTyped, r2WriteEmptyObject(raw, typed), "round " + round);
+            Assertions.assertEquals(rawNamed, r2WriteEmptyObject(raw, named), "round " + round);
+        }
+    }
+
+    private static String r2WriteEmptyObject(final Type<?> type, final XmlSerConfig config) throws IOException {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            Assertions.assertTrue(AbstractXmlParser.writeEmptyObject(type, config, null, bw));
+            return bw.toString();
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    // ---- perf review 2026-10-07 round 2 R2C end ----
+
+    // ---- perf review 2026-10-07 round 4 R4 begin ----
+
+    /** R4-01: a bean with an open property, written with its class name as the standard writer does. */
+    public static class R4OpenHolder {
+        private Object open;
+
+        public Object getOpen() {
+            return open;
+        }
+
+        public void setOpen(final Object open) {
+            this.open = open;
+        }
+    }
+
+    // R4-01: an adopted type attribute naming a class whose codec cannot read text at all (Number) is a document error reported as
+    // ParsingException naming the attribute on the standard StAX and DOM readers too (the StAX reader leaked the codec's
+    // UnsupportedOperationException from its text path, the DOM reader through the shared property reader), at a bean property, a map
+    // value and a list item; value errors of working codecs keep the codec's own exception, and a working codec still converts
+    @Test
+    public void testAdoptedTypeAttribute_unreadableCodecIsParsingExceptionOnBothBackends() {
+        final String holderTag = "<r4OpenHolder type=\"" + R4OpenHolder.class.getCanonicalName() + "\">";
+        final Type<R4OpenHolder> holderType = Type.of(R4OpenHolder.class);
+        final Type<Map<String, Object>> stringMapType = Type.of("Map<String, Object>");
+        final Type<List<Object>> listType = Type.of("List<Object>");
+        final String expectedMessage = "XML type attribute 'Number' names java.lang.Number, whose values cannot be read from element text";
+        final String[] documents = { holderTag + "<open type=\"Number\">5</open></r4OpenHolder>",
+                "<map type=\"HashMap&lt;String, Object&gt;\"><k type=\"Number\">5</k></map>",
+                "<list type=\"ArrayList&lt;Object&gt;\"><e type=\"Number\">5</e></list>" };
+        final Type<?>[] types = { holderType, stringMapType, listType };
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final String label = parser == staxParser ? "StAX" : "DOM";
+            for (int i = 0; i < documents.length; i++) {
+                final String document = documents[i];
+                final Type<?> type = types[i];
+                final ParsingException e = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(document, type), label + " " + document);
+                Assertions.assertEquals(expectedMessage, e.getMessage(), label + " " + document);
+                Assertions.assertInstanceOf(UnsupportedOperationException.class, e.getCause(), label + " " + document);
+            }
+            Assertions.assertThrows(NumberFormatException.class,
+                    () -> parser.deserialize(holderTag + "<open type=\"Long\">x</open></r4OpenHolder>", holderType), label);
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parser.deserialize(holderTag + "<open type=\"Timestamp\">5</open></r4OpenHolder>", holderType), label);
+            Assertions.assertEquals(5L, parser.deserialize(holderTag + "<open type=\"Long\">5</open></r4OpenHolder>", holderType).getOpen(), label);
+            Assertions.assertEquals("5", parser.deserialize(holderTag + "<open type=\"CharSequence\">5</open></r4OpenHolder>", holderType).getOpen(), label);
+            Assertions.assertInstanceOf(java.util.Calendar.class,
+                    parser.deserialize(holderTag + "<open type=\"Calendar\">2024-01-02T03:04:05Z</open></r4OpenHolder>", holderType).getOpen(), label);
+        }
+    }
+
+    // ---- perf review 2026-10-07 round 4 R4 end ----
 }

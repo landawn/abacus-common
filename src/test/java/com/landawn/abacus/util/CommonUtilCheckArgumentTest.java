@@ -161,7 +161,6 @@ public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
         assertTrue(called[0]);
     }
 
-
     @Test
     public void testCheckArgumentVarargsTemplateWithFiveArguments() {
         assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5));

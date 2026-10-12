@@ -519,7 +519,7 @@ public class JoinerClosedStateFixTest extends TestBase {
             refuses(() -> closed().appendAll((Iterable<Object>) list));
             refuses(() -> closed().appendAll(list.iterator()));
             // The filter is user code too, so it must not run either.
-            refuses(() -> closed().appendAll((Iterable<Object>) list, x -> {
+            refuses(() -> closed().appendAll(list, x -> {
                 calls[0]++;
                 return true;
             }));
@@ -599,7 +599,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
             // Overloads that check closed first refuse even an empty or null source.
             assertEquals("Joiner has been closed",
-                    assertThrows(IllegalStateException.class, () -> closed().appendAll((Iterable<Object>) Collections.<Object> emptyList(), x -> true))
+                    assertThrows(IllegalStateException.class, () -> closed().appendAll(Collections.<Object> emptyList(), x -> true))
                             .getMessage());
             assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed().appendBean(null)).getMessage());
             assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed().repeat("x", 0)).getMessage());

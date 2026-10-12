@@ -45,7 +45,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -154,6 +153,10 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  */
 @SuppressWarnings({ "java:S1192", "java:S1698", "java:S1845", "java:S2445", "java:S3077" })
 abstract class AbstractStream<T> extends Stream<T> {
+
+    // Iterator state intentionally keeps a bounded number of element/child references.
+    // Avoid per-element clearing or field-to-local rewrites solely to shorten reference lifetimes.
+    // Resource close and buffer cleanup still follow their lifecycle requirements.
 
     /**
      * Constructs an AbstractStream with the specified sorting state, comparator, and close handlers.
@@ -590,27 +593,32 @@ abstract class AbstractStream<T> extends Stream<T> {
             // does not throw NPE, matching the parallel path above (SpinedBuffer permits null) and JDK Stream.mapMulti,
             // and not a LinkedList, which allocated a node for every emitted element. The pending elements are
             // buffer[cursor, size); a delivered slot is cleared at once, and the drained buffer is reset before the
-            // next source element is mapped.
-            final List<R> buffer = new ArrayList<>();
-
-            final Consumer<R> consumer = buffer::add;
-
+            // next source element is mapped. As in the primitive mapMulti operations, a mapper that throws exposes none
+            // of the elements it emitted in that call, an exceptionally large expansion is not kept for the rest of
+            // the pipeline, and closing the stream releases the buffer.
             @SuppressWarnings("resource")
             final ObjIteratorEx<T> iter = iteratorEx();
 
-            return newStream(new ObjIteratorEx<>() { //NOSONAR
+            final ObjIteratorEx<R> mappedIter = new ObjIteratorEx<>() { //NOSONAR
+                // One list for the pipeline's lifetime, so the consumer stays a direct method reference; releasing a
+                // large expansion trims the list's capacity instead of replacing it.
+                private final ArrayList<R> buffer = new ArrayList<>();
+                private final Consumer<R> consumer = buffer::add;
                 private int cursor = 0;
 
                 @Override
                 public boolean hasNext() {
                     if (cursor >= buffer.size()) {
-                        if (cursor > 0) {
-                            buffer.clear();
-                            cursor = 0;
-                        }
+                        resetBuffer();
 
                         while (iter.hasNext()) {
-                            mapper.accept(iter.next(), consumer);
+                            try {
+                                // Complete the mapper before exposing any of its output, as flatMap did.
+                                mapper.accept(iter.next(), consumer);
+                            } catch (final Throwable e) { // NOSONAR: precise rethrow also cleans up a sneaky checked exception from the mapper.
+                                resetBuffer(); // A failed mapper must not expose its partially emitted elements on retry.
+                                throw e;
+                            }
 
                             if (buffer.size() > 0) {
                                 break;
@@ -629,7 +637,30 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                     return buffer.set(cursor++, null);
                 }
-            }, false, null);
+
+                private void resetBuffer() {
+                    // Reuse ordinary fan-out buffers without retaining an exceptional large expansion for the whole pipeline.
+                    if (!buffer.isEmpty()) {
+                        final boolean large = buffer.size() > MAX_BUFFERED_SIZE;
+                        buffer.clear();
+
+                        if (large) {
+                            buffer.trimToSize();
+                        }
+                    }
+
+                    cursor = 0;
+                }
+
+                @Override
+                public void closeResource() {
+                    buffer.clear();
+                    buffer.trimToSize();
+                    cursor = 0;
+                }
+            };
+
+            return newStream(mappedIter, false, null, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
         }
     }
 
@@ -639,15 +670,86 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final Function<T, IntStream> secondMapper = t -> {
-            final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
+        if (isParallel()) {
+            final Function<T, IntStream> secondMapper = t -> {
+                final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
 
-            mapper.accept(t, buffer);
+                mapper.accept(t, buffer);
 
-            return IntStream.of(buffer.iterator());
+                return IntStream.of(buffer.iterator());
+            };
+
+            return flatMapToInt(secondMapper);
+        }
+
+        final ObjIteratorEx<T> iter = iteratorEx();
+        final IntIteratorEx mappedIter = new IntIteratorEx() {
+            // The values emitted for one input element are buffer[cursor, size). A plain array, not a primitive list:
+            // stale primitive values retain nothing, so a reset forgets the size instead of zero-filling the slots.
+            private int[] buffer = N.EMPTY_INT_ARRAY;
+            private int size;
+            private final IntConsumer consumer = this::emit;
+            private int cursor;
+
+            private void emit(final int value) {
+                if (size == buffer.length) {
+                    buffer = growMapMultiBuffer(buffer);
+                }
+
+                buffer[size++] = value;
+            }
+
+            @Override
+            public boolean hasNext() {
+                if (cursor >= size) {
+                    resetBuffer();
+
+                    while (iter.hasNext()) {
+                        try {
+                            // Complete the mapper before exposing any of its output, as flatMap did.
+                            mapper.accept(iter.next(), consumer);
+                        } catch (final Throwable e) { // NOSONAR: precise rethrow also cleans up a sneaky checked exception from the mapper.
+                            resetBuffer(); // A failed mapper must not expose its partially emitted values on retry.
+                            throw e;
+                        }
+
+                        if (size > 0) {
+                            break;
+                        }
+                    }
+                }
+
+                return cursor < size;
+            }
+
+            @Override
+            public int nextInt() throws NoSuchElementException {
+                if (cursor >= size && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return buffer[cursor++];
+            }
+
+            private void resetBuffer() {
+                // Reuse ordinary fan-out buffers without retaining an exceptional large expansion for the whole pipeline.
+                if (size > MAX_BUFFERED_SIZE) {
+                    buffer = N.EMPTY_INT_ARRAY;
+                }
+
+                size = 0;
+                cursor = 0;
+            }
+
+            @Override
+            public void closeResource() {
+                buffer = N.EMPTY_INT_ARRAY;
+                size = 0;
+                cursor = 0;
+            }
         };
 
-        return flatMapToInt(secondMapper);
+        return newStream(mappedIter, false, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     @Override
@@ -656,15 +758,86 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final Function<T, LongStream> secondMapper = t -> {
-            final SpinedBuffer.OfLong buffer = new SpinedBuffer.OfLong();
+        if (isParallel()) {
+            final Function<T, LongStream> secondMapper = t -> {
+                final SpinedBuffer.OfLong buffer = new SpinedBuffer.OfLong();
 
-            mapper.accept(t, buffer);
+                mapper.accept(t, buffer);
 
-            return LongStream.of(buffer.iterator());
+                return LongStream.of(buffer.iterator());
+            };
+
+            return flatMapToLong(secondMapper);
+        }
+
+        final ObjIteratorEx<T> iter = iteratorEx();
+        final LongIteratorEx mappedIter = new LongIteratorEx() {
+            // The values emitted for one input element are buffer[cursor, size). A plain array, not a primitive list:
+            // stale primitive values retain nothing, so a reset forgets the size instead of zero-filling the slots.
+            private long[] buffer = N.EMPTY_LONG_ARRAY;
+            private int size;
+            private final LongConsumer consumer = this::emit;
+            private int cursor;
+
+            private void emit(final long value) {
+                if (size == buffer.length) {
+                    buffer = growMapMultiBuffer(buffer);
+                }
+
+                buffer[size++] = value;
+            }
+
+            @Override
+            public boolean hasNext() {
+                if (cursor >= size) {
+                    resetBuffer();
+
+                    while (iter.hasNext()) {
+                        try {
+                            // Complete the mapper before exposing any of its output, as flatMap did.
+                            mapper.accept(iter.next(), consumer);
+                        } catch (final Throwable e) { // NOSONAR: precise rethrow also cleans up a sneaky checked exception from the mapper.
+                            resetBuffer(); // A failed mapper must not expose its partially emitted values on retry.
+                            throw e;
+                        }
+
+                        if (size > 0) {
+                            break;
+                        }
+                    }
+                }
+
+                return cursor < size;
+            }
+
+            @Override
+            public long nextLong() throws NoSuchElementException {
+                if (cursor >= size && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return buffer[cursor++];
+            }
+
+            private void resetBuffer() {
+                // Reuse ordinary fan-out buffers without retaining an exceptional large expansion for the whole pipeline.
+                if (size > MAX_BUFFERED_SIZE) {
+                    buffer = N.EMPTY_LONG_ARRAY;
+                }
+
+                size = 0;
+                cursor = 0;
+            }
+
+            @Override
+            public void closeResource() {
+                buffer = N.EMPTY_LONG_ARRAY;
+                size = 0;
+                cursor = 0;
+            }
         };
 
-        return flatMapToLong(secondMapper);
+        return newStream(mappedIter, false, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     @Override
@@ -673,15 +846,86 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final Function<T, DoubleStream> secondMapper = t -> {
-            final SpinedBuffer.OfDouble buffer = new SpinedBuffer.OfDouble();
+        if (isParallel()) {
+            final Function<T, DoubleStream> secondMapper = t -> {
+                final SpinedBuffer.OfDouble buffer = new SpinedBuffer.OfDouble();
 
-            mapper.accept(t, buffer);
+                mapper.accept(t, buffer);
 
-            return DoubleStream.of(buffer.iterator());
+                return DoubleStream.of(buffer.iterator());
+            };
+
+            return flatMapToDouble(secondMapper);
+        }
+
+        final ObjIteratorEx<T> iter = iteratorEx();
+        final DoubleIteratorEx mappedIter = new DoubleIteratorEx() {
+            // The values emitted for one input element are buffer[cursor, size). A plain array, not a primitive list:
+            // stale primitive values retain nothing, so a reset forgets the size instead of zero-filling the slots.
+            private double[] buffer = N.EMPTY_DOUBLE_ARRAY;
+            private int size;
+            private final DoubleConsumer consumer = this::emit;
+            private int cursor;
+
+            private void emit(final double value) {
+                if (size == buffer.length) {
+                    buffer = growMapMultiBuffer(buffer);
+                }
+
+                buffer[size++] = value;
+            }
+
+            @Override
+            public boolean hasNext() {
+                if (cursor >= size) {
+                    resetBuffer();
+
+                    while (iter.hasNext()) {
+                        try {
+                            // Complete the mapper before exposing any of its output, as flatMap did.
+                            mapper.accept(iter.next(), consumer);
+                        } catch (final Throwable e) { // NOSONAR: precise rethrow also cleans up a sneaky checked exception from the mapper.
+                            resetBuffer(); // A failed mapper must not expose its partially emitted values on retry.
+                            throw e;
+                        }
+
+                        if (size > 0) {
+                            break;
+                        }
+                    }
+                }
+
+                return cursor < size;
+            }
+
+            @Override
+            public double nextDouble() throws NoSuchElementException {
+                if (cursor >= size && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return buffer[cursor++];
+            }
+
+            private void resetBuffer() {
+                // Reuse ordinary fan-out buffers without retaining an exceptional large expansion for the whole pipeline.
+                if (size > MAX_BUFFERED_SIZE) {
+                    buffer = N.EMPTY_DOUBLE_ARRAY;
+                }
+
+                size = 0;
+                cursor = 0;
+            }
+
+            @Override
+            public void closeResource() {
+                buffer = N.EMPTY_DOUBLE_ARRAY;
+                size = 0;
+                cursor = 0;
+            }
         };
 
-        return flatMapToDouble(secondMapper);
+        return newStream(mappedIter, false, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     /**
@@ -1053,9 +1297,19 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(collapsible, cs.collapsible);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final ObjIteratorEx<T> iter = iteratorEx();
 
@@ -1246,9 +1500,19 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(collapsible, cs.collapsible);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final ObjIteratorEx<T> iter = iteratorEx();
 
@@ -3353,8 +3617,19 @@ abstract class AbstractStream<T> extends Stream<T> {
                 cursor = n < cursor - fromIndex ? cursor - (int) n : fromIndex;
             }
 
+            /**
+             * Copies the remaining reversed elements, including when the destination is the backing array.
+             *
+             * @param <A> the destination component type
+             * @param a the destination array, reused when large enough
+             * @return the array containing the remaining elements
+             * @throws NullPointerException if {@code a} is null, before reading the source
+             * @throws ArrayStoreException if an element cannot be stored in the destination array
+             */
             @Override
             public <A> A[] toArray(A[] a) {
+                N.requireNonNull(a, cs.a);
+
                 if (!initialized) {
                     init();
                 }
@@ -3363,8 +3638,15 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 a = a.length >= len ? a : (A[]) N.newArray(a.getClass().getComponentType(), len);
 
+                // Reordered writes can overwrite unread source slots when the caller supplies the backing array.
+                final Object[] target = a == elements ? new Object[len] : a;
+
                 for (int i = 0; i < len; i++) {
-                    a[i] = (A) elements[cursor - i - 1];
+                    target[i] = elements[cursor - i - 1];
+                }
+
+                if (target != a) {
+                    System.arraycopy(target, 0, a, 0, len);
                 }
 
                 if (a.length > len) {
@@ -3449,8 +3731,19 @@ abstract class AbstractStream<T> extends Stream<T> {
                 cnt = n < len - cnt ? cnt + (int) n : len;
             }
 
+            /**
+             * Copies the remaining rotated elements, including when the destination is the backing array.
+             *
+             * @param <A> the destination component type
+             * @param a the destination array, reused when large enough
+             * @return the array containing the remaining elements
+             * @throws NullPointerException if {@code a} is null, before reading the source
+             * @throws ArrayStoreException if an element cannot be stored in the destination array
+             */
             @Override
             public <A> A[] toArray(A[] a) {
+                N.requireNonNull(a, cs.a);
+
                 if (!initialized) {
                     init();
                 }
@@ -3459,7 +3752,10 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 a = a.length >= remaining ? a : (A[]) N.newArray(a.getClass().getComponentType(), remaining);
 
-                if (remaining > 0 && a != elements && a.getClass().getComponentType().isAssignableFrom(elements.getClass().getComponentType())) {
+                // Snapshot only the remaining output when copying back into the source would corrupt a later run.
+                final Object[] target = a == elements ? new Object[remaining] : a;
+
+                if (remaining > 0 && target.getClass().getComponentType().isAssignableFrom(elements.getClass().getComponentType())) {
                     // No element can fail the array-store check here (the usual case: toArray() passes an Object[]) and
                     // the target is not the source array, so copy the at most two contiguous runs of the backing range,
                     // [head, len) then [0, ...), in bulk.
@@ -3467,13 +3763,17 @@ abstract class AbstractStream<T> extends Stream<T> {
                     final int head = (int) (first < len ? first : first - len);
                     final int headLength = Math.min(len - head, remaining);
 
-                    System.arraycopy(elements, fromIndex + head, a, 0, headLength);
-                    System.arraycopy(elements, fromIndex, a, headLength, remaining - headLength);
+                    System.arraycopy(elements, fromIndex + head, target, 0, headLength);
+                    System.arraycopy(elements, fromIndex, target, headLength, remaining - headLength);
                 } else {
                     // Element by element, so that a mistyped array fails with the usual ArrayStoreException.
                     for (int i = cnt; i < len; i++) {
-                        a[i - cnt] = (A) elements[(int) (((long) start + i) % len) + fromIndex];
+                        target[i - cnt] = elements[(int) (((long) start + i) % len) + fromIndex];
                     }
+                }
+
+                if (target != a) {
+                    System.arraycopy(target, 0, a, 0, remaining);
                 }
 
                 if (a.length > remaining) {
@@ -3708,8 +4008,8 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
 
         try {
-            @SuppressWarnings("resource")
-            final Object[] a = sorted().toArray();
+            @SuppressWarnings("unchecked")
+            final Object[] a = toSortedArray(NATURAL_COMPARATOR);
 
             if (N.isEmpty(a)) {
                 return Optional.empty();
@@ -3731,8 +4031,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(comparator, cs.comparator);
 
         try {
-            @SuppressWarnings("resource")
-            final Object[] a = sorted(comparator).toArray();
+            final Object[] a = toSortedArray(comparator);
 
             if (N.isEmpty(a)) {
                 return Optional.empty();
@@ -3745,6 +4044,32 @@ abstract class AbstractStream<T> extends Stream<T> {
         } finally {
             close();
         }
+    }
+
+    /**
+     * Returns the remaining elements in a private array sorted by {@code cmp}, for the percentile terminals.
+     * These are the steps of {@code sorted(cmp).toArray()}, in the same order: the same sorted-stream shortcut,
+     * the snapshot that closes this stream before the first comparison, then the same sequential or parallel sort.
+     * Sorting the snapshot in place avoids re-copying it element by element into a second array through the
+     * lazy stream that {@code sorted(cmp)} returns.
+     *
+     * @param cmp the comparator to sort by
+     * @return the sorted elements
+     */
+    @SuppressWarnings("unchecked")
+    private Object[] toSortedArray(final Comparator<? super T> cmp) {
+        final boolean alreadySorted = isSorted() && isSameComparator(cmp, comparator());
+        final Object[] a = toArrayForIntermediateOp();
+
+        if (!alreadySorted) {
+            if (isParallel()) {
+                N.parallelSort((T[]) a, cmp);
+            } else {
+                N.sort((T[]) a, cmp);
+            }
+        }
+
+        return a;
     }
 
     @Override
@@ -4492,16 +4817,20 @@ abstract class AbstractStream<T> extends Stream<T> {
             throw e;
         }
 
-        return buffered(queueToBuffer);
+        return buffered(queueToBuffer, true);
     }
 
     @Override
     public Stream<T> buffered(final BlockingQueue<T> queueToBuffer) throws IllegalStateException, IllegalArgumentException {
+        return buffered(queueToBuffer, false);
+    }
+
+    private Stream<T> buffered(final BlockingQueue<T> queueToBuffer, final boolean ownsQueue) {
         assertNotClosed();
         checkArgNotNull(queueToBuffer, cs.queueToBuffer);
         checkArgument(queueToBuffer.isEmpty(), "'queueToBuffer' must be empty");
 
-        final Supplier<BufferedIterator<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer);
+        final Supplier<BufferedIterator<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer, null, ownsQueue);
 
         //noinspection resource
         return just(supplier).map(Supplier::get)
@@ -5070,10 +5399,10 @@ abstract class AbstractStream<T> extends Stream<T> {
                     stmtSetter.accept(next, statement);
 
                     if (isBatchUsed) {
-                        cnt++;
                         statement.addBatch();
 
-                        if (cnt % batchSize == 0) {
+                        // A rejected add must not hide earlier queued rows from the partial-batch flush on close.
+                        if (++cnt % batchSize == 0) {
                             DataSourceUtil.executeBatch(statement);
 
                             if (batchIntervalInMillis > 0) {
@@ -5160,10 +5489,10 @@ abstract class AbstractStream<T> extends Stream<T> {
                     stmtSetter.accept(next, stmt);
 
                     if (isBatchUsed) {
-                        cnt++;
                         stmt.addBatch();
 
-                        if (cnt % batchSize == 0) {
+                        // Count only successful adds so close still flushes the pending rows after a failed add.
+                        if (++cnt % batchSize == 0) {
                             DataSourceUtil.executeBatch(stmt);
 
                             if (batchIntervalInMillis > 0) {
@@ -5268,10 +5597,10 @@ abstract class AbstractStream<T> extends Stream<T> {
                     stmtSetter.accept(next, stmt);
 
                     if (isBatchUsed) {
-                        cnt++;
                         stmt.addBatch();
 
-                        if (cnt % batchSize == 0) {
+                        // Count only successful adds so close still flushes the pending rows after a failed add.
+                        if (++cnt % batchSize == 0) {
                             DataSourceUtil.executeBatch(stmt);
 
                             if (batchIntervalInMillis > 0) {
@@ -5676,7 +6005,10 @@ abstract class AbstractStream<T> extends Stream<T> {
                 try {
                     statement.clearBatch();
                 } catch (final Throwable e2) {
-                    e.addSuppressed(e2);
+                    // A JDBC driver may reuse its failure instance when clearing the failed batch.
+                    if (e != e2) {
+                        e.addSuppressed(e2);
+                    }
                 }
             }
 
@@ -6355,10 +6687,18 @@ abstract class AbstractStream<T> extends Stream<T> {
         if (primaryFailure == null) {
             try {
                 writer.flush();
-            } finally {
+            } catch (final Throwable flushFailure) {
+                // A failed flush leaves the unwritten characters buffered, so the recycle retries the write and usually
+                // fails again: its UncheckedIOException must not replace the IOException of the flush itself.
                 if (recycle) {
-                    Objectory.recycle((BufferedWriter) writer);
+                    recycleAfterFailure((BufferedWriter) writer, flushFailure);
                 }
+
+                throw flushFailure;
+            }
+
+            if (recycle) {
+                Objectory.recycle((BufferedWriter) writer);
             }
 
             return;
@@ -7502,34 +7842,25 @@ abstract class AbstractStream<T> extends Stream<T> {
      * have side effects (they drain the right-hand source, or call the user's unjoined-elements mapper), so closing
      * the join result early, {@code limit(0)}, or a failure of the left stream must not run them - that drained
      * {@code b} for nothing and let a secondary failure replace the real one. The stream built by a traversal is
-     * closed with this stream (a mapper-supplied stream may carry close handlers), provided it was built before the
-     * close started: a close from another thread that races the build may miss it. Sources such as {@code b} keep
-     * their own close handlers on the join result, so they are closed exactly once either way.
+     * closed with this stream (a mapper-supplied stream may carry close handlers). A tail that is still being built
+     * when this stream is closed - a buffered reader racing a short-circuiting terminal - is closed by the thread
+     * that built it as soon as it is returned, and contributes no elements. Sources such as {@code b} keep their own
+     * close handlers on the join result, so they are closed exactly once either way.
      *
      * @param <R> the element type
      * @param supplier builds the tail stream; may return {@code null} for an empty tail
      * @return a lazily built stream that closes the built stream, if any, when closed
      */
     static <R> Stream<R> deferTail(final Supplier<? extends Stream<? extends R>> supplier) {
-        // The tail may be built on a parallel worker thread and closed on the caller's thread. Known window:
-        // a close() that runs while supplier.get() is still executing - only a cross-thread close of the join result
-        // during a running terminal - finds nothing built yet, and the tail built afterwards is not closed by this
-        // handler. The join terminals close the result after the traversal, so every single-threaded path closes the
-        // tail; only a mapper-supplied tail with its own close handlers could be affected.
-        final AtomicReference<Stream<? extends R>> built = new AtomicReference<>();
+        // A buffered reader can still be creating the tail when a short-circuiting terminal closes the join.
+        // Closing seals the holder, so a tail returned afterwards is closed by its producer instead of leaked.
+        final MappedStreamHolder built = new MappedStreamHolder();
 
         return Stream.<R> of(ObjIteratorEx.<R> defer(() -> {
             final Stream<? extends R> s = supplier.get();
-            built.set(s);
-            return s == null ? ObjIteratorEx.<R> empty() : s.iteratorEx();
-        })).onClose(() -> {
-            @SuppressWarnings("resource")
-            final Stream<? extends R> s = built.get();
 
-            if (s != null) {
-                s.close();
-            }
-        });
+            return s == null || !built.adoptOrClose(s) ? ObjIteratorEx.<R> empty() : s.iteratorEx();
+        })).onClose(built::close);
     }
 
     /**
@@ -7664,9 +7995,19 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(collector, cs.collector);
         checkArgNotNull(function, cs.function);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
-        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super U> accumulator;
+        final Function<Object, D> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+            finisher = (Function<Object, D>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final Function<T, R> mapper = new Function<>() {
             private final Iterator<U> iter = b;
@@ -7720,9 +8061,19 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(function, cs.function);
         checkArgNotNull(mapperForUnJoinedElements, cs.mapperForUnJoinedElements);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
-        final Function<Object, D> finisher = (Function<Object, D>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super U> accumulator;
+        final Function<Object, D> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
+            finisher = (Function<Object, D>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
         final U none = (U) NONE;
         final Holder<U> nextValueHolder = Holder.of(none);
 
@@ -7784,7 +8135,14 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(b, "Stream 'b' cannot be null");
         checkArgNotNull(predicate, cs.predicate);
 
-        return joinByRange(b.iteratorEx(), predicate).onClose(newCloseHandler(b));
+        try {
+            return joinByRange(b.iteratorEx(), predicate).onClose(newCloseHandler(b));
+        } catch (final Throwable e) {
+            // Construction can fail before the joined stream owns the right-hand close handler.
+            closeAfterFailure(e);
+            b.closeAfterFailure(e);
+            throw e;
+        }
     }
 
     @Override
@@ -7805,7 +8163,14 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(collector, cs.collector);
         checkArgNotNull(function, cs.function);
 
-        return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, function)).onClose(newCloseHandler(b));
+        try {
+            return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, function)).onClose(newCloseHandler(b));
+        } catch (final Throwable e) {
+            // Construction can fail before the joined stream owns the right-hand close handler.
+            closeAfterFailure(e);
+            b.closeAfterFailure(e);
+            throw e;
+        }
     }
 
     @Override
@@ -7820,7 +8185,14 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(function, cs.function);
         checkArgNotNull(mapperForUnJoinedElements, cs.mapperForUnJoinedElements);
 
-        return joinByRange(b.iteratorEx(), predicate, collector, function, mapperForUnJoinedElements).onClose(newCloseHandler(b));
+        try {
+            return joinByRange(b.iteratorEx(), predicate, collector, function, mapperForUnJoinedElements).onClose(newCloseHandler(b));
+        } catch (final Throwable e) {
+            // Construction can fail before the joined stream owns the right-hand close handler.
+            closeAfterFailure(e);
+            b.closeAfterFailure(e);
+            throw e;
+        }
     }
 
     @Override

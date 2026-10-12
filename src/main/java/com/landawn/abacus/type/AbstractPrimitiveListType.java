@@ -76,6 +76,16 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
         return true;
     }
 
+    /**
+     * Returns the array handler used for this list's text conversions, when exposed by the implementation.
+     * Custom implementations may return {@code null}; parsers then use their {@link #valueOf(String)} contract.
+     *
+     * @return the backing array type handler, or {@code null} for a custom conversion
+     */
+    public Type<?> arrayType() {
+        return null;
+    }
+
     static String stringOf(final char[] x, final int length) {
         if (x == null) {
             return null; // NOSONAR

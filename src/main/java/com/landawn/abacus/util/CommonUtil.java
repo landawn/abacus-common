@@ -4352,30 +4352,7 @@ sealed class CommonUtil permits N {
      * @see Beans#isBeanClass(Class)
      */
     static void checkBeanClass(final Class<?> targetClass) throws IllegalArgumentException {
-        if (!Beans.isBeanClass(targetClass)) {
-            // Name the rule that rejected the class: String, Integer or ArrayList do have accessors, they are excluded by type.
-            final String reason;
-
-            if (targetClass == null) {
-                reason = "the class is null";
-            } else if (CharSequence.class.isAssignableFrom(targetClass)) {
-                reason = "CharSequence implementations are never treated as beans";
-            } else if (Number.class.isAssignableFrom(targetClass)) {
-                reason = "Number implementations are never treated as beans";
-            } else if (Map.Entry.class.isAssignableFrom(targetClass)) {
-                reason = "Map.Entry implementations are never treated as beans";
-            } else if (Map.class.isAssignableFrom(targetClass)) {
-                reason = "Map implementations are never treated as beans";
-            } else if (Collection.class.isAssignableFrom(targetClass)) {
-                reason = "Collection implementations are never treated as beans";
-            } else {
-                reason = "no property getter/setter method or public field was found, or the class is registered as a non-bean class"
-                        + " (see Beans.isBeanClass(Class))";
-            }
-
-            throw new IllegalArgumentException(
-                    "Not a bean class: " + (targetClass == null ? "null" : ClassUtil.getCanonicalClassName(targetClass)) + " - " + reason);
-        }
+        Beans.checkBeanClass(targetClass);
     }
 
     /**
@@ -4776,7 +4753,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(boolean[], boolean[])
      */
     public static boolean equals(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int length)
@@ -4830,7 +4807,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(char[], char[])
      */
     public static boolean equals(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int length)
@@ -4884,7 +4861,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(byte[], byte[])
      */
     public static boolean equals(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int length)
@@ -4938,7 +4915,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(short[], short[])
      */
     public static boolean equals(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int length)
@@ -4992,7 +4969,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(int[], int[])
      */
     public static boolean equals(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int length)
@@ -5046,7 +5023,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(long[], long[])
      */
     public static boolean equals(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int length)
@@ -5100,7 +5077,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(float[], float[])
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int length)
@@ -5193,7 +5170,7 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the specified range of elements in both arrays are equal within the specified delta, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative, or if {@code delta} is negative or NaN (checked right after the range,
      *         whatever the arrays hold).
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      */
     public static boolean equals(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int length, final float delta)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -5253,7 +5230,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} exceeds the length of {@code a}, or {@code fromIndexB + len} exceeds the length of {@code b}
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} exceeds the length of {@code a}, or {@code fromIndexB + length} exceeds the length of {@code b}
      * @see Arrays#equals(double[], double[])
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int length)
@@ -5344,8 +5321,8 @@ sealed class CommonUtil permits N {
      * @return {@code true} if the specified range of elements in both arrays are equal within the specified delta, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative, or if {@code delta} is negative or NaN (checked right after the range,
      *         whatever the arrays hold).
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} or
-     *         {@code fromIndexB + len} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} or
+     *         {@code fromIndexB + length} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
      */
     public static boolean equals(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int length, final double delta)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -5416,8 +5393,8 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} or
-     *         {@code fromIndexB + len} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} or
+     *         {@code fromIndexB + length} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
      * @see Arrays#equals(Object[], Object[])
      */
     public static boolean equals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int length)
@@ -5550,8 +5527,8 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} or
-     *         {@code fromIndexB + len} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} or
+     *         {@code fromIndexB + length} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
      * @see Arrays#deepEquals(Object[], Object[])
      */
     public static boolean deepEquals(final Object[] a, final int fromIndexA, final Object[] b, final int fromIndexB, final int length)
@@ -5606,8 +5583,8 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return {@code true} if the specified range of elements in both arrays are equal, ignoring case considerations; {@code false} otherwise
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + len} or
-     *         {@code fromIndexB + len} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or {@code fromIndexA + length} or
+     *         {@code fromIndexB + length} exceeds the length of the corresponding array, treating a {@code null} array as length zero.
      */
     public static boolean equalsIgnoreCase(final String[] a, final int fromIndexA, final String[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -5957,9 +5934,8 @@ sealed class CommonUtil permits N {
      *   <li>JavaBean objects: properties compared by position in each type's property list (name and value must match at the same index).
      *       The same properties in a different declaration order are not equal. This applies only to non-JDK classes: a bean-shaped class
      *       that is, or extends, a JDK class ({@code java.*}, {@code javax.*}, {@code jdk.*}, {@code sun.*}, {@code com.sun.*}) - for example
-     *       {@code GregorianCalendar}, any {@code Throwable} including user exceptions, {@code SimpleDateFormat}, {@code Thread},
-     *       {@code java.awt.Point} - is compared as a leaf value with its own {@code equals}, because the properties discovered on such
-     *       classes do not capture their state.</li>
+     *       {@code GregorianCalendar}, {@code SimpleDateFormat}, {@code Thread}, {@code java.awt.Point} - is compared as a leaf value
+     *       with its own {@code equals}, because the properties discovered on such classes do not capture their state.</li>
      *   <li>{@link java.nio.file.Path}: treated as a leaf value and delegated to {@link #equals(Object, Object)}, although
      *       it is an {@link Iterable} (its name elements are themselves {@code Path}s)</li>
      *   <li>Other objects: delegated to {@link #equals(Object, Object)}</li>
@@ -6360,6 +6336,11 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (fromIndex == 0 && toIndex == a.length) {
+            // Whole array (e.g. a full CharList): same result as the loop below, via the vectorized hash-code intrinsic.
+            return Arrays.hashCode(a);
+        }
+
         int result = 1;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -6412,6 +6393,11 @@ sealed class CommonUtil permits N {
 
         if (a == null) {
             return 0;
+        }
+
+        if (fromIndex == 0 && toIndex == a.length) {
+            // Whole array (e.g. a full ByteList): same result as the loop below, via the vectorized hash-code intrinsic.
+            return Arrays.hashCode(a);
         }
 
         int result = 1;
@@ -6468,6 +6454,11 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
+        if (fromIndex == 0 && toIndex == a.length) {
+            // Whole array (e.g. a full ShortList): same result as the loop below, via the vectorized hash-code intrinsic.
+            return Arrays.hashCode(a);
+        }
+
         int result = 1;
 
         for (int i = fromIndex; i < toIndex; i++) {
@@ -6520,6 +6511,11 @@ sealed class CommonUtil permits N {
 
         if (a == null) {
             return 0;
+        }
+
+        if (fromIndex == 0 && toIndex == a.length) {
+            // Whole array (e.g. a full IntList): same result as the loop below, via the vectorized hash-code intrinsic.
+            return Arrays.hashCode(a);
         }
 
         int result = 1;
@@ -6879,8 +6875,8 @@ sealed class CommonUtil permits N {
      *   <li>{@link Map}: both keys and values are processed recursively</li>
      *   <li>JavaBean objects: each property is processed recursively. This applies only to non-JDK classes: a bean-shaped class that
      *       is, or extends, a JDK class ({@code java.*}, {@code javax.*}, {@code jdk.*}, {@code sun.*}, {@code com.sun.*}) - for example
-     *       {@code GregorianCalendar}, any {@code Throwable}, {@code SimpleDateFormat}, {@code java.awt.Point} - is hashed as a leaf value
-     *       with {@link N#hashCode(Object)}, matching {@link #equalsEverything(Object, Object)}</li>
+     *       {@code GregorianCalendar}, {@code SimpleDateFormat}, {@code java.awt.Point} - is hashed as a leaf value with
+     *       {@link N#hashCode(Object)}, matching {@link #equalsEverything(Object, Object)}</li>
      *   <li>{@link java.nio.file.Path}: treated as a leaf value and delegated to {@link N#hashCode(Object)}, although
      *       it is an {@link Iterable} (its name elements are themselves {@code Path}s)</li>
      *   <li>Other objects: delegated to {@link N#hashCode(Object)}</li>
@@ -6985,9 +6981,9 @@ sealed class CommonUtil permits N {
      * property. Both must use this same predicate to keep the equals/hash contract.
      *
      * <p>A bean-shaped JDK class, or a user subclass of one, is a leaf: the properties {@code Beans} discovers on it miss its
-     * real state ({@code GregorianCalendar} exposes only {@code timeZone}/{@code gregorianChange}, a {@code Throwable} only
-     * {@code cause}/{@code stackTrace}), so two different values compared equal; and some of their getters return a fresh
-     * bean ({@code java.awt.Point.getLocation()}), which recursed until {@code StackOverflowError}.</p>
+     * real state ({@code GregorianCalendar} exposes only {@code timeZone}/{@code gregorianChange}), so two different values
+     * compared equal; and some of their getters return a fresh bean ({@code java.awt.Point.getLocation()}), which recursed until
+     * {@code StackOverflowError}.</p>
      *
      * @param targetClass the runtime class of the value
      * @return {@code true} if the value is traversed as a bean
@@ -11886,6 +11882,8 @@ sealed class CommonUtil permits N {
      * map's equality rules, and an entry the target map rejects (such as a {@code null} key for a {@code TreeMap}) is an
      * {@code IllegalArgumentException}; sets retain their usual duplicate elimination. Source containers are not modified
      * by this traversal, although user converters/factories and resource-backed leaf conversions may have side effects.</p>
+     * <p>The fresh, empty destination requirement also applies when wrapping a scalar in a collection or copying a bean
+     * into a map. A factory destination is checked before adding any elements or properties.</p>
      *
      * <p>A registered converter is invoked once for its root value - unless that value is already an instance of the target
      * class (for a {@code Class} token) or of an unparameterized descriptor's class: an assignable value bypasses registered
@@ -11895,17 +11893,18 @@ sealed class CommonUtil permits N {
      * previously accepted incompatible converter result or heterogeneous element, or return a detached constrained container
      * where older versions returned the source unchanged.</p>
      *
-     * <p>A {@code Number} converted to {@code boolean}/{@code Boolean} is {@code true} iff it is non-zero.
-     * That holds for any {@code Number}, including one whose type handler is not itself a number type
-     * ({@code AtomicInteger}, {@code AtomicLong}). Fractional and negative values are
-     * preserved for this decision; {@link Double#NaN} is {@code false}, while either infinity is {@code true}.
-     * Two neighbours use a <i>different</i> rule and are easy to confuse with this one: the bulk
-     * {@code toBooleanArray(...)} conversions and {@code Type<Boolean>.valueOf(Object)} both test strictly
-     * {@code > 0}, so a negative number is {@code false} there. That does <i>not</i> extend to the paths that
-     * merely go <i>through</i> a {@code Type<Boolean>}: a JDBC read and a JSON number both funnel a {@code Number}
-     * into this method, so {@code -1} arrives as {@code true} from either. (XML is different again: its value
-     * arrives as text and is parsed as a string, so {@code <flag>-1</flag>} and {@code <flag>2</flag>} are both
-     * {@code false} while {@code <flag>1</flag>} is {@code true}.)
+     * <p>An {@code Integer}, {@code Short} or {@code Byte} converted to {@code boolean}/{@code Boolean} is read by its
+     * value: {@code 1} is {@code true}, {@code 0} and {@code -1} are {@code false}, and any other value ({@code 2}) is
+     * rejected with an {@code IllegalArgumentException}. A {@code Number} of any other class is rejected whatever its
+     * value - {@code Long}, {@code Float}, {@code Double}, {@code BigInteger}, {@code BigDecimal}, {@code AtomicInteger}
+     * and {@code AtomicLong} included - so {@code 1L} and {@code 1.0} are rejected too. Text (and a
+     * {@code Character}, or the string form of any other object) is never parsed as a number: {@code "1"}, {@code "y"},
+     * {@code "Y"} and {@code "true"} (any case) are {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"}
+     * and {@code "false"} (any case) are {@code false}; surrounding padding is ignored and blank text is {@code false};
+     * any other text ({@code "2"}, {@code "1.0"}, {@code "yes"}) is rejected. {@code Type<Boolean>.valueOf(Object)}, JSON
+     * and XML values and a non-{@code Boolean} JDBC value read by the {@code Boolean} type handler follow the same rule.
+     * The bulk {@code toBooleanArray(...)} conversions are separate: they map every positive element to {@code true}
+     * and never throw.
      *
      * <p><b>{@code char} and numbers</b> follow one rule: a {@code char}/{@code Character} converted to any number type
      * (including {@code AtomicInteger}/{@code AtomicLong}) is its UTF-16 code unit - {@code 'A'} gives {@code 65} and {@code '7'}
@@ -11928,7 +11927,7 @@ sealed class CommonUtil permits N {
      * combinations treat text as a <i>serialized</i> value: a {@code String} or {@code InputStream} converted to {@code char[]}, or a
      * {@code String} converted to {@code byte[]}, is parsed as an array literal (so plain text fails); a {@code char[]}/{@code byte[]}
      * converted to {@code String} is rendered as one ({@code "['a', 'b']"}, {@code "[97, 98]"}); and a {@code char[]}, {@code byte[]} or
-     * {@code Blob} converted to a boolean is not read as text.</p>
+     * {@code Blob} converted to a boolean is not read as text (its string form is not boolean text, so the conversion is rejected).</p>
      *
      * <p><b>A single value to a collection or object array</b> is wrapped as its only element when the target element type is
      * assignable from the value's class, and parsed by the target type otherwise. So {@code "[1,2]"} converted to {@code List<String>}
@@ -11940,8 +11939,12 @@ sealed class CommonUtil permits N {
      * <pre>{@code
      * N.convert("123", Integer.class);  // returns 123
      * N.convert(null, int.class);       // returns 0
-     * N.convert(1.5, Boolean.class);    // returns true
-     * N.convert(-0.9, Boolean.class);   // returns true
+     * N.convert(1, Boolean.class);      // returns true
+     * N.convert(-1, Boolean.class);     // returns false (so does 0)
+     * N.convert("Y", Boolean.class);    // returns true
+     * N.convert(2, Boolean.class);      // throws IllegalArgumentException: only 1, 0 and -1 are boolean numbers
+     * N.convert(1L, Boolean.class);     // throws IllegalArgumentException: only Integer, Short and Byte values are accepted
+     * N.convert("yes", Boolean.class);  // throws IllegalArgumentException: not one of the accepted texts
      * }</pre>
      *
      * @param <T> the type of the target object after conversion.
@@ -11950,7 +11953,9 @@ sealed class CommonUtil permits N {
      * @return an instance of the target type converted from the source object, or the default value of the target type if the source object is {@code null}
      *         (normally null for reference types or a primitive default; handlers such as Optional and Holder provide their own empty values).
      * @throws IllegalArgumentException if the target type is null or invalid, a converted value has the wrong type, a container graph is cyclic, converted
-     *         map keys collide, a container factory returns an invalid container, or a LOB exceeds the maximum array size
+     *         map keys collide, a container factory returns an invalid container, a LOB exceeds the maximum array size, or a value converted to
+     *         a boolean is neither an accepted number (an {@code Integer}, {@code Short} or {@code Byte} {@code 1}, {@code 0} or {@code -1})
+     *         nor one of the accepted texts
      * @throws NumberFormatException if the source object's {@code String} value is not a valid number for the target type.
      * @throws ArithmeticException if the value overflows the target integer type ({@code byte}/{@code short}/{@code int}/{@code long}) — whether the
      *         source is a {@code Number} or a numeric {@code String}. A {@code float}/{@code double} target instead saturates to {@code ±Infinity}
@@ -11977,7 +11982,7 @@ sealed class CommonUtil permits N {
                 // Already an instance of the target: behave as if no converter were registered at the root (as Maps.getAs does),
                 // so a converter never has to special-case its own or a super type. A constrained container is still normalized.
                 final Type<? extends T> type = typeOf(targetType);
-                return (T) (canConvertStructure(srcObj, type) ? convertStructure(srcObj, type, newCheckedGraphs()) : srcObj);
+                return (T) (canConvertStructure(srcObj, type) ? convertStructure(srcObj, type, null) : srcObj);
             }
 
             // A Class token carries no container arguments. Preserve converter-before-TypeFactory ordering.
@@ -11993,7 +11998,7 @@ sealed class CommonUtil permits N {
 
         final Type<? extends T> type = typeOf(targetType);
 
-        return (T) convertStructured(srcObj, type, newCheckedGraphs());
+        return (T) convertStructured(srcObj, type, null);
     }
 
     /**
@@ -12036,6 +12041,9 @@ sealed class CommonUtil permits N {
      * {@code IllegalArgumentException}; sets retain their usual duplicate elimination. Source containers are not modified
      * by this traversal, although user converters/factories and resource-backed leaf conversions may have side effects.</p>
      *
+     * <p>The fresh, empty destination requirement also applies when wrapping a scalar in a collection or copying a bean
+     * into a map. A factory destination is checked before adding any elements or properties.</p>
+     *
      * <p>A registered converter is invoked once for its root value - unless that value is already an instance of the target
      * class (for a {@code Class} token) or of an unparameterized descriptor's class: an assignable value bypasses registered
      * converters, as in {@code Maps.getAs}, and is returned (a constrained container is still normalized). A converter's result
@@ -12044,17 +12052,18 @@ sealed class CommonUtil permits N {
      * previously accepted incompatible converter result or heterogeneous element, or return a detached constrained container
      * where older versions returned the source unchanged.</p>
      *
-     * <p>A {@code Number} converted to {@code boolean}/{@code Boolean} is {@code true} iff it is non-zero.
-     * That holds for any {@code Number}, including one whose type handler is not itself a number type
-     * ({@code AtomicInteger}, {@code AtomicLong}). Fractional and negative values are
-     * preserved for this decision; {@link Double#NaN} is {@code false}, while either infinity is {@code true}.
-     * Two neighbours use a <i>different</i> rule and are easy to confuse with this one: the bulk
-     * {@code toBooleanArray(...)} conversions and {@code Type<Boolean>.valueOf(Object)} both test strictly
-     * {@code > 0}, so a negative number is {@code false} there. That does <i>not</i> extend to the paths that
-     * merely go <i>through</i> a {@code Type<Boolean>}: a JDBC read and a JSON number both funnel a {@code Number}
-     * into this method, so {@code -1} arrives as {@code true} from either. (XML is different again: its value
-     * arrives as text and is parsed as a string, so {@code <flag>-1</flag>} and {@code <flag>2</flag>} are both
-     * {@code false} while {@code <flag>1</flag>} is {@code true}.)
+     * <p>An {@code Integer}, {@code Short} or {@code Byte} converted to {@code boolean}/{@code Boolean} is read by its
+     * value: {@code 1} is {@code true}, {@code 0} and {@code -1} are {@code false}, and any other value ({@code 2}) is
+     * rejected with an {@code IllegalArgumentException}. A {@code Number} of any other class is rejected whatever its
+     * value - {@code Long}, {@code Float}, {@code Double}, {@code BigInteger}, {@code BigDecimal}, {@code AtomicInteger}
+     * and {@code AtomicLong} included - so {@code 1L} and {@code 1.0} are rejected too. Text (and a
+     * {@code Character}, or the string form of any other object) is never parsed as a number: {@code "1"}, {@code "y"},
+     * {@code "Y"} and {@code "true"} (any case) are {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"}
+     * and {@code "false"} (any case) are {@code false}; surrounding padding is ignored and blank text is {@code false};
+     * any other text ({@code "2"}, {@code "1.0"}, {@code "yes"}) is rejected. {@code Type<Boolean>.valueOf(Object)}, JSON
+     * and XML values and a non-{@code Boolean} JDBC value read by the {@code Boolean} type handler follow the same rule.
+     * The bulk {@code toBooleanArray(...)} conversions are separate: they map every positive element to {@code true}
+     * and never throw.
      *
      * <p><b>{@code char} and numbers</b> follow one rule: a {@code char}/{@code Character} converted to any number type
      * (including {@code AtomicInteger}/{@code AtomicLong}) is its UTF-16 code unit - {@code 'A'} gives {@code 65} and {@code '7'}
@@ -12077,7 +12086,7 @@ sealed class CommonUtil permits N {
      * combinations treat text as a <i>serialized</i> value: a {@code String} or {@code InputStream} converted to {@code char[]}, or a
      * {@code String} converted to {@code byte[]}, is parsed as an array literal (so plain text fails); a {@code char[]}/{@code byte[]}
      * converted to {@code String} is rendered as one ({@code "['a', 'b']"}, {@code "[97, 98]"}); and a {@code char[]}, {@code byte[]} or
-     * {@code Blob} converted to a boolean is not read as text.</p>
+     * {@code Blob} converted to a boolean is not read as text (its string form is not boolean text, so the conversion is rejected).</p>
      *
      * <p><b>A single value to a collection or object array</b> is wrapped as its only element when the target element type is
      * assignable from the value's class, and parsed by the target type otherwise. So {@code "[1,2]"} converted to {@code List<String>}
@@ -12098,7 +12107,9 @@ sealed class CommonUtil permits N {
      *         (normally null for reference types or a primitive default; handlers such as Optional and Holder provide their own empty values).
      * @throws IllegalArgumentException if {@code targetType} is {@code null}
      *         or if the target type is invalid, a converted value has the wrong type, a container graph is cyclic, converted
-     *         map keys collide, a container factory returns an invalid container, or a LOB exceeds the maximum array size
+     *         map keys collide, a container factory returns an invalid container, a LOB exceeds the maximum array size, or a
+     *         value converted to a boolean is neither an accepted number (an {@code Integer}, {@code Short} or {@code Byte}
+     *         {@code 1}, {@code 0} or {@code -1}) nor one of the accepted texts
      * @throws NumberFormatException if the source object's {@code String} value is not a valid number for the target type.
      * @throws ArithmeticException if the value overflows the target integer type ({@code byte}/{@code short}/{@code int}/{@code long}) — whether the
      *         source is a {@code Number} or a numeric {@code String}. A {@code float}/{@code double} target instead saturates to {@code ±Infinity}
@@ -12116,14 +12127,14 @@ sealed class CommonUtil permits N {
             return targetType.defaultValue();
         }
 
-        return (T) convertStructured(srcObj, targetType, newCheckedGraphs());
+        return (T) convertStructured(srcObj, targetType, null);
     }
 
     /**
      * Creates the per-call identity map that records the containers already checked or created by a conversion.
      *
-     * <p>A scalar conversion never touches it, and a container conversion records only a few entries, so it starts at the
-     * minimum capacity instead of the default one (a 64-slot table allocated on every call); it grows on demand.</p>
+     * <p>Created only when a conversion needs container tracking. Scalar-to-scalar conversions and assignable unconstrained
+     * containers allocate no map. Small container conversions start at minimum capacity and grow on demand.</p>
      *
      * @return a new empty identity map
      */
@@ -12150,9 +12161,27 @@ sealed class CommonUtil permits N {
             return source;
         }
 
-        // Scalar fallbacks may serialize a container. Reject a cycle before entering such serializers.
-        checkConversionGraph(source, checkedGraphs);
-        return finishStructured(convert(source, source.getClass(), target), target, checkedGraphs);
+        // Scalar fallbacks may serialize a container or populate one from a scalar/bean. Allocate tracking
+        // only for those paths, and share it with finishing so factory outputs stay reserved throughout.
+        final IdentityHashMap<Object, Boolean> graphs = checkedGraphs == null && mayTrackConversionGraphs(source, target) ? newCheckedGraphs() : checkedGraphs;
+        checkConversionGraph(source, graphs);
+        return finishStructured(convert(source, source.getClass(), target, graphs), target, graphs);
+    }
+
+    /**
+     * Returns whether a scalar-fallback conversion of {@code source} to {@code target} may read or record container
+     * identities: the source is itself a container, or the target is a collection or map, the containers whose fallbacks
+     * record the destination they create. The object-array fallback records nothing, so it needs no map. Only those
+     * conversions allocate the tracking map; all others pass {@code null} to
+     * {@code convert(Object, Class, Type, IdentityHashMap)}, so every path there that touches the map must be reached
+     * only under this condition. Keep the two in step when a fallback starts recording a container.
+     *
+     * @param source the non-null source value
+     * @param target the requested type
+     * @return {@code true} if the conversion needs the identity-tracking map
+     */
+    private static boolean mayTrackConversionGraphs(final Object source, final Type<?> target) {
+        return source instanceof Collection || source instanceof Map || source instanceof Object[] || target.isCollection() || target.isMap();
     }
 
     private static Object finishStructured(final Object value, final Type<?> target, final IdentityHashMap<Object, Boolean> checkedGraphs) {
@@ -12187,7 +12216,28 @@ sealed class CommonUtil permits N {
         if (target.isMap()) {
             return target.parameterTypes().get(0).javaType() != Object.class || target.parameterTypes().get(1).javaType() != Object.class;
         }
-        return target.javaType().isArray() && hasContainerConstraints(target.elementType());
+        return target.javaType().isArray() && hasContainerConstraints(arrayElementType(target));
+    }
+
+    /**
+     * The element type for converting into an array-typed {@code target}. A handler with an array javaType may have no element type
+     * of its own: JSON&lt;T[]&gt; / XML&lt;T[]&gt; wrap the array type T[], whose element type keeps T's own parameters
+     * ({@code List<Integer>}, not the erased {@code List}); Bytes and Base64Encoded fall back to the component class, as byte[] does.
+     */
+    private static Type<?> arrayElementType(final Type<?> target) {
+        final Type<?> elementType = target.elementType();
+
+        if (elementType != null) {
+            return elementType;
+        }
+
+        final List<Type<?>> parameterTypes = target.parameterTypes();
+
+        if (parameterTypes.size() == 1 && parameterTypes.get(0).javaType() == target.javaType() && parameterTypes.get(0).elementType() != null) {
+            return parameterTypes.get(0).elementType();
+        }
+
+        return typeOf(target.javaType().getComponentType());
     }
 
     /**
@@ -12196,10 +12246,14 @@ sealed class CommonUtil permits N {
      * @throws RuntimeException if a nested converter, container factory, or destination insertion fails
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Object convertStructure(final Object source, final Type<?> target, final IdentityHashMap<Object, Boolean> checkedGraphs)
+    private static Object convertStructure(final Object source, final Type<?> target, IdentityHashMap<Object, Boolean> checkedGraphs)
             throws IllegalArgumentException, RuntimeException {
         if (target.javaType().isInstance(source) && !hasContainerConstraints(target)) {
             return source;
+        }
+
+        if (checkedGraphs == null) {
+            checkedGraphs = newCheckedGraphs();
         }
 
         checkConversionGraph(source, checkedGraphs);
@@ -12237,12 +12291,25 @@ sealed class CommonUtil permits N {
         final Collection<?> input = source instanceof Collection ? (Collection<?>) source : null;
         final int length = input == null ? java.lang.reflect.Array.getLength(source) : input.size();
         final Iterator<?> values = input == null ? null : input.iterator();
-        final Type<?> elementType = target.elementType();
+        // reflect.Array.get/set are native calls (~27 ns each) that cost more than converting an element that already has
+        // the target type, so arrays of references are read and written directly, and primitive arrays go through the typed
+        // getPrimitiveArrayElement/setPrimitiveArrayElement, which fall back to reflect.Array for anything they do not cover.
+        final Object[] objectSource = source instanceof Object[] objects ? objects : null;
+        final Type<?> elementType = target.javaType().isArray() ? arrayElementType(target) : target.elementType();
         if (target.javaType().isArray()) {
-            final Object output = java.lang.reflect.Array.newInstance(target.javaType().getComponentType(), length);
+            final Class<?> componentType = target.javaType().getComponentType();
+            final Object output = java.lang.reflect.Array.newInstance(componentType, length);
+            final Object[] objectOutput = componentType.isPrimitive() ? null : (Object[]) output;
             for (int i = 0; i < length; i++) {
-                final Object value = values == null ? java.lang.reflect.Array.get(source, i) : values.next();
-                java.lang.reflect.Array.set(output, i, convertStructured(value, elementType, checkedGraphs));
+                final Object value = values != null ? values.next() : objectSource != null ? objectSource[i] : getPrimitiveArrayElement(source, i);
+                final Object converted = convertStructured(value, elementType, checkedGraphs);
+
+                if (objectOutput != null && (converted == null || componentType.isInstance(converted))) {
+                    objectOutput[i] = converted;
+                } else {
+                    // unboxes into a primitive array, or throws the same "array element type mismatch" IllegalArgumentException as before
+                    setPrimitiveArrayElement(output, i, converted);
+                }
             }
             return output;
         }
@@ -12257,10 +12324,74 @@ sealed class CommonUtil permits N {
         }
 
         for (int i = 0; i < length; i++) {
-            final Object value = values == null ? java.lang.reflect.Array.get(source, i) : values.next();
+            final Object value = values != null ? values.next() : objectSource != null ? objectSource[i] : getPrimitiveArrayElement(source, i);
             output.add(convertStructured(value, elementType, checkedGraphs));
         }
         return standIn != null ? finishConversionStandIn(output, target) : output;
+    }
+
+    /**
+     * Returns the element at {@code index} of a primitive array, boxed in the wrapper class of its component type, as
+     * {@link java.lang.reflect.Array#get(Object, int)} does. The eight primitive array classes are read directly and boxed by
+     * the wrapper's {@code valueOf} (so a cached box may be returned instead of a fresh one), which avoids the native reflective
+     * call per element; any other argument still goes through {@code Array.get}.
+     *
+     * @param array the array, normally a primitive array
+     * @param index the index of the element, within the array's bounds
+     * @return the boxed element
+     */
+    private static Object getPrimitiveArrayElement(final Object array, final int index) {
+        if (array instanceof final int[] ints) {
+            return ints[index];
+        } else if (array instanceof final long[] longs) {
+            return longs[index];
+        } else if (array instanceof final double[] doubles) {
+            return doubles[index];
+        } else if (array instanceof final boolean[] booleans) {
+            return booleans[index];
+        } else if (array instanceof final float[] floats) {
+            return floats[index];
+        } else if (array instanceof final char[] chars) {
+            return chars[index];
+        } else if (array instanceof final byte[] bytes) {
+            return bytes[index];
+        } else if (array instanceof final short[] shorts) {
+            return shorts[index];
+        } else {
+            return java.lang.reflect.Array.get(array, index);
+        }
+    }
+
+    /**
+     * Stores {@code element} at {@code index} of {@code array}, as {@link java.lang.reflect.Array#set(Object, int, Object)} does.
+     * An element whose class is exactly the wrapper type of a primitive array's component type is unboxed directly, which
+     * avoids the native reflective call per element; anything else (including {@code null}, a value that needs widening and
+     * any non-primitive array) still goes through {@code Array.set}, so its conversions and exceptions are unchanged.
+     *
+     * @param array the array, normally a primitive array
+     * @param index the index to store at, within the array's bounds
+     * @param element the value to store
+     */
+    private static void setPrimitiveArrayElement(final Object array, final int index, final Object element) {
+        if (array instanceof final int[] ints && element instanceof final Integer value) {
+            ints[index] = value;
+        } else if (array instanceof final long[] longs && element instanceof final Long value) {
+            longs[index] = value;
+        } else if (array instanceof final double[] doubles && element instanceof final Double value) {
+            doubles[index] = value;
+        } else if (array instanceof final boolean[] booleans && element instanceof final Boolean value) {
+            booleans[index] = value;
+        } else if (array instanceof final float[] floats && element instanceof final Float value) {
+            floats[index] = value;
+        } else if (array instanceof final char[] chars && element instanceof final Character value) {
+            chars[index] = value;
+        } else if (array instanceof final byte[] bytes && element instanceof final Byte value) {
+            bytes[index] = value;
+        } else if (array instanceof final short[] shorts && element instanceof final Short value) {
+            shorts[index] = value;
+        } else {
+            java.lang.reflect.Array.set(array, index, element);
+        }
     }
 
     /**
@@ -12474,6 +12605,15 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Converts a value through scalar, bean and type-handler fallbacks while sharing destination identity tracking.
+     *
+     * @param <T> the requested value type
+     * @param srcObj the non-null source value
+     * @param sourceClass the source's runtime class
+     * @param targetType the requested type descriptor
+     * @param checkedGraphs source containers and destinations already encountered during this conversion; {@code null}
+     *        unless {@code mayTrackConversionGraphs(Object, Type)} holds, which every map/collection branch below relies on
+     * @return the converted value, before any constrained-container normalization
      * @throws IllegalArgumentException if the source cannot be converted to the target type, or a Blob or Clob exceeds the maximum array size
      * @throws NumberFormatException if a textual value cannot be parsed as the requested number
      * @throws ArithmeticException if numeric conversion overflows the requested integral type
@@ -12481,7 +12621,8 @@ sealed class CommonUtil permits N {
      * @throws RuntimeException if a type handler, reflective bean operation, stream read, or stream cleanup fails
      */
     @SuppressWarnings("rawtypes")
-    private static <T> T convert(final Object srcObj, final Class<?> sourceClass, final Type<? extends T> targetType)
+    private static <T> T convert(final Object srcObj, final Class<?> sourceClass, final Type<? extends T> targetType,
+            final IdentityHashMap<Object, Boolean> checkedGraphs)
             throws IllegalArgumentException, NumberFormatException, ArithmeticException, UncheckedSQLException, RuntimeException {
         if (targetType.javaType().isAssignableFrom(sourceClass)) {
             return (T) srcObj;
@@ -12513,20 +12654,17 @@ sealed class CommonUtil permits N {
             return (T) (targetType.javaType().equals(java.util.concurrent.atomic.AtomicInteger.class) ? new java.util.concurrent.atomic.AtomicInteger(ch)
                     : new java.util.concurrent.atomic.AtomicLong(ch));
         } else if (targetType.isBoolean()) {
-            if (srcObj instanceof Number number) {
-                // Test the VALUE, not how its class happens to be classified: the documented rule here is
-                // "a Number is true iff it is non-zero". Testing srcType.isNumber() sent every Number whose
-                // handler is not itself a number type (AtomicInteger, AtomicLong, ...) down the else branch,
-                // where Type<Boolean>.valueOf applies its own (separately documented) longValue() > 0 rule, so
-                // this one method answered true for -1 and false for an AtomicInteger holding -1.
-                return (T) Boolean.valueOf(numberToBoolean(number));
-            } else if (srcObj instanceof Reader || srcObj instanceof InputStream || srcObj instanceof Clob) {
+            if (srcObj instanceof Reader || srcObj instanceof InputStream || srcObj instanceof Clob) {
                 // Type<Boolean>.valueOf ignores a stream/LOB and answered false for "true". Read (and close/free) the text exactly
                 // as the String target does, then apply the CharSequence rule (blank -> false).
-                return targetType.valueOf((Object) convert(srcObj, sourceClass, typeOf(String.class)));
-            } else {
-                return targetType.valueOf(srcObj);
+                return targetType.valueOf((Object) convert(srcObj, sourceClass, typeOf(String.class), checkedGraphs));
             }
+
+            // A Number of any class - AtomicInteger and AtomicLong included, whose handlers are not number types - goes
+            // to the boolean handler's number rule (AbstractType.booleanOf: an Integer, Short or Byte 1, 0 or -1; any
+            // other value or Number class is rejected); anything else to its text rule. This method used to apply its
+            // own copy of a number rule here, so the two could disagree; the handler is now the one place it lives.
+            return targetType.valueOf(srcObj);
         } else if ((targetType.javaType().equals(char.class) || targetType.javaType().equals(Character.class))) {
             if (srcObj instanceof Number number && isIntegralValue(number)) {
                 // An integral-valued Number of any type names a UTF-16 code unit, range-checked like Maps.getAsChar (Integer used to
@@ -12552,9 +12690,9 @@ sealed class CommonUtil permits N {
                 return (T) new java.sql.Date((Long) srcObj);
             } else if (targetType.javaType().equals(java.sql.Time.class)) {
                 return (T) new java.sql.Time((Long) srcObj);
-            } else {
-                return targetType.valueOf(srcObj);
             }
+            // No early valueOf for other targets: a Long must reach the single-value collection/array wrap below like any other
+            // value (an early return re-parsed it as text, so convert(5L, List.class) held an Integer and Set gave a HashSet).
         }
 
         if (targetType.isBean()) {
@@ -12566,10 +12704,9 @@ sealed class CommonUtil permits N {
         } else if (targetType.isMap()) {
             if (srcType.isBean() && targetType.parameterTypes().get(0).javaType().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.parameterTypes().get(1).javaType())) {
+                Map<String, Object> result = null;
                 try {
-                    final Map<String, Object> result = newMap((Class<Map>) targetType.javaType());
-                    Beans.beanToMap(srcObj, result);
-                    return (T) result;
+                    result = newMap((Class<Map>) targetType.javaType());
                 } catch (final Exception e) {
                     // CommonUtil must not create a logger in its own static initializer: {@code LoggerFactory}
                     // references {@link N}, and {@code N} extends this class, so touching {@code LoggerFactory} from
@@ -12577,6 +12714,19 @@ sealed class CommonUtil permits N {
                     // Nesting the field defers that work to the first actual log call, which only happens on rare failure paths. 
                     // logger.debug(e, "Failed to convert bean {} to map type {}; falling through to Type.valueOf", ClassUtil.getCanonicalClassName(srcClass), targetType.name());
                     // ignore.
+                }
+
+                if (result != null) {
+                    // Invalid destinations must fail before mutation, outside the compatibility fallback catch.
+                    requireFreshConversionContainer(result, targetType, checkedGraphs);
+                    try {
+                        Beans.beanToMap(srcObj, result);
+                        // Keep the destination identity reserved, but validate its newly copied property graph during normalization.
+                        checkedGraphs.put(result, null);
+                        return (T) result;
+                    } catch (final Exception e) {
+                        // Preserve the existing type-handler fallback when reading bean properties fails.
+                    }
                 }
             }
             // A Map source never reaches this method: convertStructured routes every Map-to-Map case
@@ -12589,6 +12739,12 @@ sealed class CommonUtil permits N {
             if (targetType.elementType().javaType().isAssignableFrom(srcType.javaType())) {
                 final Collection standIn = (Collection) newConversionStandIn(targetType, srcObj, 1);
                 final Collection result = standIn != null ? standIn : newCollection((Class<Collection>) targetType.javaType(), 1);
+                // Share the traversal's identity tracking so a scalar cannot populate an input or earlier destination.
+                if (standIn == null) {
+                    requireFreshConversionContainer(result, targetType, checkedGraphs);
+                } else {
+                    checkedGraphs.put(result, Boolean.TRUE);
+                }
                 result.add(srcObj);
                 return (T) (standIn != null ? finishConversionStandIn(result, targetType) : result);
             }
@@ -12809,18 +12965,6 @@ sealed class CommonUtil permits N {
         // any other Number: integral only if its double value is a whole number that its long value reproduces
         final double d = n.doubleValue();
         return Double.isFinite(d) && d == Math.rint(d) && n.longValue() == d;
-    }
-
-    private static boolean numberToBoolean(final Number value) {
-        if (value instanceof BigInteger bigInteger) {
-            return bigInteger.signum() != 0;
-        } else if (value instanceof BigDecimal bigDecimal) {
-            return bigDecimal.signum() != 0;
-        }
-
-        final double doubleValue = value.doubleValue();
-
-        return !Double.isNaN(doubleValue) && doubleValue != 0d;
     }
 
     /**
@@ -13724,6 +13868,30 @@ sealed class CommonUtil permits N {
     }
 
     /**
+     * Per-class cache of {@link Class#isAnonymousClass()}, which is not an intrinsic. {@code ClassValue}, so a cached
+     * application class stays collectable.
+     */
+    private static final ClassValue<Boolean> anonymousClassPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> targetClass) {
+            return targetClass.isAnonymousClass();
+        }
+    };
+
+    /**
+     * Per-class cache of {@link ClassUtil#isAnonymousOrMemberClass(Class)} ({@code isAnonymousClass() || isMemberClass()}),
+     * which {@link #newInstance(Class)} asks for every class that is not static - every top-level class included. Neither
+     * query is an intrinsic: together they cost three native calls (~70 ns) per call. {@code ClassValue}, so a cached
+     * application class stays collectable.
+     */
+    private static final ClassValue<Boolean> anonymousOrMemberClassPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> targetClass) {
+            return ClassUtil.isAnonymousOrMemberClass(targetClass);
+        }
+    };
+
+    /**
      * Returns the declared constructor, or throws the {@code IllegalArgumentException} that
      * {@link #newInstance(Class)} documents.
      *
@@ -13756,6 +13924,22 @@ sealed class CommonUtil permits N {
      * <p>Abstract collection and map types, including interfaces such as {@link List} and {@link Map},
      * are created through their registered factories.</p>
      *
+     * <p>Anonymous {@link Collection} and {@link Map} classes are rejected, in both instance and static contexts, before any
+     * enclosing instance is constructed: a recreated one would run its initializer again, and readers and copy operations
+     * would add their data to the initializer's. Use a named container class. For a concrete class, factories registered
+     * with {@link Suppliers} or {@link IntFunctions} are not used by this method, so neither are they by the readers that
+     * create a target with it (JSON and most XML paths). The XML StAX readers, and {@code XmlParserImpl} for collection
+     * properties written as child elements, create a named target through {@link #newMap(Class)} or
+     * {@link #newCollection(Class)}, which do use them; an anonymous class is rejected on every path, with or without a
+     * registered factory. Registered factories for abstract types are used as described above.</p>
+     *
+     * <p>Other non-static member and anonymous classes are created with a new enclosing chain - the caller's enclosing
+     * object is not reused - so constructors and instance initializers run again. An anonymous class declared in a static
+     * context usually has no enclosing-instance constructor and is then rejected; one that extends an inner class of its
+     * enclosing class ({@code new Outer().new Inner() {}} in a static method of {@code Outer}) takes an {@code Outer}
+     * and is created like a member class. A named container may fill itself in its constructor, so a new container is
+     * not necessarily empty.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ArrayList<String> list = N.newInstance(ArrayList.class);      // returns empty ArrayList
@@ -13768,7 +13952,8 @@ sealed class CommonUtil permits N {
      * @return a new instance of the specified class
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}, a primitive or array class, an unsupported abstract type or an
      *         abstract collection/map type whose registered factory does not create an instance of it (for example {@code AbstractQueue},
-     *         whose factory creates a {@code LinkedList}), or if a required no-argument or enclosing-instance constructor cannot be found
+     *         whose factory creates a {@code LinkedList}), an anonymous collection/map class, or if a required no-argument or
+     *         enclosing-instance constructor cannot be found
      * @throws RuntimeException if reflective construction is inaccessible, instantiation fails, or an invoked constructor throws an exception
      * @see Suppliers#ofCollection(Class)
      * @see Suppliers#registerForCollection(Class, java.util.function.Supplier)
@@ -13782,6 +13967,21 @@ sealed class CommonUtil permits N {
     @SuppressWarnings("rawtypes")
     public static <T> T newInstance(final Class<? extends T> targetClass) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetClass, cs.targetClass);
+
+        // Anonymous Collection/Map classes are rejected here, for every caller (factories, readers, copies). Why:
+        // - recreating one runs its initializer again in a fresh enclosing object (not the caller's), so the "new" container
+        //   can already hold data that a reader or copy then adds to (fromJson of a double-brace [x] gave [x, x]);
+        // - reject before building the enclosing chain: a failed recreation must not run outer constructors;
+        // - never recreate-then-clear: an anonymous view can share its backing data with the original object;
+        // - no no-arg path for static-context classes either: it only turns this failure into a pre-filled container;
+        // - never substitute the superclass: a caller typed by Class<? extends T> (`var`) would get a ClassCastException.
+        // Beans and other anonymous classes are unaffected: readers overwrite bean properties instead of adding to them.
+        // The cheap container test comes first and isAnonymousClass() is cached: it costs ~40 ns per call, and this method
+        // is on the readers' per-value path.
+        if ((Collection.class.isAssignableFrom(targetClass) || Map.class.isAssignableFrom(targetClass)) && anonymousClassPool.get(targetClass)) {
+            throw new IllegalArgumentException(
+                    "Cannot reflectively instantiate anonymous collection/map class: " + targetClass.getName() + ". Use a named container class.");
+        }
 
         if (targetClass.isPrimitive() || targetClass.isArray()) {
             // both report ABSTRACT in their modifiers, which produced a misleading "abstract class" message
@@ -13810,21 +14010,23 @@ sealed class CommonUtil permits N {
             return (T) result;
         }
 
-        if (!Modifier.isStatic(targetClass.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(targetClass)) {
+        // This classification and the enclosing classes below come from per-class caches: the uncached Class queries are native
+        // calls (~70 ns for the classification alone, about 5x the rest of this method for a top-level class).
+        if (!Modifier.isStatic(targetClass.getModifiers()) && anonymousOrMemberClassPool.get(targetClass)) {
             try {
                 // http://stackoverflow.com/questions/2097982/is-it-possible-to-create-an-instance-of-nested-class-using-java-reflection
 
                 final List<Class<?>> toInstantiate = new ArrayList<>();
-                Class<?> parent = targetClass.getEnclosingClass();
+                Class<?> parent = ClassUtil.getEnclosingClass(targetClass);
 
                 do {
                     toInstantiate.add(parent);
 
-                    if (Modifier.isStatic(parent.getModifiers()) || !ClassUtil.isAnonymousOrMemberClass(parent)) {
+                    if (Modifier.isStatic(parent.getModifiers()) || !anonymousOrMemberClassPool.get(parent)) {
                         break; // this class needs no enclosing instance, so the chain is complete
                     }
 
-                    parent = parent.getEnclosingClass();
+                    parent = ClassUtil.getEnclosingClass(parent);
                 } while (parent != null);
 
                 //    if (parent != null) {
@@ -13867,6 +14069,10 @@ sealed class CommonUtil permits N {
      * and an {@code Immutable*} target yields the plain mutable JDK collection its registered factory creates (for example
      * {@code ImmutableList} -> {@code ArrayList}), meant to be populated and then wrapped; see {@link IntFunctions#ofCollection(Class)}.</p>
      *
+     * <p>Unless a factory is registered for it or a built-in mapping applies (an anonymous {@code ImmutableSet} subclass
+     * yields a {@code HashSet}), an anonymous target class is rejected with an {@code IllegalArgumentException}; use a
+     * named class instead (see {@link #newInstance(Class)}).</p>
+     *
      * @param <T> the type of elements in the collection
      * @param targetType the class of the collection to be created
      * @return a new collection created by the factory registered for {@code targetType}
@@ -13878,6 +14084,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <T> Collection<T> newCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException, RuntimeException {
+        // Without a registered supplier, an anonymous class fails in get(); newInstance explains why it is rejected.
         return Suppliers.<T> ofCollection(targetType).get();
     }
 
@@ -13892,7 +14099,14 @@ sealed class CommonUtil permits N {
      *
      * <p>The result is not always an instance of {@code targetType}: an {@code AbstractQueue} target yields a {@code LinkedList},
      * and an {@code Immutable*} target yields the plain mutable JDK collection its registered factory creates (for example
-     * {@code ImmutableList} -> {@code ArrayList}), meant to be populated and then wrapped; see {@link IntFunctions#ofCollection(Class)}.</p>
+     * {@code ImmutableList} -> {@code ArrayList}), meant to be populated and then wrapped; see {@link IntFunctions#ofCollection(Class)}.
+     * The {@code (int)} constructor of an anonymous class, or of a local class with detected captured variables, is not used
+     * as a capacity constructor. Some Eclipse-compiled local captures cannot be detected and still receive {@code size};
+     * see the detection limits and explicit-creator alternative in {@link IntFunctions#ofCollection(Class)}.</p>
+     *
+     * <p>Unless a factory is registered for it or a built-in mapping applies (an anonymous {@code ImmutableSet} subclass
+     * yields a {@code HashSet}), an anonymous target class is rejected with an {@code IllegalArgumentException}; use a
+     * named class instead (see {@link #newInstance(Class)}).</p>
      *
      * @param <T> the type of elements in the collection
      * @param targetType the class of the collection to be created
@@ -13910,6 +14124,7 @@ sealed class CommonUtil permits N {
             throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
+        // Without a registered creator, an anonymous class fails in apply(size); newInstance explains why it is rejected.
         return IntFunctions.<T> ofCollection(targetType).apply(size);
     }
 
@@ -13922,6 +14137,10 @@ sealed class CommonUtil permits N {
      * Map<String, Integer> linkedMap = N.newMap(LinkedHashMap.class);
      * Map<String, Integer> treeMap = N.newMap(TreeMap.class);
      * }</pre>
+     *
+     * <p>Unless a factory is registered for it or a built-in mapping applies (an anonymous {@code ImmutableMap} subclass
+     * yields a {@code HashMap}), an anonymous target class is rejected with an {@code IllegalArgumentException}; use a
+     * named class instead (see {@link #newInstance(Class)}).</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -13936,6 +14155,7 @@ sealed class CommonUtil permits N {
      */
     @SuppressWarnings("rawtypes")
     public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetType) throws IllegalArgumentException, RuntimeException {
+        // Without a registered supplier, an anonymous class fails in get(); newInstance explains why it is rejected.
         return Suppliers.<K, V> ofMap(targetType).get();
     }
 
@@ -13947,6 +14167,14 @@ sealed class CommonUtil permits N {
      * N.newMap(HashMap.class, 8);        // returns empty HashMap
      * N.newMap(LinkedHashMap.class, 0);  // returns empty LinkedHashMap
      * }</pre>
+     *
+     * <p>The {@code (int)} constructor of an anonymous class, or of a local class with detected captured variables, is not used
+     * as a capacity constructor. Some Eclipse-compiled local captures cannot be detected and still receive {@code size};
+     * see the detection limits and explicit-creator alternative in {@link IntFunctions#ofMap(Class)}.</p>
+     *
+     * <p>Unless a factory is registered for it or a built-in mapping applies (an anonymous {@code ImmutableMap} subclass
+     * yields a {@code HashMap}), an anonymous target class is rejected with an {@code IllegalArgumentException}; use a
+     * named class instead (see {@link #newInstance(Class)}).</p>
      *
      * @param <K> the type of keys maintained by the map
      * @param <V> the type of mapped values
@@ -13965,6 +14193,7 @@ sealed class CommonUtil permits N {
     public static <K, V> Map<K, V> newMap(final Class<? extends Map> targetType, final int size) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
+        // Without a registered creator, an anonymous class fails in apply(size); newInstance explains why it is rejected.
         return IntFunctions.<K, V> ofMap(targetType).apply(size);
     }
 
@@ -16055,7 +16284,7 @@ sealed class CommonUtil permits N {
 
                 if (type.isPrimitiveArray()) {
                     for (int i = 0; i < columnCount; i++) {
-                        columnList.get(i).add(Array.get(row, i));
+                        columnList.get(i).add(getPrimitiveArrayElement(row, i)); // typed read: no native reflective call per cell
                     }
                 } else {
                     final Object[] array = (Object[]) row;
@@ -16464,10 +16693,29 @@ sealed class CommonUtil permits N {
      * @throws IllegalArgumentException if the datasets have different column-name sets
      */
     private static void checkIfColumnNamesAreSame(final Dataset a, final Dataset b) throws NullPointerException, IllegalArgumentException {
-        if (!(a.columnNames().size() == b.columnNames().size() && a.columnNames().containsAll(b.columnNames())
-                && b.columnNames().containsAll(a.columnNames()))) {
+        if (!(a.columnNames().size() == b.columnNames().size() && containsAllColumnNames(a, b.columnNames()) && containsAllColumnNames(b, a.columnNames()))) {
             throw new IllegalArgumentException("These two Datasets do not have the same column names: " + a.columnNames() + ", " + b.columnNames());
         }
+    }
+
+    /**
+     * Returns whether {@code dataset} has every column named in {@code columnNames}, the same answer as
+     * {@code dataset.columnNames().containsAll(columnNames)}. Each name is looked up in the dataset's column index
+     * ({@link Dataset#containsColumn(String)}) instead of scanning its name list, so a check is O(n) instead of O(n * m),
+     * and the indexed loop allocates no iterator.
+     *
+     * @param dataset the dataset whose columns are searched
+     * @param columnNames the column names to look for
+     * @return {@code true} if every name in {@code columnNames} is a column of {@code dataset}
+     */
+    private static boolean containsAllColumnNames(final Dataset dataset, final List<String> columnNames) {
+        for (int i = 0, size = columnNames.size(); i < size; i++) {
+            if (!dataset.containsColumn(columnNames.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -16808,7 +17056,8 @@ sealed class CommonUtil permits N {
      *
      * @param <A> the type of the array.
      * @param c the collection to be converted into an array.
-     * @param arraySupplier the function to generate a new array of the appropriate type and size.
+     * @param arraySupplier the function to generate a new array of the appropriate type and size. A longer supplied array
+     *        is terminated with {@code null} after the copied elements, including at index zero for an empty input.
      * @return an array containing the elements of the collection
      * @throws IllegalArgumentException if {@code arraySupplier} is {@code null}
      * @throws NullPointerException if {@code arraySupplier} returns {@code null} (checked even for an empty input)
@@ -16820,7 +17069,7 @@ sealed class CommonUtil permits N {
 
         if (isEmpty(c)) {
             // a null array from the supplier is a NullPointerException (callback-returned-null house rule), checked even for an empty input
-            return requireNonNull(arraySupplier.apply(0), "arraySupplier returned null");
+            return toArray(c, requireNonNull(arraySupplier.apply(0), "arraySupplier returned null"));
         }
 
         return toArray(c, 0, c.size(), arraySupplier);
@@ -16857,7 +17106,7 @@ sealed class CommonUtil permits N {
 
         // a null array from the supplier is a NullPointerException (callback-returned-null house rule) at every site, checked even for an empty input
         if (isEmpty(c)) {
-            return requireNonNull(arraySupplier.apply(0), "arraySupplier returned null");
+            return toArray(c, requireNonNull(arraySupplier.apply(0), "arraySupplier returned null"));
         } else if (fromIndex == 0 && toIndex == c.size()) {
             return c.toArray(requireNonNull(arraySupplier.apply(c.size()), "arraySupplier returned null"));
         } else if (c instanceof List) {
@@ -22954,7 +23203,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final boolean[] a, final int fromIndexA, final boolean[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23034,7 +23283,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final char[] a, final int fromIndexA, final char[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23114,7 +23363,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final byte[] a, final int fromIndexA, final byte[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23184,7 +23433,7 @@ sealed class CommonUtil permits N {
      * @param length the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      * @see Arrays#compareUnsigned(byte[], int, int, byte[], int, int)
      * @see Byte#compareUnsigned(byte, byte)
      */
@@ -23256,7 +23505,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final short[] a, final int fromIndexA, final short[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23326,7 +23575,7 @@ sealed class CommonUtil permits N {
      * @param length the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      * @see Arrays#compareUnsigned(short[], int, int, short[], int, int)
      * @see Short#compareUnsigned(short, short)
      */
@@ -23398,7 +23647,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final int[] a, final int fromIndexA, final int[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23468,7 +23717,7 @@ sealed class CommonUtil permits N {
      * @param length the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      * @see Arrays#compareUnsigned(int[], int, int, int[], int, int)
      * @see Integer#compareUnsigned(int, int)
      */
@@ -23540,7 +23789,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final long[] a, final int fromIndexA, final long[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23610,7 +23859,7 @@ sealed class CommonUtil permits N {
      * @param length the length of the subarrays to compare
      * @return a negative integer, zero, or a positive integer as the first subarray is less than, equal to, or greater than the second subarray
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      * @see Arrays#compareUnsigned(long[], int, int, long[], int, int)
      * @see Long#compareUnsigned(long, long)
      */
@@ -23686,7 +23935,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final float[] a, final int fromIndexA, final float[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23772,7 +24021,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static int compare(final double[] a, final int fromIndexA, final double[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23839,7 +24088,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static <T extends Comparable<? super T>> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int length)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23912,7 +24161,7 @@ sealed class CommonUtil permits N {
      * @param comparator the comparator used to compare elements; must not be {@code null}
      * @return a negative integer, zero, or a positive integer as the first array is less than, equal to, or greater than the second array
      * @throws IllegalArgumentException if {@code length} is negative, or if {@code comparator} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the length of {@code a} or {@code fromIndexB + len} exceeds the length of {@code b} (a {@code null} array has length 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the length of {@code a} or {@code fromIndexB + length} exceeds the length of {@code b} (a {@code null} array has length 0)
      */
     public static <T> int compare(final T[] a, final int fromIndexA, final T[] b, final int fromIndexB, final int length, Comparator<? super T> comparator)
             throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -23953,7 +24202,7 @@ sealed class CommonUtil permits N {
      * @param length the number of elements to compare
      * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
      * @throws IllegalArgumentException if {@code length} is negative.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the size of {@code a} or {@code fromIndexB + len} exceeds the size of {@code b} (a {@code null} collection has size 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the size of {@code a} or {@code fromIndexB + length} exceeds the size of {@code b} (a {@code null} collection has size 0)
      * @throws ClassCastException if two compared elements cannot be compared to each other
      */
     public static <T extends Comparable<? super T>> int compare(final Collection<T> a, final int fromIndexA, final Collection<T> b, final int fromIndexB,
@@ -24030,7 +24279,7 @@ sealed class CommonUtil permits N {
      * @param comparator the comparator to compare collection elements
      * @return a negative integer, zero, or a positive integer as the first collection is less than, equal to, or greater than the second collection
      * @throws IllegalArgumentException if {@code length} is negative, or if {@code comparator} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + len} exceeds the size of {@code a} or {@code fromIndexB + len} exceeds the size of {@code b} (a {@code null} collection has size 0)
+     * @throws IndexOutOfBoundsException if {@code fromIndexA} or {@code fromIndexB} is negative, or if {@code fromIndexA + length} exceeds the size of {@code a} or {@code fromIndexB + length} exceeds the size of {@code b} (a {@code null} collection has size 0)
      */
     public static <T> int compare(final Collection<T> a, int fromIndexA, final Collection<T> b, int fromIndexB, final int length,
             Comparator<? super T> comparator) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -25251,7 +25500,9 @@ sealed class CommonUtil permits N {
             }
         }
 
-        final List<T> result = new ArrayList<>(Math.min(1024, n));
+        // A Collection that gets here is larger than n, so the result holds exactly n elements; the 1024 cap only
+        // bounds the initial capacity for an Iterable of unknown size.
+        final List<T> result = new ArrayList<>(c instanceof Collection ? n : Math.min(1024, n));
         int cnt = 0;
 
         for (final T e : c) {
@@ -25290,7 +25541,8 @@ sealed class CommonUtil permits N {
     public static <T> List<T> firstElements(final Iterator<? extends T> iterator, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, cs.n);
 
-        if (isEmpty(iterator) || n == 0) {
+        // hasNext() can evaluate a lazy source; a zero-element request needs no source availability check.
+        if (n == 0 || isEmpty(iterator)) {
             return new ArrayList<>();
         }
 
@@ -25387,7 +25639,9 @@ sealed class CommonUtil permits N {
 
         // ArrayDeque rejects null elements, while an Iterable is allowed to contain them: a null is stored as
         // NULL_SENTINEL and mapped back when the window is copied out, so the window stays array-backed.
-        final Deque<Object> deque = new ArrayDeque<>(Math.min(1024, n));
+        // A Collection that gets here is larger than n, so the window fills to exactly n elements; the 1024 cap only
+        // bounds the initial capacity for an Iterable of unknown size.
+        final Deque<Object> deque = new ArrayDeque<>(c instanceof Collection ? n : Math.min(1024, n));
 
         for (final T e : c) {
             if (deque.size() >= n) {
@@ -25425,7 +25679,8 @@ sealed class CommonUtil permits N {
     public static <T> List<T> lastElements(final Iterator<? extends T> iterator, final int n) throws IllegalArgumentException {
         checkArgNotNegative(n, cs.n);
 
-        if (isEmpty(iterator) || n == 0) {
+        // hasNext() can evaluate a lazy source; a zero-element request needs no source availability check.
+        if (n == 0 || isEmpty(iterator)) {
             return new ArrayList<>();
         }
 
@@ -28735,15 +28990,19 @@ sealed class CommonUtil permits N {
             return -1;
         }
 
-        final Iterator<T> iterA = a.iterator();
-        final Iterator<T> iterB = b.iterator();
+        final Iterator<T> iterA = a instanceof List ? ((List<T>) a).listIterator(fromIndexA) : a.iterator();
+        final Iterator<T> iterB = b instanceof List ? ((List<T>) b).listIterator(fromIndexB) : b.iterator();
 
-        while (fromIndexA-- > 0) {
-            iterA.next();
+        if (!(a instanceof List)) {
+            while (fromIndexA-- > 0) {
+                iterA.next();
+            }
         }
 
-        while (fromIndexB-- > 0) {
-            iterB.next();
+        if (!(b instanceof List)) {
+            while (fromIndexB-- > 0) {
+                iterB.next();
+            }
         }
 
         for (int i = 0; i < length; i++) {
@@ -29653,8 +29912,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -29684,20 +29943,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final boolean tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final boolean last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final boolean first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -29733,8 +29992,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -29764,20 +30023,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final char tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final char last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final char first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -29813,8 +30072,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -29844,20 +30103,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final byte tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final byte last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final byte first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -29893,8 +30152,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -29924,20 +30183,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final short tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final short last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final short first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -29973,8 +30232,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30004,20 +30263,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final int tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final int last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final int first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -30053,8 +30312,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30084,20 +30343,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final long tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final long last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final long first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -30133,8 +30392,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30164,20 +30423,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final float tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final float last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final float first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -30213,8 +30472,8 @@ sealed class CommonUtil permits N {
      * rotates elements to the right, while a negative distance rotates to the left.
      * Elements outside the specified range remain unchanged.</p>
      *
-     * <p>The rotation is performed in-place using a cyclic algorithm that minimizes
-     * the number of element moves. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
+     * <p>The rotation is performed in-place in sequential passes over the range: a single shift when the elements move by
+     * one position, three reversals otherwise. The effective distance is calculated as {@code distance % (toIndex - fromIndex)}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -30244,20 +30503,20 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
-        for (int i = fromIndex, count = 0; count < len; i++) {
-            final double tmp = a[i];
-            int curr = i;
-            int next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-
-            while (next != i) {
-                a[curr] = a[next];
-                curr = next;
-                next = curr - fromIndex < distance ? curr - distance + len : curr - distance;
-                count++;
-            }
-
-            a[curr] = tmp;
-            count++;
+        // The cycle-following (juggling) algorithm jumps 'distance' slots per move and misses the cache on large ranges, so
+        // a shift by one position is a single (bulk) move and any other distance takes three sequential reversals.
+        if (distance == 1) {
+            final double last = a[toIndex - 1];
+            copy(a, fromIndex, a, fromIndex + 1, len - 1);
+            a[fromIndex] = last;
+        } else if (distance == len - 1) {
+            final double first = a[fromIndex];
+            copy(a, fromIndex + 1, a, fromIndex, len - 1);
+            a[toIndex - 1] = first;
+        } else {
+            reverse(a, fromIndex, toIndex);
+            reverse(a, fromIndex, fromIndex + distance);
+            reverse(a, fromIndex + distance, toIndex);
         }
     }
 
@@ -30324,6 +30583,8 @@ sealed class CommonUtil permits N {
             distance += len;
         }
 
+        // Object[] keeps the cycle-following algorithm (one store per element): the three reversals used by the primitive
+        // overloads store each reference twice, which measured slower under G1's per-store write barrier.
         for (int i = fromIndex, count = 0; count < len; i++) {
             final Object tmp = a[i];
             int curr = i;

@@ -604,8 +604,7 @@ public class ExceptionUtilTest extends TestBase {
         assertSame(runtimeCause, ExceptionUtil.tryToGetOriginalCheckedException(new InvocationTargetException(runtimeCause)));
 
         IOException checkedCause = new IOException("io");
-        assertSame(checkedCause,
-                ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(new UncheckedIOException(checkedCause))));
+        assertSame(checkedCause, ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(new UncheckedIOException(checkedCause))));
 
         // A wrapper that is not recognized is returned as is.
         UndeclaredThrowableException undeclared = new UndeclaredThrowableException(checkedCause);

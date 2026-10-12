@@ -1585,13 +1585,13 @@ public class SheetTest extends SheetTestSupport {
         public static void main(final String[] args) {
             System.out.println("kryoAvailable=" + com.landawn.abacus.parser.ParserFactory.isKryoParserAvailable());
 
-            final Sheet<String, String, Integer> sheet = Sheet.rows(N.asList("r1"), N.asList("c1"), new Integer[][] { { 1 } });
+            final Sheet<String, String, Integer> sheet = Sheet.rows(CommonUtil.asList("r1"), CommonUtil.asList("c1"), new Integer[][] { { 1 } });
 
             print("clone()", () -> sheet.clone());
             print("clone(false)", () -> sheet.clone(false));
             print("clone(true)", () -> sheet.clone(true));
 
-            System.out.println("copy=" + N.deepToString(sheet.copy().toArray()));
+            System.out.println("copy=" + CommonUtil.deepToString(sheet.copy().toArray()));
         }
 
         private static void print(final String op, final java.util.function.Supplier<Sheet<String, String, Integer>> call) {

@@ -505,8 +505,11 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
                 return ZERO;
             }
             final long gcd = greatestCommonDivisor(numerator, denominator);
-            numerator /= gcd;
-            denominator /= gcd;
+            // Coprime terms (the common case for reduced operands) skip two 64-bit divisions by 1.
+            if (gcd != 1) {
+                numerator /= gcd;
+                denominator /= gcd;
+            }
         }
 
         if (denominator < 0) {
@@ -810,18 +813,18 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
         }
 
         // parse X Y/Z format
-        int pos = str.indexOf(' ');
-        if (pos > 0) {
-            final String wholePart = str.substring(0, pos);
-            final int whole = parseIntPart(wholePart, str);
-            final String fractionPart = str.substring(pos + 1);
-            pos = fractionPart.indexOf('/');
-            if (pos < 0) {
+        // The integer components are parsed in place (index ranges of str), so no substring is
+        // allocated unless a malformed component has to be named in the exception message.
+        final int spacePos = str.indexOf(' ');
+        if (spacePos > 0) {
+            final int whole = parseIntPart(str, 0, spacePos);
+            final int fractionSlashPos = str.indexOf('/', spacePos + 1);
+            if (fractionSlashPos < 0) {
                 throw new NumberFormatException("The fraction \"" + str + "\" could not be parsed as the format X Y/Z");
             }
 
-            final int numer = parseIntPart(fractionPart.substring(0, pos), str);
-            final int denom = parseIntPart(fractionPart.substring(pos + 1), str);
+            final int numer = parseIntPart(str, spacePos + 1, fractionSlashPos);
+            final int denom = parseIntPart(str, fractionSlashPos + 1, str.length());
             final Fraction result = ofMixed(whole, numer, denom);
 
             // "-0 1/2" means -1/2, but Integer.parseInt("-0") is 0, so by the time the whole part is an
@@ -830,7 +833,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             // zero whole part needs this: any other negative whole already carries the sign, and the
             // numerator is non-negative by ofMixed's contract. Apply the sign without invoking
             // arithmetic normalization: parsing preserves the caller's unreduced terms.
-            return whole == 0 && wholePart.charAt(0) == '-' ? fromTerms(-(long) result.numerator, result.denominator, false) : result;
+            return whole == 0 && str.charAt(0) == '-' ? fromTerms(-(long) result.numerator, result.denominator, false) : result;
         }
 
         // parse Y/Z format
@@ -839,8 +842,8 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             return of(parseIntPart(str, str), 1);
         }
 
-        final int numer = parseIntPart(str.substring(0, slashPos), str);
-        final int denom = parseIntPart(str.substring(slashPos + 1), str);
+        final int numer = parseIntPart(str, 0, slashPos);
+        final int denom = parseIntPart(str, slashPos + 1, str.length());
         return of(numer, denom);
     }
 
@@ -857,6 +860,25 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
             return Integer.parseInt(part);
         } catch (final NumberFormatException e) {
             throw new NumberFormatException("The fraction \"" + source + "\" could not be parsed: \"" + part + "\" is not an integer");
+        }
+    }
+
+    /**
+     * Parses one integer component of a fraction string in place, without extracting it as a substring,
+     * reporting the whole input on failure exactly like {@link #parseIntPart(String, String)}.
+     *
+     * @param source the complete string being parsed, also used for the error message
+     * @param beginIndex the index of the first character of the component, inclusive
+     * @param endIndex the index after the last character of the component, exclusive
+     * @return the parsed value
+     * @throws NumberFormatException if the component is not a valid {@code int}
+     */
+    private static int parseIntPart(final String source, final int beginIndex, final int endIndex) throws NumberFormatException {
+        try {
+            return Integer.parseInt(source, beginIndex, endIndex, 10);
+        } catch (final NumberFormatException e) {
+            throw new NumberFormatException(
+                    "The fraction \"" + source + "\" could not be parsed: \"" + source.substring(beginIndex, endIndex) + "\" is not an integer");
         }
     }
 

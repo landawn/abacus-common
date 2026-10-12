@@ -201,4 +201,42 @@ public class IndexedTypeTest extends TestBase {
     public static class ReviewFixesIndexedBean {
         public Indexed<String> ix = Indexed.of("v", Long.MAX_VALUE);
     }
+
+    // ---- bug review 2026-09-30 G123 begin ----
+    // G123: an empty or blank quoted index is rejected (it was read as index 0); a JSON null index still means 0.
+    @Test
+    public void testValueOf_emptyQuotedIndexRejected() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> indexedType.valueOf("[\"\", \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> indexedType.valueOf("[\"  \", \"a\"]"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, indexedType.valueOf("[null, \"a\"]").index());
+        org.junit.jupiter.api.Assertions.assertEquals(3, indexedType.valueOf("[\"3\", \"a\"]").index());
+        org.junit.jupiter.api.Assertions.assertEquals(5, indexedType.valueOf("[5, \"a\"]").index());
+    }
+    // ---- bug review 2026-09-30 G123 end ----
+
+    // ---- bug review 2026-09-30 G142 begin ----
+    // G142: the single-quoted and escaped-blank forms of an empty index are rejected too (as for Timed).
+    @Test
+    public void testValueOf_singleQuotedAndEscapedBlankIndexRejected() {
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> indexedType.valueOf("['', \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> indexedType.valueOf("[\"\\t\", \"a\"]"));
+    }
+    // ---- bug review 2026-09-30 G142 end ----
+
+    // ---- bug review 2026-09-30 G149 begin ----
+    // G149: the blank metadata text the message quotes is escaped (a tab was embedded raw), on the valueOf and the JSON paths.
+    @Test
+    public void testValueOf_blankMetadataMessageIsEscaped() {
+        final NumberFormatException e = org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class,
+                () -> indexedType.valueOf("[\"\\t\", \"a\"]"));
+        org.junit.jupiter.api.Assertions.assertTrue(e.getMessage().startsWith("Index of ") && e.getMessage().endsWith("but was: \"\\t\""), e.getMessage());
+        org.junit.jupiter.api.Assertions.assertFalse(e.getMessage().contains("\t"), e.getMessage());
+
+        final NumberFormatException e2 = org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> com.landawn.abacus.util.N
+                .fromJson("{\"v\": [\"\\t\", \"a\"]}", com.landawn.abacus.parser.JsonDeserConfig.create().setValueType("v", indexedType), java.util.Map.class));
+        org.junit.jupiter.api.Assertions.assertTrue(e2.getMessage().endsWith("but was: \"\\t\""), e2.getMessage());
+    }
+    // ---- bug review 2026-09-30 G149 end ----
+
 }

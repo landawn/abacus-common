@@ -2146,7 +2146,7 @@ public class PropertiesUtilTest extends TestBase {
     }
 
     @Test
-    public void testXmlToJavaNormalizesRootAndNestedClassNamesAndCompiles() throws IOException {
+    public void testXmlToJavaNormalizesRootAndNestedClassNamesAndCompiles() throws Exception {
         final String xml = "<app-config><database-settings><retry-count type=\"int\">3</retry-count></database-settings></app-config>";
         final Path sourceRoot = Files.createDirectories(tempDir.resolve("normalized-source"));
 
@@ -2158,9 +2158,7 @@ public class PropertiesUtilTest extends TestBase {
         assertTrue(content.contains("class DatabaseSettings"), content);
         assertTrue(content.contains("getRetryCount"), content);
 
-        final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
-        assertNotNull(compiler, "The test requires a JDK, not a JRE");
-        assertEquals(0, compiler.run(null, null, null, "-classpath", System.getProperty("java.class.path"), generated.toString()));
+        assertGeneratedSourceCompiles(generated);
     }
 
     @Test
@@ -2170,10 +2168,7 @@ public class PropertiesUtilTest extends TestBase {
         final Path sourceRoot = Files.createDirectories(tempDir.resolve("shadowed-types-source"));
         PropertiesUtil.xmlToJava(xml, sourceRoot.toString(), "com.shadowedtypes", "Config", false);
 
-        final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
-        assertNotNull(compiler, "The test requires a JDK, not a JRE");
-        assertEquals(0, compiler.run(null, null, null, "-classpath", System.getProperty("java.class.path"),
-                sourceRoot.resolve("com/shadowedtypes/Config.java").toString()));
+        assertGeneratedSourceCompiles(sourceRoot.resolve("com/shadowedtypes/Config.java"));
 
         try (java.net.URLClassLoader loader = new java.net.URLClassLoader(new java.net.URL[] { sourceRoot.toUri().toURL() }, getClass().getClassLoader())) {
             final Class<? extends Properties<String, Object>> configClass = (Class<? extends Properties<String, Object>>) loader
@@ -2181,6 +2176,28 @@ public class PropertiesUtilTest extends TestBase {
             final Properties<String, Object> config = PropertiesUtil.loadFromXml(new StringReader(xml), configClass);
             final Object nested = configClass.getMethod("getString").invoke(config);
             assertEquals("x", nested.getClass().getMethod("getValue").invoke(nested));
+        }
+    }
+
+    // A fresh javac, so earlier in-process compilations in the suite cannot fail this source.
+    private static void assertGeneratedSourceCompiles(final Path source) throws Exception {
+        final String javac = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "javac").toString();
+        final String library = java.nio.file.Path.of(Properties.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toString();
+        final String classpath = library + File.pathSeparator + System.getProperty("surefire.test.class.path", System.getProperty("java.class.path"));
+        final Path log = Files.createTempFile("xml-to-java-javac-", ".log");
+        Process process = null;
+        try {
+            process = new ProcessBuilder(javac, "-encoding", "UTF-8", "-proc:none", "-classpath", classpath, source.toString()).redirectErrorStream(true)
+                    .redirectOutput(log.toFile())
+                    .start();
+            assertTrue(process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS), "javac did not terminate");
+            assertEquals(0, process.exitValue(), Files.readString(log));
+        } finally {
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+                process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+            }
+            Files.deleteIfExists(log);
         }
     }
 

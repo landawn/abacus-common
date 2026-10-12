@@ -294,7 +294,6 @@ public class StringsRegressionATest extends TestBase {
         assertEquals(NBSP, Strings.stripToEmpty(NBSP));
     }
 
-
     @Test
     public void testDelimitedCaseConvertersNotIdempotentForUnpairedCasedCodePoints() {
         // U+211D DOUBLE-STRUCK CAPITAL R is uppercase but has no lowercase mapping

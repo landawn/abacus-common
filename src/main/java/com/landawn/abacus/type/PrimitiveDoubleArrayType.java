@@ -118,11 +118,18 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
+     * <p>Each element is the compact JSON text form of {@code stringOf}: an element enclosed in a matching pair of double or
+     * single quotes is read by its content with its JSON escapes decoded once, so {@code ["1", 2]} yields {@code {1, 2}},
+     * as {@link com.landawn.abacus.parser.JsonParser} reads the array; an empty quoted element is rejected as a malformed
+     * number rather than read as the default; and the unquoted literal {@code null} is the element default {@code 0.0d},
+     * because a primitive array cannot hold {@code null}.</p>
+     *
      * @param str the string to parse
      * @return the parsed double array; {@code null} if input is {@code null}, empty, or blank;
      *         or an empty array if input is {@code "[]"}
      * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if any element in the string cannot be parsed as a double
+     * @throws NumberFormatException if an element, read by its content when quoted, cannot be parsed as a double (an
+     *         empty quoted element included)
      * @see #valueOf(Object)
      * @see #stringOf(double[])
      */
@@ -135,13 +142,21 @@ public final class PrimitiveDoubleArrayType extends AbstractPrimitiveArrayType<d
             return N.EMPTY_DOUBLE_ARRAY;
         }
 
+        final double[] decimalArray = (double[]) parseNumericArray(str, elementType, double.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] strs = split(str);
         final int len = strs.length;
         final double[] a = new double[len];
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                a[i] = elementType.valueOf(strs[i]);
+                // Compact JSON text form: quoted numbers, escapes and null defaults come through
+                // jsonElementContent (split preserves quotes), as PrimitiveLongArrayType already did by hand.
+                a[i] = elementType.valueOf(jsonElementContent(strs[i]));
             }
         }
 

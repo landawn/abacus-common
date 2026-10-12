@@ -186,6 +186,77 @@ public class NumbersTest extends NumbersTestSupport {
     }
 
     @Test
+    public void testParseIntOrElse() {
+        assertEquals(123, Numbers.parseIntOrElse("123", -1));
+        assertEquals(10, Numbers.parseIntOrElse("010", -1));
+        assertEquals(16, Numbers.parseIntOrElse("0x10", -1));
+        assertEquals(123, Numbers.parseIntOrElse("123L", -1));
+        assertEquals(Integer.MIN_VALUE, Numbers.parseIntOrElse("-2147483648", -1));
+        assertEquals(-1, Numbers.parseIntOrElse("2147483648", -1));
+        assertEquals(-1, Numbers.parseIntOrElse("12F", -1));
+        assertEquals(-1, Numbers.parseIntOrElse("abc", -1));
+        assertEquals(-1, Numbers.parseIntOrElse("", -1));
+        assertEquals(-1, Numbers.parseIntOrElse(null, -1));
+        assertEquals(-1, Numbers.parseIntOrElse("\u0661\u0662\u0663", -1));
+        assertEquals(7, Numbers.parseIntOrElse(" ", 7));
+    }
+
+    @Test
+    public void testParseLongOrElse() {
+        assertEquals(123L, Numbers.parseLongOrElse("123", -1L));
+        assertEquals(255L, Numbers.parseLongOrElse("0xFFL", -1L));
+        assertEquals(Long.MIN_VALUE, Numbers.parseLongOrElse("-9223372036854775808", -1L));
+        assertEquals(Long.MIN_VALUE, Numbers.parseLongOrElse("-0x8000000000000000", -1L));
+        assertEquals(-1L, Numbers.parseLongOrElse("9223372036854775808", -1L));
+        assertEquals(-1L, Numbers.parseLongOrElse("12D", -1L));
+        assertEquals(-1L, Numbers.parseLongOrElse("abc", -1L));
+        assertEquals(-1L, Numbers.parseLongOrElse("", -1L));
+        assertEquals(-1L, Numbers.parseLongOrElse(null, -1L));
+    }
+
+    @Test
+    public void testParseOrElseAgreesWithTryParseAndToNumber() {
+        final List<String> inputs = new ArrayList<>(List.of("0", "-0", "+0", "1", "-1", "007", "+42", "-128", "127", "128", "-32768", "32767", "65535",
+                "2147483647", "-2147483648", "2147483648", "-2147483649", "9223372036854775807", "-9223372036854775808", "9223372036854775808",
+                "-9223372036854775809", "0x7fffffff", "0x80000000", "-0x80000000", "#FF", "-#ff", "0X1F", "0x", "#", "0xG", "1L", "1l", "1LL", "L", "12F",
+                "12D", "1.5", "1e5", " 1", "1 ", "+", "-", "--1", "+-1", "00000000000000000000000000001", "\u0661"));
+        final Random random = new Random(20261008);
+        final String alphabet = "0123456789000999+-xX#LlFfDdaE. ";
+
+        for (int i = 0; i < 20_000; i++) {
+            final StringBuilder sb = new StringBuilder();
+
+            for (int j = 1 + random.nextInt(random.nextInt(4) == 0 ? 24 : 8); j > 0; j--) {
+                sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+            }
+
+            inputs.add(sb.toString());
+        }
+
+        for (final String text : inputs) {
+            final u.OptionalInt asInt = Numbers.tryParseInt(text);
+            final u.OptionalLong asLong = Numbers.tryParseLong(text);
+
+            for (final int defaultValue : new int[] { -1, 0, Integer.MIN_VALUE }) {
+                assertEquals(asInt.orElse(defaultValue), Numbers.parseIntOrElse(text, defaultValue), text);
+                assertEquals(asLong.orElse(defaultValue), Numbers.parseLongOrElse(text, defaultValue), text);
+            }
+
+            if (asInt.isPresent()) {
+                assertEquals(Numbers.toInt(text), asInt.getAsInt(), text);
+            } else if (!text.isEmpty()) {
+                assertThrows(RuntimeException.class, () -> Numbers.toInt(text), text);
+            }
+
+            if (asLong.isPresent()) {
+                assertEquals(Numbers.toLong(text), asLong.getAsLong(), text);
+            } else if (!text.isEmpty()) {
+                assertThrows(RuntimeException.class, () -> Numbers.toLong(text), text);
+            }
+        }
+    }
+
+    @Test
     public void testTryParseFloat() {
         for (final String value : new String[] { "0", "123.45", "NaN", "-Infinity", "0x1.0p2", "1e39" }) {
             final u.OptionalFloat result = assertDoesNotThrow(() -> Numbers.tryParseFloat(value), value);
@@ -507,10 +578,9 @@ public class NumbersTest extends NumbersTestSupport {
     @Test
     public void testToDouble_floatIntegralFastPathMatchesDecimalRoundTrip() {
         final List<Float> values = new ArrayList<>();
-        final float[] specials = { 0.0f, -0.0f, 1.0f, -1.0f, 7.0f, 100.0f, 1e7f, -1e7f, 9999999.0f, 12345678.0f, 0x1p24f - 1, 0x1p24f, -0x1p24f,
-                -(0x1p24f - 1), 0x1p24f + 2, -(0x1p24f + 2), 0x1p25f, 0x1p31f, -0x1p31f, 0x1p40f, 3.0e9f, Float.MAX_VALUE, -Float.MAX_VALUE,
-                Float.MIN_VALUE, -Float.MIN_VALUE, Float.MIN_NORMAL, 0.5f, -0.5f, 1.21f, 0.1f, -2.5f, 16777215.5f, 1234.5f, Float.NaN,
-                Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY };
+        final float[] specials = { 0.0f, -0.0f, 1.0f, -1.0f, 7.0f, 100.0f, 1e7f, -1e7f, 9999999.0f, 12345678.0f, 0x1p24f - 1, 0x1p24f, -0x1p24f, -(0x1p24f - 1),
+                0x1p24f + 2, -(0x1p24f + 2), 0x1p25f, 0x1p31f, -0x1p31f, 0x1p40f, 3.0e9f, Float.MAX_VALUE, -Float.MAX_VALUE, Float.MIN_VALUE, -Float.MIN_VALUE,
+                Float.MIN_NORMAL, 0.5f, -0.5f, 1.21f, 0.1f, -2.5f, 16777215.5f, 1234.5f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY };
 
         for (final float f : specials) {
             values.add(f);

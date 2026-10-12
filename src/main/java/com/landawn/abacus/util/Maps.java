@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -406,8 +407,11 @@ import com.landawn.abacus.util.u.OptionalShort;
  *       that kind can be reproduced: a {@link SortedMap} keeps its comparator (a {@code ConcurrentNavigableMap}
  *       stays a {@code ConcurrentSkipListMap}), an {@link java.util.EnumMap} stays an {@code EnumMap}, and a class
  *       that can be instantiated reflectively is mirrored. A map whose kind cannot be reproduced - an
- *       unmodifiable, synchronized or checked wrapper, an immutable map - yields an insertion-ordered
- *       {@link java.util.LinkedHashMap}; key semantics hidden behind a wrapper (the comparator of
+ *       unmodifiable, synchronized or checked wrapper, an immutable map, a class whose constructor or initializer
+ *       puts entries (a double-brace initialized anonymous map) - yields an insertion-ordered
+ *       {@link java.util.LinkedHashMap} (an {@link IdentityHashMap}, {@link WeakHashMap} or {@link ConcurrentHashMap}
+ *       subclass instead yields a map of that JDK family - see <b>Result map types</b> below); key semantics
+ *       hidden behind a wrapper (the comparator of
  *       {@code Collections.synchronizedMap(new TreeMap<>(String.CASE_INSENSITIVE_ORDER))}) are out of reach and
  *       lost. A mirrored class other than the JDK hash maps and {@link BiMap} never receives an estimated size,
  *       only an upper bound of the result size, so a size-capped (LRU) subclass cannot evict result entries
@@ -466,6 +470,15 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Clear Documentation:</b> Well-defined behavior for all edge cases</li>
  *   <li><b>Consistent API:</b> Uniform error handling patterns across all methods</li>
  * </ul>
+ *
+ * <p><b>Result map types:</b> Filters and other operations retaining the input's keys reproduce its map type where
+ * possible. When an empty destination cannot be recreated (including anonymous map classes), the fallback preserves
+ * known map-family behavior: {@link IdentityHashMap} identity keys, {@link WeakHashMap} weak keys, and
+ * {@link ConcurrentHashMap} concurrency and null restrictions. Sorted maps retain their comparator and enum maps their
+ * key type. Other fallbacks use {@link LinkedHashMap} to retain encounter order. Arbitrary subclass overrides and eviction
+ * policies are not preserved, and weak-key results can lose entries when their keys are collected. Operations that create
+ * different keys or may produce null values use compatible result types instead; see {@link #invert(Map)} and
+ * {@link #transpose(Map)}.</p>
  *
  * <p><b>Best Practices:</b>
  * <ul>
@@ -656,8 +669,8 @@ public final class Maps {
      *
      * <p>The trade-off is that names collide across classloaders: if {@code com.app.MyMap} from one
      * application cannot be constructed, a different {@code com.app.MyMap} loaded elsewhere is skipped too.
-     * The only cost of a false skip is a {@code LinkedHashMap} result instead of a same-type one, so the
-     * collision is preferred to the leak.</p>
+     * A collision can therefore select the standard map-family fallback instead of attempting that class's
+     * constructor. The name-based cache avoids retaining the defining classloaders.</p>
      */
     private static final Set<String> UNABLE_CREATED_MAP_CLASS_NAMES = N.newConcurrentHashSet();
 
@@ -706,9 +719,16 @@ public final class Maps {
      *   <li>a {@link ConcurrentNavigableMap} yields a {@link ConcurrentSkipListMap}, and any other
      *       {@link SortedMap} a {@link TreeMap}, each with the template's comparator;</li>
      *   <li>an {@link EnumMap} yields an empty {@code EnumMap} of the same key type (ordinal order);</li>
+     *   <li>when an {@link IdentityHashMap} subclass cannot be recreated as an empty map, its fallback is an
+     *       {@link IdentityHashMap}, preserving distinct keys that compare equal;</li>
+     *   <li>an unreproducible {@link WeakHashMap} subclass falls back to a {@code WeakHashMap}, preserving weak keys,
+     *       and an unreproducible {@link ConcurrentHashMap} subclass to a {@code ConcurrentHashMap}, preserving concurrency
+     *       and rejection of null keys and values. Weak-key results can lose entries when their keys are collected;</li>
      *   <li>an abacus {@link ImmutableMap}, which cannot receive the result, and a class that cannot be
      *       constructed reflectively (an unmodifiable, synchronized or checked wrapper, a third-party immutable
-     *       map, ...) yield a {@link LinkedHashMap}, which at least keeps the template's encounter order. A
+     *       map, an anonymous map, ...) or whose new instance is not empty yield a {@link LinkedHashMap}, except for the
+     *       map-family fallbacks above. Fallbacks preserve the stated family semantics, not arbitrary subclass overrides
+     *       or eviction policies; the {@code LinkedHashMap} fallback keeps encounter order. A
      *       wrapper's own key semantics are out of reach through the wrapper: the result for
      *       {@code Collections.synchronizedMap(new TreeMap<>(String.CASE_INSENSITIVE_ORDER))} is an
      *       equals-keyed {@code LinkedHashMap};</li>
@@ -736,6 +756,15 @@ public final class Maps {
             return expectedSize == 0 ? new HashMap<>() : N.newHashMap(expectedSize);
         }
 
+        // The two most common templates first. They get exactly the map the reflective path below creates for them
+        // (N.newMap answers N.newHashMap / N.newLinkedHashMap, and a built-in class cannot be re-registered), without
+        // its factory lookup, name-cache probe and emptiness check.
+        if (m.getClass() == HashMap.class) {
+            return N.newHashMap(expectedSize);
+        } else if (m.getClass() == LinkedHashMap.class) {
+            return N.newLinkedHashMap(expectedSize);
+        }
+
         if (m instanceof ConcurrentNavigableMap) {
             // Checked before SortedMap: a TreeMap would silently drop the template's thread safety.
             return new ConcurrentSkipListMap<>(((SortedMap) m).comparator());
@@ -757,7 +786,7 @@ public final class Maps {
 
         // ImmutableMap: N.newMap answers a plain HashMap for it, which dropped the template's order.
         if (m instanceof ImmutableMap || UNABLE_CREATED_MAP_CLASS_NAMES.contains(cls.getName())) {
-            return N.newLinkedHashMap(expectedSize);
+            return newFallbackMap(m, expectedSize);
         }
 
         // An estimate only for a class whose int constructor is KNOWN to be a capacity. Any other class may
@@ -766,7 +795,17 @@ public final class Maps {
         final int size = CAPACITY_SIZED_MAP_CLASSES.contains(cls) ? expectedSize : maxSize;
 
         try {
-            return N.newMap(cls, size);
+            final Map result = N.newMap(cls, size);
+
+            // A named class or an explicit creator can return a pre-filled map. Anonymous classes without a registered
+            // creator are rejected by N.newInstance and fall back in the catch below. Every caller
+            // expects an empty one: a filter/difference result gained entries the input no longer had, and
+            // replaceKeys wrote them back into the caller's map. Fall back as for a non-reproducible class.
+            if (!result.isEmpty()) {
+                return newFallbackMap(m, expectedSize);
+            }
+
+            return result;
         } catch (final Exception e) {
             // The size-1 retry distinguishes "this class can never be constructed reflectively" from "this
             // class rejected THIS size". Only the former is remembered: a class whose constructor validates
@@ -780,11 +819,35 @@ public final class Maps {
                 UNABLE_CREATED_MAP_CLASS_NAMES.add(cls.getName());
             }
 
-            // LinkedHashMap, not HashMap: the template defined an encounter order (an unmodifiable or
-            // synchronized LinkedHashMap, for one) that a HashMap threw away - while newOrderingMap, for the
-            // very same template, already kept it.
-            return N.newLinkedHashMap(expectedSize);
+            // Keep known map-family semantics where detectable; otherwise keep the template's encounter order.
+            return newFallbackMap(m, expectedSize);
         }
+    }
+
+    /**
+     * Preserves known map-family semantics when reflective recreation fails or produces a nonempty map.
+     * An ordinary strong, equals-keyed map would merge identity keys, retain weak keys, or drop concurrency.
+     * Other unreproducible maps retain encounter order. Arbitrary subclass overrides are not reproduced.
+     *
+     * @param template the original map, never null
+     * @param expectedSize the expected number of result entries
+     * @return an empty map preserving identity keys, weak keys, concurrency, or encounter order as applicable
+     */
+    @SuppressWarnings({ "rawtypes", "deprecation" })
+    private static Map newFallbackMap(final Map<?, ?> template, final int expectedSize) {
+        // Returning a JDK superclass is safe here, unlike in N.newInstance: callers only ever see a Map, never the
+        // template's class. Anonymous maps (other than sorted maps and EnumMaps) land here because N.newInstance rejects
+        // them, so the fallback must keep the map family's key semantics: a LinkedHashMap merged the identity-distinct
+        // keys of an IdentityHashMap template.
+        if (template instanceof IdentityHashMap) {
+            return new IdentityHashMap<>(expectedSize);
+        } else if (template instanceof WeakHashMap) {
+            return new WeakHashMap<>(N.initHashCapacity(expectedSize));
+        } else if (template instanceof ConcurrentHashMap) {
+            return N.newConcurrentHashMap(expectedSize);
+        }
+
+        return N.newLinkedHashMap(expectedSize);
     }
 
     /**
@@ -2571,29 +2634,23 @@ public final class Maps {
      * Returns {@code OptionalBoolean.empty()} if the map is {@code null}/empty, the key is absent,
      * or the mapped value is {@code null}. Non-{@code null} values that are not {@link Boolean}
      * are converted with {@link N#convert(Object, Class)}, the same conversion used by
-     * {@link #getAs(Map, Object, Class)}: a {@link Number} is {@code true} when it is non-zero - except
-     * {@code NaN}, which is non-zero but reads as {@code false} (as do {@code 0.0} and {@code -0.0}) - and
-     * anything else is read from its string form.
+     * {@link #getAs(Map, Object, Class)}: an {@code Integer}, {@code Short} or {@code Byte} is read by its value -
+     * {@code 1} is {@code true}, {@code 0} and {@code -1} are {@code false}, and any other value ({@code 2}) is rejected
+     * with an {@code IllegalArgumentException}; a {@link Number} of any other class ({@code 1L}, {@code 1.0},
+     * {@code BigDecimal}) is rejected whatever its value; and anything else is read from its string form.
      *
-     * <p><b>Exactly which strings are {@code true}:</b> only {@code "true"} (any case), the single
-     * character {@code "Y"} or {@code "y"}, and {@code "1"}, each optionally surrounded by padding
-     * (Unicode whitespace or any character {@code <= ' '}), which is stripped before the comparison;
-     * interior padding is not stripped, so {@code "tr ue"} is {@code false}. <em>Every</em> other string
-     * is {@code false} - including spellings a reader may expect to be true, such as {@code "T"},
-     * {@code "yes"} and {@code "on"}, and including {@code ""}, a string consisting only of padding, and
-     * the string form of an arbitrary object.</p>
+     * <p><b>Exactly which strings are accepted:</b> {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any
+     * case) are {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) are
+     * {@code false}. Each may be surrounded by padding (Unicode whitespace or any character {@code <= ' '}), which is
+     * stripped first; interior padding is not stripped. An empty string, or one consisting only of whitespace, is
+     * {@code false}. <em>Every</em> other string is rejected with an {@code IllegalArgumentException} - including
+     * numeric text such as {@code "2"} or {@code "1.0"} (text is never parsed as a number), spellings a reader may
+     * expect to be accepted, such as {@code "T"}, {@code "yes"} and {@code "on"}, {@code "tr ue"}, and the string form
+     * of an arbitrary object. A {@link Character} value is treated as a one-character string.</p>
      *
-     * <p><b>A {@link Character} value is treated as a one-character string</b>, so it follows exactly the rule
-     * above: {@code 'Y'}, {@code 'y'} and {@code '1'} are {@code true} and every other character is
-     * {@code false}.</p>
-     *
-     * <p><b>Note:</b> unlike the numeric parsers, the default string-to-boolean conversion treats
-     * unrecognized text as {@code false}. Conversion failures from custom converters or unsupported
-     * input structures still propagate. There is no accessor in this class that can tell "present but not a boolean" from
-     * "present and false": {@link #getAs(Map, Object, Class)} with {@code Boolean.class} performs the
-     * very same conversion and answers {@code Optional.of(false)} for {@code "junk"} just as this method
-     * answers {@code OptionalBoolean.of(false)}. To make that distinction, read the raw value with
-     * {@link #getIfExists(Map, Object)} and test its type yourself.</p>
+     * <p><b>Note:</b> {@link #getAs(Map, Object, Class)} with {@code Boolean.class} performs the very same conversion,
+     * so both reject {@code "junk"} rather than reading it as {@code false}. Conversion failures from custom converters
+     * or unsupported input structures propagate too.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2614,8 +2671,9 @@ public final class Maps {
      * @return an {@code OptionalBoolean} containing the boolean value, or empty if the map is
      *         {@code null}/empty, the key is absent, or the value is {@code null}.
      * @throws IllegalArgumentException if a non-{@code Boolean} value is rejected by
-     *         {@link N#convert(Object, Class)} - notably a self-referencing container, or a registered
-     *         converter whose result is not a {@code Boolean}.
+     *         {@link N#convert(Object, Class)} - notably an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, text that is none of the accepted
+     *         strings, a self-referencing container, or a registered converter whose result is not a {@code Boolean}.
      */
     // @ai-ignore getAs* type-conversion variants - retrieve map values with automatic type conversion for each primitive type (boolean/char/byte/short/int/long/float/double/String) plus generic typed access. Each pair provides Optional and OrDefaultIfAbsent forms. Do not suggest consolidation.
     public static <K> OptionalBoolean getAsBoolean(final Map<K, ?> map, final K key) throws IllegalArgumentException {
@@ -2642,11 +2700,12 @@ public final class Maps {
      * the key is absent, or the mapped value is {@code null}.
      * Non-{@code null} values that are not {@link Boolean} are converted with {@link N#convert(Object, Class)},
      * the same conversion used by {@link #getAs(Map, Object, Class)}, with exactly the rules spelled out on
-     * {@link #getAsBoolean(Map, Object)}: a {@link Number} is {@code true} when it is non-zero (but {@code NaN} is
-     * {@code false}), and any other value is {@code true} only when its string form, stripped of surrounding
-     * padding, is {@code "true"} (any case), {@code "Y"}, {@code "y"} or {@code "1"} - so {@code "yes"},
-     * {@code "T"} and {@code "on"} are {@code false}, and unrecognized text is {@code false} rather than an
-     * error.
+     * {@link #getAsBoolean(Map, Object)}: an {@code Integer}, {@code Short} or {@code Byte} is {@code true} when it is
+     * {@code 1}, {@code false} when it is {@code 0} or {@code -1}, and rejected otherwise ({@code 2}); a {@link Number} of
+     * any other class ({@code 1L}, {@code 1.0}) is rejected; any other value is read
+     * from its string form, stripped of surrounding padding - {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"}
+     * (any case) are {@code true}, {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case)
+     * are {@code false}, blank text is {@code false}, and any other text ({@code "yes"}, {@code "2"}) is rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2665,8 +2724,9 @@ public final class Maps {
      * @param defaultValue the value to return if the map is {@code null}/empty, the key is absent, or the value is {@code null}
      * @return the mapped boolean value, or {@code defaultValue} if the key is absent or mapped to {@code null}
      * @throws IllegalArgumentException if a non-{@code Boolean} value is rejected by
-     *         {@link N#convert(Object, Class)} - notably a self-referencing container, or a registered
-     *         converter whose result is not a {@code Boolean}.
+     *         {@link N#convert(Object, Class)} - notably an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, text that is none of the accepted
+     *         strings, a self-referencing container, or a registered converter whose result is not a {@code Boolean}.
      */
     public static <K> boolean getAsBooleanOrDefaultIfAbsent(final Map<K, ?> map, final K key, final boolean defaultValue) throws IllegalArgumentException {
         if (N.isEmpty(map)) {
@@ -5614,6 +5674,34 @@ public final class Maps {
         }
 
         final Map<V, K> result = newOrderingMap(map);
+
+        if (!(result instanceof BiMap)) {
+            // HashMap/LinkedHashMap result: one put per entry instead of get + containsKey + put. The previous value
+            // put returns is the key the merge function must see, and an unchanged size means the value was already
+            // present (possibly bound to the null key). Binding the new key before merging is unobservable: the
+            // result is not visible to anyone yet, and the merge below overwrites or removes that binding.
+            for (final Map.Entry<K, V> entry : map.entrySet()) {
+                final V value = entry.getValue();
+                final int sizeBefore = result.size();
+                final K oldKey = result.put(value, entry.getKey());
+
+                if (result.size() == sizeBefore) {
+                    final K merged = mergeFunction.apply(oldKey, entry.getKey());
+
+                    // Map.merge rule, as below: a null result removes the entry.
+                    if (merged == null) {
+                        result.remove(value);
+                    } else {
+                        result.put(value, merged);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        // A BiMap result keeps the query-first sequence: BiMap.put checks value uniqueness against the current
+        // bindings, so binding the incoming key before merging could reject a binding the merged result never holds.
         K oldVal = null;
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -5891,7 +5979,7 @@ public final class Maps {
             throw new IllegalArgumentException("mapSupplier must create a new map");
         }
 
-        flatten(map, null, delimiter, result, new IdentityHashMap<>());
+        flatten(map, delimiter, result);
 
         return result;
     }
@@ -5900,46 +5988,91 @@ public final class Maps {
      * @throws IllegalArgumentException if the map contains a cyclic nested map, a null key, or duplicate flattened keys.
      * @throws ClassCastException if a nested map's key is not a {@code String}.
      */
-    private static void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output,
-            final IdentityHashMap<Map<?, ?>, Boolean> ancestors) throws IllegalArgumentException, ClassCastException {
+    private static void flatten(final Map<String, Object> map, final String delimiter, final Map<String, Object> output)
+            throws IllegalArgumentException, ClassCastException {
         if (N.isEmpty(map)) {
             return;
         }
 
-        if (ancestors.put(map, Boolean.TRUE) != null) {
-            throw new IllegalArgumentException("Cyclic map structure cannot be flattened");
-        }
-
-        try {
-            // null is the root sentinel. An empty string is a valid nested key and must retain its
-            // path segment (for example, {"": {"a": 1}} flattens to {".a": 1}).
-            if (prefix == null) {
-                for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                    if (entry.getKey() == null) {
-                        throw new IllegalArgumentException("Map keys must not be null");
+        FlattenState state = null;
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            if (key == null) {
+                throw new IllegalArgumentException("Map keys must not be null");
+            }
+            if (entry.getValue() instanceof final Map nested) {
+                if (N.notEmpty(nested)) {
+                    if (state == null) {
+                        state = new FlattenState(map);
                     }
-
-                    if (entry.getValue() instanceof Map) {
-                        flatten((Map<String, Object>) entry.getValue(), entry.getKey(), delimiter, output, ancestors);
-                    } else {
-                        putFlattened(output, entry.getKey(), entry.getValue());
-                    }
+                    state.flatten(nested, key, delimiter, output);
                 }
             } else {
-                for (final Map.Entry<String, Object> entry : map.entrySet()) {
-                    if (entry.getKey() == null) {
-                        throw new IllegalArgumentException("Map keys must not be null");
-                    }
-
-                    if (entry.getValue() instanceof Map) {
-                        flatten((Map<String, Object>) entry.getValue(), prefix + delimiter + entry.getKey(), delimiter, output, ancestors);
-                    } else {
-                        putFlattened(output, prefix + delimiter + entry.getKey(), entry.getValue());
-                    }
-                }
+                // Flat maps need no traversal state or path copy; keep their original key identity.
+                putFlattened(output, key, entry.getValue());
             }
-        } finally {
-            ancestors.remove(map);
+        }
+    }
+
+    private static final class FlattenState {
+        final StringBuilder path = new StringBuilder();
+        final IdentityHashMap<Map<?, ?>, Boolean> ancestors = new IdentityHashMap<>();
+        final ArrayDeque<FlattenFrame> pending = new ArrayDeque<>();
+
+        FlattenState(final Map<String, Object> root) {
+            ancestors.put(root, Boolean.TRUE);
+        }
+
+        void flatten(final Map<String, Object> map, final String prefix, final String delimiter, final Map<String, Object> output) {
+            if (ancestors.put(map, Boolean.TRUE) != null) {
+                throw new IllegalArgumentException("Cyclic map structure cannot be flattened");
+            }
+            path.append(prefix);
+            pending.push(new FlattenFrame(map, 0));
+
+            while (!pending.isEmpty()) {
+                final FlattenFrame frame = pending.peek();
+                if (!frame.entries.hasNext()) {
+                    pending.pop();
+                    ancestors.remove(frame.map);
+                    path.setLength(frame.restoreLength);
+                    continue;
+                }
+
+                final Map.Entry<String, Object> entry = frame.entries.next();
+                final String key = entry.getKey();
+                if (key == null) {
+                    throw new IllegalArgumentException("Map keys must not be null");
+                }
+                final int restoreLength = path.length();
+                // Every frame is nested, even when the existing path is an empty key segment.
+                path.append(delimiter).append(key);
+
+                if (entry.getValue() instanceof final Map nested) {
+                    if (N.notEmpty(nested)) {
+                        if (ancestors.put(nested, Boolean.TRUE) != null) {
+                            throw new IllegalArgumentException("Cyclic map structure cannot be flattened");
+                        }
+                        pending.push(new FlattenFrame(nested, restoreLength));
+                        continue;
+                    }
+                } else {
+                    putFlattened(output, path.toString(), entry.getValue());
+                }
+                path.setLength(restoreLength);
+            }
+        }
+    }
+
+    private static final class FlattenFrame {
+        final Map<String, Object> map;
+        final Iterator<Map.Entry<String, Object>> entries;
+        final int restoreLength;
+
+        FlattenFrame(final Map<String, Object> map, final int restoreLength) {
+            this.map = map;
+            entries = map.entrySet().iterator();
+            this.restoreLength = restoreLength;
         }
     }
 
@@ -6131,7 +6264,7 @@ public final class Maps {
     /**
      * Replaces (renames) the keys in the specified map by applying the given converter to each existing key.
      *
-     * <p>This method operates in two phases:
+     * <p>When a faithful scratch map can be built, this method operates in two phases:
      * <ol>
      *   <li><b>Validation phase:</b> Computes the converted key for every current key and validates that no duplicates
      *       would be produced. If duplicates are detected, throws {@link IllegalStateException} before modifying the map.</li>
@@ -6145,7 +6278,8 @@ public final class Maps {
      * <p><b>Maps whose key equivalence cannot be reproduced.</b> The validation phase runs in a scratch map of
      * the same kind as {@code map}, so a comparator- or identity-keyed map is checked under its own key
      * equivalence. When no faithful scratch map can be built - a {@code Collections.synchronizedMap} or
-     * {@code checkedMap} wrapper, or any other class that cannot be instantiated reflectively - every key is
+     * {@code checkedMap} wrapper, any other class that cannot be instantiated reflectively, or a {@link BiMap}
+     * (whose key and value map suppliers may impose comparator or identity semantics) - every key is
      * still converted first, but duplicates are detected on {@code map} itself: it is cleared and refilled
      * entry by entry in the original order, and on a duplicate (or any other failure while refilling) its
      * original entries are put back, in their original order, before the exception propagates. On such a
@@ -6239,15 +6373,16 @@ public final class Maps {
         // past the end of `keys`.
         final int size = keys.size();
 
-        // Rebuild into a same-kind temporary map first. Besides validating converted keys before
-        // the original map is mutated, using the target map itself for duplicate detection honors
-        // comparator-based and identity-based key equivalence rather than assuming equals semantics.
-        final Map<K, Object> newMap = newTargetMap(map, size);
+        // Rebuild into a same-kind temporary map first when one can reproduce the map's key equivalence. Besides
+        // validating converted keys before the original map is mutated, using such a map for duplicate detection
+        // honors comparator-based and identity-based key equivalence rather than assuming equals semantics.
         // A scratch map that cannot reproduce the real map's key equivalence (the LinkedHashMap stand-in for
-        // a synchronized/checked wrapper) must not decide what is a duplicate: it silently merged keys that
-        // synchronizedMap(TreeMap CI) considers equal - the later putAll then lost a value - and rejected
-        // keys an identity map keeps apart. Such a map is validated on itself instead (rekeyInPlace).
-        final boolean faithful = isFaithfulScratch(map, newMap);
+        // a synchronized/checked wrapper, or a default BiMap for a supplier-backed one) must not decide what is a
+        // duplicate: it silently merged keys that synchronizedMap(TreeMap CI) considers equal - the later putAll
+        // then lost a value - and rejected keys an identity map keeps apart. Such a map has no scratch map
+        // (null) and is validated on itself instead (rekeyInPlace).
+        final Map<K, Object> newMap = newFaithfulScratch(map, size);
+        final boolean faithful = newMap != null;
         final List<K> convertedKeys = new ArrayList<>(size);
         K newKey = null;
 
@@ -6280,14 +6415,27 @@ public final class Maps {
     }
 
     /**
-     * Answers whether {@code scratch} - built by {@link #newTargetMap(Map, int)} from {@code map} - decides key
-     * equality exactly as {@code map} does: it is of the very same class, or both are sorted by the same
-     * comparator.
+     * Builds, with {@link #newTargetMap(Map, int)}, an empty scratch map that decides key equality exactly as
+     * {@code map} does - it is of the very same class, or both maps are sorted by the same comparator - or
+     * answers {@code null} when no such map can be built. A {@link BiMap} never gets one: its key and value
+     * map suppliers can impose comparator or identity semantics that a default {@code BiMap} of the same class
+     * would lose, so it is validated on itself, without allocating a scratch map first.
+     *
+     * @param map the map whose keys are about to be replaced
+     * @param size the number of entries the scratch map will receive
+     * @return a faithful empty scratch map, or {@code null} if {@code map} must be validated on itself
      */
-    @SuppressWarnings("rawtypes")
-    private static boolean isFaithfulScratch(final Map<?, ?> map, final Map<?, ?> scratch) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static <K, V> Map<K, V> newFaithfulScratch(final Map<K, ?> map, final int size) {
+        if (map instanceof BiMap) {
+            return null;
+        }
+
+        final Map scratch = newTargetMap(map, size);
+
         return scratch.getClass() == map.getClass()
-                || (map instanceof SortedMap && scratch instanceof SortedMap && ((SortedMap) map).comparator() == ((SortedMap) scratch).comparator());
+                || (map instanceof SortedMap && scratch instanceof SortedMap && ((SortedMap) map).comparator() == ((SortedMap) scratch).comparator()) ? scratch
+                        : null;
     }
 
     /**
@@ -6394,7 +6542,10 @@ public final class Maps {
                 throw e;
             }
 
-            failure.addSuppressed(e);
+            // A map may reuse the same exception for the failed refill and the rollback.
+            if (failure != e) {
+                failure.addSuppressed(e);
+            }
         }
     }
 
@@ -6438,10 +6589,10 @@ public final class Maps {
      * reader or writer can observe in between.</p>
      *
      * <p>Collisions are decided by a scratch map of the same kind as {@code map}. When no faithful scratch map
-     * can be built (a {@code Collections.synchronizedMap} wrapper, for one), the keys are converted first and the
-     * entries are then folded directly into the cleared {@code map}, under its own key equivalence; any failure
-     * while folding - {@code mergeFunction} throwing included - puts the original entries back before the
-     * exception propagates. See {@link #replaceKeys(Map, Function)}.</p>
+     * can be built (a {@code Collections.synchronizedMap} wrapper or a {@link BiMap}, for example), the keys are
+     * converted first and the entries are then folded directly into the cleared {@code map}, under its own key
+     * equivalence; any failure while folding - {@code mergeFunction} throwing included - puts the original
+     * entries back before the exception propagates. See {@link #replaceKeys(Map, Function)}.</p>
      *
      * <p><b>Notes:</b></p>
      * <ul>
@@ -6506,8 +6657,9 @@ public final class Maps {
      * @throws IllegalArgumentException if any of {@code keyConverter}, {@code mergeFunction} is {@code null}.
      * @throws UnsupportedOperationException if {@code map} does not support {@link Map#clear()} or
      *         {@link Map#putAll(Map)}. Failures while applying the validated copy can leave the map empty or
-     *         partially populated - the copy is built first, so only failures during conversion and merging
-     *         leave the map untouched.
+     *         partially populated. Conversion failures leave the map untouched. Merging also precedes mutation
+     *         when a faithful scratch copy is available; otherwise it runs on the cleared map, and a failure
+     *         triggers restoration of the original entries as described above.
      * @see #replaceKeys(Map, Function)
      */
     public static <K, V> void replaceKeys(final Map<K, V> map, final Function<? super K, ? extends K> keyConverter,
@@ -6530,11 +6682,12 @@ public final class Maps {
         }
 
         // Rebuilding in encounter order is important: an unchanged target must not be seeded ahead
-        // of an earlier entry that converts to that target. The temporary map also applies the same
-        // comparator/identity key semantics as the original map and validates keys before mutation.
-        final Map<K, V> newMap = newTargetMap(map, map.size());
+        // of an earlier entry that converts to that target. When a faithful temporary map can be built, it applies
+        // the same comparator/identity key semantics as the original map and validates keys before mutation;
+        // otherwise (a BiMap, or a synchronized/checked wrapper) keys are folded into the cleared map itself below.
+        final Map<K, V> newMap = newFaithfulScratch(map, map.size());
 
-        if (!isFaithfulScratch(map, newMap)) {
+        if (newMap == null) {
             // See replaceKeys(Map, Function): a scratch map with other key semantics would merge (or keep apart)
             // keys differently than `map` - synchronizedMap(TreeMap CI) lost the merge and a value. Convert
             // first (a converter failure leaves the map untouched), then fold into the map itself.

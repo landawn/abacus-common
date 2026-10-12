@@ -35,6 +35,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -310,23 +311,120 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * Creates the map for an {@code EnumMap}-typed target. {@code EnumMap} has no no-arg constructor (the generic
      * creator fails with "No default constructor found") and {@code N.newMap(EnumMap.class)} is documented to
-     * return a {@code HashMap}, which a caller that declared {@code EnumMap} cannot use.
+     * return a {@code HashMap}, which a caller that declared {@code EnumMap} cannot use. A subclass of {@code EnumMap}
+     * is created as itself through {@link N#newInstance(Class)}, so an anonymous subclass is rejected there.
      *
+     * @param targetClass the requested {@code EnumMap} class or subclass
      * @param keyType the resolved key type (property type, {@code Type.of("java.util.EnumMap<K, V>")} or
      *        {@code setMapKeyType} of the parser's deserialization config)
      * @param configClass the deserialization config class of the calling parser ({@code JsonDeserConfig} or
      *        {@code XmlDeserConfig}); its simple name tells the caller where to declare the key type
-     * @return an empty {@code EnumMap} keyed by that enum
-     * @throws ParsingException if the resolved key type is not an enum (e.g. a raw {@code EnumMap.class} target)
+     * @return an empty {@code EnumMap} keyed by that enum, or a new instance of the requested subclass
+     * @throws IllegalArgumentException if {@code targetClass} is an anonymous subclass or otherwise cannot be created by
+     *         {@link N#newInstance(Class)}
+     * @throws RuntimeException if constructing a subclass reflectively is inaccessible or its constructor throws
+     * @throws ParsingException if the resolved key type is not an enum (e.g. a raw {@code EnumMap.class} target), or is not
+     *         the enum a subclass declares as its key type ({@code class DayMap extends EnumMap<DayOfWeek, Integer>})
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    static Map<Object, Object> newEnumMap(final Type<?> keyType, final Class<?> configClass) throws ParsingException {
+    static Map<Object, Object> newEnumMap(final Class<?> targetClass, final Type<?> keyType, final Class<?> configClass)
+            throws IllegalArgumentException, RuntimeException, ParsingException {
+        // A subclass is created as itself, before the key check, as any other concrete map is: a plain EnumMap is not an
+        // instance of the requested class, and an anonymous subclass must be rejected like other anonymous maps.
+        final Map<Object, Object> subclassInstance = targetClass == EnumMap.class ? null : (Map<Object, Object>) N.newInstance(targetClass);
+
         if (!keyType.javaType().isEnum()) {
             throw new ParsingException("EnumMap requires an enum key type; declare it via the property type, Type.of(\"java.util.EnumMap<K, V>\") " + "or "
                     + configClass.getSimpleName() + ".setMapKeyType (resolved key type: " + keyType.name() + ")");
         }
 
-        return new EnumMap(keyType.javaType());
+        if (subclassInstance == null) {
+            return new EnumMap(keyType.javaType());
+        }
+
+        // A key of another enum would fail in EnumMap.put with a bare ClassCastException; name both enums instead. The
+        // declared key enum is known only when the subclass parameterizes EnumMap with a class (DayMap extends
+        // EnumMap<DayOfWeek, Integer>); otherwise a mismatch still surfaces at the first put.
+        final Class<?> declaredKeyClass = declaredEnumMapKeyClass(targetClass);
+
+        if (declaredKeyClass != null && declaredKeyClass != keyType.javaType()) {
+            throw new ParsingException(
+                    "The key type " + keyType.name() + " does not match the key enum " + declaredKeyClass.getName() + " of " + targetClass.getName());
+        }
+
+        return subclassInstance;
+    }
+
+    /**
+     * The key enum an {@code EnumMap} subclass declares through its {@code EnumMap<K, V>} superclass, if that type
+     * argument is a class.
+     *
+     * @param enumMapSubclass a subclass of {@code EnumMap}
+     * @return the declared key class, or {@code null} if it is a type variable or the superclass is raw
+     */
+    private static Class<?> declaredEnumMapKeyClass(final Class<?> enumMapSubclass) {
+        for (Class<?> cls = enumMapSubclass; cls != null && cls != EnumMap.class; cls = cls.getSuperclass()) {
+            if (cls.getSuperclass() == EnumMap.class) {
+                return cls.getGenericSuperclass() instanceof java.lang.reflect.ParameterizedType pt
+                        && pt.getActualTypeArguments()[0] instanceof Class<?> keyClass ? keyClass : null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Per-class cache of {@link Class#isAnonymousClass()}, which is not an intrinsic; {@link #newReaderMap(Class)} and
+     * {@link #newReaderCollection(Class)} run once per container read. {@code ClassValue}, so a cached application class
+     * stays collectable.
+     */
+    private static final ClassValue<Boolean> anonymousClassPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> type) {
+            return type.isAnonymousClass();
+        }
+    };
+
+    /**
+     * Creates the target map of the StAX readers or JSON's configured map implementation through {@link N#newMap(Class)},
+     * so a factory registered for a named or abstract class is used. An anonymous class is rejected first, by
+     * {@link N#newInstance(Class)}: a registered supplier could otherwise mix initializer entries into the parsed data.
+     *
+     * @param targetClass the requested map class
+     * @return a new map
+     * @throws IllegalArgumentException if {@code targetClass} is an anonymous class or cannot be created
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static Map<Object, Object> newReaderMap(final Class<?> targetClass) throws IllegalArgumentException {
+        // Only anonymous classes are taken away from the factories: a named class may need its registered factory (a
+        // constructor argument, a comparator), and ignoring it would silently change the result.
+        return anonymousClassPool.get(targetClass) ? (Map<Object, Object>) N.newInstance(targetClass) : N.newMap((Class<Map>) targetClass);
+    }
+
+    /**
+     * The collection counterpart of {@link #newReaderMap(Class)}, used by the StAX collection readers and by
+     * {@code XmlParserImpl} for a collection property written as child elements (on both of its backends).
+     *
+     * @param targetClass the requested collection class
+     * @return a new collection
+     * @throws IllegalArgumentException if {@code targetClass} is an anonymous class or cannot be created
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static Collection<Object> newReaderCollection(final Class<?> targetClass) throws IllegalArgumentException {
+        return anonymousClassPool.get(targetClass) ? (Collection<Object>) N.newInstance(targetClass) : N.newCollection((Class<Collection>) targetClass);
+    }
+
+    private static final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> COPY_ON_WRITE_LIST = Tuple.of(cls -> new ArrayList<>(),
+            values -> new CopyOnWriteArrayList<>((Collection<?>) values));
+
+    /**
+     * Builds an exact JDK copy-on-write list in bulk when no caller observes intermediate insertions.
+     * Subclasses retain their own construction and insertion behavior; the exact JDK class cannot have a
+     * registered collection factory. JSON callers must disable this path for existing output or property handlers.
+     */
+    protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> collectionCreatorAndConverter(final Class<?> targetClass,
+            final boolean allowBulkCopyOnWrite) {
+        return allowBulkCopyOnWrite && targetClass == CopyOnWriteArrayList.class ? COPY_ON_WRITE_LIST : mapOfCreatorAndConverterForTargetType.get(targetClass);
     }
 
     /**
@@ -389,8 +487,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <ol>
      *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
      *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
-     *   <li>If no property class remains after the attribute attempt, throw ParsingException;
-     *       failures instantiating a non-null property class propagate unchanged</li>
+     *   <li>If no property class remains after the attribute attempt, throw ParsingException, whose cause is the
+     *       type-attribute failure, if any; failures instantiating a non-null property class propagate unchanged</li>
      * </ol>
      *
      * <p>This enables polymorphic deserialization where the serialized data contains type information
@@ -410,22 +508,31 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     @SuppressWarnings("unchecked")
     protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass)
             throws IllegalArgumentException, RuntimeException, ParsingException {
+        Exception attributeFailure = null;
+
         if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
             try {
                 return (T) N.newInstance(attributeTypeClass);
             } catch (final Exception e) {
+                // One line, no stack trace: the property class is tried next. When there is none, the failure (with its
+                // stack trace) becomes the cause of the ParsingException below.
+                attributeFailure = e;
+
                 if (logger.isWarnEnabled()) {
-                    logger.warn("Failed to new instance by type attribute: " + attributeTypeClass.getCanonicalName(), e);
+                    logger.warn("Failed to new instance by type attribute: " + attributeTypeClass.getName() + " - " + e);
                 }
             }
         }
 
         if (propClass != null) {
+            // Not addSuppressed(attributeFailure) here: a constructor may throw a shared exception instance, which would
+            // then grow with every failed read (or suppress itself).
             return (T) N.newInstance(propClass);
         }
 
         throw new ParsingException(
-                "Failed to create property instance: no property class is available and the type attribute is missing or unusable: " + attributeTypeClass);
+                "Failed to create property instance: no property class is available and the type attribute is missing or unusable: " + attributeTypeClass,
+                attributeFailure);
     }
 
     /**
@@ -467,7 +574,45 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         }
     }
 
-    private static final Map<Class<?>, Boolean> uninstantiableContainerClassPool = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final ClassValue<ContainerInstantiation> uninstantiableContainerClassPool = new ClassValue<>() {
+        @Override
+        protected ContainerInstantiation computeValue(final Class<?> type) {
+            return new ContainerInstantiation();
+        }
+    };
+
+    // ClassValue may compute competing values, so keep the constructor probe outside computeValue: only the
+    // installed holder performs it, once. No Class reference is retained in the holder. Reads after the first
+    // probe are lock-free, and a recursively re-entered constructor retains computeIfAbsent's failure behavior.
+    private static final class ContainerInstantiation {
+        private volatile Boolean failed;
+        private boolean probing;
+
+        boolean failed(final Class<?> type) {
+            final Boolean result = failed;
+            if (result != null) {
+                return result;
+            }
+            synchronized (this) {
+                if (failed != null) {
+                    return failed;
+                }
+                if (probing) {
+                    throw new IllegalStateException("Recursive update");
+                }
+                probing = true;
+                try {
+                    N.newInstance(type);
+                    failed = false;
+                } catch (final Exception e) { // NOSONAR
+                    failed = true;
+                } finally {
+                    probing = false;
+                }
+                return failed;
+            }
+        }
+    }
 
     /**
      * Returns whether {@code targetClass} is a concrete {@code Map}/{@code Collection} implementation that the readers
@@ -480,19 +625,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return false;
         }
 
-        return uninstantiableContainerClassPool.computeIfAbsent(targetClass, c -> {
-            try {
-                N.newInstance(c);
-                return false;
-            } catch (final Exception e) { // NOSONAR
-                // Ask exactly the question the reader will ask, because a missing no-argument constructor
-                // (ImmutableMap, List.of(..), Arrays.asList(..)) is only one of the ways this fails: the
-                // java.util.Collections empty/unmodifiable classes DO declare one, but it is private in a package
-                // java.base does not open, so the reflective call fails there instead. One throwaway instance per
-                // container class, then the answer is cached for the life of the JVM.
-                return true;
-            }
-        });
+        // Ask exactly the question the reader will ask, including inaccessible or throwing constructors.
+        // Retain the answer for this class's lifetime without pinning its class loader in a global map.
+        return uninstantiableContainerClassPool.get(targetClass).failed(targetClass);
     }
 
     /**

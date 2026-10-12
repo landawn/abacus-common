@@ -74,7 +74,7 @@ public class NReview20260925Test extends com.landawn.abacus.TestBase {
         final List<Integer> backing5 = new ArrayList<>(Arrays.asList(1, 2, 3));
         assertFalse(N.removeAll(Lists.transform(backing5, i -> i * 100), new HashSet<>(Arrays.asList(7, 8))));
         assertEquals(Arrays.asList(1, 2, 3), backing5);
-        assertFalse(N.removeAll(backing5, new HashSet<Integer>()));
+        assertFalse(N.removeAll(backing5, new HashSet<>()));
         assertFalse(N.removeAll(backing5, (Set<Integer>) null));
 
         // the identity-sibling rule of a Set argument still holds for a List receiver (phase 1 decides per position)
@@ -249,8 +249,8 @@ public class NReview20260925Test extends com.landawn.abacus.TestBase {
                 (short) 3, (byte) 5);
         assertEquals(3.7, N.averageLong(longs), 1e-12);
         assertEquals(3.7, N.averageLong(longs.toArray(new Number[0])), 1e-12);
-        assertEquals((double) Long.MAX_VALUE, N.averageLong(Arrays.<Number> asList(MutableLong.of(Long.MAX_VALUE))));
-        assertEquals((double) Long.MIN_VALUE, N.averageLong(new Number[] { new AtomicLong(Long.MIN_VALUE) }));
+        assertEquals(Long.MAX_VALUE, N.averageLong(Arrays.<Number> asList(MutableLong.of(Long.MAX_VALUE))));
+        assertEquals(Long.MIN_VALUE, N.averageLong(new Number[] { new AtomicLong(Long.MIN_VALUE) }));
         assertEquals(1.0, N.averageLong(Arrays.<Number> asList(MutableDouble.of(1.7), null, MutableLong.of(2))));
         assertThrows(ArithmeticException.class, () -> N.averageLong(Arrays.<Number> asList(MutableDouble.of(1e19))));
 

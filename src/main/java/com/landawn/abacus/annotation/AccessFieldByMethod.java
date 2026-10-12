@@ -30,6 +30,18 @@ import java.lang.annotation.Target;
  * and writes are routed through the corresponding accessor methods, even when the field would
  * otherwise be directly accessible.
  *
+ * <p>Without this annotation a property that has an accessible backing field is read and written
+ * through that field, and its getter/setter is used only when there is no usable field. This is the
+ * same whether or not the optional reflectasm fast path is available: the fast path never prefers a
+ * getter/setter over the field, so a bean behaves the same in either mode.</p>
+ *
+ * <p>For a mutable bean, a missing setter does not permit a fallback write to an annotated field. Such a
+ * property is read-only unless supported XML binding can populate a collection or map returned by its getter.
+ * Such a property is serialize-only: deserialization skips its value. This also holds when its field carries a
+ * {@code @JsonXmlField} that leaves the direction at {@code BOTH} (for example one used only to rename the field);
+ * only an explicit {@code DESERIALIZE_ONLY} makes deserialization reject the write.
+ * Immutable constructor arguments and builder methods retain their construction behavior.</p>
+ *
  * <p>This is useful when a getter/setter performs work that must not be bypassed, such as:</p>
  * <ul>
  *   <li>Lazy initialization triggered on first read.</li>

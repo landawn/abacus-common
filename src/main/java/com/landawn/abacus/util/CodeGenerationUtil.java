@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -1367,12 +1368,21 @@ public final class CodeGenerationUtil {
                             checkGeneratedFieldName(newPropName, cs.propNameConverter);
 
                             final Method propGetMethod = Beans.getPropGetter(cls, propName);
+                            final Class<?> propClass;
 
-                            if (propGetMethod == null) {
-                                continue;
+                            if (propGetMethod != null) {
+                                propClass = propGetMethod.getReturnType();
+                            } else {
+                                // Public field-only properties are already included in the ordinary table.
+                                // They must also reach configured functions, using the field's declared type.
+                                final Field propField = Beans.getPropField(cls, propName);
+                                if (propField == null) {
+                                    continue;
+                                }
+                                propClass = propField.getType();
                             }
 
-                            funcPropName = propFunc.apply(cls, propGetMethod.getReturnType(), newPropName);
+                            funcPropName = propFunc.apply(cls, propClass, newPropName);
 
                             if (Strings.isEmpty(funcPropName)) {
                                 continue;
@@ -1595,7 +1605,8 @@ public final class CodeGenerationUtil {
          * Function definitions used when {@link #generateFunctionPropName} is enabled.
          *
          * <p>Map key is a non-empty constant prefix (for example {@code min}); function input is
-         * {@code (entityClass, propertyType, convertedPropertyName)}; returning {@code null} or
+         * {@code (entityClass, propertyType, convertedPropertyName)}. The property type comes from its
+         * getter, or its backing field when no getter exists. Returning {@code null} or
          * empty skips the property. Each key, when combined with an underscore and a converted
          * property name, must form a valid Java identifier.
          */

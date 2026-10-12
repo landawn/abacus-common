@@ -104,6 +104,7 @@ public class IntSupplierTest extends TestBase {
             IntSupplier.RANDOM.getAsInt();
         });
     }
+
     // ---- perf review 2026-09-26 G115 begin ----
     // G115-01: the *Supplier.RANDOM constants call ThreadLocalRandom.current() per draw - safe and varying from several threads.
     @org.junit.jupiter.api.Test

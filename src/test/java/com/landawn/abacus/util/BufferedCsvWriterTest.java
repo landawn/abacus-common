@@ -49,9 +49,10 @@ public class BufferedCsvWriterTest extends TestBase {
     }
 
     @Test
-    public void testReplacementChars_LineParaSeparatorsRemainLiteral() {
-        assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[0x2028]);
-        assertNull(BufferedCsvWriter.REPLACEMENT_CHARS[0x2029]);
+    public void testReplacementChars_LineParaSeparatorsRemainLiteral() throws IOException {
+        BufferedCsvWriter writer = new BufferedCsvWriter();
+        writer.writeCharacter("\u2028\u2029");
+        assertEquals("\u2028\u2029", writer.toString());
     }
 
     @Test

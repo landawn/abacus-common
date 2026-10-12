@@ -107,10 +107,12 @@ public class CodegenTemporaryFileTest extends TestBase {
         final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         while (!staged.await(20, TimeUnit.MILLISECONDS)) {
             // Surface reflection or worker failures promptly instead of hiding them behind a latch timeout.
-            if (first.isDone())
+            if (first.isDone()) {
                 first.get();
-            if (second.isDone())
+            }
+            if (second.isDone()) {
                 second.get();
+            }
             assertTrue(System.nanoTime() < deadline, "Writers did not reach the publication gate");
         }
     }

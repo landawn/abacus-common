@@ -79,6 +79,10 @@ import com.landawn.abacus.util.function.TriFunction;
  */
 class IteratorStream<T> extends AbstractStream<T> {
 
+    // Keep iterator state simple for ordinary, short-lived object pipelines. Do not add
+    // per-element reference clearing, eager child detachment, or field-to-local rewrites
+    // solely for earlier GC; resource ownership and close/cancellation cleanup still apply.
+
     /**
      * The backing element source. A source that is already an {@link ObjIteratorEx} is used as-is;
      * any other {@link Iterator} is wrapped. It is consumed lazily, so it must not be advanced
@@ -790,17 +794,36 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<R> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<R> iter = new SequentialFlatMapObjIterator<>() {
             private Iterator<? extends R> cur = null;
-            private Stream<? extends R> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final Stream<? extends R> s = mapper.apply(elements.next());
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -811,7 +834,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -825,17 +848,12 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Stream<? extends R> tmp = s;
-                    s = null;
-                    cur = null;
-                    tmp.close();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -921,15 +939,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final CharIteratorEx iter = new CharIteratorEx() {
             private CharIterator cur = null;
-            private CharStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final CharStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -940,7 +978,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -956,15 +994,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1022,15 +1060,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final ByteIteratorEx iter = new ByteIteratorEx() {
             private ByteIterator cur = null;
-            private ByteStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final ByteStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1041,7 +1099,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1057,15 +1115,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1123,15 +1181,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final ShortIteratorEx iter = new ShortIteratorEx() {
             private ShortIterator cur = null;
-            private ShortStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final ShortStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1142,7 +1220,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1158,15 +1236,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1224,15 +1302,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final IntIteratorEx iter = new IntIteratorEx() {
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final IntStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1243,7 +1341,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1259,15 +1357,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1325,15 +1423,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final LongIteratorEx iter = new LongIteratorEx() {
             private LongIterator cur = null;
-            private LongStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final LongStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1344,7 +1462,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1360,15 +1478,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1426,15 +1544,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final FloatIteratorEx iter = new FloatIteratorEx() {
             private FloatIterator cur = null;
-            private FloatStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final FloatStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1445,7 +1583,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1461,15 +1599,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1527,15 +1665,35 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         final DoubleIteratorEx iter = new DoubleIteratorEx() {
             private DoubleIterator cur = null;
-            private DoubleStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (elements.hasNext()) {
-                        s = mapper.apply(elements.next());
+                        final DoubleStream s = mapper.apply(elements.next());
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -1546,7 +1704,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -1562,15 +1720,15 @@ class IteratorStream<T> extends AbstractStream<T> {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -1719,9 +1877,19 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @Override
@@ -1832,9 +2000,19 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private T next = (T) NONE;
@@ -2046,9 +2224,19 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             /**
@@ -3153,9 +3341,19 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         checkArgNotNull(collector, cs.collector);
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         try {
             final Object container = supplier.get();
@@ -3819,7 +4017,7 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         checkArgNotNull(supplier, cs.supplier);
 
-        final Holder<Stream<T>> holder = new Holder<>();
+        final MappedStreamHolder holder = new MappedStreamHolder();
 
         return newStream(new ObjIteratorEx<T>() { //NOSONAR
             private ObjIteratorEx<? extends T> iter;
@@ -3873,15 +4071,18 @@ class IteratorStream<T> extends AbstractStream<T> {
                         final Stream<T> s = supplier.get();
                         try {
                             iter = s == null ? ObjIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = ObjIteratorEx.empty();
+                        }
                     }
                 }
             }
-        }, false, null).onClose(() -> close(holder));
+        }, false, null).onClose(holder::close);
     }
 
     @Override

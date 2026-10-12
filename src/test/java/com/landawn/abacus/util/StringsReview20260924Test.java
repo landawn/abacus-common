@@ -287,8 +287,8 @@ public class StringsReview20260924Test extends TestBase {
 
         assertEquals("[a=1, b=2]", Strings.joinEntries(iterable, ", ", "=", "[", "]", false, Map.Entry::getKey, Map.Entry::getValue));
         assertEquals("[a=1, b=2]", Strings.joinEntries(entries, ", ", "=", "[", "]", false, Map.Entry::getKey, Map.Entry::getValue));
-        assertEquals("[]", Strings.joinEntries(Collections.<Map.Entry<String, Integer>> emptyList(), ", ", "=", "[", "]", false, Map.Entry::getKey,
-                Map.Entry::getValue));
+        assertEquals("[]",
+                Strings.joinEntries(Collections.<Map.Entry<String, Integer>> emptyList(), ", ", "=", "[", "]", false, Map.Entry::getKey, Map.Entry::getValue));
     }
 
     // C-036: the three StrUtil.substringBetweenFirstAndLast wrappers agree with the Strings originals
@@ -382,8 +382,8 @@ public class StringsReview20260924Test extends TestBase {
     @Test
     public void testC023_randomizedIgnoreCaseAgainstRegionMatches() {
         final Random rnd = new Random(23);
-        final String[] pieces = { "a", "B", "s", "S", "\u017F", "K", "\u212A", "i", "I", "\u0130", "\u0131", "\u00DF", "\u03C3", "\u03C2", "\u03A3",
-                EMOJI, "\uD801\uDC00", "\uD801\uDC28", "\uD800", "\uDC00" };
+        final String[] pieces = { "a", "B", "s", "S", "\u017F", "K", "\u212A", "i", "I", "\u0130", "\u0131", "\u00DF", "\u03C3", "\u03C2", "\u03A3", EMOJI,
+                "\uD801\uDC00", "\uD801\uDC28", "\uD800", "\uDC00" };
 
         for (int round = 0; round < 3000; round++) {
             final StringBuilder sb = new StringBuilder();

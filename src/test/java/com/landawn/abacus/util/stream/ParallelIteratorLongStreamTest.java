@@ -160,8 +160,9 @@ public class ParallelIteratorLongStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(l -> {
-                if (l == 5L)
+                if (l == 5L) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -169,8 +170,9 @@ public class ParallelIteratorLongStreamTest extends TestBase {
         parallelStream = createLongStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(l -> {
-                if (l == 7L)
+                if (l == 7L) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return l;
             }).toArray();
         });

@@ -891,22 +891,22 @@ public class AbstractShortStreamTest extends TestBase {
     @Test
     public void testReversedRotatedReverseSorted_CountExhaustsIterator() {
         // reversed(): count() must consume all remaining elements
-        ShortIteratorEx revIter = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        ShortIteratorEx revIter = createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         assertEquals(5L, revIter.count());
         assertFalse(revIter.hasNext());
 
         // rotated(): count() must consume all remaining elements
-        ShortIteratorEx rotIter = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        ShortIteratorEx rotIter = createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
         assertEquals(5L, rotIter.count());
         assertFalse(rotIter.hasNext());
 
         // reverseSorted(): count() must consume all remaining elements
-        ShortIteratorEx rsIter = (ShortIteratorEx) createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        ShortIteratorEx rsIter = createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
         assertEquals(5L, rsIter.count());
         assertFalse(rsIter.hasNext());
 
         // After consuming a few elements first, count() returns the remaining count and exhausts the iterator
-        ShortIteratorEx revIter2 = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        ShortIteratorEx revIter2 = createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         revIter2.nextShort();
         revIter2.nextShort();
         assertEquals(3L, revIter2.count());
@@ -915,18 +915,18 @@ public class AbstractShortStreamTest extends TestBase {
 
     @Test
     public void testReversedRotatedReverseSorted_ToArrayExhaustsIterator() {
-        ShortIteratorEx reversed = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
+        ShortIteratorEx reversed = createShortStream(new short[] { 1, 2, 3, 4, 5 }).reversed().iteratorEx();
         assertEquals(5, reversed.toArray().length);
         assertFalse(reversed.hasNext());
         assertEquals(0, reversed.toArray().length);
 
-        ShortIteratorEx rotated = (ShortIteratorEx) createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
+        ShortIteratorEx rotated = createShortStream(new short[] { 1, 2, 3, 4, 5 }).rotated(2).iteratorEx();
         rotated.nextShort();
         assertEquals(4, rotated.toArray().length);
         assertFalse(rotated.hasNext());
         assertEquals(0, rotated.toArray().length);
 
-        ShortIteratorEx reverseSorted = (ShortIteratorEx) createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
+        ShortIteratorEx reverseSorted = createShortStream(new short[] { 3, 1, 4, 1, 5 }).reverseSorted().iteratorEx();
         reverseSorted.nextShort();
         reverseSorted.nextShort();
         assertEquals(3, reverseSorted.toArray().length);
@@ -1001,11 +1001,12 @@ public class AbstractShortStreamTest extends TestBase {
 
                     // full toArray()
                     assertArrayEquals(expected,
-                            (source == 0 ? ShortStream.of(backing, from, from + len) : ShortStream.of(ShortIterator.of(copy))).rotated(distance).toArray(), msg);
+                            (source == 0 ? ShortStream.of(backing, from, from + len) : ShortStream.of(ShortIterator.of(copy))).rotated(distance).toArray(),
+                            msg);
 
                     // nextShort() for the first k elements, then toArray(); advance(k), then toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final ShortIteratorEx byNext = (ShortIteratorEx) (source == 0 ? ShortStream.of(backing, from, from + len)
+                        final ShortIteratorEx byNext = (source == 0 ? ShortStream.of(backing, from, from + len)
                                 : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
@@ -1015,7 +1016,7 @@ public class AbstractShortStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         assertFalse(byNext.hasNext(), msg);
 
-                        final ShortIteratorEx byAdvance = (ShortIteratorEx) (source == 0 ? ShortStream.of(backing, from, from + len)
+                        final ShortIteratorEx byAdvance = (source == 0 ? ShortStream.of(backing, from, from + len)
                                 : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);

@@ -545,7 +545,7 @@ public class ObjIteratorTest extends TestBase {
         assertTrue(removed.get(), "an ObjIterator subclass can override remove()");
 
         removed.set(false);
-        assertThrows(UnsupportedOperationException.class, () -> ObjIterator.of((Iterator<String>) mutating).remove());
+        assertThrows(UnsupportedOperationException.class, () -> ObjIterator.of(mutating).remove());
         assertFalse(removed.get(), "of(Iterator) must not let the subclass's remove() through");
     }
 }

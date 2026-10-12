@@ -921,4 +921,104 @@ public class SingleValueTypeTest extends TestBase {
         assertTrue(e.getMessage().contains("must be static"), e.getMessage());
     }
     // ---- bug review 2026-09-27 verify G118 end ----
+
+    // ---- bug review 2026-09-30 G016 begin ----
+    // Private on purpose: its public factory/accessor are unreachable reflectively from other packages without setAccessible.
+    private static class G016PrivateId {
+        private String value;
+
+        private G016PrivateId(final String value) {
+            this.value = value;
+        }
+
+        public static G016PrivateId of(final String value) {
+            return new G016PrivateId(value);
+        }
+
+        public String value() {
+            return value;
+        }
+    }
+
+    // G016-01: auto-detected creator/accessor of a non-public class threw IllegalAccessException on stringOf/valueOf/toJson.
+    @Test
+    public void testAutoDetectedValue_nonPublicClass() {
+        final Type<G016PrivateId> type = Type.of(G016PrivateId.class);
+        assertFalse(type.isObject());
+        assertEquals("abc", type.stringOf(G016PrivateId.of("abc")));
+        assertEquals("xyz", type.valueOf("xyz").value());
+        assertEquals("[\"abc\"]", N.toJson(N.asList(G016PrivateId.of("abc"))).replace(" ", ""));
+    }
+    // ---- bug review 2026-09-30 G016 end ----
+
+    // ---- bug review 2026-09-30 verify G116 begin ----
+    // Private on purpose: the auto-detected creator is its public constructor (no static factory). The constructor takes
+    // a CharSequence so that the class is not classified as an all-arguments-constructor bean.
+    private static class G116PrivateCtorId {
+        private String value;
+
+        public G116PrivateCtorId(final CharSequence value) {
+            this.value = value.toString();
+        }
+
+        public String value() {
+            return value;
+        }
+    }
+
+    // G016-01: the constructor-creator branch of a non-public auto-detected single-value class (stringOf/valueOf/JSON round trip).
+    @Test
+    public void testAutoDetectedValue_nonPublicClassWithPublicConstructor() {
+        final Type<G116PrivateCtorId> type = Type.of(G116PrivateCtorId.class);
+        assertFalse(type.isObject());
+        assertEquals("abc", type.stringOf(new G116PrivateCtorId("abc")));
+        assertEquals("xyz", type.valueOf("xyz").value());
+        assertEquals("q", N.fromJson("[\"q\"]", Type.ofList(G116PrivateCtorId.class)).get(0).value());
+    }
+    // ---- bug review 2026-09-30 verify G116 end ----
+
+    // ---- bug review 2026-10-02 G016 begin ----
+    // G016-01: object mode wrote a map/collection under a JsonSerConfig as raw JSON into an XML or CSV writer (unescaped
+    // '<', '&', '"'), while List<Object>, Object[] and Tuple slots escape that text for the target format.
+    @Test
+    public void testSerializeTo_objectModeStructuredValueOnNonJsonWriterIsEscaped() throws IOException {
+        final Type<Object> type = Type.of(Object.class);
+        final java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("a", "<b&c>");
+        final java.util.List<Object> list = java.util.Arrays.asList(1, "x\"y");
+        final JsonSerConfig jsc = JsonSerConfig.create();
+
+        final com.landawn.abacus.util.BufferedXmlWriter xmlWriter = Objectory.createBufferedXmlWriter();
+        try {
+            type.serializeTo(xmlWriter, map, jsc);
+            assertEquals("{&quot;a&quot;: &quot;&lt;b&amp;c&gt;&quot;}", xmlWriter.toString());
+        } finally {
+            Objectory.recycle(xmlWriter);
+        }
+
+        final com.landawn.abacus.util.BufferedCsvWriter csvWriter = Objectory.createBufferedCsvWriter();
+        try {
+            type.serializeTo(csvWriter, list, jsc);
+            // same text as the List<Object> handler writes for the same values on the same writer
+            final com.landawn.abacus.util.BufferedCsvWriter expected = Objectory.createBufferedCsvWriter();
+            try {
+                Type.<Object> of("List<Object>").serializeTo(expected, list, jsc);
+                assertEquals(expected.toString(), csvWriter.toString());
+            } finally {
+                Objectory.recycle(expected);
+            }
+        } finally {
+            Objectory.recycle(csvWriter);
+        }
+
+        // unchanged: a JSON writer still receives the structural JSON directly
+        final BufferedJsonWriter jsonWriter = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(jsonWriter, map, jsc);
+            assertEquals("{\"a\": \"<b&c>\"}", jsonWriter.toString());
+        } finally {
+            Objectory.recycle(jsonWriter);
+        }
+    }
+    // ---- bug review 2026-10-02 G016 end ----
 }

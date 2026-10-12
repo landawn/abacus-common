@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
@@ -57,12 +58,12 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.ToByteFunction;
 import com.landawn.abacus.util.function.ToCharFunction;
 import com.landawn.abacus.util.function.ToFloatFunction;
 import com.landawn.abacus.util.function.ToShortFunction;
 import com.landawn.abacus.util.function.TriFunction;
+import com.landawn.abacus.util.u.Optional;
 
 /**
  * A parallel implementation of Stream backed by an array that enables concurrent processing
@@ -745,14 +746,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Character>> iters = new ArrayList<>(threadNum);
+        final List<CharIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new CharIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -762,7 +763,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() throws NoSuchElementException {
+                    public char nextChar() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -775,7 +776,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new CharIterator() {
 
                     private Object next = NONE;
 
@@ -793,12 +794,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() throws NoSuchElementException {
+                    public char nextChar() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Character result = mapper.applyAsChar((T) next);
+                        final char result = mapper.applyAsChar((T) next);
                         next = NONE;
                         return result;
                     }
@@ -807,7 +808,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorCharStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorCharStream(ParallelPrimitiveBuffer.concatChar(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
@@ -832,14 +833,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Byte>> iters = new ArrayList<>(threadNum);
+        final List<ByteIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ByteIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -849,7 +850,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() throws NoSuchElementException {
+                    public byte nextByte() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -862,7 +863,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ByteIterator() {
 
                     private Object next = NONE;
 
@@ -880,12 +881,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() throws NoSuchElementException {
+                    public byte nextByte() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Byte result = mapper.applyAsByte((T) next);
+                        final byte result = mapper.applyAsByte((T) next);
                         next = NONE;
                         return result;
                     }
@@ -894,7 +895,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorByteStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
@@ -919,14 +920,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Short>> iters = new ArrayList<>(threadNum);
+        final List<ShortIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ShortIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -936,7 +937,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() throws NoSuchElementException {
+                    public short nextShort() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -949,7 +950,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ShortIterator() {
 
                     private Object next = NONE;
 
@@ -967,12 +968,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() throws NoSuchElementException {
+                    public short nextShort() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Short result = mapper.applyAsShort((T) next);
+                        final short result = mapper.applyAsShort((T) next);
                         next = NONE;
                         return result;
                     }
@@ -981,8 +982,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorShortStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorShortStream(ParallelPrimitiveBuffer.concatShort(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1006,14 +1007,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Integer>> iters = new ArrayList<>(threadNum);
+        final List<IntIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new IntIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1023,7 +1024,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() throws NoSuchElementException {
+                    public int nextInt() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1036,7 +1037,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new IntIterator() {
 
                     private Object next = NONE;
 
@@ -1054,12 +1055,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() throws NoSuchElementException {
+                    public int nextInt() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Integer result = mapper.applyAsInt((T) next);
+                        final int result = mapper.applyAsInt((T) next);
                         next = NONE;
                         return result;
                     }
@@ -1068,7 +1069,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorIntStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
@@ -1093,14 +1094,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Long>> iters = new ArrayList<>(threadNum);
+        final List<LongIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new LongIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1110,7 +1111,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() throws NoSuchElementException {
+                    public long nextLong() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1123,7 +1124,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new LongIterator() {
 
                     private Object next = NONE;
 
@@ -1141,12 +1142,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() throws NoSuchElementException {
+                    public long nextLong() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Long result = mapper.applyAsLong((T) next);
+                        final long result = mapper.applyAsLong((T) next);
                         next = NONE;
                         return result;
                     }
@@ -1155,7 +1156,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorLongStream(ParallelPrimitiveBuffer.concatLong(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
@@ -1180,14 +1181,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Float>> iters = new ArrayList<>(threadNum);
+        final List<FloatIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new FloatIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1197,7 +1198,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() throws NoSuchElementException {
+                    public float nextFloat() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1210,7 +1211,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new FloatIterator() {
 
                     private Object next = NONE;
 
@@ -1228,12 +1229,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() throws NoSuchElementException {
+                    public float nextFloat() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Float result = mapper.applyAsFloat((T) next);
+                        final float result = mapper.applyAsFloat((T) next);
                         next = NONE;
                         return result;
                     }
@@ -1242,8 +1243,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorFloatStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1267,14 +1268,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Double>> iters = new ArrayList<>(threadNum);
+        final List<DoubleIterator> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new DoubleIterator() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
@@ -1284,7 +1285,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() throws NoSuchElementException {
+                    public double nextDouble() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1297,7 +1298,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new DoubleIterator() {
 
                     private Object next = NONE;
 
@@ -1315,12 +1316,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() throws NoSuchElementException {
+                    public double nextDouble() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final Double result = mapper.applyAsDouble((T) next);
+                        final double result = mapper.applyAsDouble((T) next);
                         next = NONE;
                         return result;
                     }
@@ -1329,8 +1330,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
+        return new ParallelIteratorDoubleStream(ParallelPrimitiveBuffer.concatDouble(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -1666,14 +1667,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Character>> iters = new ArrayList<>(threadNum);
+        final List<CharIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new CharIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private CharIterator cur = null;
@@ -1708,7 +1709,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() throws NoSuchElementException {
+                    public char nextChar() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1743,7 +1744,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new CharIteratorEx() {
 
                     private T next = null;
                     private CharIterator cur = null;
@@ -1783,7 +1784,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() throws NoSuchElementException {
+                    public char nextChar() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1818,7 +1819,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorCharStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorCharStream(ParallelPrimitiveBuffer.concatChar(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
@@ -1849,14 +1850,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Byte>> iters = new ArrayList<>(threadNum);
+        final List<ByteIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ByteIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private ByteIterator cur = null;
@@ -1891,7 +1892,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() throws NoSuchElementException {
+                    public byte nextByte() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1926,7 +1927,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ByteIteratorEx() {
 
                     private T next = null;
                     private ByteIterator cur = null;
@@ -1966,7 +1967,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() throws NoSuchElementException {
+                    public byte nextByte() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2001,7 +2002,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorByteStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
@@ -2032,14 +2033,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Short>> iters = new ArrayList<>(threadNum);
+        final List<ShortIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ShortIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private ShortIterator cur = null;
@@ -2074,7 +2075,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() throws NoSuchElementException {
+                    public short nextShort() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2109,7 +2110,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new ShortIteratorEx() {
 
                     private T next = null;
                     private ShortIterator cur = null;
@@ -2149,7 +2150,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() throws NoSuchElementException {
+                    public short nextShort() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2184,8 +2185,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorShortStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+        return new ParallelIteratorShortStream(ParallelPrimitiveBuffer.concatShort(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -2215,14 +2216,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Integer>> iters = new ArrayList<>(threadNum);
+        final List<IntIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new IntIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private IntIterator cur = null;
@@ -2257,7 +2258,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() throws NoSuchElementException {
+                    public int nextInt() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2292,7 +2293,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new IntIteratorEx() {
 
                     private T next = null;
                     private IntIterator cur = null;
@@ -2332,7 +2333,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() throws NoSuchElementException {
+                    public int nextInt() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2367,7 +2368,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorIntStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
@@ -2398,14 +2399,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Long>> iters = new ArrayList<>(threadNum);
+        final List<LongIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new LongIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private LongIterator cur = null;
@@ -2440,7 +2441,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() throws NoSuchElementException {
+                    public long nextLong() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2475,7 +2476,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new LongIteratorEx() {
 
                     private T next = null;
                     private LongIterator cur = null;
@@ -2515,7 +2516,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() throws NoSuchElementException {
+                    public long nextLong() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2550,7 +2551,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorLongStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+        return new ParallelIteratorLongStream(ParallelPrimitiveBuffer.concatLong(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
                 splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
@@ -2581,14 +2582,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Float>> iters = new ArrayList<>(threadNum);
+        final List<FloatIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new FloatIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private FloatIterator cur = null;
@@ -2623,7 +2624,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() throws NoSuchElementException {
+                    public float nextFloat() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2658,7 +2659,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new FloatIteratorEx() {
 
                     private T next = null;
                     private FloatIterator cur = null;
@@ -2698,7 +2699,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() throws NoSuchElementException {
+                    public float nextFloat() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2733,8 +2734,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorFloatStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+        return new ParallelIteratorFloatStream(ParallelPrimitiveBuffer.concatFloat(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -2764,14 +2765,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
-        final List<ObjIteratorEx<Double>> iters = new ArrayList<>(threadNum);
+        final List<DoubleIteratorEx> iters = new ArrayList<>(threadNum);
 
         if (splitStrategy == SplitStrategy.ARRAY) {
             final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
 
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new DoubleIteratorEx() {
                     private int cursor = fromIndex + sliceIndex * sliceSize;
                     private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
                     private DoubleIterator cur = null;
@@ -2806,7 +2807,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() throws NoSuchElementException {
+                    public double nextDouble() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2841,7 +2842,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             final MutableInt cursor = MutableInt.of(fromIndex);
 
             for (int i = 0; i < threadNum; i++) {
-                iters.add(new ObjIteratorEx<>() {
+                iters.add(new DoubleIteratorEx() {
 
                     private T next = null;
                     private DoubleIterator cur = null;
@@ -2881,7 +2882,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() throws NoSuchElementException {
+                    public double nextDouble() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2916,8 +2917,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
 
-        return new ParallelIteratorDoubleStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
+        return new ParallelIteratorDoubleStream(ParallelPrimitiveBuffer.concatDouble(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
@@ -3667,10 +3668,21 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         //    res.putAll(collect(Collectors.groupingByConcurrent(keyMapper, downstream)));
         //    return res;
 
-        final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
-        final BiConsumer<Object, ? super V> downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
-        final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
-        final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
+        final Supplier<Object> downstreamSupplier;
+        final BiConsumer<Object, ? super V> downstreamAccumulator;
+        final BinaryOperator<Object> downstreamCombiner;
+        final Function<Object, D> downstreamFinisher;
+
+        // Accessor failures happen before workers exist, so close the source here.
+        try {
+            downstreamSupplier = (Supplier<Object>) downstream.supplier();
+            downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
+            downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
+            downstreamFinisher = (Function<Object, D>) downstream.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<ContinuableFuture<Map<K, Object>>> futureList = new ArrayList<>(threadNum);
@@ -3838,10 +3850,21 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             return super.flatGroupTo(flatKeyExtractor, valueMapper, downstream, mapFactory);
         }
 
-        final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
-        final BiConsumer<Object, ? super V> downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
-        final BinaryOperator<Object> downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
-        final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
+        final Supplier<Object> downstreamSupplier;
+        final BiConsumer<Object, ? super V> downstreamAccumulator;
+        final BinaryOperator<Object> downstreamCombiner;
+        final Function<Object, D> downstreamFinisher;
+
+        // Accessor failures happen before workers exist, so close the source here.
+        try {
+            downstreamSupplier = (Supplier<Object>) downstream.supplier();
+            downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
+            downstreamCombiner = (BinaryOperator<Object>) downstream.combiner();
+            downstreamFinisher = (Function<Object, D>) downstream.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<ContinuableFuture<Map<K, Object>>> futureList = new ArrayList<>(threadNum);
@@ -4454,14 +4477,26 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         //        return sequential().collect(collector);
         //    }
 
-        final boolean isConcurrentCollector = N.notEmpty(collector.characteristics())
-                && collector.characteristics().contains(Collector.Characteristics.CONCURRENT)
-                && collector.characteristics().contains(Collector.Characteristics.UNORDERED);
+        final boolean isConcurrentCollector;
 
-        final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
-        final BiConsumer<Object, ? super T> accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
-        final BinaryOperator<Object> combiner = (BinaryOperator<Object>) collector.combiner();
-        final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
+        final Supplier<Object> supplier;
+        final BiConsumer<Object, ? super T> accumulator;
+        final BinaryOperator<Object> combiner;
+        final Function<Object, R> finisher;
+
+        // Collector accessors are user code too; a setup failure must release the source.
+        try {
+            final Set<Collector.Characteristics> characteristics = collector.characteristics();
+            isConcurrentCollector = N.notEmpty(characteristics) && characteristics.contains(Collector.Characteristics.CONCURRENT)
+                    && characteristics.contains(Collector.Characteristics.UNORDERED);
+            supplier = (Supplier<Object>) collector.supplier();
+            accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
+            combiner = (BinaryOperator<Object>) collector.combiner();
+            finisher = (Function<Object, R>) collector.finisher();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<ContinuableFuture<Object>> futureList = new ArrayList<>(threadNum);
@@ -4537,7 +4572,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     /**
      * Returns the minimum element of this stream according to the provided comparator, determined in
      * parallel. If the stream is already sorted with the same comparator, the first element is returned
-     * directly without parallel scanning.
+     * directly without parallel scanning. Otherwise, which of several minimal elements is returned is unspecified.
      *
      * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
@@ -5077,9 +5112,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
-
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        // Construct the Optional before cleanup: its null-result failure must take precedence over close failures.
+        return completeAndFinishResult(futureList, eHolder, () -> resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right()),
+                this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -5179,9 +5214,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
-
-        return resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value());
+        // Construct the Optional before cleanup: its null-result failure must take precedence over close failures.
+        return completeAndFinishResult(futureList, eHolder, () -> resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value()), this,
+                asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**
@@ -5286,9 +5321,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             }
         }
 
-        completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
-
-        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
+        // Construct the Optional before cleanup: its null-result failure must take precedence over close failures.
+        return completeAndFinishResult(futureList, eHolder, () -> resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right()),
+                this, asyncExecutor, asyncExecutorToUse, (E) null);
     }
 
     /**

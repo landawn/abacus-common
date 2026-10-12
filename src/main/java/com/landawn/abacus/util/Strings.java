@@ -5116,7 +5116,12 @@ public final class Strings {
             return str;
         }
 
-        if (isAsciiString(str)) {
+        final int asciiForm = asciiDelimitedCaseForm(str, separator, toUpperCase);
+
+        if (asciiForm > 0) {
+            // ASCII input already in the target form (for example "id" or "first_name" for snake_case) is returned as is.
+            return str;
+        } else if (asciiForm == 0) {
             return toDelimitedCaseAscii(str, separator, toUpperCase);
         }
 
@@ -5216,6 +5221,62 @@ public final class Strings {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Classifies the non-empty {@code str} for {@link #toDelimitedCase(String, char, boolean)} in one pass: negative if it
+     * contains a non-ASCII character, positive if it is ASCII and already in the target form (so that
+     * {@link #toDelimitedCaseAscii(String, char, boolean)} would return a string equal to it), zero otherwise.
+     *
+     * <p>An ASCII string is in the target form when no letter in it changes case and every {@code '_'}, {@code '-'} or
+     * whitespace character in it is a single {@code separator} between two other characters. No separator is inserted at
+     * a case boundary then either: that needs an uppercase letter next to a lowercase one, and the letters that would
+     * change case are absent.</p>
+     */
+    private static int asciiDelimitedCaseForm(final String str, final char separator, final boolean toUpperCase) {
+        final int len = str.length();
+        int i = 0;
+
+        for (; i < len; i++) {
+            final char ch = str.charAt(i);
+
+            if (toUpperCase ? isAsciiUpperCase(ch) : isAsciiLowerCase(ch)) {
+                continue;
+            }
+
+            if (toUpperCase ? isAsciiLowerCase(ch) : isAsciiUpperCase(ch)) {
+                break;
+            }
+
+            if (ch > 0x7F) {
+                return -1;
+            }
+
+            if (ch == SK._UNDERSCORE || ch == SK._HYPHEN || Character.isWhitespace(ch)) {
+                if (ch != separator || i == 0 || i == len - 1) {
+                    break;
+                }
+
+                final char next = str.charAt(i + 1);
+
+                if (next == SK._UNDERSCORE || next == SK._HYPHEN || Character.isWhitespace(next)) {
+                    break;
+                }
+            }
+        }
+
+        if (i == len) {
+            return 1;
+        }
+
+        // Not in the target form: only the ASCII check of isAsciiString remains for the rest.
+        for (; i < len; i++) {
+            if (str.charAt(i) > 0x7F) {
+                return -1;
+            }
+        }
+
+        return 0;
     }
 
     /**
@@ -8493,7 +8554,7 @@ public final class Strings {
                         i = len;
                         lastMatch = false;
                     }
-                    substrs.add(str.substring(start, i));
+                    substrs.add(splitToken(str, start, i, trim));
                     match = false;
                 }
                 start = ++i;
@@ -8505,16 +8566,10 @@ public final class Strings {
         }
 
         if (match || (preserveAllTokens && lastMatch)) {
-            substrs.add(str.substring(start, i));
+            substrs.add(splitToken(str, start, i, trim));
         }
 
-        final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
-
-        if (trim) {
-            trimEach(ret);
-        }
-
-        return ret;
+        return substrs.toArray(N.EMPTY_STRING_ARRAY);
     }
 
     /**
@@ -8563,13 +8618,13 @@ public final class Strings {
             final boolean hasToken = idx > i || preserveAllTokens;
 
             if (hasToken && substrs.size() == max - 1) {
-                substrs.add(str.substring(i));
+                substrs.add(splitToken(str, i, len, trim));
                 maxReached = true;
                 break;
             }
 
             if (idx > i) {
-                substrs.add(str.substring(i, idx));
+                substrs.add(splitToken(str, i, idx, trim));
             } else if (preserveAllTokens) {
                 substrs.add(EMPTY);
             }
@@ -8579,7 +8634,7 @@ public final class Strings {
 
         if (!maxReached) {
             if (i < len) {
-                substrs.add(str.substring(i, len));
+                substrs.add(splitToken(str, i, len, trim));
             } else if (preserveAllTokens) {
                 // i == len only when the input ends with the delimiter: keep the empty token that follows it,
                 // mirroring the single-char splitWorker.
@@ -8587,13 +8642,7 @@ public final class Strings {
             }
         }
 
-        final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
-
-        if (trim) {
-            trimEach(ret);
-        }
-
-        return ret;
+        return substrs.toArray(N.EMPTY_STRING_ARRAY);
     }
 
     /**
@@ -8623,7 +8672,7 @@ public final class Strings {
                         i = len;
                         lastMatch = false;
                     }
-                    substrs.add(str.substring(start, i));
+                    substrs.add(splitToken(str, start, i, trim));
                     match = false;
                 }
                 start = ++i;
@@ -8635,16 +8684,52 @@ public final class Strings {
         }
 
         if (match || (preserveAllTokens && lastMatch)) {
-            substrs.add(str.substring(start, i));
+            substrs.add(splitToken(str, start, i, trim));
         }
 
-        final String[] ret = substrs.toArray(N.EMPTY_STRING_ARRAY);
+        return substrs.toArray(N.EMPTY_STRING_ARRAY);
+    }
 
-        if (trim) {
-            trimEach(ret);
+    /**
+     * Returns the split token {@code str.substring(beginIndex, endIndex)}, or, when {@code trim} is {@code true}, that token
+     * with {@link String#trim()} applied. A token that needs trimming is copied once, already trimmed, instead of being
+     * copied untrimmed first.
+     *
+     * @param str the string being split
+     * @param beginIndex the start of the token, inclusive
+     * @param endIndex the end of the token, exclusive
+     * @param trim whether to trim the token
+     * @return the token; {@code str} itself if the range is the whole string and nothing is trimmed
+     */
+    private static String splitToken(final String str, final int beginIndex, final int endIndex, final boolean trim) {
+        if (trim && beginIndex < endIndex && (str.charAt(beginIndex) <= ' ' || str.charAt(endIndex - 1) <= ' ')) {
+            return trimmedSubstring(str, beginIndex, endIndex);
         }
 
-        return ret;
+        return str.substring(beginIndex, endIndex);
+    }
+
+    /**
+     * Returns {@code str.substring(beginIndex, endIndex).trim()} without the intermediate substring: the range is narrowed
+     * past the leading and trailing chars {@code <= ' '} (the {@link String#trim()} predicate) and only the rest is copied.
+     * Kept out of {@link #splitToken(String, int, int, boolean)} so the split loops stay free of inner loops when no token
+     * needs trimming.
+     *
+     * @param str the string being split
+     * @param beginIndex the start of the token, inclusive
+     * @param endIndex the end of the token, exclusive
+     * @return the trimmed token
+     */
+    private static String trimmedSubstring(final String str, int beginIndex, int endIndex) {
+        while (beginIndex < endIndex && str.charAt(beginIndex) <= ' ') {
+            beginIndex++;
+        }
+
+        while (endIndex > beginIndex && str.charAt(endIndex - 1) <= ' ') {
+            endIndex--;
+        }
+
+        return str.substring(beginIndex, endIndex);
     }
 
     /**
@@ -10500,9 +10585,11 @@ public final class Strings {
      * {@code wrapIfMissing("aa", "aa", "aa")} returns {@code "aaaa"}, and {@code unwrap("aaaa", "aa", "aa")}
      * returns {@code ""} rather than the original {@code "aa"}.</p>
      *
-     * <p>&#9888;&#65039; Apache Commons Lang's {@code StringUtils.wrapIfMissing} differs in both special cases: it
+     * <p>&#9888;&#65039; Apache Commons Lang has no separate prefix/suffix overload; its single-wrapper
+     * {@code StringUtils.wrapIfMissing(String, String)} differs in both special cases: it
      * returns {@code ""} for an empty input, and it returns the input unchanged in the overlap case
-     * ({@code wrapIfMissing("aa", "aa", "aa")} is {@code "aa"} there and {@code "aaaa"} here).</p>
+     * ({@code StringUtils.wrapIfMissing("aa", "aa")} is {@code "aa"}, while {@code wrapIfMissing("aa", "aa", "aa")}
+     * here is {@code "aaaa"}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -12970,6 +13057,11 @@ public final class Strings {
         return N.INDEX_NOT_FOUND;
     }
 
+    // Ignore-case searches pick KMP up front once the pattern and the input are long enough: the fallback scan calls
+    // regionMatches(true, ...) at every position, with nothing like String.indexOf's fast first-character search. The
+    // case-sensitive token searches keep String.indexOf and switch to KMP only after a work budget or for very large
+    // searches (see StrUtil.tokenSearchBudget and StrUtil.TOKEN_SCAN_LIMIT), so their thresholds differ from this one on
+    // purpose.
     private static boolean shouldUseIgnoreCaseKmp(final int searchLength, final int targetLength) {
         return targetLength >= 16 && (long) searchLength * targetLength >= 4096;
     }
@@ -15048,7 +15140,11 @@ public final class Strings {
             return false;
         }
 
-        if (shouldUseCharMembership(str.length(), valuesToFind.length)) {
+        // The membership set of str costs two full scalar passes over it, while String.indexOf(char) is a vectorized
+        // intrinsic that stops at the first occurrence (and this loop stops at the first missing candidate). With fewer
+        // than 16 candidates the indexOf loop measured faster in every input shape, by orders of magnitude when the
+        // candidates occur early or one is missing.
+        if (valuesToFind.length >= 16 && shouldUseCharMembership(str.length(), valuesToFind.length)) {
             final long[] membership = createCharMembership(str);
 
             for (final char ch : valuesToFind) {
@@ -15353,13 +15449,49 @@ public final class Strings {
             return true;
         }
 
-        for (int i = 0; i < strLen; i++) {
+        // The scalar loop checks a short string completely but only the first 32 chars of a longer one; the rest of a
+        // longer string is searched with the vectorized String.indexOf, see containsNoneInWindows.
+        final int scalarEnd = strLen <= 64 ? strLen : 32;
+
+        for (int i = 0; i < scalarEnd; i++) {
             final char ch = str.charAt(i);
 
             for (final char c : valuesToFind) {
                 if (c == ch) {
                     return false;
                 }
+            }
+        }
+
+        return scalarEnd == strLen || containsNoneInWindows(str, scalarEnd, valuesToFind);
+    }
+
+    /**
+     * Returns {@code true} if none of {@code valuesToFind} occurs in {@code str} at or after {@code fromIndex}.
+     *
+     * <p>Each candidate is searched with the vectorized {@link String#indexOf(int, int, int)} in windows that double
+     * from 32 characters, so a hit at offset {@code k} costs O({@code k}) work per candidate even when an earlier
+     * candidate does not occur at all (searching candidate by candidate through the whole string would scan all of
+     * it first).</p>
+     */
+    private static boolean containsNoneInWindows(final String str, int fromIndex, final char[] valuesToFind) {
+        final int strLen = str.length();
+        int windowLength = 32;
+
+        while (fromIndex < strLen) {
+            // A remainder shorter than two windows is searched in one go, so no window is shorter than 32 chars.
+            final int toIndex = strLen - fromIndex < 2 * windowLength ? strLen : fromIndex + windowLength;
+
+            for (final char c : valuesToFind) {
+                if (str.indexOf(c, fromIndex, toIndex) >= 0) {
+                    return false;
+                }
+            }
+
+            fromIndex = toIndex;
+
+            if (windowLength < 1 << 16) {
+                windowLength <<= 1;
             }
         }
 
@@ -26858,8 +26990,18 @@ public final class Strings {
         }
 
         for (int clusterStart = segmentationStart, len = str.length(); clusterStart < len;) {
-            final int clusterEnd = nextGraphemeClusterBoundary(str, clusterStart);
-            width += graphemeClusterDisplayWidth(str, clusterStart, clusterEnd, policy);
+            final char ch = str.charAt(clusterStart);
+            final int clusterEnd;
+
+            // Same cluster and width as the general path below, without its property-table lookups: text after an
+            // emoji, a combining mark or a symbol such as U+00A9 is otherwise measured many times slower than before it.
+            if (isStandaloneClusterChar(ch) && (clusterStart + 1 == len || isStandaloneClusterChar(str.charAt(clusterStart + 1)))) {
+                clusterEnd = clusterStart + 1;
+                width += codePointDisplayWidthUnchecked(ch, policy);
+            } else {
+                clusterEnd = nextGraphemeClusterBoundary(str, clusterStart);
+                width += graphemeClusterDisplayWidth(str, clusterStart, clusterEnd, policy);
+            }
 
             if (width >= Integer.MAX_VALUE) {
                 return Integer.MAX_VALUE;
@@ -26869,6 +27011,18 @@ public final class Strings {
         }
 
         return (int) width;
+    }
+
+    /**
+     * Returns {@code true} for an ASCII character other than CR and for a character of the
+     * {@link #isCommonWideCodePoint(int) common wide ranges}. All of them have Grapheme_Cluster_Break Other, Control,
+     * LF, LV or LVT and Indic_Conjunct_Break None in the bundled Unicode data, so no UAX #29 rule keeps two adjacent
+     * ones in one cluster (GB3 needs a CR first). Such a character followed by another one, or by the end of the string,
+     * is therefore a grapheme cluster of its own, and that cluster's width is the character's code-point width. This must
+     * be kept consistent with {@link Unicode17Data}.
+     */
+    private static boolean isStandaloneClusterChar(final char ch) {
+        return (ch <= 0x7F && ch != '\r') || isCommonWideCodePoint(ch);
     }
 
     /**
@@ -27580,7 +27734,7 @@ public final class Strings {
             }
 
             // A needle that itself contains the delimiter cannot be a single field.
-            if (token.contains(delimiter)) {
+            if (containsTokenDelimiter(token, delimiter)) {
                 return N.INDEX_NOT_FOUND;
             }
 
@@ -27588,6 +27742,19 @@ public final class Strings {
             // hit, then searched for delimiter+token+delimiter from that index — which misses valid
             // delimited matches when the first hit lies inside an overlapping delimiter
             // (e.g. indexOfToken("bababab", "a", "bab") must return 3).
+            // The scan keeps String.indexOf's fast, allocation-free search for ordinary input. Repeated overlapping
+            // rejections of a long token or delimiter would make it quadratic, so each rejected candidate is charged its
+            // token and delimiter length, and an exhausted linear budget moves the rest of the range to KMP. Choosing
+            // KMP up front by input size made ordinary long-token searches several times slower, so only a search too
+            // large for String.indexOf's own worst case to stay cheap starts with KMP (see TOKEN_SCAN_LIMIT).
+            final int searchLength = len - fromIndex;
+
+            if (tokenLength >= 16 && (long) searchLength * tokenLength >= TOKEN_SCAN_LIMIT) {
+                return findDelimitedKmp(str, token, delimiter, fromIndex, false);
+            }
+
+            final boolean kmpFallback = Math.max(tokenLength, delimiterLength) >= 16;
+            long remainingWork = tokenSearchBudget(searchLength);
             int searchFrom = fromIndex;
 
             while (searchFrom <= len - tokenLength) {
@@ -27599,6 +27766,10 @@ public final class Strings {
 
                 if (isDelimitedValueMatch(str, index, tokenLength, delimiter, delimiterLength, len, false)) {
                     return index;
+                }
+
+                if (kmpFallback && (remainingWork -= tokenLength + delimiterLength) <= 0) {
+                    return findDelimitedKmp(str, token, delimiter, index + 1, false);
                 }
 
                 // Advance by one code unit so overlapping candidates are not skipped.
@@ -27881,7 +28052,7 @@ public final class Strings {
                 return N.INDEX_NOT_FOUND;
             }
 
-            if (token.contains(delimiter)) {
+            if (containsTokenDelimiter(token, delimiter)) {
                 return N.INDEX_NOT_FOUND;
             }
 
@@ -27895,6 +28066,18 @@ public final class Strings {
 
             startIndexFromBack = Math.min(startIndexFromBack, len);
 
+            // Same bounded scan as indexOfToken: repeated overlapping rejections of a long token or delimiter move the
+            // rest of the range (indices below the rejected candidate) to KMP once their linear budget is spent, and a
+            // search too large for String.lastIndexOf's own worst case starts with KMP.
+            final int searchLength = Math.min(startIndexFromBack, len - tokenLength) + tokenLength;
+
+            if (tokenLength >= 16 && (long) searchLength * tokenLength >= TOKEN_SCAN_LIMIT) {
+                return findDelimitedKmp(str, token, delimiter, startIndexFromBack, true);
+            }
+
+            final boolean kmpFallback = Math.max(tokenLength, delimiterLength) >= 16;
+            long remainingWork = tokenSearchBudget(searchLength);
+
             for (int searchFrom = startIndexFromBack; searchFrom >= 0;) {
                 final int index = Strings.lastIndexOf(str, token, searchFrom);
 
@@ -27906,9 +28089,110 @@ public final class Strings {
                     return index;
                 }
 
+                if (kmpFallback && index > 0 && (remainingWork -= tokenLength + delimiterLength) <= 0) {
+                    return findDelimitedKmp(str, token, delimiter, index - 1, true);
+                }
+
                 searchFrom = index - 1;
             }
 
+            return N.INDEX_NOT_FOUND;
+        }
+
+        // Searched characters * token length from which a case-sensitive token search starts with KMP. The scan's budget
+        // charges only the candidates String.indexOf/lastIndexOf return; on a repetitive text that keeps matching a long
+        // token's prefix without ever containing the token, those calls themselves do up to that product of work and
+        // return nothing to charge. 2^24 keeps ordinary searches (a 36-character id in a 100K-character line is 3.6M) on
+        // the allocation-free scan and caps that hidden work at about 2^24 character comparisons.
+        private static final long TOKEN_SCAN_LIMIT = 1L << 24;
+
+        /**
+         * Returns the candidate-rejection work, in compared characters, that a case-sensitive token scan may spend before
+         * switching to KMP: four characters per searched character, at least 64.
+         */
+        private static long tokenSearchBudget(final int searchLength) {
+            return Math.max(64L, 4L * searchLength);
+        }
+
+        // Both strings are search arguments rather than the searched text, so String.contains suits every ordinary
+        // size: its naive worst case is bounded by token length * delimiter length. Only a product too large for that
+        // bound to be negligible (2^20 character pairs) builds a KMP table; below it, the pattern copy and failure table
+        // would cost more than the scan they replace (a 16-character delimiter in a 256-character token is 4096 pairs).
+        private static boolean containsTokenDelimiter(final String token, final String delimiter) {
+            if (delimiter.length() > token.length()) {
+                return false;
+            }
+            if (delimiter.length() >= 16 && (long) token.length() * delimiter.length() >= 1L << 20) {
+                return findExactKmp(token, delimiter, 0, false) >= 0;
+            }
+            return token.contains(delimiter);
+        }
+
+        /** Matches complete boundaries as part of the pattern, avoiding repeated long delimiter checks. */
+        private static int findDelimitedKmp(final String str, final String token, final String delimiter, final int bound, final boolean reverse) {
+            final int length = str.length();
+            final int tokenLength = token.length();
+            final int delimiterLength = delimiter.length();
+            final int lastStart = length - tokenLength;
+
+            // End-of-input boundaries need no delimiter. Check the nearer end first without allocating.
+            if (!reverse && bound == 0 && isDelimitedTokenAt(str, 0, token, delimiter)) {
+                return 0;
+            }
+            if (reverse && lastStart <= bound && isDelimitedTokenAt(str, lastStart, token, delimiter)) {
+                return lastStart;
+            }
+
+            // Every other match has both delimiters inside the source. Including them in one KMP
+            // pattern bounds token and boundary comparisons together, even for overlapping delimiters.
+            if (tokenLength + 2L * delimiterLength <= length) {
+                final String pattern = delimiter + token + delimiter;
+                final int patternBound = reverse ? bound - delimiterLength : Math.max(0, bound - delimiterLength);
+                final int index = findExactKmp(str, pattern, patternBound, reverse);
+                if (index >= 0) {
+                    return index + delimiterLength;
+                }
+            }
+
+            if (!reverse && lastStart >= bound && isDelimitedTokenAt(str, lastStart, token, delimiter)) {
+                return lastStart;
+            }
+            if (reverse && isDelimitedTokenAt(str, 0, token, delimiter)) {
+                return 0;
+            }
+            return N.INDEX_NOT_FOUND;
+        }
+
+        /**
+         * Returns {@code true} when {@code token} occurs at {@code index} as a whole delimited value, compared
+         * case-sensitively; the boundary rule is {@link #isDelimitedValueMatch}'s.
+         */
+        private static boolean isDelimitedTokenAt(final String str, final int index, final String token, final String delimiter) {
+            return str.startsWith(token, index) && isDelimitedValueMatch(str, index, token.length(), delimiter, delimiter.length(), str.length(), false);
+        }
+
+        private static int findExactKmp(final String str, final String needle, final int bound, final boolean reverse) {
+            final int size = needle.length();
+            if (reverse && bound < 0) {
+                return N.INDEX_NOT_FOUND;
+            }
+            final char[] pattern = needle.toCharArray();
+            if (reverse) {
+                N.reverse(pattern);
+            }
+            final int[] failure = createKmpFailureTable(pattern);
+            final int first = reverse ? Math.min(bound, str.length() - size) + size - 1 : bound;
+            final int step = reverse ? -1 : 1;
+
+            for (int i = first, matched = 0; i >= 0 && i < str.length(); i += step) {
+                final char ch = str.charAt(i);
+                while (matched > 0 && ch != pattern[matched]) {
+                    matched = failure[matched - 1];
+                }
+                if (ch == pattern[matched] && ++matched == size) {
+                    return reverse ? i : i - size + 1;
+                }
+            }
             return N.INDEX_NOT_FOUND;
         }
 

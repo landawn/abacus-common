@@ -1218,12 +1218,10 @@ public class ContinuableFutureTest extends ContinuableFutureTestSupport {
         final AtomicInteger calls = new AtomicInteger();
 
         try {
-            final ContinuableFuture<String> stage = ContinuableFuture.wrap(pending)
-                    .thenUse(threadPerTask)
-                    .thenCallAsync((value, error) -> {
-                        calls.incrementAndGet();
-                        return "recovered";
-                    });
+            final ContinuableFuture<String> stage = ContinuableFuture.wrap(pending).thenUse(threadPerTask).thenCallAsync((value, error) -> {
+                calls.incrementAndGet();
+                return "recovered";
+            });
 
             final Thread t = worker.get();
             final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);

@@ -1,6 +1,8 @@
 package com.landawn.abacus.type;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
@@ -14,9 +16,10 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.parser.XmlSerConfig;
@@ -27,14 +30,13 @@ import com.landawn.abacus.util.LongList;
 import com.landawn.abacus.util.Objectory;
 
 @Tag("unit")
-class PerformancePrimitiveListSerializationRegressionTest {
+class PerformancePrimitiveListSerializationRegressionTest extends TestBase {
     @Test
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void everyPrimitiveListMatchesItsLogicalArrayAcrossFormats() throws Exception {
-        Object[] arrays = { new boolean[] { true, false, true, false }, new byte[] { -1, 0, 127, 99 },
-                new char[] { '\'', '\n', '&', 'X' }, new short[] { -1, 0, 32767, 99 }, new int[] { -1, 0, Integer.MAX_VALUE, 99 },
-                new long[] { Long.MIN_VALUE, 0, Long.MAX_VALUE, 99 }, new float[] { -0.0f, 1.25f, Float.NaN, 99 },
-                new double[] { -0.0d, 1.25d, Double.POSITIVE_INFINITY, 99 } };
+        Object[] arrays = { new boolean[] { true, false, true, false }, new byte[] { -1, 0, 127, 99 }, new char[] { '\'', '\n', '&', 'X' },
+                new short[] { -1, 0, 32767, 99 }, new int[] { -1, 0, Integer.MAX_VALUE, 99 }, new long[] { Long.MIN_VALUE, 0, Long.MAX_VALUE, 99 },
+                new float[] { -0.0f, 1.25f, Float.NaN, 99 }, new double[] { -0.0d, 1.25d, Double.POSITIVE_INFINITY, 99 } };
         String[] names = { "Boolean", "Byte", "Char", "Short", "Int", "Long", "Float", "Double" };
         JsonXmlSerConfig<?>[] configs = { null, JsonSerConfig.create(), JsonSerConfig.create().setCharQuotation('\'').setStringQuotation('\''),
                 JsonSerConfig.create().setWriteLongAsString(true), JsonSerConfig.create().setCharQuotation((char) 0), XmlSerConfig.create() };
@@ -65,9 +67,8 @@ class PerformancePrimitiveListSerializationRegressionTest {
     @Test
     @SuppressWarnings({ "rawtypes", "unchecked" })
     void customArrayTypesReceiveLogicalSnapshotsForEveryPrimitiveList() throws Exception {
-        Object[] arrays = { new boolean[] { true, false, true, false }, new byte[] { 1, 2, 3, 4 },
-                new char[] { 'a', 'b', 'c', 'd' }, new short[] { 1, 2, 3, 4 }, new int[] { 1, 2, 3, 4 },
-                new long[] { 1, 2, 3, 4 }, new float[] { 1, 2, 3, 4 }, new double[] { 1, 2, 3, 4 } };
+        Object[] arrays = { new boolean[] { true, false, true, false }, new byte[] { 1, 2, 3, 4 }, new char[] { 'a', 'b', 'c', 'd' },
+                new short[] { 1, 2, 3, 4 }, new int[] { 1, 2, 3, 4 }, new long[] { 1, 2, 3, 4 }, new float[] { 1, 2, 3, 4 }, new double[] { 1, 2, 3, 4 } };
         String[] names = { "Boolean", "Byte", "Char", "Short", "Int", "Long", "Float", "Double" };
         for (int i = 0; i < arrays.length; i++) {
             Object backing = arrays[i];
@@ -85,7 +86,11 @@ class PerformancePrimitiveListSerializationRegressionTest {
                 assertEquals(3, Array.getLength(supplied), "Custom type must receive only logical elements");
                 callbacks.incrementAndGet();
                 Array.set(backing, 2, Array.get(backing, 3)); // Reentrant mutation must not change the supplied snapshot.
-                try { return method.invoke(arrayType, args); } catch (InvocationTargetException failure) { throw failure.getCause(); }
+                try {
+                    return method.invoke(arrayType, args);
+                } catch (InvocationTargetException failure) {
+                    throw failure.getCause();
+                }
             });
             // Inject the constructor-cached dependency into a fresh handler without changing the global type registry.
             Field arrayTypeField = typeClass.getDeclaredField("arrayType");
@@ -110,8 +115,11 @@ class PerformancePrimitiveListSerializationRegressionTest {
             type.serializeTo(writer, value, config);
             return writer.toString();
         } finally {
-            if (xml) Objectory.recycle((com.landawn.abacus.util.BufferedXmlWriter) writer);
-            else Objectory.recycle((BufferedJsonWriter) writer);
+            if (xml) {
+                Objectory.recycle((com.landawn.abacus.util.BufferedXmlWriter) writer);
+            } else {
+                Objectory.recycle((BufferedJsonWriter) writer);
+            }
         }
     }
 
@@ -125,8 +133,9 @@ class PerformancePrimitiveListSerializationRegressionTest {
         Path output = Files.createTempFile("primitive-list-allocation-", ".log");
         Process process = null;
         try {
-            process = new ProcessBuilder(executable, "-cp", classpath, IntListAllocationProcess.class.getName())
-                    .redirectErrorStream(true).redirectOutput(output.toFile()).start();
+            process = new ProcessBuilder(executable, "-cp", classpath, IntListAllocationProcess.class.getName()).redirectErrorStream(true)
+                    .redirectOutput(output.toFile())
+                    .start();
             assertTrue(process.waitFor(30, TimeUnit.SECONDS), "allocation probe did not terminate");
             assertEquals(0, process.exitValue(), Files.readString(output));
         } finally {
@@ -159,7 +168,10 @@ class PerformancePrimitiveListSerializationRegressionTest {
         Type<IntList> type = Type.of(IntList.class);
         BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(Writer.nullWriter());
         try {
-            for (int i = 0; i < 8; i++) { type.serializeTo(writer, values, null); writer.flush(); }
+            for (int i = 0; i < 8; i++) {
+                type.serializeTo(writer, values, null);
+                writer.flush();
+            }
             long start = mx.getThreadAllocatedBytes(Thread.currentThread().threadId());
             type.serializeTo(writer, values, null);
             writer.flush();
@@ -175,31 +187,58 @@ class PerformancePrimitiveListSerializationRegressionTest {
         IntList small = IntList.of(1, 2, 3);
         StringBuilder appended = new StringBuilder();
         Appendable destination = new Appendable() {
-            private void mutate() { small.set(2, 99); }
-            public Appendable append(char value) { mutate(); appended.append(value); return this; }
-            public Appendable append(CharSequence value) { mutate(); appended.append(value); return this; }
-            public Appendable append(CharSequence value, int start, int end) { mutate(); appended.append(value, start, end); return this; }
+            private void mutate() {
+                small.set(2, 99);
+            }
+
+            @Override
+            public Appendable append(char value) {
+                mutate();
+                appended.append(value);
+                return this;
+            }
+
+            @Override
+            public Appendable append(CharSequence value) {
+                mutate();
+                appended.append(value);
+                return this;
+            }
+
+            @Override
+            public Appendable append(CharSequence value, int start, int end) {
+                mutate();
+                appended.append(value, start, end);
+                return this;
+            }
         };
-        Type.<IntList>of(IntList.class).appendTo(destination, small);
+        Type.<IntList> of(IntList.class).appendTo(destination, small);
         assertEquals("[1, 2, 3]", appended.toString());
         assertEquals(99, small.get(2));
 
         int[] values = new int[100_000];
         Arrays.fill(values, 1);
         IntList large = IntList.of(values);
-        String expected = Type.<int[]>of(int[].class).stringOf(values);
+        String expected = Type.<int[]> of(int[].class).stringOf(values);
         StringBuilder output = new StringBuilder();
         Writer callback = new Writer() {
+            @Override
             public void write(char[] buffer, int offset, int length) {
                 large.set(large.size() - 1, 99);
                 output.append(buffer, offset, length);
             }
-            public void flush() { }
-            public void close() { }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
         };
         BufferedJsonWriter writer = Objectory.createBufferedJsonWriter(callback);
         try {
-            Type.<IntList>of(IntList.class).serializeTo(writer, large, null);
+            Type.<IntList> of(IntList.class).serializeTo(writer, large, null);
             assertEquals(99, large.get(large.size() - 1), "Destination must be invoked before serialization finishes");
             writer.flush();
             assertEquals(expected, output.toString());
@@ -212,7 +251,8 @@ class PerformancePrimitiveListSerializationRegressionTest {
     void customConfigurationCallbacksKeepThePreviousSnapshot() throws Exception {
         LongList values = LongList.of(1, 2, 3);
         JsonSerConfig config = new JsonSerConfig() {
-            @Override public boolean isWriteLongAsString() {
+            @Override
+            public boolean isWriteLongAsString() {
                 values.set(2, 99);
                 return false;
             }

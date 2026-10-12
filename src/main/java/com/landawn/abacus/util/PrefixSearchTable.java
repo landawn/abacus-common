@@ -444,14 +444,14 @@ public final class PrefixSearchTable<K, V> {
             }
 
             Node<K, V> build() {
-                final Node<K, V> root = new Node<>(value, new HashMap<>());
+                final Node<K, V> root = new Node<>(value, children.isEmpty() ? Map.of() : new HashMap<>());
                 final var pending = new ArrayDeque<Map.Entry<Builder<K, V>, Node<K, V>>>();
                 pending.push(Map.entry(this, root));
                 // Newly allocated child maps remain private until the entire snapshot is assembled.
                 while (!pending.isEmpty()) {
                     final var frame = pending.pop();
                     for (final var child : frame.getKey().children.entrySet()) {
-                        final Node<K, V> copy = new Node<>(child.getValue().value, new HashMap<>());
+                        final Node<K, V> copy = new Node<>(child.getValue().value, child.getValue().children.isEmpty() ? Map.of() : new HashMap<>());
                         frame.getValue().children.put(child.getKey(), copy);
                         pending.push(Map.entry(child.getValue(), copy));
                     }

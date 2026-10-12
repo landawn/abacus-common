@@ -346,6 +346,12 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     private static final int COUNT_TABLE_THRESHOLD = 1024;
 
     /**
+     * Above this many elements in the probed list, occurrence counting uses the same table even when the counted operand is
+     * small: every probed element would otherwise be boxed and hashed, which from this size on costs more than the table.
+     */
+    private static final int PROBED_COUNT_TABLE_THRESHOLD = BOUND;
+
+    /**
      * The array buffer into which the elements of the CharList are stored.
      */
     private char[] elementData = N.EMPTY_CHAR_ARRAY;
@@ -1960,19 +1966,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final CharList c = new CharList(N.min(9, size(), b.size()));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final char key = elementData[i];
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    c.add(key);
-                }
-            }
-
-            return c;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return intersectionByCountTable(b, c);
         }
 
         final Multiset<Character> bOccurrences = b.toMultiset();
@@ -2063,20 +2058,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final CharList c = new CharList(N.min(size(), N.max(9, size() - b.size())));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final char key = elementData[i];
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                } else {
-                    c.add(key);
-                }
-            }
-
-            return c;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return differenceByCountTable(b, c);
         }
 
         final Multiset<Character> bOccurrences = b.toMultiset();
@@ -2169,33 +2152,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
         final CharList c = new CharList(N.max(9, Math.abs(size() - b.size())));
 
-        if (b.size() > COUNT_TABLE_THRESHOLD) {
-            final int[] bOccurrences = occurrenceTable(b);
-            // Multiset.isEmpty() of the boxed path below is "no occurrence of b left", i.e. remainingOccurrences == 0.
-            int remainingOccurrences = b.size();
-
-            for (int i = 0, len = size(); i < len; i++) {
-                final char key = elementData[i];
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    remainingOccurrences--;
-                } else {
-                    c.add(key);
-                }
-            }
-
-            for (int i = 0, len = b.size(); i < len && remainingOccurrences > 0; i++) {
-                final char key = b.elementData[i];
-
-                if (bOccurrences[key] > 0) {
-                    bOccurrences[key]--;
-                    remainingOccurrences--;
-                    c.add(key);
-                }
-            }
-
-            return c;
+        if (b.size() > COUNT_TABLE_THRESHOLD || size() > PROBED_COUNT_TABLE_THRESHOLD) {
+            return symmetricDifferenceByCountTable(b, c);
         }
 
         final Multiset<Character> bOccurrences = b.toMultiset();
@@ -3641,6 +3599,97 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      */
     private static boolean isPresent(final long[] bits, final char value) {
         return (bits[value >>> 6] & (1L << value)) != 0;
+    }
+
+    /*
+     * The count-table loops of intersection/difference/symmetricDifference are kept out of the public methods on purpose: a
+     * separate method gets its own JIT profile. While the loops were part of the public methods, a JVM that had warmed a
+     * method up on the Multiset path only compiled the table loop later without inlining its per-element add (low call-site
+     * frequency in the stale profile), and the loop then ran several times slower than normal, slower even than the Multiset path.
+     */
+
+    /**
+     * Count-table path of {@link #intersection(CharList)}: appends to {@code c} each element of this list that still has an
+     * unmatched occurrence in {@code b}.
+     *
+     * @param b the list whose occurrences are counted
+     * @param c the result list to append to
+     * @return {@code c}
+     */
+    private CharList intersectionByCountTable(final CharList b, final CharList c) {
+        final int[] bOccurrences = occurrenceTable(b);
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final char key = elementData[i];
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                c.add(key);
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     * Count-table path of {@link #difference(CharList)}: appends to {@code c} each element of this list that has no unmatched
+     * occurrence left in {@code b}.
+     *
+     * @param b the list whose occurrences are counted
+     * @param c the result list to append to
+     * @return {@code c}
+     */
+    private CharList differenceByCountTable(final CharList b, final CharList c) {
+        final int[] bOccurrences = occurrenceTable(b);
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final char key = elementData[i];
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+            } else {
+                c.add(key);
+            }
+        }
+
+        return c;
+    }
+
+    /**
+     * Count-table path of {@link #symmetricDifference(CharList)}: appends the unmatched elements of this list, then the
+     * unmatched occurrences of {@code b} in index order.
+     *
+     * @param b the list whose occurrences are counted
+     * @param c the result list to append to
+     * @return {@code c}
+     */
+    private CharList symmetricDifferenceByCountTable(final CharList b, final CharList c) {
+        final int[] bOccurrences = occurrenceTable(b);
+        // Multiset.isEmpty() of the boxed path in symmetricDifference is "no occurrence of b left", i.e. remainingOccurrences == 0.
+        int remainingOccurrences = b.size();
+
+        for (int i = 0, len = size(); i < len; i++) {
+            final char key = elementData[i];
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
+            } else {
+                c.add(key);
+            }
+        }
+
+        for (int i = 0, len = b.size(); i < len && remainingOccurrences > 0; i++) {
+            final char key = b.elementData[i];
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
+                c.add(key);
+            }
+        }
+
+        return c;
     }
 
     /**

@@ -108,6 +108,12 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
             return N.EMPTY_BYTE_OBJ_ARRAY;
         }
 
+        final Byte[] decimalArray = (Byte[]) parseNumericArray(str, elementType, Byte.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Byte[] array = new Byte[len];

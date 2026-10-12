@@ -39,13 +39,20 @@ import com.landawn.abacus.util.cs;
  * <ol>
  *   <li>a public static factory method on the type class (such as {@code valueOf(String)}) that
  *       returns an instance of the type;</li>
- *   <li>a public static method taking a single numeric argument that returns the type;</li>
- *   <li>a public single-argument constructor accepting either a {@code String} or a numeric value.</li>
+ *   <li>a public static method returning the type whose parameter matches the inferred numeric field type
+ *       (with primitive/wrapper equivalence);</li>
+ *   <li>a public single-argument constructor accepting a {@code String}, then a numeric value;</li>
+ *   <li>a unique public static numeric factory using a different representation, only when no earlier creator exists.
+ *       Multiple such factories are ambiguous and are not selected.</li>
  * </ol>
  * Copy factories and constructors whose parameter is the handled class itself are excluded: they
  * require an existing instance and cannot construct one from text. If none of the supported creators
  * is found, {@link #valueOf(String)} throws
  * {@link UnsupportedOperationException} when called with a non-empty input.
+ * The selected creator's parameter type parses the text; numeric arguments are not obtained by narrowing a
+ * value parsed using the backing field type.
+ * The unique numeric-factory fallback excludes a parameter of {@link Number} itself because its default
+ * type handler cannot construct a value from text; such a factory must not hide a usable constructor.
  *
  * @param <T> the specific {@code Number} subclass this type handler manages
  */
@@ -132,6 +139,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                         && it.getParameterCount() == 1 //
                         && it.getParameterTypes()[0] != typeClass //
                         && ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0]))).orElse(null);
+
             } catch (final Exception e) {
                 // ignore
             }
@@ -168,10 +176,32 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
             }
         }
 
+        if (factoryMethod == null && constructor == null) {
+            // A differently represented factory is a last resort: it may encode different units from
+            // the text constructors (for example cents rather than dollars).
+            for (final Method method : typeClass.getDeclaredMethods()) {
+                if (Modifier.isPublic(method.getModifiers()) && Modifier.isStatic(method.getModifiers()) && typeClass.isAssignableFrom(method.getReturnType())
+                        && method.getParameterCount() == 1 && method.getParameterTypes()[0] != typeClass && method.getParameterTypes()[0] != Number.class
+                        && Number.class.isAssignableFrom(ClassUtil.wrap(method.getParameterTypes()[0]))) {
+                    if (factoryMethod != null) {
+                        factoryMethod = null;
+                        break;
+                    }
+
+                    factoryMethod = method;
+                }
+            }
+        }
+
         final Method fm = factoryMethod;
         final Constructor<?> cons = constructor;
         final Type<?> parameterType = fm != null ? Type.of(fm.getParameterTypes()[0])
                 : (constructor != null ? Type.of(constructor.getParameterTypes()[0]) : null);
+
+        // The detected members are public, but a non-public declaring class (e.g. a private nested class) still
+        // denies reflective access from this library, so open them (as SingleValueType does for its detected members).
+        ClassUtil.setAccessibleQuietly(fm, true);
+        ClassUtil.setAccessibleQuietly(cons, true);
 
         creator = fm != null ? str -> (T) ClassUtil.invokeMethod(fm, parameterType == null ? str : parameterType.valueOf(str)) //
                 : (cons != null ? str -> (T) ClassUtil.invokeConstructor(cons, parameterType == null ? str : parameterType.valueOf(str)) //

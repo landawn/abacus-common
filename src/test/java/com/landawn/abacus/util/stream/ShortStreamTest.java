@@ -1291,8 +1291,9 @@ public class ShortStreamTest extends TestBase {
                 ShortStream.of((short) 100, (short) 200));
         ShortStream result = ShortStream.zip(streams, shorts -> {
             short sum = 0;
-            for (Short s : shorts)
+            for (Short s : shorts) {
                 sum += s;
+            }
             return sum;
         });
         assertArrayEquals(new short[] { 111, 222 }, result.toArray());
@@ -1346,8 +1347,9 @@ public class ShortStreamTest extends TestBase {
         short[] defaults = { 0, 0, 0 };
         ShortStream result = ShortStream.zip(streams, defaults, shorts -> {
             short sum = 0;
-            for (Short s : shorts)
+            for (Short s : shorts) {
                 sum += s;
+            }
             return sum;
         });
         assertArrayEquals(new short[] { 111, 202, 3 }, result.toArray());
@@ -4268,8 +4270,8 @@ public class ShortStreamTest extends TestBase {
     // G088-01: unsorted ArrayShortStream.distinct keeps first occurrences in encounter order, incl. sign/word boundaries
     @Test
     public void testDistinct_unsortedArray_boundaryValues() {
-        final short[] boundaryValues = { 0, -1, Short.MAX_VALUE, Short.MIN_VALUE, -1, 63, 64, -64, -65, 127, 128, -128, -129, 255, 256, Short.MIN_VALUE,
-                0, Short.MAX_VALUE, 64, 63, (short) -32767, (short) 32766, -1, 1, 1 };
+        final short[] boundaryValues = { 0, -1, Short.MAX_VALUE, Short.MIN_VALUE, -1, 63, 64, -64, -65, 127, 128, -128, -129, 255, 256, Short.MIN_VALUE, 0,
+                Short.MAX_VALUE, 64, 63, (short) -32767, (short) 32766, -1, 1, 1 };
 
         // the short input (below 256 elements) and the long input (at least 256 elements) take different tracking paths
         g088CheckDistinct(boundaryValues);
@@ -4325,6 +4327,7 @@ public class ShortStreamTest extends TestBase {
         assertEquals(N.toList((short) 7, (short) -7), ShortStream.of((short) 7, (short) -7, (short) 7, (short) -7).distinct().toList());
         assertEquals(0, ShortStream.of(new short[0]).distinct().count());
     }
+
     // ---- perf review 2026-09-26 G088 end ----
     // ---- perf review 2026-09-26 G105 begin ----
     // G105-01: pins the column-major order of flatten(short[][], true) for jagged input with null/empty/short rows
@@ -4416,6 +4419,7 @@ public class ShortStreamTest extends TestBase {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new short[0], ShortStream.flatten(new short[][] { null, {}, null }, true).toArray());
     }
+
     // ---- perf review 2026-09-26 G105 end ----
     // ---- perf review 2026-09-26 G112 begin ----
     // G112-01: bulk count()/toShortList()/toArray() of concat(List<short[]>) / concat(short[]...) - null/empty arrays, skip into/at/after a
@@ -4480,14 +4484,14 @@ public class ShortStreamTest extends TestBase {
 
         // the list iterator is advanced exactly as element-by-element iteration advances it
         final int[] calls = new int[2];
-        final List<short[]> counting = new ArrayList<short[]>(list) {
+        final List<short[]> counting = new ArrayList<>(list) {
             private static final long serialVersionUID = 1L;
 
             @Override
             public java.util.Iterator<short[]> iterator() {
                 final java.util.Iterator<short[]> it = super.iterator();
 
-                return new java.util.Iterator<short[]>() {
+                return new java.util.Iterator<>() {
                     @Override
                     public boolean hasNext() {
                         calls[0]++;
@@ -4515,6 +4519,7 @@ public class ShortStreamTest extends TestBase {
         assertEquals(9, calls[0]);
         assertEquals(8, calls[1]);
     }
+
     // ---- perf review 2026-09-26 G112 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static short[] flattenVerticallyReferenceG114(final short[][] a) {

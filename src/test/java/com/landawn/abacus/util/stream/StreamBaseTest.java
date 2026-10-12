@@ -2001,7 +2001,7 @@ public class StreamBaseTest extends TestBase {
     }
 
     private static Stream<Integer> streamFailingToOpen(final RuntimeException failure) {
-        return new IteratorStream<Integer>(Collections.emptyIterator()) {
+        return new IteratorStream<>(Collections.emptyIterator()) {
             @Override
             ObjIteratorEx<Integer> iteratorEx() {
                 throw failure;
@@ -2091,7 +2091,7 @@ public class StreamBaseTest extends TestBase {
             for (boolean padded : new boolean[] { false, true }) {
                 AtomicInteger opened = new AtomicInteger();
                 AtomicInteger closed = new AtomicInteger();
-                try (Stream<Integer> source = new IteratorStream<Integer>(ObjIteratorEx.of(1, 2)) {
+                try (Stream<Integer> source = new IteratorStream<>(ObjIteratorEx.of(1, 2)) {
                     @Override
                     ObjIteratorEx<Integer> iteratorEx() {
                         opened.incrementAndGet();
@@ -3102,9 +3102,9 @@ public class StreamBaseTest extends TestBase {
                 }
             }
             case "Int": {
-                IntStream stream = Stream.of(source).mapToInt(value -> (int) value.intValue());
-                com.landawn.abacus.util.function.IntBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
-                com.landawn.abacus.util.function.IntTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
+                IntStream stream = Stream.of(source).mapToInt(value -> value.intValue());
+                com.landawn.abacus.util.function.IntBiPredicate pair = (left, right) -> predicate.test(left, right);
+                com.landawn.abacus.util.function.IntTriPredicate triple = (first, previous, next) -> predicate.test(previous, next);
                 switch (operation) {
                     case 0:
                         return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);

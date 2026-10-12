@@ -608,25 +608,25 @@ public class ReflectionTest extends TestBase {
     }
 
     /**
-     * A field whose ReflectASM accessor fails to link is remembered, so the fast path is skipped for it from
-     * then on. The JVM re-raises the accessor's resolution failure on every execution and {@link ClassValue}
-     * caches nothing for a {@code computeValue} that threw, so the uncached fallback cost ~6.2us per access -
-     * about 200x the fast path and ~400x the same read with the optional jar merely absent - forever, with no
-     * log line to explain it. Only a linkage failure is memoized: ReflectASM rejecting a field outright (a
-     * static or unshadowed private field) happens before any access and is cheap to repeat.
+     * A write the ReflectASM accessor cannot link must not be retried through it on every access: the JVM
+     * re-raises the accessor's resolution failure on every execution and {@link ClassValue} caches nothing for a
+     * {@code computeValue} that threw, so the uncached fallback cost ~6.2us per access - about 200x the fast path
+     * and ~400x the same read with the optional jar merely absent. Assigning a final field was the case that
+     * failed to link (and was then memoized); since 2026-10-10 such a write is recognized up front and goes
+     * straight to standard reflection, so it never reaches the accessor and has nothing to memoize. The memo
+     * remains for an unexpected linkage failure, such as an incomplete ReflectASM deployment.
      */
     @Test
-    public void reviewFixes20260911_aFieldWhoseAsmAccessorFailsToLinkIsMemoizedInsteadOfRetriedForever() throws Exception {
+    public void reviewFixes20260911_aFinalFieldWriteNeverRetriesTheAsmAccessor() throws Exception {
         final MemoHolder holder = new MemoHolder(new String("old"));
         final Reflection<MemoHolder> reflection = Reflection.on(holder);
 
-        // Assigning a final field always defeats the generated accessor, so this takes the fallback.
+        // Assigning a final field always defeats the generated accessor, so standard reflection writes it.
         assertSame(reflection, reflection.set("text", "new"));
         assertEquals("new", MemoHolder.class.getDeclaredField("text").get(holder));
 
-        // ... and the linkage failure is now recorded, so later accesses never re-enter ReflectASM for it.
-        // Guarded by isReflectASMAvailable so the test means the same thing without the optional jar.
-        assertEquals(Reflection.isReflectASMAvailable, Reflection.asmUnreachableFields.get(MemoHolder.class).contains("text"));
+        // It was never attempted through ReflectASM, so no linkage failure was recorded.
+        assertFalse(Reflection.asmUnreachableFields.get(MemoHolder.class).contains("text"));
 
         // The cached path must still produce exactly the same answers.
         reflection.set("text", "newer");
@@ -768,6 +768,7 @@ public class ReflectionTest extends TestBase {
         assertEquals(9L, parent.number);
         assertNull(parent.value);
     }
+
     // ---- deep review 2026-09-25 G064 end ----
     // ---- perf review 2026-09-26 G064 begin ----
     public static class PerfMemoBean {
@@ -839,19 +840,20 @@ public class ReflectionTest extends TestBase {
         assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("noSuchField"));
     }
 
-    // G064-01: a private field rejected by ReflectASM is memoized, on first read or first write (RED on base)
+    // G064-01: a private field must not pay ReflectASM's rejection on every access. It was memoized after the
+    // first rejection; since 2026-10-10 a non-public field is recognized up front and never reaches ReflectASM.
     @Test
-    public void testGet_privateFieldRejectionIsMemoized() {
+    public void testGet_privateFieldSkipsTheAsmFastPath() {
         final PerfMemoChild child = new PerfMemoChild();
         final Reflection<PerfMemoChild> reflection = Reflection.on(child);
 
         assertEquals("child", reflection.get("name"));
-        assertEquals(Reflection.isReflectASMAvailable, Reflection.asmUnreachableFields.get(PerfMemoChild.class).contains("name"));
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoChild.class).contains("name"));
         assertEquals("child", reflection.get("name"));
 
         final PerfMemoBean bean = new PerfMemoBean();
         Reflection.on(bean).set("count", 9);
-        assertEquals(Reflection.isReflectASMAvailable, Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("count"));
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("count"));
         assertEquals(9, (Integer) Reflection.on(bean).get("count"));
     }
 
@@ -923,4 +925,77 @@ public class ReflectionTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G064 end ----
+
+    // ---- bug review 2026-10-02 G066 begin ----
+    public interface G066StaticMethodHolder {
+        static String plain() {
+            return "plain";
+        }
+
+        static String create(final String value) {
+            return "created:" + value;
+        }
+    }
+
+    // G066-01: a static method of an interface target went through the ReflectASM accessor, which links it as an
+    // instance call and threw IncompatibleClassChangeError; standard reflection invokes it normally.
+    @Test
+    public void testInvoke_staticInterfaceMethod() {
+        final Reflection<G066StaticMethodHolder> reflection = Reflection.on(G066StaticMethodHolder.class);
+
+        assertEquals("plain", reflection.invoke("plain"));
+        assertEquals("created:x", reflection.invoke("create", "x"));
+        assertSame(reflection, reflection.call("create", "y"));
+        assertSame(java.util.Comparator.naturalOrder(), Reflection.on(java.util.Comparator.class).invoke("naturalOrder"));
+    }
+    // ---- bug review 2026-10-02 G066 end ----
+
+    // ---- bug review 2026-10-02 verify G120 begin ----
+    public interface G120VGreeter {
+        static String make() {
+            return "made";
+        }
+
+        default String greet() {
+            return "hi";
+        }
+
+        String name();
+    }
+
+    public interface G120VSubGreeter extends G120VGreeter {
+    }
+
+    // G120 verify of G066-01 guard: every method of an interface target now takes the standard-reflection path; a static one
+    // works, and a default or abstract one called without an instance still throws the documented NullPointerException.
+    @Test
+    public void testInvoke_interfaceInstanceMethodWithoutInstanceThrowsNpe() {
+        final Reflection<G120VGreeter> reflection = Reflection.on(G120VGreeter.class);
+
+        assertEquals("made", reflection.invoke("make"));
+        assertThrows(NullPointerException.class, () -> reflection.invoke("greet"));
+        assertThrows(NullPointerException.class, () -> reflection.invoke("name"));
+        assertThrows(NullPointerException.class, () -> reflection.call("greet"));
+    }
+
+    // G120 verify of G066-01: a static method of a SUPER-interface is not a member of the sub-interface (as in Java); it used to
+    // reach the ReflectASM accessor, which links it as an instance call (IncompatibleClassChangeError).
+    @Test
+    public void testInvoke_superInterfaceStaticMethodIsNotInherited() {
+        assertThrows(RuntimeException.class, () -> Reflection.on(G120VSubGreeter.class).invoke("make"));
+    }
+
+    // G120 verify of G066-01 guard: an interface target paired with an instance (newInstance on a collection interface) still
+    // invokes abstract and default methods.
+    @Test
+    public void testInvoke_interfaceTargetWithInstance() {
+        final Reflection<java.util.List> reflection = Reflection.on(java.util.List.class).newInstance();
+
+        reflection.call("add", "x");
+        assertEquals(Boolean.TRUE, reflection.invoke("add", "y"));
+        assertEquals(Integer.valueOf(2), reflection.invoke("size"));
+        assertEquals("x", reflection.invoke("get", 0));
+        assertEquals(2L, ((java.util.stream.Stream<?>) reflection.invoke("stream")).count());
+    }
+    // ---- bug review 2026-10-02 verify G120 end ----
 }

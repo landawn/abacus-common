@@ -18,11 +18,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
-import org.junit.jupiter.api.Assertions;
 
 public class DurationTypeTest extends TestBase {
 

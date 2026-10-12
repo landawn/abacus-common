@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.util.EscapeUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.SK;
@@ -138,6 +139,231 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     }
 
     /**
+     * Parses the ordinary decimal form of a built-in numeric array without materializing a token list.
+     * <p>
+     * The admitted form is a literal {@code [} ... {@code ]} pair around ASCII decimal elements separated by
+     * commas, with optional ASCII spaces around each element. Only an exact captured built-in handler may take
+     * this path: no application conversion is attempted, and fallback must never replay application callbacks.
+     * Any other input, and any element the conversion rejects, yields {@code null} so that the caller's original
+     * parser produces the result or the failure, with its diagnostics and validation precedence.
+     * </p>
+     *
+     * @param str the non-blank array text
+     * @param elementType the array handler's captured element type
+     * @param componentType the component class of the array to create
+     * @return the parsed array of {@code componentType}, or {@code null} if the caller must use its original parser
+     */
+    static Object parseNumericArray(final String str, final Type<?> elementType, final Class<?> componentType) {
+        final Class<?> handler = elementType.getClass();
+        final int kind;
+
+        if (componentType == int.class && handler == PrimitiveIntType.class) {
+            kind = 0;
+        } else if (componentType == long.class && handler == PrimitiveLongType.class) {
+            kind = 1;
+        } else if (componentType == byte.class && handler == PrimitiveByteType.class) {
+            kind = 2;
+        } else if (componentType == short.class && handler == PrimitiveShortType.class) {
+            kind = 3;
+        } else if (componentType == float.class && handler == PrimitiveFloatType.class) {
+            kind = 4;
+        } else if (componentType == double.class && handler == PrimitiveDoubleType.class) {
+            kind = 5;
+        } else if (componentType == Integer.class && handler == IntegerType.class) {
+            kind = 6;
+        } else if (componentType == Long.class && handler == LongType.class) {
+            kind = 7;
+        } else if (componentType == Byte.class && handler == ByteType.class) {
+            kind = 8;
+        } else if (componentType == Short.class && handler == ShortType.class) {
+            kind = 9;
+        } else if (componentType == Float.class && handler == FloatType.class) {
+            kind = 10;
+        } else if (componentType == Double.class && handler == DoubleType.class) {
+            kind = 11;
+        } else {
+            return null;
+        }
+
+        final int limit = str.length() - 1;
+
+        if (limit < 2 || str.charAt(0) != '[' || str.charAt(limit) != ']') {
+            return null;
+        }
+
+        final boolean floatingPoint = kind % 6 >= 4;
+
+        // A null, quoted or suffixed element is the usual reason for falling back, and a trailing one would
+        // otherwise be found only after the scan below has read every element before it. Checking the last
+        // element first rejects that input in time proportional to the element; it only returns earlier for
+        // input the complete scan rejects as well.
+        int pos = str.lastIndexOf(',', limit - 1) + 1;
+
+        if (pos == 0) {
+            pos = 1;
+        }
+
+        while (pos < limit && str.charAt(pos) == ' ') {
+            pos++;
+        }
+
+        pos = decimalEnd(str, pos, limit, floatingPoint);
+
+        if (pos < 0) {
+            return null;
+        }
+
+        while (pos < limit && str.charAt(pos) == ' ') {
+            pos++;
+        }
+
+        if (pos != limit) {
+            return null;
+        }
+
+        int count = 0;
+        pos = 1;
+
+        // Complete lexical validation precedes every conversion, just as split does. In particular,
+        // a missing final slot must win over an earlier malformed or overflowing numeric value.
+        while (pos < limit) {
+            while (pos < limit && str.charAt(pos) == ' ') {
+                pos++;
+            }
+
+            pos = decimalEnd(str, pos, limit, floatingPoint);
+
+            if (pos < 0) {
+                return null;
+            }
+
+            while (pos < limit && str.charAt(pos) == ' ') {
+                pos++;
+            }
+
+            count++;
+
+            if (pos == limit) {
+                break;
+            }
+
+            if (str.charAt(pos++) != ',' || pos == limit) {
+                return null;
+            }
+        }
+
+        final Object result = Array.newInstance(componentType, count);
+        pos = 1;
+
+        try {
+            for (int i = 0; i < count; i++) {
+                while (str.charAt(pos) == ' ') {
+                    pos++;
+                }
+
+                final int from = pos;
+
+                // The first pass has already checked this token's entire grammar.
+                while (pos < limit && str.charAt(pos) != ',' && str.charAt(pos) != ' ') {
+                    pos++;
+                }
+
+                switch (kind) {
+                    case 0, 6: {
+                        final long value = Long.parseLong(str, from, pos, 10);
+
+                        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                            return null;
+                        }
+
+                        if (kind == 0) {
+                            ((int[]) result)[i] = (int) value;
+                        } else {
+                            ((Integer[]) result)[i] = (int) value;
+                        }
+
+                        break;
+                    }
+
+                    case 1, 7: {
+                        final long value = Long.parseLong(str, from, pos, 10);
+
+                        if (kind == 1) {
+                            ((long[]) result)[i] = value;
+                        } else {
+                            ((Long[]) result)[i] = value;
+                        }
+
+                        break;
+                    }
+
+                    case 2, 8: {
+                        final long value = Long.parseLong(str, from, pos, 10);
+
+                        if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+                            return null;
+                        }
+
+                        if (kind == 2) {
+                            ((byte[]) result)[i] = (byte) value;
+                        } else {
+                            ((Byte[]) result)[i] = (byte) value;
+                        }
+
+                        break;
+                    }
+
+                    case 3, 9: {
+                        final long value = Long.parseLong(str, from, pos, 10);
+
+                        if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+                            return null;
+                        }
+
+                        if (kind == 3) {
+                            ((short[]) result)[i] = (short) value;
+                        } else {
+                            ((Short[]) result)[i] = (short) value;
+                        }
+
+                        break;
+                    }
+
+                    case 4:
+                        ((float[]) result)[i] = Float.parseFloat(str.substring(from, pos));
+                        break;
+
+                    case 5:
+                        ((double[]) result)[i] = Double.parseDouble(str.substring(from, pos));
+                        break;
+
+                    case 10:
+                        ((Float[]) result)[i] = Float.valueOf(str.substring(from, pos));
+                        break;
+
+                    case 11:
+                        ((Double[]) result)[i] = Double.valueOf(str.substring(from, pos));
+                        break;
+
+                    default:
+                        throw new AssertionError("Unexpected numeric array kind: " + kind);
+                }
+
+                while (pos < limit && str.charAt(pos) == ' ') {
+                    pos++;
+                }
+
+                pos++;
+            }
+        } catch (final NumberFormatException e) {
+            // The existing handlers distinguish overflow from malformed input and retain their diagnostics.
+            return null;
+        }
+
+        return result;
+    }
+
+    /**
      * Splits the given string on the specified delimiter, ignoring any delimiter that occurs
      * inside a quoted element.
      * <p>
@@ -204,6 +430,58 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
         result.add(element);
 
         return result.toArray(new String[result.size()]);
+    }
+
+    /**
+     * Reads one element of an array's JSON text form for the element type's own codec: a bare {@code null}
+     * token maps to {@code null} (the element type's default value then applies), a quoted element loses its
+     * surrounding quotes and has its JSON escapes decoded exactly once (an empty quoted element stays quoted,
+     * so it fails as malformed rather than becoming the default), and any other token is returned as is.
+     * {@link #split(String)} preserves an element's quotes, so this normalization is what lets compact JSON text
+     * such as {@code ["1","-2"]} or {@code [null,"a",null]} read back through {@code Type.valueOf}.
+     *
+     * @param element one element substring from {@link #split(String)}
+     * @return the element content for the element type's codec, or {@code null} for a bare JSON null token
+     * @see #jsonElementContent(String, boolean)
+     */
+    protected static String jsonElementContent(final String element) {
+        return jsonElementContent(element, false);
+    }
+
+    /**
+     * Reads one element of an array's JSON text form for the element type's own codec, as
+     * {@link #jsonElementContent(String)} does, with the handling of an empty quoted element ({@code ""} or
+     * {@code ''}) chosen by the caller: the numeric codecs keep it quoted so it fails as a malformed number, whereas
+     * the boolean codecs read it as its empty content so the element type's default applies.
+     *
+     * @param element one element substring from {@link #split(String)}
+     * @param emptyQuotedIsDefault {@code true} to return the empty content of an empty quoted element (the element
+     *        type's default then applies); {@code false} to return the element still quoted so it fails as malformed
+     * @return the element content for the element type's codec, or {@code null} for a bare JSON null token
+     */
+    protected static String jsonElementContent(final String element, final boolean emptyQuotedIsDefault) {
+        final int len = element.length();
+
+        if (len == 4 && element.equals(NULL_STRING)) {
+            return null;
+        }
+
+        // The PrimitiveLongArrayType guard: unless the caller asks otherwise, an empty quoted element is left quoted so
+        // it fails as a malformed number instead of becoming the element type's default.
+        if (len >= (emptyQuotedIsDefault ? 2 : 3)) {
+            final char quoteChar = element.charAt(0);
+
+            if ((quoteChar == SK._DOUBLE_QUOTE || quoteChar == SK._SINGLE_QUOTE) && element.charAt(len - 1) == quoteChar) {
+                final String content = element.substring(1, len - 1);
+
+                // Unescaping only rewrites backslash sequences, so content without a backslash is already its own
+                // unescaped form; the guard spares the translator's writer and scan for the common escape-free element
+                // (code review 2026-10-05).
+                return content.indexOf('\\') < 0 ? content : EscapeUtil.unescapeEcmaScript(content);
+            }
+        }
+
+        return element;
     }
 
     /**

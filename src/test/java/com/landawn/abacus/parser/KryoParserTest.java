@@ -3,6 +3,7 @@ package com.landawn.abacus.parser;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -13,7 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -24,33 +27,30 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Strings;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.TreeMap;
-import com.esotericsoftware.kryo.KryoException;
-import com.landawn.abacus.exception.UncheckedIOException;
-import com.landawn.abacus.util.ImmutableList;
 import com.landawn.abacus.util.u.Nullable;
 
 public class KryoParserTest extends TestBase {
@@ -945,7 +945,14 @@ public class KryoParserTest extends TestBase {
         final TreeMap<String, Integer> reversed = new TreeMap<>(Comparator.reverseOrder());
         reversed.put("a", 1);
         reversed.put("b", 2);
-        assertThrows(KryoException.class, () -> parser.decode(parser.encode(reversed)));
+        // Opening java.util lets Kryo invoke the comparator singleton's private no-argument constructor.
+        if (Object.class.getModule().isOpen("java.util", KryoParser.class.getModule())) {
+            final TreeMap<String, Integer> decoded = parser.decode(parser.encode(reversed));
+            assertEquals(reversed, decoded);
+            assertEquals(List.of("b", "a"), new ArrayList<>(decoded.keySet()));
+        } else {
+            assertThrows(KryoException.class, () -> parser.decode(parser.encode(reversed)));
+        }
 
         // Copying does not go through the wire format: the comparator singleton is shared with the copy.
         final TreeMap<String, Integer> copied = parser.deepCopy(reversed);
@@ -1115,4 +1122,290 @@ public class KryoParserTest extends TestBase {
         assertEquals(small, parser.decode(parser.encode(small)));
     }
     // ---- perf review 2026-09-26 G008 end ----
+
+    // ---- bug review 2026-10-02 G008 begin ----
+    // G008-01: String re-registered at an explicit id fell back to Kryo's FieldSerializer (String internals) instead of StringSerializer
+    @Test
+    public void testRegister_stringAtExplicitIdKeepsStringSerializer() {
+        final String baselinePayload = new KryoParser().serialize("abc");
+        parser.register(String.class, 1_920_101);
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(1_920_101, kryo.getRegistration(String.class).getId());
+            assertTrue(kryo.getRegistration(String.class).getSerializer() instanceof com.esotericsoftware.kryo.serializers.DefaultSerializers.StringSerializer);
+        } finally {
+            parser.recycle(kryo);
+        }
+
+        assertEquals(baselinePayload, parser.serialize("abc"));
+        assertEquals("abc", parser.deserialize(parser.serialize("abc"), null, String.class));
+
+        final String text = "copy me";
+        assertSame(text, parser.deepCopy(text));
+    }
+
+    // G008-01: a class registered at String's built-in id 1 leaves String name-based; that registration fell back to FieldSerializer too
+    @Test
+    public void testRegister_classAtStringIdKeepsStringSerializerForNameBasedString() {
+        final String baselinePayload = new KryoParser().serialize("abc");
+        parser.register(BuiltInIdInstanceTarget.class, 1);
+
+        assertEquals(baselinePayload, parser.serialize("abc"));
+        assertEquals(List.of("x", "y"), parser.decode(parser.encode(new ArrayList<>(List.of("x", "y")))));
+
+        final String text = "copy me";
+        assertSame(text, parser.deepCopy(text));
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertSame(BuiltInIdInstanceTarget.class, kryo.getRegistration(1).getType());
+            assertTrue(kryo.getRegistration(String.class).getSerializer() instanceof com.esotericsoftware.kryo.serializers.DefaultSerializers.StringSerializer);
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+    // ---- bug review 2026-10-02 G008 end ----
+
+    // ---- perf review 2026-10-07 G13 begin ----
+    private static final class G13RecordingWriter extends java.io.Writer {
+        // A StringBuilder, not a StringWriter: a StackOverflowError raised by an earlier cyclic-graph test can leave
+        // java.lang.StringBuffer uninitializable for the rest of a shared test JVM.
+        final StringBuilder text = new StringBuilder();
+        final StringBuilder calls = new StringBuilder();
+        final boolean fail;
+        int flushes;
+        int closes;
+
+        G13RecordingWriter(final boolean fail) {
+            this.fail = fail;
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            if (fail) {
+                throw new IOException("g13 writer failure");
+            }
+
+            calls.append('a').append(len).append(' ');
+            text.append(cbuf, off, len);
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            if (fail) {
+                throw new IOException("g13 writer failure");
+            }
+
+            calls.append("c ");
+            text.append((char) c);
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            if (fail) {
+                throw new IOException("g13 writer failure");
+            }
+
+            calls.append('s').append(len).append(' ');
+            text.append(str, off, off + len);
+        }
+
+        @Override
+        public void flush() {
+            flushes++;
+        }
+
+        @Override
+        public void close() {
+            closes++;
+        }
+    }
+
+    private static byte[] g13Payload(final int size) {
+        final byte[] bytes = new byte[size];
+
+        for (int i = 0; i < size; i++) {
+            bytes[i] = (byte) (i * 131 + (i >>> 5) + 7);
+        }
+
+        return bytes;
+    }
+
+    // G13-01: writeBase64 emits the JDK encoder's text, chunked as before: 8124-character chunks of complete groups, then the padded group char by char
+    @Test
+    public void testWriteBase64_textAndWriterCallsAcrossChunkBoundaries() throws IOException {
+        final int[] sizes = { 0, 1, 2, 3, 100, 1023, 1024, 1025, 8189, 8190, 8191, 8192, 8193, 8194, 8195, 12186, 12187, 12188, 12189, 12190, 12191, 12192,
+                12193, 12194, 16384, 16385, 16386, 24370, 24372, 24373, 24375, 24376, 24378, 65536, 65537, 65538, 100000, 100001, 100002 };
+
+        for (final int size : sizes) {
+            final byte[] bytes = g13Payload(size);
+            final com.landawn.abacus.util.ByteArrayOutputStream source = new com.landawn.abacus.util.ByteArrayOutputStream(size + 17);
+            source.write(bytes, 0, size);
+
+            final String expected = java.util.Base64.getEncoder().encodeToString(bytes);
+            final StringBuilder expectedCalls = new StringBuilder();
+
+            if (size < 8192) {
+                expectedCalls.append('s').append(expected.length()).append(' ');
+            } else {
+                int groups = size / 3;
+
+                while (groups > 0) {
+                    final int chunkGroups = Math.min(groups, 2031);
+                    expectedCalls.append('a').append(chunkGroups * 4).append(' ');
+                    groups -= chunkGroups;
+                }
+
+                if (size % 3 != 0) {
+                    expectedCalls.append("c c c c ");
+                }
+            }
+
+            final G13RecordingWriter output = new G13RecordingWriter(false);
+            BinaryParserSupport.writeBase64(source, output);
+
+            assertEquals(expected, output.text.toString(), "size " + size);
+            assertEquals(expectedCalls.toString(), output.calls.toString(), "size " + size);
+            assertEquals(0, output.flushes, "size " + size);
+            assertEquals(0, output.closes, "size " + size);
+            assertEquals(expected, BinaryParserSupport.encodeBase64(source), "size " + size);
+        }
+    }
+
+    // G13-01: the Writer overload produces the String overload's text on both sides of the streaming threshold, flushes once and never closes
+    @Test
+    public void testSerializeWriter_matchesStringOverloadAroundStreamingThreshold() {
+        final Object[] values = { new byte[0], g13Payload(100), g13Payload(8_000), g13Payload(8_189), g13Payload(8_190), g13Payload(8_191), g13Payload(65_536),
+                Strings.repeat('w', 30_000), new TestObject("g13", 13) };
+
+        for (final Object value : values) {
+            final String expected = parser.serialize(value);
+            final G13RecordingWriter output = new G13RecordingWriter(false);
+            parser.serialize(value, null, output);
+
+            assertEquals(expected, output.text.toString());
+            assertEquals(1, output.flushes);
+            assertEquals(0, output.closes);
+
+            final Object restored = parser.deserialize(new StringReader(output.text.toString()), null, value.getClass());
+
+            if (value instanceof byte[] bytes) {
+                assertArrayEquals(bytes, (byte[]) restored);
+            } else {
+                assertEquals(value, restored);
+            }
+        }
+    }
+
+    // G13-01: a failing Writer still surfaces UncheckedIOException with the IOException cause, without a flush or close, on both paths
+    @Test
+    public void testSerializeWriter_failurePropagatesWithoutFlushOrClose() {
+        for (final int size : new int[] { 10, 8_192, 100_000 }) {
+            final byte[] value = g13Payload(size);
+            final G13RecordingWriter output = new G13RecordingWriter(true);
+
+            final UncheckedIOException e = assertThrows(UncheckedIOException.class, () -> parser.serialize(value, null, output));
+
+            assertTrue(e.getCause() instanceof IOException);
+            assertEquals("g13 writer failure", e.getCause().getMessage());
+            assertEquals(0, output.flushes);
+            assertEquals(0, output.closes);
+            assertEquals(0, output.text.length());
+        }
+    }
+    // ---- perf review 2026-10-07 G13 end ----
+
+    // ---- perf review 2026-10-07 round 2 R2C begin ----
+
+    /** R2C-01: a Writer that fails on one write call and records every call made to it, before and after that failure. */
+    private static final class R2FailOnceWriter extends java.io.Writer {
+        final int failAtCall;
+        int callCount;
+        int callsAfterFailure;
+        boolean failed;
+        int flushes;
+        int closes;
+
+        R2FailOnceWriter(final int failAtCall) {
+            this.failAtCall = failAtCall;
+        }
+
+        private void record() throws IOException {
+            callCount++;
+
+            if (failed) {
+                callsAfterFailure++;
+            } else if (callCount == failAtCall) {
+                failed = true;
+                throw new IOException("r2 writer failure at call " + callCount);
+            }
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            record();
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            record();
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            record();
+        }
+
+        @Override
+        public void flush() {
+            flushes++;
+        }
+
+        @Override
+        public void close() {
+            closes++;
+        }
+    }
+
+    // R2C-01: a Writer that fails part-way through a large Base64 payload (on a middle chunk, on the last chunk, or on the
+    // first character of the padded tail) gets nothing written after the failing call, the failure is the exception the
+    // caller sees, and no close failure is attached to it as a suppressed exception (the JDK streaming encoder used until
+    // r61 finished its pending padded group in close(), after the Writer had already failed, and attached that second
+    // failure). Chunks are 2,031 complete 3-byte groups = 8,124 characters; the tail is written character by character.
+    @Test
+    public void testSerializeWriter_failureMidWayWritesNothingMoreAndAddsNoSuppressed() {
+        for (final int size : new int[] { 100_000, 99_999, 99_998 }) {
+            final byte[] value = g13Payload(size);
+            final int groups = size / 3;
+            final int chunkWrites = (groups + 2030) / 2031;
+            final int tailWrites = size % 3 == 0 ? 0 : 4;
+            final int[] failAtCalls = tailWrites == 0 ? new int[] { 2, chunkWrites } : new int[] { 2, chunkWrites, chunkWrites + 1, chunkWrites + tailWrites };
+
+            for (final int failAt : failAtCalls) {
+                final R2FailOnceWriter output = new R2FailOnceWriter(failAt);
+
+                final UncheckedIOException e = assertThrows(UncheckedIOException.class, () -> parser.serialize(value, null, output), size + "/" + failAt);
+
+                assertEquals("r2 writer failure at call " + failAt, e.getCause().getMessage(), size + "/" + failAt);
+                assertEquals(0, e.getSuppressed().length, size + "/" + failAt);
+                assertEquals(0, e.getCause().getSuppressed().length, size + "/" + failAt);
+                assertEquals(failAt, output.callCount, "no write after the failing call: " + size + "/" + failAt);
+                assertEquals(0, output.callsAfterFailure, size + "/" + failAt);
+                assertEquals(0, output.flushes, size + "/" + failAt);
+                assertEquals(0, output.closes, size + "/" + failAt);
+            }
+
+            // control: the same payload through a Writer that never fails receives exactly chunkWrites + tailWrites calls
+            final R2FailOnceWriter sink = new R2FailOnceWriter(Integer.MAX_VALUE);
+            parser.serialize(value, null, sink);
+            assertEquals(chunkWrites + tailWrites, sink.callCount, String.valueOf(size));
+            assertEquals(1, sink.flushes, String.valueOf(size));
+            assertEquals(0, sink.closes, String.valueOf(size));
+        }
+    }
+
+    // ---- perf review 2026-10-07 round 2 R2C end ----
 }

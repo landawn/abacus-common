@@ -453,8 +453,8 @@ public class ImmutableNavigableSetTest extends TestBase {
     public void testOf_nonComparableElementSelectsInheritedUnsortedFactory() {
         // of(...) requires E extends Comparable. A non-Comparable element is not applicable to
         // ImmutableNavigableSet.of, so the call binds to ImmutableSet.of and returns an unsorted set.
-        final ImmutableSet<NotComparableNS> one = ImmutableNavigableSet.of(new NotComparableNS("z"));
-        final ImmutableSet<NotComparableNS> two = ImmutableNavigableSet.of(new NotComparableNS("z"), new NotComparableNS("a"));
+        final ImmutableSet<NotComparableNS> one = ImmutableSet.of(new NotComparableNS("z"));
+        final ImmutableSet<NotComparableNS> two = ImmutableSet.of(new NotComparableNS("z"), new NotComparableNS("a"));
         Assertions.assertFalse(one instanceof SortedSet);
         Assertions.assertFalse(two instanceof SortedSet);
         Assertions.assertEquals(1, one.size());

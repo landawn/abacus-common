@@ -41,6 +41,10 @@ import java.lang.annotation.Target;
  * <p>When applied to a type, or when the value array contains multiple property names,
  * it defines a composite primary key consisting of multiple fields.</p>
  *
+ * <p>Type-level declarations are resolved through the framework's superclass and interface
+ * hierarchy. A declaration on a subclass overrides an ancestor's {@code @Id}; {@link ReadOnlyId}
+ * is resolved separately, and its properties also contribute to the identifier.</p>
+ *
  * <p><b>Best practices:</b></p>
  * <ul>
  *   <li>Every entity should have exactly one @Id field or composite key definition</li>

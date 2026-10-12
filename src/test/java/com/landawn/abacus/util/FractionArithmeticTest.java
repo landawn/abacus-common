@@ -144,7 +144,7 @@ public class FractionArithmeticTest extends TestBase {
                 } catch (ArithmeticException outOfIntRange) {
                     continue;
                 }
-                assertEquals((long) f.intValue(), f.longValue(), "terms " + f);
+                assertEquals(f.intValue(), f.longValue(), "terms " + f);
             }
         }
 
@@ -160,7 +160,7 @@ public class FractionArithmeticTest extends TestBase {
             } catch (ArithmeticException outOfIntRange) {
                 continue;
             }
-            assertEquals((long) f.intValue(), f.longValue(), "terms " + f);
+            assertEquals(f.intValue(), f.longValue(), "terms " + f);
         }
     }
 

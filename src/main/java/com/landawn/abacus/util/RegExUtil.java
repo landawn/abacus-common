@@ -19,12 +19,16 @@ package com.landawn.abacus.util;
 import java.util.regex.PatternSyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -2560,10 +2564,27 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        // quoteReplacement: the function result is a literal replacement, not a template -
-        // unquoted '$'/'\' in it would be (mis)interpreted as group references/escapes.
-        return pattern.matcher(source)
-                .replaceAll(matcher -> Matcher.quoteReplacement(Strings.nullToEmpty(replacer.apply(source.substring(matcher.start(), matcher.end())))));
+        final Matcher matcher = pattern.matcher(source);
+
+        if (!matcher.find()) {
+            return source;
+        }
+
+        // The function result is a literal replacement, not a template: append it as is. This builds the same
+        // string as Matcher.replaceAll with a quoteReplacement()-escaped result, without escaping every result
+        // and then re-parsing it char by char as a template.
+        final StringBuilder sb = new StringBuilder();
+        int lastEnd = 0;
+
+        do {
+            final int start = matcher.start();
+            final int end = matcher.end();
+
+            sb.append(source, lastEnd, start).append(Strings.nullToEmpty(replacer.apply(source.substring(start, end))));
+            lastEnd = end;
+        } while (matcher.find());
+
+        return sb.append(source, lastEnd, source.length()).toString();
     }
 
     /**
@@ -2594,8 +2615,25 @@ public final class RegExUtil {
             return Strings.EMPTY;
         }
 
-        // quoteReplacement: the function result is a literal replacement, not a template.
-        return pattern.matcher(source).replaceAll(matcher -> Matcher.quoteReplacement(Strings.nullToEmpty(replacer.apply(matcher.start(), matcher.end()))));
+        final Matcher matcher = pattern.matcher(source);
+
+        if (!matcher.find()) {
+            return source;
+        }
+
+        // The function result is a literal replacement, not a template: append it as is (see replaceAll(String, Pattern, Function)).
+        final StringBuilder sb = new StringBuilder();
+        int lastEnd = 0;
+
+        do {
+            final int start = matcher.start();
+            final int end = matcher.end();
+
+            sb.append(source, lastEnd, start).append(Strings.nullToEmpty(replacer.apply(start, end)));
+            lastEnd = end;
+        } while (matcher.find());
+
+        return sb.append(source, lastEnd, source.length()).toString();
     }
 
     /**
@@ -2764,7 +2802,28 @@ public final class RegExUtil {
             return IntStream.empty();
         }
 
-        return pattern.matcher(source).results().mapToInt(MatchResult::start);
+        final Matcher matcher = pattern.matcher(source);
+
+        return StreamSupport.intStream(new Spliterators.AbstractIntSpliterator(Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL) {
+            private boolean exhausted;
+
+            @Override
+            public boolean tryAdvance(final IntConsumer action) {
+                N.requireNonNull(action);
+
+                if (exhausted) {
+                    return false;
+                }
+
+                if (matcher.find()) {
+                    action.accept(matcher.start());
+                    return true;
+                }
+
+                exhausted = true;
+                return false;
+            }
+        }, false);
     }
 
     /**

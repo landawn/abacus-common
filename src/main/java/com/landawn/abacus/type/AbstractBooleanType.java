@@ -28,10 +28,13 @@ import com.landawn.abacus.util.Strings;
  * The abstract base class for boolean types in the type system.
  * <p>
  * This class provides common functionality for handling {@code boolean}/{@code Boolean} values,
- * including string conversion (recognising {@code "true"}, {@code "Y"}, {@code "y"}, and
- * {@code "1"} as {@code true}), conversion from {@code Number} values ({@code true} when
- * {@code longValue() > 0}), JDBC read/write operations using {@link java.sql.Types#BOOLEAN}, and JSON/XML
- * serialization with optional {@code writeNullBooleanAsFalse} support.
+ * including string conversion, conversion from {@code Number} values, JDBC read/write operations using
+ * {@link java.sql.Types#BOOLEAN}, and JSON/XML serialization with optional {@code writeNullBooleanAsFalse} support.
+ * Conversions follow the library-wide rule: an {@code Integer}, {@code Short} or {@code Byte} {@code 1} and the texts
+ * {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) are {@code true}; an {@code Integer},
+ * {@code Short} or {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"}, {@code "n"},
+ * {@code "N"} and {@code "false"} (any case) are {@code false}; any other number, a {@code Number} of any other class
+ * ({@code 1L}, {@code 1.0}), and any other text are rejected with an {@link IllegalArgumentException}.
  * Concrete subclasses cover the primitive {@code boolean} type and the {@code Boolean} wrapper.
  * </p>
  *
@@ -79,23 +82,27 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * <ul>
      *   <li>{@code null} — returns the default value.</li>
      *   <li>{@code Boolean} — returned as-is.</li>
-     *   <li>{@code Number} — returns {@code true} if {@code longValue() > 0}, {@code false} otherwise.</li>
-     *   <li>{@code CharSequence} or {@code Character} — leading and trailing padding is removed and the text is then read exactly as by
-     *       {@link #valueOf(String)}: a single {@code 'Y'}, {@code 'y'}, or {@code '1'} returns {@code true}; any
-     *       other single character returns {@code false}; longer text is parsed using
-     *       {@link Boolean#valueOf(String)} (case-insensitive {@code "true"} yields {@code true}).</li>
-     *   <li>Other objects — converted via {@code Boolean.valueOf(obj.toString())}.</li>
+     *   <li>{@code Integer}, {@code Short} or {@code Byte} — returns {@code true} if the value is {@code 1} and
+     *       {@code false} if it is {@code 0} or {@code -1}; any other value ({@code 2}, {@code -2}) is rejected.</li>
+     *   <li>Any other {@code Number} ({@code Long}, {@code Float}, {@code Double}, {@code BigInteger},
+     *       {@code BigDecimal}, {@code AtomicInteger}, ...) — rejected whatever its value, so {@code 1L} and
+     *       {@code 1.0} are rejected too.</li>
+     *   <li>Anything else, a {@code CharSequence} or {@code Character} included — its string form is read as by
+     *       {@link #valueOf(String)}: {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) return
+     *       {@code true}; {@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) return
+     *       {@code false}; any other text is rejected.</li>
      * </ul>
      * <p><b>Note:</b> unlike {@link #valueOf(String)}, this method does not special-case blank text: an empty or
-     * whitespace-only {@code CharSequence} yields {@link Boolean#FALSE} rather than the default value. A
-     * {@code Character} is treated as a one-character string, so {@code 'Y'}, {@code 'y'} and {@code '1'} yield
-     * {@code true} (earlier releases passed it through {@code Boolean.valueOf}, which always gave {@code false}).</p>
+     * whitespace-only string form yields {@link Boolean#FALSE} rather than the default value.</p>
      *
      * @param obj the source object to convert, may be {@code null}
      * @return the corresponding {@code Boolean} value, or the default value if the input is {@code null}
+     * @throws IllegalArgumentException if {@code obj} is an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, a {@code Number} of any other class, or an object whose string form is
+     *         not one of the accepted texts
      */
     @Override
-    public Boolean valueOf(final Object obj) {
+    public Boolean valueOf(final Object obj) throws IllegalArgumentException {
         if (obj == null) {
             return defaultValue();
         }
@@ -105,18 +112,18 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
         }
 
         if (obj instanceof Number num) {
-            return num.longValue() > 0;
+            // An Integer, Short or Byte 1 is true, 0 and -1 are false; anything else, and any other Number class, is
+            // rejected. longValue() > 0 truncated 0.5 to 0 and wrapped wide values, so a number that is not a boolean
+            // silently became one.
+            return booleanOf(num);
         }
 
-        if (obj instanceof CharSequence || obj instanceof Character) {
-            final String str = obj.toString();
+        final String str = obj.toString();
 
-            // Blank (not only empty) keeps the documented FALSE special case; everything else follows the padding-
-            // stripped valueOf(String) rule so " Y" and Character 'Y' agree with the String overload (and XML with JSON).
-            return Strings.isBlank(str) ? Boolean.FALSE : parseBoolean(str);
-        }
-
-        return Boolean.valueOf(obj.toString());
+        // Blank (not only empty) keeps the documented FALSE special case; everything else follows the padding-stripped
+        // valueOf(String) rule, so " Y" and Character 'Y' agree with the String overload (and XML with JSON). Any other
+        // object used to go through Boolean.valueOf, which read every unrecognized string form as false.
+        return Strings.isBlank(str) ? Boolean.FALSE : parseBoolean(str);
     }
 
     /**
@@ -128,10 +135,10 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *       {@code " true "} are accepted). Padding is a character the blank test above would discard
      *       ({@linkplain Character#isWhitespace(char) Unicode whitespace}, e.g. {@code U+3000}) or a character
      *       {@code <= ' '} (e.g. {@code U+0001}); interior padding is not removed.</li>
-     *   <li>Single character strings: {@code 'Y'}, {@code 'y'}, or {@code '1'} return {@code true};
-     *       any other single character returns {@code false}.</li>
-     *   <li>Other strings are parsed using {@link Boolean#valueOf(String)} (i.e. {@code true} only
-     *       if the string equals {@code "true"} case-insensitively).</li>
+     *   <li>{@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) return {@code true}.</li>
+     *   <li>{@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) return {@code false}.</li>
+     *   <li>Any other string is rejected. Numeric text is not parsed, so {@code "2"}, {@code "1.0"} and {@code "01"}
+     *       are rejected, as are {@code "yes"}, {@code "T"} and {@code "abc"}.</li>
      * </ul>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
@@ -140,11 +147,12 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *
      * @param str the string to convert, may be {@code null}
      * @return the {@code Boolean} value, or the default value if the input is {@code null} or blank
+     * @throws IllegalArgumentException if {@code str} is not blank and, without its padding, is none of the accepted texts
      * @see #valueOf(Object)
      * @see #stringOf(Boolean)
      */
     @Override
-    public Boolean valueOf(final String str) {
+    public Boolean valueOf(final String str) throws IllegalArgumentException {
         if (Strings.isBlank(str)) {
             return defaultValue();
         }
@@ -153,20 +161,18 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
     }
 
     /**
-     * Converts a region of the specified character array to a {@code Boolean} value.
-     * <p>
-     * Handles the following cases:
-     * </p>
+     * Converts a region of the specified character array to a {@code Boolean} value, exactly as
+     * {@link #valueOf(String)} converts the same text:
      * <ul>
      *   <li>{@code null} or zero-length region — returns the default value.</li>
-     *   <li>Single character {@code 'Y'}, {@code 'y'}, or {@code '1'} — returns {@code true}; any other single
-     *       non-padding character — returns {@code false}.</li>
-     *   <li>Four-character sequence equal to {@code "true"} (case-insensitive) — returns {@code true}.</li>
+     *   <li>{@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) — returns {@code true}; {@code "0"},
+     *       {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (any case) — returns {@code false}. These are
+     *       read in place, without allocating.</li>
      *   <li>A region that begins or ends with padding (a character {@code <= ' '} or any
-     *       {@linkplain Character#isWhitespace(char) Unicode whitespace}) — read as by
-     *       {@link #valueOf(String)}: stripped first, so {@code " Y"} and {@code " true "} return {@code true} and a
-     *       whitespace-only region (of any length) returns the default value. Interior whitespace is not removed.</li>
-     *   <li>Any other value — returns {@code false}.</li>
+     *       {@linkplain Character#isWhitespace(char) Unicode whitespace}) is stripped first, so {@code " Y"} and
+     *       {@code " true "} return {@code true}, and a whitespace-only region (of any length) returns the default
+     *       value. Interior whitespace is not removed.</li>
+     *   <li>Any other region is rejected.</li>
      * </ul>
      *
      * @param cbuf the character array to convert, may be {@code null}
@@ -174,39 +180,20 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * @param length the number of characters to read
      * @return the corresponding {@code Boolean} value, or the default value if {@code cbuf} is {@code null} or {@code length} is 0
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if the region is not blank and, without its padding, is none of the accepted texts
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (length == 0)) {
             return defaultValue();
         }
 
-        if (length == 1) {
-            final char ch = cbuf[offset];
+        final Boolean token = booleanToken(cbuf, offset, length);
 
-            if (ch == 'Y' || ch == 'y' || ch == '1') {
-                return Boolean.TRUE;
-            }
-
-            // A lone padding character is text that valueOf(String) - and therefore the XML reader - either rejects
-            // as blank (the default value) or strips away, leaving "" for Boolean.valueOf (FALSE). Which of the two
-            // it is depends on the character, so defer to it rather than answering FALSE here.
-            return isPadding(ch) ? valueOf(String.valueOf(ch)) : Boolean.FALSE;
-        }
-
-        if ((length == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
-                && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) {
-            return Boolean.TRUE;
-        }
-
-        // Miss path only: a region padded with whitespace (" Y", " true ") is read by valueOf(String) so the JSON
-        // (char[]) and XML (String) deserializers agree; the fast checks above keep the common case allocation-free.
-        // isPadding covers both definitions (<= ' ' and Character.isWhitespace), as parseBoolean's strip does.
-        if (isPadding(cbuf[offset]) || isPadding(cbuf[offset + length - 1])) {
-            return valueOf(new String(cbuf, offset, length));
-        }
-
-        return Boolean.FALSE;
+        // Miss path only: padded text (" Y", " true "), blank text and text that is not a boolean are read by
+        // valueOf(String), so the JSON (char[]) and XML (String) deserializers agree on all of them; the check above
+        // keeps the common case allocation-free.
+        return token != null ? token : valueOf(new String(cbuf, offset, length));
     }
 
     /**

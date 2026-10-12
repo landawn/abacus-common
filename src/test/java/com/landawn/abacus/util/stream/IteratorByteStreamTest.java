@@ -485,8 +485,7 @@ public class IteratorByteStreamTest extends TestBase {
     public void testDistinct_unsortedPresenceTable() {
         assertEquals(0, iter().distinct().toArray().length);
         org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 5, Byte.MIN_VALUE, Byte.MAX_VALUE, 0, -1 },
-                iter((byte) 5, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 5, (byte) 0, (byte) -1, Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, (byte) -1)
-                        .distinct()
+                iter((byte) 5, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 5, (byte) 0, (byte) -1, Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, (byte) -1).distinct()
                         .toArray());
 
         final java.util.Random random = new java.util.Random(7);

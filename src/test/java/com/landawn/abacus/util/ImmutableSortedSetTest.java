@@ -763,8 +763,8 @@ public class ImmutableSortedSetTest extends TestBase {
         // ImmutableSortedSet.of, so the call binds to ImmutableSet.of and returns an unsorted set.
         // The hierarchy is unchanged, so this fallback remains; a result demanded as
         // ImmutableSortedSet<NotComparableSS> would not compile.
-        final ImmutableSet<NotComparableSS> one = ImmutableSortedSet.of(new NotComparableSS("z"));
-        final ImmutableSet<NotComparableSS> two = ImmutableSortedSet.of(new NotComparableSS("z"), new NotComparableSS("a"));
+        final ImmutableSet<NotComparableSS> one = ImmutableSet.of(new NotComparableSS("z"));
+        final ImmutableSet<NotComparableSS> two = ImmutableSet.of(new NotComparableSS("z"), new NotComparableSS("a"));
         assertFalse(one instanceof SortedSet);
         assertFalse(two instanceof SortedSet);
         assertEquals(1, one.size());

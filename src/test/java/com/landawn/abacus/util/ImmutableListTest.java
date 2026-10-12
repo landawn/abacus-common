@@ -33,7 +33,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_Empty() {
         ImmutableList<String> list = ImmutableList.empty();
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         Assertions.assertSame(list, reversed);
     }
 
@@ -137,7 +137,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Assertions.assertEquals(3, reversed.size());
         Assertions.assertEquals("c", reversed.get(0));
@@ -148,7 +148,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_Contains() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Assertions.assertTrue(reversed.contains("a"));
         Assertions.assertTrue(reversed.contains("c"));
@@ -159,7 +159,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_IndexOf() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Assertions.assertEquals(4, reversed.indexOf("a"));
         Assertions.assertEquals(3, reversed.indexOf("b"));
@@ -172,7 +172,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_LastIndexOf() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Assertions.assertEquals(4, reversed.lastIndexOf("a"));
         Assertions.assertEquals(0, reversed.lastIndexOf("e"));
@@ -181,7 +181,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_SubList() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         ImmutableList<String> sub = reversed.subList(1, 3);
 
         Assertions.assertEquals(2, sub.size());
@@ -192,14 +192,14 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_Size() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         Assertions.assertEquals(4, reversed.size());
     }
 
     @Test
     public void testReverse_Iterator() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         ObjIterator<String> iter = reversed.iterator();
 
         List<String> collected = new ArrayList<>();
@@ -213,7 +213,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_ListIterator() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         ImmutableListIterator<String> iter = reversed.listIterator();
 
         Assertions.assertTrue(iter.hasNext());
@@ -282,7 +282,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_Operations() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d", "e");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Assertions.assertTrue(reversed.contains("c"));
 
@@ -300,7 +300,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_IndexOf_WithDuplicates() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         // reversed: ["a", "b", "a", "b", "a"]
         // forward has "a" at 0,2,4 so lastIndexOf("a") is 4 -> reversed indexOf is 5-1-4=0
         Assertions.assertEquals(0, reversed.indexOf("a"));
@@ -311,7 +311,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_LastIndexOf_WithDuplicates() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "a", "b", "a");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         // forward has "a" at 0,2,4 so indexOf("a") is 0 -> reversed lastIndexOf is 5-1-0=4
         Assertions.assertEquals(4, reversed.lastIndexOf("a"));
         // forward has "b" at 1,3 so indexOf("b") is 1 -> reversed lastIndexOf is 5-1-1=3
@@ -338,8 +338,8 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_DoubleReverse() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
-        ImmutableList<String> doubleReversed = (ImmutableList<String>) reversed.reversed();
+        ImmutableList<String> reversed = list.reversed();
+        ImmutableList<String> doubleReversed = reversed.reversed();
 
         Assertions.assertSame(list, doubleReversed);
     }
@@ -347,14 +347,14 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_SingleElement() {
         ImmutableList<String> list = ImmutableList.of("single");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         Assertions.assertSame(list, reversed);
     }
 
     @Test
     public void testReverse_ToArray() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
 
         Object[] array = reversed.toArray();
         Assertions.assertEquals(3, array.length);
@@ -469,7 +469,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReverse_Iterator_Remove_ThrowsException() {
         ImmutableList<String> list = ImmutableList.of("a", "b", "c");
-        ImmutableList<String> reversed = (ImmutableList<String>) list.reversed();
+        ImmutableList<String> reversed = list.reversed();
         ObjIterator<String> iter = reversed.iterator();
         iter.next();
         Assertions.assertThrows(UnsupportedOperationException.class, () -> iter.remove());
@@ -929,7 +929,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReversed_EqualsAndHashCode() {
         ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3);
-        ImmutableList<Integer> reversed = (ImmutableList<Integer>) forward.reversed();
+        ImmutableList<Integer> reversed = forward.reversed();
 
         // Regression: the reversed view's own equals()/hashCode() must reflect its
         // public [3, 2, 1] order (per the java.util.List contract), not the forward
@@ -1099,12 +1099,12 @@ public class ImmutableListTest extends TestBase {
 
         final ImmutableList<Integer> three = ImmutableList.of(1, 2, 3);
         Assertions.assertNotSame(three, three.reversed());
-        Assertions.assertSame(three, ((ImmutableList<Integer>) three.reversed()).reversed());
+        Assertions.assertSame(three, three.reversed().reversed());
     }
 
     @Test
     public void testReversed_iterationOrderOfEveryTraversal() {
-        final ImmutableList<Integer> reversed = (ImmutableList<Integer>) ImmutableList.of(1, 2, 3).reversed();
+        final ImmutableList<Integer> reversed = ImmutableList.of(1, 2, 3).reversed();
 
         Assertions.assertEquals(Arrays.asList(3, 2, 1), reversed.stream().toList());
         Assertions.assertEquals(Arrays.asList(3, 2, 1), reversed.parallelStream().toList());
@@ -1148,7 +1148,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReversed_subListExceptionsMatchTheForwardList() {
         final ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3);
-        final ImmutableList<Integer> reversed = (ImmutableList<Integer>) forward.reversed();
+        final ImmutableList<Integer> reversed = forward.reversed();
 
         // an inverted range is IllegalArgumentException in both directions (as in java.util.List)
         Assertions.assertThrows(IllegalArgumentException.class, () -> forward.subList(2, 1));
@@ -1223,7 +1223,7 @@ public class ImmutableListTest extends TestBase {
     @Test
     public void testReversed_nestedWithSubList() {
         final ImmutableList<Integer> forward = ImmutableList.of(1, 2, 3, 4, 5);
-        final ImmutableList<Integer> reversed = (ImmutableList<Integer>) forward.reversed();
+        final ImmutableList<Integer> reversed = forward.reversed();
 
         Assertions.assertEquals(Arrays.asList(5, 4, 3, 2, 1), reversed);
         Assertions.assertEquals(Arrays.asList(4, 3), reversed.subList(1, 3));
@@ -1252,7 +1252,7 @@ public class ImmutableListTest extends TestBase {
         Assertions.assertEquals(Arrays.asList(4, 3, 2), reversedSub);
 
         // the java.util.List.reversed() override still dispatches here through the generated bridge
-        final List<Integer> viaListInterface = ((List<Integer>) forward).reversed();
+        final List<Integer> viaListInterface = forward.reversed();
         Assertions.assertTrue(viaListInterface instanceof ImmutableList);
         Assertions.assertEquals(Arrays.asList(5, 4, 3, 2, 1), viaListInterface);
 

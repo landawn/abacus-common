@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 
 /**
  * Regression tests for the 2026-08-30 {@link Beans} deep-review fixes. One nested section per ledger
@@ -586,6 +587,9 @@ public class BeansRegressionATest extends TestBase {
     }
 
     /** Counts getter invocations so the builder's double-read is directly observable. */
+    // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
+    // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
+    @AccessFieldByMethod
     public static class C007Counting {
         static int reads = 0;
 

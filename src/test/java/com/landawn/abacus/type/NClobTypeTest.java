@@ -20,6 +20,7 @@ import javax.sql.rowset.serial.SerialException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.landawn.abacus.TestBase;
@@ -246,7 +247,7 @@ public class NClobTypeTest extends TestBase {
 
         assertEquals("", nClobType.stringOf(mockNClob));
 
-        Mockito.verify(mockNClob, Mockito.never()).getSubString(Mockito.anyLong(), Mockito.anyInt());
+        Mockito.verify(mockNClob, Mockito.never()).getSubString(ArgumentMatchers.anyLong(), ArgumentMatchers.anyInt());
         Mockito.verify(mockNClob, Mockito.times(1)).free();
     }
 
@@ -279,11 +280,11 @@ public class NClobTypeTest extends TestBase {
 
     @Test
     public void reviewFixes20260906_valueOfObjectNClobReturnsSameInstanceWithoutTouchingIt() throws SQLException {
-        assertSame(mockNClob, nClobType.valueOf((Object) mockNClob));
+        assertSame(mockNClob, nClobType.valueOf(mockNClob));
 
         Mockito.verify(mockNClob, Mockito.never()).free();
         Mockito.verify(mockNClob, Mockito.never()).length();
-        Mockito.verify(mockNClob, Mockito.never()).getSubString(Mockito.anyLong(), Mockito.anyInt());
+        Mockito.verify(mockNClob, Mockito.never()).getSubString(ArgumentMatchers.anyLong(), ArgumentMatchers.anyInt());
     }
 
     @Test
@@ -291,7 +292,7 @@ public class NClobTypeTest extends TestBase {
         final SerialClob delegate = new SerialClob("hello".toCharArray());
         final NClob nclob = nclobOver(delegate);
 
-        assertSame(nclob, nClobType.valueOf((Object) nclob));
+        assertSame(nclob, nClobType.valueOf(nclob));
         assertEquals(5L, delegate.length());
     }
 
@@ -300,8 +301,8 @@ public class NClobTypeTest extends TestBase {
         final Clob plain = Mockito.mock(Clob.class);
         final SerialClob real = new SerialClob("ab".toCharArray());
 
-        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf((Object) plain));
-        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf((Object) real));
+        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf(plain));
+        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf(real));
 
         Mockito.verify(plain, Mockito.never()).free();
         Mockito.verify(plain, Mockito.never()).length();
@@ -311,7 +312,7 @@ public class NClobTypeTest extends TestBase {
     @Test
     public void reviewFixes20260906_valueOfObjectNonLobThrowsAndNullReturnsNull() {
         assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf((Object) "x"));
-        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf((Object) 42));
+        assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf(42));
         assertNull(nClobType.valueOf((Object) null));
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> nClobType.valueOf("x"));
@@ -322,8 +323,8 @@ public class NClobTypeTest extends TestBase {
         final NClobType subtype = new NClobType(TestNClob.class);
         final TestNClob own = Mockito.mock(TestNClob.class);
 
-        assertSame(own, subtype.valueOf((Object) own));
-        assertThrows(UnsupportedOperationException.class, () -> subtype.valueOf((Object) mockNClob));
+        assertSame(own, subtype.valueOf(own));
+        assertThrows(UnsupportedOperationException.class, () -> subtype.valueOf(mockNClob));
 
         Mockito.verify(own, Mockito.never()).free();
         Mockito.verify(mockNClob, Mockito.never()).free();

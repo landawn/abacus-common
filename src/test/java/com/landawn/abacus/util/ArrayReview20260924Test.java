@@ -78,9 +78,9 @@ public class ArrayReview20260924Test extends TestBase {
 
     @Test
     public void testC306_newInstanceVoidHasMessage() {
-        for (final org.junit.jupiter.api.function.Executable call : List.<org.junit.jupiter.api.function.Executable> of(
-                () -> Array.newInstance(void.class, 0), () -> Array.newInstance(void.class, 5), () -> Array.newInstance(void.class, new int[] { 1 }),
-                () -> Array.newInstance(void.class, new int[] { 1, 2 }), () -> Array.newInstance(void.class, new int[0]), () -> N.newArray(void.class, 3))) {
+        for (final org.junit.jupiter.api.function.Executable call : List.<org.junit.jupiter.api.function.Executable> of(() -> Array.newInstance(void.class, 0),
+                () -> Array.newInstance(void.class, 5), () -> Array.newInstance(void.class, new int[] { 1 }),
+                () -> Array.newInstance(void.class, new int[] { 1, 2 }), () -> Array.newInstance(void.class, new int[0]), () -> CommonUtil.newArray(void.class, 3))) {
             final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
             assertEquals("'componentType' cannot be void", e.getMessage());
         }
@@ -165,7 +165,8 @@ public class ArrayReview20260924Test extends TestBase {
         assertArrayEquals(new char[] { 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b' }, Array.repeat(new char[] { 'a', 'b' }, 5));
         assertArrayEquals(new byte[] { 1, 2, 3, 1, 2, 3, 1, 2, 3 }, Array.repeat(new byte[] { 1, 2, 3 }, 3));
         assertArrayEquals(new short[] { -1, -1, -1, -1, -1, -1, -1 }, Array.repeat(new short[] { -1 }, 7));
-        assertArrayEquals(new long[] { Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE }, Array.repeat(new long[] { Long.MIN_VALUE, Long.MAX_VALUE }, 2));
+        assertArrayEquals(new long[] { Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE },
+                Array.repeat(new long[] { Long.MIN_VALUE, Long.MAX_VALUE }, 2));
         assertArrayEquals(new float[] { Float.NaN, -0.0f, Float.NaN, -0.0f, Float.NaN, -0.0f }, Array.repeat(new float[] { Float.NaN, -0.0f }, 3));
         assertArrayEquals(new double[] { 1.5, Double.NaN, -0.0, 1.5, Double.NaN, -0.0 }, Array.repeat(new double[] { 1.5, Double.NaN, -0.0 }, 2));
         assertArrayEquals(new String[] { "x", null, "x", null, "x", null }, Array.repeat(new String[] { "x", null }, 3));
@@ -247,7 +248,7 @@ public class ArrayReview20260924Test extends TestBase {
         arr[1] = "y";
         assertEquals("y", view.get(1));
 
-        final List<String> copy = N.asList(arr);
+        final List<String> copy = CommonUtil.asList(arr);
         assertThrows(UnsupportedOperationException.class, () -> copy.set(0, "z"));
         arr[0] = "changed";
         assertEquals("x", copy.get(0));

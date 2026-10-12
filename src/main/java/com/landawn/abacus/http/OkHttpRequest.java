@@ -1600,10 +1600,11 @@ public final class OkHttpRequest {
      *                    Use {@link Response Response.class} to receive the raw OkHttp response, or
      *                    {@code Void.class} to discard the response body.
      * @return the deserialized response body, or {@code null} if {@code resultClass} is {@code Void.class}.
-     *         A successful response without content (a HEAD request, or a 204, 205 or 304 status) is not
+     *         A successful response without content (a HEAD request, or a 204 or 205 status) is not
      *         mapped to {@code null}: it is decoded from empty input, so {@code String.class} yields {@code ""}
-     *         and {@code byte[].class} an empty array. If {@code resultClass} is {@code Response.class}, the
-     *         caller must close the returned response.
+     *         and {@code byte[].class} an empty array. A 304 status is not 2xx, so it throws
+     *         {@link HttpResponseException} like any other non-2xx status. If {@code resultClass} is
+     *         {@code Response.class}, the caller must close the returned response.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or
      *         {@code resultClass} is the abacus {@link HttpResponse} type (use OkHttp's {@code Response} class
      *         directly instead), a request body has been configured and {@code httpMethod} is GET or HEAD

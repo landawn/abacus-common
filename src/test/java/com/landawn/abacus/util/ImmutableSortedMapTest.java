@@ -832,8 +832,8 @@ public class ImmutableSortedMapTest extends TestBase {
         // ImmutableSortedMap.of, so the call binds to ImmutableMap.of and returns an unsorted map.
         // The hierarchy is unchanged, so this fallback remains; a result demanded as
         // ImmutableSortedMap<NotComparable, Integer> would not compile.
-        final ImmutableMap<NotComparable, Integer> one = ImmutableSortedMap.of(new NotComparable("z"), 1);
-        final ImmutableMap<NotComparable, Integer> two = ImmutableSortedMap.of(new NotComparable("z"), 1, new NotComparable("a"), 2);
+        final ImmutableMap<NotComparable, Integer> one = ImmutableMap.of(new NotComparable("z"), 1);
+        final ImmutableMap<NotComparable, Integer> two = ImmutableMap.of(new NotComparable("z"), 1, new NotComparable("a"), 2);
         assertFalse(one instanceof SortedMap);
         assertFalse(two instanceof SortedMap);
         assertEquals(1, one.size());

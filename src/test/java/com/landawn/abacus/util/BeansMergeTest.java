@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class BeansMergeTest extends BeansTestSupport {
 
@@ -253,7 +253,6 @@ public class BeansMergeTest extends BeansTestSupport {
         Beans.mergeInto(new BeansMutableFixture(), t2);
         assertEquals("keep", t2.getA());
     }
-
 
     /**
      * A {@code null} source is a no-op for every {@code mergeInto}/{@code mergeIntoIf} overload: the target is

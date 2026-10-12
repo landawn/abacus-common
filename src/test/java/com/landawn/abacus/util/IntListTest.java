@@ -1803,6 +1803,7 @@ public class IntListTest extends IntListTestSupport {
         assertTrue(f.retainAll(IntList.of(1)));
         assertEquals(1, f.size());
     }
+
     // ---- perf review 2026-09-26 G115 begin ----
     // G115-01: every PrimitiveList random(..) factory (now ThreadLocalRandom-backed) called from several threads at once.
     @Test
@@ -1854,11 +1855,13 @@ public class IntListTest extends IntListTestSupport {
 
                         final FloatList floats = FloatList.random(length);
                         assertEquals(length, floats.size());
-                        assertTrue(floats.min().orElseThrow() >= 0f && floats.max().orElseThrow() < 1f && floats.min().orElseThrow() < floats.max().orElseThrow());
+                        assertTrue(
+                                floats.min().orElseThrow() >= 0f && floats.max().orElseThrow() < 1f && floats.min().orElseThrow() < floats.max().orElseThrow());
 
                         final DoubleList doubles = DoubleList.random(length);
                         assertEquals(length, doubles.size());
-                        assertTrue(doubles.min().orElseThrow() >= 0d && doubles.max().orElseThrow() < 1d && doubles.min().orElseThrow() < doubles.max().orElseThrow());
+                        assertTrue(doubles.min().orElseThrow() >= 0d && doubles.max().orElseThrow() < 1d
+                                && doubles.min().orElseThrow() < doubles.max().orElseThrow());
                     }
                 } catch (final Throwable e) {
                     errors.add(e);

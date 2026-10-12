@@ -455,7 +455,8 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]")).getClass());
 
         assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("[1, null]"));
+        // 2026-10-05: the unquoted literal null is the element default, as the JSON parser reads a primitive array
+        assertArrayEquals(new byte[] { 1, 0 }, type.valueOf("[1, null]"));
     }
 
     @Test
@@ -463,14 +464,26 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         final Blob blob = mock(Blob.class);
         when(blob.length()).thenReturn(0L);
 
-        final byte[] result = type.valueOf((Object) blob);
+        final byte[] result = type.valueOf(blob);
 
         assertEquals(0, result.length);
         verify(blob, never()).getBytes(1L, 0);
         verify(blob).free();
 
         // SerialBlob rejects getBytes(1, 0) on a zero-length lob; the guard returns the empty array instead
-        assertEquals(0, type.valueOf((Object) new SerialBlob(new byte[0])).length);
-        assertArrayEquals(new byte[] { 1, 2 }, type.valueOf((Object) new SerialBlob(new byte[] { 1, 2 })));
+        assertEquals(0, type.valueOf(new SerialBlob(new byte[0])).length);
+        assertArrayEquals(new byte[] { 1, 2 }, type.valueOf(new SerialBlob(new byte[] { 1, 2 })));
+    }
+
+    // 2026-10-05: the compact JSON text form. Quoted content is decoded exactly once, a bare null is the element default,
+    // and an empty or textual quoted element is still malformed.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new byte[] { 1, -2, 0, 3 }, type.valueOf("[\"1\", '-2', null, \"\\u0033\"]"));
+        assertArrayEquals(new byte[] { 0, 0 }, type.valueOf("[null,null]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
     }
 }

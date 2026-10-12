@@ -364,4 +364,18 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
     static String getCharNum(final char ch) {
         return String.format("\\u%04x", (int) ch);
     }
+
+    /** Writes a JSON Unicode escape without constructing a formatted String on the buffered path. */
+    final void writeUnicodeEscape(final char ch) throws IOException {
+        ensureOpen();
+        final char[] chars = scalarBuffer();
+        final String digits = "0123456789abcdef";
+        chars[0] = '\\';
+        chars[1] = 'u';
+        chars[2] = digits.charAt(ch >>> 12);
+        chars[3] = digits.charAt(ch >>> 8 & 15);
+        chars[4] = digits.charAt(ch >>> 4 & 15);
+        chars[5] = digits.charAt(ch & 15);
+        writeScalar(chars, 0, 6);
+    }
 }

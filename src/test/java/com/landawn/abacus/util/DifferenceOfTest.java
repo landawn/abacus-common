@@ -307,8 +307,7 @@ public class DifferenceOfTest extends DifferenceTestSupport {
     @Test
     public void testOfShortList_countingMatchesCollectionOverload() {
         final ShortList dense = ShortList.of((short) -3, (short) 0, (short) 4, (short) -3, (short) 4, (short) 4);
-        final ShortList probe = ShortList.of((short) 4, (short) -4, (short) 5, (short) -3, (short) 4, Short.MIN_VALUE, Short.MAX_VALUE, (short) 4,
-                (short) 4);
+        final ShortList probe = ShortList.of((short) 4, (short) -4, (short) 5, (short) -3, (short) 4, Short.MIN_VALUE, Short.MAX_VALUE, (short) 4, (short) 4);
         assertSameDifferenceAsCollections(probe.boxed(), dense.boxed(), Difference.of(probe, dense));
         assertSameDifferenceAsCollections(dense.boxed(), probe.boxed(), Difference.of(dense, probe));
 

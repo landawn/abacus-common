@@ -287,7 +287,6 @@ public class RangeTypeTest extends TestBase {
         assertNull(rangeType.valueOf(" "));
     }
 
-
     @Test
     public void testAppendToKeepsJsonQuotedStringEndpointsUnlikeRangeToString() throws IOException {
         final Type<Range<String>> type = TypeFactory.getType("Range<String>");

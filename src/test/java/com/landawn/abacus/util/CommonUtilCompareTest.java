@@ -289,7 +289,6 @@ public class CommonUtilCompareTest extends CommonUtilTestSupport {
         assertEquals(0, CommonUtil.compareIgnoreCase("HELLO", "hello"));
     }
 
-
     @Test
     public void testCompare_nullIterableTreatedAsEmpty() {
         List<String> list = Arrays.asList("a");

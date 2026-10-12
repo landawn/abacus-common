@@ -17,8 +17,11 @@ package com.landawn.abacus.util.stream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -28,13 +31,13 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
-import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.function.ByteBinaryOperator;
 import com.landawn.abacus.util.function.ByteConsumer;
 import com.landawn.abacus.util.function.ByteFunction;
@@ -43,7 +46,7 @@ import com.landawn.abacus.util.function.ByteTernaryOperator;
 import com.landawn.abacus.util.function.ByteToIntFunction;
 import com.landawn.abacus.util.function.ByteUnaryOperator;
 import com.landawn.abacus.util.function.ObjByteConsumer;
-import com.landawn.abacus.util.function.ToByteFunction;
+import com.landawn.abacus.util.u.OptionalByte;
 
 /**
  * A parallel implementation of ByteStream backed by an iterator that enables concurrent processing
@@ -150,9 +153,10 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
     }
 
     /**
-     * Returns a parallel stream consisting of elements that match the given predicate.
-     * If the stream can be processed sequentially (i.e., {@code maxThreadNum} is no more than 1), delegates to
-     * the sequential implementation; otherwise boxes elements and uses the parallel object stream.
+     * Returns a parallel stream consisting of elements that match the given predicate. If the stream can be
+     * processed sequentially (i.e., {@code maxThreadNum} is no more than 1), delegates to the sequential
+     * implementation; otherwise evaluates the predicate on worker threads, which pass the retained elements to
+     * the returned stream through a bounded primitive buffer without boxing.
      *
      * <p>The encounter order of elements in the resulting stream is not guaranteed when
      * executing in parallel.
@@ -172,15 +176,58 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
             return super.filter(predicate);
         }
 
-        final Stream<Byte> stream = boxed().filter(predicate::test);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        while (true) {
+                            synchronized (source) {
+                                if (source.hasNext()) {
+                                    next = source.nextByte();
+                                } else {
+                                    break;
+                                }
+                            }
+
+                            if (predicate.test(next)) {
+                                hasNext = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
-     * Returns a parallel stream of elements that match the predicate until a worker observes
-     * a non-matching element. If the stream can be processed sequentially, delegates to the
-     * sequential implementation; otherwise boxes elements and uses the parallel object stream.
+     * Returns a parallel stream of elements that match the predicate until a worker observes a
+     * non-matching element. If the stream can be processed sequentially, delegates to the
+     * sequential implementation; otherwise evaluates the predicate on worker threads, which
+     * pass the retained elements to the returned stream through a bounded primitive buffer
+     * without boxing.
      *
      * <p><b>&#9888;&#65039; Parallel streams:</b> this operation does not guarantee encounter-order prefix
      * semantics; later matching elements may be returned.
@@ -200,15 +247,57 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
             return super.takeWhile(predicate);
         }
 
-        final Stream<Byte> stream = boxed().takeWhile(predicate::test);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
+        final AtomicBoolean hasMore = new AtomicBoolean(true);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext && hasMore.get()) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                                hasNext = true;
+                            } else {
+                                hasMore.set(false);
+                            }
+                        }
+
+                        if (hasNext && !predicate.test(next)) {
+                            hasNext = false;
+                            hasMore.set(false);
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
      * Returns a parallel stream after dropping the leading elements that match the predicate.
      * If the stream can be processed sequentially, delegates to the sequential implementation;
-     * otherwise boxes elements and delegates to the parallel object stream.
+     * otherwise evaluates the predicate on worker threads, which pass the retained elements to
+     * the returned stream through a bounded primitive buffer without boxing.
      *
      * <p>The first non-matching element and all remaining elements are retained, but their output
      * order is not guaranteed to match the source encounter order.
@@ -228,15 +317,91 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
             return super.dropWhile(predicate);
         }
 
-        final Stream<Byte> stream = boxed().dropWhile(predicate::test);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
+        final AtomicBoolean dropped = new AtomicBoolean(false);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean hasNext = false;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        // Once the boundary element has been found ('dropped' is set), all threads switch to
+                        // pass-through mode and consume the remaining elements via the shared cursor.
+                        if (dropped.get()) {
+                            synchronized (source) {
+                                if (source.hasNext()) {
+                                    next = source.nextByte();
+                                    hasNext = true;
+                                }
+                            }
+                        } else {
+                            while (!dropped.get()) {
+                                // Take the element AND decide about it under the same lock. Testing the predicate
+                                // outside it let a thread that had not yet observed `dropped` consume an element
+                                // belonging to the output and silently discard it - dropWhile must drop only the
+                                // LEADING prefix. The drop phase is inherently sequential; only it is serialized,
+                                // the pass-through phase above stays parallel.
+                                synchronized (source) {
+                                    if (dropped.get()) {
+                                        break;
+                                    }
+
+                                    if (!source.hasNext()) {
+                                        break;
+                                    }
+
+                                    next = source.nextByte();
+
+                                    if (!predicate.test(next)) {
+                                        hasNext = true;
+                                        dropped.set(true);
+                                    }
+                                }
+
+                                if (hasNext) {
+                                    break;
+                                }
+                            }
+
+                            if (!hasNext && dropped.get()) {
+                                synchronized (source) {
+                                    if (source.hasNext()) {
+                                        next = source.nextByte();
+                                        hasNext = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    hasNext = false;
+                    return next;
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
      * Returns a parallel {@code ByteStream} consisting of the results of applying the given
      * function to each element. If the stream can be processed sequentially, delegates to the
-     * sequential implementation; otherwise boxes elements and uses the parallel object stream.
+     * sequential implementation; otherwise applies the mapper on worker threads, which pass
+     * the results to the returned stream through a bounded primitive buffer without boxing.
      *
      * @param mapper a non-interfering, stateless function to apply to each element
      * @return a new parallel {@code ByteStream} of mapped elements
@@ -246,23 +411,56 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
     @Override
     public ByteStream map(final ByteUnaryOperator mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.map(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final ByteStream stream = boxed().mapToByte(mapper::applyAsByte);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public byte nextByte() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final byte result = mapper.applyAsByte(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
-     * Returns a parallel {@code IntStream} consisting of the results of applying the given
-     * function to each element. If the stream can be processed sequentially, delegates to the
-     * sequential implementation; otherwise boxes elements and maps using the parallel object stream.
+     * Returns a parallel {@code IntStream} consisting of the results of applying the given function
+     * to each element. If the stream can be processed sequentially, delegates to the sequential
+     * implementation; otherwise applies the mapper on worker threads, which pass the results to the
+     * returned stream through a bounded primitive buffer without boxing.
      *
      * @param mapper a non-interfering, stateless function mapping {@code byte} to {@code int}
      * @return a new parallel {@code IntStream} of mapped values
@@ -272,23 +470,56 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
     @Override
     public IntStream mapToInt(final ByteToIntFunction mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
             return super.mapToInt(mapper);
         }
 
-        @SuppressWarnings("resource")
-        final IntStream stream = boxed().mapToInt(mapper::applyAsInt);
+        final ByteIterator source = iteratorEx();
+        final List<IntIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new IntIterator() {
+                private byte next;
+                private boolean hasNext;
+
+                @Override
+                public boolean hasNext() {
+                    if (!hasNext) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                                hasNext = true;
+                            }
+                        }
+                    }
+
+                    return hasNext;
+                }
+
+                @Override
+                public int nextInt() {
+                    if (!hasNext && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final int result = mapper.applyAsInt(next);
+                    hasNext = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
      * Returns a parallel object {@code Stream} consisting of the results of applying the given
      * function to each element. If the stream can be processed sequentially, delegates to the
-     * sequential implementation; otherwise boxes elements and maps using the parallel object stream.
+     * sequential implementation; otherwise applies the mapper to the primitive elements on worker
+     * threads, which pass the mapped objects to the returned stream through a bounded buffer.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function to apply to each element
@@ -306,15 +537,51 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
             return super.mapToObj(mapper);
         }
 
-        //noinspection resource
-        return boxed().map(mapper::apply);
+        final ByteIterator source = iteratorEx();
+        final List<Iterator<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private byte next;
+                private boolean ready;
+
+                @Override
+                public boolean hasNext() {
+                    if (!ready) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                                ready = true;
+                            }
+                        }
+                    }
+
+                    return ready;
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if (!ready && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final T result = mapper.apply(next);
+                    ready = false;
+                    return result;
+                }
+            });
+        }
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
      * Returns a parallel {@code ByteStream} consisting of the results of replacing each element
      * with the contents of the mapped {@code ByteStream}. If the stream can be processed
      * sequentially, delegates to the sequential {@code flatMap} wrapped in a parallel iterator
-     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     * stream; otherwise flat-maps on worker threads, which pass the flattened elements to the
+     * returned stream through a bounded primitive buffer without boxing.
      *
      * @param mapper a non-interfering, stateless function that returns a {@code ByteStream} for each element
      * @return a new parallel {@code ByteStream} of the flattened mapped streams
@@ -333,17 +600,94 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final ByteStream stream = boxed().flatMapToByte(mapper::apply);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIteratorEx() {
+                private byte next;
+                private boolean exhausted;
+                private ByteIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final ByteStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextByte();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
      * Returns a parallel {@code ByteStream} consisting of the results of replacing each element
      * with the contents of the mapped collection. If the stream can be processed sequentially,
      * delegates to the sequential {@code flatmap} wrapped in a parallel iterator stream; otherwise
-     * boxes elements and flat-maps collections using the parallel object stream.
+     * flat-maps on worker threads, which unbox each collection element into a bounded primitive
+     * buffer that feeds the returned stream.
      *
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<Byte>} for each element
      * @return a new parallel {@code ByteStream} of the flattened collection contents
@@ -362,17 +706,58 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final ByteStream stream = boxed().flatmap(mapper::apply).mapToByte(ToByteFunction.UNBOX);
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean exhausted;
+                private Iterator<? extends Byte> cur = null;
+                private Collection<? extends Byte> c = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        c = mapper.apply(next);
+                        cur = N.isEmpty(c) ? null : c.iterator();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    final Byte value = cur.next();
+                    return value == null ? (byte) 0 : value;
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
      * Returns a parallel {@code ByteStream} consisting of the results of replacing each element
      * with the contents of the mapped {@code byte[]} array. If the stream can be processed
      * sequentially, delegates to the sequential {@code flatMapArray} wrapped in a parallel iterator
-     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     * stream; otherwise flat-maps on worker threads, which pass the flattened elements to the
+     * returned stream through a bounded primitive buffer without boxing.
      *
      * @param mapper a non-interfering, stateless function that returns a {@code byte[]} for each element
      * @return a new parallel {@code ByteStream} of the flattened array contents
@@ -391,17 +776,55 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     cancelUncompletedThreads, null);
         }
 
-        @SuppressWarnings("resource")
-        final ByteStream stream = boxed().flatMapToByte(value -> ByteStream.of(mapper.apply(value)));
+        final ByteIterator source = iteratorEx();
+        final List<ByteIterator> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ByteIterator() {
+                private byte next;
+                private boolean exhausted;
+                private ByteIterator cur = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        cur = ByteIterator.of(mapper.apply(next));
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public byte nextByte() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextByte();
+                }
+            });
+        }
+
+        return new ParallelIteratorByteStream(ParallelPrimitiveBuffer.concatByte(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
-     * Returns a parallel {@code IntStream} consisting of the results of replacing each element
-     * with the contents of the mapped {@code IntStream}. If the stream can be processed
-     * sequentially, delegates to the sequential {@code flatMapToInt} wrapped in a parallel iterator
-     * stream; otherwise boxes elements and flat-maps using the parallel object stream.
+     * Returns a parallel {@code IntStream} consisting of the results of replacing each element with
+     * the contents of the mapped {@code IntStream}. If the stream can be processed sequentially,
+     * delegates to the sequential {@code flatMapToInt} wrapped in a parallel iterator stream;
+     * otherwise flat-maps on worker threads, which pass the flattened elements to the returned
+     * stream through a bounded primitive buffer without boxing.
      *
      * @param mapper a non-interfering, stateless function that returns an {@code IntStream} for each element
      * @return a new parallel {@code IntStream} of the flattened mapped streams
@@ -420,17 +843,94 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     null);
         }
 
-        @SuppressWarnings("resource")
-        final IntStream stream = boxed().flatMapToInt(mapper::apply);
+        final ByteIterator source = iteratorEx();
+        final List<IntIteratorEx> iters = new ArrayList<>(maxThreadNum);
 
-        return new ParallelIteratorIntStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new IntIteratorEx() {
+                private byte next;
+                private boolean exhausted;
+                private IntIterator cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final IntStream mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public int nextInt() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.nextInt();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorIntStream(ParallelPrimitiveBuffer.concatInt(iters, cancelUncompletedThreads, asyncExecutor), false, maxThreadNum,
+                splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
      * Returns a parallel object {@code Stream} consisting of the results of replacing each element
      * with the contents of the mapped {@code Stream}. If the stream can be processed sequentially,
      * delegates to the sequential {@code flatMapToObj} wrapped in a parallel iterator stream;
-     * otherwise boxes elements and flat-maps using the parallel object stream.
+     * otherwise flat-maps the primitive elements on worker threads, which pass the elements of the
+     * mapped streams to the returned stream through a bounded buffer.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that returns a {@code Stream<T>} for each element
@@ -450,15 +950,94 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     cancelUncompletedThreads, null);
         }
 
-        //noinspection resource
-        return boxed().flatMap(mapper::apply);
+        final ByteIterator source = iteratorEx();
+        final List<ObjIteratorEx<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private byte next;
+                private boolean exhausted;
+                private Iterator<? extends T> cur = null;
+                private final MappedStreamHolder mappedStream = new MappedStreamHolder();
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        closeMappedStream();
+
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        final Stream<? extends T> mapped = mapper.apply(next);
+
+                        if (!mappedStream.adopt(mapped)) {
+                            // closeResource() already ran, so nothing else will ever close this one.
+                            if (mapped != null) {
+                                mapped.close();
+                            }
+
+                            cur = null;
+                            break;
+                        }
+
+                        cur = mapped == null ? null : mapped.iteratorEx();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.next();
+                }
+
+                @Override
+                public void closeResource() {
+                    closeMappedStream(true);
+                }
+
+                private void closeMappedStream() {
+                    closeMappedStream(false);
+                }
+
+                private void closeMappedStream(final boolean noMoreAdoptions) {
+                    @SuppressWarnings("resource")
+                    final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> tmp = mappedStream.detach(noMoreAdoptions);
+
+                    if (!noMoreAdoptions) {
+                        cur = null;
+                    }
+
+                    if (tmp != null) {
+                        tmp.close();
+                    }
+                }
+            });
+        }
+
+        final Deque<LocalRunnable> newCloseHandlers = closeHandlersForNewStream(mergeCloseHandler(iters));
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, newCloseHandlers);
     }
 
     /**
      * Returns a parallel object {@code Stream} consisting of the results of replacing each element
      * with the contents of the mapped collection. If the stream can be processed sequentially,
      * delegates to the sequential {@code flatmapToObj} wrapped in a parallel iterator stream;
-     * otherwise boxes elements and flat-maps collections using the parallel object stream.
+     * otherwise flat-maps the primitive elements on worker threads, which pass the elements of the
+     * mapped collections to the returned stream through a bounded buffer.
      *
      * @param <T> the element type of the new stream
      * @param mapper a non-interfering, stateless function that returns a {@code Collection<T>} for each element
@@ -478,8 +1057,49 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                     cancelUncompletedThreads, null);
         }
 
-        //noinspection resource
-        return boxed().flatmap(mapper::apply);
+        final ByteIterator source = iteratorEx();
+        final List<ObjIteratorEx<T>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private byte next;
+                private boolean exhausted;
+                private Iterator<? extends T> cur = null;
+                private Collection<? extends T> c = null;
+
+                @Override
+                public boolean hasNext() {
+                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        synchronized (source) {
+                            if (source.hasNext()) {
+                                next = source.nextByte();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        c = mapper.apply(next);
+                        cur = N.isEmpty(c) ? null : c.iterator();
+                    }
+
+                    return cur != null && cur.hasNext();
+                }
+
+                @Override
+                public T next() throws NoSuchElementException {
+                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur.next();
+                }
+            });
+        }
+
+        return new ParallelIteratorStream<>(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null,
+                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlersForNewStream());
     }
 
     /**
@@ -504,10 +1124,10 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
             return super.onEach(action);
         }
 
-        @SuppressWarnings("resource")
-        final ByteStream stream = boxed().onEach(action::accept).sequential().mapToByte(ToByteFunction.UNBOX);
-
-        return new ParallelIteratorByteStream(stream, false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, closeHandlers());
+        return map(value -> {
+            action.accept(value);
+            return value;
+        });
     }
 
     /**
@@ -1221,6 +1841,9 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                 // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
                 long candidateIndex = 0;
                 byte candidate = 0;
+                boolean found = false;
+                long lastMatchIndex = 0;
+                byte lastMatch = 0;
 
                 try {
                     while (eHolder.value() == null) {
@@ -1234,10 +1857,16 @@ final class ParallelIteratorByteStream extends IteratorByteStream {
                         }
 
                         if (predicate.test(candidate)) {
-                            synchronized (resultHolder) {
-                                if (resultHolder.value() == null || candidateIndex > resultHolder.value().left()) {
-                                    resultHolder.setValue(Pair.of(candidateIndex, candidate));
-                                }
+                            found = true;
+                            lastMatchIndex = candidateIndex;
+                            lastMatch = candidate;
+                        }
+                    }
+
+                    if (found) {
+                        synchronized (resultHolder) {
+                            if (resultHolder.value() == null || lastMatchIndex > resultHolder.value().left()) {
+                                resultHolder.setValue(Pair.of(lastMatchIndex, lastMatch));
                             }
                         }
                     }

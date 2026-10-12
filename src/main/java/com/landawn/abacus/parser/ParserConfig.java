@@ -14,7 +14,9 @@
 
 package com.landawn.abacus.parser;
 
+import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -235,6 +237,99 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
             return copy;
         } catch (final CloneNotSupportedException e) {
             throw new RuntimeException(e); // should never happen.
+        }
+    }
+
+    // These maps are used only for options without a public live-map getter. A parser can
+    // snapshot them for each nested value without copying every unrelated option entry.
+    static <K, V> Map<K, V> newConfigMap() {
+        return new ConfigMap<>(new HashMap<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    static <K, V> Map<K, V> copyConfigMap(final Map<K, V> source) {
+        if (source instanceof ConfigMap<?, ?> owned) {
+            return ((ConfigMap<K, V>) owned).snapshot();
+        }
+
+        // setValueTypes(Map) keeps an external alias: mutations cannot be intercepted,
+        // so each snapshot must still copy that map before adopting its private storage.
+        return new ConfigMap<>(new HashMap<>(source));
+    }
+
+    private static final class ConfigMap<K, V> extends AbstractMap<K, V> {
+        private Map<K, V> values;
+        private volatile boolean shared;
+
+        ConfigMap(final Map<K, V> values) {
+            this.values = values;
+        }
+
+        ConfigMap<K, V> snapshot() {
+            // The flag turns true only here (the writers reset it once they own a private copy of the map), so
+            // the volatile store is skipped while it is already set: a configuration shared by many parsing
+            // threads is snapshotted for every nested value, and an unconditional store would keep bouncing
+            // this cache line (which also holds the lookup map reference) between their cores.
+            if (!shared) {
+                shared = true;
+            }
+
+            final ConfigMap<K, V> copy = new ConfigMap<>(values);
+            copy.shared = true;
+            return copy;
+        }
+
+        private void prepareWrite() {
+            if (shared) {
+                values = new HashMap<>(values);
+                shared = false;
+            }
+        }
+
+        @Override
+        public V get(final Object key) {
+            return values.get(key);
+        }
+
+        @Override
+        public boolean containsKey(final Object key) {
+            return values.containsKey(key);
+        }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
+
+        @Override
+        public V put(final K key, final V value) {
+            prepareWrite();
+            return values.put(key, value);
+        }
+
+        @Override
+        public void putAll(final Map<? extends K, ? extends V> map) {
+            prepareWrite();
+            values.putAll(map);
+        }
+
+        @Override
+        public V remove(final Object key) {
+            prepareWrite();
+            return values.remove(key);
+        }
+
+        @Override
+        public void clear() {
+            values = new HashMap<>();
+            shared = false;
+        }
+
+        @Override
+        public Set<Entry<K, V>> entrySet() {
+            // No mutable view may bypass prepareWrite(). The containing configuration
+            // exposes individual option setters, not this internal map or its entries.
+            return Collections.unmodifiableMap(values).entrySet();
         }
     }
 }

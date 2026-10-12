@@ -1,6 +1,11 @@
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -12,14 +17,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import com.landawn.abacus.TestBase;
 
 import performanceintegration.PerformanceIntegrationXmlModel;
 
 @Tag("unit")
-class PerformanceIntegrationConcurrencyRegressionTest {
+class PerformanceIntegrationConcurrencyRegressionTest extends TestBase {
     @Test
     void failedAnyOfListenerRegistrationsReleaseCallbacksAndRemainRetryable() throws Exception {
         final IllegalStateException rejected = new IllegalStateException("listener registration rejected");
@@ -74,7 +81,9 @@ class PerformanceIntegrationConcurrencyRegressionTest {
     void retainedAnyOfStillReceivesCompletionsAfterTimeoutsAndGc() throws Exception {
         CompletableFuture<Integer> first = new CompletableFuture<>(), second = new CompletableFuture<>();
         ContinuableFuture<Integer> aggregate = Futures.anyOf(first, second);
-        for (int i = 0; i < 3; i++) assertThrows(TimeoutException.class, () -> aggregate.get(1, TimeUnit.MILLISECONDS));
+        for (int i = 0; i < 3; i++) {
+            assertThrows(TimeoutException.class, () -> aggregate.get(1, TimeUnit.MILLISECONDS));
+        }
         System.gc();
         first.completeExceptionally(new IllegalStateException("first"));
         assertThrows(TimeoutException.class, () -> aggregate.get(1, TimeUnit.MILLISECONDS));
@@ -127,12 +136,19 @@ class PerformanceIntegrationConcurrencyRegressionTest {
             bytes = input.readAllBytes();
         }
         return new ClassLoader(fixture.getClassLoader()) {
-            @Override protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
-                if (!requested.equals(name)) return super.loadClass(requested, resolve);
+            @Override
+            protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
+                if (!requested.equals(name)) {
+                    return super.loadClass(requested, resolve);
+                }
                 synchronized (getClassLoadingLock(requested)) {
                     Class<?> type = findLoadedClass(requested);
-                    if (type == null) type = defineClass(requested, bytes, 0, bytes.length);
-                    if (resolve) resolveClass(type);
+                    if (type == null) {
+                        type = defineClass(requested, bytes, 0, bytes.length);
+                    }
+                    if (resolve) {
+                        resolveClass(type);
+                    }
                     return type;
                 }
             }

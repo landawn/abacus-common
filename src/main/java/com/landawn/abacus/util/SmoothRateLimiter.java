@@ -262,7 +262,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
                 storedPermits = 0.0;
             } else {
                 storedPermits = (oldMaxPermits == 0.0) ? maxPermits // initial state is cold // NOSONAR
-                        : storedPermits * maxPermits / oldMaxPermits;
+                        : rescaleStoredPermits(storedPermits, oldMaxPermits, maxPermits);
             }
         }
 
@@ -356,7 +356,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
                 storedPermits = maxPermits;
             } else {
                 storedPermits = (oldMaxPermits == 0.0) ? 0.0 // initial state // NOSONAR
-                        : storedPermits * maxPermits / oldMaxPermits;
+                        : rescaleStoredPermits(storedPermits, oldMaxPermits, maxPermits);
             }
         }
 
@@ -381,6 +381,29 @@ abstract class SmoothRateLimiter extends RateLimiter {
         double coolDownIntervalMicros() {
             return stableIntervalMicros;
         }
+    }
+
+    /**
+     * Rescales a permit store while preserving its fraction of the previous capacity.
+     * Normal finite products retain the original multiplication/division order; finite positive
+     * operands whose product overflows or becomes subnormal use a bounded ratio first.
+     *
+     * @param storedPermits the current store, no greater than the previous capacity
+     * @param oldMaxPermits the previous capacity
+     * @param maxPermits the new capacity
+     * @return the store scaled to the new capacity
+     */
+    private static double rescaleStoredPermits(final double storedPermits, final double oldMaxPermits, final double maxPermits) {
+        final double product = storedPermits * maxPermits;
+
+        if ((product < Double.MIN_NORMAL || product == Double.POSITIVE_INFINITY) && storedPermits > 0 && Double.isFinite(storedPermits) && oldMaxPermits > 0
+                && Double.isFinite(oldMaxPermits) && maxPermits > 0 && Double.isFinite(maxPermits)) {
+            // The store/capacity ratio is at most one, so divide first only when the product loses range.
+            // A normal product keeps its historical rounding, and infinity/zero states keep their existing behavior.
+            return (storedPermits / oldMaxPermits) * maxPermits;
+        }
+
+        return product / oldMaxPermits;
     }
 
     /**

@@ -440,10 +440,10 @@ public class StreamBugFixVerificationTest extends TestBase {
         assertThrows(NullPointerException.class, () -> Stream.of((String) null).reduce((a, b) -> a));
         assertThrows(NullPointerException.class, () -> Stream.of(null, "x").findFirst(java.util.Objects::isNull));
 
-        assertTrue(Stream.<String>empty().first().isEmpty());
-        assertTrue(Stream.<String>empty().last().isEmpty());
-        assertTrue(Stream.<String>empty().onlyOne().isEmpty());
-        assertTrue(Stream.<String>empty().reduce((a, b) -> a).isEmpty());
+        assertTrue(Stream.<String> empty().first().isEmpty());
+        assertTrue(Stream.<String> empty().last().isEmpty());
+        assertTrue(Stream.<String> empty().onlyOne().isEmpty());
+        assertTrue(Stream.<String> empty().reduce((a, b) -> a).isEmpty());
         assertTrue(Stream.of((String) null).findFirst(value -> false).isEmpty());
 
         // onlyOne must still throw when there are two elements even if the first is null
@@ -467,9 +467,9 @@ public class StreamBugFixVerificationTest extends TestBase {
     @Test
     public void parallelReduce_nullElement_throwsNpe() {
         assertThrows(NullPointerException.class, () -> Stream.of((Integer) null).parallel(4).reduce((a, b) -> a));
-        assertThrows(NullPointerException.class, () -> Stream.<Integer>of(null, null, null, null).parallel(4).reduce((a, b) -> a));
+        assertThrows(NullPointerException.class, () -> Stream.<Integer> of(null, null, null, null).parallel(4).reduce((a, b) -> a));
         assertThrows(NullPointerException.class, () -> Stream.of(null, null).parallel(4).findAny(x -> true));
-        assertTrue(Stream.<Integer>empty().parallel(4).reduce((a, b) -> a).isEmpty());
+        assertTrue(Stream.<Integer> empty().parallel(4).reduce((a, b) -> a).isEmpty());
         assertTrue(Stream.of(null, null).parallel(4).findAny(x -> false).isEmpty());
     }
 }

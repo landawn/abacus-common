@@ -15,14 +15,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 public class NAsyncTest extends NTestSupport {
 
@@ -264,7 +264,6 @@ public class NAsyncTest extends NTestSupport {
             assertEquals(Arrays.asList("only"), seen);
         });
     }
-
 
     @Test
     public void testAsyncExecuteWithRetry_invalidRetryArgumentsRejectedOnCallingThread() {

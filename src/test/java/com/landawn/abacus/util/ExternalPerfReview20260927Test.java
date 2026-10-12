@@ -249,8 +249,7 @@ public class ExternalPerfReview20260927Test extends TestBase {
         final java.util.function.Function<Integer, List<Integer>> dense = i -> List.of(i, -i);
 
         final List<List<Integer>> sparseResults = List.of(N.flatMap(array, 0, array.length, sparse), N.flatMap(list, 0, list.size(), sparse),
-                N.flatMap(list, sparse), N.flatMap(iterableOnly, sparse), N.flatMap(array, i -> List.of(i), sparse),
-                N.flatMap(list, i -> List.of(i), sparse));
+                N.flatMap(list, sparse), N.flatMap(iterableOnly, sparse), N.flatMap(array, i -> List.of(i), sparse), N.flatMap(list, i -> List.of(i), sparse));
 
         for (final List<Integer> result : sparseResults) {
             assertEquals(List.of(7, 407, 807), result);
@@ -376,7 +375,7 @@ public class ExternalPerfReview20260927Test extends TestBase {
         assertEquals((short) 3, Beans.setPropValue(target, setCount, (short) 3)); // widened by reflection, not converted
         assertEquals(3, target.count);
         assertEquals(1.1f, Beans.setPropValue(target, setRatio, 1.1f));
-        assertEquals((double) 1.1f, target.ratio);
+        assertEquals(1.1f, target.ratio);
         assertEquals(7L, Beans.setPropValue(target, setId, 7));
         assertEquals(Long.valueOf(7), target.id);
         assertEquals("12", Beans.setPropValue(target, setLabel, 12));

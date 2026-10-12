@@ -143,9 +143,9 @@ public class XmlParserImplReview20260925Test extends TestBase {
 
         @Override
         public boolean equals(final Object o) {
-            return o instanceof Nested n && Objects.equals(byName, n.byName) && Objects.equals(enumMaps, n.enumMaps)
-                    && Objects.equals(immVals, n.immVals) && Objects.equals(immOfImm, n.immOfImm) && Objects.equals(enumOfImm, n.enumOfImm)
-                    && Objects.equals(immSetVals, n.immSetVals) && Objects.equals(mutableVals, n.mutableVals);
+            return o instanceof Nested n && Objects.equals(byName, n.byName) && Objects.equals(enumMaps, n.enumMaps) && Objects.equals(immVals, n.immVals)
+                    && Objects.equals(immOfImm, n.immOfImm) && Objects.equals(enumOfImm, n.enumOfImm) && Objects.equals(immSetVals, n.immSetVals)
+                    && Objects.equals(mutableVals, n.mutableVals);
         }
 
         @Override
@@ -155,8 +155,7 @@ public class XmlParserImplReview20260925Test extends TestBase {
 
         @Override
         public String toString() {
-            return "Nested[" + byName + ", " + enumMaps + ", " + immVals + ", " + immOfImm + ", " + enumOfImm + ", " + immSetVals + ", " + mutableVals
-                    + "]";
+            return "Nested[" + byName + ", " + enumMaps + ", " + immVals + ", " + immOfImm + ", " + enumOfImm + ", " + immSetVals + ", " + mutableVals + "]";
         }
     }
 
@@ -371,7 +370,8 @@ public class XmlParserImplReview20260925Test extends TestBase {
         // Xml-DOM used to throw "EnumMap requires an enum key type" for the EnumMap elements and read the Sub elements of
         // the ImmutableList elements as maps with type info on (DOM ARRAY/COLLECTION branches).
         final ArrayList<EnumMap<TimeUnit, String>> enumMaps = new ArrayList<>(List.of(enumMap("s1", "d1"), enumMap("s2", "d2")));
-        final ArrayList<ImmutableList<Sub>> immElems = new ArrayList<>(List.of(ImmutableList.of(new Sub("b"), new Sub("\u043A\u043B\u044E\u0447")), ImmutableList.empty()));
+        final ArrayList<ImmutableList<Sub>> immElems = new ArrayList<>(
+                List.of(ImmutableList.of(new Sub("b"), new Sub("\u043A\u043B\u044E\u0447")), ImmutableList.empty()));
 
         final Type<ArrayList<EnumMap<TimeUnit, String>>> enumMapsType = new TypeReference<ArrayList<EnumMap<TimeUnit, String>>>() {
         }.type();
@@ -406,7 +406,8 @@ public class XmlParserImplReview20260925Test extends TestBase {
         // class, so with type info the EnumMap elements threw "EnumMap requires an enum key type" and the Sub elements
         // of the ImmutableList elements were read as maps.
         final EnumMap<TimeUnit, String>[] enumMaps = new EnumMap[] { enumMap("s1", "d1"), enumMap("s2", "d2") };
-        final ImmutableList<Sub>[] immElems = new ImmutableList[] { ImmutableList.of(new Sub("b"), new Sub("\u043A\u043B\u044E\u0447")), ImmutableList.empty() };
+        final ImmutableList<Sub>[] immElems = new ImmutableList[] { ImmutableList.of(new Sub("b"), new Sub("\u043A\u043B\u044E\u0447")),
+                ImmutableList.empty() };
 
         final Type<Object> enumMapsType = Type.of("java.util.EnumMap<java.util.concurrent.TimeUnit, String>[]");
         final Type<Object> immElemsType = Type.of("ImmutableList<" + Sub.class.getCanonicalName() + ">[]");

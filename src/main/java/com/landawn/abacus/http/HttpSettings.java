@@ -15,6 +15,7 @@
 package com.landawn.abacus.http;
 
 import java.net.Proxy;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -80,7 +81,10 @@ public final class HttpSettings {
     /** Default applied by {@link #isOneWayRequest()} when the flag was never set on this instance. */
     static final boolean DEFAULT_ONE_WAY_REQUEST = false;
 
-    // The four connection flags are tri-state: null means "never set on this instance", which is
+    /** Request buffering remains the default so the JDK can replay redirects and authentication challenges. */
+    static final boolean DEFAULT_STREAM_REQUEST_BODY = false;
+
+    // The connection flags are tri-state: null means "never set on this instance", which is
     // what lets HttpClient layer a per-request HttpSettings on top of the client-level defaults.
     // A plain boolean cannot distinguish an explicitly requested false from "unset", so a request
     // settings object created only to add a header used to silently reset these flags.
@@ -91,6 +95,8 @@ public final class HttpSettings {
     private Boolean doOutput;
 
     private Boolean isOneWayRequest;
+
+    private Boolean streamRequestBody;
 
     private ContentFormat contentFormat;
 
@@ -482,6 +488,46 @@ public final class HttpSettings {
     }
 
     /**
+     * Returns whether request bodies executed by the legacy {@link HttpClient} use streaming mode.
+     * The default is {@code false}; an unset per-request setting inherits the client setting.
+     *
+     * @return whether request-body streaming is enabled
+     * @see #streamRequestBody(boolean)
+     */
+    public boolean streamRequestBody() {
+        return streamRequestBody == null ? DEFAULT_STREAM_REQUEST_BODY : streamRequestBody;
+    }
+
+    /**
+     * Enables bounded-buffer request transmission by the legacy {@link HttpClient} and its
+     * {@link HttpRequest} facade. Uncompressed {@code File}, {@code byte[]} and {@code String} bodies use
+     * fixed-length streaming (a {@code String} is encoded once with the request charset to obtain its length);
+     * streams, readers, serialized objects and compressed bodies use chunked streaming.
+     * The body is consumed once, and caller-owned streams/readers are not closed. A file must remain
+     * unchanged while it is being transmitted.
+     *
+     * <p>This is opt-in because {@link java.net.HttpURLConnection} cannot automatically replay a
+     * streaming body for authentication challenges or redirects. Such responses can fail instead of
+     * being retried. Leave this disabled when automatic replay is required. Some servers do not accept
+     * chunked uploads. The option does not change {@code OkHttpClient}, or manually opened connections.</p>
+     *
+     * @param streamRequestBody {@code true} to avoid the JDK's complete request-body buffer;
+     *        {@code false} to retain its default buffering and replay behavior
+     * @return this settings instance
+     * @see java.net.HttpURLConnection#setFixedLengthStreamingMode(long)
+     * @see java.net.HttpURLConnection#setChunkedStreamingMode(int)
+     */
+    public HttpSettings streamRequestBody(final boolean streamRequestBody) {
+        this.streamRequestBody = streamRequestBody;
+        return this;
+    }
+
+    /** Returns the explicitly set streaming flag, or null when client defaults should apply. */
+    Boolean streamRequestBodyOrNull() {
+        return streamRequestBody;
+    }
+
+    /**
      * Checks whether successful response-body processing is disabled.
      * The client still waits for the response status and checks it for errors.
      *
@@ -716,9 +762,11 @@ public final class HttpSettings {
      * encode or decode. When the request/response path resolves a {@link ContentFormat} from headers,
      * abacus auto-wraps streams for {@code gzip}, {@code lz4}, and {@code snappy} (both directions),
      * and for {@code br} (Brotli) on the <em>response</em> path only. A Brotli request body fails at
-     * wrap time because there is no bundled encoder. Other values such as {@code deflate} are sent as
+     * wrap time because there is no bundled encoder. Other values such as {@code deflate} are stored as
      * raw header text and are not auto-wrapped by {@link HttpUtil#wrapOutputStream} /
-     * {@link HttpUtil#wrapInputStream}.</p>
+     * {@link HttpUtil#wrapInputStream}. When sending a request body, {@link HttpClient} rejects an encoding
+     * declaration that its resolved body format does not implement, including unsupported or stacked
+     * encodings, so the header cannot describe compression absent from the transmitted body.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -942,6 +990,11 @@ public final class HttpSettings {
      * changes made through it take effect on this {@code HttpSettings}. Use {@link #copy()} first
      * if you need to modify headers without affecting this instance.</p>
      *
+     * <p>Headers keep the order in which they were first added: {@link HttpHeaders#headerNames()} lists them, and
+     * requests send them, in that order. Replacing the value of a header (under any letter case) keeps its position;
+     * removing a header and adding it again moves it to the end. {@link #setHeaders(HttpHeaders)} and
+     * {@link #headers(Map)} add headers in the iteration order of their argument.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpHeaders headers = settings.headers();
@@ -953,7 +1006,9 @@ public final class HttpSettings {
      */
     public HttpHeaders headers() {
         if (headers == null) {
-            headers = HttpHeaders.create();
+            // Insertion order makes the order of the sent headers predictable, and lets copy() presize its map
+            // without changing that order.
+            headers = new HttpHeaders(new LinkedHashMap<>());
         }
 
         return headers;
@@ -963,7 +1018,7 @@ public final class HttpSettings {
      * Creates a copy of this HttpSettings object.
      * The copy includes all settings: timeouts, SSL socket factory, proxy, the caching/input/output
      * flags, the one-way flag, the content format and the headers. The headers are copied into a new
-     * {@link HttpHeaders} instance, so adding, replacing, or removing headers does not affect
+     * {@link HttpHeaders} instance, in the same order, so adding, replacing, or removing headers does not affect
      * the other instance. Mutable header values and the {@code sslSocketFactory} and {@code proxy}
      * references themselves are shared.
      *
@@ -992,16 +1047,23 @@ public final class HttpSettings {
         copy.doInput = doInput;
         copy.doOutput = doOutput;
         copy.isOneWayRequest = isOneWayRequest;
+        copy.streamRequestBody = streamRequestBody;
 
-        if (headers != null) {
-            copy.setHeaders(headers.copy());
+        final HttpHeaders sourceHeaders = headers;
+
+        if (sourceHeaders != null) {
+            // These privately owned headers are already normalized by setHeaders/header/set (no two names differ
+            // only in case), so HttpHeaders.copy() copies the entries verbatim, without set(..)'s case-insensitive
+            // search of every stored name per header. headers() keeps them in a LinkedHashMap, so the presized
+            // LinkedHashMap of the copy keeps their order exactly.
+            copy.headers = sourceHeaders.copy();
         }
 
         return copy;
     }
 
     /**
-     * Copies the four tri-state connection flags from {@code source} into this instance, preserving
+     * Copies the tri-state connection flags from {@code source} into this instance, preserving
      * the "never set" state so that {@link HttpClient}'s per-request layering keeps working.
      *
      * @param source the settings to copy the flags from; must not be {@code null}
@@ -1011,6 +1073,7 @@ public final class HttpSettings {
         doInput = source.doInput;
         doOutput = source.doOutput;
         isOneWayRequest = source.isOneWayRequest;
+        streamRequestBody = source.streamRequestBody;
     }
 
     /**
@@ -1023,7 +1086,7 @@ public final class HttpSettings {
     public String toString() {
         return "{connectTimeout=" + connectTimeout + ", readTimeout=" + readTimeout + ", sslSocketFactory=" + sslSocketFactory + ", proxy=" + proxy
                 + ", useCaches=" + useCaches() + ", doInput=" + doInput() + ", doOutput=" + doOutput() + ", isOneWayRequest=" + isOneWayRequest()
-                + ", contentFormat=" + contentFormat + ", headers=" + headers + "}";
+                + ", streamRequestBody=" + streamRequestBody() + ", contentFormat=" + contentFormat + ", headers=" + headers + "}";
     }
 
 }

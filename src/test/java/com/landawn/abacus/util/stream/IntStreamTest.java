@@ -1398,8 +1398,9 @@ public class IntStreamTest extends TestBase {
         Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 2), IntStream.of(10, 20), IntStream.of(100, 200));
         stream = IntStream.zip(streams, ints -> {
             int sum = 0;
-            for (Integer i : ints)
+            for (Integer i : ints) {
                 sum += i;
+            }
             return sum;
         });
         assertArrayEquals(new int[] { 111, 222 }, stream.toArray());
@@ -1411,8 +1412,9 @@ public class IntStreamTest extends TestBase {
         int[] defaults = new int[] { 0, 0 };
         stream = IntStream.zip(streams, defaults, ints -> {
             int sum = 0;
-            for (Integer i : ints)
+            for (Integer i : ints) {
                 sum += i;
+            }
             return sum;
         });
         assertEquals(2, stream.count());
@@ -5406,8 +5408,9 @@ public class IntStreamTest extends TestBase {
         int[] source = { 1, 2, 3, 1, 5, 1 };
         int[] result = IntStream.ofIndices(source, 1, 1, (arr, fromIdx) -> {
             for (int i = fromIdx; i < arr.length; i++) {
-                if (arr[i] == 1)
+                if (arr[i] == 1) {
                     return i;
+                }
             }
             return -1;
         }).toArray();
@@ -6867,8 +6870,8 @@ public class IntStreamTest extends TestBase {
     @Test
     public void testFlattenVertically_jaggedRowsPinned() {
         final int[][][] cases = { { { 1, 2, 3 }, {}, null, { 4 }, { 5, 6 } }, { {}, { 1, 2, 3, 4, 5 }, {}, null }, { null, {}, { 7 } },
-                { { 1 }, { 2, 3, 4 }, null, { 5, 6 }, {}, { 8, 9, 10, 11 } }, { { 1, 2 }, { 3, 4 }, { 5, 6 } }, { { 1, 2, 3 }, { 4 } },
-                { { 1 }, { 2, 3 } }, { null, null }, { {}, {} } };
+                { { 1 }, { 2, 3, 4 }, null, { 5, 6 }, {}, { 8, 9, 10, 11 } }, { { 1, 2 }, { 3, 4 }, { 5, 6 } }, { { 1, 2, 3 }, { 4 } }, { { 1 }, { 2, 3 } },
+                { null, null }, { {}, {} } };
 
         for (final int[][] a : cases) {
             final IntList expected = new IntList();
@@ -7050,6 +7053,7 @@ public class IntStreamTest extends TestBase {
         assertFalse(result2 == b);
         assertEquals(100, IntStream.concat(b, a).toArray()[0]);
     }
+
     // ---- perf review 2026-09-26 G097 end ----
     // ---- perf review 2026-09-26 G115 begin ----
     // G115-01: random() streams are lazy and look up ThreadLocalRandom.current() per draw, so a stream created on one

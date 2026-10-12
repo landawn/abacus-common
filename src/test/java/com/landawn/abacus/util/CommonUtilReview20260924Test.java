@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,8 +69,8 @@ public class CommonUtilReview20260924Test extends TestBase {
 
     @Test
     public void testC101_reverseRotateShuffleOnMapViewsKeepBackingMap() {
-        final List<java.util.function.Consumer<Collection<?>>> ops = Arrays.asList(CommonUtil::reverse, c -> CommonUtil.rotate(c, 1),
-                CommonUtil::shuffle, c -> CommonUtil.shuffle(c, new Random(7)));
+        final List<java.util.function.Consumer<Collection<?>>> ops = Arrays.asList(CommonUtil::reverse, c -> CommonUtil.rotate(c, 1), CommonUtil::shuffle,
+                c -> CommonUtil.shuffle(c, new Random(7)));
 
         for (final java.util.function.Consumer<Collection<?>> op : ops) {
             final Map<String, Integer> m1 = abc();
@@ -583,8 +583,7 @@ public class CommonUtilReview20260924Test extends TestBase {
         final Object[] src = { "a", "b" };
         final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange(src, 0, 1, (Class) String.class));
         assertTrue(e1.getMessage().contains("'newType' must be an array class"), e1.getMessage());
-        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
-                () -> CommonUtil.copyOfRange(src, 0, 2, 2, (Class) String.class));
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange(src, 0, 2, 2, (Class) String.class));
         assertTrue(e2.getMessage().contains("'newType' must be an array class"), e2.getMessage());
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange(src, 0, 1, (Class) null));
         assertArrayEquals(new String[] { "a" }, CommonUtil.copyOfRange(src, 0, 1, String[].class));
@@ -625,7 +624,7 @@ public class CommonUtilReview20260924Test extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copy((Object) null, 0, dest, 0, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copy((Object) null, 1, dest, 0, 0));
         // incompatible non-null arrays still fail, even with length 0
-        assertThrows(ArrayStoreException.class, () -> CommonUtil.copy((Object) new int[1], 0, dest, 0, 0));
+        assertThrows(ArrayStoreException.class, () -> CommonUtil.copy(new int[1], 0, dest, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copy("abc", 0, dest, 0, 0));
     }
 
@@ -842,7 +841,7 @@ public class CommonUtilReview20260924Test extends TestBase {
         final IllegalArgumentException e4 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkBeanClass(HashMap.class));
         assertTrue(e4.getMessage().contains("Map implementations"), e4.getMessage());
         final IllegalArgumentException e5 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkBeanClass(Object.class));
-        assertTrue(e5.getMessage().contains("no property getter/setter method"), e5.getMessage());
+        assertTrue(e5.getMessage().contains("registered as a non-bean class"), e5.getMessage());
         final IllegalArgumentException e6 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkBeanClass(null));
         assertTrue(e6.getMessage().startsWith("Not a bean class: null"), e6.getMessage());
         assertDoesNotThrow(() -> CommonUtil.checkBeanClass(Event.class));
@@ -903,13 +902,16 @@ public class CommonUtilReview20260924Test extends TestBase {
 
     @Test
     public void testC141_javadocExamplesUseRealNames() {
-        assertEquals("'array' cannot be null or empty", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new int[0], "array")).getMessage());
+        assertEquals("'array' cannot be null or empty",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new int[0], "array")).getMessage());
         assertEquals("'items' cannot be null or empty",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(Collections.emptyList(), "items")).getMessage());
         assertEquals("'greeting' cannot be null or empty or blank",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("   ", "greeting")).getMessage());
-        assertEquals("'count' cannot be negative: -1", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative((byte) -1, "count")).getMessage());
-        assertEquals("'count' cannot be zero or negative: 0", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgPositive(0L, "count")).getMessage());
+        assertEquals("'count' cannot be negative: -1",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative((byte) -1, "count")).getMessage());
+        assertEquals("'count' cannot be zero or negative: 0",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgPositive(0L, "count")).getMessage());
         assertEquals("count must not be negative",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative(-1, "count must not be negative")).getMessage());
         assertEquals("'dataset' cannot be null or empty",
@@ -928,16 +930,17 @@ public class CommonUtilReview20260924Test extends TestBase {
     @Test
     public void testC143_surplusArgumentsAreAppendedAsDocumented() {
         assertEquals("x 1: [2, 3]", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "x {}", 1, 2, 3)).getMessage());
-        assertEquals("x 1 [2, 3, 4]",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "x {}", 1, 2, 3, 4)).getMessage());
+        assertEquals("x 1 [2, 3, 4]", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "x {}", 1, 2, 3, 4)).getMessage());
         assertEquals("x: [1]", assertThrows(IllegalStateException.class, () -> CommonUtil.checkState(false, "x", 1)).getMessage());
     }
 
     @Test
     public void testC138_floatWidensToDoubleAsDocumented() {
         final float f = 0.1f;
-        assertEquals("ratio was 0.10000000149011612", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "ratio was {}", f)).getMessage());
-        assertEquals("ratio was 0.1", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "ratio was {}", (Object) f)).getMessage());
+        assertEquals("ratio was 0.10000000149011612",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "ratio was {}", f)).getMessage());
+        assertEquals("ratio was 0.1",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "ratio was {}", (Object) f)).getMessage());
     }
 
     // ============================================================ C-139 / C-158: enum pools
@@ -1006,15 +1009,13 @@ public class CommonUtilReview20260924Test extends TestBase {
         assertEquals(msg, assertThrows(NullPointerException.class, () -> CommonUtil.toCollection(List.of("a").iterator(), () -> null)).getMessage());
 
         final String mmsg = "mapSupplier returned null";
-        assertEquals(mmsg, assertThrows(NullPointerException.class,
-                () -> CommonUtil.toMap(Collections.<String> emptyList(), s -> s, s -> s, n -> null)).getMessage());
+        assertEquals(mmsg,
+                assertThrows(NullPointerException.class, () -> CommonUtil.toMap(Collections.<String> emptyList(), s -> s, s -> s, n -> null)).getMessage());
         assertEquals(mmsg, assertThrows(NullPointerException.class, () -> CommonUtil.toMap(List.of("a"), s -> s, s -> s, n -> null)).getMessage());
-        assertEquals(mmsg, assertThrows(NullPointerException.class,
-                () -> CommonUtil.toMap(List.of("a"), s -> s, s -> s, (x, y) -> x, n -> null)).getMessage());
-        assertEquals(mmsg, assertThrows(NullPointerException.class,
-                () -> CommonUtil.toMap((Iterator<String>) null, s -> s, s -> s, () -> null)).getMessage());
-        assertEquals(mmsg, assertThrows(NullPointerException.class,
-                () -> CommonUtil.toMap(List.of("a").iterator(), s -> s, s -> s, (x, y) -> x, () -> null)).getMessage());
+        assertEquals(mmsg, assertThrows(NullPointerException.class, () -> CommonUtil.toMap(List.of("a"), s -> s, s -> s, (x, y) -> x, n -> null)).getMessage());
+        assertEquals(mmsg, assertThrows(NullPointerException.class, () -> CommonUtil.toMap((Iterator<String>) null, s -> s, s -> s, () -> null)).getMessage());
+        assertEquals(mmsg, assertThrows(NullPointerException.class, () -> CommonUtil.toMap(List.of("a").iterator(), s -> s, s -> s, (x, y) -> x, () -> null))
+                .getMessage());
 
         // happy paths unchanged
         assertEquals(Arrays.asList(1, 2), CommonUtil.toCollection(new int[] { 1, 2 }, ArrayList::new));
@@ -1038,7 +1039,8 @@ public class CommonUtilReview20260924Test extends TestBase {
         assertEquals(Collections.singletonMap('a', "a3"), m3);
 
         // non-null merges unchanged
-        assertEquals(Collections.singletonMap('a', "a1a2"), CommonUtil.toMap(Arrays.asList("a1", "a2"), s -> s.charAt(0), s -> s, String::concat, HashMap::new));
+        assertEquals(Collections.singletonMap('a', "a1a2"),
+                CommonUtil.toMap(Arrays.asList("a1", "a2"), s -> s.charAt(0), s -> s, String::concat, HashMap::new));
     }
 
     @Test
@@ -1438,15 +1440,17 @@ public class CommonUtilReview20260924Test extends TestBase {
                 type(new TypeReference<ImmutableNavigableMap<String, Integer>>() {
                 }));
         assertEquals("a", nm.firstKey());
-        final ImmutableSortedMap<String, Integer> sm = CommonUtil.convert(Map.of("b", "2", "a", "1"), type(new TypeReference<ImmutableSortedMap<String, Integer>>() {
-        }));
+        final ImmutableSortedMap<String, Integer> sm = CommonUtil.convert(Map.of("b", "2", "a", "1"),
+                type(new TypeReference<ImmutableSortedMap<String, Integer>>() {
+                }));
         assertEquals("a", sm.firstKey());
 
         final ImmutableBiMap<String, Integer> bm = CommonUtil.convert(Map.of("a", "1"), type(new TypeReference<ImmutableBiMap<String, Integer>>() {
         }));
         assertEquals("a", bm.inverse().get(1));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(Map.of("a", "1", "b", "1"), type(new TypeReference<ImmutableBiMap<String, Integer>>() {
-        })));
+        assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.convert(Map.of("a", "1", "b", "1"), type(new TypeReference<ImmutableBiMap<String, Integer>>() {
+                })));
 
         final EnumMap<java.util.concurrent.TimeUnit, Integer> em = CommonUtil.convert(Map.of("SECONDS", "1"),
                 type(new TypeReference<EnumMap<java.util.concurrent.TimeUnit, Integer>>() {
@@ -1662,11 +1666,13 @@ public class CommonUtilReview20260924Test extends TestBase {
 
         assertTrue(CommonUtil.convert(new java.io.StringReader("true"), Boolean.class));
         assertFalse(CommonUtil.convert(new java.io.StringReader("false"), Boolean.class));
-        assertFalse(CommonUtil.convert(new java.io.StringReader("junk"), Boolean.class));
+        // Text that is none of the accepted texts is rejected (code review 2026-10-05; it used to be false).
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new java.io.StringReader("junk"), Boolean.class));
         assertFalse(CommonUtil.convert(new java.io.StringReader(""), Boolean.class));
         assertFalse(CommonUtil.convert(new java.io.StringReader(""), boolean.class));
-        // unchanged (documented): char[] / byte[] are not read as text for a boolean
-        assertFalse(CommonUtil.convert("true".toCharArray(), Boolean.class));
+        // unchanged (documented): char[] / byte[] are not read as text for a boolean, and the string form of the array
+        // is not boolean text, so the conversion is rejected (code review 2026-10-05; it used to be false)
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert("true".toCharArray(), Boolean.class));
     }
 
     @Test
@@ -1686,8 +1692,9 @@ public class CommonUtilReview20260924Test extends TestBase {
     public void testC175_nullKeyIntoTreeMapIsIAE() {
         final Map<String, String> src = new HashMap<>();
         src.put(null, "1");
-        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(src, type(new TypeReference<TreeMap<String, Integer>>() {
-        })));
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.convert(src, type(new TypeReference<TreeMap<String, Integer>>() {
+                })));
         assertTrue(e.getMessage().contains("not accepted by"), e.getMessage());
         assertEquals(Integer.valueOf(1), CommonUtil.convert(src, type(new TypeReference<HashMap<String, Integer>>() {
         })).get(null));
@@ -1719,7 +1726,8 @@ public class CommonUtilReview20260924Test extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.registerConverter(java.util.TimeZone.getDefault().getClass(), (v, t) -> "x"));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.registerConverter(java.nio.file.Paths.get("x").getClass(), (v, t) -> "x"));
         // a JDK-internal exception class (java.base module, sun.* package) is refused by the shared rule
-        final Class internalException = Class.forName(System.getProperty("os.name").startsWith("Windows") ? "sun.nio.fs.WindowsException" : "sun.nio.fs.UnixException");
+        final Class internalException = Class
+                .forName(System.getProperty("os.name").startsWith("Windows") ? "sun.nio.fs.WindowsException" : "sun.nio.fs.UnixException");
         assertThrows(IllegalArgumentException.class, () -> ExceptionUtil.registerRuntimeExceptionMapper(internalException, e -> new RuntimeException()));
 
         final Object proxy = java.lang.reflect.Proxy.newProxyInstance(ConvertSource177.class.getClassLoader(), new Class<?>[] { Runnable.class },

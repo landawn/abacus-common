@@ -1344,7 +1344,7 @@ public class SetMultimapTest extends TestBase {
     // G069-01: invert() mirrored a BiMap backing map, which rejected a second inverted key with an equal value set
     @Test
     public void testInvert_biMapBackedMultimap() {
-        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         multimap.putValues("a", Arrays.asList(1, 2));
         multimap.put("b", 3);
 
@@ -1363,7 +1363,7 @@ public class SetMultimapTest extends TestBase {
     // invert() of a BiMap-backed multimap: LinkedHashMap backing, keys in the source's encounter order, shared key sets
     @Test
     public void testInvert_biMapBacking_linkedHashMapInEncounterOrder() {
-        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, LinkedHashSet::new);
+        final SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(BiMap::new, LinkedHashSet::new);
         multimap.putValues("c", Arrays.asList(5, 1, 2));
         multimap.putValues("a", Arrays.asList(2, 3));
         multimap.put("b", 4);
@@ -1391,11 +1391,11 @@ public class SetMultimapTest extends TestBase {
     // invert() of an empty BiMap-backed multimap is empty (LinkedHashMap backing); a HashMap backing still inverts into a HashMap
     @Test
     public void testInvert_emptyBiMapBackingAndHashMapBackingUnchanged() {
-        final SetMultimap<Integer, String> emptyInverted = N.<String, Integer> newSetMultimap(BiMap::new, HashSet::new).invert();
+        final SetMultimap<Integer, String> emptyInverted = CommonUtil.<String, Integer> newSetMultimap(BiMap::new, HashSet::new).invert();
         assertTrue(emptyInverted.isEmpty());
         assertEquals(LinkedHashMap.class, emptyInverted.backingMap.getClass());
 
-        final SetMultimap<String, Integer> hashBacked = N.newSetMultimap(HashMap::new, HashSet::new);
+        final SetMultimap<String, Integer> hashBacked = CommonUtil.newSetMultimap(HashMap::new, HashSet::new);
         hashBacked.putValues("a", Arrays.asList(1, 2));
         hashBacked.put("b", 3);
         final SetMultimap<Integer, String> inverted = hashBacked.invert();
@@ -1408,7 +1408,7 @@ public class SetMultimapTest extends TestBase {
     // toImmutableMap() of a BiMap-backed multimap whose value sets were made equal in place used to throw from a BiMap copy
     @Test
     public void testToImmutableMap_biMapBackingWithValueSetsMadeEqual() {
-        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         multimap.put("a", 1);
         multimap.put("b", 2);
         multimap.put("a", 2);
@@ -1425,7 +1425,7 @@ public class SetMultimapTest extends TestBase {
     // toImmutableMap() of a BiMap-backed multimap with distinct sets, and of a reverse-sorted multimap, is unchanged
     @Test
     public void testToImmutableMap_biMapDistinctAndSortedBackingUnchanged() {
-        final SetMultimap<String, Integer> biMapBacked = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> biMapBacked = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         biMapBacked.putValues("a", Arrays.asList(1, 2));
         biMapBacked.put("b", 3);
         final ImmutableMap<String, ImmutableSet<Integer>> fromBiMap = biMapBacked.toImmutableMap();
@@ -1433,7 +1433,7 @@ public class SetMultimapTest extends TestBase {
         assertEquals(Set.of(1, 2), fromBiMap.get("a"));
         assertEquals(Set.of(3), fromBiMap.get("b"));
 
-        final SetMultimap<String, Integer> sorted = N.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
+        final SetMultimap<String, Integer> sorted = CommonUtil.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
         sorted.put("a", 1);
         sorted.put("c", 3);
         sorted.put("b", 2);
@@ -1447,7 +1447,7 @@ public class SetMultimapTest extends TestBase {
     // G123-02: toMap() of a BiMap-backed multimap whose value sets were made equal in place used to throw from a BiMap copy
     @Test
     public void testToMap_biMapBackingWithValueSetsMadeEqual() {
-        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         multimap.put("a", 1);
         multimap.put("b", 2);
         multimap.put("a", 2);
@@ -1469,7 +1469,7 @@ public class SetMultimapTest extends TestBase {
     // G123-02: toMap() of a BiMap-backed multimap with distinct sets is a LinkedHashMap in the source's encounter order (was a BiMap)
     @Test
     public void testToMap_biMapBackingDistinctSets() {
-        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> multimap = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         multimap.put("c", 3);
         multimap.putValues("a", Arrays.asList(1, 2));
 
@@ -1485,19 +1485,19 @@ public class SetMultimapTest extends TestBase {
     // copy() of a BiMap backing keep their map
     @Test
     public void testToMap_nonBiMapBackingsUnchanged() {
-        final SetMultimap<String, Integer> hashBacked = N.newSetMultimap(HashMap::new, HashSet::new);
+        final SetMultimap<String, Integer> hashBacked = CommonUtil.newSetMultimap(HashMap::new, HashSet::new);
         hashBacked.putValues("a", Arrays.asList(1, 2));
         hashBacked.put("b", 1);
         assertEquals(HashMap.class, hashBacked.toMap().getClass());
         assertEquals(Map.of("a", Set.of(1, 2), "b", Set.of(1)), hashBacked.toMap());
 
-        final SetMultimap<String, Integer> linkedBacked = N.newSetMultimap(LinkedHashMap::new, HashSet::new);
+        final SetMultimap<String, Integer> linkedBacked = CommonUtil.newSetMultimap(LinkedHashMap::new, HashSet::new);
         linkedBacked.put("z", 1);
         linkedBacked.put("y", 2);
         assertEquals(LinkedHashMap.class, linkedBacked.toMap().getClass());
         assertEquals(Arrays.asList("z", "y"), new ArrayList<>(linkedBacked.toMap().keySet()));
 
-        final SetMultimap<String, Integer> sorted = N.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
+        final SetMultimap<String, Integer> sorted = CommonUtil.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
         sorted.put("a", 1);
         sorted.put("c", 3);
         sorted.put("b", 2);
@@ -1505,7 +1505,7 @@ public class SetMultimapTest extends TestBase {
         assertEquals(TreeMap.class, sortedMap.getClass());
         assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sortedMap.keySet()));
 
-        final SetMultimap<String, Integer> biMapBacked = N.newSetMultimap(BiMap::new, HashSet::new);
+        final SetMultimap<String, Integer> biMapBacked = CommonUtil.newSetMultimap(BiMap::new, HashSet::new);
         biMapBacked.put("a", 1);
         biMapBacked.put("b", 2);
         assertEquals(BiMap.class, biMapBacked.toMap(size -> new BiMap<>()).getClass());

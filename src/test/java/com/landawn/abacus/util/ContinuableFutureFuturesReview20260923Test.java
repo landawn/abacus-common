@@ -839,7 +839,8 @@ public class ContinuableFutureFuturesReview20260923Test extends TestBase {
         }
         assertEquals(List.of("d"), Futures.allOf(done).get(-1, TimeUnit.SECONDS), "a non-positive timeout polls");
 
-        for (final Runnable call : List.<Runnable> of(() -> Futures.allOf(new Future[0]), () -> Futures.anyOf(new Future[0]), () -> Futures.iterate(new Future[0]))) {
+        for (final Runnable call : List.<Runnable> of(() -> Futures.allOf(new Future[0]), () -> Futures.anyOf(new Future[0]),
+                () -> Futures.iterate(new Future[0]))) {
             final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call::run);
             assertTrue(ex.getMessage().contains("futures"), ex.getMessage());
         }

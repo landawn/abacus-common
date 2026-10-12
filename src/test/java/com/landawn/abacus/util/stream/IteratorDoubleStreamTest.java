@@ -24,7 +24,7 @@ public class IteratorDoubleStreamTest extends TestBase {
     public void testGroupToRejectsNullDownstreamBeforeInvokingMapFactory() {
         for (final boolean arrayBacked : new boolean[] { true, false }) {
             for (final boolean empty : new boolean[] { true, false }) {
-                final double[] values = empty ? new double[0] : new double[] { (double) 1 };
+                final double[] values = empty ? new double[0] : new double[] { 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
                 try (final DoubleStream stream = arrayBacked ? DoubleStream.of(values) : DoubleStream.of(com.landawn.abacus.util.DoubleIterator.of(values))) {
                     org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
@@ -46,7 +46,7 @@ public class IteratorDoubleStreamTest extends TestBase {
                 if (attempts.getAndIncrement() == 1) {
                     throw new IllegalStateException("second attempt");
                 }
-                return (double) delivered.getAndIncrement();
+                return delivered.getAndIncrement();
             }).limit(4).skip(2)) {
                 final DoubleIteratorEx iterator = stream.iteratorEx();
                 assertThrows(IllegalStateException.class, () -> {
@@ -60,8 +60,8 @@ public class IteratorDoubleStreamTest extends TestBase {
                     }
                 });
                 assertTrue(iterator.hasNext());
-                assertEquals((double) 2, iterator.nextDouble());
-                assertEquals((double) 3, iterator.nextDouble());
+                assertEquals(2, iterator.nextDouble());
+                assertEquals(3, iterator.nextDouble());
                 assertFalse(iterator.hasNext());
                 assertEquals(5, attempts.get());
                 assertEquals(4, delivered.get());
@@ -77,12 +77,12 @@ public class IteratorDoubleStreamTest extends TestBase {
             if (attempts.getAndIncrement() == 1) {
                 throw new IllegalStateException("second attempt");
             }
-            return (double) delivered.getAndIncrement();
+            return delivered.getAndIncrement();
         }).limit(2)) {
             final DoubleIteratorEx iterator = stream.iteratorEx();
             assertThrows(IllegalStateException.class, () -> iterator.advance(2));
             assertTrue(iterator.hasNext());
-            assertEquals((double) 1, iterator.nextDouble());
+            assertEquals(1, iterator.nextDouble());
             assertFalse(iterator.hasNext());
             assertThrows(java.util.NoSuchElementException.class, iterator::nextDouble);
             assertEquals(3, attempts.get());

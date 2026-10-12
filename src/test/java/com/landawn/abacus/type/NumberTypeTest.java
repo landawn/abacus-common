@@ -336,4 +336,76 @@ public class NumberTypeTest extends TestBase {
         verify(writer).write(123.45);
     }
 
+    // ---- bug review 2026-09-30 G119 begin ----
+    private static final class PrivateCtorNumber extends Number {
+        private final int value;
+
+        public PrivateCtorNumber(final String value) {
+            this.value = Integer.parseInt(value);
+        }
+
+        @Override
+        public int intValue() {
+            return value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    private static final class PrivateFactoryNumber extends Number {
+        private final long value;
+
+        private PrivateFactoryNumber(final long value) {
+            this.value = value;
+        }
+
+        public static PrivateFactoryNumber valueOf(final String value) {
+            return new PrivateFactoryNumber(Long.parseLong(value));
+        }
+
+        @Override
+        public int intValue() {
+            return (int) value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    // G119-01: the auto-detected public constructor/factory of a non-public Number subclass must be callable
+    @Test
+    public void testValueOf_nonPublicNumberSubclass() {
+        final Type<PrivateCtorNumber> ctorType = Type.of(PrivateCtorNumber.class);
+        assertEquals(4, ctorType.valueOf("4").intValue());
+
+        final Type<PrivateFactoryNumber> factoryType = Type.of(PrivateFactoryNumber.class);
+        assertEquals(5L, factoryType.valueOf("5").longValue());
+    }
+    // ---- bug review 2026-09-30 G119 end ----
+
 }

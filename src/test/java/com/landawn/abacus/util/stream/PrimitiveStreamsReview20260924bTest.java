@@ -154,7 +154,8 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayShortStream, src 1: ParallelIteratorShortStream
-                final ShortStream a = (src == 0 ? ShortStream.of(new short[] { 1, 2, 3 }) : ShortStream.of(ShortIterator.of(new short[] { 1, 2, 3 }))).parallel(3)
+                final ShortStream a = (src == 0 ? ShortStream.of(new short[] { 1, 2, 3 }) : ShortStream.of(ShortIterator.of(new short[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(aClosed::incrementAndGet);
                 assertTrue(a instanceof ParallelArrayShortStream == (src == 0));
                 final ShortStream b = ShortStream.of(new short[] { 4, 5 }).onClose(bClosed::incrementAndGet);
@@ -227,10 +228,10 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (int) 0, (int) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (int) 0, (int) 0, (int) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 });
                 assertEquals(1, aClosed.get(), "receiver close handler, overload " + ov + ", src " + src);
@@ -277,10 +278,10 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (long) 0, (long) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (long) 0, (long) 0, (long) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 });
                 assertEquals(1, aClosed.get(), "receiver close handler, overload " + ov + ", src " + src);
@@ -304,7 +305,8 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayFloatStream, src 1: ParallelIteratorFloatStream
-                final FloatStream a = (src == 0 ? FloatStream.of(new float[] { 1, 2, 3 }) : FloatStream.of(FloatIterator.of(new float[] { 1, 2, 3 }))).parallel(3)
+                final FloatStream a = (src == 0 ? FloatStream.of(new float[] { 1, 2, 3 }) : FloatStream.of(FloatIterator.of(new float[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(aClosed::incrementAndGet);
                 assertTrue(a instanceof ParallelArrayFloatStream == (src == 0));
                 final FloatStream b = FloatStream.of(new float[] { 4, 5 }).onClose(bClosed::incrementAndGet);
@@ -327,10 +329,10 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (float) 0, (float) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (float) 0, (float) 0, (float) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 });
                 assertEquals(1, aClosed.get(), "receiver close handler, overload " + ov + ", src " + src);
@@ -354,7 +356,8 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                 final AtomicInteger bClosed = new AtomicInteger();
                 final AtomicInteger cClosed = new AtomicInteger();
                 // src 0: ParallelArrayDoubleStream, src 1: ParallelIteratorDoubleStream
-                final DoubleStream a = (src == 0 ? DoubleStream.of(new double[] { 1, 2, 3 }) : DoubleStream.of(DoubleIterator.of(new double[] { 1, 2, 3 }))).parallel(3)
+                final DoubleStream a = (src == 0 ? DoubleStream.of(new double[] { 1, 2, 3 }) : DoubleStream.of(DoubleIterator.of(new double[] { 1, 2, 3 })))
+                        .parallel(3)
                         .onClose(aClosed::incrementAndGet);
                 assertTrue(a instanceof ParallelArrayDoubleStream == (src == 0));
                 final DoubleStream b = DoubleStream.of(new double[] { 4, 5 }).onClose(bClosed::incrementAndGet);
@@ -377,10 +380,10 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
                             a.zipWith(b, c, (x, y, w) -> x);
                             break;
                         case 2:
-                            a.zipWith(b, (double) 0, (double) 0, (x, y) -> x);
+                            a.zipWith(b, 0, 0, (x, y) -> x);
                             break;
                         default:
-                            a.zipWith(b, c, (double) 0, (double) 0, (double) 0, (x, y, w) -> x);
+                            a.zipWith(b, c, 0, 0, 0, (x, y, w) -> x);
                     }
                 });
                 assertEquals(1, aClosed.get(), "receiver close handler, overload " + ov + ", src " + src);
@@ -401,9 +404,7 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final int[] expected = { 5, 7, 9 };
         int[] r = IntStream.of(1, 2, 3).parallel(3).zipWith(IntStream.of(4, 5, 6), Integer::sum).sorted().toArray();
         assertArrayEquals(expected, r);
-        r = IntStream.of(IntIterator.of(1, 2, 3)).parallel(3).zipWith(IntStream.of(4, 5, 6), IntStream.of(0, 0, 0), (x, y, z) -> x + y + z)
-                .sorted()
-                .toArray();
+        r = IntStream.of(IntIterator.of(1, 2, 3)).parallel(3).zipWith(IntStream.of(4, 5, 6), IntStream.of(0, 0, 0), (x, y, z) -> x + y + z).sorted().toArray();
         assertArrayEquals(expected, r);
         r = IntStream.of(1, 2, 3).parallel(3).zipWith(IntStream.of(4, 5), 0, 100, Integer::sum).sorted().toArray();
         assertArrayEquals(new int[] { 5, 7, 103 }, r);
@@ -452,8 +453,8 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         assertNullOptionalNpe(() -> ShortStream.of((short) 1).mapPartial(x -> null).toArray());
         assertNullOptionalNpe(() -> ShortStream.of(ShortIterator.of((short) 1)).mapPartial(x -> null).count());
         assertNullOptionalNpe(() -> ShortStream.of(new short[200]).parallel(4).mapPartial(x -> null).toArray());
-        assertNullOptionalNpe(() -> IntStream.of((int) 1).mapPartial(x -> null).toArray());
-        assertNullOptionalNpe(() -> IntStream.of(IntIterator.of((int) 1)).mapPartial(x -> null).count());
+        assertNullOptionalNpe(() -> IntStream.of(1).mapPartial(x -> null).toArray());
+        assertNullOptionalNpe(() -> IntStream.of(IntIterator.of(1)).mapPartial(x -> null).count());
         assertNullOptionalNpe(() -> IntStream.of(new int[200]).parallel(4).mapPartial(x -> null).toArray());
         assertNullOptionalNpe(() -> LongStream.of((long) 1).mapPartial(x -> null).toArray());
         assertNullOptionalNpe(() -> LongStream.of(LongIterator.of((long) 1)).mapPartial(x -> null).count());
@@ -464,7 +465,7 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         assertNullOptionalNpe(() -> DoubleStream.of((double) 1).mapPartial(x -> null).toArray());
         assertNullOptionalNpe(() -> DoubleStream.of(DoubleIterator.of((double) 1)).mapPartial(x -> null).count());
         assertNullOptionalNpe(() -> DoubleStream.of(new double[200]).parallel(4).mapPartial(x -> null).toArray());
-        assertNullOptionalNpe(() -> IntStream.of((int) 1).mapPartialJdk(x -> null).toArray());
+        assertNullOptionalNpe(() -> IntStream.of(1).mapPartialJdk(x -> null).toArray());
         assertNullOptionalNpe(() -> IntStream.of(new int[200]).parallel(4).mapPartialJdk(x -> null).toArray());
         assertNullOptionalNpe(() -> LongStream.of((long) 1).mapPartialJdk(x -> null).toArray());
         assertNullOptionalNpe(() -> LongStream.of(new long[200]).parallel(4).mapPartialJdk(x -> null).toArray());
@@ -475,12 +476,14 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
     @Test
     public void n1_primitiveMapPartialValidResultsUnchanged() {
         assertArrayEquals(new int[] { 2, 4 },
-                IntStream.of(1, 2, 3, 4).mapPartial(x -> x % 2 == 0 ? com.landawn.abacus.util.u.OptionalInt.of(x) : com.landawn.abacus.util.u.OptionalInt.empty())
+                IntStream.of(1, 2, 3, 4)
+                        .mapPartial(x -> x % 2 == 0 ? com.landawn.abacus.util.u.OptionalInt.of(x) : com.landawn.abacus.util.u.OptionalInt.empty())
                         .toArray());
         assertArrayEquals(new long[] { 1, 3 },
                 LongStream.of(1, 2, 3).mapPartialJdk(x -> x % 2 == 1 ? java.util.OptionalLong.of(x) : java.util.OptionalLong.empty()).toArray());
         assertArrayEquals(new char[] { 'B' },
-                CharStream.of('a', 'b').mapPartial(c -> c == 'b' ? com.landawn.abacus.util.u.OptionalChar.of('B') : com.landawn.abacus.util.u.OptionalChar.empty())
+                CharStream.of('a', 'b')
+                        .mapPartial(c -> c == 'b' ? com.landawn.abacus.util.u.OptionalChar.of('B') : com.landawn.abacus.util.u.OptionalChar.empty())
                         .toArray());
         assertEquals(0, FloatStream.empty().mapPartial(x -> null).count()); // the mapper is never called on an empty stream
     }
@@ -500,7 +503,7 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         assertArrayEquals(new long[] { 1 }, ShortStream.of((short) 5).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
         assertArrayEquals(new long[] { 1000 }, ShortStream.of(new short[1000]).collect(() -> new long[1], (acc, x) -> acc[0]++));
         assertThrows(IllegalArgumentException.class, () -> ShortStream.of(new short[1000]).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
-        assertArrayEquals(new long[] { 1 }, IntStream.of((int) 5).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
+        assertArrayEquals(new long[] { 1 }, IntStream.of(5).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
         assertArrayEquals(new long[] { 1000 }, IntStream.of(new int[1000]).collect(() -> new long[1], (acc, x) -> acc[0]++));
         assertThrows(IllegalArgumentException.class, () -> IntStream.of(new int[1000]).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
         assertArrayEquals(new long[] { 1 }, LongStream.of((long) 5).parallel(4).collect(() -> new long[1], (acc, x) -> acc[0]++));
@@ -539,29 +542,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         ByteStream s = ByteStream.of(new byte[] { 1, 2 }).onClose(closed::incrementAndGet);
         final ByteStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = ByteStream.of(new byte[] { 1, 2 }).onClose(closed::incrementAndGet);
         final ByteStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = ByteStream.of(new byte[0]).onClose(closed::incrementAndGet);
         final ByteStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = ByteStream.of(ByteIterator.of(new byte[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final ByteStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = ByteStream.of(ByteIterator.of(new byte[] { 1, 2 })).onClose(closed::incrementAndGet);
         final ByteStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = ByteStream.of(new byte[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final ByteStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = ByteStream.of(ByteIterator.of(new byte[100])).parallel(4).onClose(closed::incrementAndGet);
         final ByteStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = ByteStream.of(new byte[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -578,29 +591,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         CharStream s = CharStream.of(new char[] { 1, 2 }).onClose(closed::incrementAndGet);
         final CharStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = CharStream.of(new char[] { 1, 2 }).onClose(closed::incrementAndGet);
         final CharStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = CharStream.of(new char[0]).onClose(closed::incrementAndGet);
         final CharStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = CharStream.of(CharIterator.of(new char[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final CharStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = CharStream.of(CharIterator.of(new char[] { 1, 2 })).onClose(closed::incrementAndGet);
         final CharStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = CharStream.of(new char[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final CharStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = CharStream.of(CharIterator.of(new char[100])).parallel(4).onClose(closed::incrementAndGet);
         final CharStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = CharStream.of(new char[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -617,29 +640,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         ShortStream s = ShortStream.of(new short[] { 1, 2 }).onClose(closed::incrementAndGet);
         final ShortStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = ShortStream.of(new short[] { 1, 2 }).onClose(closed::incrementAndGet);
         final ShortStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = ShortStream.of(new short[0]).onClose(closed::incrementAndGet);
         final ShortStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = ShortStream.of(ShortIterator.of(new short[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final ShortStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = ShortStream.of(ShortIterator.of(new short[] { 1, 2 })).onClose(closed::incrementAndGet);
         final ShortStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = ShortStream.of(new short[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final ShortStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = ShortStream.of(ShortIterator.of(new short[100])).parallel(4).onClose(closed::incrementAndGet);
         final ShortStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = ShortStream.of(new short[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -656,29 +689,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         IntStream s = IntStream.of(new int[] { 1, 2 }).onClose(closed::incrementAndGet);
         final IntStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = IntStream.of(new int[] { 1, 2 }).onClose(closed::incrementAndGet);
         final IntStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = IntStream.of(new int[0]).onClose(closed::incrementAndGet);
         final IntStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = IntStream.of(IntIterator.of(new int[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final IntStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = IntStream.of(IntIterator.of(new int[] { 1, 2 })).onClose(closed::incrementAndGet);
         final IntStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = IntStream.of(new int[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final IntStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = IntStream.of(IntIterator.of(new int[100])).parallel(4).onClose(closed::incrementAndGet);
         final IntStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = IntStream.of(new int[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -695,29 +738,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         LongStream s = LongStream.of(new long[] { 1, 2 }).onClose(closed::incrementAndGet);
         final LongStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = LongStream.of(new long[] { 1, 2 }).onClose(closed::incrementAndGet);
         final LongStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = LongStream.of(new long[0]).onClose(closed::incrementAndGet);
         final LongStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = LongStream.of(LongIterator.of(new long[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final LongStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = LongStream.of(LongIterator.of(new long[] { 1, 2 })).onClose(closed::incrementAndGet);
         final LongStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = LongStream.of(new long[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final LongStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = LongStream.of(LongIterator.of(new long[100])).parallel(4).onClose(closed::incrementAndGet);
         final LongStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = LongStream.of(new long[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -734,29 +787,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         FloatStream s = FloatStream.of(new float[] { 1, 2 }).onClose(closed::incrementAndGet);
         final FloatStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = FloatStream.of(new float[] { 1, 2 }).onClose(closed::incrementAndGet);
         final FloatStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = FloatStream.of(new float[0]).onClose(closed::incrementAndGet);
         final FloatStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = FloatStream.of(FloatIterator.of(new float[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final FloatStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = FloatStream.of(FloatIterator.of(new float[] { 1, 2 })).onClose(closed::incrementAndGet);
         final FloatStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = FloatStream.of(new float[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final FloatStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = FloatStream.of(FloatIterator.of(new float[100])).parallel(4).onClose(closed::incrementAndGet);
         final FloatStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = FloatStream.of(new float[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);
@@ -773,29 +836,39 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
         final AtomicInteger closed = new AtomicInteger();
         DoubleStream s = DoubleStream.of(new double[] { 1, 2 }).onClose(closed::incrementAndGet);
         final DoubleStream s1 = s;
-        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s1, () -> s1.collect(() -> null, (c, x) -> {
+        }));
         s = DoubleStream.of(new double[] { 1, 2 }).onClose(closed::incrementAndGet);
         final DoubleStream s2 = s;
-        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s2, () -> s2.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         // empty input: the JDK and the old code returned null here
         s = DoubleStream.of(new double[0]).onClose(closed::incrementAndGet);
         final DoubleStream s3 = s;
-        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s3, () -> s3.collect(() -> null, (c, x) -> {
+        }));
         s = DoubleStream.of(DoubleIterator.of(new double[] { 1, 2 })).filter(x -> false).onClose(closed::incrementAndGet);
         final DoubleStream s4 = s;
-        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+        assertSupplierReturnedNull(closed, s4, () -> s4.collect(() -> null, (c, x) -> {
+        }, (c1, c2) -> {
+        }));
         s = DoubleStream.of(DoubleIterator.of(new double[] { 1, 2 })).onClose(closed::incrementAndGet);
         final DoubleStream s5 = s;
-        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s5, () -> s5.collect(() -> null, (c, x) -> {
+        }));
         // parallel: array (both split strategies) and iterator sources
         for (final BaseStream.SplitStrategy strategy : BaseStream.SplitStrategy.values()) {
             s = DoubleStream.of(new double[100]).parallel(ps(strategy)).onClose(closed::incrementAndGet);
             final DoubleStream s6 = s;
-            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> { }, (c1, c2) -> { }));
+            assertSupplierReturnedNull(closed, s6, () -> s6.collect(() -> null, (c, x) -> {
+            }, (c1, c2) -> {
+            }));
         }
         s = DoubleStream.of(DoubleIterator.of(new double[100])).parallel(4).onClose(closed::incrementAndGet);
         final DoubleStream s7 = s;
-        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> { }));
+        assertSupplierReturnedNull(closed, s7, () -> s7.collect(() -> null, (c, x) -> {
+        }));
         // a supplier that returns null only for some workers is still caught
         final AtomicInteger calls = new AtomicInteger();
         s = DoubleStream.of(new double[100]).parallel(ps(BaseStream.SplitStrategy.ARRAY)).onClose(closed::incrementAndGet);

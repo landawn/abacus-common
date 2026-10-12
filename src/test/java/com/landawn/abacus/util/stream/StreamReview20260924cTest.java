@@ -728,8 +728,8 @@ public class StreamReview20260924cTest extends TestBase {
     }
 
     /** Runs {@code body} on a new thread, interrupts it once it is waiting for the subscriber, and returns what it threw. */
-    private static Throwable interruptWhileAwaitingSubscriber(final java.util.function.Supplier<Stream<Integer>> mainFactory,
-            final AtomicBoolean mainDone, final AtomicBoolean interruptFlagAfter) throws Exception {
+    private static Throwable interruptWhileAwaitingSubscriber(final java.util.function.Supplier<Stream<Integer>> mainFactory, final AtomicBoolean mainDone,
+            final AtomicBoolean interruptFlagAfter) throws Exception {
         final AtomicReference<Throwable> thrown = new AtomicReference<>();
         final Thread t = new Thread(() -> {
             try {
@@ -857,10 +857,9 @@ public class StreamReview20260924cTest extends TestBase {
         final IllegalStateException closeA = new IllegalStateException("A");
         final AtomicInteger closedC = new AtomicInteger();
         final List<Integer> delivered = new ArrayList<>();
-        final Throwable thrown = assertThrows(IllegalStateException.class,
-                () -> Stream.concat(List.of(Stream.of(1).onClose(() -> {
-                    throw closeA;
-                }), Stream.of(2), Stream.of(3).onClose(closedC::incrementAndGet))).forEach(delivered::add));
+        final Throwable thrown = assertThrows(IllegalStateException.class, () -> Stream.concat(List.of(Stream.of(1).onClose(() -> {
+            throw closeA;
+        }), Stream.of(2), Stream.of(3).onClose(closedC::incrementAndGet))).forEach(delivered::add));
 
         assertSame(closeA, thrown);
         assertEquals(List.of(1), delivered);

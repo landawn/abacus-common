@@ -83,7 +83,7 @@ public class NComplexTest extends NTestSupport {
     public void testDeepToStringGuardsArrayCyclesAndDelegatesOtherObjects() {
         Object[] cycle = new Object[1];
         cycle[0] = cycle;
-        assertEquals("[[...]]", N.deepToString(cycle));
+        assertEquals("[[...]]", CommonUtil.deepToString(cycle));
 
         RuntimeException failure = new RuntimeException("non-array rendering");
         Object element = new Object() {
@@ -92,18 +92,18 @@ public class NComplexTest extends NTestSupport {
                 throw failure;
             }
         };
-        assertSame(failure, assertThrows(RuntimeException.class, () -> N.deepToString(new Object[] { element })));
+        assertSame(failure, assertThrows(RuntimeException.class, () -> CommonUtil.deepToString(new Object[] { element })));
     }
 
     @Test
     public void testHashCodeEverythingConsumesDirectAndNestedIterators() {
         List<Integer> values = Arrays.asList(1, 2, 3);
         Iterator<Integer> direct = values.iterator();
-        assertEquals(N.hashCodeEverything(values), N.hashCodeEverything(direct));
+        assertEquals(CommonUtil.hashCodeEverything(values), CommonUtil.hashCodeEverything(direct));
         assertFalse(direct.hasNext());
 
         Iterator<Integer> nested = values.iterator();
-        assertEquals(N.hashCodeEverything(new Object[] { values }), N.hashCodeEverything(new Object[] { nested }));
+        assertEquals(CommonUtil.hashCodeEverything(new Object[] { values }), CommonUtil.hashCodeEverything(new Object[] { nested }));
         assertFalse(nested.hasNext());
     }
 
@@ -113,14 +113,14 @@ public class NComplexTest extends NTestSupport {
         multimap.get("key").clear();
 
         assertEquals(0, multimap.totalValueCount());
-        assertFalse(N.isEmpty(multimap));
-        assertSame(multimap, N.checkArgNotEmpty(multimap, "multimap"));
+        assertFalse(CommonUtil.isEmpty(multimap));
+        assertSame(multimap, CommonUtil.checkArgNotEmpty(multimap, "multimap"));
 
         multimap.removeAll("key");
-        assertTrue(N.isEmpty(multimap));
-        assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty(multimap, "multimap"));
-        assertTrue(N.isEmpty((Multimap<?, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class, () -> N.checkArgNotEmpty((Multimap<?, ?, ?>) null, "multimap"));
+        assertTrue(CommonUtil.isEmpty(multimap));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(multimap, "multimap"));
+        assertTrue(CommonUtil.isEmpty((Multimap<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty((Multimap<?, ?, ?>) null, "multimap"));
     }
 
     @Test

@@ -27,6 +27,7 @@ import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
@@ -228,25 +229,80 @@ public class ReaderType extends AbstractType<Reader> {
         }
 
         // Constructor signatures do not establish content semantics (notably FileReader(String)).
-        if (typeClass == (Class<?>) Reader.class || typeClass == (Class<?>) StringReader.class) {
+        if (!isTextConstructible()) {
+            throw unsupportedReaderClass();
+        } else if (typeClass == (Class<?>) Reader.class || typeClass == (Class<?>) StringReader.class) {
             return new StringReader(str);
         } else if (typeClass == (Class<?>) CharArrayReader.class) {
             return new CharArrayReader(str.toCharArray());
         } else if (typeClass == (Class<?>) BufferedReader.class) {
             return new BufferedReader(new StringReader(str));
-        } else if (typeClass == (Class<?>) PushbackReader.class || typeClass == (Class<?>) FilterReader.class) {
+        } else {
             return new PushbackReader(new StringReader(str));
         }
+    }
 
-        throw new UnsupportedOperationException("Text construction is not supported for reader class: " + typeClass.getName());
+    /**
+     * Whether {@link #valueOf(String)} can create the handled class: the single list of supported classes.
+     */
+    private boolean isTextConstructible() {
+        return typeClass == (Class<?>) Reader.class || typeClass == (Class<?>) StringReader.class || typeClass == (Class<?>) CharArrayReader.class
+                || typeClass == (Class<?>) BufferedReader.class || typeClass == (Class<?>) PushbackReader.class || typeClass == (Class<?>) FilterReader.class;
+    }
+
+    /**
+     * Returns {@code opened} - a JDBC reader or a reader owning a Clob locator - as the handled
+     * class: as is when it already is one, wrapped when the handled class wraps a reader (closing the result closes
+     * {@code opened}), or as a {@link StringReader}/{@link CharArrayReader} holding a copy of its content, after which
+     * {@code opened} is closed. A null reader is returned unchanged. An unsupported target closes the acquired reader before failing.
+     *
+     * @param opened the acquired reader whose ownership is transferred to this method; may be null
+     * @return the reader in the handled class, or null
+     * @throws UncheckedIOException if copying or closing an acquired reader fails
+     * @throws UnsupportedOperationException if the reader does not already match an unsupported handled class
+     */
+    private Reader asHandledClass(final Reader opened) throws UncheckedIOException {
+        if (opened == null || typeClass.isInstance(opened)) {
+            return opened;
+        } else if (typeClass == (Class<?>) BufferedReader.class) {
+            return new BufferedReader(opened);
+        } else if (typeClass == (Class<?>) PushbackReader.class || typeClass == (Class<?>) FilterReader.class) {
+            return new PushbackReader(opened);
+        }
+
+        final String text;
+
+        try (Reader source = opened) {
+            // A JDBC driver can supply an arbitrary reader class. Reject unsupported conversions without consuming
+            // its characters, but close the reader acquired for this failed conversion.
+            if (!isTextConstructible()) {
+                throw unsupportedReaderClass();
+            }
+
+            text = IOUtil.readAllToString(source);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        return typeClass == (Class<?>) CharArrayReader.class ? new CharArrayReader(text.toCharArray()) : new StringReader(text);
+    }
+
+    private UnsupportedOperationException unsupportedReaderClass() {
+        return new UnsupportedOperationException("Text construction is not supported for reader class: " + typeClass.getName());
     }
 
     /**
      * Creates a Reader from various object types.
-     * If the object is a Clob, its character stream is returned in an owning wrapper.
-     * Closing the returned reader closes the character stream and releases the Clob locator.
+     * An object that already is an instance of the handled reader class is returned as is (not read or copied).
+     * If the object is a Clob, its character stream is returned in an owning wrapper (or copied, see below).
+     * Closing the returned reader closes the character stream and releases the Clob locator - a {@code BufferedReader} or
+     * {@code PushbackReader} wraps the Clob's reader, while a {@code StringReader} or {@code CharArrayReader} gets a copy of the
+     * content and the locator is released at once. An unsupported handled class is rejected before the Clob is opened.
      * A {@code char[]} is read as its raw characters, in a reader of the handled class chosen by the
      * same rule as {@link #valueOf(String)}.
+     * Any other {@link Reader}, or an {@link java.io.InputStream} (decoded as UTF-8), has its remaining content read (it is
+     * consumed but not closed - the caller still owns it) into a reader of the handled class; when the handled class cannot be created from
+     * text, {@link UnsupportedOperationException} is thrown before the supplied reader or stream is read.
      * Otherwise, the object is converted to string and then to a Reader.
      *
      * <p><b>Usage Examples:</b></p>
@@ -271,25 +327,47 @@ public class ReaderType extends AbstractType<Reader> {
      *
      * @param obj the object to convert to a Reader
      * @return a Reader representation of the object, or {@code null} if the input is null;
-     *         for a Clob, closing the returned reader also releases the locator
+     *         for a Clob returned as (or wrapped around) its owning reader, closing the returned reader also releases the
+     *         locator; a {@code StringReader}/{@code CharArrayReader} copy is returned with the locator already released
      * @throws UncheckedSQLException if accessing the Clob's character stream fails
+     * @throws UncheckedIOException if reading a supplied reader or stream fails, or reading or releasing a Clob fails while
+     *         it is copied into a {@code StringReader} or {@code CharArrayReader}
      * @throws UnsupportedOperationException if content is supplied for an unsupported reader class
      */
     @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public Reader valueOf(final Object obj) throws UncheckedSQLException, UnsupportedOperationException {
+    public Reader valueOf(final Object obj) throws UncheckedSQLException, UncheckedIOException, UnsupportedOperationException {
         if (obj == null) {
             return null; // NOSONAR
+        } else if (typeClass.isInstance(obj)) {
+            // Returned as is, like InputStreamType: converting would read (consume) the caller's reader.
+            return (Reader) obj;
         } else if (obj instanceof Clob clob) {
+            // Checked before the Clob is opened: the opened reader is the class Utils makes, not the handled class.
+            if (!isTextConstructible()) {
+                throw unsupportedReaderClass();
+            }
+
+            final Reader opened;
+
             try {
-                return Utils.openCharacterStream(clob);
+                opened = Utils.openCharacterStream(clob);
             } catch (final SQLException e) {
                 throw new UncheckedSQLException(e);
             }
+
+            return opened == null ? null : asHandledClass(opened);
         } else if (obj instanceof char[] chars) {
             // The string route would render the array as its list text ("['a', 'b']").
             return valueOf(new String(chars));
+        } else if (obj instanceof Reader || obj instanceof java.io.InputStream) {
+            // Read to the end below: reject an unsupported target first, so that the caller's reader/stream is not consumed.
+            if (!isTextConstructible()) {
+                throw unsupportedReaderClass();
+            }
+
+            return valueOf(obj instanceof Reader reader ? IOUtil.readAllToString(reader) : Type.<Object> of(obj.getClass()).stringOf(obj));
         } else {
             return valueOf(Type.<Object> of(obj.getClass()).stringOf(obj));
         }
@@ -297,6 +375,9 @@ public class ReaderType extends AbstractType<Reader> {
 
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
+     * A reader already of the handled class is returned unchanged. Supported wrapper classes wrap it lazily;
+     * closing the returned reader closes the JDBC reader. A {@link StringReader} or {@link CharArrayReader} target copies
+     * its characters and closes the JDBC reader before returning. Other mismatched targets are rejected and the acquired reader is closed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -312,14 +393,19 @@ public class ReaderType extends AbstractType<Reader> {
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column index is invalid
+     * @throws UncheckedIOException if copying or closing the acquired reader fails
+     * @throws UnsupportedOperationException if the acquired reader does not match an unsupported handled class
      */
     @Override
     public Reader get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
-        return rs.getCharacterStream(columnIndex);
+        return asHandledClass(rs.getCharacterStream(columnIndex));
     }
 
     /**
      * Retrieves a character stream (Reader) from the specified column in the ResultSet.
+     * A reader already of the handled class is returned unchanged. Supported wrapper classes wrap it lazily;
+     * closing the returned reader closes the JDBC reader. A {@link StringReader} or {@link CharArrayReader} target copies
+     * its characters and closes the JDBC reader before returning. Other mismatched targets are rejected and the acquired reader is closed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -335,10 +421,12 @@ public class ReaderType extends AbstractType<Reader> {
      * @return the Reader for the specified column, or {@code null} if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the column label is not found
+     * @throws UncheckedIOException if copying or closing the acquired reader fails
+     * @throws UnsupportedOperationException if the acquired reader does not match an unsupported handled class
      */
     @Override
     public Reader get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
-        return rs.getCharacterStream(columnName);
+        return asHandledClass(rs.getCharacterStream(columnName));
     }
 
     /**
@@ -446,8 +534,8 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Appends the content of a Reader to the given Appendable.
      * If the Appendable is a Writer, the content is copied directly.
-     * Otherwise, the Reader content is read as a string and appended.
-     * The Reader is fully consumed after this operation.
+     * Otherwise, the Reader content is appended in bounded chunks.
+     * In the non-Writer path, reading stops at end of stream or if a read and its retry both return zero.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -488,13 +576,39 @@ public class ReaderType extends AbstractType<Reader> {
      */
     @Override
     public void appendTo(final Appendable appendable, final Reader x) throws NullPointerException, IOException, UncheckedIOException {
+        Objects.requireNonNull(appendable);
+
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
             if (appendable instanceof Writer writer) {
                 IOUtil.write(x, writer);
             } else {
-                appendable.append(IOUtil.readAllToString(x));
+                // An Appendable may stream to an external destination too; retaining all reader content
+                // first wastes memory and keeps consuming the source after the destination could have failed.
+                final char[] buf = Objectory.createCharArrayBuffer();
+
+                try {
+                    while (true) {
+                        final int count;
+
+                        try {
+                            count = IOUtil.read(x, buf, 0, buf.length);
+                        } catch (final IOException e) {
+                            // Preserve the non-Writer path's distinction between read and append failures.
+                            throw new UncheckedIOException(e);
+                        }
+
+                        // Match readAllToString: stop if the source cannot make progress after a retry.
+                        if (count <= 0) {
+                            break;
+                        }
+
+                        appendable.append(new String(buf, 0, count));
+                    }
+                } finally {
+                    Objectory.recycle(buf);
+                }
             }
         }
     }
@@ -502,7 +616,7 @@ public class ReaderType extends AbstractType<Reader> {
     /**
      * Writes the content of a Reader to the given CharacterWriter.
      * The content is optionally quoted based on the serialization configuration.
-     * The Reader is fully consumed after this operation.
+     * Reading stops at end of stream or if a read and its retry both return zero.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -559,6 +673,12 @@ public class ReaderType extends AbstractType<Reader> {
                 int count = 0;
 
                 while (IOUtil.EOF != (count = IOUtil.read(x, buf, 0, buf.length))) {
+                    // IOUtil.read reports 0 when a read and its retry both make no progress; stop, as
+                    // readAllToString and appendTo do, instead of looping forever on such a Reader.
+                    if (count == 0) {
+                        break;
+                    }
+
                     Utils.writeStringContent(writer, buf, 0, count, config == null ? 0 : config.getStringQuotation());
                 }
             } finally {

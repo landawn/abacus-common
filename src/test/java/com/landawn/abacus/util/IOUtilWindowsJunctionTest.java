@@ -1709,4 +1709,405 @@ public class IOUtilWindowsJunctionTest extends TestBase {
         assertFalse(Files.exists(new File(dest2, "sub/j/src/sub/j").toPath(), java.nio.file.LinkOption.NOFOLLOW_LINKS));
         assertTrue(deepestNameCount(dest2) <= dest2.toPath().getNameCount() + 6);
     }
+
+    // ---- bug review 2026-10-02 G045 begin ----
+
+    // G045-01: the source's own directory spelled through a subst drive (an alias toRealPath() keeps) is still the
+    // source's own directory: moving there is the documented no-op, not a FileAlreadyExistsException
+    @Test
+    public void testMoveToDirectory_ownDirectorySpelledThroughASubstDriveIsTheNoOp() throws IOException {
+        final File base = dir("g045-move-subst");
+        final File p = new File(base, "P");
+        assertTrue(p.mkdir());
+        final File f = write("g045-move-subst/P/f.txt", "orig");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasP = new File(letter + ":\\P");
+            final File aliasF = new File(aliasP, "f.txt");
+            Assumptions.assumeTrue(aliasF.isFile(), "the subst drive is not visible");
+
+            IOUtil.moveToDirectory(aliasF, p);
+            IOUtil.moveToDirectory(aliasF, p, StandardCopyOption.ATOMIC_MOVE);
+            IOUtil.moveToDirectory(f, aliasP);
+            IOUtil.moveToDirectory(f, aliasP, StandardCopyOption.ATOMIC_MOVE);
+
+            assertEquals("orig", read(f));
+            assertEquals(Arrays.asList("f.txt"), Arrays.asList(p.list()));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-01: ... and copying a file there makes "Copy of" (RED on JDK 21, whose getCanonicalPath keeps the subst
+    // spelling; JDK 22+ canonicalises it away before the directory identity is asked)
+    @Test
+    public void testCopyToDirectory_ownDirectorySpelledThroughASubstDriveIsACopyOf() throws IOException {
+        final File base = dir("g045-copy-subst");
+        final File p = new File(base, "P");
+        assertTrue(p.mkdir());
+        final File f = write("g045-copy-subst/P/f.txt", "orig");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasP = new File(letter + ":\\P");
+            final File aliasF = new File(aliasP, "f.txt");
+            Assumptions.assumeTrue(aliasF.isFile(), "the subst drive is not visible");
+
+            assertEquals("Copy of f.txt", IOUtil.copyToDirectory(aliasF, p).getName());
+            assertEquals("orig", read(new File(p, "Copy of f.txt")));
+            assertTrue(new File(p, "Copy of f.txt").delete());
+
+            assertEquals("Copy of f.txt", IOUtil.copyToDirectory(f, aliasP).getName());
+            assertEquals("orig", read(new File(p, "Copy of f.txt")));
+            assertEquals("orig", read(f));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-03: a destination inside the source spelled through a subst drive (Q:\src\sub for <base>\src\sub) is the
+    // source's own subtree and is rejected before anything is created - copyDirectory used to copy into it (for ever
+    // on JDK 21; on JDK 25 the files listed before "sub" landed in the source before the child copy refused)
+    @Test
+    public void testCopyDirectory_destinationInsideTheSourceSpelledThroughASubstDriveIsRejected() throws IOException {
+        final File base = dir("g045-copydir-subst");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g045-copydir-subst/src/a.txt", "A");
+        write("g045-copydir-subst/src/sub/b.txt", "B");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasSub = new File(letter + ":\\src\\sub");
+            Assumptions.assumeTrue(aliasSub.isDirectory(), "the subst drive is not visible");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(src, aliasSub));
+            assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()), "no partial copy may be left in the source");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(src, new File(letter + ":\\src\\newsub")));
+            assertFalse(new File(src, "newsub").exists());
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-03: the same for moveToDirectory, which created the destination inside the source and then failed with a
+    // platform AccessDeniedException instead of the documented IllegalArgumentException
+    @Test
+    public void testMoveToDirectory_destinationInsideTheSourceSpelledThroughASubstDriveIsRejected() throws IOException {
+        final File base = dir("g045-move-into-subst");
+        final File src = new File(base, "src");
+        assertTrue(src.mkdirs());
+        write("g045-move-into-subst/src/a.txt", "A");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            Assumptions.assumeTrue(new File(letter + ":\\src").isDirectory(), "the subst drive is not visible");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(src, new File(letter + ":\\src\\newsub")));
+            assertFalse(new File(src, "newsub").exists(), "rejected before the destination is created");
+            assertEquals("A", read(new File(src, "a.txt")));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-03: ... and for copyToDirectory: a destination inside the source (RED on JDK 21 only - JDK 22+ canonicalises
+    // that alias away), and a destination whose copy target would be the source itself (RED on every JDK)
+    @Test
+    public void testCopyToDirectory_destinationInsideTheSourceSpelledThroughASubstDriveIsRejected() throws IOException {
+        final File base = dir("g045-copyto-subst");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g045-copyto-subst/src/a.txt", "A");
+        write("g045-copyto-subst/src/sub/b.txt", "B");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasSub = new File(letter + ":\\src\\sub");
+            Assumptions.assumeTrue(aliasSub.isDirectory(), "the subst drive is not visible");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(src, aliasSub));
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(src, new File(letter + ":\\")));
+            assertEquals(Arrays.asList("a.txt", "sub"), Arrays.asList(src.list()));
+            assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // ---- bug review 2026-10-02 G045 end ----
+
+    // ---- bug review 2026-10-02 verify G122 begin ----
+
+    // G122-01: a directory link already sitting at the copy target and leading back to the source is judged in the
+    // source's spelling: for a UNC-spelled source it is the documented IllegalArgumentException, as for the real
+    // spelling, not the walk's IOException "already exists as a link" (copyDirectory: an entry whose target is a
+    // junction back to that entry)
+    @Test
+    public void testCopyToDirectory_uncSpelledSourceWhoseTargetIsAJunctionBackToItIsRejected() throws IOException {
+        Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "UNC administrative shares exist on Windows only");
+        final File base = dir("g122-unc-link");
+        final String abs = base.getAbsolutePath();
+        Assumptions.assumeTrue(abs.length() > 2 && abs.charAt(1) == ':', "needs a drive-letter path");
+        final File uncBase = new File("\\\\localhost\\" + abs.charAt(0) + "$" + abs.substring(2));
+        Assumptions.assumeTrue(uncBase.isDirectory(), "the administrative share is not reachable here");
+
+        final File src = new File(base, "src");
+        final File dest = new File(base, "dest");
+        final File dest2 = new File(base, "dest2");
+        assertTrue(new File(src, "sub").mkdirs());
+        assertTrue(dest.mkdir());
+        assertTrue(dest2.mkdir());
+        write("g122-unc-link/src/sub/b.txt", "B");
+        junctionOrSkip(new File(dest, "src"), src);
+        junctionOrSkip(new File(dest2, "sub"), new File(src, "sub"));
+
+        final File uncSrc = new File(uncBase, "src");
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(uncSrc, dest));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(uncSrc, dest2));
+        // the real spelling, as before
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(src, dest));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(src, dest2));
+
+        assertEquals(Arrays.asList("sub"), Arrays.asList(src.list()));
+        assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+    }
+
+    // G122-01: ... and for a source spelled through a subst drive (RED on JDK 21 only: JDK 22+ canonicalises the subst
+    // spelling of the source away before the link is judged)
+    @Test
+    public void testCopyToDirectory_substSpelledSourceWhoseTargetIsAJunctionBackToItIsRejected() throws IOException {
+        final File base = dir("g122-subst-link");
+        final File src = new File(base, "src");
+        final File dest = new File(base, "dest");
+        assertTrue(new File(src, "sub").mkdirs());
+        assertTrue(dest.mkdir());
+        write("g122-subst-link/src/sub/b.txt", "B");
+        junctionOrSkip(new File(dest, "src"), src);
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasSrc = new File(letter + ":\\src");
+            Assumptions.assumeTrue(aliasSrc.isDirectory(), "the subst drive is not visible");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(aliasSrc, dest));
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(aliasSrc, new File(letter + ":\\dest")));
+            assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-03: the containment checks hold whichever side is spelled through the alias, for the copyDirectory check of
+    // a child that would land on an ancestor, and for a move onto the source itself: each is rejected before anything
+    // is created or copied (on unfixed code under JDK 21 the first copy never ends: run it against fixed code only)
+    @Test
+    public void testCopyAndMove_aliasOfTheSourceSideOrOfAnAncestorWithACollidingChildIsRejected() throws IOException {
+        final File base = dir("g122-alias-side");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g122-alias-side/src/a.txt", "A");
+        write("g122-alias-side/src/sub/b.txt", "B");
+        // x/y copied into the base: its child "x" would land on the ancestor x
+        final File y = new File(base, "x/y");
+        assertTrue(new File(y, "x").mkdirs());
+        write("g122-alias-side/x/y/0.txt", "0");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasSrc = new File(letter + ":\\src");
+            Assumptions.assumeTrue(aliasSrc.isDirectory(), "the subst drive is not visible");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(aliasSrc, new File(src, "sub")));
+            assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()), "no partial copy may be left in the source");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(y, new File(letter + ":\\")));
+            assertFalse(new File(base, "0.txt").exists(), "rejected before the entries listed first were copied");
+
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(src, aliasSrc));
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(aliasSrc, new File(src, "sub")));
+            assertEquals(Arrays.asList("a.txt", "sub"), Arrays.asList(src.list()));
+            assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-03: an alias spelling of a destination or source OUTSIDE the source's own subtree is no reason to refuse:
+    // the copies and the move work, and the copy is returned under the destination's own spelling, as before
+    @Test
+    public void testCopyAndMove_substAliasOutsideTheSourceIsStillAccepted() throws IOException {
+        final File base = dir("g122-alias-outside");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g122-alias-outside/src/a.txt", "A");
+        write("g122-alias-outside/src/sub/b.txt", "B");
+        assertTrue(new File(base, "d1").mkdir());
+        assertTrue(new File(base, "d2").mkdir());
+        assertTrue(new File(base, "d3").mkdir());
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File alias = new File(letter + ":\\");
+            Assumptions.assumeTrue(new File(alias, "src").isDirectory(), "the subst drive is not visible");
+
+            IOUtil.copyDirectory(src, new File(alias, "d1"));
+            assertEquals("A", read(new File(base, "d1/a.txt")));
+            assertEquals("B", read(new File(base, "d1/sub/b.txt")));
+
+            final File copied = IOUtil.copyToDirectory(new File(alias, "src"), new File(base, "d2"));
+            assertEquals(new File(base, "d2/src").getCanonicalPath(), copied.getCanonicalPath());
+            assertEquals("B", read(new File(copied, "sub/b.txt")));
+
+            IOUtil.moveToDirectory(src, new File(alias, "d3"));
+            assertFalse(src.exists());
+            assertEquals("B", read(new File(base, "d3/src/sub/b.txt")));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // G045-01: the identity check sees through the alias to the SAME directory only: a file spelled through the subst
+    // drive into another directory that already holds its name is still refused (also under ATOMIC_MOVE, and in the
+    // reverse spelling), and nothing is replaced
+    @Test
+    public void testMoveAndCopyToDirectory_fileSpelledThroughASubstDriveIntoAnotherDirectoryHoldingItsNameIsStillRefused() throws IOException {
+        final File base = dir("g122-other-dir");
+        assertTrue(new File(base, "P").mkdir());
+        assertTrue(new File(base, "Q").mkdir());
+        write("g122-other-dir/P/f.txt", "P");
+        write("g122-other-dir/Q/f.txt", "Q");
+
+        final char letter = substOrSkip(base);
+
+        try {
+            final File aliasF = new File(letter + ":\\P\\f.txt");
+            Assumptions.assumeTrue(aliasF.isFile(), "the subst drive is not visible");
+            final File q = new File(base, "Q");
+
+            assertThrows(java.nio.file.FileAlreadyExistsException.class, () -> IOUtil.moveToDirectory(aliasF, q));
+            assertThrows(java.nio.file.FileAlreadyExistsException.class, () -> IOUtil.moveToDirectory(aliasF, q, StandardCopyOption.ATOMIC_MOVE));
+            assertThrows(java.nio.file.FileAlreadyExistsException.class, () -> IOUtil.moveToDirectory(new File(base, "P/f.txt"), new File(letter + ":\\Q")));
+            assertThrows(IOException.class, () -> IOUtil.copyToDirectory(aliasF, q));
+
+            assertEquals("P", read(new File(base, "P/f.txt")));
+            assertEquals("Q", read(new File(q, "f.txt")));
+            assertEquals(Arrays.asList("f.txt"), Arrays.asList(q.list()));
+        } finally {
+            unsubst(letter);
+        }
+    }
+
+    // ---- bug review 2026-10-02 verify G122 end ----
+
+    // ---- bug review 2026-10-02 final G131 begin ----
+
+    // G131-02: a destination that does not exist yet beneath a junction into the source is judged by where it will be
+    // created (under the junction's real target), not by its canonical spelling, which keeps the junction: rejected
+    // before anything is created. copyDirectory goes first: without the check it fails only after creating the new
+    // directory inside the source (and copying part of the source into it), whereas copyToDirectory copies the source
+    // into itself for ever - so code without the check stops at the first listing assertion, before that call.
+    @Test
+    public void testCopyAndMove_newDestinationBeneathAJunctionIntoTheSourceIsRejected() throws IOException {
+        final File base = dir("g131-new-under-junction");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g131-new-under-junction/src/a.txt", "A");
+        write("g131-new-under-junction/src/sub/b.txt", "B");
+        final File j = new File(base, "j");
+        final File jSub = new File(base, "jsub");
+        junctionOrSkip(j, src);
+        junctionOrSkip(jSub, new File(src, "sub"));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(src, new File(j, "new")));
+        assertEquals(Arrays.asList("a.txt", "sub"), Arrays.asList(src.list()), "nothing may be created or copied inside the source");
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyDirectory(src, new File(jSub, "n1/n2")));
+        assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(src, new File(j, "new")));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.moveToDirectory(src, new File(jSub, "n1")));
+        assertEquals(Arrays.asList("a.txt", "sub"), Arrays.asList(src.list()));
+        assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(src, new File(j, "new")));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyToDirectory(src, new File(jSub, "n1/n2")));
+        assertEquals(Arrays.asList("a.txt", "sub"), Arrays.asList(src.list()));
+        assertEquals(Arrays.asList("b.txt"), Arrays.asList(new File(src, "sub").list()));
+        assertEquals("A", read(new File(src, "a.txt")));
+    }
+
+    // G131-02: only that rejection is added: a not-yet-existing destination beneath a junction pointing OUTSIDE the
+    // source is still copied and moved into, copyToDirectory still returns the copy under the destination's spelling
+    // through the junction, and a plain not-yet-existing destination is created as before
+    @Test
+    public void testCopyAndMove_newDestinationBeneathAJunctionOutsideTheSourceIsStillAccepted() throws IOException {
+        final File base = dir("g131-new-under-outside-junction");
+        final File src = new File(base, "src");
+        assertTrue(new File(src, "sub").mkdirs());
+        write("g131-new-under-outside-junction/src/a.txt", "A");
+        write("g131-new-under-outside-junction/src/sub/b.txt", "B");
+        final File out = new File(base, "out");
+        assertTrue(out.mkdir());
+        final File jOut = new File(base, "jout");
+        junctionOrSkip(jOut, out);
+
+        IOUtil.copyDirectory(src, new File(jOut, "d1"));
+        assertEquals("A", read(new File(out, "d1/a.txt")));
+        assertEquals("B", read(new File(out, "d1/sub/b.txt")));
+
+        final File copied = IOUtil.copyToDirectory(src, new File(jOut, "d2/n"));
+        assertEquals(new File(base.getCanonicalFile(), "jout/d2/n/src").getPath(), copied.getPath());
+        assertEquals("B", read(new File(out, "d2/n/src/sub/b.txt")));
+
+        final File plain = IOUtil.copyToDirectory(src, new File(base, "n1/n2"));
+        assertEquals(new File(base.getCanonicalFile(), "n1/n2/src").getPath(), plain.getPath());
+        assertEquals("A", read(new File(plain, "a.txt")));
+
+        IOUtil.moveToDirectory(src, new File(jOut, "d3"));
+        assertFalse(src.exists());
+        assertEquals("B", read(new File(out, "d3/src/sub/b.txt")));
+    }
+
+    // G045-01: the source's own directory spelled through a UNC administrative share is still the source's own
+    // directory (RED on JDK 25 too, whose getCanonicalPath keeps a UNC spelling): a plain move there is the documented
+    // no-op, and a copy there makes "Copy of"
+    @Test
+    public void testMoveAndCopyToDirectory_ownDirectorySpelledThroughAUncShareIsTheNoOpOrACopyOf() throws IOException {
+        Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "UNC administrative shares exist on Windows only");
+        final File base = dir("g131-unc-own-dir");
+        final String abs = base.getAbsolutePath();
+        Assumptions.assumeTrue(abs.length() > 2 && abs.charAt(1) == ':', "needs a drive-letter path");
+        final File uncBase = new File("\\\\localhost\\" + abs.charAt(0) + "$" + abs.substring(2));
+        Assumptions.assumeTrue(uncBase.isDirectory(), "the administrative share is not reachable here");
+
+        final File p = new File(base, "P");
+        assertTrue(p.mkdir());
+        final File f = write("g131-unc-own-dir/P/f.txt", "orig");
+        final File uncP = new File(uncBase, "P");
+        final File uncF = new File(uncP, "f.txt");
+
+        IOUtil.moveToDirectory(uncF, p);
+        IOUtil.moveToDirectory(f, uncP);
+        assertEquals("orig", read(f));
+        assertEquals(Arrays.asList("f.txt"), Arrays.asList(p.list()));
+
+        assertEquals("Copy of f.txt", IOUtil.copyToDirectory(uncF, p).getName());
+        assertEquals("orig", read(new File(p, "Copy of f.txt")));
+        assertTrue(new File(p, "Copy of f.txt").delete());
+        assertEquals("Copy of f.txt", IOUtil.copyToDirectory(f, uncP).getName());
+        assertEquals("orig", read(new File(p, "Copy of f.txt")));
+        assertEquals("orig", read(f));
+    }
+
+    // ---- bug review 2026-10-02 final G131 end ----
 }

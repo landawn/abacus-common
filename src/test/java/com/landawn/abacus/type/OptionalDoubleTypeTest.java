@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +25,6 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalDouble;
-import java.math.BigDecimal;
 
 public class OptionalDoubleTypeTest extends TestBase {
 
@@ -289,7 +289,6 @@ public class OptionalDoubleTypeTest extends TestBase {
         assertTrue(optionalDoubleType.valueOf((String) null).isEmpty());
         assertEquals(7.0d, optionalDoubleType.valueOf("7").get());
     }
-
 
     @Test
     public void testGetFloatColumnWidensThroughDecimalSpellingLikeDoubleType() throws SQLException {

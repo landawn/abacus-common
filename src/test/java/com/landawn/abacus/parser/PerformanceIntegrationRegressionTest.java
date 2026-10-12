@@ -1,6 +1,10 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 import java.lang.management.ManagementFactory;
@@ -19,23 +23,33 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
+
 import performanceintegration.PerformanceIntegrationXmlModel;
 
 @Tag("unit")
-class PerformanceIntegrationRegressionTest {
+class PerformanceIntegrationRegressionTest extends TestBase {
     public static class Bean {
         private int keep;
-        public int getKeep() { return keep; }
-        public void setKeep(int value) { keep = value; }
+
+        public int getKeep() {
+            return keep;
+        }
+
+        public void setKeep(int value) {
+            keep = value;
+        }
     }
 
     public static class CountingMap extends HashMap<Object, Object> {
         static int insertions;
-        @Override public Object put(Object key, Object value) {
+
+        @Override
+        public Object put(Object key, Object value) {
             insertions++;
             return super.put(key, value);
         }
@@ -43,7 +57,9 @@ class PerformanceIntegrationRegressionTest {
 
     public static class CheckedList extends ArrayList<Object> {
         static int sizeChecks;
-        @Override public int size() {
+
+        @Override
+        public int size() {
             sizeChecks++;
             return super.size();
         }
@@ -53,7 +69,8 @@ class PerformanceIntegrationRegressionTest {
     void discardedMapsReadAnOverriddenFactorySettingOnlyOnce() {
         AtomicInteger calls = new AtomicInteger();
         JsonDeserConfig config = new JsonDeserConfig() {
-            @Override public Class<? extends Map> getMapInstanceType() {
+            @Override
+            public Class<? extends Map> getMapInstanceType() {
                 return calls.incrementAndGet() == 1 ? CountingMap.class : HashMap.class;
             }
         };
@@ -96,8 +113,7 @@ class PerformanceIntegrationRegressionTest {
         assertThrows(RuntimeException.class, () -> typedValues.deserialize("{\"discard\":{\"number\":\"bad\"}}", Bean.class));
         // Type-specific braced conversion must still reject a structured value for this scalar.
         assertThrows(RuntimeException.class, () -> typedValues.deserialize("{\"discard\":{\"number\":{\"value\":1}}}", Bean.class));
-        assertThrows(ParsingException.class,
-                () -> parser.deserialize("{\"discard\":" + "[".repeat(300) + "0" + "]".repeat(300) + "}", Bean.class));
+        assertThrows(ParsingException.class, () -> parser.deserialize("{\"discard\":" + "[".repeat(300) + "0" + "]".repeat(300) + "}", Bean.class));
         assertEquals(2, parser.deserialize("{\"keep\":2}", Bean.class).getKeep());
     }
 
@@ -133,7 +149,9 @@ class PerformanceIntegrationRegressionTest {
         mx.setThreadAllocatedMemoryEnabled(true);
         JsonParser parser = new JsonParserImpl();
         String json = "{\"discard\":[" + "null,".repeat(49_999) + "null],\"keep\":9}";
-        for (int i = 0; i < 8; i++) parser.deserialize(json, Bean.class);
+        for (int i = 0; i < 8; i++) {
+            parser.deserialize(json, Bean.class);
+        }
         long start = mx.getThreadAllocatedBytes(Thread.currentThread().threadId());
         assertEquals(9, parser.deserialize(json, Bean.class).getKeep());
         long allocated = mx.getThreadAllocatedBytes(Thread.currentThread().threadId()) - start;
@@ -239,7 +257,9 @@ class PerformanceIntegrationRegressionTest {
         ClassValue<?> cache = (ClassValue<?>) field.get(null);
         Map<?, ?> names = (Map<?, ?>) cache.get(PerformanceIntegrationXmlModel.Inner.class);
         assertTrue(names.size() <= 256, "Cached " + names.size() + " input names");
-        assertEquals("ok", parser.deserialize("<outer><child><inner><name>ok</name></inner></child></outer>", PerformanceIntegrationXmlModel.Outer.class)
-                .getChild().getName());
+        assertEquals("ok",
+                parser.deserialize("<outer><child><inner><name>ok</name></inner></child></outer>", PerformanceIntegrationXmlModel.Outer.class)
+                        .getChild()
+                        .getName());
     }
 }

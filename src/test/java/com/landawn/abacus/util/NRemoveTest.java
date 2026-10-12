@@ -324,7 +324,6 @@ public class NRemoveTest extends NTestSupport {
         assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr1[0]));
     }
 
-
     @Test
     public void testRemoveAll_emptyIteratorOnUnmodifiableCollectionReturnsFalse() {
         final List<Integer> list = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1, 2)));

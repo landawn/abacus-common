@@ -1385,8 +1385,9 @@ public class ByteStreamTest extends TestBase {
                 ByteStream.of((byte) 100, (byte) 127));
         ByteStream result = ByteStream.zip(streams, bytes -> {
             byte sum = 0;
-            for (Byte b : bytes)
+            for (Byte b : bytes) {
                 sum += b;
+            }
             return sum;
         });
         assertArrayEquals(new byte[] { 111, -107 }, result.toArray());
@@ -1630,8 +1631,9 @@ public class ByteStreamTest extends TestBase {
         byte[] defaults = { 0, 100 };
         ByteStream result = ByteStream.zip(streams, defaults, bytes -> {
             byte sum = 0;
-            for (Byte b : bytes)
+            for (Byte b : bytes) {
                 sum += b;
+            }
             return sum;
         });
         assertEquals(3, result.count());
@@ -4362,6 +4364,7 @@ public class ByteStreamTest extends TestBase {
         assertArrayEquals(new byte[] { 3, 1, 2, 5 }, ByteStream.of(data).distinct().toArray());
         assertArrayEquals(new byte[] { 3, 1, 2, 5 }, ByteStream.of(data).distinct().toArray());
     }
+
     // ---- perf review 2026-09-26 G087 end ----
     // ---- perf review 2026-09-26 G090 begin ----
     private static final class G090ChunkedInputStream extends InputStream {
@@ -4545,6 +4548,7 @@ public class ByteStreamTest extends TestBase {
         assertArrayEquals(Arrays.copyOfRange(expected, 9999, expected.length), ByteStream.concat(big1, big2).skip(9999).toArray());
         assertEquals(expected.length, ByteStream.concat(big1, big2).count());
     }
+
     // G090-03: pins the column-major order of flatten(byte[][], true) for jagged input with null/empty/short rows
     @Test
     public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
@@ -4634,6 +4638,7 @@ public class ByteStreamTest extends TestBase {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new byte[0], ByteStream.flatten(new byte[][] { null, {}, null }, true).toArray());
     }
+
     // ---- perf review 2026-09-26 G090 end ----
     // ---- perf review 2026-09-26 G114 begin ----
     private static byte[] flattenVerticallyReferenceG114(final byte[][] a) {

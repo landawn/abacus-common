@@ -361,7 +361,6 @@ public class StringsRegressionETest extends TestBase {
         assertNull(Strings.substringBetween("Hello", i -> -2, 3));
     }
 
-
     @Test
     public void testCapitalize_uppercaseDigraphMapsToTitlecase() {
         assertEquals(String.valueOf((char) 0x01C5) + "en", Strings.capitalize(String.valueOf((char) 0x01C4) + "en"));

@@ -15,6 +15,7 @@
 package com.landawn.abacus.http;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -306,7 +307,10 @@ public class HttpResponse {
      *
      * @param <T> The type to deserialize to
      * @param resultClass The class of the expected response object. Must not be {@code null}.
-     * @return The deserialized response body, or {@code null} if no body was received
+     * @return The deserialized response body. A response returned by {@link HttpClient} always holds a body, empty when the
+     *         server sent none (for example a 204 or HEAD response), so a missing body is not reported as {@code null}: it yields
+     *         {@code ""} for {@code String.class}, an empty array for {@code byte[].class}, and for other types whatever
+     *         decoding empty text gives (for example an empty list for {@code List.class}, {@code null} for a bean)
      * @throws IllegalArgumentException if {@code resultClass} is {@code null}, or a non-null body has to be decoded with a parser that is not
      *         available (an XML body when no XML parser is on the classpath, or a Kryo body when Kryo is not available).
      * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
@@ -328,6 +332,8 @@ public class HttpResponse {
                 return HttpUtil.kryoParser.deserialize(new ByteArrayInputStream(body), resultClass);
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
                 return URLEncodedUtil.decode(new String(body, respCharset), respCharset, resultClass);
+            } else if (body.length > 0 && bodyFormat != null && bodyFormat != ContentFormat.NONE) {
+                return HttpUtil.getParser(bodyFormat).deserialize(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultClass);
             } else {
                 // For NONE / unrecognized content formats, the configured parser falls back to
                 // JSON. That works for JSON-shaped bodies but produces confusing parse errors
@@ -369,7 +375,10 @@ public class HttpResponse {
      *
      * @param <T> The type to deserialize to
      * @param resultType The type information including generic parameters. Must not be {@code null}.
-     * @return The deserialized response body, or {@code null} if no body was received
+     * @return The deserialized response body. As with {@link #body(Class)}, a missing body is not reported as {@code null}:
+     *         a response returned by {@link HttpClient} holds an empty body then, which yields {@code ""} for a {@code String}
+     *         type, an empty array for {@code byte[]}, and for other types whatever decoding empty text gives (for example an
+     *         empty list for {@code List<String>})
      * @throws IllegalArgumentException if {@code resultType} is {@code null}, or a non-null body has to be decoded with a parser that is not
      *         available (a Kryo body when Kryo is not available).
      * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
@@ -392,9 +401,12 @@ public class HttpResponse {
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
                 return N.convert(URLEncodedUtil.decode(new String(body, respCharset), respCharset, resultType.javaType()), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("JSON")) {
-                return N.fromJson(new String(body, respCharset), resultType);
+                return body.length == 0 ? N.fromJson("", resultType)
+                        : N.fromJson(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
-                return N.fromXml(new String(body, respCharset), resultType);
+                return body.length == 0 ? N.fromXml("", resultType) : N.fromXml(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);
+            } else if (body.length > 0 && bodyFormat != null && bodyFormat != ContentFormat.NONE) {
+                return HttpUtil.getParser(bodyFormat).deserialize(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);
             } else {
                 // Same defensive path as body(Class): for NONE / unknown formats, try a String
                 // conversion before falling through to the JSON parser default.

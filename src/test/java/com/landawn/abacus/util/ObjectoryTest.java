@@ -11,10 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -315,7 +313,7 @@ public class ObjectoryTest extends TestBase {
             final java.io.BufferedWriter owned = factory.get();
 
             try {
-                assertSame(owned, Objectory.createBufferedWriter((Writer) owned), owned.getClass().getName());
+                assertSame(owned, Objectory.createBufferedWriter(owned), owned.getClass().getName());
             } finally {
                 Objectory.recycle(owned); // exactly once in total, through the owning handle
             }
@@ -329,7 +327,7 @@ public class ObjectoryTest extends TestBase {
             final java.io.BufferedReader owned = factory.get();
 
             try {
-                assertSame(owned, Objectory.createBufferedReader((Reader) owned), owned.getClass().getName());
+                assertSame(owned, Objectory.createBufferedReader(owned), owned.getClass().getName());
             } finally {
                 Objectory.recycle(owned);
             }
@@ -347,7 +345,7 @@ public class ObjectoryTest extends TestBase {
         try {
             final StringWriter inner = new StringWriter();
             final java.io.BufferedWriter owner = Objectory.createBufferedWriter(inner);
-            final java.io.BufferedWriter passThrough = Objectory.createBufferedWriter((Writer) owner);
+            final java.io.BufferedWriter passThrough = Objectory.createBufferedWriter(owner);
             assertSame(owner, passThrough);
 
             owner.write("hello");

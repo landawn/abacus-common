@@ -167,7 +167,7 @@ public class SheetKeyEqualityTest extends TestBase {
         final String rowFailure = assertThrows(IllegalArgumentException.class, () -> sheet.renameRow(first, second)).getMessage();
         final String columnFailure = assertThrows(IllegalArgumentException.class, () -> sheet.renameColumn(first, second)).getMessage();
         // Distinct arrays can render identically, so duplicate-rename diagnostics must identify the existing object.
-        final String duplicateDescription = N.toString(second) + "@" + Integer.toHexString(System.identityHashCode(second));
+        final String duplicateDescription = CommonUtil.toString(second) + "@" + Integer.toHexString(System.identityHashCode(second));
         assertTrue(rowFailure.contains(duplicateDescription) && rowFailure.contains("row key set"), rowFailure);
         assertTrue(columnFailure.contains(duplicateDescription) && columnFailure.contains("column key set"), columnFailure);
         for (final String message : List.of(rowFailure, columnFailure)) {

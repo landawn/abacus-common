@@ -170,6 +170,34 @@ public abstract class AbstractLongType extends NumberType<Number> {
             return (Long) defaultValue();
         }
 
+        // Numbers.parseLongOrElse accepts exactly the text Numbers.toLong accepts, without constructing an exception
+        // or any other object for the rest. MIN_VALUE also marks rejected text, which parseRejected parses the
+        // original way, so the suffix recovery and every failure diagnostic stay off this common path.
+        final long value = Numbers.parseLongOrElse(str, Long.MIN_VALUE);
+
+        return value != Long.MIN_VALUE ? value : parseRejected(str);
+    }
+
+    /**
+     * Parses text that {@link Numbers#parseLongOrElse(String, long)} did not accept as a {@code long} (or that is the text of {@code Long.MIN_VALUE}, the rejection marker), with the
+     * single-suffix recovery and the failures documented on {@link #valueOf(String)}.
+     *
+     * @param str the non-empty text to parse
+     * @return the parsed value
+     * @throws NumberFormatException if the text is not a valid integer literal, with or without its single suffix
+     * @throws ArithmeticException if the text is a well-formed integer outside the {@code long} range
+     */
+    private static long parseRejected(final String str) throws NumberFormatException, ArithmeticException {
+        // Decimal text with an F/f/D/d suffix is accepted below only once the suffix is removed. Parse that form
+        // directly instead of first constructing the exception Numbers.toLong reports for it.
+        if (hasDecimalFloatingSuffix(str)) {
+            final long value = Numbers.parseLongOrElse(str.substring(0, str.length() - 1), Long.MIN_VALUE);
+
+            if (value != Long.MIN_VALUE) {
+                return value;
+            }
+        }
+
         try {
             return Numbers.toLong(str);
         } catch (final NumberFormatException e) {

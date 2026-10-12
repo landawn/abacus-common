@@ -189,8 +189,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
     public void testExceptionHandling() {
         assertThrows(RuntimeException.class, () -> {
             parallelStream.filter(i -> {
-                if (i == 5)
+                if (i == 5) {
                     throw new RuntimeException("Test exception in filter");
+                }
                 return true;
             }).count();
         });
@@ -198,8 +199,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
         parallelStream = createIntStream(TEST_ARRAY);
         assertThrows(RuntimeException.class, () -> {
             parallelStream.map(i -> {
-                if (i == 7)
+                if (i == 7) {
                     throw new RuntimeException("Test exception in map");
+                }
                 return i;
             }).toArray();
         });
@@ -802,8 +804,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
     public void testReduce_WithIdentity_ParallelPath() {
         int result = createIntStream(TEST_ARRAY).reduce(0, Integer::sum);
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, result);
     }
 
@@ -812,8 +815,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
         com.landawn.abacus.util.u.OptionalInt result = createIntStream(TEST_ARRAY).reduce(Integer::sum);
         assertTrue(result.isPresent());
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, result.getAsInt());
     }
 
@@ -1161,10 +1165,12 @@ public class ParallelArrayIntStreamTest extends TestBase {
         int valA = 0;
         int valB = -1;
         IntBinaryOperator zipper = (i1, i2) -> {
-            if (i1 == valA)
+            if (i1 == valA) {
                 return i2;
-            if (i2 == valB)
+            }
+            if (i2 == valB) {
                 return i1;
+            }
             return i1 + i2;
         };
         List<Integer> result = streamA.zipWith(streamB, valA, valB, zipper).sorted().toList();
@@ -1308,8 +1314,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
         AtomicInteger sum = new AtomicInteger(0);
         createIteratorSplitStrategyIntStream(TEST_ARRAY).forEach(i -> sum.addAndGet(i));
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, sum.get());
     }
 
@@ -1332,8 +1339,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
     public void testReduceWithIdentity_IteratorSplitStrategy_LargeArray() {
         int sum = createIteratorSplitStrategyIntStream(TEST_ARRAY).reduce(0, Integer::sum);
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, sum);
     }
 
@@ -1343,8 +1351,9 @@ public class ParallelArrayIntStreamTest extends TestBase {
         com.landawn.abacus.util.u.OptionalInt result = createIteratorSplitStrategyIntStream(TEST_ARRAY).reduce(Integer::sum);
         assertTrue(result.isPresent());
         int expected = 0;
-        for (int v : TEST_ARRAY)
+        for (int v : TEST_ARRAY) {
             expected += v;
+        }
         assertEquals(expected, result.getAsInt());
     }
 
@@ -1463,7 +1472,7 @@ public class ParallelArrayIntStreamTest extends TestBase {
         final int[] source = new int[2000];
 
         for (int i = 0; i < source.length; i++) {
-            source[i] = (int) (1000 + i);
+            source[i] = 1000 + i;
         }
 
         for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
@@ -1478,10 +1487,17 @@ public class ParallelArrayIntStreamTest extends TestBase {
             assertFalse(IntStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
             assertFalse(IntStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
 
-            assertEquals(1100, new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
-            assertEquals(2899, new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
-            assertFalse(new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
-            assertFalse(new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+            assertEquals(1100,
+                    new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true)
+                            .get());
+            assertEquals(2899,
+                    new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
+            assertFalse(
+                    new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000)
+                            .isPresent());
+            assertFalse(
+                    new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999)
+                            .isPresent());
         }
     }
     // ---- perf review 2026-09-26 G101 end ----

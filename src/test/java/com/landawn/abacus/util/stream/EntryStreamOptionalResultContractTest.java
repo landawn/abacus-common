@@ -19,15 +19,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
-import com.landawn.abacus.util.stream.StreamOptionalResultContractTest.Source;
 import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.stream.StreamOptionalResultContractTest.Source;
 
 @Tag("unit")
 public class EntryStreamOptionalResultContractTest extends TestBase {
-    private static final Comparator<Entry<String, Integer>> NULLS_FIRST = Comparator.nullsFirst(
-            Entry.comparingByKey(Comparator.nullsFirst(Comparator.naturalOrder())));
-    private static final Comparator<Entry<String, Integer>> NULLS_LAST = Comparator.nullsLast(
-            Entry.comparingByKey(Comparator.nullsLast(Comparator.naturalOrder())));
+    private static final Comparator<Entry<String, Integer>> NULLS_FIRST = Comparator
+            .nullsFirst(Entry.comparingByKey(Comparator.nullsFirst(Comparator.naturalOrder())));
+    private static final Comparator<Entry<String, Integer>> NULLS_LAST = Comparator
+            .nullsLast(Entry.comparingByKey(Comparator.nullsLast(Comparator.naturalOrder())));
 
     enum Terminal {
         FIRST(EntryStream::first),

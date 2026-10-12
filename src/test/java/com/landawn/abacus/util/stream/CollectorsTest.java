@@ -3805,8 +3805,7 @@ public class CollectorsTest extends TestBase {
         // library (and java.util.stream.Collectors.groupingBy).
         assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
         assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.countingBy(Function.identity())));
-        assertThrows(NullPointerException.class,
-                () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingByConcurrent(Function.identity())));
+        assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingByConcurrent(Function.identity())));
 
         assertThrows(UnsupportedOperationException.class, () -> stringList.parallelStream().collect(Collectors.first()));
 
@@ -4318,12 +4317,14 @@ public class CollectorsTest extends TestBase {
     @Test
     public void testCustomCollectorIntegration() {
         Collector<String, StringBuilder, String> customJoiner = Collectors.create(StringBuilder::new, (sb, s) -> {
-            if (sb.length() > 0)
+            if (sb.length() > 0) {
                 sb.append("|");
+            }
             sb.append(s.toUpperCase());
         }, (sb1, sb2) -> {
-            if (sb1.length() > 0 && sb2.length() > 0)
+            if (sb1.length() > 0 && sb2.length() > 0) {
                 sb1.append("|");
+            }
             sb1.append(sb2);
             return sb1;
         }, StringBuilder::toString);
@@ -4793,7 +4794,7 @@ public class CollectorsTest extends TestBase {
     @Test
     public void testPartitioningCapturesDownstreamFunctionsOnce() {
         final int[] accessorCalls = new int[4];
-        final Collector<Integer, List<Integer>, Integer> downstream = new Collector<Integer, List<Integer>, Integer>() {
+        final Collector<Integer, List<Integer>, Integer> downstream = new Collector<>() {
             @Override
             public Supplier<List<Integer>> supplier() {
                 accessorCalls[0]++;
@@ -4914,8 +4915,7 @@ public class CollectorsTest extends TestBase {
 
     @Test
     public void testMinMaxByOrdersNullKeyBeforeNonNullKeys() {
-        final Optional<Pair<String, String>> result = Stream.of("bb", "a", "ccc")
-                .collect(Collectors.minMaxBy(s -> "bb".equals(s) ? null : s.length()));
+        final Optional<Pair<String, String>> result = Stream.of("bb", "a", "ccc").collect(Collectors.minMaxBy(s -> "bb".equals(s) ? null : s.length()));
 
         assertTrue(result.isPresent());
         assertEquals("bb", result.get().left());
@@ -4928,6 +4928,7 @@ public class CollectorsTest extends TestBase {
                 .collect(Collectors.minMaxBy(s -> "bb".equals(s) ? null : s.length(), (min, max) -> min + "-" + max));
         assertEquals("bb-ccc", withFinisher.get());
     }
+
     // ---- perf review 2026-09-26 G112 begin ----
     // The previous accumulator of commonPrefix()/commonSuffix(), rebuilt from the public Strings helpers: returns the finished result.
     private static String g112CommonAffixReference(final List<CharSequence> elements, final boolean prefix) {

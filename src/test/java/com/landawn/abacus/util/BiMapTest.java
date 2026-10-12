@@ -2258,8 +2258,7 @@ public class BiMapTest extends AbstractTest {
         final IllegalArgumentException keyEx = assertThrows(IllegalArgumentException.class, () -> new BiMap<String, String>((Class) null, HashMap.class));
         assertTrue(keyEx.getMessage().contains("keyMapType"), keyEx.getMessage());
 
-        final IllegalArgumentException valueEx = assertThrows(IllegalArgumentException.class,
-                () -> new BiMap<String, String>(HashMap.class, (Class) null));
+        final IllegalArgumentException valueEx = assertThrows(IllegalArgumentException.class, () -> new BiMap<String, String>(HashMap.class, (Class) null));
         assertTrue(valueEx.getMessage().contains("valueMapType"), valueEx.getMessage());
 
         // The key map type is still resolved before the value map type is inspected.
@@ -2267,8 +2266,9 @@ public class BiMapTest extends AbstractTest {
                 () -> new BiMap<String, String>((Class) Object.class, (Class) null));
         assertTrue(orderEx.getMessage().contains("is not a Map class"), orderEx.getMessage());
 
-        assertNotNull(new BiMap<String, String>(LinkedHashMap.class, TreeMap.class));
+        assertNotNull(new BiMap<>(LinkedHashMap.class, TreeMap.class));
     }
+
     // ---- bug review 2026-09-27 G021 begin ----
     /** A map class with only a sized constructor: Maps.newTargetMap can mirror it, Suppliers.ofMap cannot. */
     public static class G021IntOnlyConstructorMap<K, V> extends LinkedHashMap<K, V> {
@@ -2295,6 +2295,7 @@ public class BiMapTest extends AbstractTest {
         assertEquals("a", biMap.inverse().copy().get(1));
         assertThrows(IllegalArgumentException.class, () -> biMap.put("c", 1));
     }
+
     // ---- bug review 2026-09-27 G021 end ----
     // ---- bug review 2026-09-27 verify G120 begin ----
     /** An IdentityHashMap subclass WITH a no-argument constructor: copyOf must keep mirroring it. */
@@ -2340,5 +2341,35 @@ public class BiMapTest extends AbstractTest {
         assertEquals(2, biMap.copy().size());
         assertSame(k2, biMap.inverse().copy().get(2));
     }
+
     // ---- bug review 2026-09-27 verify G120 end ----
+    // ---- bug review 2026-09-30 G021 begin ----
+    // G021-01: copyOf mirrored a double-brace-initialized source class whose new instances are pre-filled: the copy kept
+    // the initializer's entries (with no reverse entries) and copy()/inverse().copy()/replaceAll threw IAE
+    @Test
+    public void testCopyOf_prefilledAnonymousSourceClass() {
+        final Map<String, Integer> source = new LinkedHashMap<>() {
+            private static final long serialVersionUID = 1L;
+
+            {
+                put("x", 1);
+                put("y", 2);
+            }
+        };
+        source.remove("x");
+        source.put("z", 3);
+
+        final BiMap<String, Integer> biMap = BiMap.copyOf(source);
+
+        assertEquals(source, biMap);
+        assertEquals("[y, z]", biMap.keySet().toString());
+        assertEquals(2, biMap.inverse().size());
+        assertEquals(biMap, biMap.copy());
+        assertEquals("y", biMap.inverse().copy().get(2));
+
+        biMap.replaceAll((k, v) -> v * 10);
+        assertEquals("{y=20, z=30}", biMap.toString());
+        assertEquals("z", biMap.getByValue(30));
+    }
+    // ---- bug review 2026-09-30 G021 end ----
 }

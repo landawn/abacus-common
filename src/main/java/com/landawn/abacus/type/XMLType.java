@@ -163,6 +163,37 @@ public class XMLType<T> extends AbstractType<T> {
     }
 
     /**
+     * Converts an object to a value of this type.
+     * <p>
+     * If the target type is a bean, map, collection or array type, an instance of the target class is converted through
+     * this type's own XML form, as {@code valueOf(stringOf(obj))}: the result is a new value whose contents are converted
+     * to the target type's parameters (for example, {@code Long} map values become {@code Integer} for
+     * {@code XML<Map<String, Integer>>}). Any other object, including XML text given as a {@code String} or {@code Reader}
+     * and every object for a target such as {@code XML<Object>}, is converted by the inherited default: the string form
+     * of the object's own type is parsed by {@link #valueOf(String)}.
+     * </p>
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return the converted value, or {@code null} if {@code obj} is {@code null}
+     * @throws UnsupportedOperationException if no XML parser is available on the classpath
+     * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
+     * @see #valueOf(String)
+     * @see #stringOf(Object)
+     */
+    @Override
+    public T valueOf(final Object obj) throws UnsupportedOperationException, RuntimeException {
+        // The inherited default renders a bean/map/collection/array with its own type's string form (JSON-like text)
+        // and then parses that text as XML, which always fails. Text sources (String, Reader, ...) keep that path: their
+        // content is the XML to parse. So does a non-container target such as Object: its XML reader yields a MapEntity,
+        // which would silently drop the elements of a collection or array.
+        if ((targetType.isBean() || targetType.isMap() || targetType.isCollection() || targetType.isArray()) && typeClass.isInstance(obj)) {
+            return valueOf(stringOf(typeClass.cast(obj)));
+        }
+
+        return super.valueOf(obj);
+    }
+
+    /**
      * Fails with a descriptive exception instead of an NPE when {@code Utils.xmlParser} is {@code null}
      * (no StAX implementation on the classpath). Checked lazily on use, not in the constructor, so that merely
      * resolving an {@code XML<...>} type name never fails.

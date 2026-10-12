@@ -14,11 +14,14 @@
 
 package com.landawn.abacus.type;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParsingException;
@@ -30,6 +33,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.SetMultimap;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Suppliers;
 
 /**
  * Type handler for {@link Multimap} objects with generic key, element, and collection value types.
@@ -38,7 +42,7 @@ import com.landawn.abacus.util.Strings;
  *
  * @param <K> the key type
  * @param <E> the element type (individual values in the collection)
- * @param <V> the value collection type (e.g., List&lt;E&gt; or Set&lt;E&gt;)
+ * @param <V> the value collection type (e.g., List&lt;E&gt;, Set&lt;E&gt;, or Queue&lt;E&gt;)
  * @param <T> the specific Multimap implementation type
  */
 @SuppressWarnings("java:S2160")
@@ -213,11 +217,16 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * Parses a JSON string to create a {@link Multimap} object.
      * The JSON must be an object where each key maps to an array of values,
      * e.g. {@code {"colors":["red","blue"],"sizes":["large"]}}.
-     * A {@link java.util.Set}-backed multimap is returned when the declared multimap class is a
-     * {@link com.landawn.abacus.util.SetMultimap SetMultimap} or its value collection type is a
-     * {@link java.util.Set}; otherwise a {@link com.landawn.abacus.util.ListMultimap ListMultimap}-backed
-     * multimap is returned. In both cases the result is a linked implementation whose keys keep the order of the JSON
-     * document. The values of each key keep the order of their JSON array when the value collection is implied by the
+     * The values of each key are held in a {@code LinkedHashSet} (for a {@link java.util.Set} value collection) or an
+     * {@code ArrayList} (for any other) when that class is an instance of the declared value collection type, e.g.
+     * {@code Set}, {@code HashSet}, {@code List} or {@code Collection}; any other declared class, e.g. {@code TreeSet},
+     * {@code SortedSet}, {@code LinkedList}, {@code Queue} or {@code ArrayDeque}, is created by its own factory, for the
+     * parsed keys and for keys added later (a class without a collection factory, such as {@code ImmutableCollection},
+     * keeps the default). The result is a {@link com.landawn.abacus.util.SetMultimap SetMultimap} for
+     * set value collections, a {@link com.landawn.abacus.util.ListMultimap ListMultimap} for list value collections and
+     * for the default {@code ArrayList} values (e.g. of a declared {@code Collection}), and a general {@link Multimap}
+     * for other collections such as queues. All results keep keys in the order of the JSON document.
+     * The values of each key keep the order of their JSON array when the value collection is implied by the
      * multimap class ({@code ListMultimap<K, E>}, {@code SetMultimap<K, E>}) or is declared as a {@code List} or a
      * {@code LinkedHashSet}; when an unordered value collection is declared explicitly (e.g.
      * {@code Multimap<K, E, Set<E>>} or {@code Multimap<K, Set<E>>}), the values are collected into that declared
@@ -252,39 +261,39 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
             return null; // NOSONAR
         }
 
-        // Decide Set- vs List-backed multimap. Prefer the declared multimap class, since
-        // parameterTypes.get(1) is the *element* type when the type name omits the value
-        // collection (e.g. "Multimap<K, E>" via SetMultimap/ListMultimap) — checking
-        // Set.class.isAssignableFrom against the element would always be false.
-        final boolean useSet;
-        if (SetMultimap.class.isAssignableFrom(typeClass)) {
-            useSet = true;
-        } else if (ListMultimap.class.isAssignableFrom(typeClass)) {
-            useSet = false;
-        } else if (parameterTypes.size() > 2) {
-            useSet = Set.class.isAssignableFrom(parameterTypes.get(2).javaType());
+        final Class<?> valueClass = jdc.getMapValueType().javaType();
+        final boolean useSet = Set.class.isAssignableFrom(valueClass);
+        // The default LinkedHashSet/ArrayList values are kept whenever they are instances of the declared value collection.
+        // Otherwise (TreeSet, SortedSet, LinkedList, a Queue, a custom class, ...) they would break a typed get() and the
+        // ordering/queue behaviour of later puts, so the declared class's own factory creates the values of every key; a
+        // declared class without a factory (ImmutableCollection, which the reader builds through a converter) keeps them.
+        final Supplier<? extends Collection<E>> valueSupplier = valueClass.isAssignableFrom(useSet ? LinkedHashSet.class : ArrayList.class) ? null
+                : getDeclaredValueSupplier(valueClass);
+        final Multimap<K, E, V> multiMap;
+
+        if (valueSupplier == null) {
+            multiMap = useSet ? (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size()) : (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
+        } else if (useSet) {
+            multiMap = (Multimap<K, E, V>) N.newSetMultimap(LinkedHashMap::new, (Supplier<? extends Set<E>>) valueSupplier);
+        } else if (List.class.isAssignableFrom(valueClass)) {
+            multiMap = (Multimap<K, E, V>) N.newListMultimap(LinkedHashMap::new, (Supplier<? extends List<E>>) valueSupplier);
         } else {
-            // size == 2 with valueElementTypeName empty: parameterTypes.get(1) is the value-collection Type
-            final Type<?> second = parameterTypes.get(1);
-            useSet = second instanceof CollectionType && Set.class.isAssignableFrom(second.javaType());
+            multiMap = N.newMultimap(LinkedHashMap::new, (Supplier<? extends V>) valueSupplier);
         }
 
-        if (useSet) {
-            final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedSetMultimap(map.size());
+        for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
+            multiMap.putValues(entry.getKey(), entry.getValue());
+        }
 
-            for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putValues(entry.getKey(), entry.getValue());
-            }
+        return (T) multiMap;
+    }
 
-            return (T) multiMap;
-        } else {
-            final Multimap<K, E, V> multiMap = (Multimap<K, E, V>) N.newLinkedListMultimap(map.size());
-
-            for (final Map.Entry<K, Collection<E>> entry : map.entrySet()) {
-                multiMap.putValues(entry.getKey(), entry.getValue());
-            }
-
-            return (T) multiMap;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static <E> Supplier<? extends Collection<E>> getDeclaredValueSupplier(final Class<?> valueClass) {
+        try {
+            return Suppliers.ofCollection((Class<? extends Collection>) valueClass);
+        } catch (final IllegalArgumentException e) {
+            return null;
         }
     }
 

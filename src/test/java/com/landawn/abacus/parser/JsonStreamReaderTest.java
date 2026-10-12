@@ -617,7 +617,6 @@ public class JsonStreamReaderTest extends TestBase {
         }
     }
 
-
     @Test
     public void testUnquotedTokenStartingWithEscapeSplitAcrossReadBufferBoundary() {
         // An unquoted token that starts with an escape has no buffered text when the escape is decoded. When a
@@ -652,4 +651,52 @@ public class JsonStreamReaderTest extends TestBase {
             }
         }
     }
+
+    // ---- perf review 2026-10-07 G15 begin ----
+
+    /** Reads one unquoted token through the stream reader with the slot's own type as the nextToken hint. */
+    private static Object g15_streamRead(final String token, final int rbufSize, final Type<?> hint, final Type<?> target) {
+        final JsonReader reader = JsonStreamReader.parse(new StringReader(token), new char[rbufSize], new char[2]);
+        reader.nextToken(hint);
+        return reader.readValue(target);
+    }
+
+    // G15-01: the inherited readValue short route for built-in numeric slots answers the same through the stream reader,
+    // including tokens split across refills (rbuf of 1..4 chars) and the range failure at the int boundary.
+    @Test
+    public void testReadValue_builtInNumericSlotsPinnedAcrossRefills() {
+        for (int rbufSize = 1; rbufSize <= 4; rbufSize++) {
+            final String tag = "rbuf=" + rbufSize;
+            final int size = rbufSize;
+
+            assertSame(Integer.valueOf(7), g15_streamRead("7", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertEquals(Integer.valueOf(300), g15_streamRead("300", size, N.typeOf(Integer.class), N.typeOf(Integer.class)), tag);
+            assertEquals(Integer.valueOf(Integer.MAX_VALUE), g15_streamRead("2147483647", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertEquals(Integer.valueOf(Integer.MIN_VALUE), g15_streamRead("-2147483648", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertEquals(Integer.valueOf(123), g15_streamRead("123L", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertThrows(ArithmeticException.class, () -> g15_streamRead("2147483648", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertThrows(ArithmeticException.class, () -> g15_streamRead("-2147483649", size, N.typeOf(Integer.class), N.typeOf(Integer.class)), tag);
+
+            assertSame(Long.valueOf(7L), g15_streamRead("7", size, N.typeOf(long.class), N.typeOf(long.class)), tag);
+            assertEquals(Long.valueOf(2147483648L), g15_streamRead("2147483648", size, N.typeOf(Long.class), N.typeOf(Long.class)), tag);
+            assertEquals(Long.valueOf(Long.MAX_VALUE), g15_streamRead("9223372036854775807", size, N.typeOf(long.class), N.typeOf(long.class)), tag);
+            assertThrows(ArithmeticException.class, () -> g15_streamRead("9223372036854775808", size, N.typeOf(long.class), N.typeOf(long.class)), tag);
+
+            assertEquals(Double.valueOf(1.5d), g15_streamRead("1.5", size, N.typeOf(double.class), N.typeOf(double.class)), tag);
+            assertEquals(Double.valueOf(7d), g15_streamRead("7", size, N.typeOf(Double.class), N.typeOf(Double.class)), tag);
+            assertEquals(Double.valueOf(0.30000000000000004d), g15_streamRead("0.30000000000000004", size, N.typeOf(double.class), N.typeOf(double.class)),
+                    tag);
+            assertEquals(Float.valueOf(1.5f), g15_streamRead("1.5", size, N.typeOf(float.class), N.typeOf(float.class)), tag);
+            assertEquals(Float.valueOf(0.1f), g15_streamRead("0.1", size, N.typeOf(Float.class), N.typeOf(Float.class)), tag);
+
+            // cross-representation slots keep their exact routes
+            assertEquals(Integer.valueOf(1), g15_streamRead("1.5", size, N.typeOf(int.class), N.typeOf(int.class)), tag);
+            assertEquals(Double.valueOf(0.1d), g15_streamRead("0.1f", size, N.typeOf(float.class), N.typeOf(double.class)), tag);
+            assertEquals(Long.valueOf(7L), g15_streamRead("7", size, N.typeOf(Object.class), N.typeOf(long.class)), tag);
+            assertSame(Integer.valueOf(7), g15_streamRead("7", size, N.typeOf(Object.class), N.typeOf(int.class)), tag);
+            assertEquals("007", g15_streamRead("007", size, N.typeOf(int.class), N.typeOf(String.class)), tag);
+        }
+    }
+
+    // ---- perf review 2026-10-07 G15 end ----
 }

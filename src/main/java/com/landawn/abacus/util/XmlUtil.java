@@ -1788,32 +1788,81 @@ public final class XmlUtil {
     public static Map<String, String> readElement(final Element element) throws IllegalArgumentException {
         N.checkArgNotNull(element, cs.element);
 
-        return readElement(Strings.EMPTY, element, new LinkedHashMap<>());
+        return readElement(element, new LinkedHashMap<>());
     }
 
-    private static Map<String, String> readElement(final String parentNodeName, final Element element, final Map<String, String> output) {
-        final var pending = new java.util.ArrayDeque<Map.Entry<Element, String>>();
-        pending.push(Map.entry(element, parentNodeName));
-        while (!pending.isEmpty()) {
-            final var frame = pending.pop();
-            final Element current = frame.getKey();
-            final boolean root = Strings.isEmpty(frame.getValue());
-            final String elementPath = root ? current.getNodeName() : frame.getValue() + "." + current.getNodeName();
-            // Preserve unqualified root attributes and fully qualified descendant attributes.
-            readAttributes(root ? Strings.EMPTY : elementPath, current, output);
-            if (isTextElement(current)) {
-                output.put(elementPath, Strings.strip(getTextContent(current)));
+    private static Map<String, String> readElement(final Element element, final Map<String, String> output) {
+        final var pending = new java.util.ArrayDeque<ElementPathFrame>();
+        final StringBuilder path = new StringBuilder();
+        Element current = element;
+        while (current != null) {
+            final int restoreLength = path.length();
+            final boolean root = pending.isEmpty();
+            if (!root) {
+                path.append('.');
             }
-            final NodeList children = current.getChildNodes();
-            // Preorder also preserves insertion order and the last-value-wins policy for repeated paths.
-            for (int i = children.getLength() - 1; i >= 0; i--) {
-                if (children.item(i) instanceof Element child) {
-                    pending.push(Map.entry(child, elementPath));
+            path.append(current.getNodeName());
+
+            // Materialize paths only for emitted keys, preserving unqualified root attributes.
+            readElementAttributes(path, root, current, output);
+            if (isTextElement(current)) {
+                output.put(path.toString(), Strings.strip(getTextContent(current)));
+            }
+            pending.push(new ElementPathFrame(current.getFirstChild(), restoreLength));
+            current = null;
+
+            // Resume the parent's next sibling after restoring its path. Preorder keeps repeated
+            // paths' last-value-wins behavior and LinkedHashMap insertion order unchanged.
+            // Children are walked through sibling links rather than NodeList.item(i): this loop interleaves a
+            // parent's child cursor with each child's own child-list access, and the JDK DOM shares a per-document
+            // pool of NodeList position caches (which turns cyclic once a cache is released twice, e.g. around
+            // whitespace text nodes), after which each item(i) recounted and rescanned the siblings from the
+            // first child, making the traversal quadratic in the number of children.
+            while (!pending.isEmpty() && current == null) {
+                final ElementPathFrame frame = pending.peek();
+                final Node child = frame.nextChild;
+                if (child == null) {
+                    pending.pop();
+                    path.setLength(frame.restoreLength);
+                } else {
+                    frame.nextChild = child.getNextSibling();
+                    if (child instanceof Element childElement) {
+                        current = childElement;
+                    }
                 }
             }
         }
 
         return output;
+    }
+
+    private static void readElementAttributes(final StringBuilder path, final boolean root, final Node node, final Map<String, String> output) {
+        final NamedNodeMap attributes = node.getAttributes();
+        if (attributes == null) {
+            return;
+        }
+        final int elementLength = path.length();
+        for (int i = 0; i < attributes.getLength(); i++) {
+            final String name = attributes.item(i).getNodeName();
+            final String value = attributes.item(i).getNodeValue();
+            if (root) {
+                output.put(name, value);
+            } else {
+                path.append('.').append(name);
+                output.put(path.toString(), value);
+                path.setLength(elementLength);
+            }
+        }
+    }
+
+    private static final class ElementPathFrame {
+        final int restoreLength;
+        Node nextChild;
+
+        ElementPathFrame(final Node firstChild, final int restoreLength) {
+            this.nextChild = firstChild;
+            this.restoreLength = restoreLength;
+        }
     }
 
     /**
@@ -1840,10 +1889,11 @@ public final class XmlUtil {
             return false;
         }
 
-        final NodeList childNodeList = node.getChildNodes();
-
-        for (int i = 0; i < childNodeList.getLength(); i++) {
-            if (childNodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+        // Sibling links rather than getChildNodes().item(i): positioning the JDK DOM's shared NodeList cache here
+        // made a caller's following child-list loop release that cache twice, leaving the document's cache pool
+        // cyclic and every later interleaved child-list access quadratic (see readElement).
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (child.getNodeType() == Node.ELEMENT_NODE) {
                 return false;
             }
         }
@@ -2433,8 +2483,12 @@ public final class XmlUtil {
      * array suffixes, are safe to pass to the type registry without the legacy opt-in.
      */
     private static boolean isSafeXmlTypeAttributeName(String typeName) {
-        while (typeName.endsWith("[]")) {
-            typeName = typeName.substring(0, typeName.length() - 2);
+        int end = typeName.length();
+        while (end >= 2 && typeName.charAt(end - 2) == '[' && typeName.charAt(end - 1) == ']') {
+            end -= 2;
+        }
+        if (end != typeName.length()) {
+            typeName = typeName.substring(0, end);
         }
 
         try {

@@ -17,6 +17,7 @@ package com.landawn.abacus.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -218,7 +219,16 @@ public final class JsonUtil {
     public static JSONArray wrap(final boolean[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls rather than org.json's JSONArray(Object) constructor: that constructor reads and boxes
+        // every element through reflective Array.get, a native call per element that is about ten times slower.
+        // The elements and the failures (put(Object) validates each value) are the same.
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final boolean element : array) {
+            result.put(element);
+        }
+
+        return result;
     }
 
     /**
@@ -242,7 +252,15 @@ public final class JsonUtil {
     public static JSONArray wrap(final char[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final char element : array) {
+            // Boxed explicitly: JSONArray has no put(char), and put(int) would store an Integer, not a Character.
+            result.put(Character.valueOf(element));
+        }
+
+        return result;
     }
 
     /**
@@ -264,7 +282,15 @@ public final class JsonUtil {
     public static JSONArray wrap(final byte[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final byte element : array) {
+            // Boxed explicitly: JSONArray has no put(byte), and put(int) would store an Integer, not a Byte.
+            result.put(Byte.valueOf(element));
+        }
+
+        return result;
     }
 
     /**
@@ -286,7 +312,15 @@ public final class JsonUtil {
     public static JSONArray wrap(final short[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final short element : array) {
+            // Boxed explicitly: JSONArray has no put(short), and put(int) would store an Integer, not a Short.
+            result.put(Short.valueOf(element));
+        }
+
+        return result;
     }
 
     /**
@@ -308,7 +342,14 @@ public final class JsonUtil {
     public static JSONArray wrap(final int[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final int element : array) {
+            result.put(element);
+        }
+
+        return result;
     }
 
     /**
@@ -332,14 +373,21 @@ public final class JsonUtil {
     public static JSONArray wrap(final long[] array) throws IllegalArgumentException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final long element : array) {
+            result.put(element);
+        }
+
+        return result;
     }
 
     /**
      * Converts a {@code float} array into a {@link JSONArray}.
      *
      * <p>Each float value is stored as a JSON number. The standard JSON specification does not
-     * support {@code NaN} or {@code Infinity}; the org.json constructor throws a
+     * support {@code NaN} or {@code Infinity}; org.json throws a
      * {@link JSONException} for such values.
      *
      * <p><b>Usage example:</b>
@@ -357,14 +405,21 @@ public final class JsonUtil {
     public static JSONArray wrap(final float[] array) throws IllegalArgumentException, JSONException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final float element : array) {
+            result.put(element);
+        }
+
+        return result;
     }
 
     /**
      * Converts a {@code double} array into a {@link JSONArray}.
      *
      * <p>Each double value is stored as a JSON number. The standard JSON specification does not
-     * support {@code NaN} or {@code Infinity}; the org.json constructor throws a
+     * support {@code NaN} or {@code Infinity}; org.json throws a
      * {@link JSONException} for such values.
      *
      * <p><b>Usage example:</b>
@@ -382,7 +437,14 @@ public final class JsonUtil {
     public static JSONArray wrap(final double[] array) throws IllegalArgumentException, JSONException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Typed put(..) calls: see wrap(boolean[]).
+        final JSONArray result = new JSONArray(array.length);
+
+        for (final double element : array) {
+            result.put(element);
+        }
+
+        return result;
     }
 
     /**
@@ -413,7 +475,9 @@ public final class JsonUtil {
     public static JSONArray wrap(final Object[] array) throws IllegalArgumentException, JSONException {
         N.checkArgNotNull(array, cs.array);
 
-        return new JSONArray(array);
+        // Through the Collection constructor: it wraps and appends each element exactly as the JSONArray(Object)
+        // array constructor does, but without that constructor's reflective Array.get (a native call) per element.
+        return new JSONArray(Arrays.asList(array));
     }
 
     /**
@@ -852,7 +916,7 @@ public final class JsonUtil {
                         element = elementType.valueOf(element);
                     }
 
-                    Array.set(array, i, element);
+                    setPrimitiveArrayElement(array, i, element);
                 }
 
                 return (T) array;
@@ -989,6 +1053,34 @@ public final class JsonUtil {
         indexJsonGraph(value, context);
         if (context.activeContainers.put(value, Boolean.TRUE) != null) {
             throw new IllegalArgumentException("Cyclic JSON container conversion");
+        }
+    }
+
+    /**
+     * Same effect as {@link Array#set(Object, int, Object)} on a primitive array, without its cost in the common case.
+     * {@code Array.set} is a native call per element; an element whose class is exactly the array's wrapper type is
+     * stored directly instead. Every other combination (a {@code null} element, a widening such as an {@code Integer}
+     * into a {@code long[]}, a mismatch) still goes through {@code Array.set}, with its conversions and exceptions.
+     */
+    private static void setPrimitiveArrayElement(final Object array, final int index, final Object element) {
+        if (array instanceof final int[] ints && element instanceof final Integer value) {
+            ints[index] = value;
+        } else if (array instanceof final long[] longs && element instanceof final Long value) {
+            longs[index] = value;
+        } else if (array instanceof final double[] doubles && element instanceof final Double value) {
+            doubles[index] = value;
+        } else if (array instanceof final boolean[] booleans && element instanceof final Boolean value) {
+            booleans[index] = value;
+        } else if (array instanceof final float[] floats && element instanceof final Float value) {
+            floats[index] = value;
+        } else if (array instanceof final char[] chars && element instanceof final Character value) {
+            chars[index] = value;
+        } else if (array instanceof final byte[] bytes && element instanceof final Byte value) {
+            bytes[index] = value;
+        } else if (array instanceof final short[] shorts && element instanceof final Short value) {
+            shorts[index] = value;
+        } else {
+            Array.set(array, index, element);
         }
     }
 

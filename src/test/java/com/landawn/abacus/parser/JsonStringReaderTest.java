@@ -806,4 +806,163 @@ public class JsonStringReaderTest extends TestBase {
         assertThrows(ArithmeticException.class, () -> fixG08_readNumber("99999.5", byte.class));
         assertThrows(ArithmeticException.class, () -> fixG08_readNumber("99999.5", short.class));
     }
+
+    // ---- perf review 2026-10-07 G15 begin ----
+
+    /** Reads one unquoted token the way the parser does: the value-type hint of nextToken is the slot's own type. */
+    private static Object g15_read(final String token, final Type<?> hint, final Type<?> target) {
+        final JsonReader reader = JsonStringReader.parse(token, new char[64]);
+        reader.nextToken(hint);
+        return reader.readValue(target);
+    }
+
+    private static Object g15_read(final String token, final Class<?> targetClass) {
+        final Type<?> type = N.typeOf(targetClass);
+        return g15_read(token, type, type);
+    }
+
+    /** A Type whose javaType is Integer but which is not the built-in handler: it must keep its own conversion route. */
+    private static final class G15CustomIntegerType extends com.landawn.abacus.type.AbstractType<Integer> {
+        G15CustomIntegerType() {
+            super("G15CustomInteger");
+        }
+
+        @Override
+        public Class<Integer> javaType() {
+            return Integer.class;
+        }
+
+        @Override
+        public boolean isString() {
+            // routes readValue to the "keep the token text" branch, which is observably not the Integer result
+            return true;
+        }
+
+        @Override
+        public String stringOf(final Integer x) {
+            return x == null ? null : x.toString();
+        }
+
+        @Override
+        public Integer valueOf(final String str) {
+            return str == null ? null : Integer.valueOf(str.trim());
+        }
+    }
+
+    // G15-01: a built-in int/long/float/double slot hands back the value the number fast path cached for it
+    // (an int-hinted integral token is cached as Long): same wrappers, same cache identity, same range failures.
+    @Test
+    public void testReadValue_builtInNumericSlotsPinned() {
+        // Long cache -> int/Integer slot: narrowed through Integer.valueOf (cache identity preserved)
+        assertSame(Integer.valueOf(7), g15_read("7", int.class));
+        assertSame(Integer.valueOf(7), g15_read("7", Integer.class));
+        assertSame(Integer.valueOf(-128), g15_read("-128", int.class));
+        assertEquals(Integer.valueOf(300), g15_read("300", int.class));
+        assertEquals(Integer.valueOf(300), g15_read("300", Integer.class));
+        assertEquals(Integer.valueOf(Integer.MAX_VALUE), g15_read("2147483647", int.class));
+        assertEquals(Integer.valueOf(Integer.MIN_VALUE), g15_read("-2147483648", Integer.class));
+        assertEquals(Integer.valueOf(123), g15_read("123L", int.class));
+        assertEquals(Integer.valueOf(123), g15_read("123l", Integer.class));
+        assertEquals(Integer.valueOf(5), g15_read("+5", int.class));
+        assertEquals(Integer.valueOf(0), g15_read("-0", int.class));
+
+        // one past the int range still fails the same way (range check of the generic conversion)
+        assertThrows(ArithmeticException.class, () -> g15_read("2147483648", int.class));
+        assertThrows(ArithmeticException.class, () -> g15_read("2147483648L", Integer.class));
+        assertThrows(ArithmeticException.class, () -> g15_read("-2147483649", int.class));
+
+        // Long cache -> long/Long slot: the cached wrapper itself
+        assertSame(Long.valueOf(7L), g15_read("7", long.class));
+        assertSame(Long.valueOf(7L), g15_read("7", Long.class));
+        assertEquals(Long.valueOf(2147483648L), g15_read("2147483648", long.class));
+        assertEquals(Long.valueOf(Long.MAX_VALUE), g15_read("9223372036854775807", Long.class));
+        assertEquals(Long.valueOf(Long.MIN_VALUE), g15_read("-9223372036854775808", long.class));
+        assertEquals(Long.valueOf(123L), g15_read("123L", long.class));
+        // 19 digits beyond the long range are not cached: the token text reaches the handler, which reports the overflow
+        assertThrows(ArithmeticException.class, () -> g15_read("9223372036854775808", long.class));
+
+        // Double cache -> double/Double slot, Float cache -> float/Float slot
+        assertEquals(Double.valueOf(1.5d), g15_read("1.5", double.class));
+        assertEquals(Double.valueOf(1.5d), g15_read("1.5", Double.class));
+        assertEquals(Double.valueOf(7d), g15_read("7", double.class));
+        assertEquals(Double.valueOf(7d), g15_read("7", Double.class));
+        assertEquals(Double.valueOf(0.1d), g15_read("0.1", double.class));
+        assertEquals(Double.valueOf(1.5d), g15_read("1.5d", double.class));
+        assertEquals(Float.valueOf(1.5f), g15_read("1.5", float.class));
+        assertEquals(Float.valueOf(1.5f), g15_read("1.5", Float.class));
+        assertEquals(Float.valueOf(0.1f), g15_read("0.1", float.class));
+        assertEquals(Float.valueOf(7f), g15_read("7", float.class));
+        assertEquals(Float.valueOf(1.5f), g15_read("1.5f", Float.class));
+
+        // spellings the fast path does not cache (negative zero, 17+ digit mantissa, exponent) still go through the text
+        assertEquals(Long.valueOf(Double.doubleToRawLongBits(-0.0d)), Long.valueOf(Double.doubleToRawLongBits((Double) g15_read("-0.0", double.class))));
+        assertEquals(Double.valueOf(0.30000000000000004d), g15_read("0.30000000000000004", double.class));
+        assertEquals(Double.valueOf(1000d), g15_read("1e3", double.class));
+        assertEquals(Integer.valueOf(1000), g15_read("1000", int.class));
+
+        // Integer cache (untyped hint) -> int/Integer slot: the cached wrapper; -> long slot: widened through the generic conversion
+        final Type<Object> objectHint = N.typeOf(Object.class);
+        assertSame(Integer.valueOf(7), g15_read("7", objectHint, N.typeOf(int.class)));
+        assertSame(Integer.valueOf(7), g15_read("7", objectHint, N.typeOf(Integer.class)));
+        assertEquals(Integer.valueOf(300), g15_read("300", objectHint, N.typeOf(Integer.class)));
+        assertEquals(Long.valueOf(7L), g15_read("7", objectHint, N.typeOf(long.class)));
+        assertEquals(Double.valueOf(7d), g15_read("7", objectHint, N.typeOf(double.class)));
+        assertEquals(Long.valueOf(2147483648L), g15_read("2147483648", objectHint, N.typeOf(Long.class)));
+
+        // cross-representation slots keep their exact routes: a cached decimal into an integral slot truncates,
+        // a cached float into a double slot re-reads the token (no double rounding), a cached long into a double slot widens
+        assertEquals(Integer.valueOf(1), g15_read("1.5", int.class));
+        assertEquals(Long.valueOf(1L), g15_read("1.9", long.class));
+        assertEquals(Double.valueOf(1.5d), g15_read("1.5f", N.typeOf(float.class), N.typeOf(double.class)));
+        assertEquals(Double.valueOf(0.1d), g15_read("0.1f", N.typeOf(float.class), N.typeOf(double.class)));
+        assertEquals(Float.valueOf(0.1f), g15_read("0.1", N.typeOf(double.class), N.typeOf(float.class)));
+        assertEquals(Double.valueOf(7d), g15_read("7", N.typeOf(long.class), N.typeOf(double.class)));
+        assertEquals(Short.valueOf((short) 7), g15_read("7", short.class));
+        assertEquals(Byte.valueOf((byte) 7), g15_read("7", byte.class));
+        assertEquals(new java.math.BigDecimal("1.50"), g15_read("1.50", java.math.BigDecimal.class));
+        assertEquals(java.math.BigInteger.valueOf(7), g15_read("7", java.math.BigInteger.class));
+        assertEquals("007", g15_read("007", N.typeOf(int.class), N.typeOf(String.class)));
+        assertEquals(Integer.valueOf(7), g15_read("7", objectHint, objectHint));
+
+        // quoted numbers never touch the numeric cache
+        final JsonReader quoted = JsonStringReader.parse("\"7\"", new char[64]);
+        quoted.nextToken(N.typeOf(int.class));
+        quoted.nextToken(N.typeOf(int.class));
+        assertEquals(Integer.valueOf(7), quoted.readValue(N.typeOf(int.class)));
+
+        // the same through the parser, both readers
+        final JsonParser parser = ParserFactory.createJsonParser();
+        final String doc = "[7,300,-128,2147483647,-2147483648,123L,1.5,0]";
+        final int[] expectedInts = { 7, 300, -128, Integer.MAX_VALUE, Integer.MIN_VALUE, 123, 1, 0 };
+        org.junit.jupiter.api.Assertions.assertArrayEquals(expectedInts, parser.deserialize(doc, int[].class));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(expectedInts, parser.deserialize(new java.io.StringReader(doc), int[].class));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 7, 300, -128, Integer.MAX_VALUE, Integer.MIN_VALUE, 123, 1, 0 },
+                parser.deserialize(doc, long[].class));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 7, 300, -128, Integer.MAX_VALUE, Integer.MIN_VALUE, 123, 1.5, 0 },
+                parser.deserialize(doc, double[].class), 0d);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 7, 300, -128, Integer.MAX_VALUE, Integer.MIN_VALUE, 123, 1.5f, 0 },
+                parser.deserialize(doc, float[].class), 0f);
+        assertEquals(List.of(7, 300, -128, Integer.MAX_VALUE, Integer.MIN_VALUE, 123, 1, 0), parser.deserialize(doc, Type.<List<Integer>> of("List<Integer>")));
+        assertThrows(ArithmeticException.class, () -> parser.deserialize("[2147483648]", int[].class));
+    }
+
+    // G15-01: only the exact built-in handlers take the short route; a custom Type with the same javaType keeps its own path
+    @Test
+    public void testReadValue_customTypeWithBuiltInJavaTypeKeepsItsOwnRoute() {
+        final G15CustomIntegerType custom = new G15CustomIntegerType();
+
+        // isNumber() is false, so the token is cached as Integer, which the javaType match hands back as is
+        assertEquals(Integer.valueOf(7), g15_read("7", custom, custom));
+        assertEquals(Integer.valueOf(300), g15_read("300", custom, custom));
+
+        // a Long cache (number hint) into the custom type: the custom type's own route (here: the token text through
+        // its isString branch), never the built-in narrowing to Integer
+        assertEquals("7", g15_read("7", N.typeOf(int.class), custom));
+        assertEquals("2147483648", g15_read("2147483648", N.typeOf(long.class), custom));
+
+        // and the built-in handler next to it is unaffected
+        assertSame(Integer.valueOf(7), g15_read("7", custom, N.typeOf(Integer.class)));
+    }
+
+    // ---- perf review 2026-10-07 G15 end ----
 }

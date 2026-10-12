@@ -12,10 +12,10 @@ import javax.xml.stream.util.StreamReaderDelegate;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
-
-import com.landawn.abacus.TestBase;
 
 @org.junit.jupiter.api.Tag("unit")
 public class XmlRootTypeTest extends TestBase {

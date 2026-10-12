@@ -139,8 +139,8 @@ public final class FilenameUtil {
      * If the double dot has no parent path segment, {@code null} is returned.</p>
      *
      * <p>A <b>leading</b> double slash is not merged: it is treated as a Windows UNC prefix, so
-     * {@code "//server/share/x"} keeps its {@code //}. A UNC prefix that names no share, or whose host
-     * component is {@code "."} or {@code ".."}, is rejected: {@code normalize("//foo")},
+     * {@code "//server/share/x"} keeps its {@code //}. A UNC prefix whose host component is empty, is not
+     * followed by a separator, or is {@code "."} or {@code ".."}, is rejected: {@code normalize("//foo")},
      * {@code normalize("///foo")} and {@code normalize("//../foo")} all return {@code null}. This also
      * applies on Unix, where {@code "//foo"} would otherwise be an ordinary absolute path.</p>
      *
@@ -925,12 +925,10 @@ public final class FilenameUtil {
      * @throws IllegalArgumentException if {@code path} contains a {@code null} byte.
      */
     private static void failIfNullBytePresent(final String path) throws IllegalArgumentException {
-        final int len = path.length();
-        for (int i = 0; i < len; i++) {
-            if (path.charAt(i) == 0) {
-                throw new IllegalArgumentException("Null byte present in file/path name. There are no "
-                        + "known legitimate use cases for such data, but several injection attacks may use it");
-            }
+        // String.indexOf is a vectorized intrinsic; it scans much faster than a charAt loop.
+        if (path.indexOf(0) >= 0) {
+            throw new IllegalArgumentException("Null byte present in file/path name. There are no "
+                    + "known legitimate use cases for such data, but several injection attacks may use it");
         }
     }
 

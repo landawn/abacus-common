@@ -377,6 +377,7 @@ public class NumbersIsTest extends NumbersTestSupport {
         assertFalse(Numbers.isNormal(Double.POSITIVE_INFINITY));
         assertFalse(Numbers.isNormal(Double.NaN));
     }
+
     // ---- perf review 2026-09-26 G061 begin ----
     // G061-01: the mod-16 residue pre-filter must agree with the exact root-and-square test at every magnitude,
     // including multi-word values whose low 32 bits are what the filter reads.

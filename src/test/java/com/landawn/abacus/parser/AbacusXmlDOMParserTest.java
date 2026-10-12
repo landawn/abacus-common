@@ -166,7 +166,9 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         String str = abacusXMLDOMParser.serialize(N.asMap((String) null, (Object) null), XmlSerConfig.create().setExclusion(Exclusion.NONE));
         Map<String, Object> map2 = abacusXMLDOMParser.deserialize(str, Map.class);
         map2 = (Map<String, Object>) abacusXMLDOMParser.deserialize(str, Object.class);
-        map2 = (Map<String, Object>) abacusXMLDOMParser.deserialize(str, abacusXMLDOMParser.getClass());
+        // A map root is no longer returned for an unrelated target class (the parser class here): owner-approved change, the map
+        // used to be returned and the caller had to cast it.
+        assertThrows(ParsingException.class, () -> abacusXMLDOMParser.deserialize(str, abacusXMLDOMParser.getClass()));
         assertThrows(ParsingException.class, () -> abacusXMLDOMParser.serialize(abacusXMLDOMParser));
         assertNotNull(map2);
 

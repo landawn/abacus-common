@@ -270,6 +270,19 @@ public class PrimitiveShortArrayTypeTest extends TestBase {
         assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1, ]")).getClass());
 
         assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
-        assertThrows(NumberFormatException.class, () -> type.valueOf("[1, null]"));
+        // 2026-10-05: the unquoted literal null is the element default, as the JSON parser reads a primitive array
+        assertArrayEquals(new short[] { 1, 0 }, type.valueOf("[1, null]"));
+    }
+
+    // 2026-10-05: the compact JSON text form. Quoted content is decoded exactly once, a bare null is the element default,
+    // and an empty or textual quoted element is still malformed.
+    @Test
+    public void compactJsonTextForm20261005() {
+        assertArrayEquals(new short[] { 1, -2, 0, 3 }, type.valueOf("[\"1\", '-2', null, \"\\u0033\"]"));
+        assertArrayEquals(new short[] { 0, 0 }, type.valueOf("[null,null]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
+        assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
     }
 }

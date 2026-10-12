@@ -344,8 +344,8 @@ public class HBaseColumnTest extends TestBase {
         Assertions.assertEquals(1, set.size());
 
         // No interning table is consulted any more, so nothing is registered for a value.
-        Assertions.assertTrue(java.util.Arrays.stream(HBaseColumn.class.getDeclaredFields())
-                .noneMatch(f -> java.util.WeakHashMap.class.isAssignableFrom(f.getType())));
+        Assertions.assertTrue(
+                java.util.Arrays.stream(HBaseColumn.class.getDeclaredFields()).noneMatch(f -> java.util.WeakHashMap.class.isAssignableFrom(f.getType())));
     }
 
     @Test
@@ -355,8 +355,8 @@ public class HBaseColumnTest extends TestBase {
         final List<String> descending = new ArrayList<>();
 
         SortedSet<HBaseColumn<String>> set = new TreeSet<>();
-        for (int i = 0; i < values.size(); i++) {
-            set.add(HBaseColumn.valueOf(values.get(i), 100L));
+        for (String value : values) {
+            set.add(HBaseColumn.valueOf(value, 100L));
         }
         set.forEach(column -> ascending.add(column.value()));
 
@@ -439,7 +439,7 @@ public class HBaseColumnTest extends TestBase {
         set.add(b5);
         set.add(c9);
 
-        Assertions.assertEquals(List.of(c9, a5, b5), new ArrayList<HBaseColumn<?>>(set));
+        Assertions.assertEquals(List.of(c9, a5, b5), new ArrayList<>(set));
     }
 
     @Test
@@ -449,6 +449,6 @@ public class HBaseColumnTest extends TestBase {
         set.add(HBaseColumn.valueOf("z", 9L));
 
         Assertions.assertEquals(List.of(HBaseColumn.valueOf("z", 9L), HBaseColumn.valueOf("a", 1L), HBaseColumn.valueOf("v", 1L)),
-                new ArrayList<HBaseColumn<String>>(set));
+                new ArrayList<>(set));
     }
 }

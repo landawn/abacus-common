@@ -20,9 +20,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
 import com.landawn.abacus.util.stream.BaseStream.SplitStrategy;
-import com.landawn.abacus.util.u.Optional;
 
 @Tag("unit")
 public class StreamOptionalResultContractTest extends TestBase {
@@ -99,12 +99,9 @@ public class StreamOptionalResultContractTest extends TestBase {
         });
     }
 
-    private static void assertKeyedExtremaCollectorContract(
-            final BiFunction<Integer[], Collector<Integer, ?, Optional<Integer>>, Optional<Integer>> collect) {
-        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1, null, 2 },
-                Collectors.minBy(value -> value == null ? -1 : value)));
-        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1, null, 2 },
-                Collectors.maxBy(value -> value == null ? 3 : value)));
+    private static void assertKeyedExtremaCollectorContract(final BiFunction<Integer[], Collector<Integer, ?, Optional<Integer>>, Optional<Integer>> collect) {
+        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1, null, 2 }, Collectors.minBy(value -> value == null ? -1 : value)));
+        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1, null, 2 }, Collectors.maxBy(value -> value == null ? 3 : value)));
         assertFalse(collect.apply(new Integer[0], Collectors.minBy(Function.identity())).isPresent());
         assertFalse(collect.apply(new Integer[0], Collectors.maxBy(Function.identity())).isPresent());
         // The Optional contains the selected element, so a null sort key is still permitted.
@@ -161,8 +158,8 @@ public class StreamOptionalResultContractTest extends TestBase {
     void firstLastCollectorsDistinguishEmptyFromNull() {
         assertThrows(NullPointerException.class, () -> Stream.of((Integer) null, 1).collect(Collectors.first()));
         assertThrows(NullPointerException.class, () -> Stream.of(1, (Integer) null).collect(Collectors.last()));
-        assertFalse(Stream.<Integer>empty().collect(Collectors.first()).isPresent());
-        assertFalse(Stream.<Integer>empty().collect(Collectors.last()).isPresent());
+        assertFalse(Stream.<Integer> empty().collect(Collectors.first()).isPresent());
+        assertFalse(Stream.<Integer> empty().collect(Collectors.last()).isPresent());
         assertEquals(Optional.of(1), Stream.of(1, (Integer) null).collect(Collectors.first()));
         assertEquals(Optional.of(2), Stream.of((Integer) null, 2).collect(Collectors.last()));
         assertThrows(NullPointerException.class, () -> java.util.stream.Stream.of((Integer) null, 1).collect(Collectors.first()));
@@ -173,7 +170,7 @@ public class StreamOptionalResultContractTest extends TestBase {
     void reducingCollectorRejectsNullFinalResults() {
         assertThrows(NullPointerException.class, () -> Stream.of(1, 2).collect(Collectors.reducing((a, b) -> null)));
         assertThrows(NullPointerException.class, () -> Stream.of(1, 2).parallel(2).collect(Collectors.reducing((a, b) -> null)));
-        assertFalse(Stream.<Integer>empty().collect(Collectors.reducing(Integer::sum)).isPresent());
+        assertFalse(Stream.<Integer> empty().collect(Collectors.reducing(Integer::sum)).isPresent());
     }
 
     @ParameterizedTest
@@ -192,35 +189,31 @@ public class StreamOptionalResultContractTest extends TestBase {
         });
     }
 
-    private static void assertMappedReducingContract(
-            final BiFunction<Integer[], Collector<Integer, ?, Optional<Integer>>, Optional<Integer>> collect) {
-        assertFalse(collect.apply(new Integer[0], Collectors.<Integer, Integer>reducing(value -> {
+    private static void assertMappedReducingContract(final BiFunction<Integer[], Collector<Integer, ?, Optional<Integer>>, Optional<Integer>> collect) {
+        assertFalse(collect.apply(new Integer[0], Collectors.<Integer, Integer> reducing(value -> {
             throw new AssertionError("empty input must not invoke the mapper");
         }, (left, right) -> {
             throw new AssertionError("empty input must not invoke the operator");
         })).isPresent());
 
-        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1 },
-                Collectors.<Integer, Integer>reducing(value -> null, (left, right) -> {
+        assertThrows(NullPointerException.class,
+                () -> collect.apply(new Integer[] { 1 }, Collectors.<Integer, Integer> reducing(value -> null, (left, right) -> {
                     throw new AssertionError("a singleton must not invoke the operator");
                 })));
-        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { null },
-                Collectors.<Integer, Integer>reducing(Function.identity(), (left, right) -> 7)));
-        assertThrows(NullPointerException.class, () -> collect.apply(new Integer[] { 1, 2, 3, 4 },
-                Collectors.<Integer, Integer>reducing(Function.identity(), (left, right) -> null)));
+        assertThrows(NullPointerException.class,
+                () -> collect.apply(new Integer[] { null }, Collectors.<Integer, Integer> reducing(Function.identity(), (left, right) -> 7)));
+        assertThrows(NullPointerException.class,
+                () -> collect.apply(new Integer[] { 1, 2, 3, 4 }, Collectors.<Integer, Integer> reducing(Function.identity(), (left, right) -> null)));
 
         // Null mapped values are allowed when subsequent reduction produces a non-null result.
-        assertEquals(Optional.of(7), collect.apply(new Integer[] { 1, 2 },
-                Collectors.<Integer, Integer>reducing(value -> null, (left, right) -> 7)));
-        assertEquals(Optional.of(10), collect.apply(new Integer[] { 1, 2, 3, 4 },
-                Collectors.<Integer, Integer>reducing(Function.identity(), Integer::sum)));
-        assertEquals(Optional.of(6), collect.apply(new Integer[] { 3 },
-                Collectors.<Integer, Integer>reducing(value -> value * 2, (left, right) -> {
-                    throw new AssertionError("a singleton must not invoke the operator");
-                })));
+        assertEquals(Optional.of(7), collect.apply(new Integer[] { 1, 2 }, Collectors.<Integer, Integer> reducing(value -> null, (left, right) -> 7)));
+        assertEquals(Optional.of(10), collect.apply(new Integer[] { 1, 2, 3, 4 }, Collectors.<Integer, Integer> reducing(Function.identity(), Integer::sum)));
+        assertEquals(Optional.of(6), collect.apply(new Integer[] { 3 }, Collectors.<Integer, Integer> reducing(value -> value * 2, (left, right) -> {
+            throw new AssertionError("a singleton must not invoke the operator");
+        })));
 
         // Represent additive zero as null, keeping the operator associative for parallel collection.
-        final Collector<Integer, ?, Optional<Integer>> nullableSum = Collectors.<Integer, Integer>reducing(Function.identity(), (left, right) -> {
+        final Collector<Integer, ?, Optional<Integer>> nullableSum = Collectors.<Integer, Integer> reducing(Function.identity(), (left, right) -> {
             final int sum = (left == null ? 0 : left) + (right == null ? 0 : right);
             return sum == 0 ? null : sum;
         });
@@ -295,7 +288,9 @@ public class StreamOptionalResultContractTest extends TestBase {
         assertThrows(NullPointerException.class, () -> FloatStream.of(1F).applyIfNotEmpty(s -> null));
         assertThrows(NullPointerException.class, () -> DoubleStream.of(1D).applyIfNotEmpty(s -> null));
         assertThrows(NullPointerException.class, () -> EntryStream.of("a", 1).applyIfNotEmpty(s -> null));
-        assertFalse(IntStream.empty().applyIfNotEmpty(s -> { throw new AssertionError("must not run"); }).isPresent());
+        assertFalse(IntStream.empty().applyIfNotEmpty(s -> {
+            throw new AssertionError("must not run");
+        }).isPresent());
     }
 
     @Test
@@ -311,11 +306,11 @@ public class StreamOptionalResultContractTest extends TestBase {
     @Test
     void collectingOrEmptyRejectsNullOnlyWhenInputWasSeen() {
         final AtomicInteger finishes = new AtomicInteger();
-        final var collector = Collectors.collectingOrEmpty(Collectors.collectingAndThen(Collectors.<Integer>toList(), list -> {
+        final var collector = Collectors.collectingOrEmpty(Collectors.collectingAndThen(Collectors.<Integer> toList(), list -> {
             finishes.incrementAndGet();
             return (Integer) null;
         }));
-        assertFalse(Stream.<Integer>empty().collect(collector).isPresent());
+        assertFalse(Stream.<Integer> empty().collect(collector).isPresent());
         assertEquals(0, finishes.get());
         assertThrows(NullPointerException.class, () -> Stream.of((Integer) null).collect(collector));
         assertEquals(1, finishes.get());
@@ -331,9 +326,9 @@ public class StreamOptionalResultContractTest extends TestBase {
         final AtomicInteger finishes = new AtomicInteger();
         final var collector = Collectors.minMax(NULLS_FIRST, (Integer min, Integer max) -> {
             finishes.incrementAndGet();
-            return (Integer) null;
+            return null;
         });
-        assertFalse(Stream.<Integer>empty().collect(collector).isPresent());
+        assertFalse(Stream.<Integer> empty().collect(collector).isPresent());
         assertEquals(0, finishes.get());
         assertThrows(NullPointerException.class, () -> Stream.of(1, 2).collect(collector));
         assertThrows(NullPointerException.class, () -> Stream.of(1, null, 2).parallel(2).collect(collector));

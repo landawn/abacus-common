@@ -21,8 +21,7 @@ public class ByteBufferTypeTest extends TestBase {
 
     @Test
     public void testNullArgumentContracts() {
-        final IllegalArgumentException bufferFailure = Assertions.assertThrowsExactly(IllegalArgumentException.class,
-                () -> ByteBufferType.byteArrayOf(null));
+        final IllegalArgumentException bufferFailure = Assertions.assertThrowsExactly(IllegalArgumentException.class, () -> ByteBufferType.byteArrayOf(null));
         final IllegalArgumentException bytesFailure = Assertions.assertThrowsExactly(IllegalArgumentException.class,
                 () -> ByteBufferType.valueOf((byte[]) null));
 
@@ -277,7 +276,7 @@ public class ByteBufferTypeTest extends TestBase {
 
         final ByteBuffer original = ByteBuffer.allocate(8);
         original.put((byte) 9).put((byte) 8);
-        final ByteBuffer fromBuffer = type.valueOf((Object) original);
+        final ByteBuffer fromBuffer = type.valueOf(original);
         Assertions.assertNotSame(original, fromBuffer);
         Assertions.assertArrayEquals(new byte[] { 9, 8 }, ByteBufferType.byteArrayOf(fromBuffer));
         assertEquals(2, fromBuffer.position());
@@ -294,7 +293,7 @@ public class ByteBufferTypeTest extends TestBase {
 
         assertEquals(3, result.position());
         Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(result));
-        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(Type.of(ByteBuffer.class).valueOf((Object) new byte[] { 1, 2, 3 })));
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(Type.of(ByteBuffer.class).valueOf(new byte[] { 1, 2, 3 })));
     }
 
     @Test

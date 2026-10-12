@@ -15,6 +15,8 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -152,7 +154,9 @@ public abstract class AbstractType<T> implements Type<T> {
      * <p>
      * The constructor normalizes the type name by stripping the package qualifier and
      * keeping only the simple class name for types that live in well-known packages
-     * ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}).
+     * ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}),
+     * but only when the class can be resolved by that simple name ({@code "java.util.UUID"} becomes
+     * {@code "UUID"}, while {@code "java.util.BitSet"} is kept as is); every other name is kept as given.
      * Generic type parameters (the {@code <...>} suffix) are preserved. The XML-safe form
      * is derived from the normalized name with {@code <} and {@code >} escaped to
      * {@code &lt;} and {@code &gt;}.
@@ -1324,12 +1328,117 @@ public abstract class AbstractType<T> implements Type<T> {
     }
 
     /**
+     * Recognizes floating decimal text with an {@code L}/{@code l} suffix: a suffix the floating type adapters accept
+     * but the JDK parser rejects. Floating text with an {@code F}/{@code f}/{@code D}/{@code d} suffix already parses
+     * directly and must not pay for a suffix substring.
+     *
+     * @param str the trimmed text to test; must not be {@code null}
+     * @return {@code true} if {@code str} is exactly an optional sign, an ASCII decimal number with an optional
+     *         fraction and exponent, and one {@code L}/{@code l} suffix
+     */
+    static boolean hasDecimalLongSuffix(final String str) {
+        final int end = str.length() - 1;
+
+        if (end <= 0) {
+            return false;
+        }
+
+        final char suffix = str.charAt(end);
+
+        return (suffix == 'L' || suffix == 'l') && decimalEnd(str, 0, end, true) == end;
+    }
+
+    /**
+     * Recognizes decimal integer text with an {@code F}/{@code f}/{@code D}/{@code d} suffix: a suffix the integral
+     * type adapters accept but {@code Numbers.toInt}/{@code toLong} reject. Hexadecimal text is never recognized, so
+     * the final {@code F} or {@code D} of a hexadecimal integer stays a digit.
+     *
+     * @param str the text to test; must not be {@code null}
+     * @return {@code true} if {@code str} is exactly an optional sign, ASCII decimal digits, and one {@code F},
+     *         {@code f}, {@code D} or {@code d} suffix
+     */
+    static boolean hasDecimalFloatingSuffix(final String str) {
+        final int end = str.length() - 1;
+
+        if (end <= 0) {
+            return false;
+        }
+
+        final char suffix = str.charAt(end);
+
+        return (suffix == 'F' || suffix == 'f' || suffix == 'D' || suffix == 'd') && decimalEnd(str, 0, end, false) == end;
+    }
+
+    /**
+     * Returns the end of an ASCII decimal token, or -1 if its significand/exponent lacks digits.
+     * The caller checks the following character or the end index; whitespace, suffixes, hexadecimal
+     * syntax and special floating values are deliberately not consumed here.
+     *
+     * @param str the text containing the token
+     * @param from the index of the token's first character (an optional sign)
+     * @param to the exclusive index the token cannot extend past
+     * @param floatingPoint {@code true} to also accept a fraction and an exponent, {@code false} for integer digits only
+     * @return the exclusive end index of the token, or {@code -1} if it has no significand digits or an exponent
+     *         without digits
+     */
+    static int decimalEnd(final String str, final int from, final int to, final boolean floatingPoint) {
+        int pos = from;
+
+        if (pos < to && (str.charAt(pos) == '+' || str.charAt(pos) == '-')) {
+            pos++;
+        }
+
+        final int integerStart = pos;
+
+        while (pos < to && isDigit(str.charAt(pos))) {
+            pos++;
+        }
+
+        int digits = pos - integerStart;
+
+        if (floatingPoint && pos < to && str.charAt(pos) == '.') {
+            final int fractionStart = ++pos;
+
+            while (pos < to && isDigit(str.charAt(pos))) {
+                pos++;
+            }
+
+            digits += pos - fractionStart;
+        }
+
+        if (digits == 0) {
+            return -1;
+        }
+
+        if (floatingPoint && pos < to && (str.charAt(pos) == 'e' || str.charAt(pos) == 'E')) {
+            pos++;
+
+            if (pos < to && (str.charAt(pos) == '+' || str.charAt(pos) == '-')) {
+                pos++;
+            }
+
+            final int exponentStart = pos;
+
+            while (pos < to && isDigit(str.charAt(pos))) {
+                pos++;
+            }
+
+            if (pos == exponentStart) {
+                return -1;
+            }
+        }
+
+        return pos;
+    }
+
+    /**
      * Parses an integer from a region of a character array.
      * <p>
-     * Optimized fast path for lengths 1&ndash;9 (parses digits inline); longer regions
-     * fall back to {@link Numbers#toInt(String)}. A trailing type suffix
-     * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
-     * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
+     * Parses an optionally signed run of ASCII decimal digits inline at any length, including leading zeros and
+     * the 10-digit values up to the {@code int} bounds. A region longer than 9 characters that holds any other
+     * character, or whose value overflows, falls back to {@link Numbers#toInt(String)}; a shorter malformed region is
+     * rejected directly. A trailing type suffix ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D})
+     * is accepted and ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
      * Returns {@code 0} when {@code cbuf} is {@code null} or {@code length == 0}.
      * </p>
      *
@@ -1396,7 +1505,36 @@ public abstract class AbstractType<T> implements Type<T> {
                 return isNegative ? -result : result;
             }
 
-            default:
+            default: {
+                final boolean isNegative = cbuf[offset] == '-';
+                final int limit = isNegative ? Integer.MIN_VALUE : -Integer.MAX_VALUE;
+                final int multiplyLimit = limit / 10;
+                final int to = offset + length;
+                int i = (isNegative || cbuf[offset] == '+') ? offset + 1 : offset;
+                int result = 0;
+
+                // Accumulate negatively so MIN_VALUE is representable. The fallback validates the
+                // whole token on overflow or other syntax and retains its original diagnostics.
+                for (; i < to; i++) {
+                    final int digit = cbuf[i] - '0';
+
+                    if (digit < 0 || digit > 9 || result < multiplyLimit) {
+                        break;
+                    }
+
+                    final int multiplied = result * 10;
+
+                    if (multiplied < limit + digit) {
+                        break;
+                    }
+
+                    result = multiplied - digit;
+                }
+
+                if (i == to) {
+                    return isNegative ? result : -result;
+                }
+
                 try {
                     return Numbers.toInt(new String(cbuf, offset, length));
                 } catch (final NumberFormatException e) {
@@ -1408,16 +1546,18 @@ public abstract class AbstractType<T> implements Type<T> {
                     throw (NumberFormatException) new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"")
                             .initCause(e);
                 }
+            }
         }
     }
 
     /**
      * Parses a long from a region of a character array.
      * <p>
-     * Optimized fast path for lengths 1&ndash;18 (parses digits inline); longer regions
-     * fall back to {@link Numbers#toLong(String)}. A trailing type suffix
-     * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
-     * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
+     * Parses an optionally signed run of ASCII decimal digits inline at any length, including leading zeros and
+     * the 19-digit values up to the {@code long} bounds. A region longer than 18 characters that holds any other
+     * character, or whose value overflows, falls back to {@link Numbers#toLong(String)}; a shorter malformed region is
+     * rejected directly. A trailing type suffix ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D})
+     * is accepted and ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
      * Returns {@code 0L} when {@code cbuf} is {@code null} or {@code length == 0}.
      * </p>
      *
@@ -1485,7 +1625,34 @@ public abstract class AbstractType<T> implements Type<T> {
                 return isNegative ? -result : result;
             }
 
-            default:
+            default: {
+                final boolean isNegative = cbuf[offset] == '-';
+                final long limit = isNegative ? Long.MIN_VALUE : -Long.MAX_VALUE;
+                final long multiplyLimit = limit / 10;
+                final int to = offset + length;
+                int i = (isNegative || cbuf[offset] == '+') ? offset + 1 : offset;
+                long result = 0;
+
+                for (; i < to; i++) {
+                    final int digit = cbuf[i] - '0';
+
+                    if (digit < 0 || digit > 9 || result < multiplyLimit) {
+                        break;
+                    }
+
+                    final long multiplied = result * 10;
+
+                    if (multiplied < limit + digit) {
+                        break;
+                    }
+
+                    result = multiplied - digit;
+                }
+
+                if (i == to) {
+                    return isNegative ? result : -result;
+                }
+
                 try {
                     return Numbers.toLong(new String(cbuf, offset, length));
                 } catch (final NumberFormatException e) {
@@ -1497,50 +1664,261 @@ public abstract class AbstractType<T> implements Type<T> {
                     throw (NumberFormatException) new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"")
                             .initCause(e);
                 }
+            }
         }
     }
 
     /**
-     * Parses a string into a Boolean value with enhanced recognition for common true/false indicators.
-     * <p>
-     * This method extends the standard Boolean parsing functionality by adding special handling
-     * for single-character strings, recognizing "Y", "y", and "1" as {@code true} values,
-     * in addition to the standard "true" string.
-     * </p>
-     * <p>
-     * For single-character inputs:
-     * </p>
+     * Parses text into a {@code Boolean} with the library-wide rule for text:
      * <ul>
-     *   <li>"Y", "y", "1" &rarr; {@code true}</li>
-     *   <li>Any other single character &rarr; {@code false}</li>
+     *   <li>{@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (in any case) &rarr; {@code true};</li>
+     *   <li>{@code "0"}, {@code "-1"}, {@code "n"}, {@code "N"} and {@code "false"} (in any case) &rarr; {@code false};</li>
+     *   <li>anything else is rejected. Numeric text is not parsed, so {@code "2"}, {@code "1.0"} and {@code "01"} are
+     *       rejected, as are {@code "yes"}, {@code "T"} and text that is nothing but padding.</li>
      * </ul>
-     * <p>
-     * For multi-character inputs, delegates to {@link Boolean#valueOf(String)}, which
-     * returns {@code true} only if the string equals "true" (case-insensitive).
-     * </p>
      * <p>
      * Leading and trailing {@linkplain #isPadding(char) padding} is removed first, so {@code " Y"} and
      * {@code " true "} are accepted. The callers test for blank text with
      * {@link Strings#isBlank(CharSequence)}, which follows {@link Character#isWhitespace(char)}: stripping here
      * with the same definition is what keeps text padded with Unicode whitespace above {@code U+0020} (U+3000
-     * followed by {@code "true"}, say) - text that is not blank - from being handed to
-     * {@link Boolean#valueOf(String)} with its padding still attached.
+     * followed by {@code "true"}, say) - text that is not blank - from being read with its padding still attached.
+     * "In any case" means ASCII case only: {@code "TRUE"} and {@code "False"} are accepted, but a non-ASCII letter
+     * that {@link String#equalsIgnoreCase(String)} would match (the long s, {@code U+017F}) is not.
      * </p>
      *
-     * @param str the string to parse; must not be {@code null}
-     * @return a non-{@code null} {@code Boolean} representing the parsed value
+     * @param str the text to parse; must not be {@code null}
+     * @return {@link Boolean#TRUE} or {@link Boolean#FALSE}
      * @throws NullPointerException if {@code str} is {@code null}
-     * @see Boolean#valueOf(String)
+     * @throws IllegalArgumentException if {@code str}, without its padding, is none of the texts above
+     * @see #booleanOf(Number)
      */
-    protected static Boolean parseBoolean(final String str) throws NullPointerException {
-        final String value = stripPadding(str);
+    protected static Boolean parseBoolean(final String str) throws NullPointerException, IllegalArgumentException {
+        final Boolean result = booleanToken(stripPadding(str));
 
-        if (value.length() == 1) {
-            final char ch = value.charAt(0);
-            return ch == 'Y' || ch == 'y' || ch == '1';
+        if (result == null) {
+            throw notABooleanText(str);
         }
 
-        return Boolean.valueOf(value);
+        return result;
+    }
+
+    /**
+     * Reads {@code text} as one of the texts {@link #parseBoolean(String)} accepts, exactly: no padding is removed.
+     *
+     * @param text the text to read; must not be {@code null}
+     * @return {@link Boolean#TRUE} or {@link Boolean#FALSE}, or {@code null} if {@code text} is none of the accepted texts
+     */
+    private static Boolean booleanToken(final String text) {
+        switch (text.length()) {
+            case 1:
+                return booleanToken(text.charAt(0));
+
+            case 2:
+                return text.charAt(0) == '-' && text.charAt(1) == '1' ? Boolean.FALSE : null;
+
+            case 4:
+                return (text.charAt(0) | 0x20) == 't' && (text.charAt(1) | 0x20) == 'r' && (text.charAt(2) | 0x20) == 'u' && (text.charAt(3) | 0x20) == 'e'
+                        ? Boolean.TRUE
+                        : null;
+
+            case 5:
+                return (text.charAt(0) | 0x20) == 'f' && (text.charAt(1) | 0x20) == 'a' && (text.charAt(2) | 0x20) == 'l' && (text.charAt(3) | 0x20) == 's'
+                        && (text.charAt(4) | 0x20) == 'e' ? Boolean.FALSE : null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Reads the region {@code cbuf[offset, offset + length)} as one of the texts {@link #parseBoolean(String)} accepts,
+     * exactly: no padding is removed. The {@code char[]} readers use it to answer the common cases without allocating,
+     * and hand anything else to their {@code String} overload, which removes padding, treats blank text as absent and
+     * rejects the rest.
+     *
+     * @param cbuf the characters; must not be {@code null}
+     * @param offset the index of the first character of the region
+     * @param length the length of the region
+     * @return {@link Boolean#TRUE} or {@link Boolean#FALSE}, or {@code null} if the region is none of the accepted texts
+     * @throws IndexOutOfBoundsException if the region is not inside {@code cbuf}
+     */
+    static Boolean booleanToken(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        switch (length) {
+            case 1:
+                return booleanToken(cbuf[offset]);
+
+            case 2:
+                return cbuf[offset] == '-' && cbuf[offset + 1] == '1' ? Boolean.FALSE : null;
+
+            case 4:
+                return (cbuf[offset] | 0x20) == 't' && (cbuf[offset + 1] | 0x20) == 'r' && (cbuf[offset + 2] | 0x20) == 'u' && (cbuf[offset + 3] | 0x20) == 'e'
+                        ? Boolean.TRUE
+                        : null;
+
+            case 5:
+                return (cbuf[offset] | 0x20) == 'f' && (cbuf[offset + 1] | 0x20) == 'a' && (cbuf[offset + 2] | 0x20) == 'l' && (cbuf[offset + 3] | 0x20) == 's'
+                        && (cbuf[offset + 4] | 0x20) == 'e' ? Boolean.FALSE : null;
+
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Reads one character as one of the one-character texts {@link #parseBoolean(String)} accepts.
+     *
+     * @param ch the character to read
+     * @return {@link Boolean#TRUE} for {@code '1'}, {@code 'y'} and {@code 'Y'}; {@link Boolean#FALSE} for {@code '0'},
+     *         {@code 'n'} and {@code 'N'}; {@code null} for any other character
+     */
+    private static Boolean booleanToken(final char ch) {
+        if (ch == '1' || ch == 'y' || ch == 'Y') {
+            return Boolean.TRUE;
+        } else if (ch == '0' || ch == 'n' || ch == 'N') {
+            return Boolean.FALSE;
+        }
+
+        return null;
+    }
+
+    /**
+     * The library-wide rule for reading a number as a boolean. Only the integral wrapper types {@link Integer},
+     * {@link Short} and {@link Byte} are read: {@code 1} is {@code true}, {@code 0} and {@code -1} are {@code false},
+     * and any other value ({@code 2}, {@code -2}) is rejected. A {@code Number} of any other class is rejected whatever
+     * its value - {@code Long}, {@code Float}, {@code Double}, {@code BigInteger}, {@code BigDecimal},
+     * {@code AtomicInteger}, {@code AtomicLong} and any custom subclass - so {@code 1L} and {@code 1.0} are rejected too.
+     * A {@code null} number is {@code false}. Text is read by {@link #parseBoolean(String)}, which never parses numbers.
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * booleanOf(1);                  // returns true
+     * booleanOf((short) 0);          // returns false
+     * booleanOf((byte) -1);          // returns false
+     * booleanOf(null);               // returns false
+     * booleanOf(2);                  // throws IllegalArgumentException: "Cannot convert Integer value 2 to boolean: ..."
+     * booleanOf(1L);                 // throws IllegalArgumentException: "Cannot convert java.lang.Long value 1 to boolean: ..."
+     * booleanOf(1.0);                // throws IllegalArgumentException: "Cannot convert java.lang.Double value 1.0 to boolean: ..."
+     * }</pre>
+     *
+     * <p>The exception message names the number's type and value and the values that are accepted. The value of a
+     * rejected class is shown bounded and escaped: a very wide {@code BigInteger} or {@code BigDecimal} is summarized by
+     * its sign and size, longer text is cut, and control characters are escaped.</p>
+     *
+     * @param number the number to read; may be {@code null}
+     * @return {@code true} for {@code 1}; {@code false} for {@code 0}, {@code -1} or {@code null}
+     * @throws IllegalArgumentException if {@code number} is an {@code Integer}, {@code Short} or {@code Byte} other than
+     *         {@code -1}, {@code 0} or {@code 1}, or a {@code Number} of any other class
+     * @see #parseBoolean(String)
+     */
+    static boolean booleanOf(final Number number) throws IllegalArgumentException {
+        if (number == null) {
+            return false;
+        }
+
+        if (number instanceof Integer || number instanceof Byte || number instanceof Short) {
+            final int i = number.intValue();
+
+            if (i == 1) {
+                return true;
+            } else if (i == 0 || i == -1) {
+                return false;
+            }
+
+            // Name the type with the value: "Short value 300" says more than "the number 300".
+            throw new IllegalArgumentException("Cannot convert " + number.getClass().getSimpleName() + " value " + i
+                    + " to boolean: only 1 (true), 0 (false) and -1 (false) are accepted");
+        } else {
+            // The class is the problem here, so name it in full (a custom Number may share a simple name with a JDK class),
+            // with the value it held. The value goes through describeForMessage: a BigInteger may have millions of digits,
+            // and a custom Number's toString() may be long or hold a line break.
+            throw new IllegalArgumentException("Cannot convert " + number.getClass().getName() + " value " + describeForMessage(number)
+                    + " to boolean: only Integer, Short and Byte values 1 (true), 0 (false) and -1 (false) are accepted");
+        }
+    }
+
+    /**
+     * Creates the exception for text that is not a boolean value.
+     *
+     * @param text the rejected text, as given
+     * @return the exception to throw
+     */
+    static IllegalArgumentException notABooleanText(final String text) {
+        return new IllegalArgumentException("Cannot convert \"" + describeForMessage(text)
+                + "\" to boolean: only 1, y, Y and true (any case) are true, and only 0, -1, n, N and false (any case) are false");
+    }
+
+    /** The most characters of a rejected value's text that {@link #describeForMessage(Object)} quotes. */
+    private static final int MAX_TEXT_IN_MESSAGE = 64;
+
+    /** The widest {@code BigInteger}, or unscaled {@code BigDecimal}, that {@link #describeForMessage(Object)} prints. */
+    private static final int MAX_NUMBER_BITS_IN_MESSAGE = 192;
+
+    /**
+     * Renders a rejected value for an exception message, bounded as {@link Numbers} bounds its own diagnostics: a
+     * {@code BigInteger} or {@code BigDecimal} too wide to print cheaply is summarized by its sign and size, longer text
+     * is cut (never inside a surrogate pair) and followed by its length, and control characters, the line and paragraph
+     * separators, Unicode format characters (a bidirectional control, a zero-width space) and unpaired surrogates are
+     * escaped. So a hostile megabyte of text or a million-digit number costs neither a slow {@code toString()} nor a
+     * megabyte message, and text or a {@code Number} subtype whose {@code toString()} holds a line break or a
+     * display-order control cannot inject it into a log line.
+     *
+     * @param value the rejected number or text
+     * @return a short, single-line description of {@code value}
+     */
+    private static String describeForMessage(final Object value) {
+        if (value instanceof BigInteger bigInteger && bigInteger.bitLength() > MAX_NUMBER_BITS_IN_MESSAGE) {
+            return "BigInteger[signum=" + bigInteger.signum() + ", bitLength=" + bigInteger.bitLength() + "]";
+        } else if (value instanceof BigDecimal bigDecimal && bigDecimal.unscaledValue().bitLength() > MAX_NUMBER_BITS_IN_MESSAGE) {
+            return "BigDecimal[signum=" + bigDecimal.signum() + ", unscaledBitLength=" + bigDecimal.unscaledValue().bitLength() + ", scale="
+                    + bigDecimal.scale() + "]";
+        }
+
+        final String text = String.valueOf(value);
+        int cut = Math.min(text.length(), MAX_TEXT_IN_MESSAGE);
+
+        // Do not split a surrogate pair.
+        if (cut < text.length() && Character.isHighSurrogate(text.charAt(cut - 1))) {
+            cut--;
+        }
+
+        final StringBuilder sb = new StringBuilder(cut + 24);
+
+        for (int i = 0; i < cut; i++) {
+            final char ch = text.charAt(i);
+
+            if (Character.isHighSurrogate(ch) && i + 1 < cut && Character.isLowSurrogate(text.charAt(i + 1))) {
+                // A well-formed pair (an emoji, say) is printable, unless it encodes a format character (a tag).
+                final char low = text.charAt(++i);
+
+                if (Character.getType(Character.toCodePoint(ch, low)) == Character.FORMAT) {
+                    appendUnicodeEscape(sb, ch);
+                    appendUnicodeEscape(sb, low);
+                } else {
+                    sb.append(ch).append(low);
+                }
+            } else if (Character.isISOControl(ch) || ch == 0x2028 || ch == 0x2029 || Character.isSurrogate(ch) || Character.getType(ch) == Character.FORMAT) {
+                appendUnicodeEscape(sb, ch);
+            } else {
+                sb.append(ch);
+            }
+        }
+
+        if (cut < text.length()) {
+            sb.append("...[").append(text.length()).append(" chars]");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Appends {@code ch} as a six-character Unicode escape: a backslash, the letter {@code u} and four hexadecimal digits.
+     *
+     * @param sb the builder to append to
+     * @param ch the character to escape
+     */
+    private static void appendUnicodeEscape(final StringBuilder sb, final char ch) {
+        final String hex = Integer.toHexString(ch);
+        sb.append("\\u").append("0000", hex.length(), 4).append(hex);
     }
 
     /**

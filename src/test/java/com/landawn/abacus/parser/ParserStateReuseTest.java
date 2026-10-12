@@ -1,6 +1,8 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -13,6 +15,7 @@ import java.util.concurrent.Executors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.AbstractCharSequenceType;
@@ -22,7 +25,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Objectory;
 
 @Tag("unit")
-class ParserStateReuseTest {
+class ParserStateReuseTest extends TestBase {
     public static class TextBean {
         private String name;
 
@@ -119,8 +122,7 @@ class ParserStateReuseTest {
             for (Object value : List.of('a', '\t', '\n', '\r', new StringBuilder("a & 😀"), new StringBuffer("b < 😀"))) {
                 AbstractXmlParser.writeXmlScalar(writer, Type.of(value.getClass()), value, new XmlSerConfig(), "Value");
             }
-            for (Object value : List.of('\u0000', '\u0001', '\uD800', '\uDC00', '\uFFFE', '\uFFFF', new StringBuilder("a\u0001"),
-                    new StringBuffer("\uD800"))) {
+            for (Object value : List.of('\u0000', '\u0001', '\uD800', '\uDC00', '\uFFFE', '\uFFFF', new StringBuilder("a\u0001"), new StringBuffer("\uD800"))) {
                 assertThrows(ParsingException.class,
                         () -> AbstractXmlParser.writeXmlScalar(writer, Type.of(value.getClass()), value, new XmlSerConfig(), "Value"));
             }
@@ -153,7 +155,7 @@ class ParserStateReuseTest {
 
     @Test
     void mutableTextKeepsCustomTypeSerialization() throws Exception {
-        Type<CharSequence> custom = new AbstractCharSequenceType<CharSequence>("CustomMutableText") {
+        Type<CharSequence> custom = new AbstractCharSequenceType<>("CustomMutableText") {
             @Override
             public Class<CharSequence> javaType() {
                 return CharSequence.class;

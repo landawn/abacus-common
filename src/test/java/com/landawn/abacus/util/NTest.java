@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.ParserUtil;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -64,7 +65,6 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.stream.Stream;
 
 import testfixtures.entity.extendDirty.basic.Account;
-import com.landawn.abacus.exception.ParsingException;
 
 public class NTest extends NTestSupport {
     @Test
@@ -2973,9 +2973,8 @@ public class NTest extends NTestSupport {
     public void testFromXml_nullTargetTypeClassOverloadsNameTargetType() {
         final Class<Object> nullType = null;
         final XmlDeserConfig cfg = XmlDeserConfig.create();
-        final List<org.junit.jupiter.api.function.Executable> calls = Arrays.asList(() -> N.fromXml("<a/>", nullType),
-                () -> N.fromXml("<a/>", cfg, nullType), () -> N.fromXml(new File("no-such-file.xml"), nullType),
-                () -> N.fromXml(new File("no-such-file.xml"), cfg, nullType),
+        final List<org.junit.jupiter.api.function.Executable> calls = Arrays.asList(() -> N.fromXml("<a/>", nullType), () -> N.fromXml("<a/>", cfg, nullType),
+                () -> N.fromXml(new File("no-such-file.xml"), nullType), () -> N.fromXml(new File("no-such-file.xml"), cfg, nullType),
                 () -> N.fromXml(new ByteArrayInputStream("<a/>".getBytes(StandardCharsets.UTF_8)), nullType),
                 () -> N.fromXml(new ByteArrayInputStream("<a/>".getBytes(StandardCharsets.UTF_8)), cfg, nullType),
                 () -> N.fromXml(new StringReader("<a/>"), nullType), () -> N.fromXml(new StringReader("<a/>"), cfg, nullType));
@@ -3106,8 +3105,7 @@ public class NTest extends NTestSupport {
         final float[] floats = { 1.5f, otherFloatNaN, -0.0f, 0.0f, Float.NaN, 1.5f, -0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY,
                 Float.POSITIVE_INFINITY };
         assertSameBits(referenceDistinct(floats, 0, floats.length), N.removeDuplicates(floats, false));
-        assertSameBits(new float[] { 1.5f, otherFloatNaN, -0.0f, 0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY },
-                N.removeDuplicates(floats, false));
+        assertSameBits(new float[] { 1.5f, otherFloatNaN, -0.0f, 0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY }, N.removeDuplicates(floats, false));
         assertSameBits(referenceDistinct(floats, 2, 6), N.removeDuplicates(floats, 2, 6, false));
         assertTrue(N.containsDuplicates(new float[] { otherFloatNaN, 1f, 2f, Float.NaN }, false));
         assertFalse(N.containsDuplicates(new float[] { -0.0f, 1f, 2f, 0.0f }, false));
@@ -3361,4 +3359,459 @@ public class NTest extends NTestSupport {
     }
 
     // ---- perf review 2026-09-26 G113 end ----
+
+    // ---- bug review 2026-09-30 G057 begin ----
+
+    // G057-01: an unmodifiable List without duplicates has nothing to remove -> false (documented: UOE only if c holds duplicates)
+    @Test
+    public void testRemoveDuplicates_unmodifiableListWithoutDuplicates() {
+        assertFalse(N.removeDuplicates(CommonUtil.asList(1, 2, 3)));
+        assertFalse(N.removeDuplicates(CommonUtil.asList(1, 2, 3), true));
+        assertFalse(N.removeDuplicates(List.of(1, 2)));
+        assertFalse(N.removeDuplicates(Collections.unmodifiableList(new ArrayList<>(Arrays.asList("a", "b", "c"))), false));
+        // isSorted == true removes only adjacent duplicates, so a non-adjacent repeat is nothing to remove
+        assertFalse(N.removeDuplicates(List.of(1, 2, 1), true));
+        // deep array content counts as a duplicate
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(List.of(new int[] { 1 }, new int[] { 2 }, new int[] { 1 }), false));
+
+        // with duplicates the failure still propagates and the list is unchanged
+        final List<Integer> withDuplicates = Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1, 2, 1)));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(withDuplicates, false));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(List.of(1, 1, 2), true));
+        assertEquals(Arrays.asList(1, 2, 1), withDuplicates);
+    }
+
+    // ---- bug review 2026-09-30 G057 end ----
+
+    // ---- bug review 2026-09-30 verify G117 begin ----
+    // A list whose removeIf removes the duplicates and THEN fails: the failure still propagates - the read-only recheck
+    // of the now duplicate-free content must not turn it into a silent false.
+    @Test
+    public void testRemoveDuplicates_removeIfFailsAfterRemoving_rethrows() {
+        final List<Integer> list = new ArrayList<>(Arrays.asList(1, 1, 2)) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean removeIf(final java.util.function.Predicate<? super Integer> filter) {
+                super.removeIf(filter);
+                throw new UnsupportedOperationException();
+            }
+        };
+
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(list));
+        assertEquals(Arrays.asList(1, 2), list);
+    }
+
+    // Neighbours of the UOE handling: modifiable and fixed-size lists, and an unmodifiable list with an adjacent duplicate.
+    @Test
+    public void testRemoveDuplicates_modifiableAndFixedSizeListsUnchanged() {
+        final List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 1, 3, 3));
+        assertTrue(N.removeDuplicates(list));
+        assertEquals(Arrays.asList(1, 2, 3), list);
+
+        final List<Integer> sorted = new LinkedList<>(Arrays.asList(1, 1, 2, 3, 3));
+        assertTrue(N.removeDuplicates(sorted, true));
+        assertEquals(Arrays.asList(1, 2, 3), sorted);
+
+        assertFalse(N.removeDuplicates(Arrays.asList(1, 2, 3)));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(Arrays.asList(1, 2, 1)));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(CommonUtil.asList(1, 2, 2), true));
+    }
+    // ---- bug review 2026-09-30 verify G117 end ----
+
+    // ---- bug review 2026-09-30 verify2 G128 begin ----
+    // A custom List whose removeIf tests every element, removes nothing and then fails: nothing to remove -> false,
+    // in both modes; with a duplicate the failure still propagates.
+    @Test
+    public void testRemoveDuplicates_customListFailingWithoutMatch_returnsFalse() {
+        final class ScanThenFail extends ArrayList<Integer> {
+            private static final long serialVersionUID = 1L;
+
+            ScanThenFail(final Collection<Integer> c) {
+                super(c);
+            }
+
+            @Override
+            public boolean removeIf(final java.util.function.Predicate<? super Integer> filter) {
+                for (final Integer e : this) {
+                    filter.test(e);
+                }
+
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        assertFalse(N.removeDuplicates(new ScanThenFail(Arrays.asList(1, 2, 3))));
+        assertFalse(N.removeDuplicates(new ScanThenFail(Arrays.asList(1, 2, 1)), true));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(new ScanThenFail(Arrays.asList(1, 2, 1))));
+    }
+
+    // Only the list's own rejection is absorbed: an element whose hashCode/equals throws UnsupportedOperationException
+    // still fails an unmodifiable list (both modes), and a CopyOnWriteArrayList is deduplicated as before.
+    @Test
+    public void testRemoveDuplicates_elementFailureNotAbsorbed_copyOnWriteListUnchanged() {
+        final class Unhashable {
+            @Override
+            public int hashCode() {
+                throw new UnsupportedOperationException("hashCode");
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                throw new UnsupportedOperationException("equals");
+            }
+        }
+
+        final List<Object> unmodifiable = List.of(new Unhashable(), new Unhashable(), new Unhashable());
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(unmodifiable));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(unmodifiable, true));
+
+        final List<Integer> cow = new java.util.concurrent.CopyOnWriteArrayList<>(Arrays.asList(3, 1, 3, 2, 1));
+        assertTrue(N.removeDuplicates(cow));
+        assertEquals(Arrays.asList(3, 1, 2), cow);
+    }
+    // ---- bug review 2026-09-30 verify2 G128 end ----
+
+    // ---- bug review 2026-10-02 final G129 begin ----
+    // key-caching fix (minBy/maxBy): a null element repeated in the first comparison is extracted once, like any repeated instance
+    @Test
+    public void testMinByMaxBy_repeatedNullElementInFirstComparisonExtractedOnce() {
+        final List<String> calls = new ArrayList<>();
+        final Function<String, Integer> length = s -> {
+            calls.add(String.valueOf(s));
+            return s == null ? 100 : s.length();
+        };
+
+        assertEquals("ab", N.minBy(new String[] { null, null, "ab" }, length));
+        assertEquals(Arrays.asList("null", "ab"), calls);
+
+        calls.clear();
+        assertNull(N.maxBy(Arrays.asList(null, null, "ab"), length));
+        assertEquals(Arrays.asList("null", "ab"), calls);
+    }
+
+    // key-caching fix (minBy/maxBy) neighbour: without an instance repeated inside one comparison, the extractor call sequence is unchanged
+    @Test
+    public void testMinByMaxBy_extractorCallSequenceForDistinctElementsUnchanged() {
+        final String a = "ccc";
+        final String b = "a";
+        final String c = "bb";
+        final String d = new String("a");
+        final List<String> calls = new ArrayList<>();
+        final Function<String, Integer> length = s -> {
+            calls.add(s);
+            return s.length();
+        };
+
+        assertSame(b, N.minBy(new String[] { a, b, c, d, b }, length));
+        assertEquals(4, calls.size());
+        assertSame(b, calls.get(0));
+        assertSame(a, calls.get(1));
+        assertSame(c, calls.get(2));
+        assertSame(d, calls.get(3));
+
+        // the candidate stays a, so the second b (no longer cached) is extracted again at its own position
+        calls.clear();
+        assertSame(a, N.maxBy(Arrays.asList(a, b, c, d, b).iterator(), length));
+        assertEquals(5, calls.size());
+        assertSame(b, calls.get(0));
+        assertSame(a, calls.get(1));
+        assertSame(c, calls.get(2));
+        assertSame(d, calls.get(3));
+        assertSame(b, calls.get(4));
+    }
+    // ---- bug review 2026-10-02 final G129 end ----
+
+    // ---- bug review 2026-10-02 removeAll rework begin ----
+    // A non-List/non-Set receiver that hands out a NEW instance for the same element on every traversal (a transforming view)
+    // loses exactly its matches when the Set argument's membership rule is known exactly (HashSet/LinkedHashSet, TreeSet/
+    // ConcurrentSkipListSet, IdentityHashSet): the matched elements are recorded under that rule, not by instance or position.
+    @Test
+    public void testRemoveAll_recreatingViewWithRecognisedSetArgument() {
+        // mixed: the cached Integer 1 comes back as the same instance, 1000 never does
+        final List<String> mixed = new ArrayList<>(Arrays.asList("1", "1000", "5"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(mixed, Integer::valueOf), new HashSet<>(Arrays.asList(1, 1000))));
+        assertEquals(Arrays.asList("5"), mixed);
+
+        // uncached first, repeated cached matches, a comparator-based (natural order) TreeSet argument
+        final List<String> sorted = new ArrayList<>(Arrays.asList("2000", "7", "1", "3000", "1", "8", "4000"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(sorted, Integer::valueOf), new TreeSet<>(Arrays.asList(1, 2000, 4000))));
+        assertEquals(Arrays.asList("7", "3000", "8"), sorted);
+
+        // all cached, all uncached, LinkedHashSet and ConcurrentSkipListSet arguments
+        final List<String> cached = new ArrayList<>(Arrays.asList("1", "2", "3"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(cached, Integer::valueOf), new LinkedHashSet<>(Arrays.asList(1, 3))));
+        assertEquals(Arrays.asList("2"), cached);
+        final List<String> uncached = new ArrayList<>(Arrays.asList("1000", "2000", "3000"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(uncached, Integer::valueOf),
+                new java.util.concurrent.ConcurrentSkipListSet<>(Arrays.asList(1000, 3000))));
+        assertEquals(Arrays.asList("2000"), uncached);
+
+        // no match: false and nothing removed
+        final List<String> none = new ArrayList<>(Arrays.asList("1", "1000"));
+        assertFalse(N.removeAll(com.google.common.collect.Collections2.transform(none, Integer::valueOf), new HashSet<>(Arrays.asList(2, 2000))));
+        assertEquals(Arrays.asList("1", "1000"), none);
+    }
+
+    // The same over backings that reorder (PriorityQueue re-heapifies) or regroup (Multiset) their elements on removal: exactly the
+    // matches go - before, a PriorityQueue view kept 1003/1006 and a Multiset view could lose a non-matching element ("127").
+    @Test
+    public void testRemoveAll_recreatingViewOverReorderingOrRegroupingBacking() {
+        final java.util.PriorityQueue<String> queue = new java.util.PriorityQueue<>(Arrays.asList("1003", "1", "1002", "7", "6", "2", "1", "1", "1006"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(queue, Integer::valueOf), new HashSet<>(Arrays.asList(1, 2, 7, 1003, 1006))));
+        final List<String> survivors = new ArrayList<>(queue);
+        Collections.sort(survivors);
+        assertEquals(Arrays.asList("1002", "6"), survivors);
+
+        final Multiset<String> fresh = Multiset.of("1000", "1000", "1001", "1001", "1001");
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(fresh, Integer::valueOf), new HashSet<>(Arrays.asList(1000, 1001))));
+        assertTrue(fresh.isEmpty(), fresh.toString());
+
+        final Multiset<String> regrouped = Multiset.of("127", "128", "128", "-129", "1002", "5", "127");
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(regrouped, Integer::valueOf), new HashSet<>(Arrays.asList(-129, 128, 1002))));
+        assertEquals(2, regrouped.getCount("127"), regrouped.toString());
+        assertEquals(1, regrouped.getCount("5"), regrouped.toString());
+        assertEquals(3, regrouped.size(), regrouped.toString());
+
+        final Multiset<String> cachedMs = Multiset.of("1", "1", "2", "3");
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(cachedMs, Integer::valueOf), new HashSet<>(Arrays.asList(1, 2))));
+        assertEquals(0, cachedMs.getCount("1"));
+        assertEquals(0, cachedMs.getCount("2"));
+        assertEquals(1, cachedMs.getCount("3"));
+    }
+
+    // The argument's own rule decides: comparator equality that differs from equals, and identity with equal-but-distinct objects.
+    @Test
+    public void testRemoveAll_recognisedSetArgumentKeepsItsMembershipRule() {
+        final TreeSet<String> caseInsensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitive.add("A");
+        final ArrayDeque<String> deque = new ArrayDeque<>(Arrays.asList("a", "A", "b"));
+        assertTrue(N.removeAll(deque, caseInsensitive));
+        assertEquals(Arrays.asList("b"), new ArrayList<>(deque));
+        final List<String> letters = new ArrayList<>(Arrays.asList("a", "A", "b"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(letters, String::new), caseInsensitive));
+        assertEquals(Arrays.asList("b"), letters);
+
+        final String s1 = new String("s");
+        final String s2 = new String("s");
+        final IdentityHashSet<String> onlyS1 = new IdentityHashSet<>();
+        onlyS1.add(s1);
+        final ArrayDeque<String> identities = new ArrayDeque<>(Arrays.asList(s1, s2, s1));
+        assertTrue(N.removeAll(identities, onlyS1));
+        assertEquals(1, identities.size());
+        assertSame(s2, identities.peekFirst());
+        // a view that never hands out the same instance twice holds no identity match
+        final List<String> backing = new ArrayList<>(Arrays.asList("s", "t"));
+        final IdentityHashSet<String> anyS = new IdentityHashSet<>();
+        anyS.add("s");
+        assertFalse(N.removeAll(com.google.common.collect.Collections2.transform(backing, String::new), anyS));
+        assertEquals(Arrays.asList("s", "t"), backing);
+    }
+
+    // Unrecognised Set arguments (a subclass overriding contains, an identity set from Collections.newSetFromMap, Set.of, a key-set
+    // view) keep the previous identity-based removal: correct for receivers that hand out the same instances.
+    @Test
+    public void testRemoveAll_unrecognisedSetArgumentKeepsPreviousBehavior() {
+        final Set<Integer> evensOnly = new HashSet<>(Arrays.asList(1, 2, 3, 4)) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean contains(final Object o) {
+                return o instanceof Integer && ((Integer) o) % 2 == 0;
+            }
+        };
+        final ArrayDeque<Integer> numbers = new ArrayDeque<>(Arrays.asList(1, 2, 3, 4, 6));
+        assertTrue(N.removeAll(numbers, evensOnly));
+        assertEquals(Arrays.asList(1, 3), new ArrayList<>(numbers));
+
+        final String s1 = new String("s");
+        final String s2 = new String("s");
+        final Set<String> identity = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        identity.add(s1);
+        final ArrayDeque<String> strings = new ArrayDeque<>(Arrays.asList(s1, s2, s1));
+        assertTrue(N.removeAll(strings, identity));
+        assertEquals(1, strings.size());
+        assertSame(s2, strings.peekFirst());
+
+        final ArrayDeque<String> fromSetOf = new ArrayDeque<>(Arrays.asList("x", "y", "z"));
+        assertTrue(N.removeAll(fromSetOf, Set.of("x", "z")));
+        assertEquals(Arrays.asList("y"), new ArrayList<>(fromSetOf));
+
+        final Map<String, Integer> keys = new HashMap<>(Map.of("p", 1, "q", 2));
+        final ArrayDeque<String> fromKeySet = new ArrayDeque<>(Arrays.asList("p", "r", "q"));
+        assertTrue(N.removeAll(fromKeySet, keys.keySet()));
+        assertEquals(Arrays.asList("r"), new ArrayList<>(fromKeySet));
+
+        // the argument is a live view of the receiver (a Multiset's element set): read completely before anything is removed
+        final Multiset<String> ms = Multiset.of("a", "a", "b");
+        assertTrue(N.removeAll(ms, ms.elementSet()));
+        assertTrue(ms.isEmpty(), ms.toString());
+    }
+
+    // Duplicates, nulls, no match, and an unmodifiable receiver with no match (its UnsupportedOperationException is preserved).
+    @Test
+    public void testRemoveAll_recognisedSetArgumentEdgeCases() {
+        final ArrayDeque<String> duplicates = new ArrayDeque<>(Arrays.asList("x", "x", "y", "x"));
+        assertTrue(N.removeAll(duplicates, new HashSet<>(Arrays.asList("x"))));
+        assertEquals(Arrays.asList("y"), new ArrayList<>(duplicates));
+
+        final List<String> withNulls = new ArrayList<>(Arrays.asList("a", null, "b", null));
+        final Collection<String> nonList = new java.util.AbstractCollection<>() {
+            @Override
+            public Iterator<String> iterator() {
+                return withNulls.iterator();
+            }
+
+            @Override
+            public int size() {
+                return withNulls.size();
+            }
+        };
+        assertTrue(N.removeAll(nonList, new HashSet<>(Arrays.asList((String) null, "b"))));
+        assertEquals(Arrays.asList("a"), withNulls);
+
+        final ArrayDeque<String> noMatch = new ArrayDeque<>(Arrays.asList("a", "b"));
+        assertFalse(N.removeAll(noMatch, new HashSet<>(Arrays.asList("z"))));
+        assertEquals(Arrays.asList("a", "b"), new ArrayList<>(noMatch));
+
+        final Collection<String> unmodifiable = Collections.unmodifiableCollection(new ArrayDeque<>(Arrays.asList("a", "b")));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, new HashSet<>(Arrays.asList("z"))));
+    }
+
+    private static final class RemoveAllCountingKey {
+        static int argumentHashCodes;
+
+        final int value;
+        final boolean argument;
+
+        RemoveAllCountingKey(final int value, final boolean argument) {
+            this.value = value;
+            this.argument = argument;
+        }
+
+        @Override
+        public int hashCode() {
+            if (argument) {
+                argumentHashCodes++;
+            }
+
+            return value;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof RemoveAllCountingKey && ((RemoveAllCountingKey) obj).value == value;
+        }
+    }
+
+    // A large recognised argument is probed, never copied: copying a HashSet would hash every one of its elements.
+    @Test
+    public void testRemoveAll_largeRecognisedSetArgumentIsNotCopied() {
+        final Set<RemoveAllCountingKey> large = new HashSet<>();
+
+        for (int i = 0; i < 100_000; i++) {
+            large.add(new RemoveAllCountingKey(i, true));
+        }
+
+        final ArrayDeque<RemoveAllCountingKey> small = new ArrayDeque<>(
+                Arrays.asList(new RemoveAllCountingKey(5, false), new RemoveAllCountingKey(-1, false), new RemoveAllCountingKey(99_999, false)));
+        RemoveAllCountingKey.argumentHashCodes = 0;
+
+        assertTrue(N.removeAll(small, large));
+
+        assertEquals(1, small.size());
+        assertEquals(-1, small.peekFirst().value);
+        assertEquals(0, RemoveAllCountingKey.argumentHashCodes);
+    }
+    // ---- bug review 2026-10-02 removeAll rework end ----
+
+    // ---- bug review 2026-10-02 final G133 begin ----
+    // removeAll rework: a re-creating view whose matches are partly cached (same instance) and partly not loses exactly its matches
+    // for each recognised value-rule class, including the comparator-copying path (reverse-order TreeSet/ConcurrentSkipListSet)
+    @Test
+    public void testRemoveAll_recreatingViewMixedHitsEachRecognisedClass() {
+        final List<Integer> values = Arrays.asList(1, 1000, 2000);
+        final TreeSet<Integer> reversedTree = new TreeSet<>(Comparator.reverseOrder());
+        reversedTree.addAll(values);
+        final java.util.concurrent.ConcurrentSkipListSet<Integer> reversedSkipList = new java.util.concurrent.ConcurrentSkipListSet<>(
+                Comparator.reverseOrder());
+        reversedSkipList.addAll(values);
+        final List<Set<Integer>> arguments = Arrays.asList(new LinkedHashSet<>(values), new java.util.concurrent.ConcurrentSkipListSet<>(values), reversedTree,
+                reversedSkipList);
+
+        for (final Set<Integer> argument : arguments) {
+            final List<String> backing = new ArrayList<>(Arrays.asList("1", "1000", "5", "2000", "1"));
+            assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(backing, Integer::valueOf), argument), argument.getClass().getName());
+            assertEquals(Arrays.asList("5"), backing, argument.getClass().getName());
+        }
+
+        // identity rule: only the cached Integer 1 comes back as the same instance, so only it is a match
+        final IdentityHashSet<Integer> identity = new IdentityHashSet<>();
+        identity.addAll(values);
+        final List<String> identityBacking = new ArrayList<>(Arrays.asList("1", "1000", "5", "2000", "1"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(identityBacking, Integer::valueOf), identity));
+        assertEquals(Arrays.asList("1000", "5", "2000"), identityBacking);
+    }
+
+    // removeAll rework: a Multiset receiver (removeIf is evaluated once per distinct element) loses every occurrence of each match
+    // under the argument's rule, and keeps everything when nothing matches
+    @Test
+    public void testRemoveAll_multisetReceiverWithRecognisedSetArgument() {
+        final Multiset<String> byEquals = Multiset.of("a", "a", "b", "c");
+        assertTrue(N.removeAll(byEquals, new HashSet<>(Arrays.asList("a", "c"))));
+        assertEquals(0, byEquals.getCount("a"));
+        assertEquals(1, byEquals.getCount("b"));
+        assertEquals(0, byEquals.getCount("c"));
+
+        final Multiset<String> byComparator = Multiset.of("a", "A", "A", "b");
+        final TreeSet<String> caseInsensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitive.add("a");
+        assertTrue(N.removeAll(byComparator, caseInsensitive));
+        assertEquals(1, byComparator.size(), byComparator.toString());
+        assertEquals(1, byComparator.getCount("b"));
+
+        final Multiset<String> noMatch = Multiset.of("a", "a");
+        assertFalse(N.removeAll(noMatch, new HashSet<>(Arrays.asList("z"))));
+        assertEquals(2, noMatch.getCount("a"));
+    }
+
+    // removeAll rework: a recognised argument may share storage with the receiver (an exact TreeSet/ConcurrentSkipListSet sub-set view
+    // of the receiver's backing, or the backing itself); it is read completely before anything is removed, and a view's range holds
+    @Test
+    public void testRemoveAll_recognisedSetArgumentSharingTheReceiversBacking() {
+        final TreeSet<Integer> tree = new TreeSet<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
+        final java.util.SortedSet<Integer> subSet = tree.subSet(3, 7);
+        assertSame(TreeSet.class, subSet.getClass());
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.filter(tree, x -> x % 2 == 0), subSet));
+        assertEquals(Arrays.asList(1, 2, 3, 5, 7, 8), new ArrayList<>(tree));
+
+        final java.util.concurrent.ConcurrentSkipListSet<String> skipList = new java.util.concurrent.ConcurrentSkipListSet<>(
+                Arrays.asList("1", "1000", "2", "2000", "3"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(skipList, String::new), skipList.tailSet("2")));
+        assertEquals(Arrays.asList("1", "1000"), new ArrayList<>(skipList));
+
+        final HashSet<Integer> hashSet = new HashSet<>(Arrays.asList(1, 2, 3));
+        assertTrue(N.removeAll(Collections.synchronizedCollection(hashSet), hashSet));
+        assertTrue(hashSet.isEmpty());
+    }
+
+    // removeAll rework: the recorded matches use the sorted argument's own comparator - elements that are not Comparable at all are
+    // matched by it, on a plain receiver and on a view that creates new elements on every traversal
+    @Test
+    public void testRemoveAll_recognisedSortedSetArgumentKeepsItsComparator() {
+        final TreeSet<AtomicInteger> byValue = new TreeSet<>(Comparator.comparingInt(AtomicInteger::get));
+        byValue.add(new AtomicInteger(2));
+        final ArrayDeque<AtomicInteger> deque = new ArrayDeque<>(
+                Arrays.asList(new AtomicInteger(1), new AtomicInteger(2), new AtomicInteger(3), new AtomicInteger(2)));
+        assertTrue(N.removeAll(deque, byValue));
+        assertEquals(Arrays.asList(1, 3), deque.stream().map(AtomicInteger::get).collect(Collectors.toList()));
+
+        final java.util.concurrent.ConcurrentSkipListSet<AtomicInteger> skipList = new java.util.concurrent.ConcurrentSkipListSet<>(
+                Comparator.comparingInt(AtomicInteger::get));
+        skipList.add(new AtomicInteger(1000));
+        final List<String> backing = new ArrayList<>(Arrays.asList("1000", "7", "1000"));
+        assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(backing, s -> new AtomicInteger(Integer.parseInt(s))), skipList));
+        assertEquals(Arrays.asList("7"), backing);
+    }
+    // ---- bug review 2026-10-02 final G133 end ----
 }

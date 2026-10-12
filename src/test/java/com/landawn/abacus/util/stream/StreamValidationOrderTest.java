@@ -1,7 +1,7 @@
 package com.landawn.abacus.util.stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.function.TriFunction;
 
 class StreamValidationOrderTest extends TestBase {

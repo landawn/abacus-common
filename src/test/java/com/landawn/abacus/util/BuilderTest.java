@@ -19,6 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
@@ -36,13 +38,6 @@ import com.landawn.abacus.util.Builder.MapBuilder;
 import com.landawn.abacus.util.Builder.MultimapBuilder;
 import com.landawn.abacus.util.Builder.MultisetBuilder;
 import com.landawn.abacus.util.Builder.ShortListBuilder;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import com.landawn.abacus.util.Builder;
-import com.landawn.abacus.util.Dataset;
-import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Triple;
-import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.function.TriFunction;
 
 public class BuilderTest extends BuilderTestSupport {
@@ -201,7 +196,6 @@ public class BuilderTest extends BuilderTestSupport {
         assertEquals(Arrays.asList("name", "age", "x"), Builder.of(reviewFixes20260906Dataset()).addColumn("x", Arrays.asList(1, 2)).val().columnNames());
         assertEquals(Arrays.asList("name"), Builder.of(reviewFixes20260906Dataset()).removeColumn("age").val().columnNames());
     }
-
 
     @Test
     public void testDatasetBuilderRenameColumnNullOrEmptyNewNameThrowsIae() {

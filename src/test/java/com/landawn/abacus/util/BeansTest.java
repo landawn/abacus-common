@@ -732,4 +732,456 @@ public class BeansTest extends BeansTestSupport {
         }
     }
     // ---- bug review 2026-09-27 verify G120 end ----
+
+    // ---- bug review 2026-09-30 G020 begin ----
+    public enum G020MutableEnum {
+        RED, GREEN;
+
+        private String code;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(final String code) {
+            this.code = code;
+        }
+    }
+
+    public static class G020EnumHolder {
+        private String name;
+        private G020MutableEnum color;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G020MutableEnum getColor() {
+            return color;
+        }
+
+        public void setColor(final G020MutableEnum color) {
+            this.color = color;
+        }
+    }
+
+    // G020-01: an enum property whose enum declares a getter/setter pair (so isBeanClass accepts it) aborted the
+    // random fill with UnsupportedOperationException after earlier properties were written; documented: default value
+    @Test
+    public void testNewRandomBean_enumWithAccessorsGetsDefault() {
+        final G020EnumHolder bean = Beans.newRandomBean(G020EnumHolder.class);
+
+        assertNotNull(bean.getName());
+        assertNull(bean.getColor());
+
+        final G020EnumHolder existing = new G020EnumHolder();
+        existing.setColor(G020MutableEnum.GREEN);
+        Beans.randomize(existing);
+
+        assertNotNull(existing.getName());
+        assertNull(existing.getColor());
+    }
+    // ---- bug review 2026-09-30 G020 end ----
+
+    // ---- bug review 2026-09-30 verify G116 begin ----
+    public enum G116FieldEnum {
+        ONE, TWO;
+
+        public int counter;
+    }
+
+    public enum G116PlainEnum {
+        ONE, TWO
+    }
+
+    public static class G116EnumHolder {
+        private String name;
+        private G116FieldEnum fieldEnum;
+        private G116PlainEnum plainEnum;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G116FieldEnum getFieldEnum() {
+            return fieldEnum;
+        }
+
+        public void setFieldEnum(final G116FieldEnum fieldEnum) {
+            this.fieldEnum = fieldEnum;
+        }
+
+        public G116PlainEnum getPlainEnum() {
+            return plainEnum;
+        }
+
+        public void setPlainEnum(final G116PlainEnum plainEnum) {
+            this.plainEnum = plainEnum;
+        }
+    }
+
+    // G020-01: an enum that isBeanClass accepts through a public mutable field, next to a plain enum; both get the default value.
+    @Test
+    public void testRandomize_enumWithPublicFieldAndPlainEnumGetDefault() {
+        assertTrue(Beans.isBeanClass(G116FieldEnum.class));
+
+        final G116EnumHolder bean = new G116EnumHolder();
+        bean.setFieldEnum(G116FieldEnum.TWO);
+        bean.setPlainEnum(G116PlainEnum.TWO);
+        Beans.randomize(bean);
+
+        assertNotNull(bean.getName());
+        assertNull(bean.getFieldEnum());
+        assertNull(bean.getPlainEnum());
+    }
+    // ---- bug review 2026-09-30 verify G116 end ----
+
+    public static class ExceptionWithProperties extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        private String code;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(final String code) {
+            this.code = code;
+        }
+    }
+
+    @com.landawn.abacus.annotation.Entity
+    public static class EntityAnnotatedException extends ExceptionWithProperties {
+        private static final long serialVersionUID = 1L;
+    }
+
+    @com.landawn.abacus.annotation.Record
+    public static class RecordAnnotatedException extends ExceptionWithProperties {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class ErrorWithPublicField extends Error {
+        private static final long serialVersionUID = 1L;
+        public String code;
+    }
+
+    public static class RegisteredException extends ExceptionWithProperties {
+        private static final long serialVersionUID = 1L;
+    }
+
+    // Throwable subclasses stay outside the bean model, even with properties or bean annotations.
+    @Test
+    public void testThrowableClassesAreNotBeans() {
+        for (final Class<?> type : List.of(Throwable.class, Error.class, Exception.class, RuntimeException.class, java.io.IOException.class,
+                ExceptionWithProperties.class, EntityAnnotatedException.class, RecordAnnotatedException.class, ErrorWithPublicField.class)) {
+            assertFalse(Beans.isBeanClass(type), type.getName());
+            final String expected = "Not a bean class: " + type.getCanonicalName() + " - Throwable subclasses are never treated as beans";
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> Beans.getBeanInfo(type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkBeanClass(type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(type, "code")).getMessage());
+            assertThrowablePropertyModelExcluded(type);
+        }
+    }
+
+    private static void assertThrowablePropertyModelExcluded(final Class<?> type) {
+        assertTrue(Beans.getPropNameList(type).isEmpty(), type.getName());
+        assertTrue(Beans.getPropFields(type).isEmpty(), type.getName());
+        assertTrue(Beans.getPropGetters(type).isEmpty(), type.getName());
+        assertTrue(Beans.getPropSetters(type).isEmpty(), type.getName());
+
+        // Exact names previously escaped the non-bean check while aliases failed.
+        for (final String name : List.of("code", "CODE", "cause", "stackTrace", "registeredCode")) {
+            assertThrows(IllegalArgumentException.class, () -> Beans.getPropField(type, name), type.getName() + ": " + name);
+            assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(type, name), type.getName() + ": " + name);
+            assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(type, name), type.getName() + ": " + name);
+        }
+    }
+
+    @Test
+    public void testThrowableAccessorRegistrationCannotRestoreProperties() throws Exception {
+        assertThrowablePropertyModelExcluded(ExceptionWithProperties.class);
+        Beans.registerPropertyAccessor("registeredCode", ExceptionWithProperties.class.getMethod("getCode"));
+        Beans.registerPropertyAccessor("registeredCode", ExceptionWithProperties.class.getMethod("setCode", String.class));
+
+        // Rebuilding an existing model and discovering a subclass after registration must both remain empty.
+        assertThrowablePropertyModelExcluded(ExceptionWithProperties.class);
+        assertThrowablePropertyModelExcluded(RegisteredException.class);
+    }
+
+    @Test
+    public void testBeanOperationsRejectThrowableTargets() {
+        final ExceptionWithProperties exception = new ExceptionWithProperties();
+        exception.setCode("unchanged");
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.beanToMap(exception));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(Map.of("code", "new"), ExceptionWithProperties.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(Map.of("code", "new"), false, ExceptionWithProperties.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(Map.of("code", "new"), List.of("code"), ExceptionWithProperties.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBean(ExceptionWithProperties.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.newRandomBeanList(ExceptionWithProperties.class, 0));
+        assertThrows(IllegalArgumentException.class, () -> Beans.randomize(exception));
+        assertThrows(IllegalArgumentException.class, () -> Beans.clearAllProps(exception));
+        assertThrows(IllegalArgumentException.class, () -> Beans.clearProps(exception, "code"));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(exception, new ExceptionWithProperties()));
+        assertEquals("unchanged", exception.getCode());
+    }
+
+    public static class NoUsableConstructorBean {
+        private int code;
+
+        public NoUsableConstructorBean(final String ignored) {
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(final int code) {
+            this.code = code;
+        }
+    }
+
+    @Test
+    public void testNewRandomBeanRequiresUsableConstructor() {
+        assertTrue(Beans.isBeanClass(NoUsableConstructorBean.class));
+        assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBean(NoUsableConstructorBean.class));
+        assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBean(NoUsableConstructorBean.class, List.of("code")));
+        assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBeanList(NoUsableConstructorBean.class, 1));
+        assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBeanList(NoUsableConstructorBean.class, List.of("code"), 1));
+        assertTrue(Beans.newRandomBeanList(NoUsableConstructorBean.class, List.of("code"), 0).isEmpty());
+    }
+
+    public static class NestedCity {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class NestedAddress {
+        private NestedCity city;
+
+        public NestedCity getCity() {
+            return city;
+        }
+
+        public void setCity(final NestedCity city) {
+            this.city = city;
+        }
+    }
+
+    public static class AddressListHolder {
+        private List<NestedAddress> addresses;
+
+        public List<NestedAddress> getAddresses() {
+            return addresses;
+        }
+
+        public void setAddresses(final List<NestedAddress> addresses) {
+            this.addresses = addresses;
+        }
+    }
+
+    // Nested property writes traverse the first collection element and create missing intermediate beans.
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testSetPropValueAndClearProps_pathsThroughCollections() {
+        final AddressListHolder person = new AddressListHolder();
+        person.setAddresses(new java.util.ArrayList<>(List.of(new NestedAddress())));
+        Beans.setPropValue(person, "addresses.city.name", "Paris");
+        assertEquals("Paris", person.getAddresses().get(0).getCity().getName());
+        Beans.clearProps(person, "addresses.city.name");
+        assertNull(person.getAddresses().get(0).getCity().getName());
+
+        final AddressListHolder empty = new AddressListHolder();
+        empty.setAddresses(new java.util.ArrayList<>());
+        Beans.setPropValue(empty, "addresses.city.name", "Rome");
+        assertEquals("Rome", empty.getAddresses().get(0).getCity().getName());
+    }
+
+    public record NestedAddressRecord(String name, NestedAddress address) {
+    }
+
+    @Test
+    public void testMapToBeanNestedPathUsesPreviouslyAssignedRecordValue() {
+        final Map<String, Object> values = new java.util.LinkedHashMap<>();
+        values.put("address", new NestedAddress());
+        values.put("address.city.name", "Paris");
+        assertEquals("Paris", Beans.mapToBean(values, false, NestedAddressRecord.class).address().getCity().getName());
+    }
+
+    // ---- bug review 2026-10-02 G020 begin ----
+    // A concrete bean type with a getter/setter pair but no accessible no-arg constructor, builder or all-arguments constructor.
+    public static class G020UnbuildableMoney {
+        private long cents;
+
+        public G020UnbuildableMoney(final long cents, final String currency) {
+            this.cents = cents;
+        }
+
+        public long getCents() {
+            return cents;
+        }
+
+        public void setCents(final long cents) {
+            this.cents = cents;
+        }
+    }
+
+    public static class G020MoneyHolder {
+        private String name;
+        private G020UnbuildableMoney money;
+        private String tail;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G020UnbuildableMoney getMoney() {
+            return money;
+        }
+
+        public void setMoney(final G020UnbuildableMoney money) {
+            this.money = money;
+        }
+
+        public String getTail() {
+            return tail;
+        }
+
+        public void setTail(final String tail) {
+            this.tail = tail;
+        }
+    }
+
+    // G020-01: a nested bean property whose type cannot be instantiated gets its default (like an abstract bean type) instead of
+    // aborting newRandomBean/randomize with UnsupportedOperationException after the earlier properties were written.
+    @Test
+    public void testNewRandomBean_nestedUninstantiableBeanTypeGetsDefault() {
+        assertTrue(Beans.isBeanClass(G020UnbuildableMoney.class));
+
+        final G020MoneyHolder created = Beans.newRandomBean(G020MoneyHolder.class);
+        assertNotNull(created.getName());
+        assertNull(created.getMoney());
+        assertNotNull(created.getTail());
+
+        final List<G020MoneyHolder> list = Beans.newRandomBeanList(G020MoneyHolder.class, 2);
+        assertEquals(2, list.size());
+        assertNull(list.get(1).getMoney());
+        assertNotNull(list.get(1).getTail());
+
+        final G020MoneyHolder holder = new G020MoneyHolder();
+        holder.setTail("origTail");
+        holder.setMoney(new G020UnbuildableMoney(5, "USD"));
+        Beans.randomize(holder);
+        assertNotNull(holder.getName());
+        assertNull(holder.getMoney());
+        assertFalse("origTail".equals(holder.getTail()));
+
+        // the class itself still cannot be created: the documented top-level UnsupportedOperationException is unchanged
+        assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBean(G020UnbuildableMoney.class));
+    }
+    // ---- bug review 2026-10-02 G020 end ----
+
+    // ---- bug review 2026-10-02 verify G120 begin ----
+    public static final class G120VBuiltCity {
+        private final String name;
+
+        private G120VBuiltCity(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public G120VBuiltCity build() {
+                return new G120VBuiltCity(name);
+            }
+        }
+    }
+
+    public static class G120VMixedHolder {
+        private G020UnbuildableMoney money;
+        private NestedAddressRecord addressRecord;
+        private NestedAddress address;
+        private G120VBuiltCity builtCity;
+
+        public G020UnbuildableMoney getMoney() {
+            return money;
+        }
+
+        public void setMoney(final G020UnbuildableMoney money) {
+            this.money = money;
+        }
+
+        public NestedAddressRecord getAddressRecord() {
+            return addressRecord;
+        }
+
+        public void setAddressRecord(final NestedAddressRecord addressRecord) {
+            this.addressRecord = addressRecord;
+        }
+
+        public NestedAddress getAddress() {
+            return address;
+        }
+
+        public void setAddress(final NestedAddress address) {
+            this.address = address;
+        }
+
+        public G120VBuiltCity getBuiltCity() {
+            return builtCity;
+        }
+
+        public void setBuiltCity(final G120VBuiltCity builtCity) {
+            this.builtCity = builtCity;
+        }
+    }
+
+    // G120 verify of G020-01: next to an uninstantiable nested type (left null), instantiable nested types - a record, a mutable
+    // bean with its own nested bean, and a builder-based bean - are still created and filled in the same pass.
+    @Test
+    public void testNewRandomBean_nestedUninstantiableNextToInstantiableNestedTypes() {
+        final G120VMixedHolder holder = Beans.newRandomBean(G120VMixedHolder.class);
+
+        assertNull(holder.getMoney());
+        assertNotNull(holder.getAddressRecord());
+        assertNotNull(holder.getAddressRecord().name());
+        assertNotNull(holder.getAddressRecord().address().getCity().getName());
+        assertNotNull(holder.getAddress().getCity().getName());
+        assertNotNull(holder.getBuiltCity());
+        assertNotNull(holder.getBuiltCity().getName());
+    }
+    // ---- bug review 2026-10-02 verify G120 end ----
+
 }

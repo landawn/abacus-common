@@ -1029,6 +1029,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * in the same order indefinitely. All elements are stored in memory after the first
      * iteration to support subsequent repetitions of the stream.
      *
+     * <p>Closing the returned stream runs its close handlers. Cached elements can remain reachable through a
+     * retained stream or iterator after close; closing does not guarantee that the replay cache is cleared.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create an infinite cycling stream of numbers that repeats [1, 2, 3]
@@ -1066,8 +1069,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Returns a stream consisting of the elements of this stream, repeating for the specified number of rounds.
      *
      * <p>The returned stream contains all the elements of the original stream repeated
-     * for the specified number of rounds. All elements are stored in memory after the first
-     * iteration to support subsequent repetitions of the stream.
+     * for the specified number of rounds. For more than one round, iterator-backed implementations cache
+     * elements during the first pass for replay; array-backed implementations can reuse their source array.
+     * Zero rounds read no elements, and one round passes through without creating a replay cache.
+     *
+     * <p>Closing the returned stream runs its close handlers. Cached elements can remain reachable through a
+     * retained stream or iterator after close; closing does not guarantee that the replay cache is cleared.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1088,7 +1095,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * original count multiplied by the specified number of rounds. A zero round count produces
      * an empty stream even for an unbounded source.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily;
+     * {@link SequentialOnly always sequential}; retains elements for replay when more than one round is requested.
      *
      * @param rounds the number of times to repeat the elements of this stream; must be non-negative.
      *               A value of {@code 0} produces an empty stream.

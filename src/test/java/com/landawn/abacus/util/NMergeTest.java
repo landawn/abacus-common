@@ -118,24 +118,24 @@ public class NMergeTest extends NTestSupport {
      */
     @Test
     public void testMergeDatasetCollectionRejectsANullElementRegardlessOfSize() {
-        final Dataset ds = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList((Object) 1)));
+        final Dataset ds = CommonUtil.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList((Object) 1)));
 
         final List<Collection<Dataset>> inputs = Arrays.asList(Arrays.asList((Dataset) null), Arrays.asList(null, ds), Arrays.asList(ds, null),
                 Arrays.asList(ds, null, ds), Arrays.asList(ds, ds, ds, null));
 
         for (final Collection<Dataset> input : inputs) {
             for (final boolean requiresSameColumns : new boolean[] { false, true }) {
-                final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> N.merge(input, requiresSameColumns),
+                final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.merge(input, requiresSameColumns),
                         () -> "size " + input.size() + ", requiresSameColumns=" + requiresSameColumns);
 
                 assertTrue(e.getMessage().contains("datasets"), e.getMessage());
             }
 
-            assertThrows(IllegalArgumentException.class, () -> N.merge(input), () -> "size " + input.size());
+            assertThrows(IllegalArgumentException.class, () -> CommonUtil.merge(input), () -> "size " + input.size());
         }
 
         // A null or empty collection remains the documented no-op that returns an empty Dataset.
-        assertTrue(N.merge((Collection<Dataset>) null).isEmpty());
-        assertTrue(N.merge(Collections.<Dataset> emptyList()).isEmpty());
+        assertTrue(CommonUtil.merge((Collection<Dataset>) null).isEmpty());
+        assertTrue(CommonUtil.merge(Collections.<Dataset> emptyList()).isEmpty());
     }
 }

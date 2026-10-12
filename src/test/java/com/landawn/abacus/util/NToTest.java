@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.XmlSerConfig;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class NToTest extends NTestSupport {
 
@@ -162,7 +162,6 @@ public class NToTest extends NTestSupport {
         assertEquals(Collections.emptySet(), CommonUtil.toSet(new Integer[] {}));
         assertEquals(Collections.emptySet(), CommonUtil.toSet((Integer[]) null));
     }
-
 
     @Test
     public void testToJson_defaultSeparatorSpacing() throws IOException {

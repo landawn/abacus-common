@@ -545,7 +545,8 @@ public class MapsBeansTest extends TestBase {
                 assertTrue(Maps.getAsBoolean(m, key).orElse(false), "should be true: " + m.get(key));
             }
 
-            // Spellings a reader may expect to be true but are not - the reason the javadoc now enumerates.
+            // Spellings a reader may expect to be accepted but are not - the reason the javadoc enumerates. They are
+            // rejected, not read as false (code review 2026-10-05).
             final Map<String, Object> f = new HashMap<>();
             f.put("T", "T");
             f.put("yes", "yes");
@@ -553,19 +554,20 @@ public class MapsBeansTest extends TestBase {
             f.put("junk", "junk");
 
             for (final String key : new String[] { "T", "yes", "on", "junk" }) {
-                assertFalse(Maps.getAsBoolean(f, key).orElse(true), "should be false: " + f.get(key));
+                assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(f, key), "should be rejected: " + f.get(key));
             }
         }
 
         @Test
-        public void getAsWithBooleanClassCannotDistinguishPresentButNotABoolean() {
-            // Pins the corrected javadoc: getAs(map, key, Boolean.class) performs the very same conversion,
-            // so it is not the escape hatch the old note claimed it was.
+        public void getAsWithBooleanClassRejectsPresentButNotABoolean() {
+            // getAs(map, key, Boolean.class) performs the very same conversion as getAsBoolean. Text that is not a
+            // boolean is rejected by both (code review 2026-10-05), so "present but not a boolean" is no longer
+            // indistinguishable from "present and false".
             final Map<String, Object> m = new HashMap<>();
             m.put("junk", "junk");
 
-            assertEquals(Maps.getAsBoolean(m, "junk").orElse(true), Maps.getAs(m, "junk", Boolean.class).orElse(true));
-            assertFalse(Maps.getAs(m, "junk", Boolean.class).orElse(true));
+            assertThrows(IllegalArgumentException.class, () -> Maps.getAsBoolean(m, "junk"));
+            assertThrows(IllegalArgumentException.class, () -> Maps.getAs(m, "junk", Boolean.class));
 
             // The raw value is how you actually tell the two apart.
             assertEquals("junk", Maps.getIfExists(m, "junk").orElse(null));

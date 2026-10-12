@@ -661,6 +661,7 @@ public class SpinedBufferTest extends TestBase {
 
         return spine == null ? 0 : java.lang.reflect.Array.getLength(spine);
     }
+
     // ---- perf review 2026-09-26 G105 begin ----
     // G105-02: the default constructors read back the same elements, in order, for every size around the chunk boundaries
     @Test

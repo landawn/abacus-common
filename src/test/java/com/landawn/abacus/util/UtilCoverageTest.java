@@ -28,7 +28,6 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -439,11 +438,13 @@ public class UtilCoverageTest extends TestBase {
     public void testCommonUtilConvertStructured() {
         assertEquals(Integer.valueOf(123), CommonUtil.convert("123", Integer.class));
         assertEquals(0, CommonUtil.convert(null, int.class));
-        assertEquals(Boolean.TRUE, CommonUtil.convert(2, Boolean.class));
+        assertEquals(Boolean.TRUE, CommonUtil.convert(1, Boolean.class));
         assertEquals(Boolean.FALSE, CommonUtil.convert(0, Boolean.class));
+        // Only 1, 0 and -1 are boolean values (code review 2026-10-05).
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(2, Boolean.class));
         assertArrayEquals(new Integer[] { 1, 2 }, CommonUtil.convert(Arrays.asList("1", "2"), Integer[].class));
         @SuppressWarnings("unchecked")
-        final com.landawn.abacus.type.Type<Map<Integer, Integer>> mapType = (com.landawn.abacus.type.Type<Map<Integer, Integer>>) (com.landawn.abacus.type.Type<?>) N
+        final com.landawn.abacus.type.Type<Map<Integer, Integer>> mapType = (com.landawn.abacus.type.Type<Map<Integer, Integer>>) (com.landawn.abacus.type.Type<?>) CommonUtil
                 .typeOf("Map<Integer, Integer>");
         Map<Integer, Integer> converted = CommonUtil.convert(Map.of("1", "2"), mapType);
         assertEquals(2, converted.get(1));

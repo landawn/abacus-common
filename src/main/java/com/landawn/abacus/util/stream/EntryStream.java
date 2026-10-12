@@ -1248,6 +1248,9 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0, "b1"=1, "b2"=2} (entry order may vary)
      * }</pre>
      *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the entries it emitted during that call reach the result.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers the output emitted by each mapper invocation until that invocation returns.
      *
      * @param <KK> the type of keys in the resulting entries
@@ -2140,7 +2143,8 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> {
             final Stream<? extends KK> keys = keyMapper.apply(e.getKey());
-            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue())).onClose(keys::close);
+            // map(..) links the mapped stream to keys (closeHandlersForNewStream): closing it closes keys exactly once.
+            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
         };
 
         return flattMap(secondMapper);
@@ -2191,7 +2195,8 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> {
             final Stream<? extends KK> keys = keyMapper.apply(e.getKey(), e.getValue());
-            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue())).onClose(keys::close);
+            // map(..) links the mapped stream to keys (closeHandlersForNewStream): closing it closes keys exactly once.
+            return keys == null ? Stream.empty() : keys.<Map.Entry<KK, V>> map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
         };
 
         return flattMap(secondMapper);
@@ -2354,7 +2359,8 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> {
             final Stream<? extends VV> values = valueMapper.apply(e.getValue());
-            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv)).onClose(values::close);
+            // map(..) links the mapped stream to values (closeHandlersForNewStream): closing it closes values exactly once.
+            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
         };
 
         return flattMap(secondMapper);
@@ -2405,7 +2411,8 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> {
             final Stream<? extends VV> values = valueMapper.apply(e.getKey(), e.getValue());
-            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv)).onClose(values::close);
+            // map(..) links the mapped stream to values (closeHandlersForNewStream): closing it closes values exactly once.
+            return values == null ? Stream.empty() : values.<Map.Entry<K, VV>> map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
         };
 
         return flattMap(secondMapper);
@@ -3242,6 +3249,10 @@ public final class EntryStream<K, V> extends
      * <p>This is an intermediate operation that processes elements sequentially.
      * Adjacent elements are collapsed together when their keys satisfy the given predicate.</p>
      *
+     * <p>The collector's functions are obtained when this stage is created. If obtaining them throws,
+     * this stream is closed, and any distinct close failure is suppressed onto the original failure.
+     * Element mapping and accumulation remain lazy.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a1", 1, "a2", 2, "b1", 3, "b2", 4, "c1", 5)
@@ -3279,7 +3290,13 @@ public final class EntryStream<K, V> extends
 
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getKey(), u.getKey());
 
-        return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
+        try {
+            // Adapting the collector reads its functions before collapse can take ownership of the source.
+            return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
     }
 
     /**
@@ -3328,6 +3345,10 @@ public final class EntryStream<K, V> extends
      * <p>This is an intermediate operation that processes elements sequentially.
      * Adjacent elements are collapsed together when their values satisfy the given predicate.</p>
      *
+     * <p>The collector's functions are obtained when this stage is created. If obtaining them throws,
+     * this stream is closed, and any distinct close failure is suppressed onto the original failure.
+     * Element mapping and accumulation remain lazy.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntryStream.of("a", 1, "b", 1, "c", 2, "d", 2, "e", 3)
@@ -3365,7 +3386,13 @@ public final class EntryStream<K, V> extends
 
         final BiPredicate<? super Map.Entry<K, V>, ? super Map.Entry<K, V>> collapsible2 = (t, u) -> collapsible.test(t.getValue(), u.getValue());
 
-        return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
+        try {
+            // Adapting the collector reads its functions before collapse can take ownership of the source.
+            return _stream.collapse(collapsible2, Collectors.mapping(mapper, collector));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
+        }
     }
 
     /**
@@ -8794,8 +8821,14 @@ public final class EntryStream<K, V> extends
      * Returns an EntryStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier is memoized and invoked at most once. Closing the returned stream before traversal may still
-     * invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
+     * Closing the returned stream before traversal may still invoke the supplier so the supplied stream can be closed.
+     *
+     * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
+     * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
+     * not detected (see {@link Stream#defer(Supplier)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

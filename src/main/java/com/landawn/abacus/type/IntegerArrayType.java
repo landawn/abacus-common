@@ -108,6 +108,12 @@ public final class IntegerArrayType extends ObjectArrayType<Integer> {
             return N.EMPTY_INT_OBJ_ARRAY;
         }
 
+        final Integer[] decimalArray = (Integer[]) parseNumericArray(str, elementType, Integer.class);
+
+        if (decimalArray != null) {
+            return decimalArray;
+        }
+
         final String[] elements = split(str);
         final int len = elements.length;
         final Integer[] array = new Integer[len];

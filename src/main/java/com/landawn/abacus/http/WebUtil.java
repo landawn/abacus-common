@@ -157,12 +157,20 @@ public final class WebUtil {
             // boolean flags off the front so the exact/attached rules below see the option they were
             // written for. This runs only on tokens in option position: option VALUES are consumed
             // with tokens.get(++i) and never reach this point, so "-d '-sX'" stays a literal body.
-            while (token.length() > 2 && token.charAt(0) == '-' && token.charAt(1) != '-' && BOOLEAN_SHORT_OPTIONS.indexOf(token.charAt(1)) >= 0) {
-                if (token.charAt(1) == 'I') {
-                    hasHeadOption = true;
+            if (token.length() > 2 && token.charAt(0) == '-' && token.charAt(1) != '-') {
+                int optionIndex = 1;
+
+                while (optionIndex < token.length() - 1 && BOOLEAN_SHORT_OPTIONS.indexOf(token.charAt(optionIndex)) >= 0) {
+                    if (token.charAt(optionIndex) == 'I') {
+                        hasHeadOption = true;
+                    }
+
+                    optionIndex++;
                 }
 
-                token = "-" + token.substring(2);
+                if (optionIndex > 1) {
+                    token = "-" + token.substring(optionIndex);
+                }
             }
 
             if (Strings.equals(token, "-I") || Strings.equals(token, "--head")) {
@@ -282,6 +290,10 @@ public final class WebUtil {
                     }
 
                     addCapturedHeader(headers, headerName, Strings.EMPTY);
+
+                    if (HttpHeaders.Names.CONTENT_TYPE.equalsIgnoreCase(headerName)) {
+                        contentType = Strings.EMPTY;
+                    }
                 }
                 // Anything else (no ':' and no trailing ';') is dropped, as curl itself does.
             } else if (isDataOptionToken(token)) {
@@ -583,7 +595,8 @@ public final class WebUtil {
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't start with "curl",
      *         contains an unclosed quote, contains no URL or more than one URL, uses an unsupported option, a
      *         request/data/header option has a missing or unsupported argument, a header references a file
-     *         ({@code -H @file}) or has an empty name, or repeated headers cannot be combined.
+     *         ({@code -H @file}) or has an empty name, repeated headers cannot be combined, or a body carries
+     *         an explicitly empty Content-Type that HttpRequest cannot reproduce (use {@link #curlToOkHttpRequestCode(String)}).
      * @see #curlToOkHttpRequestCode(String)
      */
     public static String curlToHttpRequestCode(final String curl) throws IllegalArgumentException {
@@ -591,6 +604,10 @@ public final class WebUtil {
         final CurlCommand command = parseCurlCommand(curl);
         final HttpMethod httpMethod = command.httpMethod;
         final boolean attachBody = command.hasBody() && supportsHttpRequestBodyBuilder(httpMethod);
+
+        if (attachBody && Strings.EMPTY.equals(command.contentType)) {
+            throw new IllegalArgumentException("HttpRequest replaces an empty body Content-Type with a default; use curlToOkHttpRequestCode instead");
+        }
 
         final StringBuilder sb = new StringBuilder(IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -663,7 +680,8 @@ public final class WebUtil {
      * <ul>
      *   <li>Creates a {@code RequestBody} via {@code RequestBody.create(content, mediaType)} when a body is present</li>
      *   <li>Takes the {@code MediaType} from the {@code Content-Type} header, defaulting to
-     *       {@code application/x-www-form-urlencoded} — the type cURL itself applies to {@code -d} data</li>
+     *       {@code application/x-www-form-urlencoded} only when the header is absent. An explicitly empty header
+     *       ({@code -H 'Content-Type;'}) uses a {@code null} media type so OkHttp preserves the empty header.</li>
      *   <li>Attaches the body using {@code .body(requestBody)} and invokes the HTTP method with no arguments (e.g. {@code .post()})</li>
      *   <li>Uses OkHttp-specific method calls ({@code .post()}, {@code .put()}, etc.)</li>
      * </ul>
@@ -713,15 +731,17 @@ public final class WebUtil {
             // cURL sends -d data as application/x-www-form-urlencoded unless told otherwise, so a
             // missing Content-Type header must not become a null MediaType. The argument order is
             // RequestBody.create(content, mediaType): the reverse order is deprecated in OkHttp 4.
-            final String mediaType = Strings.isEmpty(command.contentType) ? HttpHeaders.Values.APPLICATION_URL_ENCODED : command.contentType;
+            final String mediaType = command.contentType == null ? HttpHeaders.Values.APPLICATION_URL_ENCODED : command.contentType;
 
-            sb.append("  RequestBody requestBody = RequestBody.create(\"")
-                    .append(escapeJava(command.body))
-                    .append("\", MediaType.parse(\"")
-                    .append(escapeJava(mediaType))
-                    .append("\"));")
-                    .append(IOUtil.LINE_SEPARATOR_UNIX)
-                    .append(IOUtil.LINE_SEPARATOR_UNIX);
+            sb.append("  RequestBody requestBody = RequestBody.create(\"").append(escapeJava(command.body)).append("\", ");
+            if (mediaType.isEmpty()) {
+                // A body media type makes OkHttp overwrite the explicitly empty header in BridgeInterceptor.
+                // A null media type leaves the captured Content-Type header intact on the wire.
+                sb.append("null");
+            } else {
+                sb.append("MediaType.parse(\"").append(escapeJava(mediaType)).append("\")");
+            }
+            sb.append(");").append(IOUtil.LINE_SEPARATOR_UNIX).append(IOUtil.LINE_SEPARATOR_UNIX);
         } else if (command.hasBody()) {
             sb.append("  // Request body omitted for ")
                     .append(httpMethod.name())
@@ -1115,6 +1135,11 @@ public final class WebUtil {
      *   <li>The command is formatted with line separators at the beginning and end</li>
      * </ul>
      *
+     * <p>A command that sends a body with an explicitly empty {@code Content-Type} ({@code -H 'Content-Type;'})
+     * converts back to Java code only through {@link #curlToOkHttpRequestCode(String)}:
+     * {@link #curlToHttpRequestCode(String)} rejects it because {@code HttpRequest} replaces an empty body
+     * Content-Type with a default, so the generated code would send a different request.</p>
+     *
      * <p>Quoting targets POSIX-compatible shells. Both quote modes preserve literal values;
      * double-quote mode escapes dollar signs and backticks to prevent variable and command
      * expansion. The generated quoting is not intended for Windows cmd.exe or PowerShell.</p>
@@ -1163,6 +1188,8 @@ public final class WebUtil {
     /**
      * String-based counterpart used by the OkHttp interceptor, whose request model permits
      * extension methods (for example, {@code PROPFIND}) that are not members of {@link HttpMethod}.
+     * Method names containing shell-sensitive characters are quoted and escaped using {@code quoteChar};
+     * ordinary alphanumeric method names retain their unquoted spelling.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is null or empty, {@code quoteChar} is neither a single nor a double
      *         quote, or a header name is {@code null}
      * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
@@ -1190,7 +1217,25 @@ public final class WebUtil {
             if (HttpMethod.HEAD.name().equalsIgnoreCase(httpMethod) && Strings.isEmpty(body)) {
                 sb.append("curl -I ");
             } else {
-                sb.append("curl -X ").append(httpMethod).append(" ");
+                // HTTP tokens may contain shell operators, wildcards, dollars and backticks. Extension
+                // methods must be escaped as arguments too, otherwise pasting the logged command can
+                // expand the method or execute shell syntax. Keep ordinary methods' existing output.
+                boolean shellSafeMethod = true;
+                for (int i = 0; i < httpMethod.length(); i++) {
+                    final char c = httpMethod.charAt(i);
+                    if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.')) {
+                        shellSafeMethod = false;
+                        break;
+                    }
+                }
+
+                sb.append("curl -X ");
+                if (shellSafeMethod) {
+                    sb.append(httpMethod);
+                } else {
+                    sb.append(quoteChar).append(escapeForShellQuote(httpMethod, quoteChar)).append(quoteChar);
+                }
+                sb.append(' ');
             }
 
             // Shell quoting does not disable cURL's own expansion of braces and bracket ranges.

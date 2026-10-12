@@ -26,7 +26,12 @@ import com.landawn.abacus.util.N;
  *
  * <p>Retrieval is performed via {@link java.sql.ResultSet#getObject(int)}, and non-Boolean
  * database values (e.g. numeric types or strings) are automatically converted to {@code Boolean}
- * using {@link com.landawn.abacus.util.N#convert(Object, Class)}.</p>
+ * using {@link com.landawn.abacus.util.N#convert(Object, Class)}: an {@code Integer}, {@code Short} or {@code Byte}
+ * {@code 1} and the texts {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} (any case) are {@code true}; an
+ * {@code Integer}, {@code Short} or {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"},
+ * {@code "n"}, {@code "N"} and {@code "false"} (any case) are {@code false}; any other value is rejected - including a
+ * number of any other class, such as the {@code Long} of a {@code BIGINT} column or the {@code BigDecimal} of a
+ * {@code NUMERIC} column.</p>
  *
  * <p>String serialization and JDBC write operations are inherited from
  * {@link AbstractBooleanType}. The SQL type used for {@code null} writes is
@@ -74,16 +79,22 @@ public final class BooleanType extends AbstractBooleanType {
      * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} at the specified column index.
      * The column value is read via {@link java.sql.ResultSet#getObject(int)}. If the result is
      * already a {@code Boolean} (or {@code null}), it is returned directly; otherwise it is
-     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}.
+     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}: an {@code Integer}, {@code Short} or
+     * {@code Byte} {@code 1} and the texts {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} are {@code true}; an
+     * {@code Integer}, {@code Short} or {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"},
+     * {@code "n"}, {@code "N"} and {@code "false"} are {@code false}. A {@code Long} or {@code BigDecimal} column value
+     * is rejected.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnIndex the 1-based index of the column containing the boolean value
      * @return the {@code Boolean} value at the specified column, or {@code null} if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column holds any other value, a number of any class other than
+     *         {@code Integer}, {@code Short} or {@code Byte} included (blank text reads as {@code false})
      */
     @Override
-    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
+    public Boolean get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, IllegalArgumentException {
         final Object result = rs.getObject(columnIndex);
 
         if (result == null || result instanceof Boolean) {
@@ -97,16 +108,22 @@ public final class BooleanType extends AbstractBooleanType {
      * Retrieves a {@link Boolean} from a {@link java.sql.ResultSet} using the specified column label.
      * The column value is read via {@link java.sql.ResultSet#getObject(String)}. If the result is
      * already a {@code Boolean} (or {@code null}), it is returned directly; otherwise it is
-     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}.
+     * converted using {@link com.landawn.abacus.util.N#convert(Object, Class)}: an {@code Integer}, {@code Short} or
+     * {@code Byte} {@code 1} and the texts {@code "1"}, {@code "y"}, {@code "Y"} and {@code "true"} are {@code true}; an
+     * {@code Integer}, {@code Short} or {@code Byte} {@code 0} or {@code -1} and the texts {@code "0"}, {@code "-1"},
+     * {@code "n"}, {@code "N"} and {@code "false"} are {@code false}. A {@code Long} or {@code BigDecimal} column value
+     * is rejected.
      *
      * @param rs the {@code ResultSet} to read from
      * @param columnName the column label as specified in the SQL AS clause, or the column name if no AS clause was used
      * @return the {@code Boolean} value in the specified column, or {@code null} if the column value is SQL NULL
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
+     * @throws IllegalArgumentException if the column holds any other value, a number of any class other than
+     *         {@code Integer}, {@code Short} or {@code Byte} included (blank text reads as {@code false})
      */
     @Override
-    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
+    public Boolean get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, IllegalArgumentException {
         final Object result = rs.getObject(columnName);
 
         if (result == null || result instanceof Boolean) {

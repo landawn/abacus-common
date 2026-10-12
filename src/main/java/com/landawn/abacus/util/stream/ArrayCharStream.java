@@ -33,7 +33,6 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharSummaryStatistics;
-import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
@@ -425,6 +424,12 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                // advance(n) is O(1) index arithmetic and runs no callbacks, so a downstream skip()/limit() may call it in bulk.
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0) {
                     return;
@@ -606,15 +611,35 @@ class ArrayCharStream extends AbstractCharStream {
         final CharIteratorEx iter = new CharIteratorEx() {
             private int cursor = fromIndex;
             private CharIterator cur = null;
-            private CharStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final CharStream s = mapper.apply(elements[cursor++]);
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -625,7 +650,7 @@ class ArrayCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -641,15 +666,15 @@ class ArrayCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() throws IllegalStateException {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -769,15 +794,35 @@ class ArrayCharStream extends AbstractCharStream {
         final IntIteratorEx iter = new IntIteratorEx() {
             private int cursor = fromIndex;
             private IntIterator cur = null;
-            private IntStream s = null;
+            private boolean hasMappedStream;
+            private final SequentialMappedStreamHolder mappedStream = new SequentialMappedStreamHolder();
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (mappedStream.isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final IntStream s = mapper.apply(elements[cursor++]);
+
+                        if (!mappedStream.adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -788,7 +833,7 @@ class ArrayCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -804,15 +849,15 @@ class ArrayCharStream extends AbstractCharStream {
 
             @Override
             public void closeResource() {
-                closeMappedStream();
+                mappedStream.close();
             }
 
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    mappedStream.release();
                 }
             }
         };
@@ -836,18 +881,37 @@ class ArrayCharStream extends AbstractCharStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final ObjIteratorEx<T> iter = new ObjIteratorEx<>() {
+        final ObjIteratorEx<T> iter = new SequentialFlatMapObjIterator<>() {
             private int cursor = fromIndex;
             private Iterator<? extends T> cur = null;
-            private Stream<? extends T> s = null;
+            private boolean hasMappedStream;
 
             @Override
             public boolean hasNext() {
-                while (cur == null || !cur.hasNext()) {
+                if (cur == null || !cur.hasNext()) {
+                    return advanceMapped();
+                }
+
+                return cur != null;
+            }
+
+            private boolean advanceMapped() {
+                do {
                     closeMappedStream();
 
+                    if (isClosed()) {
+                        break;
+                    }
+
                     if (cursor < toIndex) {
-                        s = mapper.apply(elements[cursor++]);
+                        final Stream<? extends T> s = mapper.apply(elements[cursor++]);
+
+                        if (!adoptOrClose(s)) {
+                            cur = null;
+                            break;
+                        }
+
+                        hasMappedStream = s != null;
 
                         if (s == null) {
                             cur = null;
@@ -858,7 +922,7 @@ class ArrayCharStream extends AbstractCharStream {
                         cur = null;
                         break;
                     }
-                }
+                } while (cur == null || !cur.hasNext());
 
                 return cur != null;
             }
@@ -872,17 +936,12 @@ class ArrayCharStream extends AbstractCharStream {
                 return cur.next();
             }
 
-            @Override
-            public void closeResource() {
-                closeMappedStream();
-            }
-
             private void closeMappedStream() {
-                if (s != null) {
-                    final Runnable closeAction = s::close;
-                    s = null;
-                    cur = null;
-                    closeAction.run();
+                cur = null;
+
+                if (hasMappedStream) {
+                    hasMappedStream = false;
+                    release();
                 }
             }
         };
@@ -2029,6 +2088,12 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             @Override
+            boolean supportsFailureAtomicAdvance() {
+                // advance(n) is O(1) index arithmetic and runs no callbacks, so a downstream skip()/limit() may call it in bulk.
+                return true;
+            }
+
+            @Override
             public void advance(final long n) {
                 if (n <= 0 || cursor >= toIndex) {
                     return;
@@ -2081,7 +2146,7 @@ class ArrayCharStream extends AbstractCharStream {
         checkArgNotNull(supplier, cs.supplier);
 
         if (fromIndex == toIndex) {
-            final Holder<CharStream> holder = new Holder<>();
+            final MappedStreamHolder holder = new MappedStreamHolder();
 
             return newStream(new CharIteratorEx() { //NOSONAR
                 private CharIteratorEx iter;
@@ -2132,14 +2197,17 @@ class ArrayCharStream extends AbstractCharStream {
                         final CharStream s = supplier.get();
                         try {
                             iter = s == null ? CharIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
-                            holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
                             closeOpenedSource(s, e);
                             throw e;
                         }
+
+                        if (!holder.adoptOrClose(s)) {
+                            iter = CharIteratorEx.empty();
+                        }
                     }
                 }
-            }, false).onClose(() -> close(holder));
+            }, false).onClose(holder::close);
         } else {
             return this;
         }

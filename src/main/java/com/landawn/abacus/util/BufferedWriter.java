@@ -77,6 +77,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     static final Writer DUMMY_WRITER = new DummyWriter();
 
+    private static final String DECIMAL_PAIRS = "0001020304050607080910111213141516171819202122232425262728293031323334353637383940414243444546474849"
+            + "5051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
+
     /**
      * The underlying writer to which buffered content is flushed, or {@code null}
      * when this writer operates in internal buffer mode.
@@ -109,6 +112,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * destination was last flushed through this writer.
      */
     private boolean destinationDirty = false;
+
+    // Shared by decimal and Unicode-escape output; bounded even when this writer is pooled.
+    private char[] scalarBuffer;
 
     /**
      * Indicates whether this writer has been closed.
@@ -216,7 +222,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final short s) throws IOException {
-        write(N.stringOf(s));
+        writeInt(s);
     }
 
     /**
@@ -246,7 +252,39 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void writeInt(final int i) throws IOException {
-        write(N.stringOf(i));
+        if (i > N.intStringCacheLow && i < N.intStringCacheHigh) {
+            write(N.intStringCache[i - N.intStringCacheLow]);
+        } else {
+            writeUncachedInt(i);
+        }
+    }
+
+    private void writeUncachedInt(final int i) throws IOException {
+        ensureOpen();
+        final char[] chars = scalarBuffer();
+        int offset = chars.length;
+        // Accumulate negatively so MIN_VALUE does not need a special case or overflow.
+        int remaining = i > 0 ? -i : i;
+
+        while (remaining <= -100) {
+            final int quotient = remaining / 100;
+            final int pair = (quotient * 100 - remaining) * 2;
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair + 1);
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair);
+            remaining = quotient;
+        }
+
+        chars[--offset] = (char) ('0' - remaining % 10);
+
+        if (remaining <= -10) {
+            chars[--offset] = (char) ('0' - remaining / 10);
+        }
+
+        if (i < 0) {
+            chars[--offset] = '-';
+        }
+
+        writeScalar(chars, offset, chars.length - offset);
     }
 
     /**
@@ -261,7 +299,65 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     public void write(final long lng) throws IOException {
-        write(N.stringOf(lng));
+        if (lng > N.intStringCacheLow && lng < N.intStringCacheHigh) {
+            write(N.intStringCache[(int) (lng - N.intStringCacheLow)]);
+        } else {
+            writeUncachedLong(lng);
+        }
+    }
+
+    private void writeUncachedLong(final long lng) throws IOException {
+        ensureOpen();
+        final char[] chars = scalarBuffer();
+        int offset = chars.length;
+        long remaining = lng > 0 ? -lng : lng;
+
+        while (remaining < Integer.MIN_VALUE) {
+            final long quotient = remaining / 100;
+            final int pair = (int) (quotient * 100 - remaining) * 2;
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair + 1);
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair);
+            remaining = quotient;
+        }
+
+        int intRemaining = (int) remaining;
+        while (intRemaining <= -100) {
+            final int quotient = intRemaining / 100;
+            final int pair = (quotient * 100 - intRemaining) * 2;
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair + 1);
+            chars[--offset] = DECIMAL_PAIRS.charAt(pair);
+            intRemaining = quotient;
+        }
+
+        chars[--offset] = (char) ('0' - intRemaining % 10);
+
+        if (intRemaining <= -10) {
+            chars[--offset] = (char) ('0' - intRemaining / 10);
+        }
+
+        if (lng < 0) {
+            chars[--offset] = '-';
+        }
+
+        writeScalar(chars, offset, chars.length - offset);
+    }
+
+    final char[] scalarBuffer() {
+        if (scalarBuffer == null) {
+            scalarBuffer = new char[20]; // Long.MIN_VALUE, including its sign.
+        }
+
+        return scalarBuffer;
+    }
+
+    final void writeScalar(final char[] chars, final int offset, final int length) throws IOException {
+        if (value == null && length > Objectory.BUFFER_SIZE - nextChar) {
+            // Keep the existing flush timing and String callback for a scalar that bypasses the buffer.
+            // In particular, never expose reusable scratch storage to an application-defined Writer.
+            write(new String(chars, offset, length));
+        } else {
+            write(chars, offset, length);
+        }
     }
 
     /**

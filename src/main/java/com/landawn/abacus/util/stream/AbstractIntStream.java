@@ -265,7 +265,52 @@ abstract class AbstractIntStream extends IntStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return flatMapToObj(t -> Stream.of(mapper.apply(t)));
+        if (isParallel()) {
+            return flatMapToObj(t -> Stream.of(mapper.apply(t)));
+        }
+
+        // Sequential: read each mapped array in place instead of wrapping it in a Stream and an iterator per element.
+        // Same source/mapper call sequence as flatMapToObj(t -> Stream.of(mapper.apply(t))), and the same close handlers.
+        final IntIteratorEx iter = iteratorEx();
+        final ObjIteratorEx<T> mappedIter = new ObjIteratorEx<>() {
+            private T[] cur = null;
+            private int len = 0;
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                while (idx >= len) {
+                    if (iter.hasNext()) {
+                        cur = mapper.apply(iter.nextInt());
+                        len = N.len(cur);
+                        idx = 0;
+                    } else {
+                        cur = null;
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            @Override
+            public T next() throws NoSuchElementException {
+                if (idx >= len && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return cur[idx++];
+            }
+
+            @Override
+            public void closeResource() {
+                cur = null;
+                len = 0;
+                idx = 0;
+            }
+        };
+
+        return newStream(mappedIter, false, null, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     @Override
@@ -274,15 +319,86 @@ abstract class AbstractIntStream extends IntStream {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final IntFunction<IntStream> secondMapper = t -> {
-            final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
+        if (isParallel()) {
+            final IntFunction<IntStream> secondMapper = t -> {
+                final SpinedBuffer.OfInt buffer = new SpinedBuffer.OfInt();
 
-            mapper.accept(t, buffer);
+                mapper.accept(t, buffer);
 
-            return IntStream.of(buffer.iterator());
+                return IntStream.of(buffer.iterator());
+            };
+
+            return flatMap(secondMapper);
+        }
+
+        final IntIteratorEx iter = iteratorEx();
+        final IntIteratorEx mappedIter = new IntIteratorEx() {
+            // The values emitted for one input element are buffer[cursor, size). A plain array, not a primitive list:
+            // stale primitive values retain nothing, so a reset forgets the size instead of zero-filling the slots.
+            private int[] buffer = N.EMPTY_INT_ARRAY;
+            private int size;
+            private final IntConsumer consumer = this::emit;
+            private int cursor;
+
+            private void emit(final int value) {
+                if (size == buffer.length) {
+                    buffer = growMapMultiBuffer(buffer);
+                }
+
+                buffer[size++] = value;
+            }
+
+            @Override
+            public boolean hasNext() {
+                if (cursor >= size) {
+                    resetBuffer();
+
+                    while (iter.hasNext()) {
+                        try {
+                            // Complete the mapper before exposing any of its output, as flatMap did.
+                            mapper.accept(iter.nextInt(), consumer);
+                        } catch (final Throwable e) { // NOSONAR: precise rethrow also cleans up a sneaky checked exception from the mapper.
+                            resetBuffer(); // A failed mapper must not expose its partially emitted values on retry.
+                            throw e;
+                        }
+
+                        if (size > 0) {
+                            break;
+                        }
+                    }
+                }
+
+                return cursor < size;
+            }
+
+            @Override
+            public int nextInt() throws NoSuchElementException {
+                if (cursor >= size && !hasNext()) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return buffer[cursor++];
+            }
+
+            private void resetBuffer() {
+                // Reuse ordinary fan-out buffers without retaining an exceptional large expansion for the whole pipeline.
+                if (size > MAX_BUFFERED_SIZE) {
+                    buffer = N.EMPTY_INT_ARRAY;
+                }
+
+                size = 0;
+                cursor = 0;
+            }
+
+            @Override
+            public void closeResource() {
+                buffer = N.EMPTY_INT_ARRAY;
+                size = 0;
+                cursor = 0;
+            }
         };
 
-        return flatMap(secondMapper);
+        return newStream(mappedIter, false, mergeCloseHandlers(mappedIter::closeResource, closeHandlers()));
     }
 
     @Override
@@ -1124,6 +1240,8 @@ abstract class AbstractIntStream extends IntStream {
         }), sorted);
     }
 
+    // Avoid wrappers or checks on each read solely to release a cycle's cache when it closes.
+    // Upstream close handlers still run; cached values follow normal iterator reachability.
     @Override
     public IntStream cycled() throws IllegalStateException {
         assertNotClosed();
@@ -1558,8 +1676,15 @@ abstract class AbstractIntStream extends IntStream {
         assertNotClosed();
 
         try {
-            @SuppressWarnings("resource")
-            final int[] a = sorted().toArray();
+            final int[] a = toArray();
+
+            if (!isSorted()) {
+                if (isParallel()) {
+                    N.parallelSort(a);
+                } else {
+                    N.sort(a);
+                }
+            }
 
             if (a.length == 0) {
                 return Optional.empty();
@@ -1579,8 +1704,15 @@ abstract class AbstractIntStream extends IntStream {
         assertNotClosed();
 
         try {
-            @SuppressWarnings("resource")
-            final int[] a = sorted().toArray();
+            final int[] a = toArray();
+
+            if (!isSorted()) {
+                if (isParallel()) {
+                    N.parallelSort(a);
+                } else {
+                    N.sort(a);
+                }
+            }
 
             if (N.isEmpty(a)) {
                 return Pair.of(new IntSummaryStatistics(), Optional.empty());

@@ -2374,7 +2374,7 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertEquals(1, Iterators.frequency(ObjIterator.of(new int[][] { sought }), sought));
 
         // the workaround the same paragraph recommends
-        assertEquals(1, Iterators.count(ObjIterator.of(new int[][] { { 1, 2 } }), value -> N.deepEquals(value, new int[] { 1, 2 })));
+        assertEquals(1, Iterators.count(ObjIterator.of(new int[][] { { 1, 2 } }), value -> CommonUtil.deepEquals(value, new int[] { 1, 2 })));
     }
 
     /**

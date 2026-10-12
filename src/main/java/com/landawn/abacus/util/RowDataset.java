@@ -253,8 +253,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private static final Type<Object> strType = Type.of(String.class);
 
-    private static char[] toQuotedJsonNameChars(final String name) throws UncheckedIOException {
-        final BufferedJsonWriter bw = Objectory.createBufferedJsonWriter();
+    private static char[] toQuotedJsonNameChars(final ExportScratch exportScratch, final String name) throws UncheckedIOException {
+        final CharacterWriter bw = exportScratch.emptyWriter();
 
         try {
             bw.write(SK._DOUBLE_QUOTE);
@@ -264,25 +264,93 @@ public final class RowDataset implements Dataset, Cloneable {
             return bw.toString().toCharArray();
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            Objectory.recycle(bw);
         }
+    }
+
+    /**
+     * Set once {@link #newXmlNameDocument()} has created a document in this JVM; see that method.
+     */
+    private static volatile boolean xmlNameDocumentCreated = false;
+
+    /**
+     * Returns the document that validates the element names of one toXml call, or {@code null} once a document has
+     * been created successfully in this JVM. Until then every call creates it up front, before any name is checked, so
+     * an environment whose XML document builder cannot be created still fails every toXml call at the same point and
+     * with the same exception, even when all names are plain (see {@link #checkXmlElementName(Document, String, String)}).
+     *
+     * @return a new document, or {@code null} once one has been created
+     * @throws RuntimeException if the XML document builder cannot be created
+     */
+    private static Document newXmlNameDocument() throws RuntimeException {
+        if (xmlNameDocumentCreated) {
+            return null;
+        }
+
+        final Document document = XmlUtil.createDOMParser().newDocument();
+        xmlNameDocumentCreated = true;
+
+        return document;
     }
 
     /**
      * Validates an XML element name using the document's namespace rules.
      *
-     * @param document the document used for name validation
+     * <p>A name accepted by {@link #isPlainXmlElementName(String)} is valid for every XML version and DOM
+     * implementation, so it needs no document. Every other name is checked by the DOM, and the document is
+     * created only when the first such name is met: building a {@code DocumentBuilder} and a {@code Document}
+     * per call cost more than the whole export of a small dataset.</p>
+     *
+     * @param document the document used for name validation, or {@code null} if none has been created yet
      * @param name the proposed element name
      * @param parameterName the parameter identified in a validation failure
+     * @return the document {@code name} was checked with, or {@code document} itself if no document was needed
      * @throws IllegalArgumentException if {@code name} is not a valid unqualified XML element name
      */
-    private static void checkXmlElementName(final Document document, final String name, final String parameterName) throws IllegalArgumentException {
+    private static Document checkXmlElementName(final Document document, final String name, final String parameterName) throws IllegalArgumentException {
+        if (isPlainXmlElementName(name)) {
+            return document;
+        }
+
+        final Document documentToUse = document == null ? XmlUtil.createDOMParser().newDocument() : document;
+
         try {
-            document.createElementNS(null, name);
+            documentToUse.createElementNS(null, name);
         } catch (final DOMException e) {
             throw new IllegalArgumentException("Invalid XML element name for " + parameterName + ": " + name, e);
         }
+
+        return documentToUse;
+    }
+
+    /**
+     * Returns {@code true} if {@code name} consists of ASCII letters, digits, {@code '_'}, {@code '-'} and
+     * {@code '.'}, starts with a letter or {@code '_'}, and does not start with {@code "xml"} in any case. Such a
+     * name is an unqualified element name under every XML version. Any other name, including the reserved
+     * {@code "xml"} prefix, returns {@code false} and is left to the DOM.
+     *
+     * @param name the proposed element name
+     * @return {@code true} if {@code name} is valid without consulting a DOM
+     */
+    private static boolean isPlainXmlElementName(final String name) {
+        final int length = name == null ? 0 : name.length();
+
+        if (length == 0 || !isAsciiXmlNameStartChar(name.charAt(0)) || (length >= 3 && name.regionMatches(true, 0, "xml", 0, 3))) {
+            return false;
+        }
+
+        for (int i = 1; i < length; i++) {
+            final char ch = name.charAt(i);
+
+            if (!(isAsciiXmlNameStartChar(ch) || (ch >= '0' && ch <= '9') || ch == '-' || ch == '.')) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean isAsciiXmlNameStartChar(final char ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
     }
 
     /**
@@ -473,8 +541,13 @@ public final class RowDataset implements Dataset, Cloneable {
             return new java.util.Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {
                 private Iterator<String> iter;
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NullPointerException if {@code action} is null, even when no element remains
+                 */
                 @Override
                 public boolean tryAdvance(final Consumer<? super String> action) {
+                    Objects.requireNonNull(action);
                     if (iter == null) {
                         iter = iterator();
                     }
@@ -1379,7 +1452,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (final List<Object> column : _columnList) {
             final List<Object> subList = column.subList(fromRowIndex, toRowIndex);
-            final List<Object> tmpList = new ArrayList<>(subList);
+            // One copy of the moved rows (see appendRows): new ArrayList<>(subList) copied them twice.
+            final List<Object> tmpList = Arrays.asList(subList.toArray());
 
             subList.clear();
 
@@ -3682,9 +3756,10 @@ public final class RowDataset implements Dataset, Cloneable {
         final Map<String, Object> properties = copyProperties(other.getProperties());
 
         // A source slice can share every destination column. Snapshot all columns before the first
-        // write, and never query the source after a write has invalidated that slice.
+        // write, and never query the source after a write has invalidated that slice. The toArray() copy
+        // is the snapshot; new ArrayList<>(column) copied each column twice.
         for (int i = 0; i < columnIndexes.length; i++) {
-            incoming.add(new ArrayList<>(other.getColumn(i)));
+            incoming.add(Arrays.asList(other.getColumn(i).toArray()));
         }
         for (int i = 0; i < columnIndexes.length; i++) {
             _columnList.get(columnIndexes[i]).addAll(rowPosition, incoming.get(i));
@@ -3781,8 +3856,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
         // Source and destination may overlap, including through a slice. Finish reading the source
         // before adding columns or rows; otherwise a failure can leave columns at different lengths.
+        // One toArray() copy per column is the snapshot (see appendRows).
         for (final String name : selectedNames) {
-            incoming.put(name, new ArrayList<>(other.getColumn(name).subList(fromRowIndexFromOther, toRowIndexFromOther)));
+            incoming.put(name, Arrays.asList(other.getColumn(name).subList(fromRowIndexFromOther, toRowIndexFromOther).toArray()));
         }
         for (final String name : selectedNames) {
             if (!result.containsColumn(name)) {
@@ -4153,7 +4229,8 @@ public final class RowDataset implements Dataset, Cloneable {
                     }
 
                     final Class<Object> propBeanClass = propBeanType.javaType();
-                    final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
+                    // Keep the nested property's resolved arguments: raw Box.class loses Box<Integer>'s value type.
+                    final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanType.reflectType());
                     final List<String> newTmpColumnNameList = new ArrayList<>();
                     final List<List<Object>> newTmpColumnList = new ArrayList<>();
 
@@ -5286,6 +5363,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+     * @implNote Newly created nested collections are populated before assignment because a setter or builder may copy them.
+     *         Merging appends directly to existing mutable collections, preserving their identity and initial contents.
      * @throws ConcurrentModificationException if this dataset is an invalidated slice
      * @throws IndexOutOfBoundsException if the requested row range is outside this dataset
      * @throws IllegalArgumentException if merging is requested without ID properties, a selected column is absent or
@@ -5429,7 +5508,8 @@ public final class RowDataset implements Dataset, Cloneable {
                 }
 
                 final Class<?> propBeanClass = propBeanType.javaType();
-                final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanClass);
+                // The declared bean or collection-element type carries arguments needed by each child property.
+                final BeanInfo propBeanInfo = ParserUtil.getBeanInfo(propBeanType.reflectType());
                 final List<String> propEntityIdPropNames = mergeResult ? propBeanInfo.idPropNameList : null;
                 final List<String> newPropEntityIdNames = mergeResult && N.isEmpty(propEntityIdPropNames) ? new ArrayList<>() : propEntityIdPropNames;
                 final List<String> newTmpColumnNameList = new ArrayList<>();
@@ -5468,6 +5548,10 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 if (propInfo.type.isCollection()) {
                     Collection<Object> c = null;
+                    // Keep newly allocated collections until every child is present: setters can copy or wrap their input,
+                    // and builders cannot be read through the finished bean's accessors. Existing mutable collections stay
+                    // attached to their beans and are appended directly. Parent identity also covers record intermediates.
+                    Map<Object, Collection<Object>> collectionsToAssign = null;
 
                     for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
                         if (resultEntities[i] == null || propValueList.get(i) == null || (allNullNestedRow != null && allNullNestedRow[i])) {
@@ -5478,11 +5562,27 @@ public final class RowDataset implements Dataset, Cloneable {
                         // holds, as documented there. Every other conversion replaces it, as getRow always did: appending
                         // put a pre-initialised field's default elements in front of the row's element (and failed on an
                         // immutable default), so toList(beanClass) and stream(beanClass).toList() disagreed.
-                        c = mergeResult ? propInfo.getPropValue(resultEntities[i]) : null;
+                        if (!mergeResult) {
+                            c = N.newCollection((Class) propInfo.clazz);
+                            c.add(propValueList.get(i));
+                            propInfo.setPropValue(resultEntities[i], c);
+                            continue;
+                        }
+
+                        final boolean isBuilder = beanInfo.isImmutable && !(resultEntities[i] instanceof Object[]);
+                        c = collectionsToAssign == null ? null : collectionsToAssign.get(resultEntities[i]);
+                        if (c == null && !isBuilder) {
+                            c = propInfo.getPropValue(resultEntities[i]);
+                        }
 
                         if (c == null) {
                             c = N.newCollection((Class) propInfo.clazz);
-                            propInfo.setPropValue(resultEntities[i], c);
+
+                            if (collectionsToAssign == null) {
+                                collectionsToAssign = new IdentityHashMap<>();
+                            }
+
+                            collectionsToAssign.put(resultEntities[i], c);
                         }
 
                         if (isToMerge && !(c instanceof Set)) {
@@ -5497,6 +5597,12 @@ public final class RowDataset implements Dataset, Cloneable {
                         }
 
                         c.add(propValueList.get(i));
+                    }
+
+                    if (collectionsToAssign != null) {
+                        for (final Map.Entry<Object, Collection<Object>> entry : collectionsToAssign.entrySet()) {
+                            propInfo.setPropValue(entry.getKey(), entry.getValue());
+                        }
                     }
                 } else {
                     for (int rowIndex = fromRowIndex, i = 0; rowIndex < toRowIndex; rowIndex++, i++) {
@@ -5914,19 +6020,10 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         } else if (valueType.isBean()) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
-            final boolean ignoreUnmatchedProperty = missingPropertyPolicy == MissingPropertyPolicy.IGNORE;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                final Object value = rowSupplierToUse.apply(valueColumnCount);
-                for (final int columnIndex : valueColumnIndexes) {
-                    final String propName = _columnNameList.get(columnIndex);
-                    final PropInfo propInfo = beanInfo.getPropInfo(propName);
-                    if (propInfo == null) {
-                        beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
-                    } else {
-                        setConvertedPropValue(propInfo, value, _columnList.get(columnIndex).get(rowIndex));
-                    }
-                }
+                // Use the row conversion path so nested records are constructed and nested collections replace defaults.
+                final Object value = getRow(rowIndex, valueColumnIndexes, valueColumnCount, null, beanInfo, rowClass, (Type<V>) valueType, rowSupplierToUse);
                 resultMap.put(_columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else {
@@ -6254,20 +6351,12 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         } else if (valueType.isBean()) {
             final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
-            final boolean ignoreUnmatchedProperty = missingPropertyPolicy == MissingPropertyPolicy.IGNORE;
 
             for (int rowIndex = fromRowIndex; rowIndex < toRowIndex; rowIndex++) {
-                final Object value = rowSupplierToUse.apply(valueColumnCount);
-                for (final int columnIndex : valueColumnIndexes) {
-                    final String propName = _columnNameList.get(columnIndex);
-                    final PropInfo propInfo = beanInfo.getPropInfo(propName);
-                    if (propInfo == null) {
-                        beanInfo.setPropValue(value, propName, _columnList.get(columnIndex).get(rowIndex), ignoreUnmatchedProperty);
-                    } else {
-                        setConvertedPropValue(propInfo, value, _columnList.get(columnIndex).get(rowIndex));
-                    }
-                }
-                resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), (T) value);
+                // Keep supplied roots while sharing the nested bean construction and collection replacement rules.
+                final T value = getRow(rowIndex, valueColumnIndexes, valueColumnCount, null, beanInfo, (Class<T>) rowClass, (Type<T>) valueType,
+                        rowSupplierToUse);
+                resultMap.put((K) _columnList.get(keyColumnIndex).get(rowIndex), value);
             }
         } else {
             throw new IllegalArgumentException(
@@ -6405,7 +6494,8 @@ public final class RowDataset implements Dataset, Cloneable {
             if (!isXmlCharacter(cp)) {
                 throw invalidExportValue(false, row, column);
             }
-            if (serialized) {
+            // Every marker tested below starts with one of these four characters: skip the prefix tests for other text.
+            if (serialized && (cp == '<' || cp == ']' || cp == '-' || cp == '&')) {
                 if (text.startsWith("<![CDATA[", i) || text.startsWith("<!--", i)) {
                     literal = true;
                 } else if (text.startsWith("]]>", i) || text.startsWith("-->", i)) {
@@ -6441,8 +6531,59 @@ public final class RowDataset implements Dataset, Cloneable {
         }
     }
 
-    private static void writeExportValue(final CharacterWriter output, final Object value, final Type<Object> type, final boolean json, final int row,
-            final String column) throws IOException {
+    /**
+     * The scratch writer of one export call. A non-simple cell is serialized into it, validated, and only then
+     * copied to the output. One pooled writer serves every such cell of the call and is emptied in place between
+     * cells: taking a writer from the pool and recycling it again for each cell zero-filled a whole pool buffer
+     * per cell.
+     */
+    private static final class ExportScratch {
+        private final boolean json;
+        private CharacterWriter writer;
+
+        ExportScratch(final boolean json) {
+            this.json = json;
+        }
+
+        /**
+         * Returns an empty scratch writer: the current one, emptied, while it still has a pool-sized buffer;
+         * otherwise (first use, closed by a serializer, or grown by a large cell) a new pooled writer.
+         *
+         * @return the scratch writer, holding no characters
+         */
+        CharacterWriter emptyWriter() {
+            if (writer != null && writer.value != null && writer.value.length <= Objectory.BUFFER_SIZE) {
+                // An internal-buffer writer holds its text in value[0, count); toString() reads nothing beyond count.
+                writer.count = 0;
+                return writer;
+            }
+
+            recycle();
+            writer = json ? Objectory.createBufferedJsonWriter() : Objectory.createBufferedXmlWriter();
+            return writer;
+        }
+
+        /**
+         * Discards the current scratch writer, whatever state a failed serializer left it in, and returns a new one.
+         *
+         * @return a new, empty scratch writer
+         */
+        CharacterWriter newWriter() {
+            recycle();
+            return emptyWriter();
+        }
+
+        void recycle() {
+            if (writer != null) {
+                final CharacterWriter toRecycle = writer;
+                writer = null;
+                recycleExportWriter(toRecycle);
+            }
+        }
+    }
+
+    private static void writeExportValue(final CharacterWriter output, final ExportScratch exportScratch, final Object value, final Type<Object> type,
+            final boolean json, final int row, final String column) throws IOException {
         if (value == null) {
             output.write(NULL_CHAR_ARRAY);
             return;
@@ -6458,35 +6599,31 @@ public final class RowDataset implements Dataset, Cloneable {
             return;
         }
 
-        CharacterWriter scratch = json ? Objectory.createBufferedJsonWriter() : Objectory.createBufferedXmlWriter();
-        try {
-            if (type.isSerializable()) {
-                type.serializeTo(scratch, value, json ? jsc : xsc);
-            } else {
-                try {
-                    if (json) {
-                        jsonParser.serialize(value, jsc, scratch);
-                    } else {
-                        xmlParser.serialize(value, xsc, scratch);
-                    }
-                } catch (final Exception e) { // A parser failure retains the documented string fallback.
-                    recycleExportWriter(scratch);
-                    scratch = json ? Objectory.createBufferedJsonWriter() : Objectory.createBufferedXmlWriter();
-                    strType.serializeTo(scratch, N.toString(value), json ? jsc : xsc);
+        CharacterWriter scratch = exportScratch.emptyWriter();
+
+        if (type.isSerializable()) {
+            type.serializeTo(scratch, value, json ? jsc : xsc);
+        } else {
+            try {
+                if (json) {
+                    jsonParser.serialize(value, jsc, scratch);
+                } else {
+                    xmlParser.serialize(value, xsc, scratch);
                 }
+            } catch (final Exception e) { // A parser failure retains the documented string fallback.
+                scratch = exportScratch.newWriter();
+                strType.serializeTo(scratch, N.toString(value), json ? jsc : xsc);
             }
-            // Check completed output, including nested arrays/beans and XML numeric references. Validation
-            // stays outside the fallback catch: malformed values must fail, not silently become strings.
-            final String text = scratch.toString();
-            if (json) {
-                checkJsonNumbers(text, row, column);
-            } else {
-                checkXmlCharacters(text, true, row, column);
-            }
-            output.write(text);
-        } finally {
-            recycleExportWriter(scratch);
         }
+        // Check completed output, including nested arrays/beans and XML numeric references. Validation
+        // stays outside the fallback catch: malformed values must fail, not silently become strings.
+        final String text = scratch.toString();
+        if (json) {
+            checkJsonNumbers(text, row, column);
+        } else {
+            checkXmlCharacters(text, true, row, column);
+        }
+        output.write(text);
     }
 
     private static void recycleExportWriter(final CharacterWriter writer) {
@@ -6686,16 +6823,17 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgNotNull(output, cs.output);
         final int columnCount = columnIndexes.length;
 
-        final char[][] charArrayOfColumnNames = new char[columnCount][];
-
-        for (int i = 0; i < columnCount; i++) {
-            charArrayOfColumnNames[i] = toQuotedJsonNameChars(_columnNameList.get(columnIndexes[i]));
-        }
-
         final boolean isBufferedWriter = output instanceof BufferedJsonWriter;
         final BufferedJsonWriter bw = isBufferedWriter ? (BufferedJsonWriter) output : Objectory.createBufferedJsonWriter(output);
+        final ExportScratch exportScratch = new ExportScratch(true);
 
         try {
+            final char[][] charArrayOfColumnNames = new char[columnCount][];
+
+            for (int i = 0; i < columnCount; i++) {
+                charArrayOfColumnNames[i] = toQuotedJsonNameChars(exportScratch, _columnNameList.get(columnIndexes[i]));
+            }
+
             bw.write(SK._BRACKET_L);
 
             Type<Object> type = null;
@@ -6720,7 +6858,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     bw.write(charArrayOfColumnNames[i]);
                     bw.write(SK._COLON);
 
-                    writeExportValue(bw, element, type, true, rowIndex, _columnNameList.get(columnIndexes[i]));
+                    writeExportValue(bw, exportScratch, element, type, true, rowIndex, _columnNameList.get(columnIndexes[i]));
                 }
 
                 bw.write(SK._BRACE_R);
@@ -6732,6 +6870,8 @@ public final class RowDataset implements Dataset, Cloneable {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
+            exportScratch.recycle();
+
             if (!isBufferedWriter) {
                 Objectory.recycle(bw);
             }
@@ -6904,11 +7044,10 @@ public final class RowDataset implements Dataset, Cloneable {
             checkColumnNames(columnNames);
         }
         N.checkArgNotEmpty(rowElementName, cs.rowElementName);
-        final Document document = XmlUtil.createDOMParser().newDocument();
-        checkXmlElementName(document, rowElementName, cs.rowElementName);
+        Document document = checkXmlElementName(newXmlNameDocument(), rowElementName, cs.rowElementName);
         if (columnNames != null) {
             for (final String name : columnNames) {
-                checkXmlElementName(document, name, cs.columnName);
+                document = checkXmlElementName(document, name, cs.columnName);
             }
         }
         writeExportFile(output, writer -> toXml(fromRowIndex, toRowIndex, columnNames, rowElementName, writer));
@@ -7086,8 +7225,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int[] columnIndexes = N.isEmpty(columnNames) ? N.EMPTY_INT_ARRAY : checkColumnNames(columnNames);
         N.checkArgNotEmpty(rowElementName, cs.rowElementName);
 
-        final Document document = XmlUtil.createDOMParser().newDocument();
-        checkXmlElementName(document, rowElementName, cs.rowElementName);
+        Document document = checkXmlElementName(newXmlNameDocument(), rowElementName, cs.rowElementName);
 
         if (N.isEmpty(columnNames)) {
             try {
@@ -7110,7 +7248,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
         for (int i = 0; i < columnCount; i++) {
             final String columnName = _columnNameList.get(columnIndexes[i]);
-            checkXmlElementName(document, columnName, cs.columnName);
+            document = checkXmlElementName(document, columnName, cs.columnName);
 
             charArrayOfColumnNames[i] = columnName.toCharArray();
         }
@@ -7118,6 +7256,7 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgNotNull(output, cs.output);
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
+        final ExportScratch exportScratch = new ExportScratch(false);
 
         try {
             bw.write(XmlConstants.DATASET_ELE_START);
@@ -7137,7 +7276,7 @@ public final class RowDataset implements Dataset, Cloneable {
                     bw.write(charArrayOfColumnNames[i]);
                     bw.write(SK._GREATER_THAN);
 
-                    writeExportValue(bw, element, type, false, rowIndex, _columnNameList.get(columnIndexes[i]));
+                    writeExportValue(bw, exportScratch, element, type, false, rowIndex, _columnNameList.get(columnIndexes[i]));
 
                     bw.write(SK._LESS_THAN);
                     bw.write(SK._SLASH);
@@ -7154,6 +7293,8 @@ public final class RowDataset implements Dataset, Cloneable {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
+            exportScratch.recycle();
+
             if (!isBufferedWriter) {
                 Objectory.recycle(bw);
             }
@@ -11827,7 +11968,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
             final List<Object>[] rightColumns = resolveColumns(right, rightColumnIndexes);
-            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
+            // Membership only, as in the single-key branch: one add() both tests and records a left key, where
+            // containsKey + put hashed every new key twice and boxed a row index that was never read.
+            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -11843,8 +11986,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, leftRowIndex, rightRowIndexList, rightColumns);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
-                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
+                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
                     row = null;
                 }
             }
@@ -11861,7 +12003,7 @@ public final class RowDataset implements Dataset, Cloneable {
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
             for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
+                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
                     unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
                 }
             }
@@ -12008,7 +12150,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
+            // Membership only (see fullJoin(Dataset, Map)): one add() per left row instead of containsKey + put.
+            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -12024,8 +12167,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
-                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
+                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
                     row = null;
                 }
             }
@@ -12042,7 +12184,7 @@ public final class RowDataset implements Dataset, Cloneable {
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
             for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
+                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
                     unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
                 }
             }
@@ -12174,7 +12316,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Map<Wrapper<Object[]>, Integer> joinColumnLeftRowIndexMap = new HashMap<>();
+            // Membership only (see fullJoin(Dataset, Map)): one add() per left row instead of containsKey + put.
+            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -12190,8 +12333,7 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (!joinColumnLeftRowIndexMap.containsKey(rowWrapper)) {
-                    joinColumnLeftRowIndexMap.put(rowWrapper, leftRowIndex);
+                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
                     row = null;
                 }
             }
@@ -12202,7 +12344,7 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexMap.containsKey(rightRowIndexEntry.getKey())) {
+                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
                     fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, rightRowIndexEntry.getValue());
                 }
             }
@@ -12712,7 +12854,9 @@ public final class RowDataset implements Dataset, Cloneable {
         N.checkArgNotNull(other, cs.other);
 
         final List<String> commonColumnNameList = new ArrayList<>(_columnNameList);
-        commonColumnNameList.retainAll(other.columnNames());
+        // A hash lookup in other's column index, not retainAll(other.columnNames()): that view has no indexed
+        // contains, so retainAll scanned other's names once per column of this Dataset (quadratic in the width).
+        commonColumnNameList.removeIf(columnName -> !other.containsColumn(columnName));
 
         if (N.isEmpty(commonColumnNameList) && (columnCount() != 0 || other.columnCount() != 0)) {
             throw new IllegalArgumentException("These two Datasets do not have any common column names: " + _columnNameList + ", " + other.columnNames());
@@ -12725,8 +12869,9 @@ public final class RowDataset implements Dataset, Cloneable {
      * @throws IllegalArgumentException if {@code requiresSameColumns} is true and {@code other} has a different set of column names
      */
     private void checkIfColumnNamesAreSame(final Dataset other, final boolean requiresSameColumns) throws IllegalArgumentException {
-        //noinspection SlowListContainsAll
-        if (requiresSameColumns && !(columnCount() == other.columnCount() && _columnNameList.containsAll(other.columnNames()))) {
+        // The key set of the column index answers each of other's names with one hash lookup; _columnNameList.containsAll
+        // scanned the name list once per name of other (quadratic in the width, on every append/prepend).
+        if (requiresSameColumns && !(columnCount() == other.columnCount() && columnIndexMap().keySet().containsAll(other.columnNames()))) {
             throw new IllegalArgumentException("These two Datasets do not have the same column names: " + _columnNameList + ", " + other.columnNames());
         }
     }

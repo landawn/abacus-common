@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
-import com.landawn.abacus.exception.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
 
 /**
  * Regression tests for the 2026-09-24 review of {@link Throwables} (C-054 .. C-058, T1-06, T1-08, T1-10).
@@ -230,8 +230,8 @@ public class ThrowablesReview20260924Test extends TestBase {
 
     @Test
     public void testCallWithSupplier_wrappedInterrupt_restoresFlag() {
-        assertEquals("s", Throwables.call(throwing(new InvocationTargetException(new InterruptedException())),
-                (java.util.function.Supplier<String>) () -> "s"));
+        assertEquals("s",
+                Throwables.call(throwing(new InvocationTargetException(new InterruptedException())), (java.util.function.Supplier<String>) () -> "s"));
         assertTrue(Thread.interrupted());
     }
 
@@ -256,8 +256,7 @@ public class ThrowablesReview20260924Test extends TestBase {
 
     @Test
     public void testCallPredicate_rejectingBranch_stillRestoresFlag() {
-        assertThrows(RuntimeException.class,
-                () -> Throwables.call(throwing(new InvocationTargetException(new InterruptedException())), e -> false, "d"));
+        assertThrows(RuntimeException.class, () -> Throwables.call(throwing(new InvocationTargetException(new InterruptedException())), e -> false, "d"));
         assertTrue(Thread.interrupted());
     }
 

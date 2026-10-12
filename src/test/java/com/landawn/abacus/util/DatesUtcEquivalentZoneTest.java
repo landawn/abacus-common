@@ -117,11 +117,11 @@ public class DatesUtcEquivalentZoneTest extends TestBase {
 
     private static TimeZone[] utcSpellings() {
         return new TimeZone[] { UTC, TimeZone.getTimeZone("GMT"), TimeZone.getTimeZone("Etc/UTC"), new SimpleTimeZone(0, "Any"), new SimpleTimeZone(0, "UTC"),
-                fixedOffsetSubclass(0, "Also/Any") };
+                new SimpleTimeZone(0, "America/New_York") };
     }
 
     // ---------------------------------------------------------------------------------------------
-    // B1 - UTC-equivalence is a property of the rules, not of the zone's class or ID
+    // B1 - verified fixed rules qualify regardless of ID; arbitrary subclass flags cannot prove them.
 
     @Test
     public void b1_fixedZoneConstants_acceptEveryUtcSpellingOnTheStaticEntryPoints() {
@@ -161,10 +161,10 @@ public class DatesUtcEquivalentZoneTest extends TestBase {
     }
 
     @Test
-    public void b1_fixedZoneConstants_stillRejectAZoneThatIsNotUtc() {
+    public void b1_fixedZoneConstants_rejectNonUtcOrUnverifiedRules() {
         final Date date = new Date(MODERN_SECONDS);
         final TimeZone[] notUtc = { NEW_YORK, new SimpleTimeZone(3_600_000, "PlusOne"), fixedOffsetSubclass(-3_600_000, "MinusOne"), customDstZone(),
-                TimeZone.getTimeZone("Europe/London") }; // London has a zero raw offset but observes daylight saving
+                TimeZone.getTimeZone("Europe/London"), fixedOffsetSubclass(0, "Also/Any"), fixedOffsetSubclass(0, "UTC") };
 
         for (final TimeZone zone : notUtc) {
             final String id = zone.getID();
@@ -188,10 +188,10 @@ public class DatesUtcEquivalentZoneTest extends TestBase {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // B2 - the Calendar civil-field comparisons compare rules, not classes
+    // B2 - Calendar civil-field comparisons compare verified rules and reject unverified custom zones.
 
     @Test
-    public void b2_calendarCivilComparisons_acceptEquivalentFixedZonesOfAnyClass() {
+    public void b2_calendarCivilComparisons_acceptVerifiedEquivalentFixedZones() {
         final Calendar utc = Dates.createCalendar(MODERN, UTC);
         final Calendar utcLater = Dates.createCalendar(MODERN + 7 * 86_400_000L, UTC); // 2025-01-22
         final Calendar simple = Dates.createCalendar(MODERN, new SimpleTimeZone(0, "Any"));
@@ -202,8 +202,9 @@ public class DatesUtcEquivalentZoneTest extends TestBase {
         assertTrue(Dates.isSameMonth(utc, simple));
         assertTrue(Dates.isSameYear(utc, simple));
         assertTrue(Dates.isSameDay(simple, utc));
-        assertTrue(Dates.isSameDay(simple, subclass));
-        assertTrue(Dates.isSameDay(subclass, utc));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(simple, subclass));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(subclass, utc));
+        assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(utc, subclass));
         assertTrue(Dates.isSameDay(utc, etcUtc));
 
         // a different answer is still an answer, not a rejection

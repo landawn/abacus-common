@@ -1406,7 +1406,9 @@ public final class IntFunctions {
      * find an appropriate constructor or factory for custom types. The returned function is cached
      * per target type for performance. Discovering a custom constructor does not invoke it; if a
      * constructor later fails for a requested capacity, the returned function throws an
-     * {@link IllegalArgumentException} with the constructor failure as its cause.</p>
+     * {@link IllegalArgumentException} with the constructor failure as its cause - except that an
+     * {@code IllegalArgumentException} from {@link N#newInstance(Class)} (the path of a class whose {@code (int)}
+     * constructor is absent or not used), including one thrown by the constructor itself, is rethrown unchanged.</p>
      *
      * <p>Supported target types and the creator each one selects:</p>
      * <ul>
@@ -1450,6 +1452,19 @@ public final class IntFunctions {
      * IntFunctions.ofCollection(null);                                    // throws IllegalArgumentException
      * }</pre>
      *
+     * <p>The {@code (int)} constructor of an anonymous class, or of a local class whose captured variables are detected
+     * (directly or through a local superclass), is not used as a capacity constructor: its {@code int} parameter may receive
+     * a captured value instead. Such a class is created the way {@link Suppliers#ofCollection(Class)} creates it, which rejects
+     * it with an {@link IllegalArgumentException} when it has no usable construction path. Detection of local captures relies
+     * on synthetic {@code val$} fields. The Eclipse compiler can omit these for captures used only in initializers or constructor
+     * bodies; those {@code (int)} constructors cannot be distinguished from capacity constructors and are still invoked with
+     * the requested size. Register an explicit creator before the first factory lookup when that argument is not a capacity.</p>
+     *
+     * <p>For an anonymous class, unless a creator is registered for it or it has a built-in mapping listed above (such as an
+     * {@code ImmutableSet} subclass), the returned function's {@code apply(int)} throws {@link IllegalArgumentException}
+     * without constructing anything; use a named class instead. A registered creator must return an instance of
+     * {@code targetType} itself, and readers do not use it (see {@link N#newInstance(Class)}).</p>
+     *
      * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
      * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
      *
@@ -1470,7 +1485,6 @@ public final class IntFunctions {
         IntFunction ret = slot.get();
 
         if (ret == null) {
-
             if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
                     || AbstractList.class.equals(targetType) || ArrayList.class.equals(targetType)) {
                 ret = ofList();
@@ -1513,7 +1527,9 @@ public final class IntFunctions {
                 throw new IllegalArgumentException("Not able to create instance for collection: " + targetType);
             } else {
                 try {
-                    final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
+                    // The int constructor of a class that cannot declare one, or of a local class whose captured variables are appended
+                    // to its constructors' parameters, is not known to be a capacity (see mayTakeCapturedInt).
+                    final Constructor<?> constructor = mayTakeCapturedInt(targetType) ? null : ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                     if (constructor != null) {
                         ret = size -> {
@@ -1529,13 +1545,17 @@ public final class IntFunctions {
                 }
 
                 try {
-                    // Mirrors Suppliers: N.newInstance also handles non-static member and anonymous
-                    // classes, whose declared constructor takes the enclosing instance and so is not
-                    // found by getDeclaredConstructor(targetType).
+                    // Discover without running constructors. Named member classes can use an enclosing-instance
+                    // constructor. Anonymous classes get this function too and N.newInstance rejects them in apply(int),
+                    // as in Suppliers.get() (newInstance's comment says why). Their int constructor is skipped above: its
+                    // int may be a captured value, and using it would bypass that rejection.
                     if (ret == null && Suppliers.canInstantiateWithoutProbe(targetType)) {
                         ret = size -> {
                             try {
                                 return (Collection<T>) N.newInstance(targetType);
+                            } catch (final IllegalArgumentException e) {
+                                // Keep newInstance's reason (an anonymous container, a missing constructor) as the message.
+                                throw e;
                             } catch (final Throwable e) { // NOSONAR
                                 throw new IllegalArgumentException("Not able to create instance for collection: " + targetType, e);
                             }
@@ -1569,6 +1589,40 @@ public final class IntFunctions {
         return ret;
     }
 
+    /**
+     * Whether an {@code (int)} constructor of {@code targetType} may take a captured variable rather than a capacity: an
+     * anonymous class cannot declare a constructor, so its parameters are captured variables and superclass-constructor
+     * arguments; a local class that captures variables gets them appended to every constructor, so its single-{@code int}
+     * constructor takes a captured value - and so does a local subclass of such a class, which passes them on. Such a
+     * constructor made an anonymous or local LRU map whose captured cap became the requested size (evicting everything for
+     * size 0). Such a class is created through {@link N#newInstance(Class)} instead, which rejects an anonymous collection
+     * or map; using its int constructor would bypass that rejection. A local class that needs captured arguments has no
+     * constructor a factory can call, so the factory lookup itself rejects it with {@link IllegalArgumentException}.
+     *
+     * <p>A capture is recognized by the synthetic {@code val$} field the compiler stores it in. javac always emits one; the
+     * Eclipse compiler emits none for a variable used only while an instance is constructed - in a field initializer, an
+     * instance initializer or a constructor body - and such a capture cannot be told apart from a declared {@code int}
+     * parameter, so the int constructor of a class compiled that way is still used.</p>
+     *
+     * @param targetType the class to test
+     * @return {@code true} if an int constructor of {@code targetType} is not known to be a capacity
+     */
+    private static boolean mayTakeCapturedInt(final Class<?> targetType) {
+        if (targetType.isAnonymousClass()) {
+            return true;
+        }
+
+        for (Class<?> cls = targetType; cls != null && cls.isLocalClass(); cls = cls.getSuperclass()) {
+            for (final java.lang.reflect.Field field : cls.getDeclaredFields()) {
+                if (field.isSynthetic() && field.getName().startsWith("val$")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     @SuppressWarnings("rawtypes")
     private static final ClassValue<java.util.concurrent.atomic.AtomicReference<IntFunction>> mapCreatorPool = new ClassValue<>() {
         @Override
@@ -1589,7 +1643,9 @@ public final class IntFunctions {
      * an appropriate constructor or factory for custom types. The returned function is cached per
      * target type for performance. Discovering a custom constructor does not invoke it; if a
      * constructor later fails for a requested capacity, the returned function throws an
-     * {@link IllegalArgumentException} with the constructor failure as its cause.</p>
+     * {@link IllegalArgumentException} with the constructor failure as its cause - except that an
+     * {@code IllegalArgumentException} from {@link N#newInstance(Class)} (the path of a class whose {@code (int)}
+     * constructor is absent or not used), including one thrown by the constructor itself, is rethrown unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1604,6 +1660,19 @@ public final class IntFunctions {
      * // constructor (e.g. a custom abstract Map subclass) throws IllegalArgumentException.
      * IntFunctions.ofMap(null);                         // throws IllegalArgumentException
      * }</pre>
+     *
+     * <p>The {@code (int)} constructor of an anonymous class, or of a local class whose captured variables are detected
+     * (directly or through a local superclass), is not used as a capacity constructor: its {@code int} parameter may receive
+     * a captured value instead. Such a class is created the way {@link Suppliers#ofMap(Class)} creates it, which rejects it with
+     * an {@link IllegalArgumentException} when it has no usable construction path. Detection of local captures relies on
+     * synthetic {@code val$} fields. The Eclipse compiler can omit these for captures used only in initializers or constructor
+     * bodies; those {@code (int)} constructors cannot be distinguished from capacity constructors and are still invoked with
+     * the requested size. Register an explicit creator before the first factory lookup when that argument is not a capacity.</p>
+     *
+     * <p>For an anonymous class, unless a creator is registered for it or it has a built-in mapping listed above (such as an
+     * {@code ImmutableMap} subclass), the returned function's {@code apply(int)} throws {@link IllegalArgumentException}
+     * without constructing anything; use a named class instead. A registered creator must return an instance of
+     * {@code targetType} itself, and readers do not use it (see {@link N#newInstance(Class)}).</p>
      *
      * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
      * classes in a registered callback can retain those classes for as long as that factory remains reachable.</p>
@@ -1626,7 +1695,6 @@ public final class IntFunctions {
         IntFunction ret = slot.get();
 
         if (ret == null) {
-
             if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType) || EnumMap.class.equals(targetType)) {
                 ret = ofMap();
             } else if (LinkedHashMap.class.equals(targetType)) {
@@ -1656,7 +1724,9 @@ public final class IntFunctions {
                 throw new IllegalArgumentException("Not able to create instance for abstract Map: " + targetType);
             } else {
                 try {
-                    final Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetType, int.class);
+                    // The int constructor of a class that cannot declare one, or of a local class whose captured variables are appended
+                    // to its constructors' parameters, is not known to be a capacity (see mayTakeCapturedInt).
+                    final Constructor<?> constructor = mayTakeCapturedInt(targetType) ? null : ClassUtil.getDeclaredConstructor(targetType, int.class);
 
                     if (constructor != null) {
                         ret = size -> {
@@ -1672,13 +1742,17 @@ public final class IntFunctions {
                 }
 
                 try {
-                    // Mirrors Suppliers: N.newInstance also handles non-static member and anonymous
-                    // classes, whose declared constructor takes the enclosing instance and so is not
-                    // found by getDeclaredConstructor(targetType).
+                    // Discover without running constructors. Named member classes can use an enclosing-instance
+                    // constructor. Anonymous classes get this function too and N.newInstance rejects them in apply(int),
+                    // as in Suppliers.get() (newInstance's comment says why). Their int constructor is skipped above: its
+                    // int may be a captured value, and using it would bypass that rejection.
                     if (ret == null && Suppliers.canInstantiateWithoutProbe(targetType)) {
                         ret = size -> {
                             try {
                                 return (Map<K, V>) N.newInstance(targetType);
+                            } catch (final IllegalArgumentException e) {
+                                // Keep newInstance's reason (an anonymous container, a missing constructor) as the message.
+                                throw e;
                             } catch (final Throwable e) { // NOSONAR
                                 throw new IllegalArgumentException("Not able to create instance for Map: " + targetType, e);
                             }

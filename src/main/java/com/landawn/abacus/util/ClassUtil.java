@@ -1200,7 +1200,9 @@ public final class ClassUtil {
      *
      * <p>This method performs classpath scanning to discover classes within the specified package hierarchy.
      * It scans file system directories and top-level JARs located via {@code ClassUtil.class.getClassLoader()}
-     * and the system class loader.</p>
+     * and the system class loader. Literal archive punctuation in a directory or file name is preserved;
+     * only an archive resource's unescaped {@code !/} separator identifies its archive boundary.
+     * Archive protocols {@code jar:}, {@code zip:}, and {@code wsjar:} are supported.</p>
      *
      * <p><b>⚠️ IMPORTANT - JDK Package Limitation:</b>
      * This method does not work for JDK core packages (e.g., java.lang, java.util, javax.swing) as these
@@ -1400,18 +1402,20 @@ public final class ClassUtil {
 
         final List<Class<?>> classes = new ArrayList<>();
         for (final URL resource : resourceList) {
-            // Get a File object for the package
-            // Percent-decode properly (see decodeUrlPath), reduce a "jar:file:/x.jar!/pkg" URL to the
-            // archive itself, and strip a leading "file:" scheme. The scheme was previously removed with
-            // String.replaceFirst("file:", ""), i.e. a REGEX matching the first occurrence ANYWHERE in the
-            // string - a directory named e.g. "profile:1" further along the path was mangled instead.
-            String fullPath = decodeUrlPath(resource.getPath());
-            final int jarMarker = fullPath.indexOf(JAR_POSTFIX + "!");
+            // Separate a real jar URL before decoding: a file path may contain literal ".jar!", and
+            // decoding an escaped '%21' first would mistake part of an archive's own path for '!/'.
+            String fullPath = resource.getPath();
+            if ("jar".equals(resource.getProtocol()) || "zip".equals(resource.getProtocol()) || "wsjar".equals(resource.getProtocol())) {
+                final int jarMarker = fullPath.indexOf("!/");
 
-            if (jarMarker >= 0) {
-                fullPath = fullPath.substring(0, jarMarker + JAR_POSTFIX.length());
+                if (jarMarker >= 0) {
+                    fullPath = fullPath.substring(0, jarMarker);
+                }
             }
 
+            fullPath = decodeUrlPath(fullPath);
+
+            // Strip only a leading scheme; "file:" elsewhere may be part of a literal directory name.
             if (fullPath.startsWith("file:")) {
                 fullPath = fullPath.substring("file:".length());
             }

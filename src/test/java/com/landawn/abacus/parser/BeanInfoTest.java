@@ -839,8 +839,8 @@ public class BeanInfoTest extends TestBase {
         String[][] expected = { { "email", "email" }, { "phone", "phone" }, { "alpha", "alpha" }, { "id", "id" }, { "address", "address" },
                 { "userName", "userName" }, { "user_name", "userName" }, { "USER_NAME", "userName" }, { "Email", "email" }, { "EMAIL", "email" },
                 { "Aa", "x1" }, { "BB", "x2" }, { "x1", "x1" }, { "x2", "x2" }, { "line", "line" }, { "ADDR_LINE", "line" }, { "addr_line", "line" },
-                { "emaiL", null }, { "zz", null }, { "AB", null }, { "C#", null }, { "a", null }, { "averyveryverylongunknownkey", null },
-                { "phonE", null }, { "address1", null } };
+                { "emaiL", null }, { "zz", null }, { "AB", null }, { "C#", null }, { "a", null }, { "averyveryverylongunknownkey", null }, { "phonE", null },
+                { "address1", null } };
 
         for (String[] pair : expected) {
             String key = pair[0];
@@ -871,8 +871,8 @@ public class BeanInfoTest extends TestBase {
 
         Assertions.assertNull(info.readPropInfo("email".toCharArray(), 2, 2));
 
-        SameLengthNames bean = N.fromJson("{\"Aa\": \"1\", \"BB\": \"2\", \"email\": \"e\", \"phone\": \"p\", \"alpha\": \"a\", \"ADDR_LINE\": \"l\", \"id\": 7}",
-                SameLengthNames.class);
+        SameLengthNames bean = N.fromJson(
+                "{\"Aa\": \"1\", \"BB\": \"2\", \"email\": \"e\", \"phone\": \"p\", \"alpha\": \"a\", \"ADDR_LINE\": \"l\", \"id\": 7}", SameLengthNames.class);
         Assertions.assertEquals("1", bean.getX1());
         Assertions.assertEquals("2", bean.getX2());
         Assertions.assertEquals("e", bean.getEmail());
@@ -885,14 +885,22 @@ public class BeanInfoTest extends TestBase {
     // ---- perf review 2026-09-26 G009 end ----
 
     public static class WideBean {
-        public int field000, field001, field002, field003, field004, field005, field006, field007, field008, field009, field010, field011, field012, field013, field014, field015;
-        public int field016, field017, field018, field019, field020, field021, field022, field023, field024, field025, field026, field027, field028, field029, field030, field031;
-        public int field032, field033, field034, field035, field036, field037, field038, field039, field040, field041, field042, field043, field044, field045, field046, field047;
-        public int field048, field049, field050, field051, field052, field053, field054, field055, field056, field057, field058, field059, field060, field061, field062, field063;
-        public int field064, field065, field066, field067, field068, field069, field070, field071, field072, field073, field074, field075, field076, field077, field078, field079;
-        public int field080, field081, field082, field083, field084, field085, field086, field087, field088, field089, field090, field091, field092, field093, field094, field095;
-        public int field096, field097, field098, field099, field100, field101, field102, field103, field104, field105, field106, field107, field108, field109, field110, field111;
-        public int field112, field113, field114, field115, field116, field117, field118, field119, field120, field121, field122, field123, field124, field125, field126, field127;
+        public int field000, field001, field002, field003, field004, field005, field006, field007, field008, field009, field010, field011, field012, field013,
+                field014, field015;
+        public int field016, field017, field018, field019, field020, field021, field022, field023, field024, field025, field026, field027, field028, field029,
+                field030, field031;
+        public int field032, field033, field034, field035, field036, field037, field038, field039, field040, field041, field042, field043, field044, field045,
+                field046, field047;
+        public int field048, field049, field050, field051, field052, field053, field054, field055, field056, field057, field058, field059, field060, field061,
+                field062, field063;
+        public int field064, field065, field066, field067, field068, field069, field070, field071, field072, field073, field074, field075, field076, field077,
+                field078, field079;
+        public int field080, field081, field082, field083, field084, field085, field086, field087, field088, field089, field090, field091, field092, field093,
+                field094, field095;
+        public int field096, field097, field098, field099, field100, field101, field102, field103, field104, field105, field106, field107, field108, field109,
+                field110, field111;
+        public int field112, field113, field114, field115, field116, field117, field118, field119, field120, field121, field122, field123, field124, field125,
+                field126, field127;
     }
 
     @Test

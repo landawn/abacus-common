@@ -3214,29 +3214,35 @@ public class ParallelArrayStreamTest extends TestBase {
                         final Optional<Integer> expectedFirst = first < 0 ? Optional.empty() : Optional.of(source[first]);
                         final Optional<Integer> expectedLast = last < 0 ? Optional.empty() : Optional.of(source[last]);
 
-                        assertEquals(expectedFirst, new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false,
-                                new ArrayList<>()).findFirst(predicate::test));
-                        assertEquals(expectedLast, new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false,
-                                new ArrayList<>()).findLast(predicate::test));
+                        assertEquals(expectedFirst,
+                                new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false, new ArrayList<>())
+                                        .findFirst(predicate::test));
+                        assertEquals(expectedLast,
+                                new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false, new ArrayList<>())
+                                        .findLast(predicate::test));
                     }
                 }
             }
 
             for (final boolean last : new boolean[] { false, true }) {
                 final AtomicInteger calls = new AtomicInteger();
-                final Stream<Integer> stream = new ParallelArrayStream<>(source, 0, source.length, false, null, 4, splitStrategy, null, false, new ArrayList<>());
+                final Stream<Integer> stream = new ParallelArrayStream<>(source, 0, source.length, false, null, 4, splitStrategy, null, false,
+                        new ArrayList<>());
 
-                assertEquals(Optional.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+                assertEquals(Optional.empty(),
+                        last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
                 assertEquals(source.length, calls.get());
             }
 
             final Integer[] withNull = source.clone();
             withNull[500] = null;
 
-            assertThrows(NullPointerException.class, () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false,
-                    new ArrayList<>()).findFirst(value -> value == null));
-            assertThrows(NullPointerException.class, () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false,
-                    new ArrayList<>()).findLast(value -> value == null));
+            assertThrows(NullPointerException.class,
+                    () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false, new ArrayList<>())
+                            .findFirst(value -> value == null));
+            assertThrows(NullPointerException.class,
+                    () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false, new ArrayList<>())
+                            .findLast(value -> value == null));
             assertEquals(Optional.of(-3), new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false, new ArrayList<>())
                     .findFirst(value -> value != null && value == -3));
         }

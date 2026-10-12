@@ -894,7 +894,6 @@ public class CommonUtilNTest extends TestBase {
         }
     }
 
-
     @Test
     public void testEnumListOfAndEnumSetOf_constantBodyClassResolvesToDeclaringEnum() {
         enum Op {

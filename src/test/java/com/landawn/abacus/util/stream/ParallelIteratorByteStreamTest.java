@@ -855,10 +855,11 @@ public class ParallelIteratorByteStreamTest extends TestBase {
 
         for (final boolean last : new boolean[] { false, true }) {
             final AtomicInteger calls = new AtomicInteger();
-            final ByteStream stream = new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, 4, SplitStrategy.ITERATOR, null, false,
-                    null);
+            final ByteStream stream = new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, 4, SplitStrategy.ITERATOR, null,
+                    false, null);
 
-            assertEquals(OptionalByte.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+            assertEquals(OptionalByte.empty(),
+                    last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
             assertEquals(source.length, calls.get());
         }
 

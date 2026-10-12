@@ -33,6 +33,7 @@ import java.util.Deque;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
@@ -192,6 +193,13 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   <li>Create a new stream for each sequence of operations</li>
  *   <li>Streams are automatically closed after terminal operations complete</li>
  * </ul>
+ *
+ * <p>Collector-based {@code split}, {@code sliding}, {@code collapse}, and {@code joinByRange} stages obtain
+ * collector functions during construction. If a collector accessor throws at that point, the source is closed
+ * before the original failure is rethrown, with distinct close failures suppressed on it. Collector-based
+ * {@code joinByRange} overloads taking a second stream also close that input if construction fails after argument
+ * validation succeeds; their method documentation describes which inputs close. The source cannot be reused
+ * after such a failure, even if no elements have been traversed.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -555,6 +563,10 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
 @LazyEvaluation
 @SuppressWarnings({ "java:S1192", "java:S1845" })
 public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? super T>, Consumer<? super T>, Optional<T>, Indexed<T>, ObjIterator<T>, Stream<T>> {
+
+    // Iterator-state policy: favor simple traversal for ordinary, short-lived object pipelines.
+    // Do not add per-element reference clearing, eager child detachment, or field-to-local rewrites
+    // solely for earlier GC. Resource ownership, close/cancellation cleanup and buffer bounds still apply.
 
     private static final Splitter lineSplitter = Splitter.forLines();
     // stripResults(), not trimResults(): Splitter.trimResults() removes only the space character U+0020, so a
@@ -1739,9 +1751,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is the flatMap operation that flattens nested streams into a single stream.
      * Each element is transformed into a stream, and all resulting streams are concatenated.
-     * Each non-{@code null} mapped stream is closed after its contents are consumed. Closing the
-     * returned stream also closes the mapped stream currently being consumed. A {@code null}
-     * mapped stream is treated as empty.
+     * A {@code null} mapped stream is treated as empty.
+     *
+     * <p><b>Closing mapped streams.</b> When traversal advances past an exhausted mapped stream, that stream is
+     * closed before the source is checked for another element, including when the source has no more elements;
+     * a failure while closing it propagates, and the source is not checked. Closing the returned stream closes the
+     * mapped stream currently being consumed, so each non-{@code null} mapped stream is closed exactly once.</p>
+     *
+     * <p><b>Cancellation.</b> Once a traversal observes that the returned stream has been closed - for example by a
+     * short-circuiting terminal operation while a {@code buffered()} or parallel reader is still producing - it reads
+     * no further source elements and invokes the mapper no more. A traversal that has not yet observed the close
+     * can still read and map one more element (at most one per reading thread); the mapped stream that call
+     * returns is closed without being traversed. Source or mapper failures during that advance propagate
+     * normally.</p>
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -1869,7 +1891,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This is similar to flatMap but works specifically with JDK streams.
      * Each element is transformed into a JDK stream, and all resulting streams are flattened into a single stream.
      * Each non-{@code null} mapped JDK stream is closed after its contents are consumed. Closing
-     * the returned stream also closes the mapped JDK stream currently being consumed.
+     * the returned stream also closes the mapped JDK stream currently being consumed. Exhaustion, close failures
+     * and cancellation are handled as described for {@link #flatMap(Function)}.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * The mapper function should be non-interfering and stateless for correct behavior in parallel streams.
@@ -1949,7 +1972,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a CharStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2045,7 +2069,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a ByteStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2140,7 +2165,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a ShortStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2235,7 +2261,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return an IntStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2330,7 +2357,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a LongStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2425,7 +2453,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a FloatStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2519,7 +2548,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a DoubleStream of elements.
      * Each non-null mapped stream is closed after its contents are consumed or when the resulting
-     * stream is closed while consuming it. A null mapped stream is treated as empty.
+     * stream is closed while consuming it. A null mapped stream is treated as empty. Exhaustion, close
+     * failures and cancellation are handled as described for {@link #flatMap(Function)}.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2835,6 +2865,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns ["HELLO", "hello", 5, "WORLD", "world", 5]
      * }</pre>
      *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param <R> the type of the output stream
@@ -2872,6 +2905,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       })
      *       .toArray();   // returns [1, 2, 3, 4, 5]
      * }</pre>
+     *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
@@ -2912,6 +2948,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toArray();   // returns [1, 2, 3, 5, 6, 7]
      * }</pre>
      *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param mapper a BiConsumer that takes an input element and a LongConsumer for output longs, and produces multiple output longs for each input element.
@@ -2947,6 +2986,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       })
      *       .toArray();   // returns [1.5, 2.5, 3.5, 4.5]
      * }</pre>
+     *
+     * <p>The consumer handed to {@code mapper} is valid only during that call; keeping it and calling it later is not
+     * supported. If {@code mapper} throws, none of the values it emitted during that call reach the result.</p>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
@@ -4619,6 +4661,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
      * the grouping predicate throws.</p>
      *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
+     *
      * @param <R> the type of the collected result
      * @param collapsible a predicate that determines if two consecutive elements should be collapsed into the same group.
      *        The first parameter is the last (not the first) element of the current group, and the second parameter is the next element to check.
@@ -4818,6 +4864,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
      * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
      * the grouping predicate throws.</p>
+     *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
      *
      * @param <R> the type of the collected result
      * @param collapsible a predicate that determines if the next element from this stream should be collapsed with the first and last elements of current group
@@ -5021,6 +5071,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; accumulates up to {@code chunkSize} elements in each collector result container.
      *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
+     *
      * @param <R> The type of the result produced by the collector
      * @param chunkSize the desired size of each sub stream (the last may be smaller). Must be positive.
      * @param collector the collector to be used for collecting elements of each sub stream
@@ -5112,6 +5166,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; accumulates the current partition in the collector's result container.
+     *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
      *
      * @param <R> The type of the result produced by the collector
      * @param predicate the condition to be used for splitting the stream
@@ -5337,6 +5395,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; accumulates up to {@code windowSize} elements in each collector result container.
      *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
+     *
      * @param <R> The type of result produced by the collector
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
      * @param collector the collector to be used for reduction of the elements in each window
@@ -5454,6 +5516,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>During manual iteration of a sequential stream, if {@code hasNext()} or {@code next()} encounters a
      * source failure while skipping the gap between windows, the next such call resumes the unfinished gap.</p>
+     *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
      *
      * @param <R> The type of result produced by the collector
      * @param windowSize the size of the window to be used for sliding over the Stream elements. Must be positive.
@@ -13532,7 +13598,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("A", "B")
      *       .crossJoin(Arrays.asList(1, 2, 3))
      *       .forEach(System.out::println);
-     * // Output: (A,1), (A,2), (A,3), (B,1), (B,2), (B,3)
+     * // Output: (A, 1), (A, 2), (A, 3), (B, 1), (B, 2), (B, 3)
      *
      * // Generate all color-size combinations for products
      * Stream.of("Red", "Blue", "Green")
@@ -15767,6 +15833,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
      *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
+     *
      * @param <U> the type of elements in the iterator
      * @param <R> the result type of the collector
      * @param b the iterator to join with; desired matches must form successive prefixes for the left elements
@@ -15811,6 +15881,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
+     *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
      *
      * @param <U> the type of elements in the iterator
      * @param <D> the result type of the collector
@@ -15867,6 +15941,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
      *
+     * <p>The collector's supplier, accumulator, and finisher accessors are read when this stage is created.
+     * If an accessor throws, this stream is closed before the original failure is rethrown; distinct close
+     * failures are suppressed on it. Element processing remains lazy.</p>
+     *
      * @param <U> the type of elements in the iterator
      * @param <D> the result type of the collector
      * @param <R> the type of the result elements
@@ -15920,6 +15998,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
      *
+     * <p>After argument validation succeeds, a construction failure, including failure to obtain {@code b}'s
+     * iterator, closes both input streams. The original failure is rethrown with distinct close failures
+     * suppressed on it. A null-argument validation failure closes this stream without obtaining {@code b}'s
+     * iterator or explicitly closing {@code b}; an independent right stream remains usable.</p>
+     *
      * @param <U> the type of elements in the stream to join with
      * @param b the ordered stream to join with. Will be closed along with this stream.
      * @param predicate the condition to test if elements can be joined.
@@ -15962,6 +16045,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
+     *
+     * <p>After argument validation succeeds, a construction failure, including failure to obtain {@code b}'s
+     * iterator or read the collector accessors, closes both input streams. The original failure is rethrown
+     * with distinct close failures suppressed on it. A null-argument validation failure closes this stream
+     * without obtaining its iterator or explicitly closing {@code b}.</p>
      *
      * @param <U> the type of elements in the stream to join with
      * @param <R> the result type of the collector
@@ -16009,6 +16097,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
+     *
+     * <p>After argument validation succeeds, a construction failure, including failure to obtain {@code b}'s
+     * iterator or read the collector accessors, closes both input streams. The original failure is rethrown
+     * with distinct close failures suppressed on it. A null-argument validation failure closes this stream
+     * without obtaining its iterator or explicitly closing {@code b}.</p>
      *
      * @param <U> the type of elements in the stream to join with
      * @param <D> the result type of the collector
@@ -16065,6 +16158,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
+     *
+     * <p>After argument validation succeeds, a construction failure, including failure to obtain {@code b}'s
+     * iterator or read the collector accessors, closes both input streams. The original failure is rethrown
+     * with distinct close failures suppressed on it. A null-argument validation failure closes this stream
+     * without obtaining its iterator or explicitly closing {@code b}.</p>
      *
      * @param <U> the type of elements in the stream to join with
      * @param <D> the result type of the collector
@@ -16135,7 +16233,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
         final MutableBoolean hasMore = MutableBoolean.of(true);
 
-        final Supplier<ObjIteratorEx<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore);
+        final Supplier<ObjIteratorEx<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore, true);
 
         //noinspection resource
         return Stream.just(supplier) //
@@ -16247,7 +16345,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
         final MutableBoolean hasMore = MutableBoolean.of(true);
 
-        final Supplier<ObjIteratorEx<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore);
+        final Supplier<ObjIteratorEx<T>> supplier = () -> buffered(iteratorEx(), queueToBuffer, hasMore, true);
 
         //noinspection resource
         return Stream.just(supplier) //
@@ -17083,7 +17181,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             private BiConsumer<Object, ? super T> accumulator;
             private Function<Object, R> finisher;
 
-            private ObjIteratorEx<T> iter;
+            private volatile ObjIteratorEx<T> iter;
+            private volatile boolean closed;
             private Timed<T> timedNext = null;
             private T next = null;
 
@@ -17098,8 +17197,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
                 if (!initialized) {
                     init();
+                }
+
+                if (closed) {
+                    return false;
                 }
 
                 if (useQueue && queue.size() > 0) {
@@ -17120,7 +17227,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 if (timedNext == null || timedNext.timestamp() < fromTime) {
-                    while (iter.hasNext()) {
+                    while (!closed && iter.hasNext()) {
                         next = iter.next();
                         now = System.currentTimeMillis();
                         eventTime = isEventTimeExtractorNull ? now : timeExtractor.applyAsLong(next);
@@ -17200,7 +17307,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     // Pull through the iterator when it's ArrayStream or async = false, or when the window closes on
                     // event time only (the timed poll below exists to close a window on the wall clock).
                     if (queueToBuffer == null || eventTimeOnly) {
-                        while ((eventTimeOnly || (now = System.currentTimeMillis()) < endTime) && iter.hasNext()) {
+                        while (!closed && (eventTimeOnly || (now = System.currentTimeMillis()) < endTime) && iter.hasNext()) {
                             next = iter.next();
                             now = System.currentTimeMillis();
                             eventTime = isEventTimeExtractorNull ? now : timeExtractor.applyAsLong(next);
@@ -17226,7 +17333,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         }
                     } else {
                         try {
-                            while ((now = System.currentTimeMillis()) < endTime) {
+                            while (!closed && (now = System.currentTimeMillis()) < endTime) {
                                 // Poll in short slices so that an exhausted source (hasMore false, queue drained) closes
                                 // the window at once instead of after the full remaining wall-clock duration.
                                 next = queueToBuffer.poll(Math.min(endTime - now, MAX_WAIT_TIME_FOR_QUEUE_POLL), TimeUnit.MILLISECONDS);
@@ -17286,18 +17393,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 return ret;
             }
 
-            private boolean bufferReleased = false;
+            private final AtomicBoolean bufferReleased = new AtomicBoolean();
 
             /** Stops the buffering thread and releases a temporary executor, once; a no-op on the synchronous path. */
             private void releaseBuffer() {
-                if (queueToBuffer != null && iter != null && !bufferReleased) {
-                    bufferReleased = true;
-                    iter.closeResource();
+                final ObjIteratorEx<T> current = iter;
+                if (queueToBuffer != null && current != null && bufferReleased.compareAndSet(false, true)) {
+                    current.closeResource();
                 }
             }
 
             @Override
             public void closeResource() {
+                closed = true;
                 releaseBuffer();
             }
 
@@ -17309,11 +17417,21 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
                     finisher = (Function<Object, R>) collector.finisher();
 
+                    if (closed) {
+                        return;
+                    }
+
                     if (queueToBuffer == null) {
                         iter = iteratorEx();
                     } else {
                         //noinspection resource
-                        iter = buffered(iteratorEx(), queueToBuffer, hasMore);
+                        iter = buffered(iteratorEx(), queueToBuffer, hasMore, true);
+                    }
+
+                    // Close can run while buffering is being constructed; reclaim a late-published reader too.
+                    if (closed) {
+                        releaseBuffer();
+                        return;
                     }
 
                     startTime = startTimeSupplier.getAsLong();
@@ -17323,9 +17441,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
         };
 
-        // Release the buffering thread on early close (see closeResource()) as well as after exhaustion.
-        return newStream(delayForLateData ? releaseOnEviction(windowIter, windowResultCacheSize) : windowIter, false, null,
-                mergeCloseHandlers(windowIter::closeResource, closeHandlers()));
+        final ObjIteratorEx<R> resultIter = delayForLateData ? releaseOnEviction(windowIter, windowResultCacheSize) : new WindowIterator<>(windowIter);
+        return newStream(resultIter, false, null, mergeCloseHandlers(resultIter::closeResource, closeHandlers()));
     }
 
     /**
@@ -17822,7 +17939,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             private BiConsumer<Object, ? super T> accumulator = null;
             private Function<Object, R> finisher = null;
 
-            private ObjIteratorEx<T> iter;
+            private volatile ObjIteratorEx<T> iter;
+            private volatile boolean closed;
             private Timed<T> timedNext = null;
             private T next = null;
 
@@ -17837,8 +17955,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
                 if (!initialized) {
                     init();
+                }
+
+                if (closed) {
+                    return false;
                 }
 
                 if (timedNext != null && timedNext.timestamp() >= endTime) {
@@ -17847,7 +17973,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 if (timedNext == null || timedNext.timestamp() < fromTime) {
-                    while (iter.hasNext()) {
+                    while (!closed && iter.hasNext()) {
                         next = iter.next();
                         now = System.currentTimeMillis();
                         eventTime = isEventTimeExtractorNull ? now : timeExtractor.applyAsLong(next);
@@ -17901,7 +18027,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     // Pull through the iterator when it's ArrayStream or async = false, or when the window closes on
                     // event time only (the timed poll below exists to close a window on the wall clock).
                     if (queueToBuffer == null || eventTimeOnly) {
-                        while (cnt < maxWindowSize && (eventTimeOnly || (now = System.currentTimeMillis()) < endTime) && iter.hasNext()) {
+                        while (!closed && cnt < maxWindowSize && (eventTimeOnly || (now = System.currentTimeMillis()) < endTime) && iter.hasNext()) {
                             next = iter.next();
                             now = System.currentTimeMillis();
                             eventTime = isEventTimeExtractorNull ? now : timeExtractor.applyAsLong(next);
@@ -17925,7 +18051,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         }
                     } else {
                         try {
-                            while (cnt < maxWindowSize && (now = System.currentTimeMillis()) < endTime) {
+                            while (!closed && cnt < maxWindowSize && (now = System.currentTimeMillis()) < endTime) {
                                 // Poll in short slices so that an exhausted source (hasMore false, queue drained) closes
                                 // the window at once instead of after the full remaining wall-clock duration.
                                 next = queueToBuffer.poll(Math.min(endTime - now, MAX_WAIT_TIME_FOR_QUEUE_POLL), TimeUnit.MILLISECONDS);
@@ -18007,18 +18133,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 return ret;
             }
 
-            private boolean bufferReleased = false;
+            private final AtomicBoolean bufferReleased = new AtomicBoolean();
 
             /** Stops the buffering thread and releases a temporary executor, once; a no-op on the synchronous path. */
             private void releaseBuffer() {
-                if (queueToBuffer != null && iter != null && !bufferReleased) {
-                    bufferReleased = true;
-                    iter.closeResource();
+                final ObjIteratorEx<T> current = iter;
+                if (queueToBuffer != null && current != null && bufferReleased.compareAndSet(false, true)) {
+                    current.closeResource();
                 }
             }
 
             @Override
             public void closeResource() {
+                closed = true;
                 releaseBuffer();
             }
 
@@ -18030,11 +18157,21 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
                     finisher = (Function<Object, R>) collector.finisher();
 
+                    if (closed) {
+                        return;
+                    }
+
                     if (queueToBuffer == null) {
                         iter = iteratorEx();
                     } else {
                         //noinspection resource
-                        iter = buffered(iteratorEx(), queueToBuffer, hasMore);
+                        iter = buffered(iteratorEx(), queueToBuffer, hasMore, true);
+                    }
+
+                    // Close can run while buffering is being constructed; reclaim a late-published reader too.
+                    if (closed) {
+                        releaseBuffer();
+                        return;
                     }
 
                     startTime = startTimeSupplier.getAsLong();
@@ -18044,9 +18181,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
         };
 
-        // Release the buffering thread on early close (see closeResource()) as well as after exhaustion.
-        return newStream(delayForLateData ? releaseOnEviction(windowIter, windowResultCacheSize) : windowIter, false, null,
-                mergeCloseHandlers(windowIter::closeResource, closeHandlers()));
+        final ObjIteratorEx<R> resultIter = delayForLateData ? releaseOnEviction(windowIter, windowResultCacheSize) : new WindowIterator<>(windowIter);
+        return newStream(resultIter, false, null, mergeCloseHandlers(resultIter::closeResource, closeHandlers()));
     }
 
     /**
@@ -18154,7 +18290,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return an iterator over the same results, each released after it has left the late-data cache
      */
     static <R> ObjIteratorEx<R> releaseOnEviction(final ObjIteratorEx<R> windowIter, final int cacheSize) {
-        return new ObjIteratorEx<>() {
+        return new WindowIterator<>(new ObjIteratorEx<R>() {
             // Not pre-sized (cacheSize may be huge); holds at most cacheSize + 1 results. NONE stands for a null result.
             private final Deque<Object> pending = new ArrayDeque<>();
 
@@ -18183,7 +18319,46 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             public void closeResource() {
                 windowIter.closeResource();
             }
-        };
+        });
+    }
+
+    // Detach all window-owned caches on close without clearing state an in-flight read is still using.
+    private static final class WindowIterator<R> extends ObjIteratorEx<R> {
+        private volatile ObjIteratorEx<R> delegate;
+
+        private WindowIterator(final ObjIteratorEx<R> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public boolean hasNext() {
+            final ObjIteratorEx<R> current = delegate;
+            return current != null && current.hasNext();
+        }
+
+        @Override
+        public R next() throws NoSuchElementException {
+            final ObjIteratorEx<R> current = delegate;
+            if (current == null) {
+                throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+            }
+
+            return current.next();
+        }
+
+        @Override
+        public void closeResource() {
+            final ObjIteratorEx<R> current;
+            synchronized (this) {
+                current = delegate;
+                delegate = null;
+            }
+
+            // Claim before cancellation: a user callback may reenter close, and another read must not start.
+            if (current != null) {
+                current.closeResource();
+            }
+        }
     }
 
     /**
@@ -18439,7 +18614,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
         checkArgNotNull(collector, cs.collector);
 
-        return newStream(new ObjIteratorEx<>() { //NOSONAR
+        final ObjIteratorEx<R> resultIter = new WindowIterator<>(new ObjIteratorEx<R>() { //NOSONAR
             private final T none = (T) NONE;
             private final TimedS<T> timedFirst = TimedS.of(none, 0);
             private final TimedS<T> timedLast = TimedS.of(none, 0);
@@ -18450,6 +18625,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             private Function<Object, R> finisher;
 
             private ObjIteratorEx<T> iter;
+            private volatile boolean closed;
 
             private long now = 0;
             private long startTime = 0;
@@ -18459,12 +18635,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
                 if (!initialized) {
                     init();
                 }
 
+                if (closed) {
+                    return false;
+                }
+
                 if (timedFirst.value() == none) {
-                    while (iter.hasNext()) {
+                    while (!closed && iter.hasNext()) {
                         next = iter.next();
 
                         if ((now = System.currentTimeMillis()) >= startTime) {
@@ -18491,7 +18675,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 int cnt = 1;
                 boolean isTimedFirstAssigned = false;
 
-                while (iter.hasNext()) {
+                while (!closed && iter.hasNext()) {
                     next = iter.next();
 
                     timedNext.set(next, now = System.currentTimeMillis());
@@ -18520,6 +18704,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 return finisher.apply(container);
             }
 
+            @Override
+            public void closeResource() {
+                closed = true;
+            }
+
             private void init() {
                 if (!initialized) {
                     initialized = true;
@@ -18528,12 +18717,18 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
                     finisher = (Function<Object, R>) collector.finisher();
 
+                    if (closed) {
+                        return;
+                    }
+
                     iter = iteratorEx();
 
                     startTime = startTimeSupplier.getAsLong();
                 }
             }
-        }, false, null);
+        });
+
+        return newStream(resultIter, false, null, mergeCloseHandlers(resultIter::closeResource, closeHandlers()));
     }
 
     /**
@@ -18833,7 +19028,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             private BiConsumer<Object, ? super T> accumulator;
             private Function<Object, R> finisher;
 
-            private ObjIteratorEx<T> iter;
+            private volatile ObjIteratorEx<T> iter;
+            private volatile boolean closed;
 
             private long now = 0;
             private long startTime = 0;
@@ -18843,12 +19039,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
                 if (!initialized) {
                     init();
                 }
 
+                if (closed) {
+                    return false;
+                }
+
                 if (timedFirst.value() == none) {
-                    while (iter.hasNext()) {
+                    while (!closed && iter.hasNext()) {
                         next = iter.next();
 
                         if ((now = System.currentTimeMillis()) >= startTime) {
@@ -18882,7 +19086,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 try {
                     long deadline = deadlineForNext(cnt);
 
-                    while (true) {
+                    while (!closed) {
                         final long remaining = deadline - System.currentTimeMillis();
 
                         // Poll in short slices so that an exhausted source (hasMore false, queue drained) ends the wait
@@ -18931,18 +19135,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 return finisher.apply(container);
             }
 
-            private boolean bufferReleased = false;
+            private final AtomicBoolean bufferReleased = new AtomicBoolean();
 
             /** Stops the buffering thread and releases a temporary executor, once; a no-op on the synchronous path. */
             private void releaseBuffer() {
-                if (queueToBuffer != null && iter != null && !bufferReleased) {
-                    bufferReleased = true;
-                    iter.closeResource();
+                final ObjIteratorEx<T> current = iter;
+                if (queueToBuffer != null && current != null && bufferReleased.compareAndSet(false, true)) {
+                    current.closeResource();
                 }
             }
 
             @Override
             public void closeResource() {
+                closed = true;
                 releaseBuffer();
             }
 
@@ -18954,16 +19159,26 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     accumulator = (BiConsumer<Object, ? super T>) collector.accumulator();
                     finisher = (Function<Object, R>) collector.finisher();
 
+                    if (closed) {
+                        return;
+                    }
+
                     //noinspection resource
-                    iter = buffered(iteratorEx(), queueToBuffer, hasMore);
+                    iter = buffered(iteratorEx(), queueToBuffer, hasMore, true);
+
+                    // Close can run while buffering is being constructed; reclaim a late-published reader too.
+                    if (closed) {
+                        releaseBuffer();
+                        return;
+                    }
 
                     startTime = startTimeSupplier.getAsLong();
                 }
             }
         };
 
-        // Release the buffering thread on early close (see closeResource()) as well as after exhaustion.
-        return newStream(windowIter, false, null, mergeCloseHandlers(windowIter::closeResource, closeHandlers()));
+        final ObjIteratorEx<R> resultIter = new WindowIterator<>(windowIter);
+        return newStream(resultIter, false, null, mergeCloseHandlers(resultIter::closeResource, closeHandlers()));
     }
 
     /**
@@ -20616,13 +20831,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a Stream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If the supplier throws, a later traversal or close
-     * operation may retry it. Closing the returned stream before traversal may invoke the supplier so the supplied
-     * stream can be closed.
+     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
+     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
+     * invoke the supplier once more so that a stream it then supplies can be closed.
+     * Closing the returned stream before traversal may invoke the supplier so the supplied stream can be closed.
      *
      * <p><b>Implementation Note:</b> the traversal is deferred via {@code ObjIteratorEx.defer}; a {@code null}
-     * supplier result yields an empty stream, and recursive initialization fails fast with
-     * {@code IllegalStateException} instead of {@code StackOverflowError}.
+     * supplier result yields an empty stream, and recursive initialization - including a supplier that returns the
+     * deferred stream itself - fails fast with {@code IllegalStateException} instead of {@code StackOverflowError}.
+     * A supplier that returns a stream derived from the deferred stream (for example {@code self.map(f)}) is not detected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20641,10 +20858,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         N.checkArgNotNull(supplier, cs.supplier);
 
         final Supplier<? extends Stream<? extends T>> s = Fn.memoize(supplier);
-        return Stream.<T> of(ObjIteratorEx.defer(() -> {
+        // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
+        final Holder<Stream<T>> deferred = new Holder<>();
+
+        final Stream<T> result = Stream.<T> of(ObjIteratorEx.defer(() -> {
             final Stream<? extends T> source = s.get();
+
+            if (source != null && source == deferred.value()) {
+                throw new IllegalStateException("Stream supplier returned the deferred stream itself");
+            }
+
             return source == null ? ObjIteratorEx.empty() : source.iteratorEx();
         })).onClose(newCloseHandler(s));
+
+        deferred.setValue(result);
+
+        return result;
     }
 
     /**
@@ -22246,12 +22475,21 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * or {@code LinkedList} throws {@link java.util.ConcurrentModificationException} on the next element read, and a
      * snapshot list such as {@code CopyOnWriteArrayList} keeps returning its snapshot - also across
      * {@code skip}/{@code count}.
-     * Traversal takes O(n) time for any list. {@code skip}/{@code count} take O(1) on a {@link java.util.RandomAccess}
-     * list whose list iterators read the list itself - a {@link java.util.AbstractList} such as {@code ArrayList},
-     * {@code Vector}, {@code Arrays.asList(..)} or a sub-list of one, or an unmodifiable {@code List.of(..)} list - and
-     * step through the skipped elements on any other list (as {@code Stream.of(list)} always does), because only then
-     * does repositioning read the same elements as the original list iterator.
-     * A {@code null} list yields an empty stream.
+     * Traversal takes O(n) time for any list. {@code skip}/{@code count} take O(1) on supported
+     * {@link java.util.RandomAccess} lists with JDK list-iterator implementations: {@code ArrayList} (including its
+     * sub-lists), {@code Vector}, {@code Arrays.asList(..)} itself, {@code Collections.nCopies(..)} (including its
+     * sub-lists), and known unmodifiable {@code List.of(..)} lists. Subclasses that inherit the supported iterator
+     * implementations also use this optimization.
+     *
+     * <p>Other lists, including {@code Arrays.asList(..).subList(..)}, use the original iterator element by element:
+     * skipping k elements takes O(k), and counting n remaining elements takes O(n). These opaque
+     * {@link java.util.AbstractList} sub-lists can delegate to a custom root's snapshot iterator, so their runtime
+     * class alone cannot establish that replacing the iterator is safe. Custom iterator overrides use the same
+     * fallback. When a supported root list and valid range bounds are available,
+     * {@code ofReversed(list).skip(list.size() - toIndex).limit(toIndex - fromIndex)} avoids traversing the excluded
+     * suffix; traversing or counting the retained range still takes O(n).
+     *
+     * <p>A {@code null} list yields an empty stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22279,18 +22517,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         // one when list iterators read the list itself: a snapshot iterator (CopyOnWriteArrayList, or a wrapper such as
         // Collections.unmodifiableList around one) would switch to the list's CURRENT contents. So jump only for lists
         // known to iterate live, and step otherwise.
-        final boolean canJump = list instanceof java.util.RandomAccess && (list instanceof java.util.AbstractList || isJdkImmutableList(list));
+        final boolean canJump = list instanceof java.util.RandomAccess
+                && ((list instanceof java.util.AbstractList && JDK_LIST_ITERATOR_IMPLEMENTATION.get(list.getClass())) || isJdkImmutableList(list));
 
         return of(new ObjIteratorEx<T>() {
             private java.util.ListIterator<? extends T> iter = initialIter;
+            private boolean needsCursorRestore;
 
             @Override
             public boolean hasNext() {
-                return iter.hasPrevious();
+                return needsCursorRestore || iter.hasPrevious();
             }
 
             @Override
             public T next() {
+                restoreCursorIfNeeded();
+
                 if (!iter.hasPrevious()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22305,9 +22547,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public void advance(final long n) {
+                if (n <= 0) {
+                    return;
+                }
+
+                restoreCursorIfNeeded();
+
                 final int remaining = iter.nextIndex(); // the elements before the cursor are the ones still to come
 
-                if (n <= 0 || remaining == 0) {
+                if (remaining == 0) {
                     return;
                 }
 
@@ -22326,20 +22574,54 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 iter.previous();
 
                 if (n > 1) {
-                    iter = list.listIterator(n >= remaining ? 0 : remaining - (int) n);
+                    try {
+                        iter = list.listIterator(n >= remaining ? 0 : remaining - (int) n);
+                    } catch (final Throwable e) {
+                        // An inherited AbstractList iterator can still call an overridden size(). Restore its
+                        // cursor before the next read so a failed reposition consumes no logical elements.
+                        needsCursorRestore = true;
+                        throw e;
+                    }
                 }
             }
 
             @Override
             public long count() {
-                final int remaining = iter.nextIndex();
+                final int remaining = iter.nextIndex() + (needsCursorRestore ? 1 : 0);
 
                 advance(remaining);
 
                 return remaining;
             }
+
+            private void restoreCursorIfNeeded() {
+                if (needsCursorRestore) {
+                    // Re-read through the original iterator to preserve live updates and its fail-fast checks.
+                    iter.next();
+                    needsCursorRestore = false;
+                }
+            }
         });
     }
+
+    private static final Class<?> JDK_ARRAY_LIST_SUBLIST_CLASS = new ArrayList<>().subList(0, 0).getClass();
+
+    // Custom overrides may return snapshots; even AbstractList's own sub-list iterator delegates to its root's
+    // listIterator. That opaque implementation is shared by Arrays.asList sub-lists and custom snapshot roots:
+    // accepting its class would silently replace snapshots after a skip. Only the implementations below are known
+    // to read the live list without that indirection; the conservative fallback can therefore be linear.
+    private static final ClassValue<Boolean> JDK_LIST_ITERATOR_IMPLEMENTATION = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> type) {
+            try {
+                final Class<?> implementation = type.getMethod("listIterator", int.class).getDeclaringClass();
+                return implementation == java.util.AbstractList.class || implementation == ArrayList.class || implementation == java.util.Vector.class
+                        || implementation == JDK_ARRAY_LIST_SUBLIST_CLASS;
+            } catch (final NoSuchMethodException | SecurityException e) {
+                return false;
+            }
+        }
+    };
 
     /**
      * The classes of the JDK's unmodifiable lists ({@code List.of(..)}, {@code List.copyOf(..)}, their sub-lists and
@@ -22791,9 +23073,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         return;
                     }
 
-                    while (n-- > 0 && cursor < totalSize) {
-                        cursor = cnt++ < smallerCount ? cursor + smallerSize : cursor + biggerSize;
-                    }
+                    cnt += (int) Math.min(n, count - cnt);
+                    // Sum the two regions of the skipped prefix directly, without evaluating the mapper.
+                    cursor = Math.min(cnt, smallerCount) * smallerSize + Math.max(0, cnt - smallerCount) * biggerSize;
                 }
 
                 @Override
@@ -22834,9 +23116,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         return;
                     }
 
-                    while (n-- > 0 && cursor < totalSize) {
-                        cursor = cnt++ < biggerCount ? cursor + biggerSize : cursor + smallerSize;
-                    }
+                    cnt += (int) Math.min(n, count - cnt);
+                    // Sum the two regions of the skipped prefix directly, without evaluating the mapper.
+                    cursor = Math.min(cnt, biggerCount) * biggerSize + Math.max(0, cnt - biggerCount) * smallerSize;
                 }
 
                 @Override
@@ -24480,7 +24762,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final List<? extends Stream<? extends T>> sources = new ArrayList<>(streams);
 
         return of(new ObjIteratorEx<T>() {
-            private final Iterator<? extends Stream<? extends T>> iterators = sources.iterator();
+            private final ListIterator<? extends Stream<? extends T>> iterators = sources.listIterator();
             private Stream<? extends T> cur;
             private Iterator<? extends T> iter;
 
@@ -24488,7 +24770,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             public boolean hasNext() {
                 while ((iter == null || !iter.hasNext()) && iterators.hasNext()) {
                     if (cur != null) {
+                        // The slot is taken before close(): a close handler that re-enters this iterator moves it on.
+                        final int index = iterators.previousIndex();
                         cur.close();
+                        // Drop the closed input from the private snapshot (the close handler skips a closed stream anyway):
+                        // otherwise it keeps whatever the exhausted input still references, such as the array of a
+                        // sorted() input, reachable until this stream itself is unreachable.
+                        sources.set(index, null);
                     }
 
                     cur = iterators.next();
@@ -24823,11 +25111,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final MutableBoolean onGoing = MutableBoolean.of(true);
         final int threadNum = Math.min(sources.size(), readThreadNum);
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
-        final Holder<AsyncExecutor> holderForAsyncExecutorUsed = new Holder<>();
 
         final Supplier<BufferedIterator<T>> supplier = () -> {
             final BlockingQueue<T> queue = newBoundedQueue(bufferSize);
             final Holder<Throwable> eHolder = new Holder<>();
+            // A worker failure stops production too, but its queued prefix must still be delivered.
+            final AtomicBoolean closed = new AtomicBoolean();
 
             final Iterator<? extends Stream<? extends T>> iterators = sources.iterator();
             final AtomicInteger threadCounter = new AtomicInteger(threadNum);
@@ -24880,6 +25169,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                                             //    }
                                         }
                                     }
+
+                                    if (closed.get()) {
+                                        // Closing can unblock a timed offer, or race a worker returning from next().
+                                        queue.clear();
+                                    }
                                 }
 
                                 if (s != null) {
@@ -24889,6 +25183,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         } catch (final Throwable e) { // NOSONAR: an Error (e.g. AssertionError) from a worker must be propagated via eHolder, not swallowed (which would silently truncate the stream); matches parallelMerge.
                             setError(eHolder, e, onGoing);
                         } finally {
+                            if (closed.get()) {
+                                queue.clear();
+                            }
                             threadCounter.decrementAndGet();
                         }
                     });
@@ -24897,17 +25194,26 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 noException = true;
             } finally {
                 if (!noException) {
+                    closed.set(true);
                     onGoing.setFalse();
+                    queue.clear();
+                    // No child iterator exists to own the executor when worker submission fails.
+                    shutdownTempExecutor(asyncExecutorToUse);
                 }
             }
 
-            holderForAsyncExecutorUsed.setValue(asyncExecutorToUse);
+            final AsyncExecutor executorToClose = asyncExecutorToUse;
 
             return new BufferedIterator<>(bufferSize) {
-                T next = null;
+                private T next = null;
 
                 @Override
                 public boolean hasNext() {
+                    if (closed.get()) {
+                        next = null;
+                        return false;
+                    }
+
                     try {
                         if (next == null && (next = queue.poll()) == null) {
                             // int cnt = 0;
@@ -24931,6 +25237,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         next = queue.poll(); // a producer that offered and then failed between the timed poll and the onGoing re-check
                     }
 
+                    if (closed.get()) {
+                        next = null;
+                        return false;
+                    }
+
                     // Report the producer failure only once every element it queued before failing has been handed out;
                     // otherwise buffered() would drop elements the unbuffered pipeline delivers before the failure.
                     if (next == null && eHolder.value() != null) {
@@ -24942,27 +25253,43 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
                 @Override
                 public T next() throws NoSuchElementException {
-                    if (next == null && !hasNext()) {
+                    if (closed.get()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    final T result = next == NONE ? null : next;
+                    T result = next;
+                    if (result == null) {
+                        if (!hasNext() || (result = next) == null) {
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                        }
+                    }
+
+                    // Keep a claimed value local so a concurrent close cannot turn it into a spurious null.
                     next = null;
-                    return result;
+                    return result == NONE ? null : result;
+                }
+
+                @Override
+                public void closeResource() {
+                    if (!closed.compareAndSet(false, true)) {
+                        return;
+                    }
+
+                    onGoing.setFalse();
+                    next = null;
+                    queue.clear();
+                    shutdownTempExecutor(executorToClose);
                 }
             };
         };
 
+        // The child owns the temporary executor. flatMap closes it on exhaustion or pipeline closure, including
+        // when a buffered consumer cancels while the supplier is still starting workers and returns a late child.
         //noinspection resource
-        return just(supplier).flatMap(it -> Stream.of(it.get())).onClose(newCloseHandler(sources)).onClose(() -> {
-            onGoing.setFalse();
-
-            if (holderForAsyncExecutorUsed.isNotNull()) {
-                shutdownTempExecutor(holderForAsyncExecutorUsed.value());
-            }
-
-            // cancelAll(futureList);
-        });
+        return just(supplier).map(Supplier::get)
+                .flatMap(it -> Stream.of(it).onClose(it::closeResource))
+                .onClose(newCloseHandler(sources))
+                .onClose(onGoing::setFalse);
     }
 
     /**
@@ -25083,16 +25410,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final BlockingQueue<T> queue = newBoundedQueue(bufferSize);
 
-        return parallelConcatIterators(iterators, readThreadNum, queue);
-    }
-
-    static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final BlockingQueue<T> queue) {
-        if (N.isEmpty(iterators)) {
-            return Stream.empty();
-        }
-
-        return parallelConcatIterators(iterators, readThreadNum, queue, false, null);
+        return parallelConcatIterators(iterators, readThreadNum, queue, false, null, true);
     }
 
     static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
@@ -25109,17 +25427,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final BlockingQueue<T> queue = newBoundedQueue(bufferSize);
 
-        return parallelConcatIterators(iterators, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor);
+        return parallelConcatIterators(iterators, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor, true);
     }
 
-    static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
-            final BlockingQueue<T> queue, final boolean cancelUncompletedThreads, final AsyncExecutor asyncExecutor) {
+    private static <T> Stream<T> parallelConcatIterators(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
+            final BlockingQueue<T> queue, final boolean cancelUncompletedThreads, final AsyncExecutor asyncExecutor, final boolean ownsQueue) {
         if (N.isEmpty(iterators)) {
             return Stream.empty();
         }
 
         final List<? extends Iterator<? extends T>> sources = new ArrayList<>(iterators);
-        final Supplier<BufferedIterator<T>> supplier = () -> buffered(sources, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor, null);
+        final Supplier<BufferedIterator<T>> supplier = () -> buffered(sources, readThreadNum, queue, cancelUncompletedThreads, asyncExecutor, null, ownsQueue);
 
         //noinspection resource
         return just(supplier).map(Supplier::get).flatMap(it -> Stream.of(it).onClose(it::closeResource));
@@ -25147,25 +25465,39 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             return (BufferedIterator<T>) iterator;
         }
 
-        return buffered(iterator, new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR));
+        return buffered(iterator, new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR), null, true);
     }
 
-    static <T> BufferedIterator<T> buffered(final Iterator<? extends T> iterator, final BlockingQueue<T> queue) {
-        return buffered(iterator, queue, null);
+    /**
+     * Returns an iterator over {@code iterator}'s elements that one background thread reads ahead into {@code queue}.
+     *
+     * <p>{@code ownsQueue} says who owns the queue; there is deliberately no overload that chooses for the caller. Pass
+     * {@code true} for a queue created for this iterator: closing the iterator clears it, releasing the elements still
+     * buffered. Pass {@code false} for a queue the caller supplied: its contents are left to the caller.
+     *
+     * @param <T> the element type
+     * @param iterator the source the background thread reads
+     * @param queue the queue the background thread fills; its capacity bounds how far it reads ahead
+     * @param hasMore if not {@code null}, set to {@code false} once the background thread has finished
+     * @param ownsQueue whether this iterator owns {@code queue}
+     * @return the buffered iterator
+     */
+    static <T> BufferedIterator<T> buffered(final Iterator<? extends T> iterator, final BlockingQueue<T> queue, final MutableBoolean hasMore,
+            final boolean ownsQueue) {
+        return buffered(N.asList(iterator), 1, queue, false, null, hasMore, ownsQueue);
     }
 
-    static <T> BufferedIterator<T> buffered(final Iterator<? extends T> iterator, final BlockingQueue<T> queue, final MutableBoolean hasMore) {
-        return buffered(N.asList(iterator), 1, queue, false, null, hasMore);
-    }
-
-    static <T> BufferedIterator<T> buffered(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum, final BlockingQueue<T> queue,
-            final boolean cancelUncompletedThreads, final AsyncExecutor asyncExecutor, final MutableBoolean hasMore) {
+    private static <T> BufferedIterator<T> buffered(final Collection<? extends Iterator<? extends T>> iterators, final int readThreadNum,
+            final BlockingQueue<T> queue, final boolean cancelUncompletedThreads, final AsyncExecutor asyncExecutor, final MutableBoolean hasMore,
+            final boolean ownsQueue) {
         if (N.isEmpty(iterators)) {
             return BufferedIterator.empty();
         }
 
         final int bufferSize = queue.remainingCapacity();
         final MutableBoolean onGoing = MutableBoolean.of(true);
+        // A producer failure also stops onGoing, but its queued prefix must remain readable until explicitly closed.
+        final AtomicBoolean closed = new AtomicBoolean();
         final int threadNum = Math.min(iterators.size(), readThreadNum);
         final Holder<AsyncExecutor> holderForAsyncExecutorUsed = new Holder<>();
         final T none = (T) NONE;
@@ -25225,11 +25557,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                                         //    }
                                     }
                                 }
+
+                                if (ownsQueue && closed.get()) {
+                                    // close may race an offer (including a timed offer that close's clear unblocks).
+                                    queue.clear();
+                                }
                             }
                         }
                     } catch (final Throwable e) { // NOSONAR: an Error (e.g. AssertionError) from a worker must be propagated via eHolder, not swallowed (which would silently truncate the stream); matches parallelMerge.
                         setError(eHolder, e, onGoing);
                     } finally {
+                        if (ownsQueue && closed.get()) {
+                            queue.clear();
+                        }
+
                         if ((threadCounter.decrementAndGet() == 0) && (hasMore != null)) {
                             hasMore.setFalse();
                         }
@@ -25240,7 +25581,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             noException = true;
         } finally {
             if (!noException) {
+                closed.set(true);
                 onGoing.setFalse();
+
+                if (ownsQueue) {
+                    queue.clear();
+                }
 
                 if (hasMore != null) {
                     hasMore.setFalse();
@@ -25251,11 +25597,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         holderForAsyncExecutorUsed.setValue(asyncExecutorToUse);
 
         return new BufferedIterator<>(bufferSize) {
-            private boolean isClosed = false;
             private T next = null;
 
             @Override
             public boolean hasNext() {
+                if (closed.get()) {
+                    next = null;
+                    return false;
+                }
+
                 try {
                     if (next == null && (next = queue.poll()) == null) {
                         // int cnt = 0;
@@ -25282,6 +25632,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     next = queue.poll(); // a producer that offered and then failed between the timed poll and the onGoing re-check
                 }
 
+                if (closed.get()) {
+                    next = null;
+                    return false;
+                }
+
                 // Report the producer failure only once every element it queued before failing has been handed out;
                 // otherwise buffered() would drop elements the unbuffered pipeline delivers before the failure.
                 if (next == null && eHolder.value() != null) {
@@ -25293,24 +25648,34 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
             @Override
             public T next() throws NoSuchElementException {
-                if (next == null && !hasNext()) {
+                if (closed.get()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T result = next == none ? null : next;
+                T result = next;
+                if (result == null) {
+                    if (!hasNext() || (result = next) == null) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+                }
+
+                // Close may clear lookahead after hasNext; never manufacture a null from that cleared slot.
                 next = null;
-                return result;
+                return result == none ? null : result;
             }
 
             @Override
             public void closeResource() {
-                if (isClosed) {
+                if (!closed.compareAndSet(false, true)) {
                     return;
                 }
 
-                isClosed = true;
-
                 onGoing.setFalse();
+                next = null;
+
+                if (ownsQueue) {
+                    queue.clear();
+                }
 
                 try {
                     if (cancelUncompletedThreads && N.notEmpty(futureList)) {
@@ -30549,6 +30914,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns [111, 22, 30]
      * }</pre>
      *
+     * <p>If copying {@code valuesForNone} or later result construction fails after all input iterators have been
+     * obtained, all input streams are closed. The original failure is rethrown with distinct close failures
+     * suppressed on it. Argument validation does not close the inputs; iterator acquisition failure closes only
+     * the successfully opened prefix.</p>
+     *
      * @param <T> the type of the elements in the streams
      * @param <R> the type of the result
      * @param streams the collection of streams to be zipped; {@code null} is treated as empty, in which case {@code valuesForNone} must also be empty
@@ -30569,8 +30939,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
-        //noinspection resource
-        return (Stream<R>) zipIterators(iterateAll(sources), valuesForNone, zipFunction).onClose(newCloseHandler(sources));
+        // Acquisition owns cleanup of its opened prefix. Once it succeeds, setup can still fail
+        // when the caller's defaults list is copied, before the result owns the close handlers.
+        final List<ObjIteratorEx<T>> iterators = iterateAll(sources);
+        try {
+            return (Stream<R>) zipIterators(iterators, valuesForNone, zipFunction).onClose(newCloseHandler(sources));
+        } catch (final RuntimeException | Error e) {
+            for (final Stream<? extends T> source : sources) {
+                closeOpenedSource(source, e);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -31627,6 +32006,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // contains [111, 220, 30], order may vary with multiple threads
      * }</pre>
      *
+     * <p>If copying {@code valuesForNone} or later result construction fails after all input iterators have been
+     * obtained, all input streams are closed. The original failure is rethrown with distinct close failures
+     * suppressed on it. Argument validation does not close the inputs; iterator acquisition failure closes only
+     * the successfully opened prefix.</p>
+     *
      * @param <T> the type of the elements in the streams
      * @param <R> the type of the result
      * @param streams the collection of streams; {@code null} is treated as empty, in which case {@code valuesForNone} must also be empty
@@ -31652,9 +32036,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         N.checkArgNotNull(zipFunction, cs.zipFunction);
         N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
-        //noinspection resource
-        return ((Stream<R>) parallelZipIterators(iterateAll(sources), valuesForNone, zipFunction, maxThreadNumForZipFunction))
-                .onClose(newCloseHandler(sources));
+        // Acquisition owns cleanup of its opened prefix. Once it succeeds, setup can still fail
+        // when the caller's defaults list is copied, before the result owns the close handlers.
+        final List<ObjIteratorEx<T>> iterators = iterateAll(sources);
+        try {
+            return ((Stream<R>) parallelZipIterators(iterators, valuesForNone, zipFunction, maxThreadNumForZipFunction)).onClose(newCloseHandler(sources));
+        } catch (final RuntimeException | Error e) {
+            for (final Stream<? extends T> source : sources) {
+                closeOpenedSource(source, e);
+            }
+            throw e;
+        }
     }
 
     /**
@@ -32191,17 +32583,25 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 if (hasNextA && hasNextB) {
                     if (nextSelector.apply(nextA, nextB) == MergeResult.TAKE_FIRST) {
                         hasNextA = false;
-                        return nextA;
+                        final T result = nextA;
+                        nextA = null;
+                        return result;
                     } else {
                         hasNextB = false;
-                        return nextB;
+                        final T result = nextB;
+                        nextB = null;
+                        return result;
                     }
                 } else if (hasNextA) {
                     hasNextA = false;
-                    return nextA;
+                    final T result = nextA;
+                    nextA = null;
+                    return result;
                 } else if (hasNextB) {
                     hasNextB = false;
-                    return nextB;
+                    final T result = nextB;
+                    nextB = null;
+                    return result;
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
