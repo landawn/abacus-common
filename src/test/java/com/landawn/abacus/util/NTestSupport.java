@@ -1,10 +1,10 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -35,6 +35,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.AfterEach;
@@ -45,9 +48,6 @@ import com.landawn.abacus.AbstractParserTest;
 import com.landawn.abacus.util.function.IntPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import testfixtures.entity.extendDirty.basic.Account;
 import testfixtures.entity.extendDirty.basic.AccountContact;
 import testfixtures.entity.extendDirty.basic.ExtendDirtyBasicPNL;

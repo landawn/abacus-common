@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class CommonUtilLastTest extends CommonUtilTestSupport {
+
+    // lastElement
+
     @Test
     public void testLastElement() {
         List<String> list = Arrays.asList("a", "b", "c");
@@ -60,6 +63,8 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
 
         Assertions.assertFalse(CommonUtil.lastElement((Iterator<String>) null).isPresent());
     }
+
+    // lastElements
 
     @Test
     public void testLastElements() {
@@ -118,108 +123,50 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
         Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.lastElements(list.iterator(), -1));
     }
 
+
+
+    // G05-130: the window is collected in a pre-sized ArrayDeque again, with a null element held as an internal
+    // sentinel; the sentinel must never reach the caller and the window must keep its encounter order.
     @Test
-    public void testLastNonNull() {
-        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(null, "first", null, "second", null);
-        assertTrue(result.isPresent());
-        assertEquals("second", result.get());
+    public void testLastElementsMapsTheNullSentinelBack() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
+
+        assertEquals(Arrays.asList("a", null, "c"), CommonUtil.lastElements(set, 3));
+        assertEquals(Arrays.asList("a", null, "c"), CommonUtil.lastElements(set, 9));
+        assertEquals(Collections.singletonList("c"), CommonUtil.lastElements(set, 1));
+        assertEquals(Arrays.asList(null, null), CommonUtil.lastElements(Arrays.asList(null, null, null).iterator(), 2));
+
+        // a real null, not a placeholder that merely prints as one, and a list the caller may modify
+        final List<String> window = CommonUtil.lastElements(Arrays.asList("a", null, "c").iterator(), 3);
+        assertNull(window.get(1));
+        window.set(0, "z");
+        assertEquals(Arrays.asList("z", null, "c"), window);
+
+        // a window wider than the ArrayDeque's initial capacity keeps every element, in order
+        final List<Integer> source = new ArrayList<>();
+
+        for (int i = 0; i < 3000; i++) {
+            source.add(i % 7 == 0 ? null : i); // many nulls: the iterator overload sees them all
+        }
+
+        assertEquals(source.subList(1000, 3000), CommonUtil.lastElements(source.iterator(), 2000));
+
+        // the same for a non-List Collection (a Set holds one null, so the elements are distinct here)
+        final List<Integer> distinct = new ArrayList<>();
+
+        for (int i = 0; i < 3000; i++) {
+            distinct.add(i == 5 ? null : i);
+        }
+
+        assertEquals(distinct.subList(1000, 3000), CommonUtil.lastElements(new LinkedHashSet<>(distinct), 2000));
     }
 
     @Test
-    public void testLastNonNullTwo() {
-        Assertions.assertEquals("b", CommonUtil.lastNonNull("a", "b").get());
+    public void testLastElementsSupportsNullElements() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
 
-        Assertions.assertEquals("b", CommonUtil.lastNonNull(null, "b").get());
-
-        Assertions.assertEquals("a", CommonUtil.lastNonNull("a", null).get());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(null, null).isPresent());
-    }
-
-    @Test
-    public void testLastNonNullThree() {
-        Assertions.assertEquals("c", CommonUtil.lastNonNull("a", "b", "c").get());
-
-        Assertions.assertEquals("b", CommonUtil.lastNonNull("a", "b", null).get());
-
-        Assertions.assertEquals("a", CommonUtil.lastNonNull("a", null, null).get());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(null, null, null).isPresent());
-    }
-
-    @Test
-    public void testLastNonNullVarargs() {
-        Assertions.assertEquals("d", CommonUtil.lastNonNull("a", "b", null, "d", null).get());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(new String[] {}).isPresent());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull((String[]) null).isPresent());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(new String[] { null, null, null }).isPresent());
-    }
-
-    @Test
-    public void testLastNonNullIterable() {
-        List<String> list = Arrays.asList("a", "b", null, "d", null);
-        Assertions.assertEquals("d", CommonUtil.lastNonNull(list).get());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(Collections.emptyList()).isPresent());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull((Iterable<String>) null).isPresent());
-
-        List<String> allNulls = Arrays.asList(null, null, null);
-        Assertions.assertFalse(CommonUtil.lastNonNull(allNulls).isPresent());
-
-        ArrayList<String> arrayList = new ArrayList<>(list);
-        Assertions.assertEquals("d", CommonUtil.lastNonNull(arrayList).get());
-
-    }
-
-    @Test
-    public void testLastNonNullIterator() {
-        List<String> list = Arrays.asList("a", "b", null, "d", null);
-        Assertions.assertEquals("d", CommonUtil.lastNonNull(list.iterator()).get());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull(Collections.emptyIterator()).isPresent());
-
-        Assertions.assertFalse(CommonUtil.lastNonNull((Iterator<String>) null).isPresent());
-
-        List<String> allNulls = Arrays.asList(null, null, null);
-        Assertions.assertFalse(CommonUtil.lastNonNull(allNulls.iterator()).isPresent());
-    }
-
-    @Test
-    public void testLastNonNull2() {
-        assertEquals("b", CommonUtil.lastNonNull("a", "b").get());
-        assertEquals("a", CommonUtil.lastNonNull("a", null).get());
-        assertFalse(CommonUtil.lastNonNull(null, null).isPresent());
-    }
-
-    // ========== lastNonNull(Iterable) - Deque and non-list Iterable paths ==========
-
-    @Test
-    public void testLastNonNull_Iterable_Deque() {
-        // LinkedList implements Deque and supports null; descendingIterator is used
-        java.util.LinkedList<String> deque = new java.util.LinkedList<>(Arrays.asList(null, "first", null, "last"));
-        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(deque);
-        assertTrue(result.isPresent());
-        assertEquals("last", result.get());
-    }
-
-    @Test
-    public void testLastNonNull_Iterable_Deque_AllNull() {
-        java.util.LinkedList<String> deque = new java.util.LinkedList<>(Arrays.asList(null, null));
-        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(deque);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testLastNonNullOrDefault_Array() {
-        String[] arr = { "first", "second", null, null };
-        assertEquals("second", CommonUtil.lastNonNullOrDefault(arr, "default"));
-        String[] allNull = { null, null };
-        assertEquals("default", CommonUtil.lastNonNullOrDefault(allNull, "default"));
-        assertEquals("default", CommonUtil.lastNonNullOrDefault((String[]) null, "default"));
+        assertEquals(Arrays.asList(null, "c"), CommonUtil.lastElements(set, 2));
+        assertEquals(Arrays.asList(null, "c"), CommonUtil.lastElements(Arrays.asList("a", null, "c").iterator(), 2));
     }
 
     @Test
@@ -233,85 +180,7 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
         assertEquals(Integer.valueOf(2), entry.get().getValue());
     }
 
-    @Test
-    public void testLastOrNullIfEmpty() {
-        List<String> list = Arrays.asList("a", "b");
-        assertEquals("b", CommonUtil.lastOrNullIfEmpty(list));
-        assertNull(CommonUtil.lastOrNullIfEmpty(new ArrayList<>()));
-    }
-
-    @Test
-    public void testLastOrNullIfEmptyArray() {
-        String[] arr = { "a", "b", "c" };
-        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(arr));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(new String[] {}));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((String[]) null));
-    }
-
-    @Test
-    public void testLastOrNullIfEmptyIterable() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(list));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(Collections.emptyList()));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((Iterable<String>) null));
-    }
-
-    @Test
-    public void testLastOrNullIfEmptyIterator() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(list.iterator()));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(Collections.emptyIterator()));
-
-        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((Iterator<String>) null));
-    }
-
-    @Test
-    public void testLastOrDefaultIfEmpty() {
-        List<String> list = Arrays.asList("a", "b");
-        assertEquals("b", CommonUtil.lastOrDefaultIfEmpty(list, "default"));
-        assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(new ArrayList<>(), "default"));
-    }
-
-    @Test
-    public void testLastOrDefaultIfEmptyArray() {
-        String[] arr = { "a", "b", "c" };
-        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(arr, "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(new String[] {}, "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((String[]) null, "default"));
-    }
-
-    @Test
-    public void testLastOrDefaultIfEmptyIterable() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(list, "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(Collections.emptyList(), "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((Iterable<String>) null, "default"));
-
-        ArrayList<String> arrayList = new ArrayList<>(list);
-        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(arrayList, "default"));
-
-        Deque<String> deque = new ArrayDeque<>(list);
-        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(deque, "default"));
-    }
-
-    @Test
-    public void testLastOrDefaultIfEmptyIterator() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(list.iterator(), "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(Collections.emptyIterator(), "default"));
-
-        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((Iterator<String>) null, "default"));
-    }
+    // lastIndexOf
 
     @Test
     public void testLastIndexOf() {
@@ -366,11 +235,36 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testLastIndexOfSubList_withStartIndex() {
-        List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d");
-        List<String> sub = Arrays.asList("c", "d");
-        Assertions.assertEquals(2, CommonUtil.lastIndexOfSubList(source, sub, 3));
-        Assertions.assertEquals(-1, CommonUtil.lastIndexOfSubList(source, sub, 1));
+    public void testLastIndexOf_toleranceStartIndexFromBackClamping() {
+        final float[] floats = { 1.0f, 2.0f, 1.0f };
+        assertEquals(-1, CommonUtil.lastIndexOf(floats, 1.0f, -1, 0.01f));
+        assertEquals(-1, CommonUtil.lastIndexOf(floats, 1.0f, -100, 0.01f));
+        assertEquals(2, CommonUtil.lastIndexOf(floats, 1.0f, floats.length, 0.01f));
+        assertEquals(2, CommonUtil.lastIndexOf(floats, 1.0f, 99, 0.01f));
+        assertEquals(0, CommonUtil.lastIndexOf(floats, 1.0f, 1, 0.01f));
+        assertEquals(-1, CommonUtil.lastIndexOf((float[]) null, 1.0f, 1, 0.01f));
+
+        final double[] doubles = { 1.0d, 2.0d, 1.0d };
+        assertEquals(-1, CommonUtil.lastIndexOf(doubles, 1.0d, -1, 0.01d));
+        assertEquals(-1, CommonUtil.lastIndexOf(doubles, 1.0d, -100, 0.01d));
+        assertEquals(2, CommonUtil.lastIndexOf(doubles, 1.0d, doubles.length, 0.01d));
+        assertEquals(2, CommonUtil.lastIndexOf(doubles, 1.0d, 99, 0.01d));
+        assertEquals(0, CommonUtil.lastIndexOf(doubles, 1.0d, 1, 0.01d));
+        assertEquals(-1, CommonUtil.lastIndexOf((double[]) null, 1.0d, 1, 0.01d));
+    }
+
+    @Test
+    public void testLastIndexOfIgnoreCase() {
+        String[] arr = { "Apple", "Banana", "apple" };
+        assertEquals(2, CommonUtil.lastIndexOfIgnoreCase(arr, "APPLE"));
+        assertEquals(-1, CommonUtil.lastIndexOfIgnoreCase(arr, "grape"));
+    }
+
+    @Test
+    public void testLastIndexOfIgnoreCase_withStartIndex() {
+        String[] arr = { "A", "B", "C", "D", "c" };
+        Assertions.assertEquals(2, CommonUtil.lastIndexOfIgnoreCase(arr, "C", 3));
+        Assertions.assertEquals(-1, CommonUtil.lastIndexOfIgnoreCase(arr, "C", -1));
     }
 
     @Test
@@ -390,17 +284,43 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testLastIndexOfIgnoreCase() {
-        String[] arr = { "Apple", "Banana", "apple" };
-        assertEquals(2, CommonUtil.lastIndexOfIgnoreCase(arr, "APPLE"));
-        assertEquals(-1, CommonUtil.lastIndexOfIgnoreCase(arr, "grape"));
+    public void testLastIndexOfSubList_withStartIndex() {
+        List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d");
+        List<String> sub = Arrays.asList("c", "d");
+        Assertions.assertEquals(2, CommonUtil.lastIndexOfSubList(source, sub, 3));
+        Assertions.assertEquals(-1, CommonUtil.lastIndexOfSubList(source, sub, 1));
+    }
+
+    // lastNonNull
+
+    @Test
+    public void testLastNonNull() {
+        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(null, "first", null, "second", null);
+        assertTrue(result.isPresent());
+        assertEquals("second", result.get());
     }
 
     @Test
-    public void testLastIndexOfIgnoreCase_withStartIndex() {
-        String[] arr = { "A", "B", "C", "D", "c" };
-        Assertions.assertEquals(2, CommonUtil.lastIndexOfIgnoreCase(arr, "C", 3));
-        Assertions.assertEquals(-1, CommonUtil.lastIndexOfIgnoreCase(arr, "C", -1));
+    public void testLastNonNull2() {
+        assertEquals("b", CommonUtil.lastNonNull("a", "b").get());
+        assertEquals("a", CommonUtil.lastNonNull("a", null).get());
+        assertFalse(CommonUtil.lastNonNull(null, null).isPresent());
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_Deque() {
+        // LinkedList implements Deque and supports null; descendingIterator is used
+        java.util.LinkedList<String> deque = new java.util.LinkedList<>(Arrays.asList(null, "first", null, "last"));
+        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(deque);
+        assertTrue(result.isPresent());
+        assertEquals("last", result.get());
+    }
+
+    @Test
+    public void testLastNonNull_Iterable_Deque_AllNull() {
+        java.util.LinkedList<String> deque = new java.util.LinkedList<>(Arrays.asList(null, null));
+        com.landawn.abacus.util.u.Optional<String> result = CommonUtil.lastNonNull(deque);
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -412,66 +332,160 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testLastElementsSupportsNullElements() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
+    public void testLastNonNullIterable() {
+        List<String> list = Arrays.asList("a", "b", null, "d", null);
+        Assertions.assertEquals("d", CommonUtil.lastNonNull(list).get());
 
-        assertEquals(Arrays.asList(null, "c"), CommonUtil.lastElements(set, 2));
-        assertEquals(Arrays.asList(null, "c"), CommonUtil.lastElements(Arrays.asList("a", null, "c").iterator(), 2));
-    }
+        Assertions.assertFalse(CommonUtil.lastNonNull(Collections.emptyList()).isPresent());
 
-    // G05-130: the window is collected in a pre-sized ArrayDeque again, with a null element held as an internal
-    // sentinel; the sentinel must never reach the caller and the window must keep its encounter order.
-    @Test
-    public void testLastElementsMapsTheNullSentinelBack() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
+        Assertions.assertFalse(CommonUtil.lastNonNull((Iterable<String>) null).isPresent());
 
-        assertEquals(Arrays.asList("a", null, "c"), CommonUtil.lastElements(set, 3));
-        assertEquals(Arrays.asList("a", null, "c"), CommonUtil.lastElements(set, 9));
-        assertEquals(Collections.singletonList("c"), CommonUtil.lastElements(set, 1));
-        assertEquals(Arrays.asList(null, null), CommonUtil.lastElements(Arrays.asList(null, null, null).iterator(), 2));
+        List<String> allNulls = Arrays.asList(null, null, null);
+        Assertions.assertFalse(CommonUtil.lastNonNull(allNulls).isPresent());
 
-        // a real null, not a placeholder that merely prints as one, and a list the caller may modify
-        final List<String> window = CommonUtil.lastElements(Arrays.asList("a", null, "c").iterator(), 3);
-        assertNull(window.get(1));
-        window.set(0, "z");
-        assertEquals(Arrays.asList("z", null, "c"), window);
+        ArrayList<String> arrayList = new ArrayList<>(list);
+        Assertions.assertEquals("d", CommonUtil.lastNonNull(arrayList).get());
 
-        // a window wider than the ArrayDeque's initial capacity keeps every element, in order
-        final List<Integer> source = new ArrayList<>();
-
-        for (int i = 0; i < 3000; i++) {
-            source.add(i % 7 == 0 ? null : i); // many nulls: the iterator overload sees them all
-        }
-
-        assertEquals(source.subList(1000, 3000), CommonUtil.lastElements(source.iterator(), 2000));
-
-        // the same for a non-List Collection (a Set holds one null, so the elements are distinct here)
-        final List<Integer> distinct = new ArrayList<>();
-
-        for (int i = 0; i < 3000; i++) {
-            distinct.add(i == 5 ? null : i);
-        }
-
-        assertEquals(distinct.subList(1000, 3000), CommonUtil.lastElements(new LinkedHashSet<>(distinct), 2000));
     }
 
     @Test
-    public void testLastIndexOf_toleranceStartIndexFromBackClamping() {
-        final float[] floats = { 1.0f, 2.0f, 1.0f };
-        assertEquals(-1, CommonUtil.lastIndexOf(floats, 1.0f, -1, 0.01f));
-        assertEquals(-1, CommonUtil.lastIndexOf(floats, 1.0f, -100, 0.01f));
-        assertEquals(2, CommonUtil.lastIndexOf(floats, 1.0f, floats.length, 0.01f));
-        assertEquals(2, CommonUtil.lastIndexOf(floats, 1.0f, 99, 0.01f));
-        assertEquals(0, CommonUtil.lastIndexOf(floats, 1.0f, 1, 0.01f));
-        assertEquals(-1, CommonUtil.lastIndexOf((float[]) null, 1.0f, 1, 0.01f));
+    public void testLastNonNullIterator() {
+        List<String> list = Arrays.asList("a", "b", null, "d", null);
+        Assertions.assertEquals("d", CommonUtil.lastNonNull(list.iterator()).get());
 
-        final double[] doubles = { 1.0d, 2.0d, 1.0d };
-        assertEquals(-1, CommonUtil.lastIndexOf(doubles, 1.0d, -1, 0.01d));
-        assertEquals(-1, CommonUtil.lastIndexOf(doubles, 1.0d, -100, 0.01d));
-        assertEquals(2, CommonUtil.lastIndexOf(doubles, 1.0d, doubles.length, 0.01d));
-        assertEquals(2, CommonUtil.lastIndexOf(doubles, 1.0d, 99, 0.01d));
-        assertEquals(0, CommonUtil.lastIndexOf(doubles, 1.0d, 1, 0.01d));
-        assertEquals(-1, CommonUtil.lastIndexOf((double[]) null, 1.0d, 1, 0.01d));
+        Assertions.assertFalse(CommonUtil.lastNonNull(Collections.emptyIterator()).isPresent());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull((Iterator<String>) null).isPresent());
+
+        List<String> allNulls = Arrays.asList(null, null, null);
+        Assertions.assertFalse(CommonUtil.lastNonNull(allNulls.iterator()).isPresent());
     }
+
+    @Test
+    public void testLastNonNullThree() {
+        Assertions.assertEquals("c", CommonUtil.lastNonNull("a", "b", "c").get());
+
+        Assertions.assertEquals("b", CommonUtil.lastNonNull("a", "b", null).get());
+
+        Assertions.assertEquals("a", CommonUtil.lastNonNull("a", null, null).get());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull(null, null, null).isPresent());
+    }
+
+    @Test
+    public void testLastNonNullTwo() {
+        Assertions.assertEquals("b", CommonUtil.lastNonNull("a", "b").get());
+
+        Assertions.assertEquals("b", CommonUtil.lastNonNull(null, "b").get());
+
+        Assertions.assertEquals("a", CommonUtil.lastNonNull("a", null).get());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull(null, null).isPresent());
+    }
+
+    @Test
+    public void testLastNonNullVarargs() {
+        Assertions.assertEquals("d", CommonUtil.lastNonNull("a", "b", null, "d", null).get());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull(new String[] {}).isPresent());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull((String[]) null).isPresent());
+
+        Assertions.assertFalse(CommonUtil.lastNonNull(new String[] { null, null, null }).isPresent());
+    }
+
+    @Test
+    public void testLastNonNullOrDefault_Array() {
+        String[] arr = { "first", "second", null, null };
+        assertEquals("second", CommonUtil.lastNonNullOrDefault(arr, "default"));
+        String[] allNull = { null, null };
+        assertEquals("default", CommonUtil.lastNonNullOrDefault(allNull, "default"));
+        assertEquals("default", CommonUtil.lastNonNullOrDefault((String[]) null, "default"));
+    }
+
+    // lastOrDefaultIfEmpty
+
+    @Test
+    public void testLastOrDefaultIfEmpty() {
+        List<String> list = Arrays.asList("a", "b");
+        assertEquals("b", CommonUtil.lastOrDefaultIfEmpty(list, "default"));
+        assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(new ArrayList<>(), "default"));
+    }
+
+    @Test
+    public void testLastOrDefaultIfEmptyArray() {
+        String[] arr = { "a", "b", "c" };
+        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(arr, "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(new String[] {}, "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((String[]) null, "default"));
+    }
+
+    @Test
+    public void testLastOrDefaultIfEmptyIterable() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(list, "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(Collections.emptyList(), "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((Iterable<String>) null, "default"));
+
+        ArrayList<String> arrayList = new ArrayList<>(list);
+        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(arrayList, "default"));
+
+        Deque<String> deque = new ArrayDeque<>(list);
+        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(deque, "default"));
+    }
+
+    @Test
+    public void testLastOrDefaultIfEmptyIterator() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        Assertions.assertEquals("c", CommonUtil.lastOrDefaultIfEmpty(list.iterator(), "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty(Collections.emptyIterator(), "default"));
+
+        Assertions.assertEquals("default", CommonUtil.lastOrDefaultIfEmpty((Iterator<String>) null, "default"));
+    }
+
+    // lastOrNullIfEmpty
+
+    @Test
+    public void testLastOrNullIfEmpty() {
+        List<String> list = Arrays.asList("a", "b");
+        assertEquals("b", CommonUtil.lastOrNullIfEmpty(list));
+        assertNull(CommonUtil.lastOrNullIfEmpty(new ArrayList<>()));
+    }
+
+    @Test
+    public void testLastOrNullIfEmptyArray() {
+        String[] arr = { "a", "b", "c" };
+        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(arr));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(new String[] {}));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((String[]) null));
+    }
+
+    @Test
+    public void testLastOrNullIfEmptyIterable() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(list));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(Collections.emptyList()));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((Iterable<String>) null));
+    }
+
+    @Test
+    public void testLastOrNullIfEmptyIterator() {
+        List<String> list = Arrays.asList("a", "b", "c");
+        Assertions.assertEquals("c", CommonUtil.lastOrNullIfEmpty(list.iterator()));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty(Collections.emptyIterator()));
+
+        Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((Iterator<String>) null));
+    }
+
 
 }

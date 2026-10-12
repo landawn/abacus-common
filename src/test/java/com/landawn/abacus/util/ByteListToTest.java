@@ -15,75 +15,6 @@ import org.junit.jupiter.api.Test;
 public class ByteListToTest extends ByteListTestSupport {
 
     @Test
-    public void testList() {
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-            List<Byte> result = list.toList(1, 4);
-            assertEquals(3, result.size());
-            assertEquals(Byte.valueOf((byte) 2), result.get(0));
-            assertEquals(Byte.valueOf((byte) 3), result.get(1));
-            assertEquals(Byte.valueOf((byte) 4), result.get(2));
-        }
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-            List<Byte> result = list.toList();
-            assertEquals(3, result.size());
-            assertEquals(Byte.valueOf((byte) 1), result.get(0));
-            assertEquals(Byte.valueOf((byte) 2), result.get(1));
-            assertEquals(Byte.valueOf((byte) 3), result.get(2));
-        }
-    }
-
-    @Test
-    public void testList_OutOfBounds() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(0, 4));
-    }
-
-    @Test
-    public void testList_Empty() {
-        List<Byte> result = list.toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetSet() {
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 4);
-            Set<Byte> result = list.toSet(1, 4);
-            assertEquals(2, result.size());
-            assertTrue(result.contains((byte) 2));
-            assertTrue(result.contains((byte) 3));
-        }
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 1, (byte) 3);
-            Set<Byte> result = list.toSet();
-            assertEquals(3, result.size());
-            assertTrue(result.contains((byte) 1));
-            assertTrue(result.contains((byte) 2));
-            assertTrue(result.contains((byte) 3));
-        }
-    }
-
-    @Test
-    public void testGetSet_OutOfBounds() {
-        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(0, 4));
-    }
-
-    @Test
-    public void testGetSet_Empty() {
-        Set<Byte> result = list.toSet();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     public void testArray() {
         {
             list = new ByteList();
@@ -107,33 +38,6 @@ public class ByteListToTest extends ByteListTestSupport {
 
             array[0] = 10;
             assertEquals((byte) 1, list.get(0));
-        }
-    }
-
-    @Test
-    public void testInt() {
-        {
-            list = new ByteList();
-            list.add((byte) 1);
-            list.add((byte) -1);
-            list.add((byte) 127);
-            list.add((byte) -128);
-
-            IntList intList = list.toIntList();
-            assertEquals(4, intList.size());
-            assertEquals(1, intList.get(0));
-            assertEquals(-1, intList.get(1));
-            assertEquals(127, intList.get(2));
-            assertEquals(-128, intList.get(3));
-        }
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-            IntList intList = list.toIntList();
-            assertEquals(3, intList.size());
-            assertEquals(1, intList.get(0));
-            assertEquals(2, intList.get(1));
-            assertEquals(3, intList.get(2));
         }
     }
 
@@ -173,6 +77,102 @@ public class ByteListToTest extends ByteListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(-1, 2, ArrayList::new));
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(0, 4, ArrayList::new));
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(2, 1, ArrayList::new));
+    }
+
+    @Test
+    public void testGetSet() {
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 4);
+            Set<Byte> result = list.toSet(1, 4);
+            assertEquals(2, result.size());
+            assertTrue(result.contains((byte) 2));
+            assertTrue(result.contains((byte) 3));
+        }
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 1, (byte) 3);
+            Set<Byte> result = list.toSet();
+            assertEquals(3, result.size());
+            assertTrue(result.contains((byte) 1));
+            assertTrue(result.contains((byte) 2));
+            assertTrue(result.contains((byte) 3));
+        }
+    }
+
+    @Test
+    public void testGetSet_Empty() {
+        Set<Byte> result = list.toSet();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetSet_OutOfBounds() {
+        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(0, 4));
+    }
+
+    @Test
+    public void testInt() {
+        {
+            list = new ByteList();
+            list.add((byte) 1);
+            list.add((byte) -1);
+            list.add((byte) 127);
+            list.add((byte) -128);
+
+            IntList intList = list.toIntList();
+            assertEquals(4, intList.size());
+            assertEquals(1, intList.get(0));
+            assertEquals(-1, intList.get(1));
+            assertEquals(127, intList.get(2));
+            assertEquals(-128, intList.get(3));
+        }
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+            IntList intList = list.toIntList();
+            assertEquals(3, intList.size());
+            assertEquals(1, intList.get(0));
+            assertEquals(2, intList.get(1));
+            assertEquals(3, intList.get(2));
+        }
+    }
+
+    @Test
+    public void testList() {
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+            List<Byte> result = list.toList(1, 4);
+            assertEquals(3, result.size());
+            assertEquals(Byte.valueOf((byte) 2), result.get(0));
+            assertEquals(Byte.valueOf((byte) 3), result.get(1));
+            assertEquals(Byte.valueOf((byte) 4), result.get(2));
+        }
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+            List<Byte> result = list.toList();
+            assertEquals(3, result.size());
+            assertEquals(Byte.valueOf((byte) 1), result.get(0));
+            assertEquals(Byte.valueOf((byte) 2), result.get(1));
+            assertEquals(Byte.valueOf((byte) 3), result.get(2));
+        }
+    }
+
+    @Test
+    public void testList_Empty() {
+        List<Byte> result = list.toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testList_OutOfBounds() {
+        ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(0, 4));
     }
 
     @Test
@@ -265,4 +265,5 @@ public class ByteListToTest extends ByteListTestSupport {
         String str = list.toString();
         assertNotNull(str);
     }
+
 }

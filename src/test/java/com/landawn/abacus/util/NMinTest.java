@@ -15,50 +15,7 @@ import org.junit.jupiter.api.Test;
 
 public class NMinTest extends NTestSupport {
 
-    @Test
-    public void testMinWithOnlyNaNAndNullValues() {
-        Double[] values = { null, Double.NaN, Double.NaN };
-        List<Double> list = Arrays.asList(values);
-        assertTrue(N.min(values).isNaN());
-        assertTrue(N.min(list).isNaN());
-        assertTrue(N.min(list.iterator()).isNaN());
-        assertTrue(N.min((Double) null, Double.valueOf(Double.NaN)).isNaN());
-        assertTrue(N.min((Double) null, Double.valueOf(Double.NaN), (Double) null).isNaN());
-
-        for (String[] labels : new String[][] { { "first", "second" }, { "null", "first", "second" } }) {
-            java.util.function.Function<String, Double> key = s -> "null".equals(s) ? null : Double.NaN;
-            assertEquals("first", N.minBy(labels, key));
-            assertEquals("first", N.minBy(Arrays.asList(labels), key));
-            assertEquals("first", N.minBy(Arrays.asList(labels).iterator(), key));
-        }
-    }
-
-    @Test
-    public void testMin_twoAndThreeValues() {
-        assertEquals('a', N.min('a', 'b'));
-        assertEquals((byte) 1, N.min((byte) 1, (byte) 2));
-        assertEquals((short) 1, N.min((short) 1, (short) 2));
-        assertEquals(1, N.min(1, 2));
-        assertEquals(1L, N.min(1L, 2L));
-        assertEquals(1.0f, N.min(1.0f, 2.0f), DELTAf);
-        assertEquals(1.0, N.min(1.0, 2.0), DELTA);
-
-        assertEquals('a', N.min('a', 'b', 'c'));
-        assertEquals((byte) 1, N.min((byte) 1, (byte) 2, (byte) 3));
-        assertEquals((short) 1, N.min((short) 1, (short) 2, (short) 3));
-        assertEquals(1, N.min(1, 2, 3));
-        assertEquals(1L, N.min(1L, 2L, 3L));
-        assertEquals(1.0f, N.min(1.0f, 2.0f, 3.0f), DELTAf);
-        assertEquals(1.0, N.min(1.0, 2.0, 3.0), DELTA);
-
-        assertEquals("a", N.min("a", "b"));
-        assertEquals("a", N.min("a", "b", "c"));
-        assertEquals("a", N.min(null, "a"));
-        assertEquals("a", N.min("a", null));
-        assertEquals(Integer.valueOf(1), N.min(1, 2, Comparator.naturalOrder()));
-        assertEquals("b", N.min("a", "b", Comparator.reverseOrder()));
-        assertEquals("c", N.min("a", "b", "c", Comparator.reverseOrder()));
-    }
+    // min
 
     @Test
     public void testMin_arrays() {
@@ -120,6 +77,82 @@ public class NMinTest extends NTestSupport {
     }
 
     @Test
+    public void testMin_nanAndEmpty() {
+        assertEquals(Float.NaN, N.min(Float.NaN, 1.0f), DELTA);
+        assertEquals(Float.NaN, N.min(1.0f, Float.NaN), DELTA);
+        assertEquals(Float.NaN, N.min(new float[] { 3.0f, 1.0f, Float.NaN, 2.0f }), DELTA);
+        assertTrue(Float.isNaN(N.min(new float[] { 1.0f, Float.NaN, 3.0f })));
+        assertEquals(1.0f, N.min(new float[] { 1.0f, Float.NaN, 3.0f }, 0, 1), 0.0f);
+
+        assertEquals(-1, N.min(new int[] { 3, 1, 4, 1, 5, 9, -1, 2, 6 }));
+        assertEquals(Integer.valueOf(1), N.min(new Integer[] { 3, 1, null, 5 }));
+        assertEquals("apple", N.min(Arrays.asList("zebra", "apple", "Banana"), String.CASE_INSENSITIVE_ORDER));
+    }
+
+    @Test
+    public void testMin_nullCollectionRangeCheckRunsFirst() {
+        assertThrows(IndexOutOfBoundsException.class, () -> N.min((java.util.Collection<String>) null, 0, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.min((java.util.Collection<String>) null, 0, 1, Comparator.naturalOrder()));
+        assertThrows(IllegalArgumentException.class, () -> N.min((java.util.Collection<String>) null, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> N.min((java.util.Collection<String>) null, 0, 0, Comparator.naturalOrder()));
+    }
+
+    @Test
+    public void testMin_twoAndThreeValues() {
+        assertEquals('a', N.min('a', 'b'));
+        assertEquals((byte) 1, N.min((byte) 1, (byte) 2));
+        assertEquals((short) 1, N.min((short) 1, (short) 2));
+        assertEquals(1, N.min(1, 2));
+        assertEquals(1L, N.min(1L, 2L));
+        assertEquals(1.0f, N.min(1.0f, 2.0f), DELTAf);
+        assertEquals(1.0, N.min(1.0, 2.0), DELTA);
+
+        assertEquals('a', N.min('a', 'b', 'c'));
+        assertEquals((byte) 1, N.min((byte) 1, (byte) 2, (byte) 3));
+        assertEquals((short) 1, N.min((short) 1, (short) 2, (short) 3));
+        assertEquals(1, N.min(1, 2, 3));
+        assertEquals(1L, N.min(1L, 2L, 3L));
+        assertEquals(1.0f, N.min(1.0f, 2.0f, 3.0f), DELTAf);
+        assertEquals(1.0, N.min(1.0, 2.0, 3.0), DELTA);
+
+        assertEquals("a", N.min("a", "b"));
+        assertEquals("a", N.min("a", "b", "c"));
+        assertEquals("a", N.min(null, "a"));
+        assertEquals("a", N.min("a", null));
+        assertEquals(Integer.valueOf(1), N.min(1, 2, Comparator.naturalOrder()));
+        assertEquals("b", N.min("a", "b", Comparator.reverseOrder()));
+        assertEquals("c", N.min("a", "b", "c", Comparator.reverseOrder()));
+    }
+
+    @Test
+    public void testMinWithOnlyNaNAndNullValues() {
+        Double[] values = { null, Double.NaN, Double.NaN };
+        List<Double> list = Arrays.asList(values);
+        assertTrue(N.min(values).isNaN());
+        assertTrue(N.min(list).isNaN());
+        assertTrue(N.min(list.iterator()).isNaN());
+        assertTrue(N.min((Double) null, Double.valueOf(Double.NaN)).isNaN());
+        assertTrue(N.min((Double) null, Double.valueOf(Double.NaN), (Double) null).isNaN());
+
+        for (String[] labels : new String[][] { { "first", "second" }, { "null", "first", "second" } }) {
+            java.util.function.Function<String, Double> key = s -> "null".equals(s) ? null : Double.NaN;
+            assertEquals("first", N.minBy(labels, key));
+            assertEquals("first", N.minBy(Arrays.asList(labels), key));
+            assertEquals("first", N.minBy(Arrays.asList(labels).iterator(), key));
+        }
+    }
+
+    @Test
+    public void testMinAll() {
+        assertEquals(Arrays.asList(1, 1), N.minAll(new Integer[] { 1, 2, 3, 1, 4 }));
+        assertEquals(Arrays.asList(1, 1), N.minAll(new Integer[] { 1, 2, 3, 1, 4 }, Comparator.naturalOrder()));
+        assertEquals(Arrays.asList(1, 1), N.minAll(Arrays.asList(1, 2, 3, 1, 4)));
+        assertEquals(Arrays.asList(1, 1), N.minAll(Arrays.asList(1, 2, 3, 1, 4).iterator()));
+        assertEquals(Collections.emptyList(), N.minAll(new Integer[] {}));
+        assertEquals(Collections.emptyList(), N.minAll(Collections.emptyList()));
+    }
+
+    @Test
     public void testMinBy() {
         Person[] people = { new Person("John", 25), new Person("Jane", 22), new Person("Bob", 30) };
         assertEquals("Jane", N.minBy(people, p -> p.age).name);
@@ -131,13 +164,41 @@ public class NMinTest extends NTestSupport {
     }
 
     @Test
-    public void testMinAll() {
-        assertEquals(Arrays.asList(1, 1), N.minAll(new Integer[] { 1, 2, 3, 1, 4 }));
-        assertEquals(Arrays.asList(1, 1), N.minAll(new Integer[] { 1, 2, 3, 1, 4 }, Comparator.naturalOrder()));
-        assertEquals(Arrays.asList(1, 1), N.minAll(Arrays.asList(1, 2, 3, 1, 4)));
-        assertEquals(Arrays.asList(1, 1), N.minAll(Arrays.asList(1, 2, 3, 1, 4).iterator()));
-        assertEquals(Collections.emptyList(), N.minAll(new Integer[] {}));
-        assertEquals(Collections.emptyList(), N.minAll(Collections.emptyList()));
+    public void testMinBy_keyExtractorIsAppliedToNullElements() {
+        // The extractor is applied to every element that takes part in a comparison, a null element included.
+        assertThrows(NullPointerException.class, () -> N.minBy(new String[] { null, "x" }, String::length));
+        assertThrows(NullPointerException.class, () -> N.minBy(new String[] { null, null }, String::length));
+        assertThrows(NullPointerException.class, () -> N.minBy(Arrays.asList(null, "x"), String::length));
+
+        // ... except for a single-element input, where no comparison is made at all.
+        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        assertNull(N.minBy(new String[] { null }, s -> {
+            calls.incrementAndGet();
+            return s == null ? null : s.length();
+        }));
+        assertEquals(0, calls.get());
+
+        // A null element ranks last only because of the key it is mapped to: a null key does it, and so does a
+        // maximal non-null key.
+        assertEquals("x", N.minBy(new String[] { null, "x" }, s -> s == null ? null : s.length()));
+        assertEquals("x", N.minBy(new String[] { null, "x" }, s -> s == null ? Integer.MAX_VALUE : s.length()));
+    }
+
+    @Test
+    public void testMinMax() {
+        assertEquals(Pair.of(1, 5), N.minMax(new Integer[] { 1, 2, 3, 4, 5 }));
+        assertEquals(Pair.of(1, 5), N.minMax(new Integer[] { 1, 2, 3, 4, 5 }, Comparator.naturalOrder()));
+        assertEquals(Pair.of(1, 5), N.minMax(Arrays.asList(1, 2, 3, 4, 5)));
+        assertEquals(Pair.of(1, 5), N.minMax(Arrays.asList(1, 2, 3, 4, 5).iterator()));
+        assertEquals(Pair.of(1, 1), N.minMax(new Integer[] { 1 }));
+        assertEquals(Pair.of(1, 3), N.minMax(new Integer[] { null, 3, 1, null, 2 }));
+        assertEquals(Pair.of(null, null), N.minMax(new Integer[] { null, null }));
+        assertEquals(Pair.of("five", "two"), N.minMax(stringArray));
+        assertEquals(Pair.of("a", "c"), N.minMax(Arrays.asList("b", "c", "a"), String::compareTo));
+
+        assertThrows(IllegalArgumentException.class, () -> N.minMax(new Integer[] {}));
+        assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<String> emptyList().iterator()));
     }
 
     @Test
@@ -165,62 +226,4 @@ public class NMinTest extends NTestSupport {
         assertEquals(Integer.valueOf(99), N.minValueOrDefaultIfEmpty(Arrays.asList("a", "b").iterator(), toNull, 99));
     }
 
-    @Test
-    public void testMinMax() {
-        assertEquals(Pair.of(1, 5), N.minMax(new Integer[] { 1, 2, 3, 4, 5 }));
-        assertEquals(Pair.of(1, 5), N.minMax(new Integer[] { 1, 2, 3, 4, 5 }, Comparator.naturalOrder()));
-        assertEquals(Pair.of(1, 5), N.minMax(Arrays.asList(1, 2, 3, 4, 5)));
-        assertEquals(Pair.of(1, 5), N.minMax(Arrays.asList(1, 2, 3, 4, 5).iterator()));
-        assertEquals(Pair.of(1, 1), N.minMax(new Integer[] { 1 }));
-        assertEquals(Pair.of(1, 3), N.minMax(new Integer[] { null, 3, 1, null, 2 }));
-        assertEquals(Pair.of(null, null), N.minMax(new Integer[] { null, null }));
-        assertEquals(Pair.of("five", "two"), N.minMax(stringArray));
-        assertEquals(Pair.of("a", "c"), N.minMax(Arrays.asList("b", "c", "a"), String::compareTo));
-
-        assertThrows(IllegalArgumentException.class, () -> N.minMax(new Integer[] {}));
-        assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.emptyList()));
-        assertThrows(IllegalArgumentException.class, () -> N.minMax(Collections.<String> emptyList().iterator()));
-    }
-
-    @Test
-    public void testMin_nanAndEmpty() {
-        assertEquals(Float.NaN, N.min(Float.NaN, 1.0f), DELTA);
-        assertEquals(Float.NaN, N.min(1.0f, Float.NaN), DELTA);
-        assertEquals(Float.NaN, N.min(new float[] { 3.0f, 1.0f, Float.NaN, 2.0f }), DELTA);
-        assertTrue(Float.isNaN(N.min(new float[] { 1.0f, Float.NaN, 3.0f })));
-        assertEquals(1.0f, N.min(new float[] { 1.0f, Float.NaN, 3.0f }, 0, 1), 0.0f);
-
-        assertEquals(-1, N.min(new int[] { 3, 1, 4, 1, 5, 9, -1, 2, 6 }));
-        assertEquals(Integer.valueOf(1), N.min(new Integer[] { 3, 1, null, 5 }));
-        assertEquals("apple", N.min(Arrays.asList("zebra", "apple", "Banana"), String.CASE_INSENSITIVE_ORDER));
-    }
-
-    @Test
-    public void testMinBy_keyExtractorIsAppliedToNullElements() {
-        // The extractor is applied to every element that takes part in a comparison, a null element included.
-        assertThrows(NullPointerException.class, () -> N.minBy(new String[] { null, "x" }, String::length));
-        assertThrows(NullPointerException.class, () -> N.minBy(new String[] { null, null }, String::length));
-        assertThrows(NullPointerException.class, () -> N.minBy(Arrays.asList(null, "x"), String::length));
-
-        // ... except for a single-element input, where no comparison is made at all.
-        final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
-        assertNull(N.minBy(new String[] { null }, s -> {
-            calls.incrementAndGet();
-            return s == null ? null : s.length();
-        }));
-        assertEquals(0, calls.get());
-
-        // A null element ranks last only because of the key it is mapped to: a null key does it, and so does a
-        // maximal non-null key.
-        assertEquals("x", N.minBy(new String[] { null, "x" }, s -> s == null ? null : s.length()));
-        assertEquals("x", N.minBy(new String[] { null, "x" }, s -> s == null ? Integer.MAX_VALUE : s.length()));
-    }
-
-    @Test
-    public void testMin_nullCollectionRangeCheckRunsFirst() {
-        assertThrows(IndexOutOfBoundsException.class, () -> N.min((java.util.Collection<String>) null, 0, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.min((java.util.Collection<String>) null, 0, 1, Comparator.naturalOrder()));
-        assertThrows(IllegalArgumentException.class, () -> N.min((java.util.Collection<String>) null, 0, 0));
-        assertThrows(IllegalArgumentException.class, () -> N.min((java.util.Collection<String>) null, 0, 0, Comparator.naturalOrder()));
-    }
 }

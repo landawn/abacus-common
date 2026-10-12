@@ -17,24 +17,40 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.TriPredicate;
 
 public class RowDatasetFilterTest extends RowDatasetTestSupport {
-    @Test
-    public void testFilterWithPredicate() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 30;
-        Dataset filtered = dataset.filter(filter);
 
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
+    // filter
+
+    @Test
+    public void testFilter_MultiCols_EmptyDataset_ReturnsEmpty() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
+        Dataset result = ds.filter(Arrays.asList("id", "name"), (Predicate<DisposableObjArray>) arr -> true);
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 
     @Test
-    public void testFilterWithPredicateAndMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 25;
-        Dataset filtered = dataset.filter(filter, 2);
+    public void testFilter_SingleCol_EmptyDataset_ReturnsEmpty() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>())));
+        Dataset result = ds.filter("id", (Predicate<Integer>) v -> v > 0);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
 
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
+    @Test
+    public void testFilter_Tuple2_EmptyDataset_ReturnsEmpty() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
+        Dataset result = ds.filter(Tuple.of("id", "name"), (BiPredicate<Integer, String>) (id, name) -> id > 0);
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testFilter_Tuple3_EmptyDataset_ReturnsEmpty() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name", "age")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())));
+        Dataset result = ds.filter(Tuple.of("id", "name", "age"), (TriPredicate<Integer, String, Integer>) (id, name, age) -> id > 0);
+        assertNotNull(result);
+        assertEquals(0, result.size());
     }
 
     @Test
@@ -58,6 +74,26 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
     }
 
     @Test
+    public void testFilterByColumnWithRowRange() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<Object> filter = city -> "NYC".equals(city);
+        Dataset filtered = dataset.filter(0, 5, "city", filter);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByColumnWithRowRangeAndMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<Object> filter = city -> city != null;
+        Dataset filtered = dataset.filter(1, 4, "city", filter, 2);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
     public void testFilterByMultipleColumns() {
         final RowDataset dataset = createFiveRowCityDataset();
         Predicate<DisposableObjArray> filter = arr -> "NYC".equals(arr.get(0)) && ((Integer) arr.get(1)) > 30;
@@ -78,40 +114,30 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
     }
 
     @Test
+    public void testFilterByMultipleColumnsWithRowRange() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<DisposableObjArray> filter = arr -> true;
+        Dataset filtered = dataset.filter(1, 3, CommonUtil.toList("name", "age"), filter);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByMultipleColumnsWithRowRangeAndMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<DisposableObjArray> filter = arr -> true;
+        Dataset filtered = dataset.filter(0, 5, CommonUtil.toList("id", "name"), filter, 4);
+
+        assertNotNull(filtered);
+        assertEquals(4, filtered.size());
+    }
+
+    @Test
     public void testFilterByTuple2() {
         final RowDataset dataset = createFiveRowCityDataset();
         BiPredicate<Object, Object> filter = (name, age) -> ((Integer) age) > 30;
         Dataset filtered = dataset.filter(Tuple.of("name", "age"), filter);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple2WithMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        BiPredicate<Object, Object> filter = (id, name) -> ((Integer) id) <= 3;
-        Dataset filtered = dataset.filter(Tuple.of("id", "name"), filter, 2);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple3() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) age) < 30;
-        Dataset filtered = dataset.filter(Tuple.of("id", "name", "age"), filter);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple3WithMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        TriPredicate<Object, Object, Object> filter = (name, age, city) -> true;
-        Dataset filtered = dataset.filter(Tuple.of("name", "age", "city"), filter, 2);
 
         assertNotNull(filtered);
         assertEquals(2, filtered.size());
@@ -130,6 +156,46 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
     }
 
     @Test
+    public void testFilterByTuple2WithMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        BiPredicate<Object, Object> filter = (id, name) -> ((Integer) id) <= 3;
+        Dataset filtered = dataset.filter(Tuple.of("id", "name"), filter, 2);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple2WithRowRange() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        BiPredicate<Object, Object> filter = (name, city) -> "LA".equals(city);
+        Dataset filtered = dataset.filter(1, 5, Tuple.of("name", "city"), filter);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple2WithRowRangeAndMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        BiPredicate<Object, Object> filter = (id, age) -> true;
+        Dataset filtered = dataset.filter(0, 5, Tuple.of("id", "age"), filter, 3);
+
+        assertNotNull(filtered);
+        assertEquals(3, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple3() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) age) < 30;
+        Dataset filtered = dataset.filter(Tuple.of("id", "name", "age"), filter);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
     public void testFilterByTuple3_NegativeMax_ThrowsIllegalArgumentException() {
         final RowDataset dataset = createFiveRowCityDataset();
         final TriPredicate<Object, Object, Object> filter = (name, age, city) -> true;
@@ -139,6 +205,36 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
 
         ex = assertThrows(IllegalArgumentException.class, () -> dataset.filter(0, dataset.size(), Tuple.of("name", "age", "city"), filter, -1));
         assertTrue(ex.getMessage().contains("max"));
+    }
+
+    @Test
+    public void testFilterByTuple3WithMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        TriPredicate<Object, Object, Object> filter = (name, age, city) -> true;
+        Dataset filtered = dataset.filter(Tuple.of("name", "age", "city"), filter, 2);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple3WithRowRange() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) id) > 2;
+        Dataset filtered = dataset.filter(1, 5, Tuple.of("id", "name", "age"), filter);
+
+        assertNotNull(filtered);
+        assertEquals(3, filtered.size());
+    }
+
+    @Test
+    public void testFilterByTuple3WithRowRangeAndMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        TriPredicate<Object, Object, Object> filter = (id, age, city) -> true;
+        Dataset filtered = dataset.filter(0, 4, Tuple.of("id", "age", "city"), filter, 3);
+
+        assertNotNull(filtered);
+        assertEquals(3, filtered.size());
     }
 
     @Test
@@ -177,39 +273,24 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
         assertTrue(ex.getMessage().contains("nope"), ex.getMessage());
     }
 
-    // ========== filter - empty dataset ==========
-
     @Test
-    public void testFilter_Tuple2_EmptyDataset_ReturnsEmpty() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
-        Dataset result = ds.filter(Tuple.of("id", "name"), (BiPredicate<Integer, String>) (id, name) -> id > 0);
-        assertNotNull(result);
-        assertEquals(0, result.size());
+    public void testFilterWithPredicate() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 30;
+        Dataset filtered = dataset.filter(filter);
+
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
     }
 
     @Test
-    public void testFilter_Tuple3_EmptyDataset_ReturnsEmpty() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name", "age")),
-                new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>(), new ArrayList<>())));
-        Dataset result = ds.filter(Tuple.of("id", "name", "age"), (TriPredicate<Integer, String, Integer>) (id, name, age) -> id > 0);
-        assertNotNull(result);
-        assertEquals(0, result.size());
-    }
+    public void testFilterWithPredicateAndMax() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Predicate<DisposableObjArray> filter = arr -> ((Integer) arr.get(2)) > 25;
+        Dataset filtered = dataset.filter(filter, 2);
 
-    @Test
-    public void testFilter_SingleCol_EmptyDataset_ReturnsEmpty() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>())));
-        Dataset result = ds.filter("id", (Predicate<Integer>) v -> v > 0);
-        assertNotNull(result);
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void testFilter_MultiCols_EmptyDataset_ReturnsEmpty() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
-        Dataset result = ds.filter(Arrays.asList("id", "name"), (Predicate<DisposableObjArray>) arr -> true);
-        assertNotNull(result);
-        assertEquals(0, result.size());
+        assertNotNull(filtered);
+        assertEquals(2, filtered.size());
     }
 
     @Test
@@ -232,84 +313,5 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
         assertEquals(3, filtered.size());
     }
 
-    @Test
-    public void testFilterByColumnWithRowRange() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<Object> filter = city -> "NYC".equals(city);
-        Dataset filtered = dataset.filter(0, 5, "city", filter);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByColumnWithRowRangeAndMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<Object> filter = city -> city != null;
-        Dataset filtered = dataset.filter(1, 4, "city", filter, 2);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByMultipleColumnsWithRowRange() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<DisposableObjArray> filter = arr -> true;
-        Dataset filtered = dataset.filter(1, 3, CommonUtil.toList("name", "age"), filter);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByMultipleColumnsWithRowRangeAndMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Predicate<DisposableObjArray> filter = arr -> true;
-        Dataset filtered = dataset.filter(0, 5, CommonUtil.toList("id", "name"), filter, 4);
-
-        assertNotNull(filtered);
-        assertEquals(4, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple2WithRowRange() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        BiPredicate<Object, Object> filter = (name, city) -> "LA".equals(city);
-        Dataset filtered = dataset.filter(1, 5, Tuple.of("name", "city"), filter);
-
-        assertNotNull(filtered);
-        assertEquals(2, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple2WithRowRangeAndMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        BiPredicate<Object, Object> filter = (id, age) -> true;
-        Dataset filtered = dataset.filter(0, 5, Tuple.of("id", "age"), filter, 3);
-
-        assertNotNull(filtered);
-        assertEquals(3, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple3WithRowRange() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        TriPredicate<Object, Object, Object> filter = (id, name, age) -> ((Integer) id) > 2;
-        Dataset filtered = dataset.filter(1, 5, Tuple.of("id", "name", "age"), filter);
-
-        assertNotNull(filtered);
-        assertEquals(3, filtered.size());
-    }
-
-    @Test
-    public void testFilterByTuple3WithRowRangeAndMax() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        TriPredicate<Object, Object, Object> filter = (id, age, city) -> true;
-        Dataset filtered = dataset.filter(0, 4, Tuple.of("id", "age", "city"), filter, 3);
-
-        assertNotNull(filtered);
-        assertEquals(3, filtered.size());
-    }
 
 }

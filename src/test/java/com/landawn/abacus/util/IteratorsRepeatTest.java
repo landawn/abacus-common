@@ -16,6 +16,34 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.stream.Stream;
 
 public class IteratorsRepeatTest extends IteratorsTestSupport {
+
+    // repeat
+
+    @Test
+    public void test_repeat() throws Exception {
+        Stream.of(Iterators.repeatElements(CommonUtil.toList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.cycle(CommonUtil.toList(1, 2, 3), 3)).println();
+        Stream.of(Iterators.repeatElementsToSize(CommonUtil.toList(1, 2, 3), 7)).println();
+        Stream.of(Iterators.cycleToSize(CommonUtil.toList(1, 2, 3), 5)).println();
+
+        assertEquals(3, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
+
+        assertEquals(3, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
+        assertEquals(8, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
+    }
+
+    @Test
+    public void testRepeat_Negative_Throws() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("x", -1));
+    }
+
+    @Test
+    public void testRepeat_ZeroTimes() {
+        ObjIterator<String> r = Iterators.repeat("x", 0);
+        assertFalse(r.hasNext());
+    }
+
     @Test
     public void testRepeatElement() {
         ObjIterator<String> iter = Iterators.repeat("hello", 3);
@@ -37,44 +65,9 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertFalse(iter.hasNext());
     }
 
-    // ===================== repeat Additional Edge Cases =====================
-
     @Test
-    public void testRepeatInt_One() {
-        ObjIterator<String> iter = Iterators.repeat("x", 1);
-        assertTrue(iter.hasNext());
-        assertEquals("x", iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testRepeatLong_One() {
-        ObjIterator<String> iter = Iterators.repeat("x", 1L);
-        assertTrue(iter.hasNext());
-        assertEquals("x", iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testRepeatInt_NullElement() {
-        ObjIterator<String> iter = Iterators.repeat(null, 2);
-        assertEquals(null, iter.next());
-        assertEquals(null, iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void test_repeat() throws Exception {
-        Stream.of(Iterators.repeatElements(CommonUtil.toList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.cycle(CommonUtil.toList(1, 2, 3), 3)).println();
-        Stream.of(Iterators.repeatElementsToSize(CommonUtil.toList(1, 2, 3), 7)).println();
-        Stream.of(Iterators.cycleToSize(CommonUtil.toList(1, 2, 3), 5)).println();
-
-        assertEquals(3, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, CommonUtil.repeatElementsToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
-
-        assertEquals(3, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 3).size());
-        assertEquals(8, CommonUtil.cycleToSize(CommonUtil.toList(1, 2, 3, 4, 5, 6), 8).size());
+    public void testRepeatElementNegative() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("hello", -1));
     }
 
     @Test
@@ -89,6 +82,22 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     @Test
+    public void testRepeatInt_NullElement() {
+        ObjIterator<String> iter = Iterators.repeat(null, 2);
+        assertEquals(null, iter.next());
+        assertEquals(null, iter.next());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testRepeatInt_One() {
+        ObjIterator<String> iter = Iterators.repeat("x", 1);
+        assertTrue(iter.hasNext());
+        assertEquals("x", iter.next());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
     public void testRepeatLong() {
         ObjIterator<String> iter = Iterators.repeat("b", 4L);
         assertEquals(Arrays.asList("b", "b", "b", "b"), iter.toList());
@@ -100,33 +109,11 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     @Test
-    public void testRepeatCollection() {
-        ObjIterator<Integer> iter = Iterators.cycle(Arrays.asList(1, 2), 3);
-        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), iter.toList());
-
-        iter = Iterators.cycle(Arrays.asList(1, 2, 3), 0);
+    public void testRepeatLong_One() {
+        ObjIterator<String> iter = Iterators.repeat("x", 1L);
+        assertTrue(iter.hasNext());
+        assertEquals("x", iter.next());
         assertFalse(iter.hasNext());
-
-        iter = Iterators.cycle(null, 2);
-        assertFalse(iter.hasNext());
-
-        assertThrows(IllegalArgumentException.class, () -> Iterators.cycle(Arrays.asList(1), -1));
-    }
-
-    @Test
-    public void testRepeatCollectionToSize() {
-        ObjIterator<Integer> iter = Iterators.cycleToSize(Arrays.asList(1, 2), 5);
-        assertEquals(Arrays.asList(1, 2, 1, 2, 1), iter.toList());
-
-        iter = Iterators.cycleToSize(Arrays.asList(1, 2, 3), 8);
-        assertEquals(Arrays.asList(1, 2, 3, 1, 2, 3, 1, 2), iter.toList());
-
-        iter = Iterators.cycleToSize(Arrays.asList(1, 2), 0);
-        assertFalse(iter.hasNext());
-
-        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(null, 5));
-
-        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(Arrays.asList(1), -1));
     }
 
     @Test
@@ -174,49 +161,36 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     @Test
-    public void testRepeatElementNegative() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("hello", -1));
-    }
+    public void testRepeatCollection() {
+        ObjIterator<Integer> iter = Iterators.cycle(Arrays.asList(1, 2), 3);
+        assertEquals(Arrays.asList(1, 2, 1, 2, 1, 2), iter.toList());
 
-    // ===================== repeatElements Dedicated Tests =====================
-
-    @Test
-    public void testRepeatElements_Dedicated() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2), 3);
-        assertEquals(Arrays.asList(1, 1, 1, 2, 2, 2), iter.toList());
-    }
-
-    @Test
-    public void testRepeatElements_OneRepeat() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2, 3), 1);
-        assertEquals(Arrays.asList(1, 2, 3), iter.toList());
-    }
-
-    @Test
-    public void testRepeatElements_Zero() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2), 0);
+        iter = Iterators.cycle(Arrays.asList(1, 2, 3), 0);
         assertFalse(iter.hasNext());
-    }
 
-    @Test
-    public void testRepeatElements_NullIterable() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(null, 2);
+        iter = Iterators.cycle(null, 2);
         assertFalse(iter.hasNext());
-    }
 
-    // ===================== repeatElements Additional Edge Cases =====================
-
-    @Test
-    public void testRepeatElements_SingleElement() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(5), 3);
-        assertEquals(Arrays.asList(5, 5, 5), iter.toList());
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycle(Arrays.asList(1), -1));
     }
 
     @Test
-    public void testRepeatElements_EmptyCollection() {
-        ObjIterator<Integer> iter = Iterators.repeatElements(Collections.emptyList(), 5);
+    public void testRepeatCollectionToSize() {
+        ObjIterator<Integer> iter = Iterators.cycleToSize(Arrays.asList(1, 2), 5);
+        assertEquals(Arrays.asList(1, 2, 1, 2, 1), iter.toList());
+
+        iter = Iterators.cycleToSize(Arrays.asList(1, 2, 3), 8);
+        assertEquals(Arrays.asList(1, 2, 3, 1, 2, 3, 1, 2), iter.toList());
+
+        iter = Iterators.cycleToSize(Arrays.asList(1, 2), 0);
         assertFalse(iter.hasNext());
+
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(null, 5));
+
+        assertThrows(IllegalArgumentException.class, () -> Iterators.cycleToSize(Arrays.asList(1), -1));
     }
+
+    // repeatElements
 
     @Test
     public void testRepeatElements() {
@@ -232,52 +206,43 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElements(Arrays.asList(1), -1));
     }
 
-    // ===================== repeatElementsToSize Dedicated Tests =====================
-
     @Test
-    public void testRepeatElementsToSize_Dedicated() {
-        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 7);
-        List<Integer> result = iter.toList();
-        assertEquals(7, result.size());
+    public void testRepeatElements_Dedicated() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2), 3);
+        assertEquals(Arrays.asList(1, 1, 1, 2, 2, 2), iter.toList());
     }
 
     @Test
-    public void testRepeatElementsToSize_SmallerThanCollection() {
-        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 2);
-        List<Integer> result = iter.toList();
-        assertEquals(2, result.size());
-    }
-
-    // ===================== repeatElementsToSize Additional Edge Cases =====================
-
-    @Test
-    public void testRepeatElementsToSize_ExactSize() {
-        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 3);
-        List<Integer> result = iter.toList();
-        assertEquals(3, result.size());
+    public void testRepeatElements_EmptyCollection() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(Collections.emptyList(), 5);
+        assertFalse(iter.hasNext());
     }
 
     @Test
-    public void testRepeatElementsToSize_LargerThanCollection() {
-        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 7);
-        List<Integer> list = new ArrayList<>();
-        result.forEachRemaining(list::add);
-        assertEquals(7, list.size());
+    public void testRepeatElements_NullIterable() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(null, 2);
+        assertFalse(iter.hasNext());
     }
 
     @Test
-    public void testRepeatElementsToSize_TruncatesToSize() {
-        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 2);
-        List<Integer> list = new ArrayList<>();
-        result.forEachRemaining(list::add);
-        assertEquals(2, list.size());
+    public void testRepeatElements_OneRepeat() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2, 3), 1);
+        assertEquals(Arrays.asList(1, 2, 3), iter.toList());
     }
 
     @Test
-    public void testRepeatElementsToSize_ZeroSize() {
-        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 0);
-        assertFalse(result.hasNext());
+    public void testRepeatElements_SingleElement() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(5), 3);
+        assertEquals(Arrays.asList(5, 5, 5), iter.toList());
     }
+
+    @Test
+    public void testRepeatElements_Zero() {
+        ObjIterator<Integer> iter = Iterators.repeatElements(Arrays.asList(1, 2), 0);
+        assertFalse(iter.hasNext());
+    }
+
+    // repeatElementsToSize
 
     @Test
     public void testRepeatElementsToSize() {
@@ -296,26 +261,20 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     @Test
+    public void testRepeatElementsToSize_Dedicated() {
+        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 7);
+        List<Integer> result = iter.toList();
+        assertEquals(7, result.size());
+    }
+
+    @Test
     public void testRepeatElementsToSize_EmptyCollection() {
         assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(Collections.emptyList(), 5));
     }
 
     @Test
-    public void testRepeatElementsToSize_NullThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(null, 5));
-    }
-
-    // ===================== repeat / repeatElements edge =====================
-
-    @Test
-    public void testRepeat_ZeroTimes() {
-        ObjIterator<String> r = Iterators.repeat("x", 0);
-        assertFalse(r.hasNext());
-    }
-
-    @Test
-    public void testRepeat_Negative_Throws() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeat("x", -1));
+    public void testRepeatElementsToSize_EmptyCollection_NonZeroThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
     }
 
     @Test
@@ -325,9 +284,51 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     @Test
-    public void testRepeatElementsToSize_EmptyCollection_NonZeroThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(Collections.<String> emptyList(), 5));
+    public void testRepeatElementsToSize_ExactSize() {
+        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 3);
+        List<Integer> result = iter.toList();
+        assertEquals(3, result.size());
     }
+
+    @Test
+    public void testRepeatElementsToSize_LargerThanCollection() {
+        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 7);
+        List<Integer> list = new ArrayList<>();
+        result.forEachRemaining(list::add);
+        assertEquals(7, list.size());
+    }
+
+    @Test
+    public void testRepeatElementsToSize_NullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Iterators.repeatElementsToSize(null, 5));
+    }
+
+    @Test
+    public void testRepeatElementsToSize_SmallerThanCollection() {
+        ObjIterator<Integer> iter = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 2);
+        List<Integer> result = iter.toList();
+        assertEquals(2, result.size());
+    }
+
+
+
+    /**
+     * Pins the "Live view" paragraph (C-322, 2026-09-24): if {@code c} has been emptied before the first
+     * {@code next()}, it is treated like a shrunk source - {@code hasNext()} reports {@code false} and
+     * {@code next()} throws {@link NoSuchElementException}.
+     */
+    @Test
+    public void testRepeatElementsToSize_SourceEmptiedBeforeFirstNext() {
+        final List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
+        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, 4);
+
+        source.clear();
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+
 
     /**
      * The requested total must hold even if the source collection grows between the factory call and the first
@@ -358,52 +359,31 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertThrows(NoSuchElementException.class, iter::next);
     }
 
+
+
     /**
-     * The inherited terminal helpers are bounded by the same guard, because they all drive
-     * {@code hasNext()}/{@code next()}.
+     * Pins the other half of the corrected "Live view" paragraph: a structural modification made <i>after</i> the
+     * first {@code next()} is governed by the source collection's own iterator contract, so a fail-fast source
+     * raises {@link java.util.ConcurrentModificationException}. A modification made <i>before</i> that first
+     * {@code next()} raises nothing, because the iterator is created after it - see
+     * {@link #testRepeatElementsToSize_SourceGrowsBeforeFirstNext()}.
      */
     @Test
-    public void testRepeatElementsToSize_SourceGrowsBeforeFirstNext_TerminalOps() {
-        assertEquals(4, grownAfterCreation(4).count());
-        assertEquals(4, grownAfterCreation(4).toArray().length);
-        assertEquals(Arrays.asList("a", "a", "b", "b"), grownAfterCreation(4).toList());
-    }
-
-    /** A {@code repeatElementsToSize} iterator whose source gained three elements before it was first read. */
-    private static ObjIterator<String> grownAfterCreation(final long size) {
+    public void testRepeatElementsToSize_SourceModifiedAfterFirstNext() {
         final List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
-        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, size);
+        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, 4);
+
+        assertEquals("a", iter.next());
 
         source.add("c");
-        source.add("d");
-        source.add("e");
 
-        return iter;
+        // "a" is due once more and repeats without touching the source iterator; the fail-fast check fires when
+        // the next distinct element is pulled.
+        assertEquals("a", iter.next());
+        assertThrows(java.util.ConcurrentModificationException.class, iter::next);
     }
 
-    /** An unmutated source is unaffected by the total-count guard. */
-    @Test
-    public void testRepeatElementsToSize_UnmutatedSourceIsUnchanged() {
-        for (final int size : new int[] { 0, 1, 4, 5, 7, 10 }) {
-            final ObjIterator<String> iter = Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), size);
-            final List<String> out = new ArrayList<>();
 
-            while (iter.hasNext()) {
-                out.add(iter.next());
-            }
-
-            assertEquals(size, out.size());
-        }
-
-        final ObjIterator<String> iter = Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), 7);
-        final List<String> out = new ArrayList<>();
-
-        while (iter.hasNext()) {
-            out.add(iter.next());
-        }
-
-        assertEquals(Arrays.asList("a", "a", "a", "b", "b", "c", "c"), out);
-    }
 
     /**
      * A source that shrinks behaves exactly as it did before the total-count guard was added.
@@ -431,41 +411,71 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertFalse(iter.hasNext());
     }
 
-    /**
-     * Pins the "Live view" paragraph (C-322, 2026-09-24): if {@code c} has been emptied before the first
-     * {@code next()}, it is treated like a shrunk source - {@code hasNext()} reports {@code false} and
-     * {@code next()} throws {@link NoSuchElementException}.
-     */
     @Test
-    public void testRepeatElementsToSize_SourceEmptiedBeforeFirstNext() {
-        final List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
-        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, 4);
-
-        source.clear();
-
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, iter::next);
+    public void testRepeatElementsToSize_TruncatesToSize() {
+        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 2);
+        List<Integer> list = new ArrayList<>();
+        result.forEachRemaining(list::add);
+        assertEquals(2, list.size());
     }
 
+
+
+    /** An unmutated source is unaffected by the total-count guard. */
+    @Test
+    public void testRepeatElementsToSize_UnmutatedSourceIsUnchanged() {
+        for (final int size : new int[] { 0, 1, 4, 5, 7, 10 }) {
+            final ObjIterator<String> iter = Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), size);
+            final List<String> out = new ArrayList<>();
+
+            while (iter.hasNext()) {
+                out.add(iter.next());
+            }
+
+            assertEquals(size, out.size());
+        }
+
+        final ObjIterator<String> iter = Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), 7);
+        final List<String> out = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            out.add(iter.next());
+        }
+
+        assertEquals(Arrays.asList("a", "a", "a", "b", "b", "c", "c"), out);
+    }
+
+    @Test
+    public void testRepeatElementsToSize_ZeroSize() {
+        ObjIterator<Integer> result = Iterators.repeatElementsToSize(Arrays.asList(1, 2, 3), 0);
+        assertFalse(result.hasNext());
+    }
+
+
+
     /**
-     * Pins the other half of the corrected "Live view" paragraph: a structural modification made <i>after</i> the
-     * first {@code next()} is governed by the source collection's own iterator contract, so a fail-fast source
-     * raises {@link java.util.ConcurrentModificationException}. A modification made <i>before</i> that first
-     * {@code next()} raises nothing, because the iterator is created after it - see
-     * {@link #testRepeatElementsToSize_SourceGrowsBeforeFirstNext()}.
+     * The inherited terminal helpers are bounded by the same guard, because they all drive
+     * {@code hasNext()}/{@code next()}.
      */
     @Test
-    public void testRepeatElementsToSize_SourceModifiedAfterFirstNext() {
-        final List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
-        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, 4);
+    public void testRepeatElementsToSize_SourceGrowsBeforeFirstNext_TerminalOps() {
+        assertEquals(4, grownAfterCreation(4).count());
+        assertEquals(4, grownAfterCreation(4).toArray().length);
+        assertEquals(Arrays.asList("a", "a", "b", "b"), grownAfterCreation(4).toList());
+    }
 
-        assertEquals("a", iter.next());
+
+
+    /** A {@code repeatElementsToSize} iterator whose source gained three elements before it was first read. */
+    private static ObjIterator<String> grownAfterCreation(final long size) {
+        final List<String> source = new ArrayList<>(Arrays.asList("a", "b"));
+        final ObjIterator<String> iter = Iterators.repeatElementsToSize(source, size);
 
         source.add("c");
+        source.add("d");
+        source.add("e");
 
-        // "a" is due once more and repeats without touching the source iterator; the fail-fast check fires when
-        // the next distinct element is pulled.
-        assertEquals("a", iter.next());
-        assertThrows(java.util.ConcurrentModificationException.class, iter::next);
+        return iter;
     }
+
 }

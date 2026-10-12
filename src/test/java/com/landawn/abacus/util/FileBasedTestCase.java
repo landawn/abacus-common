@@ -1,7 +1,7 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -18,10 +18,9 @@ import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.opentest4j.AssertionFailedError;
 
 import com.landawn.abacus.TestBase;
-
-import junit.framework.AssertionFailedError;
 
 public abstract class FileBasedTestCase extends TestBase {
 
@@ -87,7 +86,7 @@ public abstract class FileBasedTestCase extends TestBase {
     }
 
     protected void checkFile(File file, File referenceFile) throws Exception {
-        assertTrue("Check existence of output file", file.exists());
+        assertTrue(file.exists(), "Check existence of output file");
         assertEqualContent(referenceFile, file);
     }
 
@@ -104,9 +103,9 @@ public abstract class FileBasedTestCase extends TestBase {
                 while (-1 != n0) {
                     n0 = is0.read(buf0);
                     n1 = is1.read(buf1);
-                    assertTrue("The files " + f0 + " and " + f1 + " have differing number of bytes available (" + n0 + " vs " + n1 + ")", (n0 == n1));
+                    assertTrue((n0 == n1), "The files " + f0 + " and " + f1 + " have differing number of bytes available (" + n0 + " vs " + n1 + ")");
 
-                    assertTrue("The files " + f0 + " and " + f1 + " have different content", Arrays.equals(buf0, buf1));
+                    assertTrue(Arrays.equals(buf0, buf1), "The files " + f0 + " and " + f1 + " have different content");
                 }
             } finally {
                 is1.close();
@@ -123,9 +122,9 @@ public abstract class FileBasedTestCase extends TestBase {
                 numRead = is.read(b1, count, b0.length);
                 count += numRead;
             }
-            assertEquals("Different number of bytes: ", b0.length, count);
+            assertEquals(b0.length, count, "Different number of bytes: ");
             for (int i = 0; i < count; i++) {
-                assertEquals("byte " + i + " differs", b0[i], b1[i]);
+                assertEquals(b0[i], b1[i], "byte " + i + " differs");
             }
         } finally {
             is.close();
@@ -141,9 +140,9 @@ public abstract class FileBasedTestCase extends TestBase {
                 numRead = ir.read(c1, count, c0.length);
                 count += numRead;
             }
-            assertEquals("Different number of chars: ", c0.length, count);
+            assertEquals(c0.length, count, "Different number of chars: ");
             for (int i = 0; i < count; i++) {
-                assertEquals("char " + i + " differs", c0[i], c1[i]);
+                assertEquals(c0[i], c1[i], "char " + i + " differs");
             }
         } finally {
             ir.close();
@@ -168,7 +167,7 @@ public abstract class FileBasedTestCase extends TestBase {
 
     protected void deleteFile(File file) throws Exception {
         if (file.exists()) {
-            assertTrue("Couldn't delete file: " + file, file.delete());
+            assertTrue(file.delete(), "Couldn't delete file: " + file);
         }
     }
 

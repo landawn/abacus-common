@@ -26,127 +26,261 @@ import org.junit.jupiter.api.Test;
 public class JoinerTest extends JoinerTestSupport {
 
     @Test
-    public void testWith() {
-        assertEquals("a, b", Joiner.withDefault().append("a").append("b").toString());
-        assertEquals("k=v", Joiner.withDefault().appendEntry("k", "v").toString());
-        assertEquals("a, b, c", Joiner.withDefault().append("a").append("b").append("c").toString());
-        assertEquals("a, b, c", Joiner.with(", ").append("a").append("b").append("c").toString());
-        assertEquals("a#b#c", Joiner.with("#").append("a").append("b").append("c").toString());
-        assertEquals("x|y|z", Joiner.with("|").append("x").append("y").append("z").toString());
-        assertEquals("a --- b --- c", Joiner.with(" --- ").append("a").append("b").append("c").toString());
-        assertEquals("k:v,a:1", Joiner.with(",", ":").appendEntry("k", "v").appendEntry("a", 1).toString());
-        assertEquals("key1->val1;key2->val2", Joiner.with(";", "->").appendEntry("key1", "val1").appendEntry("key2", "val2").toString());
-        assertEquals("[a, b, c]", Joiner.with(", ", "[", "]").append("a").append("b").append("c").toString());
-        assertEquals("{a,b,c}", Joiner.with(",", "{", "}").append("a").append("b").append("c").toString());
-        assertEquals("START-a|b|c-END", Joiner.with("|", "START-", "-END").append("a").append("b").append("c").toString());
-        assertEquals("{a=1, b=2}", Joiner.with(", ", "=", "{", "}").appendEntry("a", 1).appendEntry("b", 2).toString());
-        assertEquals("<name:Alice;age:30>", Joiner.with(";", ":", "<", ">").appendEntry("name", "Alice").appendEntry("age", "30").toString());
-        assertEquals("a, b, c", Joiner.with(", ").appendAll(Arrays.asList("a", "b", "c")).toString());
-        assertEquals("abc", Joiner.with("").append("a").append("b").append("c").toString());
-        assertEquals("ab", Joiner.with("", "", "", "").append("a").append("b").toString());
-        assertEquals("Hello,世界,🌍", Joiner.with(",").append("Hello").append("世界").append("🌍").toString());
-        assertEquals("a\nb\tc\rd\te\tf", Joiner.with("\t").append("a\nb").append("c\rd").append("e\tf").toString());
-        assertEquals("false, 0, 3, 5.0, NULL, NULL",
-                Joiner.withDefault().useForNull("NULL").append(false).append(0).append(3L).append(5d).append((Boolean) null).append((Double) null).toString());
+    public void testAppendEntryObjectValueIsTrimmedAndStrippedLikeTheKey() {
+        assertEquals("k=v", Joiner.with(", ").trimBeforeAppend().appendEntry(" k ", (Object) "  v  ").toString());
+        assertEquals("k=v", Joiner.with(", ").stripBeforeAppend().appendEntry("\u2003k", (Object) "v\u2003").toString());
+        assertEquals("k=  v  ", Joiner.with(", ").appendEntry("k", (Object) "  v  ").toString());
+        assertEquals("k=N/A", Joiner.with(", ").useForNull("N/A").trimBeforeAppend().appendEntry("k", (Object) null).toString());
     }
 
     @Test
-    public void testWith_EdgeCase() {
-        assertEquals("<>", Joiner.with(",", "<", ">").toString());
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with((CharSequence) null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(null, "="));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(null, "=", "{", "}"));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", null, "{", "}"));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", "=", null, "}"));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", "=", "{", null));
+    public void reviewFixes20260906_appendToRejectsNullInEveryState() throws IOException {
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendTo(null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").setEmptyValue("").appendTo(null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").append("a").appendTo(null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(", ", "[", "]").appendTo(null));
+
+        final StringBuilder sb = new StringBuilder("Result: ");
+        Joiner.with(", ").append("a").append("b").appendTo(sb);
+        assertEquals("Result: a, b", sb.toString());
+
+        final StringBuilder empty = new StringBuilder("x");
+        assertSame(empty, Joiner.with(",").appendTo(empty));
+        assertEquals("x", empty.toString());
+
+        final StringBuilder withEmptyValue = new StringBuilder();
+        Joiner.with(",").setEmptyValue("<none>").appendTo(withEmptyValue);
+        assertEquals("<none>", withEmptyValue.toString());
     }
 
     @Test
-    public void testSetEmptyValue() {
-        assertEquals("NONE", Joiner.with(", ").setEmptyValue("NONE").toString());
-        assertEquals("EMPTY", Joiner.with(", ").setEmptyValue("EMPTY").toString());
-        assertEquals("[]", Joiner.with(", ", "[", "]").toString());
+    public void testClose() {
+        final Joiner skipped = Joiner.with(",").skipNulls();
+        skipped.close();
+        assertThrows(IllegalStateException.class, () -> skipped.appendAll(new String[0]));
+        assertThrows(IllegalStateException.class, () -> skipped.append((String) null));
+        assertThrows(IllegalStateException.class, () -> skipped.append((CharSequence) null));
+        assertThrows(IllegalStateException.class, () -> skipped.merge(Joiner.with(",")));
+
+        final Joiner closed = Joiner.with(",").reuseBuffer().append("a").append("b");
+        closed.close();
+        assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed.append("c")).getMessage());
 
         final Joiner joiner = Joiner.with(",");
-        assertSame(joiner, joiner.setEmptyValue("EMPTY"));
-        assertEquals("EMPTY", joiner.toString());
-        joiner.append("test");
-        assertEquals("test", joiner.toString());
+        joiner.close();
+        joiner.close();
+        assertEquals("", joiner.toString());
+
+        final Joiner plain = Joiner.with(",").append("a").append("b");
+        plain.close();
+        assertEquals("a,b", plain.toString());
+
+        final Joiner reused = Joiner.with(",").reuseBuffer().append("a");
+        assertEquals("a", reused.toString());
+        reused.close();
+        assertEquals("a", reused.toString());
     }
 
     @Test
-    public void testSetEmptyValue_EdgeCase() {
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").setEmptyValue(null));
-    }
-
-    @Test
-    public void testTrimBeforeAppend() {
-        assertEquals("a,b,c", Joiner.with(",").trimBeforeAppend().append("  a  ").append("  b  ").append("  c  ").toString());
-        assertEquals("text", Joiner.with(",").trimBeforeAppend().append(new StringBuilder("  text  ")).toString());
-        assertEquals("padded", Joiner.with(",").trimBeforeAppend().append((Object) "  padded  ").toString());
-        assertEquals("hello world", Joiner.with(",").trimBeforeAppend().append("  hello world  ", 0, 15).toString());
-    }
-
-    @Test
-    public void testStripBeforeAppend() {
-        final String emSpace = " ";
-        assertEquals("a,b,c",
-                Joiner.with(",").stripBeforeAppend().append(emSpace + "a" + emSpace).append(" b ").append((Object) (emSpace + "c" + emSpace)).toString());
-        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
-        assertEquals("key=value",
-                Joiner.with(",").stripBeforeAppend().appendEntry(emSpace + "key" + emSpace, new StringBuilder(emSpace + "value" + emSpace)).toString());
-        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").stripBeforeAppend().trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
-        assertEquals("a", Joiner.with(",").trimBeforeAppend().stripBeforeAppend().append(emSpace + "a" + emSpace).toString());
-    }
-
-    @Test
-    public void testSkipNulls() {
-        assertEquals("a,b,c", Joiner.with(",").skipNulls().append("a").append((String) null).append("b").append((Object) null).append("c").toString());
-        assertEquals("a, b", Joiner.with(", ").skipNulls().append("a").append((Object) null).append("b").toString());
-        assertEquals("", Joiner.with(",").skipNulls().append((String) null).toString());
-        assertEquals("null", Joiner.with(",").append((String) null).toString());
-        assertEquals("<<key1->value1|key2->null|key3->value3>>",
-                Joiner.with("|", "->", "<<", ">>")
-                        .trimBeforeAppend()
-                        .skipNulls()
-                        .appendEntry("  key1  ", "  value1  ")
-                        .appendEntry("key2", (String) null)
-                        .appendEntry("key3", "value3")
-                        .toString());
-    }
-
-    @Test
-    public void testUseForNull() {
-        assertEquals("a,NULL,b", Joiner.with(",").useForNull("NULL").append("a").append((String) null).append("b").toString());
-        assertEquals("a,,b", Joiner.with(",").useForNull("").append("a").append((String) null).append("b").toString());
-        assertEquals("null", Joiner.with(",").useForNull(null).append((String) null).toString());
-        assertEquals("a, N/A, b", Joiner.with(", ").useForNull("N/A").append("a").append((java.util.List<?>) null).append("b").toString());
+    public void testLargeDataset() {
+        final String payload = "payload".repeat(1000);
+        assertEquals(payload + "|" + payload, Joiner.with("|").appendAll(Arrays.asList(payload, payload)).toString());
 
         final Joiner joiner = Joiner.with(",");
-        assertSame(joiner, joiner.useForNull("N/A"));
-        joiner.append((String) null);
-        assertEquals("N/A", joiner.toString());
-    }
-
-    @Test
-    public void testReuseBuffer() {
-        final Joiner joiner = Joiner.with(",").reuseBuffer();
-        joiner.append("a").append("b");
-        assertEquals("a,b", joiner.toString());
-        assertEquals("a,b,c", joiner.append("c").toString());
-
-        try (Joiner pooled = Joiner.with(",").reuseBuffer()) {
-            pooled.append("a").append("b").append("c");
-            assertEquals("a,b,c", pooled.toString());
+        for (int i = 0; i < 1000; i++) {
+            joiner.append(i);
         }
+        final String result = joiner.toString();
+        assertTrue(result.startsWith("0,1,2"));
+        assertTrue(result.endsWith("997,998,999"));
+
+        final StringBuilder largeBuilder = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            largeBuilder.append("x");
+        }
+        final String large = Joiner.with(",").append(largeBuilder).append("end").toString();
+        assertTrue(large.startsWith("xxxx"));
+        assertTrue(large.endsWith("x,end"));
     }
 
     @Test
-    public void testReuseBuffer_EdgeCase() {
+    public void testLength() {
         final Joiner joiner = Joiner.with(",");
-        joiner.append("a");
-        assertThrows(IllegalStateException.class, joiner::reuseBuffer);
-        assertThrows(IllegalStateException.class, () -> Joiner.with(", ").append("a").reuseBuffer());
+        assertEquals(0, joiner.length());
+        joiner.append("hello");
+        assertEquals(5, joiner.length());
+        joiner.append("world");
+        assertEquals(11, joiner.length());
+
+        final Joiner wrapped = Joiner.with(",", "[", "]");
+        assertEquals(2, wrapped.length());
+        wrapped.append("a");
+        assertEquals(3, wrapped.length());
+        wrapped.append("b");
+        assertEquals(5, wrapped.length());
+
+        final Joiner afterToString = Joiner.with(",").append("test");
+        afterToString.toString();
+        assertEquals(4, afterToString.length());
+    }
+
+    @Test
+    public void testMap() {
+        assertEquals(Integer.valueOf(5), Joiner.with(",").append("a").append("b").append("c").map(String::length));
+        assertEquals("HELLO,WORLD", Joiner.with(",").append("hello").append("world").map(String::toUpperCase));
+        assertEquals(Integer.valueOf(0), Joiner.with(",").map(String::length));
+    }
+
+    @Test
+    public void testMapIfNotEmpty() {
+        assertFalse(Joiner.with(",").mapIfNotEmpty(String::length).isPresent());
+        assertTrue(Joiner.with(",").mapIfNotEmpty(s -> s.length()).isEmpty());
+        assertFalse(Joiner.with(",", "[", "]").mapIfNotEmpty(String::length).isPresent());
+
+        final Joiner joiner = Joiner.with(",").append("a").append("b");
+        assertTrue(joiner.mapIfNotEmpty(String::length).isPresent());
+        assertEquals(Integer.valueOf(3), joiner.mapIfNotEmpty(String::length).get());
+
+        final AtomicBoolean emptyCalled = new AtomicBoolean(false);
+        assertFalse(Joiner.with(",").mapIfNotEmpty(s -> {
+            emptyCalled.set(true);
+            return s;
+        }).isPresent());
+        assertFalse(emptyCalled.get());
+
+        final AtomicBoolean called = new AtomicBoolean(false);
+        final u.Optional<String> mapped = Joiner.with(",").append("a").mapIfNotEmpty(s -> {
+            called.set(true);
+            return "mapped:" + s;
+        });
+        assertTrue(called.get());
+        assertEquals("mapped:a", mapped.get());
+
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").append("a").mapIfNotEmpty(null));
+    }
+
+    // merge
+
+    @Test
+    public void testMerge() {
+        final Joiner joiner1 = Joiner.with(",", "[", "]").append("a").append("b");
+        joiner1.merge(Joiner.with("-").append("c").append("d"));
+        assertEquals("[a,b,c-d]", joiner1.toString());
+
+        final Joiner sameConfig = Joiner.with(",", "[", "]").append("a").append("b");
+        sameConfig.merge(Joiner.with(",", "[", "]").append("c").append("d"));
+        assertEquals("[a,b,c,d]", sameConfig.toString());
+
+        assertEquals("c|d", Joiner.with(", ").merge(Joiner.with("|").append("c").append("d")).toString());
+    }
+
+
+
+
+    // G113-01: merge bulk-copies the other Joiner's content (empty prefix, non-empty prefix, self-merge).
+    @Test
+    public void testMerge_bulkCopyPrefixSuffixAndOtherState() {
+        // empty prefix on the other side
+        final Joiner other1 = Joiner.with(";").append("b").append("c");
+        assertEquals("a, b;c", Joiner.with(", ").append("a").merge(other1).toString());
+        assertEquals("b;c", other1.toString());
+        assertEquals(3, other1.length());
+        assertEquals("b;c;d", other1.append("d").toString());
+
+        // non-empty (multi-char) prefix and suffix on both sides
+        final Joiner other2 = Joiner.with("-", "{{", "}").append("x").append("y");
+        final Joiner receiver2 = Joiner.with(", ", "[", "]").append("a");
+        assertEquals("[a, x-y]", receiver2.merge(other2).toString());
+        assertEquals("{{x-y}", other2.toString());
+        assertEquals(6, other2.length());
+        assertEquals("{{x-y-z}", other2.append("z").toString());
+        assertEquals("[a, x-y, q]", receiver2.append("q").toString());
+
+        // receiver never appended to: its own prefix, then the other's content without its prefix
+        assertEquals("<p|q>", Joiner.with(",", "<", ">").merge(Joiner.with("|", "(", ")").append("p").append("q")).toString());
+
+        // other never appended to contributes nothing; other holding one empty element contributes a separator
+        assertEquals("[a]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").setEmptyValue("E")).toString());
+        assertEquals("[a, ]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").append("")).toString());
+        assertEquals("E", Joiner.with(", ").setEmptyValue("E").merge(Joiner.with(",")).toString());
+
+        // self-merge appends the content before the merge exactly once
+        final Joiner self = Joiner.with(", ", "[", "]").append("a").append("b");
+        assertEquals("[a, b, a, b]", self.merge(self).toString());
+        final Joiner selfNoPrefix = Joiner.with("").append("a").append("b");
+        assertEquals("abab", selfNoPrefix.merge(selfNoPrefix).toString());
+
+        // non-Latin-1 text on either side, and a Latin-1 receiver merging a UTF-16 other (and vice versa)
+        assertEquals("[a, \u4e2d-\u00e9]",
+                Joiner.with(", ", "[", "]").append("a").merge(Joiner.with("-", "\u6587", "!").append("\u4e2d").append("\u00e9")).toString());
+        assertEquals("\u4e2d,x-y", Joiner.with(",").append("\u4e2d").merge(Joiner.with("-", "\u00e9", "").append("x").append("y")).toString());
+
+        // pooled (reuseBuffer) other: merged live, after its toString() and after close()
+        final Joiner pooled = Joiner.with(",", "(", ")").reuseBuffer().append("m").append("n");
+        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
+        assertEquals("(m,n)", pooled.toString());
+        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
+        final Joiner closed = Joiner.with(",", "((", ")").reuseBuffer().append("c1").append("c2");
+        closed.close();
+        assertEquals("[k, c1,c2]", Joiner.with(", ", "[", "]").append("k").merge(closed).toString());
+
+        // large content keeps every character in order
+        final Joiner big = Joiner.with(",", "#", "$");
+        final StringBuilder expected = new StringBuilder("head");
+
+        for (int i = 0; i < 5000; i++) {
+            big.append(i);
+            expected.append(',').append(i);
+        }
+
+        assertEquals(expected.toString(), Joiner.with(",").append("head").merge(big).toString());
+        assertEquals("#" + expected.substring(5) + "$", big.toString());
+    }
+
+    @Test
+    public void testMerge_EdgeCase() {
+        assertEquals("a", Joiner.with(",").append("a").merge(Joiner.with("-")).toString());
+        assertEquals("", Joiner.with(",").merge(Joiner.with("-")).toString());
+        assertEquals("[a,b,c-EMPTY-d]",
+                Joiner.with(",", "[", "]")
+                        .skipNulls()
+                        .append("a")
+                        .append((String) null)
+                        .append("b")
+                        .merge(Joiner.with("-", "{", "}").useForNull("EMPTY").append("c").append((String) null).append("d"))
+                        .toString());
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").merge(null));
+
+        final Joiner other = Joiner.with(",").reuseBuffer().append("x").append("y");
+        assertEquals("x,y", other.toString());
+        assertEquals("a;x,y", Joiner.with(";").append("a").merge(other).toString());
+    }
+
+    @Test
+    public void testMethodChaining() {
+        final Person person = new Person("John", null, "NYC", null);
+        assertEquals("name=John, age=null", Joiner.with(", ").appendBean(person, Arrays.asList("name", "age")).toString());
+        assertEquals("name=John", Joiner.with(", ").appendBean(person, true, Collections.singleton("city")).toString());
+
+        assertEquals("a,b", Joiner.with(",").skipNulls().trimBeforeAppend().append("  a  ").append((String) null).append("  b  ").toString());
+    }
+
+
+
+    /**
+     * Pins the scope of the two monitors the class javadoc documents: {@link Joiner#toString()} and
+     * {@link Joiner#close()} are {@code synchronized}, so the pooled buffer cannot be released to {@link Objectory}
+     * twice, while the {@code append} family deliberately is not - which is why appending concurrently stays
+     * unsupported and why the race test above pins only the {@code toString()}/{@code close()} window.
+     */
+    @Test
+    public void onlyToStringAndCloseHoldTheMonitorTheAppendFamilyDoesNot() throws Exception {
+        assertTrue(Modifier.isSynchronized(Joiner.class.getDeclaredMethod("toString").getModifiers()));
+        assertTrue(Modifier.isSynchronized(Joiner.class.getDeclaredMethod("close").getModifiers()));
+
+        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("append", String.class).getModifiers()));
+        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("append", Object.class).getModifiers()));
+        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("appendEntry", String.class, String.class).getModifiers()));
     }
 
     @Test
@@ -191,150 +325,27 @@ public class JoinerTest extends JoinerTestSupport {
         assertEquals(Strings.repeat(nullText, 10, "|"), Joiner.with("|").trimBeforeAppend().useForNull(nullText).repeat((String) null, 10).toString());
     }
 
-    @Test
-    public void testMerge() {
-        final Joiner joiner1 = Joiner.with(",", "[", "]").append("a").append("b");
-        joiner1.merge(Joiner.with("-").append("c").append("d"));
-        assertEquals("[a,b,c-d]", joiner1.toString());
-
-        final Joiner sameConfig = Joiner.with(",", "[", "]").append("a").append("b");
-        sameConfig.merge(Joiner.with(",", "[", "]").append("c").append("d"));
-        assertEquals("[a,b,c,d]", sameConfig.toString());
-
-        assertEquals("c|d", Joiner.with(", ").merge(Joiner.with("|").append("c").append("d")).toString());
-    }
+    // reuseBuffer
 
     @Test
-    public void testMerge_EdgeCase() {
-        assertEquals("a", Joiner.with(",").append("a").merge(Joiner.with("-")).toString());
-        assertEquals("", Joiner.with(",").merge(Joiner.with("-")).toString());
-        assertEquals("[a,b,c-EMPTY-d]",
-                Joiner.with(",", "[", "]")
-                        .skipNulls()
-                        .append("a")
-                        .append((String) null)
-                        .append("b")
-                        .merge(Joiner.with("-", "{", "}").useForNull("EMPTY").append("c").append((String) null).append("d"))
-                        .toString());
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").merge(null));
-
-        final Joiner other = Joiner.with(",").reuseBuffer().append("x").append("y");
-        assertEquals("x,y", other.toString());
-        assertEquals("a;x,y", Joiner.with(";").append("a").merge(other).toString());
-    }
-
-    @Test
-    public void testLength() {
-        final Joiner joiner = Joiner.with(",");
-        assertEquals(0, joiner.length());
-        joiner.append("hello");
-        assertEquals(5, joiner.length());
-        joiner.append("world");
-        assertEquals(11, joiner.length());
-
-        final Joiner wrapped = Joiner.with(",", "[", "]");
-        assertEquals(2, wrapped.length());
-        wrapped.append("a");
-        assertEquals(3, wrapped.length());
-        wrapped.append("b");
-        assertEquals(5, wrapped.length());
-
-        final Joiner afterToString = Joiner.with(",").append("test");
-        afterToString.toString();
-        assertEquals(4, afterToString.length());
-    }
-
-    @Test
-    public void testToString() {
-        assertEquals("", Joiner.with(", ").toString());
-        assertEquals("a", Joiner.with(", ").append("a").toString());
-        assertEquals("a,b,c", Joiner.with(",").append("a").append("b").append("c").toString());
-        assertEquals("[a, b, c]", Joiner.with(", ", "[", "]").append("a").append("b").append("c").toString());
-        assertEquals("[]", Joiner.with(",", "[", "]").toString());
-        assertEquals("EMPTY", Joiner.with(",").setEmptyValue("EMPTY").toString());
-        assertEquals("", Joiner.with(", ").appendAll(new int[0]).toString());
-        assertEquals("", Joiner.with(", ").appendAll((int[]) null).toString());
-        assertEquals("", Joiner.with(", ").appendAll(Collections.emptyList()).toString());
-
-        final Joiner joiner = Joiner.with(",").append("a").append("b");
+    public void testReuseBuffer() {
+        final Joiner joiner = Joiner.with(",").reuseBuffer();
+        joiner.append("a").append("b");
         assertEquals("a,b", joiner.toString());
         assertEquals("a,b,c", joiner.append("c").toString());
 
-        final Joiner reused = Joiner.with(", ", "=", "{", "}").reuseBuffer();
-        assertEquals("{a=1}", reused.appendEntry("a", 1).toString());
-        assertEquals("{a=1, b=2}", reused.appendEntry("b", 2).toString());
+        try (Joiner pooled = Joiner.with(",").reuseBuffer()) {
+            pooled.append("a").append("b").append("c");
+            assertEquals("a,b,c", pooled.toString());
+        }
     }
 
     @Test
-    public void testMap() {
-        assertEquals(Integer.valueOf(5), Joiner.with(",").append("a").append("b").append("c").map(String::length));
-        assertEquals("HELLO,WORLD", Joiner.with(",").append("hello").append("world").map(String::toUpperCase));
-        assertEquals(Integer.valueOf(0), Joiner.with(",").map(String::length));
-    }
-
-    @Test
-    public void testMapIfNotEmpty() {
-        assertFalse(Joiner.with(",").mapIfNotEmpty(String::length).isPresent());
-        assertTrue(Joiner.with(",").mapIfNotEmpty(s -> s.length()).isEmpty());
-        assertFalse(Joiner.with(",", "[", "]").mapIfNotEmpty(String::length).isPresent());
-
-        final Joiner joiner = Joiner.with(",").append("a").append("b");
-        assertTrue(joiner.mapIfNotEmpty(String::length).isPresent());
-        assertEquals(Integer.valueOf(3), joiner.mapIfNotEmpty(String::length).get());
-
-        final AtomicBoolean emptyCalled = new AtomicBoolean(false);
-        assertFalse(Joiner.with(",").mapIfNotEmpty(s -> {
-            emptyCalled.set(true);
-            return s;
-        }).isPresent());
-        assertFalse(emptyCalled.get());
-
-        final AtomicBoolean called = new AtomicBoolean(false);
-        final u.Optional<String> mapped = Joiner.with(",").append("a").mapIfNotEmpty(s -> {
-            called.set(true);
-            return "mapped:" + s;
-        });
-        assertTrue(called.get());
-        assertEquals("mapped:a", mapped.get());
-
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").append("a").mapIfNotEmpty(null));
-    }
-
-    @Test
-    public void testClose() {
-        final Joiner skipped = Joiner.with(",").skipNulls();
-        skipped.close();
-        assertThrows(IllegalStateException.class, () -> skipped.appendAll(new String[0]));
-        assertThrows(IllegalStateException.class, () -> skipped.append((String) null));
-        assertThrows(IllegalStateException.class, () -> skipped.append((CharSequence) null));
-        assertThrows(IllegalStateException.class, () -> skipped.merge(Joiner.with(",")));
-
-        final Joiner closed = Joiner.with(",").reuseBuffer().append("a").append("b");
-        closed.close();
-        assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed.append("c")).getMessage());
-
+    public void testReuseBuffer_EdgeCase() {
         final Joiner joiner = Joiner.with(",");
-        joiner.close();
-        joiner.close();
-        assertEquals("", joiner.toString());
-
-        final Joiner plain = Joiner.with(",").append("a").append("b");
-        plain.close();
-        assertEquals("a,b", plain.toString());
-
-        final Joiner reused = Joiner.with(",").reuseBuffer().append("a");
-        assertEquals("a", reused.toString());
-        reused.close();
-        assertEquals("a", reused.toString());
-    }
-
-    @Test
-    public void testMethodChaining() {
-        final Person person = new Person("John", null, "NYC", null);
-        assertEquals("name=John, age=null", Joiner.with(", ").appendBean(person, Arrays.asList("name", "age")).toString());
-        assertEquals("name=John", Joiner.with(", ").appendBean(person, true, Collections.singleton("city")).toString());
-
-        assertEquals("a,b", Joiner.with(",").skipNulls().trimBeforeAppend().append("  a  ").append((String) null).append("  b  ").toString());
+        joiner.append("a");
+        assertThrows(IllegalStateException.class, joiner::reuseBuffer);
+        assertThrows(IllegalStateException.class, () -> Joiner.with(", ").append("a").reuseBuffer());
     }
 
     @Test
@@ -360,46 +371,52 @@ public class JoinerTest extends JoinerTestSupport {
     }
 
     @Test
-    public void testLargeDataset() {
-        final String payload = "payload".repeat(1000);
-        assertEquals(payload + "|" + payload, Joiner.with("|").appendAll(Arrays.asList(payload, payload)).toString());
+    public void testSetEmptyValue() {
+        assertEquals("NONE", Joiner.with(", ").setEmptyValue("NONE").toString());
+        assertEquals("EMPTY", Joiner.with(", ").setEmptyValue("EMPTY").toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").toString());
 
         final Joiner joiner = Joiner.with(",");
-        for (int i = 0; i < 1000; i++) {
-            joiner.append(i);
-        }
-        final String result = joiner.toString();
-        assertTrue(result.startsWith("0,1,2"));
-        assertTrue(result.endsWith("997,998,999"));
-
-        final StringBuilder largeBuilder = new StringBuilder();
-        for (int i = 0; i < 1000; i++) {
-            largeBuilder.append("x");
-        }
-        final String large = Joiner.with(",").append(largeBuilder).append("end").toString();
-        assertTrue(large.startsWith("xxxx"));
-        assertTrue(large.endsWith("x,end"));
+        assertSame(joiner, joiner.setEmptyValue("EMPTY"));
+        assertEquals("EMPTY", joiner.toString());
+        joiner.append("test");
+        assertEquals("test", joiner.toString());
     }
 
     @Test
-    public void reviewFixes20260906_appendToRejectsNullInEveryState() throws IOException {
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendTo(null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").setEmptyValue("").appendTo(null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").append("a").appendTo(null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(", ", "[", "]").appendTo(null));
-
-        final StringBuilder sb = new StringBuilder("Result: ");
-        Joiner.with(", ").append("a").append("b").appendTo(sb);
-        assertEquals("Result: a, b", sb.toString());
-
-        final StringBuilder empty = new StringBuilder("x");
-        assertSame(empty, Joiner.with(",").appendTo(empty));
-        assertEquals("x", empty.toString());
-
-        final StringBuilder withEmptyValue = new StringBuilder();
-        Joiner.with(",").setEmptyValue("<none>").appendTo(withEmptyValue);
-        assertEquals("<none>", withEmptyValue.toString());
+    public void testSetEmptyValue_EdgeCase() {
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").setEmptyValue(null));
     }
+
+    @Test
+    public void testSkipNulls() {
+        assertEquals("a,b,c", Joiner.with(",").skipNulls().append("a").append((String) null).append("b").append((Object) null).append("c").toString());
+        assertEquals("a, b", Joiner.with(", ").skipNulls().append("a").append((Object) null).append("b").toString());
+        assertEquals("", Joiner.with(",").skipNulls().append((String) null).toString());
+        assertEquals("null", Joiner.with(",").append((String) null).toString());
+        assertEquals("<<key1->value1|key2->null|key3->value3>>",
+                Joiner.with("|", "->", "<<", ">>")
+                        .trimBeforeAppend()
+                        .skipNulls()
+                        .appendEntry("  key1  ", "  value1  ")
+                        .appendEntry("key2", (String) null)
+                        .appendEntry("key3", "value3")
+                        .toString());
+    }
+
+    @Test
+    public void testStripBeforeAppend() {
+        final String emSpace = " ";
+        assertEquals("a,b,c",
+                Joiner.with(",").stripBeforeAppend().append(emSpace + "a" + emSpace).append(" b ").append((Object) (emSpace + "c" + emSpace)).toString());
+        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
+        assertEquals("key=value",
+                Joiner.with(",").stripBeforeAppend().appendEntry(emSpace + "key" + emSpace, new StringBuilder(emSpace + "value" + emSpace)).toString());
+        assertEquals(emSpace + "a" + emSpace, Joiner.with(",").stripBeforeAppend().trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
+        assertEquals("a", Joiner.with(",").trimBeforeAppend().stripBeforeAppend().append(emSpace + "a" + emSpace).toString());
+    }
+
+
 
     /**
      * A {@code toString()} racing a {@code close()} used to hand the SAME pooled {@code StringBuilder} back to
@@ -506,20 +523,82 @@ public class JoinerTest extends JoinerTestSupport {
         }
     }
 
-    /**
-     * Pins the scope of the two monitors the class javadoc documents: {@link Joiner#toString()} and
-     * {@link Joiner#close()} are {@code synchronized}, so the pooled buffer cannot be released to {@link Objectory}
-     * twice, while the {@code append} family deliberately is not - which is why appending concurrently stays
-     * unsupported and why the race test above pins only the {@code toString()}/{@code close()} window.
-     */
     @Test
-    public void onlyToStringAndCloseHoldTheMonitorTheAppendFamilyDoesNot() throws Exception {
-        assertTrue(Modifier.isSynchronized(Joiner.class.getDeclaredMethod("toString").getModifiers()));
-        assertTrue(Modifier.isSynchronized(Joiner.class.getDeclaredMethod("close").getModifiers()));
+    public void testToString() {
+        assertEquals("", Joiner.with(", ").toString());
+        assertEquals("a", Joiner.with(", ").append("a").toString());
+        assertEquals("a,b,c", Joiner.with(",").append("a").append("b").append("c").toString());
+        assertEquals("[a, b, c]", Joiner.with(", ", "[", "]").append("a").append("b").append("c").toString());
+        assertEquals("[]", Joiner.with(",", "[", "]").toString());
+        assertEquals("EMPTY", Joiner.with(",").setEmptyValue("EMPTY").toString());
+        assertEquals("", Joiner.with(", ").appendAll(new int[0]).toString());
+        assertEquals("", Joiner.with(", ").appendAll((int[]) null).toString());
+        assertEquals("", Joiner.with(", ").appendAll(Collections.emptyList()).toString());
 
-        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("append", String.class).getModifiers()));
-        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("append", Object.class).getModifiers()));
-        assertFalse(Modifier.isSynchronized(Joiner.class.getMethod("appendEntry", String.class, String.class).getModifiers()));
+        final Joiner joiner = Joiner.with(",").append("a").append("b");
+        assertEquals("a,b", joiner.toString());
+        assertEquals("a,b,c", joiner.append("c").toString());
+
+        final Joiner reused = Joiner.with(", ", "=", "{", "}").reuseBuffer();
+        assertEquals("{a=1}", reused.appendEntry("a", 1).toString());
+        assertEquals("{a=1, b=2}", reused.appendEntry("b", 2).toString());
+    }
+
+    @Test
+    public void testTrimBeforeAppend() {
+        assertEquals("a,b,c", Joiner.with(",").trimBeforeAppend().append("  a  ").append("  b  ").append("  c  ").toString());
+        assertEquals("text", Joiner.with(",").trimBeforeAppend().append(new StringBuilder("  text  ")).toString());
+        assertEquals("padded", Joiner.with(",").trimBeforeAppend().append((Object) "  padded  ").toString());
+        assertEquals("hello world", Joiner.with(",").trimBeforeAppend().append("  hello world  ", 0, 15).toString());
+    }
+
+    @Test
+    public void testUseForNull() {
+        assertEquals("a,NULL,b", Joiner.with(",").useForNull("NULL").append("a").append((String) null).append("b").toString());
+        assertEquals("a,,b", Joiner.with(",").useForNull("").append("a").append((String) null).append("b").toString());
+        assertEquals("null", Joiner.with(",").useForNull(null).append((String) null).toString());
+        assertEquals("a, N/A, b", Joiner.with(", ").useForNull("N/A").append("a").append((java.util.List<?>) null).append("b").toString());
+
+        final Joiner joiner = Joiner.with(",");
+        assertSame(joiner, joiner.useForNull("N/A"));
+        joiner.append((String) null);
+        assertEquals("N/A", joiner.toString());
+    }
+
+    @Test
+    public void testWith() {
+        assertEquals("a, b", Joiner.withDefault().append("a").append("b").toString());
+        assertEquals("k=v", Joiner.withDefault().appendEntry("k", "v").toString());
+        assertEquals("a, b, c", Joiner.withDefault().append("a").append("b").append("c").toString());
+        assertEquals("a, b, c", Joiner.with(", ").append("a").append("b").append("c").toString());
+        assertEquals("a#b#c", Joiner.with("#").append("a").append("b").append("c").toString());
+        assertEquals("x|y|z", Joiner.with("|").append("x").append("y").append("z").toString());
+        assertEquals("a --- b --- c", Joiner.with(" --- ").append("a").append("b").append("c").toString());
+        assertEquals("k:v,a:1", Joiner.with(",", ":").appendEntry("k", "v").appendEntry("a", 1).toString());
+        assertEquals("key1->val1;key2->val2", Joiner.with(";", "->").appendEntry("key1", "val1").appendEntry("key2", "val2").toString());
+        assertEquals("[a, b, c]", Joiner.with(", ", "[", "]").append("a").append("b").append("c").toString());
+        assertEquals("{a,b,c}", Joiner.with(",", "{", "}").append("a").append("b").append("c").toString());
+        assertEquals("START-a|b|c-END", Joiner.with("|", "START-", "-END").append("a").append("b").append("c").toString());
+        assertEquals("{a=1, b=2}", Joiner.with(", ", "=", "{", "}").appendEntry("a", 1).appendEntry("b", 2).toString());
+        assertEquals("<name:Alice;age:30>", Joiner.with(";", ":", "<", ">").appendEntry("name", "Alice").appendEntry("age", "30").toString());
+        assertEquals("a, b, c", Joiner.with(", ").appendAll(Arrays.asList("a", "b", "c")).toString());
+        assertEquals("abc", Joiner.with("").append("a").append("b").append("c").toString());
+        assertEquals("ab", Joiner.with("", "", "", "").append("a").append("b").toString());
+        assertEquals("Hello,世界,🌍", Joiner.with(",").append("Hello").append("世界").append("🌍").toString());
+        assertEquals("a\nb\tc\rd\te\tf", Joiner.with("\t").append("a\nb").append("c\rd").append("e\tf").toString());
+        assertEquals("false, 0, 3, 5.0, NULL, NULL",
+                Joiner.withDefault().useForNull("NULL").append(false).append(0).append(3L).append(5d).append((Boolean) null).append((Double) null).toString());
+    }
+
+    @Test
+    public void testWith_EdgeCase() {
+        assertEquals("<>", Joiner.with(",", "<", ">").toString());
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with((CharSequence) null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(null, "="));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(null, "=", "{", "}"));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", null, "{", "}"));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", "=", null, "}"));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",", "=", "{", null));
     }
 
     private static void awaitQuietly(final CyclicBarrier barrier) {
@@ -533,75 +612,6 @@ public class JoinerTest extends JoinerTestSupport {
         }
     }
 
-    @Test
-    public void testAppendEntryObjectValueIsTrimmedAndStrippedLikeTheKey() {
-        assertEquals("k=v", Joiner.with(", ").trimBeforeAppend().appendEntry(" k ", (Object) "  v  ").toString());
-        assertEquals("k=v", Joiner.with(", ").stripBeforeAppend().appendEntry("\u2003k", (Object) "v\u2003").toString());
-        assertEquals("k=  v  ", Joiner.with(", ").appendEntry("k", (Object) "  v  ").toString());
-        assertEquals("k=N/A", Joiner.with(", ").useForNull("N/A").trimBeforeAppend().appendEntry("k", (Object) null).toString());
-    }
-
-    // ---- perf review 2026-09-26 G113 begin ----
-
-    // G113-01: merge bulk-copies the other Joiner's content (empty prefix, non-empty prefix, self-merge).
-    @Test
-    public void testMerge_bulkCopyPrefixSuffixAndOtherState() {
-        // empty prefix on the other side
-        final Joiner other1 = Joiner.with(";").append("b").append("c");
-        assertEquals("a, b;c", Joiner.with(", ").append("a").merge(other1).toString());
-        assertEquals("b;c", other1.toString());
-        assertEquals(3, other1.length());
-        assertEquals("b;c;d", other1.append("d").toString());
-
-        // non-empty (multi-char) prefix and suffix on both sides
-        final Joiner other2 = Joiner.with("-", "{{", "}").append("x").append("y");
-        final Joiner receiver2 = Joiner.with(", ", "[", "]").append("a");
-        assertEquals("[a, x-y]", receiver2.merge(other2).toString());
-        assertEquals("{{x-y}", other2.toString());
-        assertEquals(6, other2.length());
-        assertEquals("{{x-y-z}", other2.append("z").toString());
-        assertEquals("[a, x-y, q]", receiver2.append("q").toString());
-
-        // receiver never appended to: its own prefix, then the other's content without its prefix
-        assertEquals("<p|q>", Joiner.with(",", "<", ">").merge(Joiner.with("|", "(", ")").append("p").append("q")).toString());
-
-        // other never appended to contributes nothing; other holding one empty element contributes a separator
-        assertEquals("[a]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").setEmptyValue("E")).toString());
-        assertEquals("[a, ]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").append("")).toString());
-        assertEquals("E", Joiner.with(", ").setEmptyValue("E").merge(Joiner.with(",")).toString());
-
-        // self-merge appends the content before the merge exactly once
-        final Joiner self = Joiner.with(", ", "[", "]").append("a").append("b");
-        assertEquals("[a, b, a, b]", self.merge(self).toString());
-        final Joiner selfNoPrefix = Joiner.with("").append("a").append("b");
-        assertEquals("abab", selfNoPrefix.merge(selfNoPrefix).toString());
-
-        // non-Latin-1 text on either side, and a Latin-1 receiver merging a UTF-16 other (and vice versa)
-        assertEquals("[a, \u4e2d-\u00e9]",
-                Joiner.with(", ", "[", "]").append("a").merge(Joiner.with("-", "\u6587", "!").append("\u4e2d").append("\u00e9")).toString());
-        assertEquals("\u4e2d,x-y", Joiner.with(",").append("\u4e2d").merge(Joiner.with("-", "\u00e9", "").append("x").append("y")).toString());
-
-        // pooled (reuseBuffer) other: merged live, after its toString() and after close()
-        final Joiner pooled = Joiner.with(",", "(", ")").reuseBuffer().append("m").append("n");
-        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
-        assertEquals("(m,n)", pooled.toString());
-        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
-        final Joiner closed = Joiner.with(",", "((", ")").reuseBuffer().append("c1").append("c2");
-        closed.close();
-        assertEquals("[k, c1,c2]", Joiner.with(", ", "[", "]").append("k").merge(closed).toString());
-
-        // large content keeps every character in order
-        final Joiner big = Joiner.with(",", "#", "$");
-        final StringBuilder expected = new StringBuilder("head");
-
-        for (int i = 0; i < 5000; i++) {
-            big.append(i);
-            expected.append(',').append(i);
-        }
-
-        assertEquals(expected.toString(), Joiner.with(",").append("head").merge(big).toString());
-        assertEquals("#" + expected.substring(5) + "$", big.toString());
-    }
 
     // ---- perf review 2026-09-26 G113 end ----
 }

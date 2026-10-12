@@ -1,12 +1,12 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Method;
 
@@ -305,8 +305,8 @@ public class JavaVersionTest extends TestBase {
     @Test
     public void testOfRejectsNonVersionStringsThatFloatParsingWouldAccept() {
         for (final String bogus : new String[] { "Infinity", "1e9", "4e1", "40f", "40F", "40d", " 40 ", "\t40\n", "0x1p10", "40e0" }) {
-            assertThrows("of(\"" + bogus + "\") must be rejected", IllegalArgumentException.class, () -> JavaVersion.of(bogus));
-            assertThrows("get(\"" + bogus + "\") must be rejected", IllegalArgumentException.class, () -> JavaVersion.get(bogus));
+            assertThrows(IllegalArgumentException.class, () -> JavaVersion.of(bogus), "of(\"" + bogus + "\") must be rejected");
+            assertThrows(IllegalArgumentException.class, () -> JavaVersion.get(bogus), "get(\"" + bogus + "\") must be rejected");
         }
 
         // The rejection reports the caller's own string.
@@ -344,18 +344,16 @@ public class JavaVersionTest extends TestBase {
     public void testNonAsciiDecimalDigitsAreRejectedByTheNumericGuard() {
         // Arabic-Indic "40", Devanagari "20", fullwidth "40" - written as escapes to keep this file ASCII.
         for (final String digits : new String[] { "\u0664\u0660", "\u0968\u0966", "\uff14\uff10" }) {
-            assertTrue("Strings.isNumeric accepts Unicode decimal digits: " + digits, Strings.isNumeric(digits));
-            assertFalse("... but they are not ASCII digits, which is what the guard tests: " + digits, Strings.isAsciiNumeric(digits));
+            assertTrue(Strings.isNumeric(digits), "Strings.isNumeric accepts Unicode decimal digits: " + digits);
+            assertFalse(Strings.isAsciiNumeric(digits), "... but they are not ASCII digits, which is what the guard tests: " + digits);
 
-            final IllegalArgumentException fromOf = assertThrows("of(\"" + digits + "\") must be rejected", IllegalArgumentException.class,
-                    () -> JavaVersion.of(digits));
+            final IllegalArgumentException fromOf = assertThrows(IllegalArgumentException.class, () -> JavaVersion.of(digits), "of(\"" + digits + "\") must be rejected");
             assertEquals("Invalid Java version: " + digits, fromOf.getMessage());
-            assertNull("rejected by the guard, so there is no parse failure to report as a cause", fromOf.getCause());
+            assertNull(fromOf.getCause(), "rejected by the guard, so there is no parse failure to report as a cause");
 
-            final IllegalArgumentException fromGet = assertThrows("get(\"" + digits + "\") must be rejected", IllegalArgumentException.class,
-                    () -> JavaVersion.get(digits));
+            final IllegalArgumentException fromGet = assertThrows(IllegalArgumentException.class, () -> JavaVersion.get(digits), "get(\"" + digits + "\") must be rejected");
             assertEquals("Invalid Java version: " + digits, fromGet.getMessage());
-            assertNull("rejected by the guard, so there is no parse failure to report as a cause", fromGet.getCause());
+            assertNull(fromGet.getCause(), "rejected by the guard, so there is no parse failure to report as a cause");
         }
     }
 
@@ -373,7 +371,7 @@ public class JavaVersionTest extends TestBase {
         final float specValue = Float.parseFloat(spec);
 
         assertEquals(Float.toString(specValue), JavaVersion.JAVA_RECENT.toString());
-        assertTrue("a float rendering always carries a dot", JavaVersion.JAVA_RECENT.toString().indexOf('.') > 0);
+        assertTrue(JavaVersion.JAVA_RECENT.toString().indexOf('.') > 0, "a float rendering always carries a dot");
 
         // Had JAVA_RECENT been built by the single-argument constructor its name would have been derived from the
         // COMPARISON value instead, which is floored at 40.
@@ -411,7 +409,7 @@ public class JavaVersionTest extends TestBase {
             }
         }
 
-        assertEquals("JAVA_ANDROID_0_9 is the only declaration-order inversion", 1, inversions);
+        assertEquals(1, inversions, "JAVA_ANDROID_0_9 is the only declaration-order inversion");
     }
 
 }

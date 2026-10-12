@@ -9,16 +9,7 @@ import org.junit.jupiter.api.Test;
 
 public class ArrayRangeTest extends ArrayTestSupport {
 
-    @Test
-    public void testRange_char() {
-        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, Array.range('a', 'e'));
-        assertArrayEquals(new char[0], Array.range('a', 'a'));
-        assertArrayEquals(new char[0], Array.range('z', 'a'));
-        assertArrayEquals(new char[] { 'a', 'c', 'e' }, Array.range('a', 'f', 2));
-        assertArrayEquals(new char[] { 'g', 'e', 'c' }, Array.range('g', 'a', -2));
-        assertArrayEquals(new char[0], Array.range('a', 'e', -1));
-        assertThrows(IllegalArgumentException.class, () -> Array.range('a', 'e', 0));
-    }
+    // range
 
     @Test
     public void testRange_byte() {
@@ -31,12 +22,14 @@ public class ArrayRangeTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRange_short() {
-        assertArrayEquals(new short[] { 1, 2, 3, 4 }, Array.range((short) 1, (short) 5));
-        assertArrayEquals(new short[0], Array.range((short) 5, (short) 5));
-        assertArrayEquals(new short[] { 1, 3, 5 }, Array.range((short) 1, (short) 6, (short) 2));
-        assertArrayEquals(new short[0], Array.range((short) 1, (short) 5, (short) -1));
-        assertThrows(IllegalArgumentException.class, () -> Array.range((short) 1, (short) 5, (short) 0));
+    public void testRange_char() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, Array.range('a', 'e'));
+        assertArrayEquals(new char[0], Array.range('a', 'a'));
+        assertArrayEquals(new char[0], Array.range('z', 'a'));
+        assertArrayEquals(new char[] { 'a', 'c', 'e' }, Array.range('a', 'f', 2));
+        assertArrayEquals(new char[] { 'g', 'e', 'c' }, Array.range('g', 'a', -2));
+        assertArrayEquals(new char[0], Array.range('a', 'e', -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.range('a', 'e', 0));
     }
 
     @Test
@@ -64,13 +57,15 @@ public class ArrayRangeTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRangeClosed_char() {
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, Array.rangeClosed('a', 'c'));
-        assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'a'));
-        assertArrayEquals(new char[0], Array.rangeClosed('c', 'a'));
-        assertArrayEquals(new char[] { 'a', 'c', 'e' }, Array.rangeClosed('a', 'e', 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed('a', 'e', 0));
+    public void testRange_short() {
+        assertArrayEquals(new short[] { 1, 2, 3, 4 }, Array.range((short) 1, (short) 5));
+        assertArrayEquals(new short[0], Array.range((short) 5, (short) 5));
+        assertArrayEquals(new short[] { 1, 3, 5 }, Array.range((short) 1, (short) 6, (short) 2));
+        assertArrayEquals(new short[0], Array.range((short) 1, (short) 5, (short) -1));
+        assertThrows(IllegalArgumentException.class, () -> Array.range((short) 1, (short) 5, (short) 0));
     }
+
+    // rangeClosed
 
     @Test
     public void testRangeClosed_byte() {
@@ -82,12 +77,12 @@ public class ArrayRangeTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRangeClosed_short() {
-        assertArrayEquals(new short[] { 1, 2, 3 }, Array.rangeClosed((short) 1, (short) 3));
-        assertArrayEquals(new short[] { 7 }, Array.rangeClosed((short) 7, (short) 7));
-        assertArrayEquals(new short[0], Array.rangeClosed((short) 5, (short) 0));
-        assertArrayEquals(new short[] { 1, 3, 5 }, Array.rangeClosed((short) 1, (short) 5, (short) 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed((short) 1, (short) 5, (short) 0));
+    public void testRangeClosed_char() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, Array.rangeClosed('a', 'c'));
+        assertArrayEquals(new char[] { 'a' }, Array.rangeClosed('a', 'a'));
+        assertArrayEquals(new char[0], Array.rangeClosed('c', 'a'));
+        assertArrayEquals(new char[] { 'a', 'c', 'e' }, Array.rangeClosed('a', 'e', 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed('a', 'e', 0));
     }
 
     @Test
@@ -118,4 +113,14 @@ public class ArrayRangeTest extends ArrayTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0L, Long.MIN_VALUE + 1, -1L));
         assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed(0L, Long.MAX_VALUE, 2L));
     }
+
+    @Test
+    public void testRangeClosed_short() {
+        assertArrayEquals(new short[] { 1, 2, 3 }, Array.rangeClosed((short) 1, (short) 3));
+        assertArrayEquals(new short[] { 7 }, Array.rangeClosed((short) 7, (short) 7));
+        assertArrayEquals(new short[0], Array.rangeClosed((short) 5, (short) 0));
+        assertArrayEquals(new short[] { 1, 3, 5 }, Array.rangeClosed((short) 1, (short) 5, (short) 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.rangeClosed((short) 1, (short) 5, (short) 0));
+    }
+
 }

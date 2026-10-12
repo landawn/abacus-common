@@ -17,28 +17,26 @@ import org.junit.jupiter.api.Test;
 public class CommonUtilCheckArgTest extends CommonUtilTestSupport {
 
     @Test
-    public void testCheckArgNotNull() {
-        String obj = "test";
-        assertSame(obj, CommonUtil.checkArgNotNull(obj));
-        assertSame(obj, CommonUtil.checkArgNotNull(obj, "testObject"));
-        Integer num = 1;
-        assertSame(num, CommonUtil.checkArgNotNull(num));
+    public void testCheckArgNotBlank() {
+        String s = "test";
+        assertSame(s, CommonUtil.checkArgNotBlank(s, "notBlankStr"));
+        String padded = "  test  ";
+        assertSame(padded, CommonUtil.checkArgNotBlank(padded, "notBlankStrWithSpaces"));
+        StringBuilder sb = new StringBuilder("  test  ");
+        assertSame(sb, CommonUtil.checkArgNotBlank(sb, "sb"));
     }
 
     @Test
-    public void testCheckArgNotNull_EdgeCase() {
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null));
-        assertEquals("'testObject' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "testObject")).getMessage());
-        assertEquals("Custom error message for null object",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "Custom error message for null object")).getMessage());
-        assertEquals(" must not be null (custom message)",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, " must not be null (custom message)")).getMessage());
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, (String) null));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty((Collection<?>) null, (String) null));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative(-1, (String) null));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgPositive(0, (String) null));
-        assertThrows(NullPointerException.class, () -> CommonUtil.requireNonNull(null, (String) null));
+    public void testCheckArgNotBlank_EdgeCase() {
+        assertEquals("'notBlankStr' cannot be null or empty or blank",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank(null, "notBlankStr")).getMessage());
+        assertEquals("'notBlankStr' cannot be null or empty or blank",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("", "notBlankStr")).getMessage());
+        assertEquals("'notBlankStr' cannot be null or empty or blank",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("   ", "notBlankStr")).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("\t\n", "str"));
+        assertEquals("Custom error for blank string",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank(null, "Custom error for blank string")).getMessage());
     }
 
     @Test
@@ -143,29 +141,6 @@ public class CommonUtilCheckArgTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testCheckArgNotBlank() {
-        String s = "test";
-        assertSame(s, CommonUtil.checkArgNotBlank(s, "notBlankStr"));
-        String padded = "  test  ";
-        assertSame(padded, CommonUtil.checkArgNotBlank(padded, "notBlankStrWithSpaces"));
-        StringBuilder sb = new StringBuilder("  test  ");
-        assertSame(sb, CommonUtil.checkArgNotBlank(sb, "sb"));
-    }
-
-    @Test
-    public void testCheckArgNotBlank_EdgeCase() {
-        assertEquals("'notBlankStr' cannot be null or empty or blank",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank(null, "notBlankStr")).getMessage());
-        assertEquals("'notBlankStr' cannot be null or empty or blank",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("", "notBlankStr")).getMessage());
-        assertEquals("'notBlankStr' cannot be null or empty or blank",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("   ", "notBlankStr")).getMessage());
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank("\t\n", "str"));
-        assertEquals("Custom error for blank string",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotBlank(null, "Custom error for blank string")).getMessage());
-    }
-
-    @Test
     public void testCheckArgNotNegative() {
         assertEquals((byte) 0, CommonUtil.checkArgNotNegative((byte) 0, "byteArg"));
         assertEquals((byte) 10, CommonUtil.checkArgNotNegative((byte) 10, "byteArg"));
@@ -210,6 +185,31 @@ public class CommonUtilCheckArgTest extends CommonUtilTestSupport {
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative(-1.0f, "float value must not be negative")).getMessage());
         assertEquals("double value must not be negative",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative(-1.0, "double value must not be negative")).getMessage());
+    }
+
+    @Test
+    public void testCheckArgNotNull() {
+        String obj = "test";
+        assertSame(obj, CommonUtil.checkArgNotNull(obj));
+        assertSame(obj, CommonUtil.checkArgNotNull(obj, "testObject"));
+        Integer num = 1;
+        assertSame(num, CommonUtil.checkArgNotNull(num));
+    }
+
+    @Test
+    public void testCheckArgNotNull_EdgeCase() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null));
+        assertEquals("'testObject' cannot be null",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "testObject")).getMessage());
+        assertEquals("Custom error message for null object",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, "Custom error message for null object")).getMessage());
+        assertEquals(" must not be null (custom message)",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, " must not be null (custom message)")).getMessage());
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNull(null, (String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty((Collection<?>) null, (String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotNegative(-1, (String) null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgPositive(0, (String) null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.requireNonNull(null, (String) null));
     }
 
     @Test
@@ -264,4 +264,5 @@ public class CommonUtilCheckArgTest extends CommonUtilTestSupport {
         assertEquals("double value must be positive",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgPositive(0.0, "double value must be positive")).getMessage());
     }
+
 }

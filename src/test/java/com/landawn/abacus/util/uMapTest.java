@@ -21,6 +21,7 @@ import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.u.OptionalShort;
 
 public class uMapTest extends uTestSupport {
+
     @Test
     public void testMap() throws Exception {
         u.OptionalInt present = u.OptionalInt.of(10);
@@ -47,68 +48,22 @@ public class uMapTest extends uTestSupport {
     }
 
     @Test
-    public void testMapToChar() throws Exception {
-        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
-
-        u.OptionalChar mapped = optional.mapToChar(value -> value ? 'T' : 'F');
+    @DisplayName("Test mapIfNotNull()")
+    public void testMapIfNotNull() throws Exception {
+        u.Nullable<String> opt = u.Nullable.of("test");
+        u.Nullable<Integer> mapped = opt.mapIfNotNull(String::length);
         assertTrue(mapped.isPresent());
-        assertEquals('T', mapped.get());
+        assertEquals(4, mapped.get());
 
-        u.OptionalBoolean empty = u.OptionalBoolean.empty();
-        mapped = empty.mapToChar(value -> 'X');
-        assertFalse(mapped.isPresent());
-    }
+        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
+        u.Nullable<Integer> mappedNull = nullOpt.mapIfNotNull(String::length);
+        assertFalse(mappedNull.isPresent());
 
-    @Test
-    public void testMapToInt() throws Exception {
-        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+        u.Nullable<String> empty = u.Nullable.empty();
+        u.Nullable<Integer> mappedEmpty = empty.mapIfNotNull(String::length);
+        assertFalse(mappedEmpty.isPresent());
 
-        u.OptionalInt mapped = optional.mapToInt(value -> value ? 1 : 0);
-        assertTrue(mapped.isPresent());
-        assertEquals(1, mapped.get());
-
-        u.OptionalBoolean empty = u.OptionalBoolean.empty();
-        mapped = empty.mapToInt(value -> 99);
-        assertFalse(mapped.isPresent());
-    }
-
-    @Test
-    public void testMapToLong() throws Exception {
-        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
-
-        u.OptionalLong mapped = optional.mapToLong(value -> value ? 1L : 0L);
-        assertTrue(mapped.isPresent());
-        assertEquals(1L, mapped.get());
-
-        u.OptionalBoolean empty = u.OptionalBoolean.empty();
-        mapped = empty.mapToLong(value -> 99L);
-        assertFalse(mapped.isPresent());
-    }
-
-    @Test
-    public void testMapToDouble() throws Exception {
-        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
-
-        u.OptionalDouble mapped = optional.mapToDouble(value -> value ? 1.0 : 0.0);
-        assertTrue(mapped.isPresent());
-        assertEquals(1.0, mapped.get());
-
-        u.OptionalBoolean empty = u.OptionalBoolean.empty();
-        mapped = empty.mapToDouble(value -> 99.0);
-        assertFalse(mapped.isPresent());
-    }
-
-    @Test
-    public void testMapToObj() throws Exception {
-        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
-
-        Optional<String> mapped = optional.mapToObj(value -> value ? "TRUE" : "FALSE");
-        assertTrue(mapped.isPresent());
-        assertEquals("TRUE", mapped.get());
-
-        u.OptionalBoolean empty = u.OptionalBoolean.empty();
-        mapped = empty.mapToObj(value -> "X");
-        assertFalse(mapped.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> opt.mapIfNotNull(null));
     }
 
     @Test
@@ -125,29 +80,18 @@ public class uMapTest extends uTestSupport {
     }
 
     @Test
-    public void testMapToNonNull() throws Exception {
-        u.OptionalChar optional = u.OptionalChar.of('A');
-
-        Optional<String> mapped = optional.mapToObj(value -> String.valueOf(value));
+    @DisplayName("Test mapToBooleanIfNotNull()")
+    public void testMapToBooleanIfNotNull() throws Exception {
+        u.Nullable<String> opt = u.Nullable.of("test");
+        OptionalBoolean mapped = opt.mapToBooleanIfNotNull(s -> s.length() > 3);
         assertTrue(mapped.isPresent());
-        assertEquals("A", mapped.get());
+        assertTrue(mapped.get());
 
-        u.OptionalChar empty = u.OptionalChar.empty();
-        mapped = empty.mapToObj(value -> "X");
-        assertFalse(mapped.isPresent());
-    }
+        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
+        OptionalBoolean mappedNull = nullOpt.mapToBooleanIfNotNull(s -> true);
+        assertFalse(mappedNull.isPresent());
 
-    @Test
-    public void testMapToFloat() throws Exception {
-        u.OptionalInt optional = u.OptionalInt.of(42);
-
-        u.OptionalFloat mapped = optional.mapToFloat(value -> value / 2.0f);
-        assertTrue(mapped.isPresent());
-        assertEquals(21.0f, mapped.get());
-
-        u.OptionalInt empty = u.OptionalInt.empty();
-        mapped = empty.mapToFloat(value -> 99.0f);
-        assertFalse(mapped.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToBooleanIfNotNull(null));
     }
 
     @Test
@@ -166,37 +110,171 @@ public class uMapTest extends uTestSupport {
     }
 
     @Test
-    @DisplayName("Test mapToShort()")
-    public void testMapToShort() throws Exception {
-        u.Optional<Integer> opt = u.Optional.of(1000);
-        OptionalShort mapped = opt.mapToShort(Integer::shortValue);
+    @DisplayName("Test mapToByteIfNotNull()")
+    public void testMapToByteIfNotNull() throws Exception {
+        u.Nullable<Integer> opt = u.Nullable.of(100);
+        OptionalByte mapped = opt.mapToByteIfNotNull(Integer::byteValue);
         assertTrue(mapped.isPresent());
-        assertEquals((short) 1000, mapped.get());
+        assertEquals((byte) 100, mapped.get());
 
-        u.Optional<Integer> empty = u.Optional.empty();
-        OptionalShort mappedEmpty = empty.mapToShort(i -> (short) 0);
-        assertFalse(mappedEmpty.isPresent());
+        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
+        OptionalByte mappedNull = nullOpt.mapToByteIfNotNull(i -> (byte) 0);
+        assertFalse(mappedNull.isPresent());
 
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToShort(null));
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToByteIfNotNull(null));
     }
 
     @Test
-    @DisplayName("Test mapIfNotNull()")
-    public void testMapIfNotNull() throws Exception {
-        u.Nullable<String> opt = u.Nullable.of("test");
-        u.Nullable<Integer> mapped = opt.mapIfNotNull(String::length);
+    public void testMapToChar() throws Exception {
+        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+
+        u.OptionalChar mapped = optional.mapToChar(value -> value ? 'T' : 'F');
         assertTrue(mapped.isPresent());
-        assertEquals(4, mapped.get());
+        assertEquals('T', mapped.get());
+
+        u.OptionalBoolean empty = u.OptionalBoolean.empty();
+        mapped = empty.mapToChar(value -> 'X');
+        assertFalse(mapped.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test mapToCharIfNotNull()")
+    public void testMapToCharIfNotNull() throws Exception {
+        u.Nullable<String> opt = u.Nullable.of("test");
+        OptionalChar mapped = opt.mapToCharIfNotNull(s -> s.charAt(0));
+        assertTrue(mapped.isPresent());
+        assertEquals('t', mapped.get());
 
         u.Nullable<String> nullOpt = u.Nullable.of((String) null);
-        u.Nullable<Integer> mappedNull = nullOpt.mapIfNotNull(String::length);
+        OptionalChar mappedNull = nullOpt.mapToCharIfNotNull(s -> 'a');
         assertFalse(mappedNull.isPresent());
 
-        u.Nullable<String> empty = u.Nullable.empty();
-        u.Nullable<Integer> mappedEmpty = empty.mapIfNotNull(String::length);
-        assertFalse(mappedEmpty.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToCharIfNotNull(null));
+    }
 
-        assertThrows(IllegalArgumentException.class, () -> opt.mapIfNotNull(null));
+    @Test
+    public void testMapToDouble() throws Exception {
+        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+
+        u.OptionalDouble mapped = optional.mapToDouble(value -> value ? 1.0 : 0.0);
+        assertTrue(mapped.isPresent());
+        assertEquals(1.0, mapped.get());
+
+        u.OptionalBoolean empty = u.OptionalBoolean.empty();
+        mapped = empty.mapToDouble(value -> 99.0);
+        assertFalse(mapped.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test mapToDoubleIfNotNull()")
+    public void testMapToDoubleIfNotNull() throws Exception {
+        u.Nullable<Integer> opt = u.Nullable.of(10);
+        OptionalDouble mapped = opt.mapToDoubleIfNotNull(i -> i / 2.0);
+        assertTrue(mapped.isPresent());
+        assertEquals(5.0, mapped.getAsDouble());
+
+        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
+        OptionalDouble mappedNull = nullOpt.mapToDoubleIfNotNull(i -> 0.0);
+        assertFalse(mappedNull.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToDoubleIfNotNull(null));
+    }
+
+    @Test
+    public void testMapToFloat() throws Exception {
+        u.OptionalInt optional = u.OptionalInt.of(42);
+
+        u.OptionalFloat mapped = optional.mapToFloat(value -> value / 2.0f);
+        assertTrue(mapped.isPresent());
+        assertEquals(21.0f, mapped.get());
+
+        u.OptionalInt empty = u.OptionalInt.empty();
+        mapped = empty.mapToFloat(value -> 99.0f);
+        assertFalse(mapped.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test mapToFloatIfNotNull()")
+    public void testMapToFloatIfNotNull() throws Exception {
+        u.Nullable<Integer> opt = u.Nullable.of(10);
+        OptionalFloat mapped = opt.mapToFloatIfNotNull(i -> i / 2.0f);
+        assertTrue(mapped.isPresent());
+        assertEquals(5.0f, mapped.get());
+
+        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
+        OptionalFloat mappedNull = nullOpt.mapToFloatIfNotNull(i -> 0.0f);
+        assertFalse(mappedNull.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToFloatIfNotNull(null));
+    }
+
+    @Test
+    public void testMapToInt() throws Exception {
+        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+
+        u.OptionalInt mapped = optional.mapToInt(value -> value ? 1 : 0);
+        assertTrue(mapped.isPresent());
+        assertEquals(1, mapped.get());
+
+        u.OptionalBoolean empty = u.OptionalBoolean.empty();
+        mapped = empty.mapToInt(value -> 99);
+        assertFalse(mapped.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test mapToIntIfNotNull()")
+    public void testMapToIntIfNotNull() throws Exception {
+        u.Nullable<String> opt = u.Nullable.of("test");
+        OptionalInt mapped = opt.mapToIntIfNotNull(String::length);
+        assertTrue(mapped.isPresent());
+        assertEquals(4, mapped.getAsInt());
+
+        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
+        OptionalInt mappedNull = nullOpt.mapToIntIfNotNull(s -> 0);
+        assertFalse(mappedNull.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToIntIfNotNull(null));
+    }
+
+    @Test
+    public void testMapToLong() throws Exception {
+        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+
+        u.OptionalLong mapped = optional.mapToLong(value -> value ? 1L : 0L);
+        assertTrue(mapped.isPresent());
+        assertEquals(1L, mapped.get());
+
+        u.OptionalBoolean empty = u.OptionalBoolean.empty();
+        mapped = empty.mapToLong(value -> 99L);
+        assertFalse(mapped.isPresent());
+    }
+
+    @Test
+    @DisplayName("Test mapToLongIfNotNull()")
+    public void testMapToLongIfNotNull() throws Exception {
+        u.Nullable<String> opt = u.Nullable.of("test");
+        OptionalLong mapped = opt.mapToLongIfNotNull(s -> (long) s.length());
+        assertTrue(mapped.isPresent());
+        assertEquals(4L, mapped.getAsLong());
+
+        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
+        OptionalLong mappedNull = nullOpt.mapToLongIfNotNull(s -> 0L);
+        assertFalse(mappedNull.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToLongIfNotNull(null));
+    }
+
+    @Test
+    public void testMapToNonNull() throws Exception {
+        u.OptionalChar optional = u.OptionalChar.of('A');
+
+        Optional<String> mapped = optional.mapToObj(value -> String.valueOf(value));
+        assertTrue(mapped.isPresent());
+        assertEquals("A", mapped.get());
+
+        u.OptionalChar empty = u.OptionalChar.empty();
+        mapped = empty.mapToObj(value -> "X");
+        assertFalse(mapped.isPresent());
     }
 
     @Test
@@ -217,123 +295,16 @@ public class uMapTest extends uTestSupport {
     }
 
     @Test
-    @DisplayName("Test mapToBooleanIfNotNull()")
-    public void testMapToBooleanIfNotNull() throws Exception {
-        u.Nullable<String> opt = u.Nullable.of("test");
-        OptionalBoolean mapped = opt.mapToBooleanIfNotNull(s -> s.length() > 3);
+    public void testMapToObj() throws Exception {
+        u.OptionalBoolean optional = u.OptionalBoolean.of(true);
+
+        Optional<String> mapped = optional.mapToObj(value -> value ? "TRUE" : "FALSE");
         assertTrue(mapped.isPresent());
-        assertTrue(mapped.get());
+        assertEquals("TRUE", mapped.get());
 
-        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
-        OptionalBoolean mappedNull = nullOpt.mapToBooleanIfNotNull(s -> true);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToBooleanIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToCharIfNotNull()")
-    public void testMapToCharIfNotNull() throws Exception {
-        u.Nullable<String> opt = u.Nullable.of("test");
-        OptionalChar mapped = opt.mapToCharIfNotNull(s -> s.charAt(0));
-        assertTrue(mapped.isPresent());
-        assertEquals('t', mapped.get());
-
-        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
-        OptionalChar mappedNull = nullOpt.mapToCharIfNotNull(s -> 'a');
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToCharIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToByteIfNotNull()")
-    public void testMapToByteIfNotNull() throws Exception {
-        u.Nullable<Integer> opt = u.Nullable.of(100);
-        OptionalByte mapped = opt.mapToByteIfNotNull(Integer::byteValue);
-        assertTrue(mapped.isPresent());
-        assertEquals((byte) 100, mapped.get());
-
-        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
-        OptionalByte mappedNull = nullOpt.mapToByteIfNotNull(i -> (byte) 0);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToByteIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToShortIfNotNull()")
-    public void testMapToShortIfNotNull() throws Exception {
-        u.Nullable<Integer> opt = u.Nullable.of(1000);
-        OptionalShort mapped = opt.mapToShortIfNotNull(Integer::shortValue);
-        assertTrue(mapped.isPresent());
-        assertEquals((short) 1000, mapped.get());
-
-        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
-        OptionalShort mappedNull = nullOpt.mapToShortIfNotNull(i -> (short) 0);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToShortIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToIntIfNotNull()")
-    public void testMapToIntIfNotNull() throws Exception {
-        u.Nullable<String> opt = u.Nullable.of("test");
-        OptionalInt mapped = opt.mapToIntIfNotNull(String::length);
-        assertTrue(mapped.isPresent());
-        assertEquals(4, mapped.getAsInt());
-
-        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
-        OptionalInt mappedNull = nullOpt.mapToIntIfNotNull(s -> 0);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToIntIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToLongIfNotNull()")
-    public void testMapToLongIfNotNull() throws Exception {
-        u.Nullable<String> opt = u.Nullable.of("test");
-        OptionalLong mapped = opt.mapToLongIfNotNull(s -> (long) s.length());
-        assertTrue(mapped.isPresent());
-        assertEquals(4L, mapped.getAsLong());
-
-        u.Nullable<String> nullOpt = u.Nullable.of((String) null);
-        OptionalLong mappedNull = nullOpt.mapToLongIfNotNull(s -> 0L);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToLongIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToFloatIfNotNull()")
-    public void testMapToFloatIfNotNull() throws Exception {
-        u.Nullable<Integer> opt = u.Nullable.of(10);
-        OptionalFloat mapped = opt.mapToFloatIfNotNull(i -> i / 2.0f);
-        assertTrue(mapped.isPresent());
-        assertEquals(5.0f, mapped.get());
-
-        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
-        OptionalFloat mappedNull = nullOpt.mapToFloatIfNotNull(i -> 0.0f);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToFloatIfNotNull(null));
-    }
-
-    @Test
-    @DisplayName("Test mapToDoubleIfNotNull()")
-    public void testMapToDoubleIfNotNull() throws Exception {
-        u.Nullable<Integer> opt = u.Nullable.of(10);
-        OptionalDouble mapped = opt.mapToDoubleIfNotNull(i -> i / 2.0);
-        assertTrue(mapped.isPresent());
-        assertEquals(5.0, mapped.getAsDouble());
-
-        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
-        OptionalDouble mappedNull = nullOpt.mapToDoubleIfNotNull(i -> 0.0);
-        assertFalse(mappedNull.isPresent());
-
-        assertThrows(IllegalArgumentException.class, () -> opt.mapToDoubleIfNotNull(null));
+        u.OptionalBoolean empty = u.OptionalBoolean.empty();
+        mapped = empty.mapToObj(value -> "X");
+        assertFalse(mapped.isPresent());
     }
 
     @Test
@@ -429,4 +400,35 @@ public class uMapTest extends uTestSupport {
             return 1.0;
         }).isPresent());
     }
+
+    @Test
+    @DisplayName("Test mapToShort()")
+    public void testMapToShort() throws Exception {
+        u.Optional<Integer> opt = u.Optional.of(1000);
+        OptionalShort mapped = opt.mapToShort(Integer::shortValue);
+        assertTrue(mapped.isPresent());
+        assertEquals((short) 1000, mapped.get());
+
+        u.Optional<Integer> empty = u.Optional.empty();
+        OptionalShort mappedEmpty = empty.mapToShort(i -> (short) 0);
+        assertFalse(mappedEmpty.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToShort(null));
+    }
+
+    @Test
+    @DisplayName("Test mapToShortIfNotNull()")
+    public void testMapToShortIfNotNull() throws Exception {
+        u.Nullable<Integer> opt = u.Nullable.of(1000);
+        OptionalShort mapped = opt.mapToShortIfNotNull(Integer::shortValue);
+        assertTrue(mapped.isPresent());
+        assertEquals((short) 1000, mapped.get());
+
+        u.Nullable<Integer> nullOpt = u.Nullable.of((Integer) null);
+        OptionalShort mappedNull = nullOpt.mapToShortIfNotNull(i -> (short) 0);
+        assertFalse(mappedNull.isPresent());
+
+        assertThrows(IllegalArgumentException.class, () -> opt.mapToShortIfNotNull(null));
+    }
+
 }

@@ -38,122 +38,6 @@ import com.landawn.abacus.util.u.Optional;
 public class SeqOfTest extends SeqTestSupport {
 
     @Test
-    public void testOfNullable() throws Exception {
-        assertEquals(Collections.singletonList("hello"), Seq.ofNullable("hello").toList());
-        assertTrue(Seq.ofNullable(null).toList().isEmpty());
-        assertEquals(0, Seq.ofNullable(null).count());
-    }
-
-    @Test
-    public void testOfNullable_ExceptionType() throws Exception {
-        assertEquals(Collections.singletonList("hello"), Seq.ofNullable("hello", IOException.class).toList());
-        assertTrue(Seq.ofNullable(null, IOException.class).toList().isEmpty());
-        assertEquals(Collections.singletonList("world"), Seq.ofNullable("world", Exception.class).toList());
-    }
-
-    @Test
-    public void testOf() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).toList());
-        assertTrue(Seq.of().toList().isEmpty());
-        assertEquals(Collections.singletonList(null), Seq.of((Integer) null).toList());
-        assertTrue(Seq.of((Integer[]) null).toList().isEmpty());
-        assertEquals(0, Seq.of(new String[] {}).count());
-        assertEquals(3, Seq.of(new String[] { "a", "b", "c" }).count());
-    }
-
-    @Test
-    public void testOf_booleanArray() throws Exception {
-        assertEquals(Arrays.asList(true, false, true), Seq.of(new boolean[] { true, false, true }).toList());
-        assertTrue(Seq.of(new boolean[] {}).toList().isEmpty());
-        assertTrue(Seq.of((boolean[]) null).toList().isEmpty());
-        assertEquals(Arrays.asList(false, true, false), Seq.of(new boolean[] { true, false, true, false }).skip(1).toList());
-        assertTrue(Seq.of(new boolean[] { true, false }).skip(5).toList().isEmpty());
-        assertEquals(3, Seq.of(new boolean[] { true, false, true }).skip(0).toList().size());
-    }
-
-    @Test
-    public void testOf_charArray() throws Exception {
-        assertEquals(Arrays.asList('a', 'b', 'c'), Seq.of(new char[] { 'a', 'b', 'c' }).toList());
-        assertTrue(Seq.of(new char[] {}).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_byteArray() throws Exception {
-        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), Seq.of(new byte[] { 1, 2, 3 }).toList());
-        assertTrue(Seq.of(new byte[] {}).toList().isEmpty());
-        assertEquals(Arrays.asList((byte) 30, (byte) 40), Seq.of(new byte[] { 10, 20, 30, 40 }).skip(2).toList());
-        assertTrue(Seq.of(new byte[] { 1, 2, 3 }).skip(10).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_shortArray() throws Exception {
-        assertEquals(Arrays.asList((short) 10, (short) 20, (short) 30), Seq.of(new short[] { 10, 20, 30 }).toList());
-        assertTrue(Seq.of(new short[] {}).toList().isEmpty());
-        assertEquals(Arrays.asList((short) 4, (short) 5), Seq.of(new short[] { 1, 2, 3, 4, 5 }).skip(3).toList());
-    }
-
-    @Test
-    public void testOf_intArray() throws Exception {
-        assertEquals(Arrays.asList(100, 200, 300), Seq.of(new int[] { 100, 200, 300 }).toList());
-        assertTrue(Seq.of(new int[] {}).toList().isEmpty());
-        assertTrue(Seq.of(new int[] { 1, 2, 3 }).skip(100).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_longArray() throws Exception {
-        assertEquals(Arrays.asList(1L, 2L, 3L), Seq.of(new long[] { 1L, 2L, 3L }).toList());
-        assertTrue(Seq.of(new long[] {}).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_floatArray() throws Exception {
-        assertEquals(Arrays.asList(1.0f, 2.5f, 3.0f), Seq.of(new float[] { 1.0f, 2.5f, 3.0f }).toList());
-        assertTrue(Seq.of(new float[] {}).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_doubleArray() throws Exception {
-        assertEquals(Arrays.asList(1.1, 2.2, 3.3), Seq.of(new double[] { 1.1, 2.2, 3.3 }).toList());
-        assertTrue(Seq.of(new double[] {}).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_PrimitiveArray_throwsNoSuchElementWhenExhausted() {
-        final Iterator<Integer> iter = Seq.<Exception> of(new int[] { 1 }).stream().iterator();
-        assertEquals(Integer.valueOf(1), iter.next());
-        assertThrows(NoSuchElementException.class, iter::next);
-
-        final Iterator<Double> iter2 = Seq.<Exception> of(new double[] { 1.5d }).stream().iterator();
-        assertEquals(Double.valueOf(1.5d), iter2.next());
-        assertThrows(NoSuchElementException.class, iter2::next);
-    }
-
-    @Test
-    public void testOf_Optional() throws Exception {
-        assertEquals(Collections.singletonList("hello"), Seq.of(Optional.of("hello")).toList());
-        assertTrue(Seq.of(Optional.<String> empty()).toList().isEmpty());
-        assertTrue(Seq.of((Optional<String>) null).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_JavaOptional() throws Exception {
-        assertEquals(Collections.singletonList("hello"), Seq.of(java.util.Optional.of("hello")).toList());
-        assertTrue(Seq.of(java.util.Optional.<String> empty()).toList().isEmpty());
-        assertTrue(Seq.of((java.util.Optional<String>) null).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_Iterable() throws Exception {
-        List<String> list = Arrays.asList("a", "b", "c");
-        assertEquals(list, Seq.of(list).toList());
-        assertTrue(Seq.of(Collections.emptyList()).toList().isEmpty());
-        assertTrue(Seq.of((Iterable<String>) null).toList().isEmpty());
-        assertEquals(list, Seq.of(list, IOException.class).toList());
-        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c").skip(0).toList().size());
-        assertTrue(Seq.<String, RuntimeException> of("a", "b").skip(10).toList().isEmpty());
-    }
-
-    @Test
     public void testOf_Iterator() throws Exception {
         assertEquals(Arrays.asList("x", "y"), Seq.of(Arrays.asList("x", "y").iterator()).toList());
         assertTrue(Seq.of(Collections.emptyIterator()).toList().isEmpty());
@@ -190,12 +74,89 @@ public class SeqOfTest extends SeqTestSupport {
     }
 
     @Test
+    public void testOf() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).toList());
+        assertTrue(Seq.of().toList().isEmpty());
+        assertEquals(Collections.singletonList(null), Seq.of((Integer) null).toList());
+        assertTrue(Seq.of((Integer[]) null).toList().isEmpty());
+        assertEquals(0, Seq.of(new String[] {}).count());
+        assertEquals(3, Seq.of(new String[] { "a", "b", "c" }).count());
+    }
+
+    @Test
+    public void testOf_booleanArray() throws Exception {
+        assertEquals(Arrays.asList(true, false, true), Seq.of(new boolean[] { true, false, true }).toList());
+        assertTrue(Seq.of(new boolean[] {}).toList().isEmpty());
+        assertTrue(Seq.of((boolean[]) null).toList().isEmpty());
+        assertEquals(Arrays.asList(false, true, false), Seq.of(new boolean[] { true, false, true, false }).skip(1).toList());
+        assertTrue(Seq.of(new boolean[] { true, false }).skip(5).toList().isEmpty());
+        assertEquals(3, Seq.of(new boolean[] { true, false, true }).skip(0).toList().size());
+    }
+
+    @Test
+    public void testOf_byteArray() throws Exception {
+        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), Seq.of(new byte[] { 1, 2, 3 }).toList());
+        assertTrue(Seq.of(new byte[] {}).toList().isEmpty());
+        assertEquals(Arrays.asList((byte) 30, (byte) 40), Seq.of(new byte[] { 10, 20, 30, 40 }).skip(2).toList());
+        assertTrue(Seq.of(new byte[] { 1, 2, 3 }).skip(10).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_charArray() throws Exception {
+        assertEquals(Arrays.asList('a', 'b', 'c'), Seq.of(new char[] { 'a', 'b', 'c' }).toList());
+        assertTrue(Seq.of(new char[] {}).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_doubleArray() throws Exception {
+        assertEquals(Arrays.asList(1.1, 2.2, 3.3), Seq.of(new double[] { 1.1, 2.2, 3.3 }).toList());
+        assertTrue(Seq.of(new double[] {}).toList().isEmpty());
+    }
+
+    @Test
     public void testOf_Enumeration() throws Exception {
         Vector<String> vector = new Vector<>(Arrays.asList("e1", "e2"));
         assertEquals(Arrays.asList("e1", "e2"), Seq.of(vector.elements()).toList());
         assertTrue(Seq.of(Collections.emptyEnumeration()).toList().isEmpty());
         assertTrue(Seq.of((Enumeration<String>) null).toList().isEmpty());
         assertEquals(Arrays.asList("a", "b", "c"), Seq.of(new Vector<>(Arrays.asList("a", "b", "c")).elements(), IOException.class).toList());
+    }
+
+    @Test
+    public void testOf_floatArray() throws Exception {
+        assertEquals(Arrays.asList(1.0f, 2.5f, 3.0f), Seq.of(new float[] { 1.0f, 2.5f, 3.0f }).toList());
+        assertTrue(Seq.of(new float[] {}).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_intArray() throws Exception {
+        assertEquals(Arrays.asList(100, 200, 300), Seq.of(new int[] { 100, 200, 300 }).toList());
+        assertTrue(Seq.of(new int[] {}).toList().isEmpty());
+        assertTrue(Seq.of(new int[] { 1, 2, 3 }).skip(100).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_Iterable() throws Exception {
+        List<String> list = Arrays.asList("a", "b", "c");
+        assertEquals(list, Seq.of(list).toList());
+        assertTrue(Seq.of(Collections.emptyList()).toList().isEmpty());
+        assertTrue(Seq.of((Iterable<String>) null).toList().isEmpty());
+        assertEquals(list, Seq.of(list, IOException.class).toList());
+        assertEquals(3, Seq.<String, RuntimeException> of("a", "b", "c").skip(0).toList().size());
+        assertTrue(Seq.<String, RuntimeException> of("a", "b").skip(10).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_JavaOptional() throws Exception {
+        assertEquals(Collections.singletonList("hello"), Seq.of(java.util.Optional.of("hello")).toList());
+        assertTrue(Seq.of(java.util.Optional.<String> empty()).toList().isEmpty());
+        assertTrue(Seq.of((java.util.Optional<String>) null).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_longArray() throws Exception {
+        assertEquals(Arrays.asList(1L, 2L, 3L), Seq.of(new long[] { 1L, 2L, 3L }).toList());
+        assertTrue(Seq.of(new long[] {}).toList().isEmpty());
     }
 
     @Test
@@ -213,6 +174,31 @@ public class SeqOfTest extends SeqTestSupport {
     }
 
     @Test
+    public void testOf_Optional() throws Exception {
+        assertEquals(Collections.singletonList("hello"), Seq.of(Optional.of("hello")).toList());
+        assertTrue(Seq.of(Optional.<String> empty()).toList().isEmpty());
+        assertTrue(Seq.of((Optional<String>) null).toList().isEmpty());
+    }
+
+    @Test
+    public void testOf_PrimitiveArray_throwsNoSuchElementWhenExhausted() {
+        final Iterator<Integer> iter = Seq.<Exception> of(new int[] { 1 }).stream().iterator();
+        assertEquals(Integer.valueOf(1), iter.next());
+        assertThrows(NoSuchElementException.class, iter::next);
+
+        final Iterator<Double> iter2 = Seq.<Exception> of(new double[] { 1.5d }).stream().iterator();
+        assertEquals(Double.valueOf(1.5d), iter2.next());
+        assertThrows(NoSuchElementException.class, iter2::next);
+    }
+
+    @Test
+    public void testOf_shortArray() throws Exception {
+        assertEquals(Arrays.asList((short) 10, (short) 20, (short) 30), Seq.of(new short[] { 10, 20, 30 }).toList());
+        assertTrue(Seq.of(new short[] {}).toList().isEmpty());
+        assertEquals(Arrays.asList((short) 4, (short) 5), Seq.of(new short[] { 1, 2, 3, 4, 5 }).skip(3).toList());
+    }
+
+    @Test
     public void testOfKeys() throws Exception {
         Map<Integer, String> map = new LinkedHashMap<>();
         map.put(1, "apple");
@@ -225,67 +211,7 @@ public class SeqOfTest extends SeqTestSupport {
                 Seq.ofKeys(map, (Throwables.BiPredicate<Integer, String, Exception>) (key, value) -> key > 1 && value.length() > 5).toList());
     }
 
-    @Test
-    public void testOfValues() throws Exception {
-        Map<Integer, String> map = new LinkedHashMap<>();
-        map.put(1, "apple");
-        map.put(2, "banana");
-        map.put(3, "apricot");
-        assertEquals(Arrays.asList("apple", "banana", "apricot"), Seq.ofValues(map).toList());
-        assertTrue(Seq.ofValues(Collections.emptyMap()).toList().isEmpty());
-        assertEquals(Arrays.asList("apple", "apricot"), Seq.ofValues(map, (Throwables.Predicate<Integer, Exception>) key -> key % 2 != 0).toList());
-        assertEquals(Arrays.asList("banana", "apricot"),
-                Seq.ofValues(map, (Throwables.BiPredicate<Integer, String, Exception>) (key, value) -> value.length() > 5 && key > 1).toList());
-    }
-
-    @Test
-    public void testOfReversed_Array() throws Exception {
-        assertEquals(Arrays.asList(3, 2, 1), Seq.ofReversed(new Integer[] { 1, 2, 3 }).toList());
-        assertTrue(Seq.ofReversed(new Integer[0]).toList().isEmpty());
-        assertEquals(Arrays.asList("c", "b", "a"), Seq.ofReversed(new String[] { "a", "b", "c" }).toList());
-    }
-
-    @Test
-    public void testOfReversed_List() throws Exception {
-        assertEquals(Arrays.asList("d", "c", "b", "a"), Seq.ofReversed(Arrays.asList("a", "b", "c", "d")).toList());
-        assertTrue(Seq.ofReversed(Collections.emptyList()).toList().isEmpty());
-        assertEquals(CommonUtil.asList("c", "b", "a"), Seq.<String, Exception> ofReversed(new ArrayList<>(CommonUtil.asList("a", "b", "c"))).toList());
-        assertEquals(CommonUtil.asList("c", "b", "a"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).toList());
-        assertEquals(Arrays.asList(null, "b", "a"), Seq.<String, Exception> ofReversed(new LinkedList<>(Arrays.asList("a", "b", null))).toList());
-        assertEquals(CommonUtil.emptyList(), Seq.<String, Exception> ofReversed((List<String>) null).toList());
-        assertEquals(CommonUtil.asList("b"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).skip(1).limit(1).toList());
-    }
-
-    // C-128 (2026-09-24 review, cycle 3): the list iterator is created by the factory, so a structural change made
-    // afterwards is handled by that iterator - fail-fast, like Seq.of(list) - instead of being silently dropped.
-    @Test
-    public void testOfReversed_structuralChangeAfterCreationFailsFast() throws Exception {
-        final LinkedList<String> linked = new LinkedList<>(CommonUtil.asList("a", "b", "c"));
-        final Seq<String, Exception> fromLinked = Seq.ofReversed(linked);
-        linked.add("d");
-        assertThrows(java.util.ConcurrentModificationException.class, fromLinked::toList);
-
-        final ArrayList<String> indexed = new ArrayList<>(CommonUtil.asList("a", "b", "c"));
-        final Seq<String, Exception> fromIndexed = Seq.ofReversed(indexed);
-        indexed.add("d");
-        assertThrows(java.util.ConcurrentModificationException.class, fromIndexed::toList);
-
-        // a snapshot list keeps the elements (and size) it had at the call
-        final java.util.concurrent.CopyOnWriteArrayList<String> cow = new java.util.concurrent.CopyOnWriteArrayList<>(CommonUtil.asList("a", "b", "c"));
-        final Seq<String, Exception> fromCow = Seq.ofReversed(cow);
-        cow.add("d");
-        assertEquals(CommonUtil.asList("c", "b", "a"), fromCow.toList());
-    }
-
-    @Test
-    public void testOfReversed_linkedListIsLinearNotQuadratic() throws Exception {
-        final LinkedList<Integer> big = new LinkedList<>();
-        for (int i = 0; i < 200_000; i++) {
-            big.add(i);
-        }
-        assertEquals(200_000, Seq.<Integer, Exception> ofReversed(big).count());
-        assertEquals(Nullable.of(199_999), Seq.<Integer, Exception> ofReversed(big).first());
-    }
+    // ofLines
 
     @Test
     public void testOfLines_File() throws Exception {
@@ -298,14 +224,6 @@ public class SeqOfTest extends SeqTestSupport {
         File utf = Files.createTempFile(tempFolder, "utf", ".txt").toFile();
         Files.write(utf.toPath(), "テスト".getBytes(StandardCharsets.UTF_8));
         assertEquals(Collections.singletonList("テスト"), Seq.ofLines(utf, StandardCharsets.UTF_8).toList());
-    }
-
-    @Test
-    public void testOfLines_Path() throws Exception {
-        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.ofLines(tempPath).toList());
-        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.ofLines(tempPath, StandardCharsets.UTF_8).toList());
-        assertThrows(IllegalArgumentException.class, () -> Seq.ofLines((Path) null));
-        assertThrows(IllegalArgumentException.class, () -> Seq.ofLines((Path) null, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -322,6 +240,14 @@ public class SeqOfTest extends SeqTestSupport {
         for (int i = 0; i < 2; i++) {
             assertThrows(java.io.FileNotFoundException.class, () -> Seq.ofLines(new File("no_such_retry_file.txt")).toList());
         }
+    }
+
+    @Test
+    public void testOfLines_Path() throws Exception {
+        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.ofLines(tempPath).toList());
+        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.ofLines(tempPath, StandardCharsets.UTF_8).toList());
+        assertThrows(IllegalArgumentException.class, () -> Seq.ofLines((Path) null));
+        assertThrows(IllegalArgumentException.class, () -> Seq.ofLines((Path) null, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -363,7 +289,65 @@ public class SeqOfTest extends SeqTestSupport {
         assertTrue(ex.getMessage().contains("reader"), ex.getMessage());
     }
 
-    // ---- perf review 2026-09-26 G068 begin ----
+    @Test
+    public void testOfNullable() throws Exception {
+        assertEquals(Collections.singletonList("hello"), Seq.ofNullable("hello").toList());
+        assertTrue(Seq.ofNullable(null).toList().isEmpty());
+        assertEquals(0, Seq.ofNullable(null).count());
+    }
+
+    @Test
+    public void testOfNullable_ExceptionType() throws Exception {
+        assertEquals(Collections.singletonList("hello"), Seq.ofNullable("hello", IOException.class).toList());
+        assertTrue(Seq.ofNullable(null, IOException.class).toList().isEmpty());
+        assertEquals(Collections.singletonList("world"), Seq.ofNullable("world", Exception.class).toList());
+    }
+
+    // ofReversed
+
+    @Test
+    public void testOfReversed_Array() throws Exception {
+        assertEquals(Arrays.asList(3, 2, 1), Seq.ofReversed(new Integer[] { 1, 2, 3 }).toList());
+        assertTrue(Seq.ofReversed(new Integer[0]).toList().isEmpty());
+        assertEquals(Arrays.asList("c", "b", "a"), Seq.ofReversed(new String[] { "a", "b", "c" }).toList());
+    }
+
+    @Test
+    public void testOfReversed_List() throws Exception {
+        assertEquals(Arrays.asList("d", "c", "b", "a"), Seq.ofReversed(Arrays.asList("a", "b", "c", "d")).toList());
+        assertTrue(Seq.ofReversed(Collections.emptyList()).toList().isEmpty());
+        assertEquals(CommonUtil.asList("c", "b", "a"), Seq.<String, Exception> ofReversed(new ArrayList<>(CommonUtil.asList("a", "b", "c"))).toList());
+        assertEquals(CommonUtil.asList("c", "b", "a"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).toList());
+        assertEquals(Arrays.asList(null, "b", "a"), Seq.<String, Exception> ofReversed(new LinkedList<>(Arrays.asList("a", "b", null))).toList());
+        assertEquals(CommonUtil.emptyList(), Seq.<String, Exception> ofReversed((List<String>) null).toList());
+        assertEquals(CommonUtil.asList("b"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).skip(1).limit(1).toList());
+    }
+
+
+
+    // C-128 (2026-09-24 review, cycle 3): the list iterator is created by the factory, so a structural change made
+    // afterwards is handled by that iterator - fail-fast, like Seq.of(list) - instead of being silently dropped.
+    @Test
+    public void testOfReversed_structuralChangeAfterCreationFailsFast() throws Exception {
+        final LinkedList<String> linked = new LinkedList<>(CommonUtil.asList("a", "b", "c"));
+        final Seq<String, Exception> fromLinked = Seq.ofReversed(linked);
+        linked.add("d");
+        assertThrows(java.util.ConcurrentModificationException.class, fromLinked::toList);
+
+        final ArrayList<String> indexed = new ArrayList<>(CommonUtil.asList("a", "b", "c"));
+        final Seq<String, Exception> fromIndexed = Seq.ofReversed(indexed);
+        indexed.add("d");
+        assertThrows(java.util.ConcurrentModificationException.class, fromIndexed::toList);
+
+        // a snapshot list keeps the elements (and size) it had at the call
+        final java.util.concurrent.CopyOnWriteArrayList<String> cow = new java.util.concurrent.CopyOnWriteArrayList<>(CommonUtil.asList("a", "b", "c"));
+        final Seq<String, Exception> fromCow = Seq.ofReversed(cow);
+        cow.add("d");
+        assertEquals(CommonUtil.asList("c", "b", "a"), fromCow.toList());
+    }
+
+
+
     // G068-01: ofReversed(T[]) walks the array directly; pins traversal, skip/limit/step/count, nulls, lazy element reads and exhaustion.
     @Test
     public void testOfReversedArray_directWalkEdgeCases() throws Exception {
@@ -404,5 +388,29 @@ public class SeqOfTest extends SeqTestSupport {
         assertThrows(NoSuchElementException.class, iter::next);
         single.close();
     }
+
+    @Test
+    public void testOfReversed_linkedListIsLinearNotQuadratic() throws Exception {
+        final LinkedList<Integer> big = new LinkedList<>();
+        for (int i = 0; i < 200_000; i++) {
+            big.add(i);
+        }
+        assertEquals(200_000, Seq.<Integer, Exception> ofReversed(big).count());
+        assertEquals(Nullable.of(199_999), Seq.<Integer, Exception> ofReversed(big).first());
+    }
+
+    @Test
+    public void testOfValues() throws Exception {
+        Map<Integer, String> map = new LinkedHashMap<>();
+        map.put(1, "apple");
+        map.put(2, "banana");
+        map.put(3, "apricot");
+        assertEquals(Arrays.asList("apple", "banana", "apricot"), Seq.ofValues(map).toList());
+        assertTrue(Seq.ofValues(Collections.emptyMap()).toList().isEmpty());
+        assertEquals(Arrays.asList("apple", "apricot"), Seq.ofValues(map, (Throwables.Predicate<Integer, Exception>) key -> key % 2 != 0).toList());
+        assertEquals(Arrays.asList("banana", "apricot"),
+                Seq.ofValues(map, (Throwables.BiPredicate<Integer, String, Exception>) (key, value) -> value.length() > 5 && key > 1).toList());
+    }
+
     // ---- perf review 2026-09-26 G068 end ----
 }

@@ -12,62 +12,8 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.Builder.BooleanListBuilder;
 
 public class BuilderBooleanTest extends BuilderTestSupport {
-    @Test
-    public void testBooleanListBuilder_set_returnsBuilder() {
-        BooleanList list = BooleanList.of(true);
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.set(0, false));
-    }
 
-    @Test
-    public void testBooleanListBuilder_add_returnsBuilder() {
-        BooleanList list = BooleanList.of();
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.add(true));
-    }
-
-    @Test
-    public void testBooleanListBuilder_addAtIndex_returnsBuilder() {
-        BooleanList list = BooleanList.of(true);
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.add(0, false));
-    }
-
-    @Test
-    public void testBooleanListBuilder_addAll_returnsBuilder() {
-        BooleanList list = BooleanList.of();
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.addAll(BooleanList.of(true)));
-    }
-
-    @Test
-    public void testBooleanListBuilder_addAllAtIndex_returnsBuilder() {
-        BooleanList list = BooleanList.of(true);
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.addAll(0, BooleanList.of(false)));
-    }
-
-    @Test
-    public void testBooleanListBuilder_remove_returnsBuilder() {
-        BooleanList list = BooleanList.of(true);
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.remove(true));
-    }
-
-    @Test
-    public void testBooleanListBuilder_removeAll_returnsBuilder() {
-        BooleanList list = BooleanList.of(true);
-        BooleanListBuilder b = Builder.of(list);
-        assertSame(b, b.removeAll(BooleanList.of(true)));
-    }
-
-    @Test
-    public void testBooleanListBuilder_set() {
-        BooleanList list = BooleanList.of(true, false);
-        BooleanListBuilder builder = Builder.of(list);
-        builder.set(0, false);
-        assertFalse(builder.val().get(0));
-    }
+    // add
 
     @Test
     public void testBooleanListBuilder_add() {
@@ -76,6 +22,13 @@ public class BuilderBooleanTest extends BuilderTestSupport {
         builder.add(true).add(false);
         assertEquals(2, builder.val().size());
         assertTrue(builder.val().get(0));
+    }
+
+    @Test
+    public void testBooleanListBuilder_add_returnsBuilder() {
+        BooleanList list = BooleanList.of();
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.add(true));
     }
 
     @Test
@@ -88,12 +41,28 @@ public class BuilderBooleanTest extends BuilderTestSupport {
     }
 
     @Test
+    public void testBooleanListBuilder_addAtIndex_returnsBuilder() {
+        BooleanList list = BooleanList.of(true);
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.add(0, false));
+    }
+
+    // addAll
+
+    @Test
     public void testBooleanListBuilder_addAll() {
         BooleanList list = BooleanList.of(true);
         BooleanList toAdd = BooleanList.of(false, true);
         BooleanListBuilder builder = Builder.of(list);
         builder.addAll(toAdd);
         assertEquals(3, builder.val().size());
+    }
+
+    @Test
+    public void testBooleanListBuilder_addAll_returnsBuilder() {
+        BooleanList list = BooleanList.of();
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.addAll(BooleanList.of(true)));
     }
 
     @Test
@@ -107,21 +76,13 @@ public class BuilderBooleanTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testBooleanListBuilder_remove() {
-        BooleanList list = BooleanList.of(true, false, true);
-        BooleanListBuilder builder = Builder.of(list);
-        builder.remove(false);
-        assertEquals(2, builder.val().size());
+    public void testBooleanListBuilder_addAllAtIndex_returnsBuilder() {
+        BooleanList list = BooleanList.of(true);
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.addAll(0, BooleanList.of(false)));
     }
 
-    @Test
-    public void testBooleanListBuilder_removeAll() {
-        BooleanList list = BooleanList.of(true, false, true, false);
-        BooleanList toRemove = BooleanList.of(false);
-        BooleanListBuilder builder = Builder.of(list);
-        builder.removeAll(toRemove);
-        assertEquals(2, builder.val().size());
-    }
+    // BooleanListBuilder
 
     @Test
     public void testBooleanListBuilder() {
@@ -138,16 +99,6 @@ public class BuilderBooleanTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testBooleanListBuilderSet() {
-        BooleanList list = new BooleanList();
-        list.add(true);
-        Builder.BooleanListBuilder builder = Builder.of(list);
-
-        builder.set(0, false);
-        Assertions.assertFalse(list.get(0));
-    }
-
-    @Test
     public void testBooleanListBuilderAdd() {
         BooleanList list = new BooleanList();
         Builder.BooleanListBuilder builder = Builder.of(list);
@@ -155,18 +106,6 @@ public class BuilderBooleanTest extends BuilderTestSupport {
         builder.add(true);
         Assertions.assertEquals(1, list.size());
         Assertions.assertTrue(list.get(0));
-    }
-
-    @Test
-    public void testBooleanListBuilderAddAtIndex() {
-        BooleanList list = new BooleanList();
-        list.add(true);
-        Builder.BooleanListBuilder builder = Builder.of(list);
-
-        builder.add(0, false);
-        Assertions.assertEquals(2, list.size());
-        Assertions.assertFalse(list.get(0));
-        Assertions.assertTrue(list.get(1));
     }
 
     @Test
@@ -194,6 +133,18 @@ public class BuilderBooleanTest extends BuilderTestSupport {
         Builder.BooleanListBuilder builder = Builder.of(list);
         builder.addAll(0, toAdd);
 
+        Assertions.assertEquals(2, list.size());
+        Assertions.assertFalse(list.get(0));
+        Assertions.assertTrue(list.get(1));
+    }
+
+    @Test
+    public void testBooleanListBuilderAddAtIndex() {
+        BooleanList list = new BooleanList();
+        list.add(true);
+        Builder.BooleanListBuilder builder = Builder.of(list);
+
+        builder.add(0, false);
         Assertions.assertEquals(2, list.size());
         Assertions.assertFalse(list.get(0));
         Assertions.assertTrue(list.get(1));
@@ -230,10 +181,67 @@ public class BuilderBooleanTest extends BuilderTestSupport {
     }
 
     @Test
+    public void testBooleanListBuilderSet() {
+        BooleanList list = new BooleanList();
+        list.add(true);
+        Builder.BooleanListBuilder builder = Builder.of(list);
+
+        builder.set(0, false);
+        Assertions.assertFalse(list.get(0));
+    }
+
+    @Test
     public void testBooleanListBuilder_of() {
         BooleanList list = BooleanList.of(true, false, true);
         BooleanListBuilder builder = Builder.of(list);
         assertNotNull(builder);
         assertEquals(3, builder.val().size());
     }
+
+    @Test
+    public void testBooleanListBuilder_remove() {
+        BooleanList list = BooleanList.of(true, false, true);
+        BooleanListBuilder builder = Builder.of(list);
+        builder.remove(false);
+        assertEquals(2, builder.val().size());
+    }
+
+    @Test
+    public void testBooleanListBuilder_remove_returnsBuilder() {
+        BooleanList list = BooleanList.of(true);
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.remove(true));
+    }
+
+    @Test
+    public void testBooleanListBuilder_removeAll() {
+        BooleanList list = BooleanList.of(true, false, true, false);
+        BooleanList toRemove = BooleanList.of(false);
+        BooleanListBuilder builder = Builder.of(list);
+        builder.removeAll(toRemove);
+        assertEquals(2, builder.val().size());
+    }
+
+    @Test
+    public void testBooleanListBuilder_removeAll_returnsBuilder() {
+        BooleanList list = BooleanList.of(true);
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.removeAll(BooleanList.of(true)));
+    }
+
+    @Test
+    public void testBooleanListBuilder_set() {
+        BooleanList list = BooleanList.of(true, false);
+        BooleanListBuilder builder = Builder.of(list);
+        builder.set(0, false);
+        assertFalse(builder.val().get(0));
+    }
+
+    @Test
+    public void testBooleanListBuilder_set_returnsBuilder() {
+        BooleanList list = BooleanList.of(true);
+        BooleanListBuilder b = Builder.of(list);
+        assertSame(b, b.set(0, false));
+    }
+
 }

@@ -22,6 +22,115 @@ import org.junit.jupiter.api.Test;
 
 public class SeqOnTest extends SeqTestSupport {
 
+    // onClose
+
+    @Test
+    public void testOnClose() throws Exception {
+        AtomicInteger closed = new AtomicInteger();
+        Seq.of(1, 2, 3).onClose(closed::incrementAndGet).toList();
+        assertEquals(1, closed.get());
+
+        List<Integer> closeOrder = new ArrayList<>();
+        Seq.of(1, 2, 3).onClose(() -> closeOrder.add(1)).onClose(() -> closeOrder.add(2)).onClose(() -> closeOrder.add(3)).count();
+        assertEquals(Arrays.asList(1, 2, 3), closeOrder);
+
+        AtomicInteger twice = new AtomicInteger();
+        Seq<String, Exception> seq = Seq.of("x", "y").onClose(twice::incrementAndGet);
+        seq.close();
+        seq.close();
+        assertEquals(1, twice.get());
+
+        assertThrows(IllegalArgumentException.class, () -> Seq.of("a", "b").onClose(null));
+    }
+
+    @Test
+    public void testOnClose_CalledOnOperationFailure() {
+        AtomicBoolean closed = new AtomicBoolean();
+        RuntimeException op = new RuntimeException("Operation failed");
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3).onClose(() -> closed.set(true)).map(i -> {
+            if (i == 2) {
+                throw op;
+            }
+            return i * 2;
+        }).toList());
+        assertSame(op, thrown);
+        assertTrue(closed.get());
+
+        AtomicBoolean closed2 = new AtomicBoolean();
+        AtomicInteger processed = new AtomicInteger();
+        RuntimeException terminal = new RuntimeException("Terminal op failed mid-way");
+        RuntimeException thrown2 = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3, 4).onClose(() -> closed2.set(true)).forEach(val -> {
+            processed.incrementAndGet();
+            if (val == 3) {
+                throw terminal;
+            }
+        }));
+        assertSame(terminal, thrown2);
+        assertEquals(3, processed.get());
+        assertTrue(closed2.get());
+    }
+
+    @Test
+    public void testOnClose_FlatMap() throws Exception {
+        AtomicBoolean outer = new AtomicBoolean();
+        AtomicBoolean inner1 = new AtomicBoolean();
+        AtomicBoolean inner2 = new AtomicBoolean();
+        List<String> result = Seq.of(1, 2).onClose(() -> outer.set(true)).flatMap(i -> {
+            if (i == 1) {
+                return Seq.of("a" + i, "b" + i).onClose(() -> inner1.set(true));
+            }
+            return Seq.of("x" + i, "y" + i).onClose(() -> inner2.set(true));
+        }).toList();
+        assertEquals(Arrays.asList("a1", "b1", "x2", "y2"), result);
+        assertTrue(outer.get() && inner1.get() && inner2.get());
+
+        final AtomicInteger innerCloseCount = new AtomicInteger();
+        final Seq<Integer, Exception> source = Seq.of(1);
+        final Seq<Integer, Exception> flatMapped = source.flatMap(i -> Seq.<Integer, Exception> of(10, 20).onClose(innerCloseCount::incrementAndGet));
+        assertEquals(10, flatMapped.iteratorEx().next());
+        source.close();
+        assertDoesNotThrow(flatMapped::close);
+        assertEquals(1, innerCloseCount.get());
+
+        AtomicBoolean outerNull = new AtomicBoolean();
+        assertEquals(Collections.singletonList("a1"), Seq.of(1, 2).onClose(() -> outerNull.set(true)).flatMap(i -> i == 1 ? Seq.of("a" + i) : null).toList());
+        assertTrue(outerNull.get());
+    }
+
+    @Test
+    public void testOnClose_HandlerFailures() {
+        AtomicBoolean first = new AtomicBoolean();
+        AtomicBoolean second = new AtomicBoolean();
+        RuntimeException failure = new RuntimeException("Close handler failed");
+        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3).onClose(() -> {
+            first.set(true);
+            throw failure;
+        }).onClose(() -> second.set(true)).toList());
+        assertTrue(first.get() && second.get());
+        assertEquals(failure, thrown);
+
+        RuntimeException repeated = new RuntimeException("repeated close failure");
+        AtomicInteger later = new AtomicInteger();
+        Seq<Integer, Exception> seq = Seq.of(1).onClose(() -> {
+            throw repeated;
+        }).onClose(() -> {
+            throw repeated;
+        }).onClose(later::incrementAndGet);
+        RuntimeException repeatedThrown = assertThrows(RuntimeException.class, seq::close);
+        assertSame(repeated, repeatedThrown);
+        assertEquals(0, repeatedThrown.getSuppressed().length);
+        assertEquals(1, later.get());
+        assertDoesNotThrow(seq::close);
+
+        AssertionError error = new AssertionError("close failure");
+        AtomicInteger afterError = new AtomicInteger();
+        Seq<Integer, Exception> seq2 = Seq.of(1).onClose(() -> {
+            throw error;
+        }).onClose(afterError::incrementAndGet);
+        assertSame(error, assertThrows(AssertionError.class, seq2::close));
+        assertEquals(1, afterError.get());
+    }
+
     @Test
     public void testOnEach() throws Exception {
         List<Integer> sideEffect = new ArrayList<>();
@@ -110,110 +219,4 @@ public class SeqOnTest extends SeqTestSupport {
         assertEquals(1, seen.size());
     }
 
-    @Test
-    public void testOnClose() throws Exception {
-        AtomicInteger closed = new AtomicInteger();
-        Seq.of(1, 2, 3).onClose(closed::incrementAndGet).toList();
-        assertEquals(1, closed.get());
-
-        List<Integer> closeOrder = new ArrayList<>();
-        Seq.of(1, 2, 3).onClose(() -> closeOrder.add(1)).onClose(() -> closeOrder.add(2)).onClose(() -> closeOrder.add(3)).count();
-        assertEquals(Arrays.asList(1, 2, 3), closeOrder);
-
-        AtomicInteger twice = new AtomicInteger();
-        Seq<String, Exception> seq = Seq.of("x", "y").onClose(twice::incrementAndGet);
-        seq.close();
-        seq.close();
-        assertEquals(1, twice.get());
-
-        assertThrows(IllegalArgumentException.class, () -> Seq.of("a", "b").onClose(null));
-    }
-
-    @Test
-    public void testOnClose_FlatMap() throws Exception {
-        AtomicBoolean outer = new AtomicBoolean();
-        AtomicBoolean inner1 = new AtomicBoolean();
-        AtomicBoolean inner2 = new AtomicBoolean();
-        List<String> result = Seq.of(1, 2).onClose(() -> outer.set(true)).flatMap(i -> {
-            if (i == 1) {
-                return Seq.of("a" + i, "b" + i).onClose(() -> inner1.set(true));
-            }
-            return Seq.of("x" + i, "y" + i).onClose(() -> inner2.set(true));
-        }).toList();
-        assertEquals(Arrays.asList("a1", "b1", "x2", "y2"), result);
-        assertTrue(outer.get() && inner1.get() && inner2.get());
-
-        final AtomicInteger innerCloseCount = new AtomicInteger();
-        final Seq<Integer, Exception> source = Seq.of(1);
-        final Seq<Integer, Exception> flatMapped = source.flatMap(i -> Seq.<Integer, Exception> of(10, 20).onClose(innerCloseCount::incrementAndGet));
-        assertEquals(10, flatMapped.iteratorEx().next());
-        source.close();
-        assertDoesNotThrow(flatMapped::close);
-        assertEquals(1, innerCloseCount.get());
-
-        AtomicBoolean outerNull = new AtomicBoolean();
-        assertEquals(Collections.singletonList("a1"), Seq.of(1, 2).onClose(() -> outerNull.set(true)).flatMap(i -> i == 1 ? Seq.of("a" + i) : null).toList());
-        assertTrue(outerNull.get());
-    }
-
-    @Test
-    public void testOnClose_HandlerFailures() {
-        AtomicBoolean first = new AtomicBoolean();
-        AtomicBoolean second = new AtomicBoolean();
-        RuntimeException failure = new RuntimeException("Close handler failed");
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3).onClose(() -> {
-            first.set(true);
-            throw failure;
-        }).onClose(() -> second.set(true)).toList());
-        assertTrue(first.get() && second.get());
-        assertEquals(failure, thrown);
-
-        RuntimeException repeated = new RuntimeException("repeated close failure");
-        AtomicInteger later = new AtomicInteger();
-        Seq<Integer, Exception> seq = Seq.of(1).onClose(() -> {
-            throw repeated;
-        }).onClose(() -> {
-            throw repeated;
-        }).onClose(later::incrementAndGet);
-        RuntimeException repeatedThrown = assertThrows(RuntimeException.class, seq::close);
-        assertSame(repeated, repeatedThrown);
-        assertEquals(0, repeatedThrown.getSuppressed().length);
-        assertEquals(1, later.get());
-        assertDoesNotThrow(seq::close);
-
-        AssertionError error = new AssertionError("close failure");
-        AtomicInteger afterError = new AtomicInteger();
-        Seq<Integer, Exception> seq2 = Seq.of(1).onClose(() -> {
-            throw error;
-        }).onClose(afterError::incrementAndGet);
-        assertSame(error, assertThrows(AssertionError.class, seq2::close));
-        assertEquals(1, afterError.get());
-    }
-
-    @Test
-    public void testOnClose_CalledOnOperationFailure() {
-        AtomicBoolean closed = new AtomicBoolean();
-        RuntimeException op = new RuntimeException("Operation failed");
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3).onClose(() -> closed.set(true)).map(i -> {
-            if (i == 2) {
-                throw op;
-            }
-            return i * 2;
-        }).toList());
-        assertSame(op, thrown);
-        assertTrue(closed.get());
-
-        AtomicBoolean closed2 = new AtomicBoolean();
-        AtomicInteger processed = new AtomicInteger();
-        RuntimeException terminal = new RuntimeException("Terminal op failed mid-way");
-        RuntimeException thrown2 = assertThrows(RuntimeException.class, () -> Seq.of(1, 2, 3, 4).onClose(() -> closed2.set(true)).forEach(val -> {
-            processed.incrementAndGet();
-            if (val == 3) {
-                throw terminal;
-            }
-        }));
-        assertSame(terminal, thrown2);
-        assertEquals(3, processed.get());
-        assertTrue(closed2.get());
-    }
 }

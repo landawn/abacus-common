@@ -16,22 +16,37 @@ import org.junit.jupiter.api.Test;
 public class ArrayTest extends ArrayTestSupport {
 
     @Test
-    public void testUnboxPreservesExistingWrappers() {
-        final Integer[] wrappers = { 1000, null, -2000 };
-        final Integer first = wrappers[0];
-        final Integer last = wrappers[2];
-
-        assertArrayEquals(new int[] { 1000, 0, -2000 }, Array.unbox(wrappers));
-        assertSame(first, wrappers[0]);
-        assertSame(null, wrappers[1]);
-        assertSame(last, wrappers[2]);
-    }
-
-    @Test
     public void testArrayUtil_CannotInstantiate() {
         assertTrue(Modifier.isFinal(Array.ArrayUtil.class.getModifiers()));
         assertTrue(Modifier.isPrivate(Array.class.getDeclaredConstructors()[0].getModifiers()));
     }
+
+    @Test
+    public void testAsList() {
+        final String[] a = { "a", "b", "c" };
+        final List<String> list = Array.asList(a);
+        assertEquals(3, list.size());
+        list.set(0, "x");
+        assertEquals("x", a[0]);
+
+        assertTrue(Array.asList((String[]) null).isEmpty());
+        assertTrue(Array.asList(new String[0]).isEmpty());
+        assertEquals(1, Array.asList("only").size());
+        assertThrows(UnsupportedOperationException.class, () -> Array.asList("a", "b").add("c"));
+    }
+
+    @Test
+    public void testGetLength() {
+        assertEquals(0, Array.getLength(null));
+        assertEquals(0, Array.getLength(new int[0]));
+        assertEquals(3, Array.getLength(new int[] { 1, 2, 3 }));
+        assertEquals(2, Array.getLength(new String[] { "a", "b" }));
+        assertEquals(2, Array.getLength(new boolean[] { true, false }));
+        assertEquals(1, Array.getLength(new Object[] { null }));
+        assertThrows(IllegalArgumentException.class, () -> Array.getLength("not-an-array"));
+    }
+
+    // newInstance
 
     @Test
     public void testNewInstance() {
@@ -48,23 +63,6 @@ public class ArrayTest extends ArrayTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Array.newInstance(null, 1));
         assertThrows(IllegalArgumentException.class, () -> Array.newInstance(void.class, 1));
         assertThrows(NegativeArraySizeException.class, () -> Array.newInstance(int.class, -1));
-    }
-
-    @Test
-    public void testNewInstance_EmptyArrayCache() {
-        assertSame(Array.newInstance(int.class, 0), Array.newInstance(int.class, 0));
-        assertSame(Array.newInstance(String.class, 0), Array.newInstance(String.class, 0));
-        assertNotSame(Array.newInstance(String.class, 1), Array.newInstance(String.class, 1));
-    }
-
-    @Test
-    public void testNewInstance_DoesNotPinCallerClasses() {
-        assertFalse(CommonUtil.CLASS_EMPTY_ARRAY.containsKey(EmptyArrayCacheProbe.class));
-        final EmptyArrayCacheProbe[] first = Array.newInstance(EmptyArrayCacheProbe.class, 0);
-        final EmptyArrayCacheProbe[] second = Array.newInstance(EmptyArrayCacheProbe.class, 0);
-        assertEquals(0, first.length);
-        assertNotSame(first, second);
-        assertFalse(CommonUtil.CLASS_EMPTY_ARRAY.containsKey(EmptyArrayCacheProbe.class));
     }
 
     @Test
@@ -87,28 +85,20 @@ public class ArrayTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testGetLength() {
-        assertEquals(0, Array.getLength(null));
-        assertEquals(0, Array.getLength(new int[0]));
-        assertEquals(3, Array.getLength(new int[] { 1, 2, 3 }));
-        assertEquals(2, Array.getLength(new String[] { "a", "b" }));
-        assertEquals(2, Array.getLength(new boolean[] { true, false }));
-        assertEquals(1, Array.getLength(new Object[] { null }));
-        assertThrows(IllegalArgumentException.class, () -> Array.getLength("not-an-array"));
+    public void testNewInstance_DoesNotPinCallerClasses() {
+        assertFalse(CommonUtil.CLASS_EMPTY_ARRAY.containsKey(EmptyArrayCacheProbe.class));
+        final EmptyArrayCacheProbe[] first = Array.newInstance(EmptyArrayCacheProbe.class, 0);
+        final EmptyArrayCacheProbe[] second = Array.newInstance(EmptyArrayCacheProbe.class, 0);
+        assertEquals(0, first.length);
+        assertNotSame(first, second);
+        assertFalse(CommonUtil.CLASS_EMPTY_ARRAY.containsKey(EmptyArrayCacheProbe.class));
     }
 
     @Test
-    public void testAsList() {
-        final String[] a = { "a", "b", "c" };
-        final List<String> list = Array.asList(a);
-        assertEquals(3, list.size());
-        list.set(0, "x");
-        assertEquals("x", a[0]);
-
-        assertTrue(Array.asList((String[]) null).isEmpty());
-        assertTrue(Array.asList(new String[0]).isEmpty());
-        assertEquals(1, Array.asList("only").size());
-        assertThrows(UnsupportedOperationException.class, () -> Array.asList("a", "b").add("c"));
+    public void testNewInstance_EmptyArrayCache() {
+        assertSame(Array.newInstance(int.class, 0), Array.newInstance(int.class, 0));
+        assertSame(Array.newInstance(String.class, 0), Array.newInstance(String.class, 0));
+        assertNotSame(Array.newInstance(String.class, 1), Array.newInstance(String.class, 1));
     }
 
     @Test
@@ -123,6 +113,8 @@ public class ArrayTest extends ArrayTestSupport {
         assertArrayEquals(new String[] { "a", "b" }, of);
         assertSame(of, Array.oF(of));
     }
+
+    // random
 
     @Test
     public void testRandom() {
@@ -142,46 +134,8 @@ public class ArrayTest extends ArrayTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Array.random(10, 0, 1));
     }
 
-    @Test
-    public void testRandom_FullIntRange() {
-        final int[] values = Array.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 1000);
-        assertEquals(1000, values.length);
-        boolean hasNegative = false;
-        boolean hasNonNegative = false;
-        boolean hasDistinct = false;
-        for (final int value : values) {
-            hasNegative |= value < 0;
-            hasNonNegative |= value >= 0;
-            hasDistinct |= value != values[0];
-        }
-        assertTrue(hasNegative);
-        assertTrue(hasNonNegative);
-        assertTrue(hasDistinct);
-    }
 
-    @Test
-    public void testRandom_RandomnessSource() {
-        // Contract pin for the javadoc: Array.random draws from ThreadLocalRandom.current() (owner decision
-        // 2026-09-26; it used to be a shared SecureRandom held by N). There is no shared generator field any more
-        // (see testRandom_noSharedStaticGenerator); the results must still have the requested length and range
-        // and vary between elements.
-        final int[] values = Array.random(64);
-        assertEquals(64, values.length);
-        boolean hasDistinct = false;
-        for (final int value : values) {
-            hasDistinct |= value != values[0];
-        }
-        assertTrue(hasDistinct);
 
-        assertEquals(4, Array.random(4).length);
-        final int[] ranged = Array.random(0, 10, 200);
-        assertEquals(200, ranged.length);
-        for (final int value : ranged) {
-            assertTrue(value >= 0 && value < 10, String.valueOf(value));
-        }
-    }
-
-    // ---- perf review 2026-09-26 G018 begin ----
     // G018-01: pins random(int) across the bulk-chunk boundaries - length, freshness and full 32-bit coverage.
     @Test
     public void testRandom_chunkBoundariesAndBitCoverage() {
@@ -220,27 +174,7 @@ public class ArrayTest extends ArrayTestSupport {
         assertEquals(-1, tailOr);
     }
 
-    // ---- perf review 2026-09-26 G018 end ----
-    // ---- perf review 2026-09-26 G115 begin ----
-    // G115-01: the random-value helpers use ThreadLocalRandom.current(); no class keeps a shared static generator field.
-    @Test
-    public void testRandom_noSharedStaticGenerator() throws Exception {
-        final String[] classNames = { "com.landawn.abacus.util.CommonUtil", "com.landawn.abacus.util.N", "com.landawn.abacus.util.BooleanList",
-                "com.landawn.abacus.util.ByteList", "com.landawn.abacus.util.CharList", "com.landawn.abacus.util.ShortList", "com.landawn.abacus.util.IntList",
-                "com.landawn.abacus.util.LongList", "com.landawn.abacus.util.FloatList", "com.landawn.abacus.util.DoubleList",
-                "com.landawn.abacus.util.stream.StreamBase", "com.landawn.abacus.util.stream.Stream", "com.landawn.abacus.util.stream.ByteStream",
-                "com.landawn.abacus.util.stream.CharStream", "com.landawn.abacus.util.stream.ShortStream", "com.landawn.abacus.util.stream.IntStream",
-                "com.landawn.abacus.util.stream.LongStream", "com.landawn.abacus.util.stream.FloatStream", "com.landawn.abacus.util.stream.DoubleStream",
-                "com.landawn.abacus.util.function.Util" };
 
-        for (final String className : classNames) {
-            for (final java.lang.reflect.Field field : Class.forName(className).getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers())) {
-                    assertFalse(java.util.Random.class.isAssignableFrom(field.getType()), className + "." + field.getName());
-                }
-            }
-        }
-    }
 
     // G115-01: Array.random(..) called from several threads at once - lengths/ranges hold, values vary, threads differ.
     @Test
@@ -294,5 +228,79 @@ public class ArrayTest extends ArrayTestSupport {
             assertFalse(java.util.Arrays.equals(firstArrays[0], firstArrays[t]), "threads produced identical sequences");
         }
     }
+
+    @Test
+    public void testRandom_FullIntRange() {
+        final int[] values = Array.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 1000);
+        assertEquals(1000, values.length);
+        boolean hasNegative = false;
+        boolean hasNonNegative = false;
+        boolean hasDistinct = false;
+        for (final int value : values) {
+            hasNegative |= value < 0;
+            hasNonNegative |= value >= 0;
+            hasDistinct |= value != values[0];
+        }
+        assertTrue(hasNegative);
+        assertTrue(hasNonNegative);
+        assertTrue(hasDistinct);
+    }
+
+    @Test
+    public void testRandom_RandomnessSource() {
+        // Contract pin for the javadoc: Array.random draws from ThreadLocalRandom.current() (owner decision
+        // 2026-09-26; it used to be a shared SecureRandom held by N). There is no shared generator field any more
+        // (see testRandom_noSharedStaticGenerator); the results must still have the requested length and range
+        // and vary between elements.
+        final int[] values = Array.random(64);
+        assertEquals(64, values.length);
+        boolean hasDistinct = false;
+        for (final int value : values) {
+            hasDistinct |= value != values[0];
+        }
+        assertTrue(hasDistinct);
+
+        assertEquals(4, Array.random(4).length);
+        final int[] ranged = Array.random(0, 10, 200);
+        assertEquals(200, ranged.length);
+        for (final int value : ranged) {
+            assertTrue(value >= 0 && value < 10, String.valueOf(value));
+        }
+    }
+
+
+
+    // G115-01: the random-value helpers use ThreadLocalRandom.current(); no class keeps a shared static generator field.
+    @Test
+    public void testRandom_noSharedStaticGenerator() throws Exception {
+        final String[] classNames = { "com.landawn.abacus.util.CommonUtil", "com.landawn.abacus.util.N", "com.landawn.abacus.util.BooleanList",
+                "com.landawn.abacus.util.ByteList", "com.landawn.abacus.util.CharList", "com.landawn.abacus.util.ShortList", "com.landawn.abacus.util.IntList",
+                "com.landawn.abacus.util.LongList", "com.landawn.abacus.util.FloatList", "com.landawn.abacus.util.DoubleList",
+                "com.landawn.abacus.util.stream.StreamBase", "com.landawn.abacus.util.stream.Stream", "com.landawn.abacus.util.stream.ByteStream",
+                "com.landawn.abacus.util.stream.CharStream", "com.landawn.abacus.util.stream.ShortStream", "com.landawn.abacus.util.stream.IntStream",
+                "com.landawn.abacus.util.stream.LongStream", "com.landawn.abacus.util.stream.FloatStream", "com.landawn.abacus.util.stream.DoubleStream",
+                "com.landawn.abacus.util.function.Util" };
+
+        for (final String className : classNames) {
+            for (final java.lang.reflect.Field field : Class.forName(className).getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    assertFalse(java.util.Random.class.isAssignableFrom(field.getType()), className + "." + field.getName());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testUnboxPreservesExistingWrappers() {
+        final Integer[] wrappers = { 1000, null, -2000 };
+        final Integer first = wrappers[0];
+        final Integer last = wrappers[2];
+
+        assertArrayEquals(new int[] { 1000, 0, -2000 }, Array.unbox(wrappers));
+        assertSame(first, wrappers[0]);
+        assertSame(null, wrappers[1]);
+        assertSame(last, wrappers[2]);
+    }
+
     // ---- perf review 2026-09-26 G115 end ----
 }

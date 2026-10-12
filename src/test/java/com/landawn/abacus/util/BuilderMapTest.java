@@ -20,94 +20,37 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.Builder.MapBuilder;
 
 public class BuilderMapTest extends BuilderTestSupport {
-    @Test
-    public void testMapBuilderRemoveAllWithLiveMapViews() {
-        final Map<String, String> map = new LinkedHashMap<>();
-        map.put("a", "b");
-        map.put("b", "a");
-        final var mapBuilder = Builder.of(map);
-        assertSame(mapBuilder, mapBuilder.removeAll(map.keySet()));
-        assertTrue(map.isEmpty());
 
-        map.put("a", "b");
-        map.put("b", "a");
-        assertSame(mapBuilder, mapBuilder.removeAll(map.values()));
-        assertTrue(map.isEmpty());
-
-        final TreeMap<String, Integer> sorted = new TreeMap<>();
-        sorted.put("a", 1);
-        sorted.put("b", 2);
-        sorted.put("c", 3);
-        Builder.of(sorted).removeAll(sorted.headMap("c").keySet());
-        assertEquals(Map.of("c", 3), sorted);
-    }
+    // MapBuilder
 
     @Test
-    public void testMapBuilder_put_returnsBuilder() {
-        Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        assertSame(b, b.put("a", 1));
-    }
-
-    @Test
-    public void testMapBuilder_put() {
-        Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        builder.put("a", 1).put("b", 2);
-        assertEquals(2, builder.val().size());
-    }
-
-    @Test
-    public void testMapBuilder_putAll() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        Map<String, Integer> toAdd = new HashMap<>();
-        toAdd.put("b", 2);
-        toAdd.put("c", 3);
-        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        builder.putAll(toAdd);
-        assertEquals(3, builder.val().size());
-    }
-
-    @Test
-    public void testMapBuilder_putIfAbsent() {
+    public void testMapBuilder() {
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        builder.putIfAbsent("a", 2);
-        builder.putIfAbsent("b", 2);
-        assertEquals(1, builder.val().get("a"));
-        assertEquals(2, builder.val().get("b"));
-    }
 
-    @Test
-    public void testMapBuilder_putIfAbsentSupplier() {
-        Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        Supplier<Integer> supplier = () -> 5;
-        builder.putIfAbsentBySupplier("a", supplier);
-        assertEquals(5, builder.val().get("a"));
-    }
+        builder.put("b", 2);
+        assertEquals(2, map.size());
 
-    @Test
-    public void testMapBuilder_remove() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        Map<String, Integer> anotherMap = new HashMap<>();
+        anotherMap.put("c", 3);
+        builder.putAll(anotherMap);
+        assertEquals(3, map.size());
+
+        builder.putIfAbsent("a", 10);
+        assertEquals(1, (int) map.get("a"));
+
+        builder.putIfAbsent("d", 4);
+        assertEquals(4, (int) map.get("d"));
+
+        builder.putIfAbsentBySupplier("e", () -> 5);
+        assertEquals(5, (int) map.get("e"));
+
         builder.remove("a");
-        assertEquals(1, builder.val().size());
-    }
+        assertFalse(map.containsKey("a"));
 
-    @Test
-    public void testMapBuilder_removeAll() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        builder.removeAll(Arrays.asList("a", "b"));
-        assertEquals(1, builder.val().size());
+        builder.removeAll(Arrays.asList("b", "c"));
+        assertFalse(map.isEmpty());
     }
 
     @Test
@@ -189,12 +132,45 @@ public class BuilderMapTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testMapBuilder_putIfAbsent_existingKey() {
+    public void testMapBuilder_of() {
         Map<String, Integer> map = new HashMap<>();
-        map.put("key", 1);
+        map.put("a", 1);
         MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        builder.putIfAbsent("key", 99);
-        assertEquals(1, (int) builder.val().get("key"));
+        assertNotNull(builder);
+        assertEquals(1, builder.val().size());
+    }
+
+    @Test
+    public void testMapBuilder_putIfAbsentSupplier() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        Supplier<Integer> supplier = () -> 5;
+        builder.putIfAbsentBySupplier("a", supplier);
+        assertEquals(5, builder.val().get("a"));
+    }
+
+    @Test
+    public void testMapBuilder_putIfAbsentSupplier_returnsBuilder() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
+        assertSame(b, b.putIfAbsentBySupplier("a", () -> 1));
+    }
+
+    // put
+
+    @Test
+    public void testMapBuilder_put() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        builder.put("a", 1).put("b", 2);
+        assertEquals(2, builder.val().size());
+    }
+
+    @Test
+    public void testMapBuilder_put_returnsBuilder() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
+        assertSame(b, b.put("a", 1));
     }
 
     @Test
@@ -206,43 +182,62 @@ public class BuilderMapTest extends BuilderTestSupport {
         assertEquals(1, (int) builder.val().get("key"));
     }
 
+    // putAll
+
     @Test
-    public void testMapBuilder_of() {
+    public void testMapBuilder_putAll() {
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
+        Map<String, Integer> toAdd = new HashMap<>();
+        toAdd.put("b", 2);
+        toAdd.put("c", 3);
         MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
-        assertNotNull(builder);
-        assertEquals(1, builder.val().size());
+        builder.putAll(toAdd);
+        assertEquals(3, builder.val().size());
     }
 
     @Test
-    public void testMapBuilder() {
+    public void testMapBuilder_putAll_nullMap() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
+        b.putAll(null);
+        assertEquals(0, map.size());
+    }
+
+    @Test
+    public void testMapBuilder_putAll_returnsBuilder() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
+        assertSame(b, b.putAll(new HashMap<>()));
+    }
+
+    // putIfAbsent
+
+    @Test
+    public void testMapBuilder_putIfAbsent() {
         Map<String, Integer> map = new HashMap<>();
         map.put("a", 1);
         MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        builder.putIfAbsent("a", 2);
+        builder.putIfAbsent("b", 2);
+        assertEquals(1, builder.val().get("a"));
+        assertEquals(2, builder.val().get("b"));
+    }
 
-        builder.put("b", 2);
-        assertEquals(2, map.size());
+    @Test
+    public void testMapBuilder_putIfAbsent_existingKey() {
+        Map<String, Integer> map = new HashMap<>();
+        map.put("key", 1);
+        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        builder.putIfAbsent("key", 99);
+        assertEquals(1, (int) builder.val().get("key"));
+    }
 
-        Map<String, Integer> anotherMap = new HashMap<>();
-        anotherMap.put("c", 3);
-        builder.putAll(anotherMap);
-        assertEquals(3, map.size());
-
-        builder.putIfAbsent("a", 10);
-        assertEquals(1, (int) map.get("a"));
-
-        builder.putIfAbsent("d", 4);
-        assertEquals(4, (int) map.get("d"));
-
-        builder.putIfAbsentBySupplier("e", () -> 5);
-        assertEquals(5, (int) map.get("e"));
-
-        builder.remove("a");
-        assertFalse(map.containsKey("a"));
-
-        builder.removeAll(Arrays.asList("b", "c"));
-        assertFalse(map.isEmpty());
+    @Test
+    public void testMapBuilder_putIfAbsent_returnsBuilder() {
+        Map<String, Integer> map = new HashMap<>();
+        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
+        assertSame(b, b.putIfAbsent("a", 1));
     }
 
     @Test
@@ -261,24 +256,13 @@ public class BuilderMapTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testMapBuilder_putAll_returnsBuilder() {
+    public void testMapBuilder_remove() {
         Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        assertSame(b, b.putAll(new HashMap<>()));
-    }
-
-    @Test
-    public void testMapBuilder_putIfAbsent_returnsBuilder() {
-        Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        assertSame(b, b.putIfAbsent("a", 1));
-    }
-
-    @Test
-    public void testMapBuilder_putIfAbsentSupplier_returnsBuilder() {
-        Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        assertSame(b, b.putIfAbsentBySupplier("a", () -> 1));
+        map.put("a", 1);
+        map.put("b", 2);
+        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        builder.remove("a");
+        assertEquals(1, builder.val().size());
     }
 
     @Test
@@ -289,19 +273,26 @@ public class BuilderMapTest extends BuilderTestSupport {
         assertSame(b, b.remove("a"));
     }
 
+    // removeAll
+
     @Test
-    public void testMapBuilder_removeAll_returnsBuilder() {
+    public void testMapBuilder_removeAll() {
         Map<String, Integer> map = new HashMap<>();
-        MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        assertSame(b, b.removeAll(Arrays.asList("a")));
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+        MapBuilder<String, Integer, Map<String, Integer>> builder = Builder.of(map);
+        builder.removeAll(Arrays.asList("a", "b"));
+        assertEquals(1, builder.val().size());
     }
 
     @Test
-    public void testMapBuilder_putAll_nullMap() {
+    public void testMapBuilder_removeAll_emptyCollection() {
         Map<String, Integer> map = new HashMap<>();
+        map.put("a", 1);
         MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        b.putAll(null);
-        assertEquals(0, map.size());
+        b.removeAll(Collections.emptyList());
+        assertEquals(1, map.size());
     }
 
     @Test
@@ -314,11 +305,32 @@ public class BuilderMapTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testMapBuilder_removeAll_emptyCollection() {
+    public void testMapBuilder_removeAll_returnsBuilder() {
         Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
         MapBuilder<String, Integer, Map<String, Integer>> b = Builder.of(map);
-        b.removeAll(Collections.emptyList());
-        assertEquals(1, map.size());
+        assertSame(b, b.removeAll(Arrays.asList("a")));
     }
+
+    @Test
+    public void testMapBuilderRemoveAllWithLiveMapViews() {
+        final Map<String, String> map = new LinkedHashMap<>();
+        map.put("a", "b");
+        map.put("b", "a");
+        final var mapBuilder = Builder.of(map);
+        assertSame(mapBuilder, mapBuilder.removeAll(map.keySet()));
+        assertTrue(map.isEmpty());
+
+        map.put("a", "b");
+        map.put("b", "a");
+        assertSame(mapBuilder, mapBuilder.removeAll(map.values()));
+        assertTrue(map.isEmpty());
+
+        final TreeMap<String, Integer> sorted = new TreeMap<>();
+        sorted.put("a", 1);
+        sorted.put("b", 2);
+        sorted.put("c", 3);
+        Builder.of(sorted).removeAll(sorted.headMap("c").keySet());
+        assertEquals(Map.of("c", 3), sorted);
+    }
+
 }

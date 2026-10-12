@@ -32,77 +32,12 @@ public class SeqToTest extends SeqTestSupport {
     }
 
     @Test
-    public void testToList() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).toList());
-    }
-
-    @Test
-    public void testToSet() throws Exception {
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), Seq.of(1, 2, 2, 3).toSet());
-    }
-
-    @Test
     public void testToCollection() throws Exception {
         assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).toCollection(ArrayList::new));
         assertEquals(new LinkedList<>(Arrays.asList(1, 2, 3)), Seq.of(1, 2, 3).toCollection(LinkedList::new));
         TreeSet<Integer> tree = Seq.of(3, 1, 4, 1, 5).toCollection(TreeSet::new);
         assertEquals(4, tree.size());
         assertEquals(Integer.valueOf(1), tree.first());
-    }
-
-    @Test
-    public void testToImmutableList() throws Exception {
-        ImmutableList<Integer> list = Seq.of(1, 2, 3).toImmutableList();
-        assertEquals(Arrays.asList(1, 2, 3), list);
-        assertThrows(UnsupportedOperationException.class, () -> list.add(4));
-    }
-
-    @Test
-    public void testToImmutableSet() throws Exception {
-        ImmutableSet<Integer> set = Seq.of(1, 2, 2, 3).toImmutableSet();
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), set);
-        assertThrows(UnsupportedOperationException.class, () -> set.add(4));
-    }
-
-    @Test
-    public void testToListThenApply() throws Exception {
-        assertEquals(3, Seq.of(1, 2, 3).toListThenApply(List::size).intValue());
-        assertEquals(6, Seq.of(1, 2, 3).toListThenApply(list -> list.stream().mapToInt(Integer::intValue).sum()).intValue());
-    }
-
-    @Test
-    public void testToListThenAccept() throws Exception {
-        AtomicInteger size = new AtomicInteger();
-        Seq.of(1, 2, 3).toListThenAccept(list -> size.set(list.size()));
-        assertEquals(3, size.get());
-        List<Integer> target = new ArrayList<>();
-        Seq.of(1, 2, 3).toListThenAccept(target::addAll);
-        assertEquals(Arrays.asList(1, 2, 3), target);
-    }
-
-    @Test
-    public void testToSetThenApply() throws Exception {
-        assertEquals(3, Seq.of(1, 2, 3, 2, 1).toSetThenApply(Set::size).intValue());
-        assertEquals(6, Seq.of(1, 2, 3, 2).toSetThenApply(set -> set.stream().mapToInt(Integer::intValue).sum()).intValue());
-    }
-
-    @Test
-    public void testToSetThenAccept() throws Exception {
-        AtomicInteger size = new AtomicInteger();
-        Seq.of(1, 2, 3, 2, 1).toSetThenAccept(set -> size.set(set.size()));
-        assertEquals(3, size.get());
-        Set<Integer> target = new HashSet<>();
-        Seq.of(1, 2, 3, 2).toSetThenAccept(target::addAll);
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), target);
-    }
-
-    @Test
-    public void testToCollectionThenApply() throws Exception {
-        assertEquals("1-2-3", Seq.of(1, 2, 3)
-                .toCollectionThenApply(LinkedList::new, list -> list.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining("-"))));
-        assertEquals("apple", Seq.of("apple", "banana", "cherry").toCollectionThenApply(LinkedList::new, LinkedList::getFirst));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenApply(null, Fn.identity()));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenApply(ArrayList::new, null));
     }
 
     @Test
@@ -116,6 +51,95 @@ public class SeqToTest extends SeqTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenAccept(null, s -> {
         }));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenAccept(ArrayList::new, null));
+    }
+
+    @Test
+    public void testToCollectionThenApply() throws Exception {
+        assertEquals("1-2-3", Seq.of(1, 2, 3)
+                .toCollectionThenApply(LinkedList::new, list -> list.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining("-"))));
+        assertEquals("apple", Seq.of("apple", "banana", "cherry").toCollectionThenApply(LinkedList::new, LinkedList::getFirst));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenApply(null, Fn.identity()));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2).toCollectionThenApply(ArrayList::new, null));
+    }
+
+    @Test
+    public void testToDataset() throws Exception {
+        List<Map<String, Object>> data = Arrays.asList(CommonUtil.asMap("id", 1, "name", "Alice"), CommonUtil.asMap("id", 2, "name", "Bob"));
+        Dataset dataset = Seq.of(data).toDataset();
+        assertEquals(2, dataset.size());
+        assertTrue(dataset.columnNames().containsAll(Arrays.asList("id", "name")));
+        assertEquals((Integer) 1, dataset.moveToRow(0).get("id"));
+        assertEquals("Bob", dataset.moveToRow(1).get("name"));
+
+        List<String> columnNames = Arrays.asList("UserID", "UserName");
+        Dataset named = Seq.of(Arrays.asList(Arrays.asList(1, "Alice"), Arrays.asList(2, "Bob"))).toDataset(columnNames);
+        assertEquals(columnNames, named.columnNames());
+        assertEquals((Integer) 1, named.moveToRow(0).get("UserID"));
+        assertNotNull(Seq.of(1, 2, 3).toDataset(Arrays.asList("value")));
+    }
+
+    @Test
+    public void testToDatasetWithColumnNamesRejectsUnreadableRowsAfterClosing() throws Exception {
+        final AtomicInteger closed = new AtomicInteger();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2, 3))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
+        assertEquals(1, closed.get());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "a")));
+        assertEquals(2, closed.get());
+
+        assertThrows(IllegalArgumentException.class, () -> Seq.of("x", "y").onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
+        assertEquals(3, closed.get());
+
+        assertEquals(3, Seq.of("x", "y", "z").toDataset(Arrays.asList("value")).size());
+    }
+
+    @Test
+    public void testToImmutableList() throws Exception {
+        ImmutableList<Integer> list = Seq.of(1, 2, 3).toImmutableList();
+        assertEquals(Arrays.asList(1, 2, 3), list);
+        assertThrows(UnsupportedOperationException.class, () -> list.add(4));
+    }
+
+    @Test
+    public void testToImmutableMap() throws Exception {
+        ImmutableMap<String, Integer> map = Seq.of("a", "bb").toImmutableMap(s -> s, String::length);
+        assertEquals(1, map.get("a").intValue());
+        assertThrows(UnsupportedOperationException.class, () -> map.put("c", 3));
+
+        ImmutableMap<Character, Integer> merged = Seq.of("apple", "apricot", "banana").toImmutableMap(s -> s.charAt(0), String::length, Integer::sum);
+        assertEquals(Integer.valueOf(12), merged.get('a'));
+        assertThrows(UnsupportedOperationException.class, () -> merged.put('d', 3));
+    }
+
+    @Test
+    public void testToImmutableSet() throws Exception {
+        ImmutableSet<Integer> set = Seq.of(1, 2, 2, 3).toImmutableSet();
+        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), set);
+        assertThrows(UnsupportedOperationException.class, () -> set.add(4));
+    }
+
+    @Test
+    public void testToList() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).toList());
+    }
+
+    @Test
+    public void testToListThenAccept() throws Exception {
+        AtomicInteger size = new AtomicInteger();
+        Seq.of(1, 2, 3).toListThenAccept(list -> size.set(list.size()));
+        assertEquals(3, size.get());
+        List<Integer> target = new ArrayList<>();
+        Seq.of(1, 2, 3).toListThenAccept(target::addAll);
+        assertEquals(Arrays.asList(1, 2, 3), target);
+    }
+
+    @Test
+    public void testToListThenApply() throws Exception {
+        assertEquals(3, Seq.of(1, 2, 3).toListThenApply(List::size).intValue());
+        assertEquals(6, Seq.of(1, 2, 3).toListThenApply(list -> list.stream().mapToInt(Integer::intValue).sum()).intValue());
     }
 
     @Test
@@ -143,17 +167,6 @@ public class SeqToTest extends SeqTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(Fn.identity(), null, Integer::sum, TreeMap::new));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 1).toMap(Fn.identity(), Fn.identity(), null, TreeMap::new));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1).toMap(Fn.identity(), Fn.identity(), Integer::sum, null));
-    }
-
-    @Test
-    public void testToImmutableMap() throws Exception {
-        ImmutableMap<String, Integer> map = Seq.of("a", "bb").toImmutableMap(s -> s, String::length);
-        assertEquals(1, map.get("a").intValue());
-        assertThrows(UnsupportedOperationException.class, () -> map.put("c", 3));
-
-        ImmutableMap<Character, Integer> merged = Seq.of("apple", "apricot", "banana").toImmutableMap(s -> s.charAt(0), String::length, Integer::sum);
-        assertEquals(Integer.valueOf(12), merged.get('a'));
-        assertThrows(UnsupportedOperationException.class, () -> merged.put('d', 3));
     }
 
     @Test
@@ -193,36 +206,24 @@ public class SeqToTest extends SeqTestSupport {
     }
 
     @Test
-    public void testToDataset() throws Exception {
-        List<Map<String, Object>> data = Arrays.asList(CommonUtil.asMap("id", 1, "name", "Alice"), CommonUtil.asMap("id", 2, "name", "Bob"));
-        Dataset dataset = Seq.of(data).toDataset();
-        assertEquals(2, dataset.size());
-        assertTrue(dataset.columnNames().containsAll(Arrays.asList("id", "name")));
-        assertEquals((Integer) 1, dataset.moveToRow(0).get("id"));
-        assertEquals("Bob", dataset.moveToRow(1).get("name"));
-
-        List<String> columnNames = Arrays.asList("UserID", "UserName");
-        Dataset named = Seq.of(Arrays.asList(Arrays.asList(1, "Alice"), Arrays.asList(2, "Bob"))).toDataset(columnNames);
-        assertEquals(columnNames, named.columnNames());
-        assertEquals((Integer) 1, named.moveToRow(0).get("UserID"));
-        assertNotNull(Seq.of(1, 2, 3).toDataset(Arrays.asList("value")));
+    public void testToSet() throws Exception {
+        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), Seq.of(1, 2, 2, 3).toSet());
     }
 
     @Test
-    public void testToDatasetWithColumnNamesRejectsUnreadableRowsAfterClosing() throws Exception {
-        final AtomicInteger closed = new AtomicInteger();
-
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2, 3))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
-        assertEquals(1, closed.get());
-
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "a")));
-        assertEquals(2, closed.get());
-
-        assertThrows(IllegalArgumentException.class, () -> Seq.of("x", "y").onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
-        assertEquals(3, closed.get());
-
-        assertEquals(3, Seq.of("x", "y", "z").toDataset(Arrays.asList("value")).size());
+    public void testToSetThenAccept() throws Exception {
+        AtomicInteger size = new AtomicInteger();
+        Seq.of(1, 2, 3, 2, 1).toSetThenAccept(set -> size.set(set.size()));
+        assertEquals(3, size.get());
+        Set<Integer> target = new HashSet<>();
+        Seq.of(1, 2, 3, 2).toSetThenAccept(target::addAll);
+        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), target);
     }
+
+    @Test
+    public void testToSetThenApply() throws Exception {
+        assertEquals(3, Seq.of(1, 2, 3, 2, 1).toSetThenApply(Set::size).intValue());
+        assertEquals(6, Seq.of(1, 2, 3, 2).toSetThenApply(set -> set.stream().mapToInt(Integer::intValue).sum()).intValue());
+    }
+
 }

@@ -32,151 +32,6 @@ import org.junit.jupiter.api.Test;
 public class CommonUtilToTest extends CommonUtilTestSupport {
 
     @Test
-    public void testToString_primitives() {
-        assertEquals("true", CommonUtil.toString(true));
-        assertEquals("false", CommonUtil.toString(false));
-        assertEquals("a", CommonUtil.toString('a'));
-        assertEquals("5", CommonUtil.toString((byte) 5));
-        assertEquals("-1", CommonUtil.toString((byte) -1));
-        assertEquals("100", CommonUtil.toString((short) 100));
-        assertEquals("42", CommonUtil.toString(42));
-        assertEquals("-42", CommonUtil.toString(-42));
-        assertEquals("100", CommonUtil.toString(100L));
-        assertEquals("10.5", CommonUtil.toString(10.5f));
-        assertEquals("10.5", CommonUtil.toString(10.5));
-    }
-
-    @Test
-    public void testToString_arrays() {
-        assertEquals("[true, false, true]", CommonUtil.toString(new boolean[] { true, false, true }));
-        assertEquals("null", CommonUtil.toString((boolean[]) null));
-        assertEquals("[]", CommonUtil.toString(new boolean[0]));
-        assertEquals("[a, b, c]", CommonUtil.toString(new char[] { 'a', 'b', 'c' }));
-        assertEquals("null", CommonUtil.toString((char[]) null));
-        assertEquals("[]", CommonUtil.toString(new char[0]));
-        assertEquals("[1, 2, 3]", CommonUtil.toString(new byte[] { 1, 2, 3 }));
-        assertEquals("null", CommonUtil.toString((byte[]) null));
-        assertEquals("[1, 2, 3]", CommonUtil.toString(new short[] { 1, 2, 3 }));
-        assertEquals("null", CommonUtil.toString((short[]) null));
-        assertEquals("[1, 2, 3]", CommonUtil.toString(new int[] { 1, 2, 3 }));
-        assertEquals("null", CommonUtil.toString((int[]) null));
-        assertEquals("[1, 2, 3]", CommonUtil.toString(new long[] { 1L, 2L, 3L }));
-        assertEquals("null", CommonUtil.toString((long[]) null));
-        assertEquals("[1.0, 2.0, 3.0]", CommonUtil.toString(new float[] { 1.0f, 2.0f, 3.0f }));
-        assertEquals("null", CommonUtil.toString((float[]) null));
-        assertEquals("[1.0, 2.0, 3.0]", CommonUtil.toString(new double[] { 1.0, 2.0, 3.0 }));
-        assertEquals("null", CommonUtil.toString((double[]) null));
-        assertEquals("[a, b, c]", CommonUtil.toString(new String[] { "a", "b", "c" }));
-        assertEquals("null", CommonUtil.toString((Object[]) null));
-        assertEquals("[]", CommonUtil.toString(new Object[0]));
-    }
-
-    @Test
-    public void testToString_arrayRange() {
-        assertEquals("[false, true]", CommonUtil.toString(new boolean[] { true, false, true, false }, 1, 3));
-        assertEquals("null", CommonUtil.toString((boolean[]) null, 0, 0));
-        assertEquals("[]", CommonUtil.toString(new boolean[0], 0, 0));
-        assertEquals("[]", CommonUtil.toString(new boolean[] { true, false }, 1, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(new boolean[] { true }, 0, 6));
-        assertEquals("[b, c]", CommonUtil.toString(new char[] { 'a', 'b', 'c', 'd' }, 1, 3));
-        assertEquals("null", CommonUtil.toString((char[]) null, 0, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(new char[] { 'a' }, 0, 6));
-        assertEquals("[2, 3]", CommonUtil.toString(new byte[] { 1, 2, 3, 4, 5 }, 1, 3));
-        assertEquals("null", CommonUtil.toString((byte[]) null, 0, 0));
-        assertEquals("[]", CommonUtil.toString(new byte[0], 0, 0));
-        assertEquals("[2, 3]", CommonUtil.toString(new short[] { 1, 2, 3, 4, 5 }, 1, 3));
-        assertEquals("[20, 30]", CommonUtil.toString(new int[] { 10, 20, 30, 40 }, 1, 3));
-        assertEquals("[2, 3]", CommonUtil.toString(new long[] { 1L, 2L, 3L, 4L, 5L }, 1, 3));
-        assertEquals("[2.0, 3.0]", CommonUtil.toString(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, 1, 3));
-        assertEquals("[2.0, 3.0]", CommonUtil.toString(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 3));
-        assertEquals("[2, three, null]", CommonUtil.toString(new Object[] { "one", 2, "three", null, 5.0 }, 1, 4));
-        assertEquals("[]", CommonUtil.toString(new Object[] { "a", "b" }, 1, 1));
-    }
-
-    @Test
-    public void testToString_objects() {
-        assertEquals("test", CommonUtil.toString("test"));
-        assertEquals("null", CommonUtil.toString((Object) null));
-        assertEquals("default", CommonUtil.toString(null, "default"));
-        assertEquals("test", CommonUtil.toString("test", "default"));
-        assertEquals("[a, b, c]", CommonUtil.toString(Arrays.asList("a", "b", "c")));
-        Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
-        assertNotEquals("[a, b, c]", CommonUtil.toString(iter));
-        Object obj = new Object();
-        assertEquals(obj.toString(), CommonUtil.toString(obj));
-    }
-
-    @Test
-    public void testToString_stringBuilder() {
-        StringBuilder sb = new StringBuilder();
-        CommonUtil.toString(sb, (boolean[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new boolean[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new boolean[] { true, false });
-        assertTrue(sb.toString().contains("true"));
-        sb.setLength(0);
-        CommonUtil.toString(sb, (char[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, (byte[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new byte[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new byte[] { 1, 2 });
-        assertTrue(sb.toString().contains("1"));
-        sb.setLength(0);
-        CommonUtil.toString(sb, (short[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new short[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new short[] { 1, 2, 3 });
-        assertEquals("[1, 2, 3]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, (int[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new int[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new int[] { 10, 20 });
-        assertEquals("[10, 20]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, (long[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new long[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new long[] { 100L, 200L });
-        assertEquals("[100, 200]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, (float[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new float[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new float[] { 1.0f, 2.0f });
-        assertEquals("[1.0, 2.0]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, (double[]) null);
-        assertEquals("null", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new double[0]);
-        assertEquals("[]", sb.toString());
-        sb.setLength(0);
-        CommonUtil.toString(sb, new double[] { 1.5d, 2.5d });
-        assertEquals("[1.5, 2.5]", sb.toString());
-    }
-
-    @Test
     public void testToArray() {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
         Object[] arr = CommonUtil.toArray(list);
@@ -254,16 +109,6 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testToCharArray() {
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c')));
-        assertArrayEquals(new char[] { 'b', 'c', '\0' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c', null, 'd'), 1, 4));
-        assertArrayEquals(new char[] { 'b', 'c', 'X' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c', null, 'd'), 1, 4, 'X'));
-        LinkedList<Character> linked = new LinkedList<>(Arrays.asList('a', 'b', null, 'd', 'e'));
-        assertArrayEquals(new char[] { 'b', 'X', 'd' }, CommonUtil.toCharArray(linked, 1, 4, 'X'));
-        assertEquals(0, CommonUtil.toCharArray(linked, 2, 2, 'X').length);
-    }
-
-    @Test
     public void testToByteArray() {
         assertArrayEquals(new byte[] { 1, 2, 3 }, CommonUtil.toByteArray(Arrays.asList((byte) 1, (byte) 2, (byte) 3)));
         assertArrayEquals(new byte[] { 2, 3, 0 }, CommonUtil.toByteArray(Arrays.asList((byte) 1, 2, 3L, null, 5.0), 1, 4));
@@ -276,33 +121,62 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testToShortArray() {
-        assertArrayEquals(new short[] { 1, 2, 3 }, CommonUtil.toShortArray(Arrays.asList((short) 1, (short) 2, (short) 3)));
-        assertArrayEquals(new short[] { 2, 3, 0 }, CommonUtil.toShortArray(Arrays.asList((short) 1, 2, 3L, null, 5.0), 1, 4));
-        assertArrayEquals(new short[] { 99, 3 }, CommonUtil.toShortArray(Arrays.asList((short) 1, null, (short) 3, (short) 4), 1, 3, (short) 99));
-        Collection<Short> c = CommonUtil.toLinkedList((short) 1, (short) 2, (short) 3, null, (short) 4);
-        assertArrayEquals(new short[] { 2, 3, 0 }, CommonUtil.toShortArray(c, 1, 4, (short) 0));
+    public void testToCharArray() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c')));
+        assertArrayEquals(new char[] { 'b', 'c', '\0' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c', null, 'd'), 1, 4));
+        assertArrayEquals(new char[] { 'b', 'c', 'X' }, CommonUtil.toCharArray(Arrays.asList('a', 'b', 'c', null, 'd'), 1, 4, 'X'));
+        LinkedList<Character> linked = new LinkedList<>(Arrays.asList('a', 'b', null, 'd', 'e'));
+        assertArrayEquals(new char[] { 'b', 'X', 'd' }, CommonUtil.toCharArray(linked, 1, 4, 'X'));
+        assertEquals(0, CommonUtil.toCharArray(linked, 2, 2, 'X').length);
     }
 
     @Test
-    public void testToIntArray() {
-        assertArrayEquals(new int[] { 1, 2, 3 }, CommonUtil.toIntArray(Arrays.asList(1, 2, 3)));
-        assertArrayEquals(new int[] { 2, 3, 0 }, CommonUtil.toIntArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4));
-        assertArrayEquals(new int[] { 99, 3 }, CommonUtil.toIntArray(Arrays.asList(1, null, 3, 4), 1, 3, 99));
-        assertArrayEquals(new int[] { 65, 66, 67 }, CommonUtil.toIntArray(new char[] { 'A', 'B', 'C' }));
-        assertArrayEquals(new int[0], CommonUtil.toIntArray((char[]) null));
-        assertArrayEquals(new int[] { 1, 0, 1, 0 }, CommonUtil.toIntArray(new boolean[] { true, false, true, false }));
-        Collection<Integer> c = CommonUtil.toLinkedList(1, 2, 3, null, 4);
-        assertArrayEquals(new int[] { 2, 3, 0 }, CommonUtil.toIntArray(c, 1, 4, 0));
+    public void testToCollection() {
+        assertEquals(Arrays.asList(true, false), new ArrayList<>(CommonUtil.toCollection(new boolean[] { true, false }, ArrayList::new)));
+        assertEquals(Arrays.asList(false, true), new ArrayList<>(CommonUtil.toCollection(new boolean[] { true, false, true, false }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList('a', 'b'), new ArrayList<>(CommonUtil.toCollection(new char[] { 'a', 'b' }, ArrayList::new)));
+        assertEquals(Arrays.asList('b', 'c'), new ArrayList<>(CommonUtil.toCollection(new char[] { 'a', 'b', 'c', 'd' }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList((byte) 1, (byte) 2), new ArrayList<>(CommonUtil.toCollection(new byte[] { 1, 2 }, ArrayList::new)));
+        assertEquals(Arrays.asList((byte) 2, (byte) 3), new ArrayList<>(CommonUtil.toCollection(new byte[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList((short) 1, (short) 2), new ArrayList<>(CommonUtil.toCollection(new short[] { 1, 2 }, ArrayList::new)));
+        assertEquals(Arrays.asList((short) 2, (short) 3), new ArrayList<>(CommonUtil.toCollection(new short[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList(1, 2), new ArrayList<>(CommonUtil.toCollection(new int[] { 1, 2 }, ArrayList::new)));
+        assertEquals(Arrays.asList(2, 3), new ArrayList<>(CommonUtil.toCollection(new int[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList(1L, 2L), new ArrayList<>(CommonUtil.toCollection(new long[] { 1L, 2L }, ArrayList::new)));
+        assertEquals(Arrays.asList(2L, 3L), new ArrayList<>(CommonUtil.toCollection(new long[] { 1L, 2L, 3L, 4L }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList(1.0f, 2.0f), new ArrayList<>(CommonUtil.toCollection(new float[] { 1.0f, 2.0f }, ArrayList::new)));
+        assertEquals(Arrays.asList(2.0f, 3.0f), new ArrayList<>(CommonUtil.toCollection(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList(1.0, 2.0), new ArrayList<>(CommonUtil.toCollection(new double[] { 1.0, 2.0 }, ArrayList::new)));
+        assertEquals(Arrays.asList(2.0, 3.0), new ArrayList<>(CommonUtil.toCollection(new double[] { 1.0, 2.0, 3.0, 4.0 }, 1, 3, ArrayList::new)));
+        assertEquals(Arrays.asList("a", "b"), new ArrayList<>(CommonUtil.toCollection(new String[] { "a", "b" }, ArrayList::new)));
+        assertEquals(Arrays.asList("b", "c"), CommonUtil.toCollection(new String[] { "a", "b", "c" }, 1, 3, n -> new ArrayList<>(n)));
+        assertTrue(CommonUtil.toCollection(new String[] { "a", "b", "c" }, 1, 1, n -> new ArrayList<>(n)).isEmpty());
+        assertEquals(Arrays.asList("a", "b"), CommonUtil.toCollection(Arrays.asList("a", "b"), ArrayList::new));
+        assertEquals(Arrays.asList("a", "b"), CommonUtil.toCollection(Arrays.asList("a", "b").iterator(), ArrayList::new));
+        Queue<String> queue = CommonUtil.toQueue("a", "b");
+        assertEquals(2, queue.size());
+        Deque<String> deque = CommonUtil.toDeque("a", "b");
+        assertEquals(2, deque.size());
+        ArrayDeque<String> arrayDeque = CommonUtil.toArrayDeque("a", "b");
+        assertEquals(2, arrayDeque.size());
+        Multiset<String> ms = CommonUtil.toMultiset("a", "a", "b");
+        assertEquals(2, ms.getCount("a"));
     }
 
     @Test
-    public void testToLongArray() {
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, CommonUtil.toLongArray(Arrays.asList(1L, 2L, 3L)));
-        assertArrayEquals(new long[] { 2, 3, 0 }, CommonUtil.toLongArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4));
-        assertArrayEquals(new long[] { 99L, 3L }, CommonUtil.toLongArray(Arrays.asList(1L, null, 3L, 4L), 1, 3, 99L));
-        Collection<Long> c = CommonUtil.toLinkedList(1L, 2L, 3L, null, 4L);
-        assertArrayEquals(new long[] { 2L, 3L, 0L }, CommonUtil.toLongArray(c, 1, 4, 0L));
+    public void testToDoubleArray() {
+        double[] arr = CommonUtil.toDoubleArray(Arrays.asList(1.1, 2.2, 3.3));
+        assertEquals(1.1, arr[0], 0.01);
+        assertArrayEquals(new double[] { 2, 3, 0 }, CommonUtil.toDoubleArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4), 0.0);
+        assertArrayEquals(new double[] { 99.0, 3.0 }, CommonUtil.toDoubleArray(Arrays.asList(1.0, null, 3.0, 4.0), 1, 3, 99.0), 0.0);
+        Collection<Double> c = CommonUtil.toLinkedList(1.0d, 2.0d, 3.0d, null, 4.0d);
+        assertArrayEquals(new double[] { 2.0d, 3.0d, 0.0d }, CommonUtil.toDoubleArray(c, 1, 4, 0.0d), 0.0);
+    }
+
+    @Test
+    public void testToDoubleArray_floatElementWidenedViaDecimalSpelling() {
+        assertArrayEquals(new double[] { 1.21, 0.1, 2.5 }, CommonUtil.toDoubleArray(Arrays.<Number> asList(1.21f, 0.1f, 2.5d)), 0.0);
+        assertArrayEquals(new double[] { 1.21 }, CommonUtil.toDoubleArray(new LinkedList<>(Arrays.asList(0.5d, 1.21f)), 1, 2), 0.0);
     }
 
     @Test
@@ -316,13 +190,15 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testToDoubleArray() {
-        double[] arr = CommonUtil.toDoubleArray(Arrays.asList(1.1, 2.2, 3.3));
-        assertEquals(1.1, arr[0], 0.01);
-        assertArrayEquals(new double[] { 2, 3, 0 }, CommonUtil.toDoubleArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4), 0.0);
-        assertArrayEquals(new double[] { 99.0, 3.0 }, CommonUtil.toDoubleArray(Arrays.asList(1.0, null, 3.0, 4.0), 1, 3, 99.0), 0.0);
-        Collection<Double> c = CommonUtil.toLinkedList(1.0d, 2.0d, 3.0d, null, 4.0d);
-        assertArrayEquals(new double[] { 2.0d, 3.0d, 0.0d }, CommonUtil.toDoubleArray(c, 1, 4, 0.0d), 0.0);
+    public void testToIntArray() {
+        assertArrayEquals(new int[] { 1, 2, 3 }, CommonUtil.toIntArray(Arrays.asList(1, 2, 3)));
+        assertArrayEquals(new int[] { 2, 3, 0 }, CommonUtil.toIntArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4));
+        assertArrayEquals(new int[] { 99, 3 }, CommonUtil.toIntArray(Arrays.asList(1, null, 3, 4), 1, 3, 99));
+        assertArrayEquals(new int[] { 65, 66, 67 }, CommonUtil.toIntArray(new char[] { 'A', 'B', 'C' }));
+        assertArrayEquals(new int[0], CommonUtil.toIntArray((char[]) null));
+        assertArrayEquals(new int[] { 1, 0, 1, 0 }, CommonUtil.toIntArray(new boolean[] { true, false, true, false }));
+        Collection<Integer> c = CommonUtil.toLinkedList(1, 2, 3, null, 4);
+        assertArrayEquals(new int[] { 2, 3, 0 }, CommonUtil.toIntArray(c, 1, 4, 0));
     }
 
     @Test
@@ -358,72 +234,12 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testToSet() {
-        assertEquals(new HashSet<>(Arrays.asList("a", "b", "c")), CommonUtil.toSet(new String[] { "a", "b", "c", "a" }));
-        assertEquals(new HashSet<>(), CommonUtil.toSet(new String[0]));
-        assertEquals(new HashSet<>(), CommonUtil.toSet((String[]) null));
-        assertEquals(new HashSet<>(Arrays.asList(true, false)), CommonUtil.toSet(new boolean[] { true, false, true, false }));
-        assertEquals(new HashSet<>(), CommonUtil.toSet((boolean[]) null));
-        assertEquals(3, CommonUtil.toSet(new char[] { 'a', 'b', 'c', 'a' }).size());
-        assertEquals(3, CommonUtil.toSet(new byte[] { 1, 2, 3, 1, 2 }).size());
-        assertEquals(3, CommonUtil.toSet(new short[] { 1, 2, 3, 1, 2 }).size());
-        assertEquals(3, CommonUtil.toSet(new int[] { 1, 2, 3, 1, 2 }).size());
-        assertEquals(3, CommonUtil.toSet(new long[] { 1L, 2L, 3L, 1L, 2L }).size());
-        assertEquals(3, CommonUtil.toSet(new float[] { 1.0f, 2.0f, 3.0f, 1.0f, 2.0f }).size());
-        assertEquals(3, CommonUtil.toSet(new double[] { 1.0, 2.0, 3.0, 1.0, 2.0 }).size());
-        assertEquals(2, CommonUtil.toSet(new boolean[] { true, false, true, false, true }, 1, 4).size());
-        assertTrue(CommonUtil.toSet(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 4).contains('b'));
-        assertTrue(CommonUtil.toSet(new byte[] { 1, 2, 3, 4, 5 }, 1, 4).contains((byte) 2));
-        assertTrue(CommonUtil.toSet(new short[] { 1, 2, 3, 4, 5 }, 1, 4).contains((short) 2));
-        assertTrue(CommonUtil.toSet(new int[] { 1, 2, 3, 4, 5 }, 1, 4).contains(2));
-        assertTrue(CommonUtil.toSet(new long[] { 1L, 2L, 3L, 4L, 5L }, 1, 4).contains(2L));
-        assertTrue(CommonUtil.toSet(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, 1, 4).contains(2.0f));
-        assertTrue(CommonUtil.toSet(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 4).contains(2.0));
-        assertTrue(CommonUtil.toSet(new String[] { "a", "b", "c", "d", "e" }, 1, 4).contains("b"));
-        assertEquals(3, CommonUtil.toSet(Arrays.asList("a", "b", "c", "a", "b").iterator()).size());
-        assertEquals(new HashSet<>(), CommonUtil.toSet((Iterator<String>) null));
-        Set<String> linked = CommonUtil.toLinkedHashSet("a", "b", "c", "a");
-        assertEquals(3, linked.size());
-        Iterator<String> it = linked.iterator();
-        assertEquals("a", it.next());
-        assertEquals("b", it.next());
-        SortedSet<String> sorted = CommonUtil.toSortedSet("b", "a", "c");
-        assertEquals("a", sorted.first());
-        NavigableSet<String> nav = CommonUtil.toNavigableSet("b", "a", "c");
-        assertEquals("a", nav.first());
-    }
-
-    @Test
-    public void testToCollection() {
-        assertEquals(Arrays.asList(true, false), new ArrayList<>(CommonUtil.toCollection(new boolean[] { true, false }, ArrayList::new)));
-        assertEquals(Arrays.asList(false, true), new ArrayList<>(CommonUtil.toCollection(new boolean[] { true, false, true, false }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList('a', 'b'), new ArrayList<>(CommonUtil.toCollection(new char[] { 'a', 'b' }, ArrayList::new)));
-        assertEquals(Arrays.asList('b', 'c'), new ArrayList<>(CommonUtil.toCollection(new char[] { 'a', 'b', 'c', 'd' }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList((byte) 1, (byte) 2), new ArrayList<>(CommonUtil.toCollection(new byte[] { 1, 2 }, ArrayList::new)));
-        assertEquals(Arrays.asList((byte) 2, (byte) 3), new ArrayList<>(CommonUtil.toCollection(new byte[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList((short) 1, (short) 2), new ArrayList<>(CommonUtil.toCollection(new short[] { 1, 2 }, ArrayList::new)));
-        assertEquals(Arrays.asList((short) 2, (short) 3), new ArrayList<>(CommonUtil.toCollection(new short[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList(1, 2), new ArrayList<>(CommonUtil.toCollection(new int[] { 1, 2 }, ArrayList::new)));
-        assertEquals(Arrays.asList(2, 3), new ArrayList<>(CommonUtil.toCollection(new int[] { 1, 2, 3, 4 }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList(1L, 2L), new ArrayList<>(CommonUtil.toCollection(new long[] { 1L, 2L }, ArrayList::new)));
-        assertEquals(Arrays.asList(2L, 3L), new ArrayList<>(CommonUtil.toCollection(new long[] { 1L, 2L, 3L, 4L }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList(1.0f, 2.0f), new ArrayList<>(CommonUtil.toCollection(new float[] { 1.0f, 2.0f }, ArrayList::new)));
-        assertEquals(Arrays.asList(2.0f, 3.0f), new ArrayList<>(CommonUtil.toCollection(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList(1.0, 2.0), new ArrayList<>(CommonUtil.toCollection(new double[] { 1.0, 2.0 }, ArrayList::new)));
-        assertEquals(Arrays.asList(2.0, 3.0), new ArrayList<>(CommonUtil.toCollection(new double[] { 1.0, 2.0, 3.0, 4.0 }, 1, 3, ArrayList::new)));
-        assertEquals(Arrays.asList("a", "b"), new ArrayList<>(CommonUtil.toCollection(new String[] { "a", "b" }, ArrayList::new)));
-        assertEquals(Arrays.asList("b", "c"), CommonUtil.toCollection(new String[] { "a", "b", "c" }, 1, 3, n -> new ArrayList<>(n)));
-        assertTrue(CommonUtil.toCollection(new String[] { "a", "b", "c" }, 1, 1, n -> new ArrayList<>(n)).isEmpty());
-        assertEquals(Arrays.asList("a", "b"), CommonUtil.toCollection(Arrays.asList("a", "b"), ArrayList::new));
-        assertEquals(Arrays.asList("a", "b"), CommonUtil.toCollection(Arrays.asList("a", "b").iterator(), ArrayList::new));
-        Queue<String> queue = CommonUtil.toQueue("a", "b");
-        assertEquals(2, queue.size());
-        Deque<String> deque = CommonUtil.toDeque("a", "b");
-        assertEquals(2, deque.size());
-        ArrayDeque<String> arrayDeque = CommonUtil.toArrayDeque("a", "b");
-        assertEquals(2, arrayDeque.size());
-        Multiset<String> ms = CommonUtil.toMultiset("a", "a", "b");
-        assertEquals(2, ms.getCount("a"));
+    public void testToLongArray() {
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, CommonUtil.toLongArray(Arrays.asList(1L, 2L, 3L)));
+        assertArrayEquals(new long[] { 2, 3, 0 }, CommonUtil.toLongArray(Arrays.asList(1, 2L, 3.0, null, (byte) 5), 1, 4));
+        assertArrayEquals(new long[] { 99L, 3L }, CommonUtil.toLongArray(Arrays.asList(1L, null, 3L, 4L), 1, 3, 99L));
+        Collection<Long> c = CommonUtil.toLinkedList(1L, 2L, 3L, null, 4L);
+        assertArrayEquals(new long[] { 2L, 3L, 0L }, CommonUtil.toLongArray(c, 1, 4, 0L));
     }
 
     @Test
@@ -470,6 +286,100 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
+    public void testToSet() {
+        assertEquals(new HashSet<>(Arrays.asList("a", "b", "c")), CommonUtil.toSet(new String[] { "a", "b", "c", "a" }));
+        assertEquals(new HashSet<>(), CommonUtil.toSet(new String[0]));
+        assertEquals(new HashSet<>(), CommonUtil.toSet((String[]) null));
+        assertEquals(new HashSet<>(Arrays.asList(true, false)), CommonUtil.toSet(new boolean[] { true, false, true, false }));
+        assertEquals(new HashSet<>(), CommonUtil.toSet((boolean[]) null));
+        assertEquals(3, CommonUtil.toSet(new char[] { 'a', 'b', 'c', 'a' }).size());
+        assertEquals(3, CommonUtil.toSet(new byte[] { 1, 2, 3, 1, 2 }).size());
+        assertEquals(3, CommonUtil.toSet(new short[] { 1, 2, 3, 1, 2 }).size());
+        assertEquals(3, CommonUtil.toSet(new int[] { 1, 2, 3, 1, 2 }).size());
+        assertEquals(3, CommonUtil.toSet(new long[] { 1L, 2L, 3L, 1L, 2L }).size());
+        assertEquals(3, CommonUtil.toSet(new float[] { 1.0f, 2.0f, 3.0f, 1.0f, 2.0f }).size());
+        assertEquals(3, CommonUtil.toSet(new double[] { 1.0, 2.0, 3.0, 1.0, 2.0 }).size());
+        assertEquals(2, CommonUtil.toSet(new boolean[] { true, false, true, false, true }, 1, 4).size());
+        assertTrue(CommonUtil.toSet(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 4).contains('b'));
+        assertTrue(CommonUtil.toSet(new byte[] { 1, 2, 3, 4, 5 }, 1, 4).contains((byte) 2));
+        assertTrue(CommonUtil.toSet(new short[] { 1, 2, 3, 4, 5 }, 1, 4).contains((short) 2));
+        assertTrue(CommonUtil.toSet(new int[] { 1, 2, 3, 4, 5 }, 1, 4).contains(2));
+        assertTrue(CommonUtil.toSet(new long[] { 1L, 2L, 3L, 4L, 5L }, 1, 4).contains(2L));
+        assertTrue(CommonUtil.toSet(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, 1, 4).contains(2.0f));
+        assertTrue(CommonUtil.toSet(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 4).contains(2.0));
+        assertTrue(CommonUtil.toSet(new String[] { "a", "b", "c", "d", "e" }, 1, 4).contains("b"));
+        assertEquals(3, CommonUtil.toSet(Arrays.asList("a", "b", "c", "a", "b").iterator()).size());
+        assertEquals(new HashSet<>(), CommonUtil.toSet((Iterator<String>) null));
+        Set<String> linked = CommonUtil.toLinkedHashSet("a", "b", "c", "a");
+        assertEquals(3, linked.size());
+        Iterator<String> it = linked.iterator();
+        assertEquals("a", it.next());
+        assertEquals("b", it.next());
+        SortedSet<String> sorted = CommonUtil.toSortedSet("b", "a", "c");
+        assertEquals("a", sorted.first());
+        NavigableSet<String> nav = CommonUtil.toNavigableSet("b", "a", "c");
+        assertEquals("a", nav.first());
+    }
+
+    @Test
+    public void testToShortArray() {
+        assertArrayEquals(new short[] { 1, 2, 3 }, CommonUtil.toShortArray(Arrays.asList((short) 1, (short) 2, (short) 3)));
+        assertArrayEquals(new short[] { 2, 3, 0 }, CommonUtil.toShortArray(Arrays.asList((short) 1, 2, 3L, null, 5.0), 1, 4));
+        assertArrayEquals(new short[] { 99, 3 }, CommonUtil.toShortArray(Arrays.asList((short) 1, null, (short) 3, (short) 4), 1, 3, (short) 99));
+        Collection<Short> c = CommonUtil.toLinkedList((short) 1, (short) 2, (short) 3, null, (short) 4);
+        assertArrayEquals(new short[] { 2, 3, 0 }, CommonUtil.toShortArray(c, 1, 4, (short) 0));
+    }
+
+    // toString
+
+    @Test
+    public void testToString_arrayRange() {
+        assertEquals("[false, true]", CommonUtil.toString(new boolean[] { true, false, true, false }, 1, 3));
+        assertEquals("null", CommonUtil.toString((boolean[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new boolean[0], 0, 0));
+        assertEquals("[]", CommonUtil.toString(new boolean[] { true, false }, 1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(new boolean[] { true }, 0, 6));
+        assertEquals("[b, c]", CommonUtil.toString(new char[] { 'a', 'b', 'c', 'd' }, 1, 3));
+        assertEquals("null", CommonUtil.toString((char[]) null, 0, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.toString(new char[] { 'a' }, 0, 6));
+        assertEquals("[2, 3]", CommonUtil.toString(new byte[] { 1, 2, 3, 4, 5 }, 1, 3));
+        assertEquals("null", CommonUtil.toString((byte[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new byte[0], 0, 0));
+        assertEquals("[2, 3]", CommonUtil.toString(new short[] { 1, 2, 3, 4, 5 }, 1, 3));
+        assertEquals("[20, 30]", CommonUtil.toString(new int[] { 10, 20, 30, 40 }, 1, 3));
+        assertEquals("[2, 3]", CommonUtil.toString(new long[] { 1L, 2L, 3L, 4L, 5L }, 1, 3));
+        assertEquals("[2.0, 3.0]", CommonUtil.toString(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f }, 1, 3));
+        assertEquals("[2.0, 3.0]", CommonUtil.toString(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 3));
+        assertEquals("[2, three, null]", CommonUtil.toString(new Object[] { "one", 2, "three", null, 5.0 }, 1, 4));
+        assertEquals("[]", CommonUtil.toString(new Object[] { "a", "b" }, 1, 1));
+    }
+
+    @Test
+    public void testToString_arrays() {
+        assertEquals("[true, false, true]", CommonUtil.toString(new boolean[] { true, false, true }));
+        assertEquals("null", CommonUtil.toString((boolean[]) null));
+        assertEquals("[]", CommonUtil.toString(new boolean[0]));
+        assertEquals("[a, b, c]", CommonUtil.toString(new char[] { 'a', 'b', 'c' }));
+        assertEquals("null", CommonUtil.toString((char[]) null));
+        assertEquals("[]", CommonUtil.toString(new char[0]));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(new byte[] { 1, 2, 3 }));
+        assertEquals("null", CommonUtil.toString((byte[]) null));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(new short[] { 1, 2, 3 }));
+        assertEquals("null", CommonUtil.toString((short[]) null));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(new int[] { 1, 2, 3 }));
+        assertEquals("null", CommonUtil.toString((int[]) null));
+        assertEquals("[1, 2, 3]", CommonUtil.toString(new long[] { 1L, 2L, 3L }));
+        assertEquals("null", CommonUtil.toString((long[]) null));
+        assertEquals("[1.0, 2.0, 3.0]", CommonUtil.toString(new float[] { 1.0f, 2.0f, 3.0f }));
+        assertEquals("null", CommonUtil.toString((float[]) null));
+        assertEquals("[1.0, 2.0, 3.0]", CommonUtil.toString(new double[] { 1.0, 2.0, 3.0 }));
+        assertEquals("null", CommonUtil.toString((double[]) null));
+        assertEquals("[a, b, c]", CommonUtil.toString(new String[] { "a", "b", "c" }));
+        assertEquals("null", CommonUtil.toString((Object[]) null));
+        assertEquals("[]", CommonUtil.toString(new Object[0]));
+    }
+
+    @Test
     public void testToString_nestedArrayIsRenderedByContent() {
         final Object[] nested = { new int[] { 1, 2 } };
         assertEquals("[[1, 2]]", CommonUtil.toString(nested));
@@ -483,8 +393,101 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testToDoubleArray_floatElementWidenedViaDecimalSpelling() {
-        assertArrayEquals(new double[] { 1.21, 0.1, 2.5 }, CommonUtil.toDoubleArray(Arrays.<Number> asList(1.21f, 0.1f, 2.5d)), 0.0);
-        assertArrayEquals(new double[] { 1.21 }, CommonUtil.toDoubleArray(new LinkedList<>(Arrays.asList(0.5d, 1.21f)), 1, 2), 0.0);
+    public void testToString_objects() {
+        assertEquals("test", CommonUtil.toString("test"));
+        assertEquals("null", CommonUtil.toString((Object) null));
+        assertEquals("default", CommonUtil.toString(null, "default"));
+        assertEquals("test", CommonUtil.toString("test", "default"));
+        assertEquals("[a, b, c]", CommonUtil.toString(Arrays.asList("a", "b", "c")));
+        Iterator<String> iter = Arrays.asList("a", "b", "c").iterator();
+        assertNotEquals("[a, b, c]", CommonUtil.toString(iter));
+        Object obj = new Object();
+        assertEquals(obj.toString(), CommonUtil.toString(obj));
     }
+
+    @Test
+    public void testToString_primitives() {
+        assertEquals("true", CommonUtil.toString(true));
+        assertEquals("false", CommonUtil.toString(false));
+        assertEquals("a", CommonUtil.toString('a'));
+        assertEquals("5", CommonUtil.toString((byte) 5));
+        assertEquals("-1", CommonUtil.toString((byte) -1));
+        assertEquals("100", CommonUtil.toString((short) 100));
+        assertEquals("42", CommonUtil.toString(42));
+        assertEquals("-42", CommonUtil.toString(-42));
+        assertEquals("100", CommonUtil.toString(100L));
+        assertEquals("10.5", CommonUtil.toString(10.5f));
+        assertEquals("10.5", CommonUtil.toString(10.5));
+    }
+
+    @Test
+    public void testToString_stringBuilder() {
+        StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, (boolean[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new boolean[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new boolean[] { true, false });
+        assertTrue(sb.toString().contains("true"));
+        sb.setLength(0);
+        CommonUtil.toString(sb, (char[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, (byte[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new byte[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new byte[] { 1, 2 });
+        assertTrue(sb.toString().contains("1"));
+        sb.setLength(0);
+        CommonUtil.toString(sb, (short[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new short[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new short[] { 1, 2, 3 });
+        assertEquals("[1, 2, 3]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, (int[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new int[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new int[] { 10, 20 });
+        assertEquals("[10, 20]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, (long[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new long[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new long[] { 100L, 200L });
+        assertEquals("[100, 200]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, (float[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new float[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new float[] { 1.0f, 2.0f });
+        assertEquals("[1.0, 2.0]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, (double[]) null);
+        assertEquals("null", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new double[0]);
+        assertEquals("[]", sb.toString());
+        sb.setLength(0);
+        CommonUtil.toString(sb, new double[] { 1.5d, 2.5d });
+        assertEquals("[1.5, 2.5]", sb.toString());
+    }
+
 }

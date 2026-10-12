@@ -19,6 +19,9 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.u.OptionalInt;
 
 public class IndexAllTest extends IndexTestSupport {
+
+    // allOf
+
     @Test
     public void testAllOf() {
         int[] array = { 1, 2, 1, 3, 1 };
@@ -27,154 +30,6 @@ public class IndexAllTest extends IndexTestSupport {
         expected.set(2);
         expected.set(4);
         assertEquals(expected, Index.allOf(array, 1));
-    }
-
-    @Test
-    public void testAllOfWithPredicate() {
-        String[] array = { "apple", "banana", "avocado", "orange" };
-        Predicate<String> startsWithA = s -> s.startsWith("a");
-        BitSet expected = new BitSet();
-        expected.set(0);
-        expected.set(2);
-        assertEquals(expected, Index.allOf(array, startsWithA));
-    }
-
-    @Test
-    public void testAllOf_ByteArray() {
-        byte[] array = { 1, 2, 1, 2, 1 };
-
-        BitSet result = Index.allOf(array, (byte) 1);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_CharArray() {
-        char[] array = { 'a', 'b', 'a', 'b', 'a' };
-
-        BitSet result = Index.allOf(array, 'a');
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_ShortArray() {
-        short[] array = { 10, 20, 10, 20, 10 };
-
-        BitSet result = Index.allOf(array, (short) 10);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_IntArray() {
-        int[] array = { 100, 200, 100, 200, 100 };
-
-        BitSet result = Index.allOf(array, 100);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_LongArray() {
-        long[] array = { 1000L, 2000L, 1000L, 2000L, 1000L };
-
-        BitSet result = Index.allOf(array, 1000L);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_FloatArray() {
-        float[] array = { 1.1f, 2.2f, 1.1f, 2.2f, 1.1f };
-
-        BitSet result = Index.allOf(array, 1.1f);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_DoubleArray() {
-        double[] array = { 1.11, 2.22, 1.11, 2.22, 1.11 };
-
-        BitSet result = Index.allOf(array, 1.11);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_DoubleArray_WithTolerance() {
-        double[] array = { 1.0, 2.001, 1.01, 2.999, 0.99 };
-
-        BitSet result = Index.allOf(array, 1.0, 0, 0.02);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "apple");
-
-        BitSet result = Index.allOf(list, "apple");
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.allOf(linkedList, "apple");
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-    }
-
-    @Test
-    public void testAllOf_Array_WithPredicate() {
-        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
-
-        BitSet result = Index.allOf(array, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-
-        result = Index.allOf(array, s -> s.length() > 10);
-        Assertions.assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_Collection_WithPredicate() {
-        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
-
-        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-
-        LinkedList<String> linkedList = new LinkedList<>(list);
-        result = Index.allOf(linkedList, s -> s.startsWith("a"));
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
     }
 
     @Test
@@ -223,59 +78,39 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void testAllOf_LargeArrayPerformance() {
-        int size = 10000;
-        int[] largeArray = new int[size];
-        for (int i = 0; i < size; i++) {
-            largeArray[i] = i % 10;
-        }
+    public void testAllOf_Array_WithPredicate() {
+        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
 
-        BitSet result = Index.allOf(largeArray, 5);
-        assertEquals(1000, result.cardinality());
+        BitSet result = Index.allOf(array, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
 
-        assertTrue(result.get(5));
-        assertTrue(result.get(15));
-        assertTrue(result.get(9995));
-        assertFalse(result.get(0));
-        assertFalse(result.get(9999));
+        result = Index.allOf(array, s -> s.length() > 10);
+        Assertions.assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void testAllOf_WithPredicate_Array() {
-        Integer[] arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    public void testAllOf_Array_WithPredicate_FromIndex() {
+        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
 
-        BitSet result = Index.allOf(arr, n -> n % 2 == 0);
-        assertTrue(result.get(1));
-        assertTrue(result.get(3));
-        assertTrue(result.get(5));
-        assertTrue(result.get(7));
-        assertTrue(result.get(9));
-        assertFalse(result.get(0));
-        assertFalse(result.get(2));
-        assertFalse(result.get(4));
-        assertFalse(result.get(6));
-        assertFalse(result.get(8));
-
-        result = Index.allOf(arr, n -> n > 5, 5);
-        assertTrue(result.get(5));
-        assertTrue(result.get(6));
-        assertTrue(result.get(7));
-        assertTrue(result.get(8));
-        assertTrue(result.get(9));
-        assertFalse(result.get(0));
-        assertFalse(result.get(4));
+        BitSet result = Index.allOf(array, s -> s.startsWith("a"), 2);
+        Assertions.assertEquals(1, result.cardinality());
+        Assertions.assertTrue(result.get(3));
     }
 
     @Test
-    public void testAllOf_WithPredicate_Collection() {
-        List<String> list = Arrays.asList("apple", "banana", "apricot", "cherry", "avocado");
-
-        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
-        assertTrue(result.get(0));
+    public void testAllOf_ArrayWithPredicateAndFromIndex() {
+        String[] source = { "apple", "banana", "avocado", "cherry", "apricot" };
+        java.util.BitSet result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
+        assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
-        assertFalse(result.get(1));
-        assertFalse(result.get(3));
+
+        // fromIndex >= len
+        result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
@@ -316,6 +151,38 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
+    public void testAllOf_BooleanArray() {
+        boolean[] array = { true, false, true, false, true };
+
+        BitSet result = Index.allOf(array, true);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+
+        result = Index.allOf(array, false);
+        Assertions.assertEquals(2, result.cardinality());
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+
+        result = Index.allOf(null, true);
+        Assertions.assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_BooleanArray_WithFromIndex() {
+        boolean[] array = { true, false, true, false, true };
+
+        BitSet result = Index.allOf(array, true, 2);
+        Assertions.assertEquals(2, result.cardinality());
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+
+        result = Index.allOf(array, true, 10);
+        Assertions.assertEquals(0, result.cardinality());
+    }
+
+    @Test
     public void test_allOf_byte_array() {
         byte[] a = { 1, 2, 1, 3, 1 };
         BitSet result = Index.allOf(a, (byte) 1);
@@ -341,6 +208,17 @@ public class IndexAllTest extends IndexTestSupport {
 
         result = Index.allOf(a, (byte) 1, -1);
         assertEquals(3, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_ByteArray() {
+        byte[] array = { 1, 2, 1, 2, 1 };
+
+        BitSet result = Index.allOf(array, (byte) 1);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
     }
 
     @Test
@@ -372,87 +250,347 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void test_allOf_short_array() {
-        short[] a = { 1, 2, 1, 3, 1 };
-        BitSet result = Index.allOf(a, (short) 1);
+    public void testAllOf_CharArray() {
+        char[] array = { 'a', 'b', 'a', 'b', 'a' };
+
+        BitSet result = Index.allOf(array, 'a');
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "apple");
+
+        BitSet result = Index.allOf(list, "apple");
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.allOf(linkedList, "apple");
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void test_allOf_Collection() {
+        List<String> c = Arrays.asList("a", "b", "a", "c", "a");
+        BitSet result = Index.allOf(c, "a");
         assertEquals(3, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, (short) 5);
+        result = Index.allOf(c, "d");
         assertEquals(0, result.cardinality());
 
-        result = Index.allOf((short[]) null, (short) 1);
+        List<String> b = Arrays.asList("a", null, "c", null);
+        result = Index.allOf(b, (String) null);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+
+        result = Index.allOf((Collection<?>) null, "a");
         assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_short_array_fromIndex() {
-        short[] a = { 1, 2, 1, 3, 1 };
-        BitSet result = Index.allOf(a, (short) 1, 2);
+    public void test_allOf_Collection_fromIndex() {
+        List<String> c = Arrays.asList("a", "b", "a", "c", "a");
+        BitSet result = Index.allOf(c, "a", 2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, (short) 1, -1);
+        result = Index.allOf(c, "a", -1);
         assertEquals(3, result.cardinality());
     }
 
     @Test
-    public void test_allOf_int_array() {
-        int[] a = { 1, 2, 1, 3, 1 };
-        BitSet result = Index.allOf(a, 1);
+    public void testAllOf_Collection_NonRandomAccess_WithFromIndex() {
+        // Non-RandomAccess collection path with fromIndex
+        java.util.LinkedList<String> list = new java.util.LinkedList<>(Arrays.asList("x", "a", "b", "a", "c"));
+        java.util.BitSet result = Index.allOf(list, "a", 0);
+        assertEquals(2, result.cardinality());
+
+        // With fromIndex skipping first match
+        result = Index.allOf(list, "a", 2);
+        assertEquals(1, result.cardinality());
+    }
+
+    @Test
+    public void test_allOf_Collection_NonRandomAccess_WithFromIndex() {
+        LinkedList<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        BitSet result = Index.allOf(list, (Predicate<String>) s -> s.compareTo("c") >= 0, 2);
+        assertEquals(3, result.cardinality());
+        assertTrue(result.get(2)); // "c"
+        assertTrue(result.get(3)); // "d"
+        assertTrue(result.get(4)); // "e"
+    }
+
+    @Test
+    public void test_allOf_Collection_Predicate() {
+        List<String> c = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
+        BitSet result = Index.allOf(c, s -> s.startsWith("a"));
         assertEquals(3, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 5);
-        assertEquals(0, result.cardinality());
-
-        result = Index.allOf((int[]) null, 1);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void test_allOf_int_array_fromIndex() {
-        int[] a = { 1, 2, 1, 3, 1 };
-        BitSet result = Index.allOf(a, 1, 2);
+        result = Index.allOf(c, s -> s.length() > 6);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 1, -1);
-        assertEquals(3, result.cardinality());
+        result = Index.allOf((Collection<String>) null, s -> s.startsWith("a"));
+        assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_long_array() {
-        long[] a = { 1L, 2L, 1L, 3L, 1L };
-        BitSet result = Index.allOf(a, 1L);
+    public void test_allOf_Collection_Predicate_fromIndex() {
+        List<String> c = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
+        BitSet result = Index.allOf(c, s -> s.startsWith("a"), 2);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(c, s -> s.startsWith("a"), -1);
+        assertEquals(3, result.cardinality());
+
+        result = Index.allOf(c, s -> s.startsWith("a"), 10);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_Collection_WithPredicate() {
+        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
+
+        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+
+        LinkedList<String> linkedList = new LinkedList<>(list);
+        result = Index.allOf(linkedList, s -> s.startsWith("a"));
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+    }
+
+    @Test
+    public void testAllOf_Collection_WithPredicate_FromIndex() {
+        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
+
+        BitSet result = Index.allOf(list, s -> s.startsWith("a"), 2);
+        Assertions.assertEquals(1, result.cardinality());
+        Assertions.assertTrue(result.get(3));
+    }
+
+    @Test
+    public void testAllOf_collectionWithFromIndex() {
+        List<String> list = Arrays.asList("a", "b", "a", "c", "a");
+        BitSet expected = new BitSet();
+        expected.set(2);
+        expected.set(4);
+        assertEquals(expected, Index.allOf(list, "a", 1));
+    }
+
+    @Test
+    public void testAllOf_CollectionWithFromIndex() {
+        List<String> list = Arrays.asList("a", "b", "a", "c", "a");
+        java.util.BitSet result = Index.allOf(list, "a", 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        // fromIndex >= size
+        result = Index.allOf(list, "a", 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((java.util.Collection<?>) null, "a", 0);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_CollectionWithPredicateAndFromIndex() {
+        List<String> list = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
+        java.util.BitSet result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
+        assertEquals(2, result.cardinality());
+
+        // fromIndex >= size
+        result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((java.util.Collection<String>) null, (java.util.function.Predicate<String>) s -> true, 0);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void test_allOf_double_array() {
+        double[] a = { 1.0, 2.0, 1.0, 3.0, 1.0 };
+        BitSet result = Index.allOf(a, 1.0);
         assertEquals(3, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 5L);
+        result = Index.allOf(a, 5.0);
         assertEquals(0, result.cardinality());
 
-        result = Index.allOf((long[]) null, 1L);
+        result = Index.allOf((double[]) null, 1.0);
         assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_long_array_fromIndex() {
-        long[] a = { 1L, 2L, 1L, 3L, 1L };
-        BitSet result = Index.allOf(a, 1L, 2);
+    public void test_allOf_double_array_fromIndex() {
+        double[] a = { 1.0, 2.0, 1.0, 3.0, 1.0 };
+        BitSet result = Index.allOf(a, 1.0, 2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 1L, -1);
+        result = Index.allOf(a, 1.0, -1);
         assertEquals(3, result.cardinality());
+    }
+
+    @Test
+    public void test_allOf_double_array_tolerance() {
+        double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
+        BitSet result = Index.allOf(a, 2.0, 0, 0.2);
+        assertEquals(3, result.cardinality());
+        assertTrue(result.get(1));
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(a, 2.0, 0, 0.01);
+        assertEquals(1, result.cardinality());
+        assertTrue(result.get(1));
+
+        result = Index.allOf((double[]) null, 2.0, 0, 0.1);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void test_allOf_double_array_tolerance_fromIndex() {
+        double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
+        BitSet result = Index.allOf(a, 2.0, 2, 0.2);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(a, 2.0, -1, 0.2);
+        assertEquals(3, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_DoubleArray() {
+        double[] array = { 1.11, 2.22, 1.11, 2.22, 1.11 };
+
+        BitSet result = Index.allOf(array, 1.11);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_infinity() {
+        // Infinities of the same sign should match each other under fuzzyEquals (which Index.of uses).
+        double[] arr = { Double.POSITIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
+        BitSet result = Index.allOf(arr, Double.POSITIVE_INFINITY, 0, 0.0);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(0));
+        assertTrue(result.get(2));
+    }
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_NaN_consistency() {
+        // BUG FIX: allOf(double[], NaN, tolerance) used to use min/max range comparison which returns false for NaN,
+        // while of(...) and last(...) use Numbers.fuzzyEquals which treats NaN==NaN as true.
+        // After fix, allOf is consistent with of/last: NaN matches NaN.
+        double[] arr = { 1.0, Double.NaN, 2.0, Double.NaN, 5.0 };
+        BitSet result = Index.allOf(arr, Double.NaN, 0, 0.1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+
+        // Sanity: of/last/allOf all agree
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN, 0, 0.1));
+        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN, arr.length - 1, 0.1));
+    }
+
+    @Test
+    public void test_allOf_doubleArray_tolerance_negative_throws() {
+        // The tolerance contract rejects negative values.
+        double[] arr = { 1.0, 2.0, 3.0 };
+        assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, 0, -0.1));
+    }
+
+    @Test
+    public void testAllOf_DoubleArray_WithTolerance() {
+        double[] array = { 1.0, 2.001, 1.01, 2.999, 0.99 };
+
+        BitSet result = Index.allOf(array, 1.0, 0, 0.02);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_DoubleArrayWithTolerance_FromIndex() {
+        double[] source = { 1.0, 2.0, 1.05, 3.0, 0.95 };
+        java.util.BitSet result = Index.allOf(source, 1.0, 1, 0.1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        // fromIndex >= len
+        result = Index.allOf(source, 1.0, 10, 0.1);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_doubleWithTolerance() {
+        double[] array = { 1.0, 1.05, 2.0, 1.1, 0.95 };
+        // Use 0.11 rather than 0.1: |1.1 - 1.0| evaluates to ~0.10000000000000009 in IEEE-754,
+        // so a tolerance of exactly 0.1 excludes index 3. 0.11 keeps the test off the FP boundary.
+        BitSet expected = new BitSet();
+        expected.set(0);
+        expected.set(1);
+        expected.set(3);
+        expected.set(4);
+        assertEquals(expected, Index.allOf(array, 1.0, 0, 0.11));
+
+        BitSet expectedFromIndex = new BitSet();
+        expectedFromIndex.set(1);
+        expectedFromIndex.set(3);
+        expectedFromIndex.set(4);
+        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 1, 0.11));
+    }
+
+    @Test
+    public void testAllOf_EmptyResultSet() {
+        int[] arr = { 1, 2, 3, 4, 5 };
+
+        BitSet result = Index.allOf(arr, 10);
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.cardinality());
+
+        Integer[] intArr = { 1, 2, 3, 4, 5 };
+        result = Index.allOf(intArr, n -> n > 10);
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.cardinality());
     }
 
     @Test
@@ -514,60 +652,166 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void test_allOf_double_array() {
-        double[] a = { 1.0, 2.0, 1.0, 3.0, 1.0 };
-        BitSet result = Index.allOf(a, 1.0);
+    public void testAllOf_FloatArray() {
+        float[] array = { 1.1f, 2.2f, 1.1f, 2.2f, 1.1f };
+
+        BitSet result = Index.allOf(array, 1.1f);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_FloatArrayWithFromIndex() {
+        float[] source = { 1f, 2f, 1f, 3f, 1f };
+        java.util.BitSet result = Index.allOf(source, 1f, 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        result = Index.allOf(source, 1f, 10);
+        assertEquals(0, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_FloatSpecialValues() {
+        float[] arr = { 1.0f, Float.NaN, 2.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NaN };
+
+        BitSet nanResult = Index.allOf(arr, Float.NaN);
+        assertTrue(nanResult.get(1));
+        assertTrue(nanResult.get(3));
+        assertTrue(nanResult.get(5));
+        assertEquals(3, nanResult.cardinality());
+
+        BitSet infResult = Index.allOf(arr, Float.POSITIVE_INFINITY);
+        assertTrue(infResult.get(4));
+        assertEquals(1, infResult.cardinality());
+
+        BitSet fuzzyNanResult = Index.allOf(arr, Float.NaN, 0, 0.1f);
+        assertTrue(fuzzyNanResult.get(1));
+        assertTrue(fuzzyNanResult.get(3));
+        assertTrue(fuzzyNanResult.get(5));
+        assertEquals(3, fuzzyNanResult.cardinality());
+        assertEquals(OptionalInt.of(1), Index.of(arr, Float.NaN, 0, 0.1f));
+        assertEquals(OptionalInt.of(5), Index.last(arr, Float.NaN, arr.length - 1, 0.1f));
+
+        BitSet fuzzyInfResult = Index.allOf(arr, Float.POSITIVE_INFINITY, 0, 0.0f);
+        assertTrue(fuzzyInfResult.get(4));
+        assertEquals(1, fuzzyInfResult.cardinality());
+    }
+
+    @Test
+    public void test_allOf_int_array() {
+        int[] a = { 1, 2, 1, 3, 1 };
+        BitSet result = Index.allOf(a, 1);
         assertEquals(3, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 5.0);
+        result = Index.allOf(a, 5);
         assertEquals(0, result.cardinality());
 
-        result = Index.allOf((double[]) null, 1.0);
+        result = Index.allOf((int[]) null, 1);
         assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_double_array_fromIndex() {
-        double[] a = { 1.0, 2.0, 1.0, 3.0, 1.0 };
-        BitSet result = Index.allOf(a, 1.0, 2);
+    public void test_allOf_int_array_fromIndex() {
+        int[] a = { 1, 2, 1, 3, 1 };
+        BitSet result = Index.allOf(a, 1, 2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 1.0, -1);
+        result = Index.allOf(a, 1, -1);
         assertEquals(3, result.cardinality());
     }
 
     @Test
-    public void test_allOf_double_array_tolerance() {
-        double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
-        BitSet result = Index.allOf(a, 2.0, 0, 0.2);
+    public void testAllOf_IntArray() {
+        int[] array = { 100, 200, 100, 200, 100 };
+
+        BitSet result = Index.allOf(array, 100);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_LargeArrayPerformance() {
+        int size = 10000;
+        int[] largeArray = new int[size];
+        for (int i = 0; i < size; i++) {
+            largeArray[i] = i % 10;
+        }
+
+        BitSet result = Index.allOf(largeArray, 5);
+        assertEquals(1000, result.cardinality());
+
+        assertTrue(result.get(5));
+        assertTrue(result.get(15));
+        assertTrue(result.get(9995));
+        assertFalse(result.get(0));
+        assertFalse(result.get(9999));
+    }
+
+    @Test
+    public void test_allOf_long_array() {
+        long[] a = { 1L, 2L, 1L, 3L, 1L };
+        BitSet result = Index.allOf(a, 1L);
         assertEquals(3, result.cardinality());
-        assertTrue(result.get(1));
+        assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 2.0, 0, 0.01);
-        assertEquals(1, result.cardinality());
-        assertTrue(result.get(1));
+        result = Index.allOf(a, 5L);
+        assertEquals(0, result.cardinality());
 
-        result = Index.allOf((double[]) null, 2.0, 0, 0.1);
+        result = Index.allOf((long[]) null, 1L);
         assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_double_array_tolerance_fromIndex() {
-        double[] a = { 1.0, 2.0, 2.1, 3.0, 2.05 };
-        BitSet result = Index.allOf(a, 2.0, 2, 0.2);
+    public void test_allOf_long_array_fromIndex() {
+        long[] a = { 1L, 2L, 1L, 3L, 1L };
+        BitSet result = Index.allOf(a, 1L, 2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(a, 2.0, -1, 0.2);
+        result = Index.allOf(a, 1L, -1);
         assertEquals(3, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_LongArray() {
+        long[] array = { 1000L, 2000L, 1000L, 2000L, 1000L };
+
+        BitSet result = Index.allOf(array, 1000L);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_LongArrayWithFromIndex() {
+        long[] source = { 1L, 2L, 1L, 3L, 1L };
+        java.util.BitSet result = Index.allOf(source, 1L, 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        // fromIndex >= len
+        result = Index.allOf(source, 1L, 10);
+        assertEquals(0, result.cardinality());
+
+        // null source
+        result = Index.allOf((long[]) null, 1L, 0);
+        assertEquals(0, result.cardinality());
     }
 
     @Test
@@ -605,40 +849,6 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void test_allOf_Collection() {
-        List<String> c = Arrays.asList("a", "b", "a", "c", "a");
-        BitSet result = Index.allOf(c, "a");
-        assertEquals(3, result.cardinality());
-        assertTrue(result.get(0));
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        result = Index.allOf(c, "d");
-        assertEquals(0, result.cardinality());
-
-        List<String> b = Arrays.asList("a", null, "c", null);
-        result = Index.allOf(b, (String) null);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(1));
-        assertTrue(result.get(3));
-
-        result = Index.allOf((Collection<?>) null, "a");
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void test_allOf_Collection_fromIndex() {
-        List<String> c = Arrays.asList("a", "b", "a", "c", "a");
-        BitSet result = Index.allOf(c, "a", 2);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        result = Index.allOf(c, "a", -1);
-        assertEquals(3, result.cardinality());
-    }
-
-    @Test
     public void test_allOf_Object_array_Predicate() {
         String[] a = { "apple", "banana", "avocado", "cherry", "apricot" };
         BitSet result = Index.allOf(a, s -> s.startsWith("a"));
@@ -672,36 +882,105 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void test_allOf_Collection_Predicate() {
-        List<String> c = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
-        BitSet result = Index.allOf(c, s -> s.startsWith("a"));
+    public void testAllOf_ObjectArray() {
+        String[] array = { "apple", "banana", "apple", "banana", "apple" };
+
+        BitSet result = Index.allOf(array, "apple");
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+
+        result = Index.allOf(array, (String) null);
+        Assertions.assertEquals(0, result.cardinality());
+
+        String[] arrayWithNull = { "apple", null, "apple", null };
+        result = Index.allOf(arrayWithNull, (String) null);
+        Assertions.assertEquals(2, result.cardinality());
+        Assertions.assertTrue(result.get(1));
+        Assertions.assertTrue(result.get(3));
+    }
+
+    @Test
+    public void testAllOf_ObjectArrayWithFromIndex() {
+        String[] source = { "a", "b", "a", "c", "a" };
+        java.util.BitSet result = Index.allOf(source, "a", 1);
+        assertEquals(2, result.cardinality());
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+
+        // fromIndex >= len
+        result = Index.allOf(source, "a", 10);
+        assertEquals(0, result.cardinality());
+
+        // null value matching
+        String[] withNulls = { "a", null, "b", null };
+        result = Index.allOf(withNulls, (Object) null, 0);
+        assertEquals(2, result.cardinality());
+    }
+
+    @Test
+    public void testAllOf_predicateWithFromIndex() {
+        String[] array = { "apple", "banana", "avocado", "orange", "apricot" };
+        Predicate<String> startsWithA = s -> s.startsWith("a");
+        BitSet expected = new BitSet();
+        expected.set(2);
+        expected.set(4);
+        assertEquals(expected, Index.allOf(array, startsWithA, 1));
+    }
+
+    @Test
+    public void test_allOf_short_array() {
+        short[] a = { 1, 2, 1, 3, 1 };
+        BitSet result = Index.allOf(a, (short) 1);
         assertEquals(3, result.cardinality());
         assertTrue(result.get(0));
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(c, s -> s.length() > 6);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
+        result = Index.allOf(a, (short) 5);
+        assertEquals(0, result.cardinality());
 
-        result = Index.allOf((Collection<String>) null, s -> s.startsWith("a"));
+        result = Index.allOf((short[]) null, (short) 1);
         assertEquals(0, result.cardinality());
     }
 
     @Test
-    public void test_allOf_Collection_Predicate_fromIndex() {
-        List<String> c = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
-        BitSet result = Index.allOf(c, s -> s.startsWith("a"), 2);
+    public void test_allOf_short_array_fromIndex() {
+        short[] a = { 1, 2, 1, 3, 1 };
+        BitSet result = Index.allOf(a, (short) 1, 2);
         assertEquals(2, result.cardinality());
         assertTrue(result.get(2));
         assertTrue(result.get(4));
 
-        result = Index.allOf(c, s -> s.startsWith("a"), -1);
+        result = Index.allOf(a, (short) 1, -1);
         assertEquals(3, result.cardinality());
+    }
 
-        result = Index.allOf(c, s -> s.startsWith("a"), 10);
-        assertEquals(0, result.cardinality());
+    @Test
+    public void testAllOf_ShortArray() {
+        short[] array = { 10, 20, 10, 20, 10 };
+
+        BitSet result = Index.allOf(array, (short) 10);
+        Assertions.assertEquals(3, result.cardinality());
+        Assertions.assertTrue(result.get(0));
+        Assertions.assertTrue(result.get(2));
+        Assertions.assertTrue(result.get(4));
+    }
+
+    @Test
+    public void testAllOf_withFromIndex() {
+        int[] array = { 1, 2, 1, 3, 1 };
+        BitSet expected = new BitSet();
+        expected.set(2);
+        expected.set(4);
+        assertEquals(expected, Index.allOf(array, 1, 1));
+        assertEquals(expected, Index.allOf(array, 1, 2));
+
+        BitSet expected2 = new BitSet();
+        expected2.set(4);
+        assertEquals(expected2, Index.allOf(array, 1, 3));
+        assertTrue(Index.allOf(array, 1, 5).isEmpty());
     }
 
     @Test
@@ -723,153 +1002,41 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void testAllOf_withFromIndex() {
-        int[] array = { 1, 2, 1, 3, 1 };
-        BitSet expected = new BitSet();
-        expected.set(2);
-        expected.set(4);
-        assertEquals(expected, Index.allOf(array, 1, 1));
-        assertEquals(expected, Index.allOf(array, 1, 2));
+    public void testAllOf_WithPredicate_Array() {
+        Integer[] arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-        BitSet expected2 = new BitSet();
-        expected2.set(4);
-        assertEquals(expected2, Index.allOf(array, 1, 3));
-        assertTrue(Index.allOf(array, 1, 5).isEmpty());
+        BitSet result = Index.allOf(arr, n -> n % 2 == 0);
+        assertTrue(result.get(1));
+        assertTrue(result.get(3));
+        assertTrue(result.get(5));
+        assertTrue(result.get(7));
+        assertTrue(result.get(9));
+        assertFalse(result.get(0));
+        assertFalse(result.get(2));
+        assertFalse(result.get(4));
+        assertFalse(result.get(6));
+        assertFalse(result.get(8));
+
+        result = Index.allOf(arr, n -> n > 5, 5);
+        assertTrue(result.get(5));
+        assertTrue(result.get(6));
+        assertTrue(result.get(7));
+        assertTrue(result.get(8));
+        assertTrue(result.get(9));
+        assertFalse(result.get(0));
+        assertFalse(result.get(4));
     }
 
     @Test
-    public void testAllOf_collectionWithFromIndex() {
-        List<String> list = Arrays.asList("a", "b", "a", "c", "a");
-        BitSet expected = new BitSet();
-        expected.set(2);
-        expected.set(4);
-        assertEquals(expected, Index.allOf(list, "a", 1));
-    }
+    public void testAllOf_WithPredicate_Collection() {
+        List<String> list = Arrays.asList("apple", "banana", "apricot", "cherry", "avocado");
 
-    @Test
-    public void testAllOf_predicateWithFromIndex() {
-        String[] array = { "apple", "banana", "avocado", "orange", "apricot" };
-        Predicate<String> startsWithA = s -> s.startsWith("a");
-        BitSet expected = new BitSet();
-        expected.set(2);
-        expected.set(4);
-        assertEquals(expected, Index.allOf(array, startsWithA, 1));
-    }
-
-    @Test
-    public void testAllOf_doubleWithTolerance() {
-        double[] array = { 1.0, 1.05, 2.0, 1.1, 0.95 };
-        // Use 0.11 rather than 0.1: |1.1 - 1.0| evaluates to ~0.10000000000000009 in IEEE-754,
-        // so a tolerance of exactly 0.1 excludes index 3. 0.11 keeps the test off the FP boundary.
-        BitSet expected = new BitSet();
-        expected.set(0);
-        expected.set(1);
-        expected.set(3);
-        expected.set(4);
-        assertEquals(expected, Index.allOf(array, 1.0, 0, 0.11));
-
-        BitSet expectedFromIndex = new BitSet();
-        expectedFromIndex.set(1);
-        expectedFromIndex.set(3);
-        expectedFromIndex.set(4);
-        assertEquals(expectedFromIndex, Index.allOf(array, 1.0, 1, 0.11));
-    }
-
-    @Test
-    public void testAllOf_BooleanArray() {
-        boolean[] array = { true, false, true, false, true };
-
-        BitSet result = Index.allOf(array, true);
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-
-        result = Index.allOf(array, false);
-        Assertions.assertEquals(2, result.cardinality());
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-
-        result = Index.allOf(null, true);
-        Assertions.assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_BooleanArray_WithFromIndex() {
-        boolean[] array = { true, false, true, false, true };
-
-        BitSet result = Index.allOf(array, true, 2);
-        Assertions.assertEquals(2, result.cardinality());
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-
-        result = Index.allOf(array, true, 10);
-        Assertions.assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_ObjectArray() {
-        String[] array = { "apple", "banana", "apple", "banana", "apple" };
-
-        BitSet result = Index.allOf(array, "apple");
-        Assertions.assertEquals(3, result.cardinality());
-        Assertions.assertTrue(result.get(0));
-        Assertions.assertTrue(result.get(2));
-        Assertions.assertTrue(result.get(4));
-
-        result = Index.allOf(array, (String) null);
-        Assertions.assertEquals(0, result.cardinality());
-
-        String[] arrayWithNull = { "apple", null, "apple", null };
-        result = Index.allOf(arrayWithNull, (String) null);
-        Assertions.assertEquals(2, result.cardinality());
-        Assertions.assertTrue(result.get(1));
-        Assertions.assertTrue(result.get(3));
-    }
-
-    @Test
-    public void testAllOf_Array_WithPredicate_FromIndex() {
-        String[] array = { "apple", "apricot", "banana", "avocado", "cherry" };
-
-        BitSet result = Index.allOf(array, s -> s.startsWith("a"), 2);
-        Assertions.assertEquals(1, result.cardinality());
-        Assertions.assertTrue(result.get(3));
-    }
-
-    @Test
-    public void testAllOf_Collection_WithPredicate_FromIndex() {
-        List<String> list = Arrays.asList("apple", "apricot", "banana", "avocado", "cherry");
-
-        BitSet result = Index.allOf(list, s -> s.startsWith("a"), 2);
-        Assertions.assertEquals(1, result.cardinality());
-        Assertions.assertTrue(result.get(3));
-    }
-
-    @Test
-    public void testAllOf_FloatSpecialValues() {
-        float[] arr = { 1.0f, Float.NaN, 2.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NaN };
-
-        BitSet nanResult = Index.allOf(arr, Float.NaN);
-        assertTrue(nanResult.get(1));
-        assertTrue(nanResult.get(3));
-        assertTrue(nanResult.get(5));
-        assertEquals(3, nanResult.cardinality());
-
-        BitSet infResult = Index.allOf(arr, Float.POSITIVE_INFINITY);
-        assertTrue(infResult.get(4));
-        assertEquals(1, infResult.cardinality());
-
-        BitSet fuzzyNanResult = Index.allOf(arr, Float.NaN, 0, 0.1f);
-        assertTrue(fuzzyNanResult.get(1));
-        assertTrue(fuzzyNanResult.get(3));
-        assertTrue(fuzzyNanResult.get(5));
-        assertEquals(3, fuzzyNanResult.cardinality());
-        assertEquals(OptionalInt.of(1), Index.of(arr, Float.NaN, 0, 0.1f));
-        assertEquals(OptionalInt.of(5), Index.last(arr, Float.NaN, arr.length - 1, 0.1f));
-
-        BitSet fuzzyInfResult = Index.allOf(arr, Float.POSITIVE_INFINITY, 0, 0.0f);
-        assertTrue(fuzzyInfResult.get(4));
-        assertEquals(1, fuzzyInfResult.cardinality());
+        BitSet result = Index.allOf(list, s -> s.startsWith("a"));
+        assertTrue(result.get(0));
+        assertTrue(result.get(2));
+        assertTrue(result.get(4));
+        assertFalse(result.get(1));
+        assertFalse(result.get(3));
     }
 
     @Test
@@ -916,176 +1083,13 @@ public class IndexAllTest extends IndexTestSupport {
     }
 
     @Test
-    public void testAllOf_EmptyResultSet() {
-        int[] arr = { 1, 2, 3, 4, 5 };
-
-        BitSet result = Index.allOf(arr, 10);
-        assertTrue(result.isEmpty());
-        assertEquals(0, result.cardinality());
-
-        Integer[] intArr = { 1, 2, 3, 4, 5 };
-        result = Index.allOf(intArr, n -> n > 10);
-        assertTrue(result.isEmpty());
-        assertEquals(0, result.cardinality());
+    public void testAllOfWithPredicate() {
+        String[] array = { "apple", "banana", "avocado", "orange" };
+        Predicate<String> startsWithA = s -> s.startsWith("a");
+        BitSet expected = new BitSet();
+        expected.set(0);
+        expected.set(2);
+        assertEquals(expected, Index.allOf(array, startsWithA));
     }
 
-    @Test
-    public void testAllOf_CollectionWithFromIndex() {
-        List<String> list = Arrays.asList("a", "b", "a", "c", "a");
-        java.util.BitSet result = Index.allOf(list, "a", 1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        // fromIndex >= size
-        result = Index.allOf(list, "a", 10);
-        assertEquals(0, result.cardinality());
-
-        // null source
-        result = Index.allOf((java.util.Collection<?>) null, "a", 0);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_Collection_NonRandomAccess_WithFromIndex() {
-        // Non-RandomAccess collection path with fromIndex
-        java.util.LinkedList<String> list = new java.util.LinkedList<>(Arrays.asList("x", "a", "b", "a", "c"));
-        java.util.BitSet result = Index.allOf(list, "a", 0);
-        assertEquals(2, result.cardinality());
-
-        // With fromIndex skipping first match
-        result = Index.allOf(list, "a", 2);
-        assertEquals(1, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_LongArrayWithFromIndex() {
-        long[] source = { 1L, 2L, 1L, 3L, 1L };
-        java.util.BitSet result = Index.allOf(source, 1L, 1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        // fromIndex >= len
-        result = Index.allOf(source, 1L, 10);
-        assertEquals(0, result.cardinality());
-
-        // null source
-        result = Index.allOf((long[]) null, 1L, 0);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_FloatArrayWithFromIndex() {
-        float[] source = { 1f, 2f, 1f, 3f, 1f };
-        java.util.BitSet result = Index.allOf(source, 1f, 1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        result = Index.allOf(source, 1f, 10);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_DoubleArrayWithTolerance_FromIndex() {
-        double[] source = { 1.0, 2.0, 1.05, 3.0, 0.95 };
-        java.util.BitSet result = Index.allOf(source, 1.0, 1, 0.1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        // fromIndex >= len
-        result = Index.allOf(source, 1.0, 10, 0.1);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_ObjectArrayWithFromIndex() {
-        String[] source = { "a", "b", "a", "c", "a" };
-        java.util.BitSet result = Index.allOf(source, "a", 1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        // fromIndex >= len
-        result = Index.allOf(source, "a", 10);
-        assertEquals(0, result.cardinality());
-
-        // null value matching
-        String[] withNulls = { "a", null, "b", null };
-        result = Index.allOf(withNulls, (Object) null, 0);
-        assertEquals(2, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_ArrayWithPredicateAndFromIndex() {
-        String[] source = { "apple", "banana", "avocado", "cherry", "apricot" };
-        java.util.BitSet result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(2));
-        assertTrue(result.get(4));
-
-        // fromIndex >= len
-        result = Index.allOf(source, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void testAllOf_CollectionWithPredicateAndFromIndex() {
-        List<String> list = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
-        java.util.BitSet result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 1);
-        assertEquals(2, result.cardinality());
-
-        // fromIndex >= size
-        result = Index.allOf(list, (java.util.function.Predicate<String>) s -> s.startsWith("a"), 10);
-        assertEquals(0, result.cardinality());
-
-        // null source
-        result = Index.allOf((java.util.Collection<String>) null, (java.util.function.Predicate<String>) s -> true, 0);
-        assertEquals(0, result.cardinality());
-    }
-
-    @Test
-    public void test_allOf_Collection_NonRandomAccess_WithFromIndex() {
-        LinkedList<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        BitSet result = Index.allOf(list, (Predicate<String>) s -> s.compareTo("c") >= 0, 2);
-        assertEquals(3, result.cardinality());
-        assertTrue(result.get(2)); // "c"
-        assertTrue(result.get(3)); // "d"
-        assertTrue(result.get(4)); // "e"
-    }
-
-    @Test
-    public void test_allOf_doubleArray_tolerance_NaN_consistency() {
-        // BUG FIX: allOf(double[], NaN, tolerance) used to use min/max range comparison which returns false for NaN,
-        // while of(...) and last(...) use Numbers.fuzzyEquals which treats NaN==NaN as true.
-        // After fix, allOf is consistent with of/last: NaN matches NaN.
-        double[] arr = { 1.0, Double.NaN, 2.0, Double.NaN, 5.0 };
-        BitSet result = Index.allOf(arr, Double.NaN, 0, 0.1);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(1));
-        assertTrue(result.get(3));
-
-        // Sanity: of/last/allOf all agree
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.NaN, 0, 0.1));
-        assertEquals(OptionalInt.of(3), Index.last(arr, Double.NaN, arr.length - 1, 0.1));
-    }
-
-    @Test
-    public void test_allOf_doubleArray_tolerance_infinity() {
-        // Infinities of the same sign should match each other under fuzzyEquals (which Index.of uses).
-        double[] arr = { Double.POSITIVE_INFINITY, 1.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
-        BitSet result = Index.allOf(arr, Double.POSITIVE_INFINITY, 0, 0.0);
-        assertEquals(2, result.cardinality());
-        assertTrue(result.get(0));
-        assertTrue(result.get(2));
-    }
-
-    @Test
-    public void test_allOf_doubleArray_tolerance_negative_throws() {
-        // The tolerance contract rejects negative values.
-        double[] arr = { 1.0, 2.0, 3.0 };
-        assertThrows(IllegalArgumentException.class, () -> Index.allOf(arr, 2.0, 0, -0.1));
-    }
 }

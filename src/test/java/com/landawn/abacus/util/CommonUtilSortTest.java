@@ -16,6 +16,46 @@ import org.junit.jupiter.api.Test;
 
 public class CommonUtilSortTest extends CommonUtilTestSupport {
 
+
+
+    /**
+     * {@code parallelSort} of a {@code CopyOnWriteArrayList} must not depend on its size.
+     *
+     * <p>Above {@code DOUBLE_PIPE_SORT_OBJECT_THRESHOLD} (2000) on a multi-core machine the {@code list.sort}
+     * fast path is skipped and the array write-back runs, so the same call used to succeed at 2000 elements and
+     * throw {@code UnsupportedOperationException} at 2001.</p>
+     */
+    @Test
+    public void testParallelSort_CopyOnWriteArrayListAboveThreshold() {
+        for (final int n : new int[] { 2000, 2001, 5000 }) {
+            final List<Integer> cow = descendingCopyOnWrite(n);
+
+            CommonUtil.parallelSort(cow, Comparator.<Integer> naturalOrder());
+
+            assertEquals(ascending(1, n), new ArrayList<>(cow));
+        }
+    }
+
+
+
+    /**
+     * A partial-range {@code parallelSort} always reaches the array write-back, whatever the core count.
+     *
+     * <p>The {@code list.sort(cmp)} fast path requires {@code fromIndex == 0 && toIndex == list.size()}, so unlike
+     * the full-range case above this does not depend on {@code IOUtil.CPU_CORES} or on the 2000-element
+     * threshold.</p>
+     */
+    @Test
+    public void testParallelSort_PartialRangeOfCopyOnWriteArrayList() {
+        final List<Integer> cow = descendingCopyOnWrite(10);
+
+        CommonUtil.parallelSort(cow, 1, 9, Comparator.<Integer> naturalOrder());
+
+        assertEquals(Arrays.asList(10, 2, 3, 4, 5, 6, 7, 8, 9, 1), new ArrayList<>(cow));
+    }
+
+    // sort
+
     @Test
     public void testSort_arrays() {
         CommonUtil.sort((boolean[]) null);
@@ -77,53 +117,6 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         String[] byLength = { "aaa", "b", "cc" };
         CommonUtil.sort(byLength, Comparator.comparing(String::length));
         assertArrayEquals(new String[] { "b", "cc", "aaa" }, byLength);
-    }
-
-    @Test
-    public void testSort_range() {
-        boolean[] bools = { true, true, false, true, false };
-        CommonUtil.sort(bools, 1, 4);
-        assertArrayEquals(new boolean[] { true, false, true, true, false }, bools);
-        boolean[] emptyRange = { true, false };
-        CommonUtil.sort(emptyRange, 1, 1);
-        assertArrayEquals(new boolean[] { true, false }, emptyRange);
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.sort(bools, -1, 2));
-
-        char[] chars = { 'd', 'c', 'b', 'a', 'e' };
-        CommonUtil.sort(chars, 1, 4);
-        assertArrayEquals(new char[] { 'd', 'a', 'b', 'c', 'e' }, chars);
-
-        byte[] bytes = { 5, 3, 2, 1, 4 };
-        CommonUtil.sort(bytes, 1, 4);
-        assertArrayEquals(new byte[] { 5, 1, 2, 3, 4 }, bytes);
-
-        short[] shorts = { 5, 3, 2, 1, 4 };
-        CommonUtil.sort(shorts, 1, 4);
-        assertArrayEquals(new short[] { 5, 1, 2, 3, 4 }, shorts);
-
-        int[] ints = { 5, 3, 2, 1, 4 };
-        CommonUtil.sort(ints, 1, 4);
-        assertArrayEquals(new int[] { 5, 1, 2, 3, 4 }, ints);
-
-        long[] longs = { 5L, 3L, 2L, 1L, 4L };
-        CommonUtil.sort(longs, 1, 4);
-        assertArrayEquals(new long[] { 5L, 1L, 2L, 3L, 4L }, longs);
-
-        float[] floats = { 5.0f, 3.0f, 2.0f, 1.0f, 4.0f };
-        CommonUtil.sort(floats, 1, 4);
-        assertArrayEquals(new float[] { 5.0f, 1.0f, 2.0f, 3.0f, 4.0f }, floats);
-
-        double[] doubles = { 5.0, 3.0, 2.0, 1.0, 4.0 };
-        CommonUtil.sort(doubles, 1, 4);
-        assertArrayEquals(new double[] { 5.0, 1.0, 2.0, 3.0, 4.0 }, doubles);
-
-        String[] strings = { "e", "d", "c", "b", "a" };
-        CommonUtil.sort(strings, 1, 4);
-        assertArrayEquals(new String[] { "e", "b", "c", "d", "a" }, strings);
-
-        String[] byLength = { "e", "aaa", "b", "cc", "d" };
-        CommonUtil.sort(byLength, 1, 4, Comparator.comparing(String::length));
-        assertArrayEquals(new String[] { "e", "b", "cc", "aaa", "d" }, byLength);
     }
 
     @Test
@@ -194,6 +187,8 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         assertEquals(Arrays.asList("a", "pie", "apple"), byDouble);
     }
 
+
+
     /**
      * A partial-range sort of a {@code CopyOnWriteArrayList} must not throw.
      *
@@ -213,6 +208,8 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         assertEquals(Arrays.asList(5, 2, 3, 4, 1), new ArrayList<>(partial));
     }
 
+
+
     /** The non-{@code RandomAccess} write-back branch must still sort a partial range correctly. */
     @Test
     public void testSort_PartialRangeOfLinkedList() {
@@ -221,39 +218,54 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         assertEquals(Arrays.asList(5, 2, 3, 4, 1), new ArrayList<>(list));
     }
 
-    /**
-     * {@code parallelSort} of a {@code CopyOnWriteArrayList} must not depend on its size.
-     *
-     * <p>Above {@code DOUBLE_PIPE_SORT_OBJECT_THRESHOLD} (2000) on a multi-core machine the {@code list.sort}
-     * fast path is skipped and the array write-back runs, so the same call used to succeed at 2000 elements and
-     * throw {@code UnsupportedOperationException} at 2001.</p>
-     */
     @Test
-    public void testParallelSort_CopyOnWriteArrayListAboveThreshold() {
-        for (final int n : new int[] { 2000, 2001, 5000 }) {
-            final List<Integer> cow = descendingCopyOnWrite(n);
+    public void testSort_range() {
+        boolean[] bools = { true, true, false, true, false };
+        CommonUtil.sort(bools, 1, 4);
+        assertArrayEquals(new boolean[] { true, false, true, true, false }, bools);
+        boolean[] emptyRange = { true, false };
+        CommonUtil.sort(emptyRange, 1, 1);
+        assertArrayEquals(new boolean[] { true, false }, emptyRange);
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.sort(bools, -1, 2));
 
-            CommonUtil.parallelSort(cow, Comparator.<Integer> naturalOrder());
+        char[] chars = { 'd', 'c', 'b', 'a', 'e' };
+        CommonUtil.sort(chars, 1, 4);
+        assertArrayEquals(new char[] { 'd', 'a', 'b', 'c', 'e' }, chars);
 
-            assertEquals(ascending(1, n), new ArrayList<>(cow));
-        }
+        byte[] bytes = { 5, 3, 2, 1, 4 };
+        CommonUtil.sort(bytes, 1, 4);
+        assertArrayEquals(new byte[] { 5, 1, 2, 3, 4 }, bytes);
+
+        short[] shorts = { 5, 3, 2, 1, 4 };
+        CommonUtil.sort(shorts, 1, 4);
+        assertArrayEquals(new short[] { 5, 1, 2, 3, 4 }, shorts);
+
+        int[] ints = { 5, 3, 2, 1, 4 };
+        CommonUtil.sort(ints, 1, 4);
+        assertArrayEquals(new int[] { 5, 1, 2, 3, 4 }, ints);
+
+        long[] longs = { 5L, 3L, 2L, 1L, 4L };
+        CommonUtil.sort(longs, 1, 4);
+        assertArrayEquals(new long[] { 5L, 1L, 2L, 3L, 4L }, longs);
+
+        float[] floats = { 5.0f, 3.0f, 2.0f, 1.0f, 4.0f };
+        CommonUtil.sort(floats, 1, 4);
+        assertArrayEquals(new float[] { 5.0f, 1.0f, 2.0f, 3.0f, 4.0f }, floats);
+
+        double[] doubles = { 5.0, 3.0, 2.0, 1.0, 4.0 };
+        CommonUtil.sort(doubles, 1, 4);
+        assertArrayEquals(new double[] { 5.0, 1.0, 2.0, 3.0, 4.0 }, doubles);
+
+        String[] strings = { "e", "d", "c", "b", "a" };
+        CommonUtil.sort(strings, 1, 4);
+        assertArrayEquals(new String[] { "e", "b", "c", "d", "a" }, strings);
+
+        String[] byLength = { "e", "aaa", "b", "cc", "d" };
+        CommonUtil.sort(byLength, 1, 4, Comparator.comparing(String::length));
+        assertArrayEquals(new String[] { "e", "b", "cc", "aaa", "d" }, byLength);
     }
 
-    /**
-     * A partial-range {@code parallelSort} always reaches the array write-back, whatever the core count.
-     *
-     * <p>The {@code list.sort(cmp)} fast path requires {@code fromIndex == 0 && toIndex == list.size()}, so unlike
-     * the full-range case above this does not depend on {@code IOUtil.CPU_CORES} or on the 2000-element
-     * threshold.</p>
-     */
-    @Test
-    public void testParallelSort_PartialRangeOfCopyOnWriteArrayList() {
-        final List<Integer> cow = descendingCopyOnWrite(10);
 
-        CommonUtil.parallelSort(cow, 1, 9, Comparator.<Integer> naturalOrder());
-
-        assertEquals(Arrays.asList(10, 2, 3, 4, 5, 6, 7, 8, 9, 1), new ArrayList<>(cow));
-    }
 
     /**
      * The two overloads that delegate to {@code sort(List, int, int, Comparator)} inherit the fix.
@@ -292,4 +304,5 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
 
         return expected;
     }
+
 }

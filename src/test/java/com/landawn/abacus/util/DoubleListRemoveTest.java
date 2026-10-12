@@ -52,31 +52,7 @@ public class DoubleListRemoveTest extends DoubleListTestSupport {
         assertEquals(2.2, list.get(1), DELTA);
     }
 
-    @Test
-    public void testRemoveAllOccurrences() {
-        list.add(10.5);
-        list.add(20.5);
-        list.add(10.5);
-        list.add(30.5);
-        list.add(10.5);
-
-        boolean result = list.removeAllOccurrences(10.5);
-        assertTrue(result);
-        assertEquals(2, list.size());
-        assertEquals(20.5, list.get(0), DELTA);
-        assertEquals(30.5, list.get(1), DELTA);
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_NaN() {
-        list.addAll(new double[] { Double.NaN, 1.1, Double.NaN, 2.2, Double.NaN });
-
-        boolean result = list.removeAllOccurrences(Double.NaN);
-        assertTrue(result);
-        assertEquals(2, list.size());
-        assertEquals(1.1, list.get(0), DELTA);
-        assertEquals(2.2, list.get(1), DELTA);
-    }
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -146,80 +122,29 @@ public class DoubleListRemoveTest extends DoubleListTestSupport {
     }
 
     @Test
-    public void testRemoveIf() {
-        list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
+    public void testRemoveAllOccurrences() {
+        list.add(10.5);
+        list.add(20.5);
+        list.add(10.5);
+        list.add(30.5);
+        list.add(10.5);
 
-        boolean result = list.removeIf(x -> x > 3.0);
+        boolean result = list.removeAllOccurrences(10.5);
+        assertTrue(result);
+        assertEquals(2, list.size());
+        assertEquals(20.5, list.get(0), DELTA);
+        assertEquals(30.5, list.get(1), DELTA);
+    }
+
+    @Test
+    public void testRemoveAllOccurrences_NaN() {
+        list.addAll(new double[] { Double.NaN, 1.1, Double.NaN, 2.2, Double.NaN });
+
+        boolean result = list.removeAllOccurrences(Double.NaN);
         assertTrue(result);
         assertEquals(2, list.size());
         assertEquals(1.1, list.get(0), DELTA);
         assertEquals(2.2, list.get(1), DELTA);
-    }
-
-    @Test
-    public void testRemoveIf_NaN() {
-        list.addAll(new double[] { 1.1, Double.NaN, 2.2, Double.NaN, 3.3 });
-
-        boolean result = list.removeIf(Double::isNaN);
-        assertTrue(result);
-        assertEquals(3, list.size());
-        assertEquals(1.1, list.get(0), DELTA);
-        assertEquals(2.2, list.get(1), DELTA);
-        assertEquals(3.3, list.get(2), DELTA);
-    }
-
-    @Test
-    public void testRemoveIf_Empty() {
-        assertFalse(list.removeIf(x -> true));
-    }
-
-    @Test
-    public void testRemoveIf_Infinity() {
-        list.addAll(new double[] { 1.1, Double.POSITIVE_INFINITY, 2.2, Double.NEGATIVE_INFINITY, 3.3 });
-
-        boolean result = list.removeIf(Double::isInfinite);
-        assertTrue(result);
-        assertEquals(3, list.size());
-        assertEquals(1.1, list.get(0), DELTA);
-        assertEquals(2.2, list.get(1), DELTA);
-        assertEquals(3.3, list.get(2), DELTA);
-    }
-
-    @Test
-    public void testRemoveDuplicates() {
-        {
-            list = new DoubleList();
-            list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3, 3.3, 3.3, 4.4 });
-
-            boolean result = list.removeDuplicates();
-            assertTrue(result);
-            assertEquals(4, list.size());
-            assertEquals(1.1, list.get(0), DELTA);
-            assertEquals(2.2, list.get(1), DELTA);
-            assertEquals(3.3, list.get(2), DELTA);
-            assertEquals(4.4, list.get(3), DELTA);
-        }
-        {
-            list = new DoubleList();
-            list.add(1.1);
-            boolean result = list.removeDuplicates();
-            assertFalse(result);
-            assertEquals(1, list.size());
-        }
-    }
-
-    @Test
-    public void testRemoveDuplicates_NaN() {
-        list.addAll(new double[] { 1.1, Double.NaN, Double.NaN, 2.2 });
-        assertTrue(list.removeDuplicates());
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testRemoveDuplicates_Empty() {
-        boolean result = list.removeDuplicates();
-        assertFalse(result);
-        assertTrue(list.isEmpty());
     }
 
     @Test
@@ -253,22 +178,43 @@ public class DoubleListRemoveTest extends DoubleListTestSupport {
         }
     }
 
+    // removeDuplicates
+
     @Test
-    public void testRemoveRange() {
-        list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
+    public void testRemoveDuplicates() {
+        {
+            list = new DoubleList();
+            list.addAll(new double[] { 1.1, 2.2, 2.2, 3.3, 3.3, 3.3, 4.4 });
 
-        list.removeRange(1, 3);
+            boolean result = list.removeDuplicates();
+            assertTrue(result);
+            assertEquals(4, list.size());
+            assertEquals(1.1, list.get(0), DELTA);
+            assertEquals(2.2, list.get(1), DELTA);
+            assertEquals(3.3, list.get(2), DELTA);
+            assertEquals(4.4, list.get(3), DELTA);
+        }
+        {
+            list = new DoubleList();
+            list.add(1.1);
+            boolean result = list.removeDuplicates();
+            assertFalse(result);
+            assertEquals(1, list.size());
+        }
+    }
+
+    @Test
+    public void testRemoveDuplicates_Empty() {
+        boolean result = list.removeDuplicates();
+        assertFalse(result);
+        assertTrue(list.isEmpty());
+    }
+
+    @Test
+    public void testRemoveDuplicates_NaN() {
+        list.addAll(new double[] { 1.1, Double.NaN, Double.NaN, 2.2 });
+        assertTrue(list.removeDuplicates());
         assertEquals(3, list.size());
-        assertEquals(1.1, list.get(0), DELTA);
-        assertEquals(4.4, list.get(1), DELTA);
-        assertEquals(5.5, list.get(2), DELTA);
-
-        // Empty range
-        list.removeRange(1, 1);
-        assertEquals(3, list.size());
-
-        // Invalid range
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 10));
     }
 
     @Test
@@ -310,6 +256,48 @@ public class DoubleListRemoveTest extends DoubleListTestSupport {
         assertThrows(NoSuchElementException.class, () -> list.removeFirst());
     }
 
+    // removeIf
+
+    @Test
+    public void testRemoveIf() {
+        list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
+
+        boolean result = list.removeIf(x -> x > 3.0);
+        assertTrue(result);
+        assertEquals(2, list.size());
+        assertEquals(1.1, list.get(0), DELTA);
+        assertEquals(2.2, list.get(1), DELTA);
+    }
+
+    @Test
+    public void testRemoveIf_Empty() {
+        assertFalse(list.removeIf(x -> true));
+    }
+
+    @Test
+    public void testRemoveIf_Infinity() {
+        list.addAll(new double[] { 1.1, Double.POSITIVE_INFINITY, 2.2, Double.NEGATIVE_INFINITY, 3.3 });
+
+        boolean result = list.removeIf(Double::isInfinite);
+        assertTrue(result);
+        assertEquals(3, list.size());
+        assertEquals(1.1, list.get(0), DELTA);
+        assertEquals(2.2, list.get(1), DELTA);
+        assertEquals(3.3, list.get(2), DELTA);
+    }
+
+    @Test
+    public void testRemoveIf_NaN() {
+        list.addAll(new double[] { 1.1, Double.NaN, 2.2, Double.NaN, 3.3 });
+
+        boolean result = list.removeIf(Double::isNaN);
+        assertTrue(result);
+        assertEquals(3, list.size());
+        assertEquals(1.1, list.get(0), DELTA);
+        assertEquals(2.2, list.get(1), DELTA);
+        assertEquals(3.3, list.get(2), DELTA);
+    }
+
     @Test
     public void testRemoveLast() {
         list.addAll(new double[] { 1.1, 2.2, 3.3 });
@@ -323,4 +311,23 @@ public class DoubleListRemoveTest extends DoubleListTestSupport {
     public void testRemoveLast_Empty() {
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    @Test
+    public void testRemoveRange() {
+        list.addAll(new double[] { 1.1, 2.2, 3.3, 4.4, 5.5 });
+
+        list.removeRange(1, 3);
+        assertEquals(3, list.size());
+        assertEquals(1.1, list.get(0), DELTA);
+        assertEquals(4.4, list.get(1), DELTA);
+        assertEquals(5.5, list.get(2), DELTA);
+
+        // Empty range
+        list.removeRange(1, 1);
+        assertEquals(3, list.size());
+
+        // Invalid range
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 10));
+    }
+
 }

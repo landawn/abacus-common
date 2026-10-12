@@ -20,6 +20,8 @@ import com.landawn.abacus.util.stream.Collectors;
 
 public class SeqGroupTest extends SeqTestSupport {
 
+    // groupBy
+
     @Test
     public void testGroupBy() throws Exception {
         Map<Integer, List<String>> grouped = Seq.of("a", "bb", "ccc", "dd", "e").groupBy(String::length).toMap(Map.Entry::getKey, Map.Entry::getValue);
@@ -29,50 +31,6 @@ public class SeqGroupTest extends SeqTestSupport {
         assertTrue(Seq.<String, Exception> empty().groupBy(String::length).toList().isEmpty());
         assertEquals(1, Seq.of("hello").groupBy(String::length).count());
         assertEquals(1, Seq.<String, RuntimeException> of("a", "bb", "aa", "ccc", "bbb").groupBy(String::length).skip(2).count());
-    }
-
-    @Test
-    public void testGroupBy_MapFactory() throws Exception {
-        List<Map.Entry<Integer, List<String>>> ordered = Seq.of("a", "bb", "ccc", "dd", "e").groupBy(String::length, Suppliers.ofTreeMap()).toList();
-        assertEquals(1, ordered.get(0).getKey().intValue());
-        assertEquals(2, ordered.get(1).getKey().intValue());
-        assertEquals(3, ordered.get(2).getKey().intValue());
-
-        Map<Integer, List<String>> insertion = Seq.of("ccc", "a", "bb")
-                .groupBy(String::length, Suppliers.ofLinkedHashMap())
-                .toMap(Map.Entry::getKey, Map.Entry::getValue, Suppliers.ofLinkedHashMap());
-        assertEquals(Arrays.asList(3, 1, 2), new ArrayList<>(insertion.keySet()));
-    }
-
-    @Test
-    public void testGroupBy_ValueMapper() throws Exception {
-        Map<Integer, List<String>> groups = Seq.of("Alice:25", "Bob:30", "Charlie:25", "David:30")
-                .groupBy(s -> Integer.parseInt(s.split(":")[1]), s -> s.split(":")[0])
-                .toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(Arrays.asList("Alice", "Charlie"), groups.get(25));
-        assertEquals(Arrays.asList("Bob", "David"), groups.get(30));
-
-        List<Map.Entry<String, List<Integer>>> tree = Seq.of("1:Electronics", "2:Books", "3:Electronics", "4:Books")
-                .groupBy(s -> s.split(":")[1], s -> Integer.parseInt(s.split(":")[0]), TreeMap::new)
-                .toList();
-        assertEquals("Books", tree.get(0).getKey());
-        assertEquals(Arrays.asList(2, 4), tree.get(0).getValue());
-    }
-
-    @Test
-    public void testGroupBy_MergeFunction() throws Exception {
-        Map<Integer, Integer> sums = Seq.of(1, 4, 7, 2, 5, 8, 3, 6, 9).groupBy(n -> n % 3, n -> n, Integer::sum).toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(18, sums.get(0).intValue());
-        assertEquals(12, sums.get(1).intValue());
-        assertEquals(15, sums.get(2).intValue());
-
-        List<Map.Entry<String, Integer>> maxByDept = Seq.of("Sales:100", "IT:150", "Sales:200", "IT:120")
-                .groupBy(s -> s.split(":")[0], s -> Integer.parseInt(s.split(":")[1]), Integer::max, TreeMap::new)
-                .toList();
-        assertEquals("IT", maxByDept.get(0).getKey());
-        assertEquals(150, maxByDept.get(0).getValue().intValue());
-        assertEquals("Sales", maxByDept.get(1).getKey());
-        assertEquals(200, maxByDept.get(1).getValue().intValue());
     }
 
     @Test
@@ -106,6 +64,61 @@ public class SeqGroupTest extends SeqTestSupport {
                 .toList();
         assertEquals("Credit", linked.get(0).getKey());
         assertEquals(300L, linked.get(0).getValue().longValue());
+    }
+
+    @Test
+    public void testGroupBy_MapFactory() throws Exception {
+        List<Map.Entry<Integer, List<String>>> ordered = Seq.of("a", "bb", "ccc", "dd", "e").groupBy(String::length, Suppliers.ofTreeMap()).toList();
+        assertEquals(1, ordered.get(0).getKey().intValue());
+        assertEquals(2, ordered.get(1).getKey().intValue());
+        assertEquals(3, ordered.get(2).getKey().intValue());
+
+        Map<Integer, List<String>> insertion = Seq.of("ccc", "a", "bb")
+                .groupBy(String::length, Suppliers.ofLinkedHashMap())
+                .toMap(Map.Entry::getKey, Map.Entry::getValue, Suppliers.ofLinkedHashMap());
+        assertEquals(Arrays.asList(3, 1, 2), new ArrayList<>(insertion.keySet()));
+    }
+
+    @Test
+    public void testGroupBy_MapFactoryExampleUsesALambdaFactory() throws Exception {
+        final Seq<String, Exception> seq = Seq.of("a", "bb", "ccc");
+        final List<String> lines = new ArrayList<>();
+
+        seq.groupBy(String::length, () -> new TreeMap<Integer, List<String>>())
+                .forEach(entry -> lines.add("Length " + entry.getKey() + ": " + entry.getValue()));
+
+        assertEquals(Arrays.asList("Length 1: [a]", "Length 2: [bb]", "Length 3: [ccc]"), lines);
+    }
+
+    @Test
+    public void testGroupBy_MergeFunction() throws Exception {
+        Map<Integer, Integer> sums = Seq.of(1, 4, 7, 2, 5, 8, 3, 6, 9).groupBy(n -> n % 3, n -> n, Integer::sum).toMap(Map.Entry::getKey, Map.Entry::getValue);
+        assertEquals(18, sums.get(0).intValue());
+        assertEquals(12, sums.get(1).intValue());
+        assertEquals(15, sums.get(2).intValue());
+
+        List<Map.Entry<String, Integer>> maxByDept = Seq.of("Sales:100", "IT:150", "Sales:200", "IT:120")
+                .groupBy(s -> s.split(":")[0], s -> Integer.parseInt(s.split(":")[1]), Integer::max, TreeMap::new)
+                .toList();
+        assertEquals("IT", maxByDept.get(0).getKey());
+        assertEquals(150, maxByDept.get(0).getValue().intValue());
+        assertEquals("Sales", maxByDept.get(1).getKey());
+        assertEquals(200, maxByDept.get(1).getValue().intValue());
+    }
+
+    @Test
+    public void testGroupBy_ValueMapper() throws Exception {
+        Map<Integer, List<String>> groups = Seq.of("Alice:25", "Bob:30", "Charlie:25", "David:30")
+                .groupBy(s -> Integer.parseInt(s.split(":")[1]), s -> s.split(":")[0])
+                .toMap(Map.Entry::getKey, Map.Entry::getValue);
+        assertEquals(Arrays.asList("Alice", "Charlie"), groups.get(25));
+        assertEquals(Arrays.asList("Bob", "David"), groups.get(30));
+
+        List<Map.Entry<String, List<Integer>>> tree = Seq.of("1:Electronics", "2:Books", "3:Electronics", "4:Books")
+                .groupBy(s -> s.split(":")[1], s -> Integer.parseInt(s.split(":")[0]), TreeMap::new)
+                .toList();
+        assertEquals("Books", tree.get(0).getKey());
+        assertEquals(Arrays.asList(2, 4), tree.get(0).getValue());
     }
 
     @Test
@@ -153,17 +166,4 @@ public class SeqGroupTest extends SeqTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Seq.of("a").groupTo(s -> s.charAt(0), String::length, Collectors.counting(), null));
     }
 
-    // --- G12-004 (doc): the javadoc example for groupBy(keyMapper, mapFactory) used an inexact TreeMap::new, which
-    // --- leaves this overload and groupBy(keyMapper, valueMapper) equally applicable - it did not compile. The
-    // --- corrected example (a lambda factory) is pinned here.
-    @Test
-    public void testGroupBy_MapFactoryExampleUsesALambdaFactory() throws Exception {
-        final Seq<String, Exception> seq = Seq.of("a", "bb", "ccc");
-        final List<String> lines = new ArrayList<>();
-
-        seq.groupBy(String::length, () -> new TreeMap<Integer, List<String>>())
-                .forEach(entry -> lines.add("Length " + entry.getKey() + ": " + entry.getValue()));
-
-        assertEquals(Arrays.asList("Length 1: [a]", "Length 2: [bb]", "Length 3: [ccc]"), lines);
-    }
 }

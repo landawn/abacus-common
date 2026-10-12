@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 public class SeqSkipTest extends SeqTestSupport {
 
+    // skip
+
     @Test
     public void testSkip() throws Exception {
         assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).skip(2).toList());
@@ -23,17 +25,6 @@ public class SeqSkipTest extends SeqTestSupport {
         Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
         drainWithException(closed);
         assertThrows(IllegalStateException.class, () -> closed.skip(1));
-    }
-
-    @Test
-    public void testSkip_WithAction() throws Exception {
-        List<Integer> skipped = new ArrayList<>();
-        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).skip(3, skipped::add).toList());
-        assertEquals(Arrays.asList(1, 2, 3), skipped);
-
-        skipped.clear();
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).skip(0, skipped::add).toList());
-        assertTrue(skipped.isEmpty());
     }
 
     @Test
@@ -54,20 +45,30 @@ public class SeqSkipTest extends SeqTestSupport {
     }
 
     @Test
-    public void testSkipUntil() throws Exception {
-        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipUntil(x -> x >= 3).toList());
-        assertEquals(Arrays.asList(3, 2, 1), Seq.of(1, 2, 3, 2, 1).skipUntil(x -> x == 3).toList());
-        assertTrue(Seq.of(1, 2, 3).skipUntil(x -> x > 10).toList().isEmpty());
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).skipUntil(x -> x > 0).toList());
-        assertArrayEquals(new String[] { "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").skipUntil(s -> s.compareTo("d") >= 0).skip(1).toArray(String[]::new));
+    public void testSkip_WithAction() throws Exception {
+        List<Integer> skipped = new ArrayList<>();
+        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).skip(3, skipped::add).toList());
+        assertEquals(Arrays.asList(1, 2, 3), skipped);
+
+        skipped.clear();
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).skip(0, skipped::add).toList());
+        assertTrue(skipped.isEmpty());
     }
 
     @Test
-    public void testSkipNulls() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, null, 2, null, 3).skipNulls().toList());
-        assertArrayEquals(new String[] { "e" }, Seq.<String, RuntimeException> of("a", null, "c", null, "e").skipNulls().skip(2).toArray(String[]::new));
+    public void testSkipAndLimit() throws Exception {
+        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5, 6, 7).skipAndLimit(2, 3).toList());
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, 3).toList());
+        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipAndLimit(2, Long.MAX_VALUE).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, Long.MAX_VALUE).toList());
+        assertEquals(Arrays.asList(3, 4), Seq.of(1, 2, 3, 4, 5).skipAndLimit(2L, 2L).toList());
+
+        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
+        drainWithException(closed);
+        assertThrows(IllegalStateException.class, () -> closed.skipAndLimit(0, Long.MAX_VALUE));
     }
+
+    // skipLast
 
     @Test
     public void testSkipLast() throws Exception {
@@ -138,15 +139,19 @@ public class SeqSkipTest extends SeqTestSupport {
     }
 
     @Test
-    public void testSkipAndLimit() throws Exception {
-        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5, 6, 7).skipAndLimit(2, 3).toList());
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, 3).toList());
-        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipAndLimit(2, Long.MAX_VALUE).toList());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipAndLimit(0, Long.MAX_VALUE).toList());
-        assertEquals(Arrays.asList(3, 4), Seq.of(1, 2, 3, 4, 5).skipAndLimit(2L, 2L).toList());
-
-        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
-        drainWithException(closed);
-        assertThrows(IllegalStateException.class, () -> closed.skipAndLimit(0, Long.MAX_VALUE));
+    public void testSkipNulls() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, null, 2, null, 3).skipNulls().toList());
+        assertArrayEquals(new String[] { "e" }, Seq.<String, RuntimeException> of("a", null, "c", null, "e").skipNulls().skip(2).toArray(String[]::new));
     }
+
+    @Test
+    public void testSkipUntil() throws Exception {
+        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).skipUntil(x -> x >= 3).toList());
+        assertEquals(Arrays.asList(3, 2, 1), Seq.of(1, 2, 3, 2, 1).skipUntil(x -> x == 3).toList());
+        assertTrue(Seq.of(1, 2, 3).skipUntil(x -> x > 10).toList().isEmpty());
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).skipUntil(x -> x > 0).toList());
+        assertArrayEquals(new String[] { "e" },
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").skipUntil(s -> s.compareTo("d") >= 0).skip(1).toArray(String[]::new));
+    }
+
 }

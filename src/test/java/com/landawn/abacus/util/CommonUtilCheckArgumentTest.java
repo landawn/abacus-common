@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
 
+    // checkArgument
+
     @Test
     public void testCheckArgument() {
         assertDoesNotThrow(() -> CommonUtil.checkArgument(true));
@@ -27,6 +29,38 @@ public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
         assertEquals("", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "")).getMessage());
         assertEquals("Special chars: \n\t\r",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Special chars: \n\t\r")).getMessage());
+    }
+
+    @Test
+    public void testCheckArgument_oneArg() {
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Char: {}", 'a'));
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Int: {}", 10));
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Long: {}", 100L));
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Double: {}", 3.14));
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Object: {}", "test"));
+        assertEquals("Char: a", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Char: {}", 'a')).getMessage());
+        assertEquals("Int: 10", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Int: {}", 10)).getMessage());
+        assertEquals("Long: 100", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Long: {}", 100L)).getMessage());
+        assertEquals("Double: 3.14", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Double: {}", 3.14)).getMessage());
+        assertEquals("Object: test", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Object: {}", "test")).getMessage());
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Value is {}", (Object) null)).getMessage()
+                .contains("null"));
+    }
+
+    @Test
+    public void testCheckArgument_supplier() {
+        Supplier<String> supplier = () -> "Supplier error message";
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, supplier));
+        assertEquals("Supplier error message", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, supplier)).getMessage());
+        final boolean[] called = { false };
+        Supplier<String> tracking = () -> {
+            called[0] = true;
+            return "Called";
+        };
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, tracking));
+        assertFalse(called[0]);
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, tracking));
+        assertTrue(called[0]);
     }
 
     @Test
@@ -53,19 +87,18 @@ public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testCheckArgument_oneArg() {
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Char: {}", 'a'));
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Int: {}", 10));
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Long: {}", 100L));
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Double: {}", 3.14));
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "Object: {}", "test"));
-        assertEquals("Char: a", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Char: {}", 'a')).getMessage());
-        assertEquals("Int: 10", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Int: {}", 10)).getMessage());
-        assertEquals("Long: 100", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Long: {}", 100L)).getMessage());
-        assertEquals("Double: 3.14", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Double: {}", 3.14)).getMessage());
-        assertEquals("Object: test", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Object: {}", "test")).getMessage());
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "Value is {}", (Object) null)).getMessage()
-                .contains("null"));
+    public void testCheckArgument_threeAndFourArgs() {
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "values are %s, %s, %s", "a", "b", "c"));
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "values are %s, %s, %s, %s", "a", "b", "c", "d"));
+        Exception three = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "values %s, %s, %s", 1, 2, 3));
+        assertTrue(three.getMessage().contains("1") && three.getMessage().contains("2") && three.getMessage().contains("3"));
+        Exception four = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "values %s, %s, %s, %s", 1, 2, 3, 4));
+        assertTrue(four.getMessage().contains("1") && four.getMessage().contains("4"));
+        assertEquals("No placeholder: [a, b, c]",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "No placeholder", "a", "b", "c")).getMessage());
+        assertEquals("No placeholder [a, b, c, d]",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "No placeholder", "a", "b", "c", "d")).getMessage());
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, null, "arg1", "arg2")).getMessage().contains("null"));
     }
 
     @Test
@@ -131,40 +164,10 @@ public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testCheckArgument_threeAndFourArgs() {
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "values are %s, %s, %s", "a", "b", "c"));
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "values are %s, %s, %s, %s", "a", "b", "c", "d"));
-        Exception three = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "values %s, %s, %s", 1, 2, 3));
-        assertTrue(three.getMessage().contains("1") && three.getMessage().contains("2") && three.getMessage().contains("3"));
-        Exception four = assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "values %s, %s, %s, %s", 1, 2, 3, 4));
-        assertTrue(four.getMessage().contains("1") && four.getMessage().contains("4"));
-        assertEquals("No placeholder: [a, b, c]",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "No placeholder", "a", "b", "c")).getMessage());
-        assertEquals("No placeholder [a, b, c, d]",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "No placeholder", "a", "b", "c", "d")).getMessage());
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, null, "arg1", "arg2")).getMessage().contains("null"));
-    }
-
-    @Test
-    public void testCheckArgument_supplier() {
-        Supplier<String> supplier = () -> "Supplier error message";
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, supplier));
-        assertEquals("Supplier error message", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, supplier)).getMessage());
-        final boolean[] called = { false };
-        Supplier<String> tracking = () -> {
-            called[0] = true;
-            return "Called";
-        };
-        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, tracking));
-        assertFalse(called[0]);
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, tracking));
-        assertTrue(called[0]);
-    }
-
-    @Test
     public void testCheckArgumentVarargsTemplateWithFiveArguments() {
         assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5));
         assertEquals("1, 2, 3, 4, 5",
                 assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5)).getMessage());
     }
+
 }

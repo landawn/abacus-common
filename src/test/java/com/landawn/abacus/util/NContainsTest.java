@@ -16,50 +16,17 @@ import org.junit.jupiter.api.Test;
 
 public class NContainsTest extends NTestSupport {
 
-    @Test
-    public void testContainsDuplicatesCollectionRules() {
-        final List<Integer> separatedDuplicates = List.of(1, 2, 1);
-        assertTrue(N.containsDuplicates(separatedDuplicates));
-        assertFalse(N.containsDuplicates(separatedDuplicates, true));
-        assertTrue(N.containsDuplicates(new Integer[] { 1, 2, 1 }, true));
-
-        final int[] first = { 1 };
-        final int[] second = { 1 };
-        final Set<int[]> arrays = new HashSet<>(List.of(first, second));
-        assertFalse(N.containsDuplicates(arrays));
-        assertFalse(N.containsDuplicates(arrays, true));
-        assertTrue(N.containsDuplicates(List.of(first, second)));
-        assertTrue(N.containsDuplicates(List.of(first, second), true));
-    }
+    // contains
 
     @Test
-    public void testContainsAnyAndNoneRetainReceiverSetMembership() {
-        final Set<String> insensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        insensitive.add("alpha");
-
-        assertTrue(N.containsAny(insensitive, "ALPHA"));
-        assertFalse(N.containsNone(insensitive, "ALPHA"));
-        assertTrue(N.containsAny(insensitive, Set.of("ALPHA")));
-        assertFalse(N.containsNone(insensitive, Set.of("ALPHA")));
-        assertFalse(N.containsAny(Set.of("ALPHA"), insensitive));
-        assertTrue(N.containsNone(Set.of("ALPHA"), insensitive));
-
-        assertTrue(N.containsAny(List.of("ALPHA"), insensitive));
-        assertFalse(N.containsNone(List.of("ALPHA"), insensitive));
-        assertFalse(N.containsAny(List.of("ALPHA"), insensitive.toArray()));
-        assertTrue(N.containsNone(List.of("ALPHA"), insensitive.toArray()));
-    }
-
-    @Test
-    public void testContainsAllUsesTreeSetReceiverMembership() {
-        final Collection<String> receiver = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-        receiver.addAll(List.of("alpha", "beta"));
-        final Collection<String> values = List.of("ALPHA", "BETA");
-
-        assertTrue(N.containsAll(receiver, values));
-        assertTrue(N.containsAll((Iterable<String>) receiver, values));
-        assertFalse(N.containsAll(receiver, List.of("ALPHA", "missing")));
-        assertFalse(N.containsAll((Iterable<String>) receiver, List.of("ALPHA", "missing")));
+    public void testContains_arrayElementsUseIdentity() {
+        final List<int[]> list = Arrays.asList(new int[] { 1, 2 });
+        assertFalse(N.contains(list, new int[] { 1, 2 }));
+        assertFalse(N.contains((Iterable<?>) list, new int[] { 1, 2 }));
+        assertFalse(N.contains(new Object[] { new int[] { 1, 2 } }, new int[] { 1, 2 }));
+        final Iterable<int[]> notACollection = () -> Arrays.asList(new int[] { 1, 2 }).iterator();
+        assertFalse(N.contains(notACollection, new int[] { 1, 2 }));
+        assertTrue(N.contains(list, list.get(0)));
     }
 
     @Test
@@ -123,17 +90,6 @@ public class NContainsTest extends NTestSupport {
     }
 
     @Test
-    public void testContains_arrayElementsUseIdentity() {
-        final List<int[]> list = Arrays.asList(new int[] { 1, 2 });
-        assertFalse(N.contains(list, new int[] { 1, 2 }));
-        assertFalse(N.contains((Iterable<?>) list, new int[] { 1, 2 }));
-        assertFalse(N.contains(new Object[] { new int[] { 1, 2 } }, new int[] { 1, 2 }));
-        final Iterable<int[]> notACollection = () -> Arrays.asList(new int[] { 1, 2 }).iterator();
-        assertFalse(N.contains(notACollection, new int[] { 1, 2 }));
-        assertTrue(N.contains(list, list.get(0)));
-    }
-
-    @Test
     public void testContainsAll() {
         Collection<String> main = Arrays.asList("a", "b", "c", "d");
         assertTrue(N.containsAll(main, Arrays.asList("a", "c")));
@@ -162,6 +118,20 @@ public class NContainsTest extends NTestSupport {
         assertTrue(N.containsAll(main, (Set<?>) null));
         assertFalse(N.containsAll((Collection<?>) null, new HashSet<>(Arrays.asList("a"))));
     }
+
+    @Test
+    public void testContainsAllUsesTreeSetReceiverMembership() {
+        final Collection<String> receiver = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        receiver.addAll(List.of("alpha", "beta"));
+        final Collection<String> values = List.of("ALPHA", "BETA");
+
+        assertTrue(N.containsAll(receiver, values));
+        assertTrue(N.containsAll((Iterable<String>) receiver, values));
+        assertFalse(N.containsAll(receiver, List.of("ALPHA", "missing")));
+        assertFalse(N.containsAll((Iterable<String>) receiver, List.of("ALPHA", "missing")));
+    }
+
+    // containsAny
 
     @Test
     public void testContainsAny() {
@@ -193,33 +163,21 @@ public class NContainsTest extends NTestSupport {
     }
 
     @Test
-    public void testContainsNone() {
-        Collection<String> main = Arrays.asList("a", "b", "c");
-        assertTrue(N.containsNone(main, Arrays.asList("d", "e")));
-        assertTrue(N.containsNone(main, "d", "e"));
-        assertFalse(N.containsNone(main, Arrays.asList("c", "d")));
-        assertFalse(N.containsNone(main, "c", "d"));
-        assertTrue(N.containsNone(main, Collections.emptyList()));
-        assertTrue(N.containsNone(main));
-        assertTrue(N.containsNone(main, (Collection<?>) null));
-        assertTrue(N.containsNone(main, (Object[]) null));
-        assertTrue(N.containsNone(null, Arrays.asList("a")));
-        assertTrue(N.containsNone(Collections.emptyList(), Arrays.asList("a")));
+    public void testContainsAnyAndNoneRetainReceiverSetMembership() {
+        final Set<String> insensitive = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        insensitive.add("alpha");
 
-        assertTrue(N.containsNone((Iterable<?>) main, new HashSet<>(Arrays.asList("d", "e"))));
-        assertFalse(N.containsNone((Iterable<?>) main, new HashSet<>(Arrays.asList("c", "d"))));
-        assertTrue(N.containsNone((Iterable<String>) null, new HashSet<>(Arrays.asList("a"))));
+        assertTrue(N.containsAny(insensitive, "ALPHA"));
+        assertFalse(N.containsNone(insensitive, "ALPHA"));
+        assertTrue(N.containsAny(insensitive, Set.of("ALPHA")));
+        assertFalse(N.containsNone(insensitive, Set.of("ALPHA")));
+        assertFalse(N.containsAny(Set.of("ALPHA"), insensitive));
+        assertTrue(N.containsNone(Set.of("ALPHA"), insensitive));
 
-        assertTrue(N.containsNone(main.iterator(), new HashSet<>(Arrays.asList("d", "e"))));
-        assertFalse(N.containsNone(main.iterator(), new HashSet<>(Arrays.asList("c", "d"))));
-        assertTrue(N.containsNone((Iterator<String>) null, new HashSet<>(Arrays.asList("a"))));
-
-        Set<String> somePresent = new HashSet<>(Arrays.asList("c", "d"));
-        Set<String> nonePresent = new HashSet<>(Arrays.asList("x", "y"));
-        assertFalse(N.containsNone(main, somePresent));
-        assertTrue(N.containsNone(main, nonePresent));
-        assertTrue(N.containsNone(main, new HashSet<>()));
-        assertTrue(N.containsNone((Collection<?>) null, somePresent));
+        assertTrue(N.containsAny(List.of("ALPHA"), insensitive));
+        assertFalse(N.containsNone(List.of("ALPHA"), insensitive));
+        assertFalse(N.containsAny(List.of("ALPHA"), insensitive.toArray()));
+        assertTrue(N.containsNone(List.of("ALPHA"), insensitive.toArray()));
     }
 
     @Test
@@ -268,4 +226,51 @@ public class NContainsTest extends NTestSupport {
         assertTrue(N.containsDuplicates(three, 1, 3, false));
         assertFalse(N.containsDuplicates(three, 0, 2, false));
     }
+
+    @Test
+    public void testContainsDuplicatesCollectionRules() {
+        final List<Integer> separatedDuplicates = List.of(1, 2, 1);
+        assertTrue(N.containsDuplicates(separatedDuplicates));
+        assertFalse(N.containsDuplicates(separatedDuplicates, true));
+        assertTrue(N.containsDuplicates(new Integer[] { 1, 2, 1 }, true));
+
+        final int[] first = { 1 };
+        final int[] second = { 1 };
+        final Set<int[]> arrays = new HashSet<>(List.of(first, second));
+        assertFalse(N.containsDuplicates(arrays));
+        assertFalse(N.containsDuplicates(arrays, true));
+        assertTrue(N.containsDuplicates(List.of(first, second)));
+        assertTrue(N.containsDuplicates(List.of(first, second), true));
+    }
+
+    @Test
+    public void testContainsNone() {
+        Collection<String> main = Arrays.asList("a", "b", "c");
+        assertTrue(N.containsNone(main, Arrays.asList("d", "e")));
+        assertTrue(N.containsNone(main, "d", "e"));
+        assertFalse(N.containsNone(main, Arrays.asList("c", "d")));
+        assertFalse(N.containsNone(main, "c", "d"));
+        assertTrue(N.containsNone(main, Collections.emptyList()));
+        assertTrue(N.containsNone(main));
+        assertTrue(N.containsNone(main, (Collection<?>) null));
+        assertTrue(N.containsNone(main, (Object[]) null));
+        assertTrue(N.containsNone(null, Arrays.asList("a")));
+        assertTrue(N.containsNone(Collections.emptyList(), Arrays.asList("a")));
+
+        assertTrue(N.containsNone((Iterable<?>) main, new HashSet<>(Arrays.asList("d", "e"))));
+        assertFalse(N.containsNone((Iterable<?>) main, new HashSet<>(Arrays.asList("c", "d"))));
+        assertTrue(N.containsNone((Iterable<String>) null, new HashSet<>(Arrays.asList("a"))));
+
+        assertTrue(N.containsNone(main.iterator(), new HashSet<>(Arrays.asList("d", "e"))));
+        assertFalse(N.containsNone(main.iterator(), new HashSet<>(Arrays.asList("c", "d"))));
+        assertTrue(N.containsNone((Iterator<String>) null, new HashSet<>(Arrays.asList("a"))));
+
+        Set<String> somePresent = new HashSet<>(Arrays.asList("c", "d"));
+        Set<String> nonePresent = new HashSet<>(Arrays.asList("x", "y"));
+        assertFalse(N.containsNone(main, somePresent));
+        assertTrue(N.containsNone(main, nonePresent));
+        assertTrue(N.containsNone(main, new HashSet<>()));
+        assertTrue(N.containsNone((Collection<?>) null, somePresent));
+    }
+
 }

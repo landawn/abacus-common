@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class RowDatasetMoveTest extends RowDatasetTestSupport {
+
+    // moveColumn
+
     @Test
     public void testMoveColumn() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
@@ -19,6 +22,21 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         assertEquals("id", ds.getColumnName(1));
         assertEquals("name", ds.getColumnName(2));
         assertEquals("age", ds.getColumnName(3));
+    }
+
+    @Test
+    public void testMoveColumnInvalidPosition() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            ds.moveColumn("id", 10);
+        });
+    }
+
+    @Test
+    public void testMoveColumnSamePosition() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        ds.moveColumn("id", 0);
+        assertEquals("id", ds.getColumnName(0));
     }
 
     @Test
@@ -38,14 +56,6 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
     }
 
     @Test
-    public void testMoveColumnInvalidPosition() {
-        RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            ds.moveColumn("id", 10);
-        });
-    }
-
-    @Test
     public void testMoveColumnWithInvalidPosition() {
         final RowDataset dataset = createThreeRowScoreDataset();
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
@@ -56,12 +66,7 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         });
     }
 
-    @Test
-    public void testMoveColumnSamePosition() {
-        RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        ds.moveColumn("id", 0);
-        assertEquals("id", ds.getColumnName(0));
-    }
+    // moveColumns
 
     @Test
     public void testMoveColumns() {
@@ -95,12 +100,36 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         assertEquals("salary", ds.getColumnName(0));
     }
 
+    // moveRow
+
     @Test
     public void testMoveRow() {
         RowDataset ds = new RowDataset(columnNames, copyColumnList());
         Object firstValue = ds.get(0, 1);
         ds.moveRow(0, 2);
         assertEquals(firstValue, ds.get(2, 1));
+    }
+
+    @Test
+    public void testMoveRow_InvalidNewPosition_ThrowsIndexOutOfBounds() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)))));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(0, 3));
+    }
+
+    @Test
+    public void testMoveRow_InvalidRowIndex_ThrowsIndexOutOfBounds() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)))));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(-1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(3, 0));
+    }
+
+    @Test
+    public void testMoveRowSamePosition() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        Object value = ds.get(0, 1);
+        ds.moveRow(0, 0);
+        assertEquals(value, ds.get(0, 1));
     }
 
     @Test
@@ -119,29 +148,7 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         Assertions.assertEquals(originalRow1Name, dataset.get(1, 1));
     }
 
-    // ========== moveRow - out of bounds ==========
-
-    @Test
-    public void testMoveRow_InvalidRowIndex_ThrowsIndexOutOfBounds() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)))));
-        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(-1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(3, 0));
-    }
-
-    @Test
-    public void testMoveRow_InvalidNewPosition_ThrowsIndexOutOfBounds() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3)))));
-        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(0, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> ds.moveRow(0, 3));
-    }
-
-    @Test
-    public void testMoveRowSamePosition() {
-        RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        Object value = ds.get(0, 1);
-        ds.moveRow(0, 0);
-        assertEquals(value, ds.get(0, 1));
-    }
+    // moveRows
 
     @Test
     public void testMoveRows() {
@@ -152,20 +159,20 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
     }
 
     @Test
+    public void testMoveRowsInvalidRange() {
+        RowDataset ds = new RowDataset(columnNames, copyColumnList());
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            ds.moveRows(3, 2, 0);
+        });
+    }
+
+    @Test
     public void testMoveRowsToNewPosition() {
         RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "name")),
                 new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5)), new ArrayList<>(Arrays.asList("A", "B", "C", "D", "E")))));
         ds.moveRows(0, 2, 3);
         assertEquals(3, (int) ds.get(0, 0));
         assertEquals(4, (int) ds.get(1, 0));
-    }
-
-    @Test
-    public void testMoveRowsInvalidRange() {
-        RowDataset ds = new RowDataset(columnNames, copyColumnList());
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            ds.moveRows(3, 2, 0);
-        });
     }
 
     @Test
@@ -179,5 +186,6 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         assertThrows(Exception.class, () -> dataset.moveToRow(-1));
         assertThrows(Exception.class, () -> dataset.moveToRow(100));
     }
+
 
 }

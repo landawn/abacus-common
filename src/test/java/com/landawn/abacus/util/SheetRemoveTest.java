@@ -11,32 +11,34 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.Sheet.Point;
 
 public class SheetRemoveTest extends SheetTestSupport {
+
+    // remove
+
     @Test
-    public void testRemoveWithKeys() {
-        Integer removed = sheet.remove("row1", "col1");
-        assertEquals(Integer.valueOf(1), removed);
-        assertNull(sheet.get("row1", "col1"));
+    public void testRemove() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
+        uninitSheet.set("R1", "C1", 100);
+        assertEquals(Integer.valueOf(100), uninitSheet.remove("R1", "C1"));
+        assertNull(uninitSheet.get("R1", "C1"));
     }
 
     @Test
-    public void testRemoveWithIndices() {
-        Integer removed = sheet.removeAt(0, 0);
-        assertEquals(Integer.valueOf(1), removed);
-        assertNull(sheet.getAt(0, 0));
+    public void testRemove_DoesNotShrinkSheet() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        int rows = s.rowCount();
+        int cols = s.columnCount();
+        s.remove("row1", "col1");
+        assertEquals(rows, s.rowCount());
+        assertEquals(cols, s.columnCount());
+        assertNull(s.get("row1", "col1"));
+        assertTrue(s.containsCell("row1", "col1"));
     }
 
     @Test
-    public void testRemoveWithPoint() {
-        Point point = Point.of(0, 0);
-        Integer removed = sheet.remove(point);
-        assertEquals(Integer.valueOf(1), removed);
-        assertNull(sheet.get(point));
-    }
-
-    @Test
-    public void testRemoveUninitializedSheet() {
-        Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys);
-        assertNull(s.remove("row1", "col1"));
+    public void testRemove_frozenSheet() {
+        objectSheet.freeze();
+        assertThrows(IllegalStateException.class, () -> objectSheet.remove("R1", "C1"));
+        assertThrows(IllegalStateException.class, () -> objectSheet.removeAt(0, 0));
     }
 
     @Test
@@ -44,6 +46,11 @@ public class SheetRemoveTest extends SheetTestSupport {
         Object removed = objectSheet.remove("R1", "C1");
         assertEquals("V11", removed);
         assertNull(objectSheet.get("R1", "C1"));
+    }
+
+    @Test
+    public void testRemoveByKeys_invalidKeys() {
+        assertThrows(IllegalArgumentException.class, () -> objectSheet.remove("RX", "C1"));
     }
 
     @Test
@@ -60,6 +67,89 @@ public class SheetRemoveTest extends SheetTestSupport {
     }
 
     @Test
+    public void testRemoveByPoint() {
+        Object removed = objectSheet.remove(Sheet.Point.of(1, 0));
+        assertEquals(100, removed);
+        assertNull(objectSheet.getAt(1, 0));
+    }
+
+
+
+    /**
+     * {@code set(Point, V)} and {@code remove(Point)} used to disagree on a frozen sheet with a {@code null}
+     * point: {@code set} checked the frozen state first and threw {@link IllegalStateException}, while
+     * {@code remove} checked the argument first and threw {@link IllegalArgumentException}. Three of the four
+     * cell-address mutators &mdash; {@code set(R, C, V)}, {@code remove(R, C)} and {@code set(Point, V)}
+     * &mdash; already checked state first, so {@code remove(Point)} was the outlier.
+     */
+    @Test
+    public void testRemoveByPointChecksTheFrozenStateBeforeTheArgument() {
+        sheet.freeze();
+
+        assertThrows(IllegalStateException.class, () -> sheet.remove((Point) null));
+        assertThrows(IllegalStateException.class, () -> sheet.set((Point) null, 9));
+        assertThrows(IllegalStateException.class, () -> sheet.remove(Point.of(0, 0)));
+    }
+
+
+
+    /**
+     * The state check must not swallow the argument check: on an open sheet a {@code null} point is still
+     * reported as {@link IllegalArgumentException}, and a valid point still removes the cell.
+     */
+    @Test
+    public void testRemoveByPointStillRejectsANullPointOnAnOpenSheet() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.remove((Point) null));
+        assertThrows(IllegalArgumentException.class, () -> sheet.set((Point) null, 9));
+
+        assertEquals(1, sheet.remove(Point.of(0, 0)));
+        assertNull(sheet.get(Point.of(0, 0)));
+    }
+
+    @Test
+    public void testRemoveOnFrozenSheet() {
+        sheet.freeze();
+        assertThrows(IllegalStateException.class, () -> {
+            sheet.remove("row1", "col1");
+        });
+    }
+
+    @Test
+    public void testRemoveUninitializedSheet() {
+        Sheet<String, String, Integer> s = new Sheet<>(rowKeys, columnKeys);
+        assertNull(s.remove("row1", "col1"));
+    }
+
+    @Test
+    public void testRemoveWithInvalidKeys() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.remove("invalidRow", "col1");
+        });
+    }
+
+    @Test
+    public void testRemoveWithKeys() {
+        Integer removed = sheet.remove("row1", "col1");
+        assertEquals(Integer.valueOf(1), removed);
+        assertNull(sheet.get("row1", "col1"));
+    }
+
+    @Test
+    public void testRemoveWithPoint() {
+        Point point = Point.of(0, 0);
+        Integer removed = sheet.remove(point);
+        assertEquals(Integer.valueOf(1), removed);
+        assertNull(sheet.get(point));
+    }
+
+    @Test
+    public void testRemoveByIndex() {
+        sheet.setAt(0, 0, 100);
+        assertEquals(Integer.valueOf(100), sheet.removeAt(0, 0));
+        assertNull(sheet.getAt(0, 0));
+    }
+
+    @Test
     public void testRemoveByIndices() {
         Object removed = objectSheet.removeAt(0, 1);
         assertEquals("V12", removed);
@@ -72,75 +162,75 @@ public class SheetRemoveTest extends SheetTestSupport {
         assertNull(uninitializedSheet.removeAt(0, 0));
     }
 
-    @Test
-    public void testRemoveByPoint() {
-        Object removed = objectSheet.remove(Sheet.Point.of(1, 0));
-        assertEquals(100, removed);
-        assertNull(objectSheet.getAt(1, 0));
-    }
+    // removeColumn
 
     @Test
-    public void testRemove() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
-        uninitSheet.set("R1", "C1", 100);
-        assertEquals(Integer.valueOf(100), uninitSheet.remove("R1", "C1"));
-        assertNull(uninitSheet.get("R1", "C1"));
-    }
-
-    @Test
-    public void testRemoveByIndex() {
-        sheet.setAt(0, 0, 100);
-        assertEquals(Integer.valueOf(100), sheet.removeAt(0, 0));
-        assertNull(sheet.getAt(0, 0));
-    }
-
-    @Test
-    public void testRemoveWithInvalidKeys() {
+    public void testRemoveColumn() {
+        sheet.removeColumn("col2");
+        assertEquals(2, sheet.columnCount());
+        assertFalse(sheet.containsColumn("col2"));
         assertThrows(IllegalArgumentException.class, () -> {
-            sheet.remove("invalidRow", "col1");
+            sheet.get("row1", "col2");
         });
     }
 
     @Test
-    public void testRemoveWithInvalidIndices() {
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.removeAt(-1, 0);
-        });
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.removeAt(0, 10);
+    public void testRemoveColumn_DataIntegrity() {
+        sheet.removeColumn("col2");
+        assertEquals(2, sheet.columnCount());
+        assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
+        assertEquals(Integer.valueOf(3), sheet.get("row1", "col3"));
+        assertEquals(Integer.valueOf(7), sheet.get("row3", "col1"));
+    }
+
+    @Test
+    public void testRemoveColumn_frozen() {
+        objectSheet.freeze();
+        assertThrows(IllegalStateException.class, () -> objectSheet.removeColumn("C1"));
+    }
+
+    @Test
+    public void testRemoveColumn_New() {
+        sheet.removeColumn("col2");
+        assertEquals(2, sheet.columnCount());
+        assertFalse(sheet.containsColumn("col2"));
+        assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
+        assertEquals(Integer.valueOf(3), sheet.get("row1", "col3"));
+    }
+
+    @Test
+    public void testRemoveColumn_UninitializedSheet() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
+        uninitSheet.removeColumn("col2");
+        assertEquals(2, uninitSheet.columnCount());
+        assertFalse(uninitSheet.containsColumn("col2"));
+    }
+
+    @Test
+    public void testRemoveColumnInvalidKey() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.removeColumn("invalidCol");
         });
     }
 
     @Test
-    public void testRemoveOnFrozenSheet() {
+    public void testRemoveColumnOnFrozenSheet() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> {
-            sheet.remove("row1", "col1");
+            sheet.removeColumn("col1");
         });
     }
 
-    @Test
-    public void testRemoveByKeys_invalidKeys() {
-        assertThrows(IllegalArgumentException.class, () -> objectSheet.remove("RX", "C1"));
-    }
+    // removeRow
 
     @Test
-    public void testRemove_frozenSheet() {
-        objectSheet.freeze();
-        assertThrows(IllegalStateException.class, () -> objectSheet.remove("R1", "C1"));
-        assertThrows(IllegalStateException.class, () -> objectSheet.removeAt(0, 0));
-    }
-
-    @Test
-    public void testRemove_DoesNotShrinkSheet() {
-        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
-        int rows = s.rowCount();
-        int cols = s.columnCount();
-        s.remove("row1", "col1");
-        assertEquals(rows, s.rowCount());
-        assertEquals(cols, s.columnCount());
-        assertNull(s.get("row1", "col1"));
-        assertTrue(s.containsCell("row1", "col1"));
+    public void testRemoveRow() {
+        sheet.removeRow("row2");
+        assertEquals(2, sheet.rowCount());
+        assertFalse(sheet.containsRow("row2"));
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.get("row2", "col1");
+        });
     }
 
     @Test
@@ -154,21 +244,17 @@ public class SheetRemoveTest extends SheetTestSupport {
     }
 
     @Test
+    public void testRemoveRow_frozen() {
+        objectSheet.freeze();
+        assertThrows(IllegalStateException.class, () -> objectSheet.removeRow("R1"));
+    }
+
+    @Test
     public void testRemoveRow_UninitializedSheet() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
         uninitSheet.removeRow("row2");
         assertEquals(2, uninitSheet.rowCount());
         assertFalse(uninitSheet.containsRow("row2"));
-    }
-
-    @Test
-    public void testRemoveRow() {
-        sheet.removeRow("row2");
-        assertEquals(2, sheet.rowCount());
-        assertFalse(sheet.containsRow("row2"));
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.get("row2", "col1");
-        });
     }
 
     @Test
@@ -187,95 +273,21 @@ public class SheetRemoveTest extends SheetTestSupport {
     }
 
     @Test
-    public void testRemoveRow_frozen() {
-        objectSheet.freeze();
-        assertThrows(IllegalStateException.class, () -> objectSheet.removeRow("R1"));
+    public void testRemoveWithIndices() {
+        Integer removed = sheet.removeAt(0, 0);
+        assertEquals(Integer.valueOf(1), removed);
+        assertNull(sheet.getAt(0, 0));
     }
 
     @Test
-    public void testRemoveColumn_DataIntegrity() {
-        sheet.removeColumn("col2");
-        assertEquals(2, sheet.columnCount());
-        assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
-        assertEquals(Integer.valueOf(3), sheet.get("row1", "col3"));
-        assertEquals(Integer.valueOf(7), sheet.get("row3", "col1"));
-    }
-
-    @Test
-    public void testRemoveColumn_UninitializedSheet() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
-        uninitSheet.removeColumn("col2");
-        assertEquals(2, uninitSheet.columnCount());
-        assertFalse(uninitSheet.containsColumn("col2"));
-    }
-
-    @Test
-    public void testRemoveColumn_New() {
-        sheet.removeColumn("col2");
-        assertEquals(2, sheet.columnCount());
-        assertFalse(sheet.containsColumn("col2"));
-        assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
-        assertEquals(Integer.valueOf(3), sheet.get("row1", "col3"));
-    }
-
-    @Test
-    public void testRemoveColumn() {
-        sheet.removeColumn("col2");
-        assertEquals(2, sheet.columnCount());
-        assertFalse(sheet.containsColumn("col2"));
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.get("row1", "col2");
+    public void testRemoveWithInvalidIndices() {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            sheet.removeAt(-1, 0);
+        });
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            sheet.removeAt(0, 10);
         });
     }
 
-    @Test
-    public void testRemoveColumnInvalidKey() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.removeColumn("invalidCol");
-        });
-    }
-
-    @Test
-    public void testRemoveColumnOnFrozenSheet() {
-        sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> {
-            sheet.removeColumn("col1");
-        });
-    }
-
-    @Test
-    public void testRemoveColumn_frozen() {
-        objectSheet.freeze();
-        assertThrows(IllegalStateException.class, () -> objectSheet.removeColumn("C1"));
-    }
-
-    /**
-     * {@code set(Point, V)} and {@code remove(Point)} used to disagree on a frozen sheet with a {@code null}
-     * point: {@code set} checked the frozen state first and threw {@link IllegalStateException}, while
-     * {@code remove} checked the argument first and threw {@link IllegalArgumentException}. Three of the four
-     * cell-address mutators &mdash; {@code set(R, C, V)}, {@code remove(R, C)} and {@code set(Point, V)}
-     * &mdash; already checked state first, so {@code remove(Point)} was the outlier.
-     */
-    @Test
-    public void testRemoveByPointChecksTheFrozenStateBeforeTheArgument() {
-        sheet.freeze();
-
-        assertThrows(IllegalStateException.class, () -> sheet.remove((Point) null));
-        assertThrows(IllegalStateException.class, () -> sheet.set((Point) null, 9));
-        assertThrows(IllegalStateException.class, () -> sheet.remove(Point.of(0, 0)));
-    }
-
-    /**
-     * The state check must not swallow the argument check: on an open sheet a {@code null} point is still
-     * reported as {@link IllegalArgumentException}, and a valid point still removes the cell.
-     */
-    @Test
-    public void testRemoveByPointStillRejectsANullPointOnAnOpenSheet() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.remove((Point) null));
-        assertThrows(IllegalArgumentException.class, () -> sheet.set((Point) null, 9));
-
-        assertEquals(1, sheet.remove(Point.of(0, 0)));
-        assertNull(sheet.get(Point.of(0, 0)));
-    }
 
 }

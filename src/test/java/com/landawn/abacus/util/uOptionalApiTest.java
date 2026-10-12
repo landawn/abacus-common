@@ -31,254 +31,7 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 public class uOptionalApiTest extends uTestSupport {
 
-    @Test
-    public void testOptionalBoolean() throws Exception {
-        assertTrue(OptionalBoolean.of(true).getAsBoolean());
-        assertFalse(OptionalBoolean.of(false).getAsBoolean());
-        assertThrows(NoSuchElementException.class, () -> OptionalBoolean.empty().getAsBoolean());
-        assertFalse(OptionalBoolean.of(true).map(v -> !v).get());
-        assertFalse(OptionalBoolean.empty().map(v -> !v).isPresent());
-        assertTrue(OptionalBoolean.of(true).orElseFalse());
-        assertFalse(OptionalBoolean.of(false).orElseFalse());
-        assertFalse(OptionalBoolean.empty().orElseFalse());
-        assertTrue(OptionalBoolean.of(true).orElseTrue());
-        assertFalse(OptionalBoolean.of(false).orElseTrue());
-        assertTrue(OptionalBoolean.empty().orElseTrue());
-        assertEquals("OptionalBoolean[true]", OptionalBoolean.of(true).toString());
-        assertEquals("OptionalBoolean[false]", OptionalBoolean.of(false).toString());
-        assertEquals("OptionalBoolean.empty", OptionalBoolean.empty().toString());
-    }
 
-    @Test
-    public void testOptionalChar() throws Exception {
-        OptionalChar present = OptionalChar.of('A');
-        assertTrue(present.isPresent());
-        assertFalse(present.isEmpty());
-        assertEquals('A', present.get());
-        assertEquals('A', present.getAsChar());
-        assertFalse(OptionalChar.ofNullable(null).isPresent());
-        assertEquals('X', OptionalChar.ofNullable('X').get());
-        char[] seen = { 0 };
-        present.ifPresent(v -> seen[0] = v);
-        assertEquals('A', seen[0]);
-        boolean[] emptyCalled = { false };
-        OptionalChar.empty().ifPresentOrElse(v -> seen[0] = 'X', () -> emptyCalled[0] = true);
-        assertTrue(emptyCalled[0]);
-        assertTrue(present.filter(v -> v == 'A').isPresent());
-        assertFalse(present.filter(v -> v == 'Z').isPresent());
-        assertEquals('B', present.map(v -> (char) (v + 1)).get());
-        assertEquals(65, present.mapToInt(v -> (int) v).get());
-        assertFalse(present.flatMap(v -> OptionalChar.empty()).isPresent());
-        assertEquals('A', present.or(() -> OptionalChar.of('Z')).get());
-        assertEquals('Z', OptionalChar.empty().or(() -> OptionalChar.of('Z')).get());
-        assertEquals('A', present.orElse('Z'));
-        assertEquals('Z', OptionalChar.empty().orElseGet(() -> 'Z'));
-        assertEquals('A', present.orElseThrow());
-        assertThrows(IllegalStateException.class, () -> OptionalChar.empty().orElseThrow(IllegalStateException::new));
-        assertEquals(1, present.stream().count());
-        assertEquals('A', present.toList().get(0));
-        assertTrue(present.toSet().contains('A'));
-        assertEquals('A', present.toImmutableList().get(0));
-        assertTrue(present.toImmutableSet().contains('A'));
-        assertEquals(Optional.of('A'), present.boxed());
-        assertTrue(present.compareTo(OptionalChar.empty()) > 0);
-        assertEquals(present, OptionalChar.of('A'));
-        assertEquals("OptionalChar[A]", present.toString());
-        assertEquals("OptionalChar.empty", OptionalChar.empty().toString());
-    }
-
-    @Test
-    public void testOptionalByte() throws Exception {
-        OptionalByte present = OptionalByte.of((byte) 10);
-        assertEquals((byte) 10, present.get());
-        assertFalse(OptionalByte.ofNullable(null).isPresent());
-        byte[] seen = { 0 };
-        present.ifPresent(v -> seen[0] = v);
-        assertEquals((byte) 10, seen[0]);
-        boolean[] emptyCalled = { false };
-        OptionalByte.empty().ifPresentOrElse(v -> seen[0] = 99, () -> emptyCalled[0] = true);
-        assertTrue(emptyCalled[0]);
-        assertTrue(present.filter(v -> v > 5).isPresent());
-        assertEquals((byte) 20, present.map(v -> (byte) (v * 2)).get());
-        assertEquals(100, present.mapToInt(v -> v * 10).get());
-        assertEquals("10", present.mapToObj(String::valueOf).get());
-        assertEquals((byte) 11, present.flatMap(v -> OptionalByte.of((byte) (v + 1))).get());
-        assertEquals((byte) 10, present.or(() -> OptionalByte.of((byte) 20)).get());
-        assertEquals((byte) 20, OptionalByte.empty().or(() -> OptionalByte.of((byte) 20)).get());
-        assertEquals((byte) 10, present.orElseZero());
-        assertEquals((byte) 0, OptionalByte.empty().orElseZero());
-        assertEquals((byte) 20, OptionalByte.empty().orElse((byte) 20));
-        assertEquals((byte) 10, present.orElseThrow());
-        assertThrows(NoSuchElementException.class, () -> OptionalByte.empty().orElseThrow());
-        assertThrows(IllegalStateException.class, () -> OptionalByte.empty().orElseThrow(IllegalStateException::new));
-        assertEquals(1, present.stream().count());
-        assertEquals((byte) 10, present.toList().get(0));
-        assertTrue(present.toSet().contains((byte) 10));
-        assertEquals((byte) 10, present.toImmutableList().get(0));
-        assertEquals(Optional.of((byte) 10), present.boxed());
-        assertTrue(present.compareTo(OptionalByte.of((byte) 20)) < 0);
-        assertEquals(present, OptionalByte.of((byte) 10));
-        assertEquals("OptionalByte[10]", present.toString());
-    }
-
-    @Test
-    public void testOptionalShort() throws Exception {
-        OptionalShort present = OptionalShort.of((short) 100);
-        assertEquals((short) 100, present.get());
-        assertFalse(OptionalShort.ofNullable(null).isPresent());
-        short[] seen = { 0 };
-        present.ifPresent(v -> seen[0] = v);
-        assertEquals((short) 100, seen[0]);
-        boolean[] emptyCalled = { false };
-        OptionalShort.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
-        assertTrue(emptyCalled[0]);
-        assertTrue(present.filter(v -> v > 50).isPresent());
-        assertEquals((short) 200, present.map(v -> (short) (v * 2)).get());
-        assertEquals(100, present.mapToInt(v -> v.intValue()).get());
-        assertEquals("100", present.mapToObj(String::valueOf).get());
-        assertEquals((short) 101, present.flatMap(v -> OptionalShort.of((short) (v + 1))).get());
-        assertEquals((short) 100, present.orElseZero());
-        assertEquals((short) 9, OptionalShort.empty().orElse((short) 9));
-        assertEquals((short) 100, present.orElseThrow());
-        assertEquals(1, present.stream().count());
-        assertTrue(present.toSet().contains((short) 100));
-        assertEquals(Optional.of((short) 100), present.boxed());
-        assertEquals(present, OptionalShort.of((short) 100));
-        assertEquals("OptionalShort[100]", present.toString());
-        assertEquals("OptionalShort.empty", OptionalShort.empty().toString());
-    }
-
-    @Test
-    public void testOptionalInt() throws Exception {
-        OptionalInt present = OptionalInt.of(42);
-        assertEquals(42, present.get());
-        assertFalse(OptionalInt.ofNullable(null).isPresent());
-        int[] seen = { 0 };
-        present.ifPresent(v -> seen[0] = v);
-        assertEquals(42, seen[0]);
-        boolean[] emptyCalled = { false };
-        OptionalInt.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
-        assertTrue(emptyCalled[0]);
-        assertTrue(present.mapToBoolean(v -> v > 5).get());
-        assertEquals('A', OptionalInt.of(65).mapToChar(v -> (char) v.intValue()).get());
-        assertEquals(21.0, present.mapToDouble(v -> v / 2.0).get());
-        assertEquals(84, present.flatMap(v -> OptionalInt.of(v * 2)).get());
-        assertEquals(42, present.or(() -> OptionalInt.of(100)).get());
-        assertEquals(100, OptionalInt.empty().or(() -> OptionalInt.of(100)).get());
-        assertEquals(42, present.orElseZero());
-        assertEquals(100, OptionalInt.empty().orElse(100));
-        assertEquals(100, OptionalInt.empty().orElseGet(() -> 100));
-        assertEquals(42, present.orElseThrow());
-        assertEquals(42, present.orElseThrow("No value"));
-        assertEquals(42, present.orElseThrow("Error: %s", "arg1"));
-        assertEquals(42, present.orElseThrow("Error: %s %s", "a", "b"));
-        assertEquals(42, present.orElseThrow("Error: %s %s %s", "a", "b", "c"));
-        assertEquals(42, present.orElseThrow("Error: %s", new Object[] { "arg" }));
-        assertThrows(NoSuchElementException.class, () -> OptionalInt.empty().orElseThrow("Custom error"));
-        assertThrows(IllegalStateException.class, () -> OptionalInt.empty().orElseThrow(() -> new IllegalStateException("not found")));
-        assertEquals(1, present.stream().count());
-        assertEquals(42, present.toList().get(0));
-        assertTrue(present.toSet().contains(42));
-        assertEquals(42, present.toImmutableList().get(0));
-        assertTrue(present.toImmutableSet().contains(42));
-        assertEquals(Optional.of(42), present.boxed());
-        assertEquals(42, present.toJdkOptional().getAsInt());
-        assertTrue(present.compareTo(OptionalInt.of(20)) > 0);
-        assertEquals(present, OptionalInt.of(42));
-        assertEquals("OptionalInt[42]", present.toString());
-    }
-
-    @Test
-    public void testOptionalLong() throws Exception {
-        OptionalLong present = OptionalLong.of(42L);
-        assertEquals(42L, present.get());
-        assertFalse(OptionalLong.ofNullable(null).isPresent());
-        assertEquals(42L, OptionalLong.from(java.util.OptionalLong.of(42L)).get());
-        assertFalse(OptionalLong.from(java.util.OptionalLong.empty()).isPresent());
-        long[] seen = { 0 };
-        present.ifPresent(v -> seen[0] = v);
-        assertEquals(42L, seen[0]);
-        boolean[] emptyCalled = { false };
-        OptionalLong.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
-        assertTrue(emptyCalled[0]);
-        assertTrue(present.filter(v -> v > 5).isPresent());
-        assertEquals(84L, present.map(v -> v * 2).get());
-        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
-        assertEquals(42.0, present.mapToDouble(v -> v.doubleValue()).get());
-        assertEquals("42", present.mapToObj(String::valueOf).get());
-        assertEquals(43L, present.flatMap(v -> OptionalLong.of(v + 1)).get());
-        assertEquals(42L, present.or(() -> OptionalLong.of(1L)).get());
-        assertEquals(42L, present.orElseZero());
-        assertEquals(100L, OptionalLong.empty().orElseGet(() -> 100L));
-        assertEquals(42L, present.orElseThrow());
-        assertEquals(1, present.stream().count());
-        assertEquals(42L, present.toList().get(0));
-        assertTrue(present.toImmutableSet().contains(42L));
-        assertEquals(Optional.of(42L), present.boxed());
-        assertEquals(42L, present.toJdkOptional().getAsLong());
-        assertEquals(present, OptionalLong.of(42L));
-        assertEquals("OptionalLong[42]", present.toString());
-    }
-
-    @Test
-    public void testOptionalFloat() throws Exception {
-        OptionalFloat present = OptionalFloat.of(42.5f);
-        assertEquals(42.5f, present.getAsFloat());
-        assertFalse(OptionalFloat.ofNullable(null).isPresent());
-        assertTrue(present.filter(v -> v > 1).isPresent());
-        assertEquals(85.0f, present.map(v -> v * 2).get());
-        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
-        assertEquals(42.5, present.mapToDouble(v -> v.doubleValue()).get(), 0.001);
-        assertEquals("42.5", present.mapToObj(String::valueOf).get());
-        assertFalse(present.flatMap(v -> OptionalFloat.empty()).isPresent());
-        assertEquals(42.5f, present.or(() -> OptionalFloat.of(1f)).get());
-        assertEquals(42.5f, present.orElseThrow());
-        assertEquals(1, present.stream().count());
-        assertEquals(Optional.of(42.5f), present.boxed());
-        assertEquals(42.5f, present.toImmutableList().get(0));
-        assertTrue(present.toImmutableSet().contains(42.5f));
-        assertEquals(present, OptionalFloat.of(42.5f));
-        assertEquals("OptionalFloat[42.5]", present.toString());
-
-        assertSame(OptionalFloat.of(0.0f), OptionalFloat.of(0.0f));
-        assertNotSame(OptionalFloat.of(-0.0f), OptionalFloat.of(-0.0f));
-        assertNotEquals(OptionalFloat.of(-0.0f), OptionalFloat.of(0.0f));
-        assertNotEquals(OptionalFloat.of(-0.0f).hashCode(), OptionalFloat.of(0.0f).hashCode());
-        assertTrue(OptionalFloat.of(-0.0f).compareTo(OptionalFloat.of(0.0f)) < 0);
-        assertEquals(OptionalFloat.of(Float.NaN), OptionalFloat.of(Float.NaN));
-        assertEquals(0, OptionalFloat.of(Float.NaN).compareTo(OptionalFloat.of(Float.NaN)));
-    }
-
-    @Test
-    public void testOptionalDouble() throws Exception {
-        OptionalDouble present = OptionalDouble.of(42.5);
-        assertEquals(42.5, present.get());
-        assertFalse(OptionalDouble.ofNullable(null).isPresent());
-        assertEquals(42.5, OptionalDouble.from(java.util.OptionalDouble.of(42.5)).get());
-        assertTrue(present.filter(v -> v > 1).isPresent());
-        assertEquals(85.0, present.map(v -> v * 2).get());
-        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
-        assertEquals(42L, present.mapToLong(v -> v.longValue()).get());
-        assertEquals("42.5", present.mapToObj(String::valueOf).get());
-        assertFalse(present.flatMap(v -> OptionalDouble.empty()).isPresent());
-        assertEquals(42.5, present.or(() -> OptionalDouble.of(1d)).get());
-        assertEquals(0.0, OptionalDouble.empty().orElseZero());
-        assertEquals(42.5, present.orElseThrow());
-        assertEquals(1, present.stream().count());
-        assertEquals(Optional.of(42.5), present.boxed());
-        assertEquals(42.5, present.toJdkOptional().getAsDouble());
-        assertEquals(42.5, present.toImmutableList().get(0));
-        assertTrue(present.toImmutableSet().contains(42.5));
-        assertEquals(present, OptionalDouble.of(42.5));
-        assertEquals("OptionalDouble[42.5]", present.toString());
-
-        assertSame(OptionalDouble.of(0.0d), OptionalDouble.of(0.0d));
-        assertNotSame(OptionalDouble.of(-0.0d), OptionalDouble.of(-0.0d));
-        assertNotEquals(OptionalDouble.of(-0.0d), OptionalDouble.of(0.0d));
-        assertTrue(OptionalDouble.of(-0.0d).compareTo(OptionalDouble.of(0.0d)) < 0);
-        assertEquals(OptionalDouble.of(Double.NaN), OptionalDouble.of(Double.NaN));
-        assertEquals(0, OptionalDouble.of(Double.NaN).compareTo(OptionalDouble.of(Double.NaN)));
-    }
 
     /**
      * Pins the "Checked exceptions" row of the JDK-comparison tables in the {@code OptionalInt},
@@ -339,14 +92,7 @@ public class uOptionalApiTest extends uTestSupport {
         assertThrows(IOException.class, () -> OptionalDouble.empty().orElseThrow(() -> new IOException("boom")));
     }
 
-    /** The one-argument declared overloads of {@code name} on {@code cls}, by parameter type, name-sorted. */
-    private static List<Class<?>> oneArgParamTypes(final Class<?> cls, final String name) {
-        return java.util.Arrays.stream(cls.getDeclaredMethods())
-                .filter(m -> m.getName().equals(name) && m.getParameterCount() == 1)
-                .map(m -> m.getParameterTypes()[0])
-                .sorted(java.util.Comparator.comparing(Class::getName))
-                .collect(java.util.stream.Collectors.toList());
-    }
+
 
     /**
      * Completes the coverage of the "Checked exceptions" doc row: {@link #testCheckedExceptionDocContract()}
@@ -501,4 +247,265 @@ public class uOptionalApiTest extends uTestSupport {
             throw boom;
         }));
     }
+
+    @Test
+    public void testOptionalBoolean() throws Exception {
+        assertTrue(OptionalBoolean.of(true).getAsBoolean());
+        assertFalse(OptionalBoolean.of(false).getAsBoolean());
+        assertThrows(NoSuchElementException.class, () -> OptionalBoolean.empty().getAsBoolean());
+        assertFalse(OptionalBoolean.of(true).map(v -> !v).get());
+        assertFalse(OptionalBoolean.empty().map(v -> !v).isPresent());
+        assertTrue(OptionalBoolean.of(true).orElseFalse());
+        assertFalse(OptionalBoolean.of(false).orElseFalse());
+        assertFalse(OptionalBoolean.empty().orElseFalse());
+        assertTrue(OptionalBoolean.of(true).orElseTrue());
+        assertFalse(OptionalBoolean.of(false).orElseTrue());
+        assertTrue(OptionalBoolean.empty().orElseTrue());
+        assertEquals("OptionalBoolean[true]", OptionalBoolean.of(true).toString());
+        assertEquals("OptionalBoolean[false]", OptionalBoolean.of(false).toString());
+        assertEquals("OptionalBoolean.empty", OptionalBoolean.empty().toString());
+    }
+
+    @Test
+    public void testOptionalByte() throws Exception {
+        OptionalByte present = OptionalByte.of((byte) 10);
+        assertEquals((byte) 10, present.get());
+        assertFalse(OptionalByte.ofNullable(null).isPresent());
+        byte[] seen = { 0 };
+        present.ifPresent(v -> seen[0] = v);
+        assertEquals((byte) 10, seen[0]);
+        boolean[] emptyCalled = { false };
+        OptionalByte.empty().ifPresentOrElse(v -> seen[0] = 99, () -> emptyCalled[0] = true);
+        assertTrue(emptyCalled[0]);
+        assertTrue(present.filter(v -> v > 5).isPresent());
+        assertEquals((byte) 20, present.map(v -> (byte) (v * 2)).get());
+        assertEquals(100, present.mapToInt(v -> v * 10).get());
+        assertEquals("10", present.mapToObj(String::valueOf).get());
+        assertEquals((byte) 11, present.flatMap(v -> OptionalByte.of((byte) (v + 1))).get());
+        assertEquals((byte) 10, present.or(() -> OptionalByte.of((byte) 20)).get());
+        assertEquals((byte) 20, OptionalByte.empty().or(() -> OptionalByte.of((byte) 20)).get());
+        assertEquals((byte) 10, present.orElseZero());
+        assertEquals((byte) 0, OptionalByte.empty().orElseZero());
+        assertEquals((byte) 20, OptionalByte.empty().orElse((byte) 20));
+        assertEquals((byte) 10, present.orElseThrow());
+        assertThrows(NoSuchElementException.class, () -> OptionalByte.empty().orElseThrow());
+        assertThrows(IllegalStateException.class, () -> OptionalByte.empty().orElseThrow(IllegalStateException::new));
+        assertEquals(1, present.stream().count());
+        assertEquals((byte) 10, present.toList().get(0));
+        assertTrue(present.toSet().contains((byte) 10));
+        assertEquals((byte) 10, present.toImmutableList().get(0));
+        assertEquals(Optional.of((byte) 10), present.boxed());
+        assertTrue(present.compareTo(OptionalByte.of((byte) 20)) < 0);
+        assertEquals(present, OptionalByte.of((byte) 10));
+        assertEquals("OptionalByte[10]", present.toString());
+    }
+
+    @Test
+    public void testOptionalChar() throws Exception {
+        OptionalChar present = OptionalChar.of('A');
+        assertTrue(present.isPresent());
+        assertFalse(present.isEmpty());
+        assertEquals('A', present.get());
+        assertEquals('A', present.getAsChar());
+        assertFalse(OptionalChar.ofNullable(null).isPresent());
+        assertEquals('X', OptionalChar.ofNullable('X').get());
+        char[] seen = { 0 };
+        present.ifPresent(v -> seen[0] = v);
+        assertEquals('A', seen[0]);
+        boolean[] emptyCalled = { false };
+        OptionalChar.empty().ifPresentOrElse(v -> seen[0] = 'X', () -> emptyCalled[0] = true);
+        assertTrue(emptyCalled[0]);
+        assertTrue(present.filter(v -> v == 'A').isPresent());
+        assertFalse(present.filter(v -> v == 'Z').isPresent());
+        assertEquals('B', present.map(v -> (char) (v + 1)).get());
+        assertEquals(65, present.mapToInt(v -> (int) v).get());
+        assertFalse(present.flatMap(v -> OptionalChar.empty()).isPresent());
+        assertEquals('A', present.or(() -> OptionalChar.of('Z')).get());
+        assertEquals('Z', OptionalChar.empty().or(() -> OptionalChar.of('Z')).get());
+        assertEquals('A', present.orElse('Z'));
+        assertEquals('Z', OptionalChar.empty().orElseGet(() -> 'Z'));
+        assertEquals('A', present.orElseThrow());
+        assertThrows(IllegalStateException.class, () -> OptionalChar.empty().orElseThrow(IllegalStateException::new));
+        assertEquals(1, present.stream().count());
+        assertEquals('A', present.toList().get(0));
+        assertTrue(present.toSet().contains('A'));
+        assertEquals('A', present.toImmutableList().get(0));
+        assertTrue(present.toImmutableSet().contains('A'));
+        assertEquals(Optional.of('A'), present.boxed());
+        assertTrue(present.compareTo(OptionalChar.empty()) > 0);
+        assertEquals(present, OptionalChar.of('A'));
+        assertEquals("OptionalChar[A]", present.toString());
+        assertEquals("OptionalChar.empty", OptionalChar.empty().toString());
+    }
+
+    @Test
+    public void testOptionalDouble() throws Exception {
+        OptionalDouble present = OptionalDouble.of(42.5);
+        assertEquals(42.5, present.get());
+        assertFalse(OptionalDouble.ofNullable(null).isPresent());
+        assertEquals(42.5, OptionalDouble.from(java.util.OptionalDouble.of(42.5)).get());
+        assertTrue(present.filter(v -> v > 1).isPresent());
+        assertEquals(85.0, present.map(v -> v * 2).get());
+        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
+        assertEquals(42L, present.mapToLong(v -> v.longValue()).get());
+        assertEquals("42.5", present.mapToObj(String::valueOf).get());
+        assertFalse(present.flatMap(v -> OptionalDouble.empty()).isPresent());
+        assertEquals(42.5, present.or(() -> OptionalDouble.of(1d)).get());
+        assertEquals(0.0, OptionalDouble.empty().orElseZero());
+        assertEquals(42.5, present.orElseThrow());
+        assertEquals(1, present.stream().count());
+        assertEquals(Optional.of(42.5), present.boxed());
+        assertEquals(42.5, present.toJdkOptional().getAsDouble());
+        assertEquals(42.5, present.toImmutableList().get(0));
+        assertTrue(present.toImmutableSet().contains(42.5));
+        assertEquals(present, OptionalDouble.of(42.5));
+        assertEquals("OptionalDouble[42.5]", present.toString());
+
+        assertSame(OptionalDouble.of(0.0d), OptionalDouble.of(0.0d));
+        assertNotSame(OptionalDouble.of(-0.0d), OptionalDouble.of(-0.0d));
+        assertNotEquals(OptionalDouble.of(-0.0d), OptionalDouble.of(0.0d));
+        assertTrue(OptionalDouble.of(-0.0d).compareTo(OptionalDouble.of(0.0d)) < 0);
+        assertEquals(OptionalDouble.of(Double.NaN), OptionalDouble.of(Double.NaN));
+        assertEquals(0, OptionalDouble.of(Double.NaN).compareTo(OptionalDouble.of(Double.NaN)));
+    }
+
+    @Test
+    public void testOptionalFloat() throws Exception {
+        OptionalFloat present = OptionalFloat.of(42.5f);
+        assertEquals(42.5f, present.getAsFloat());
+        assertFalse(OptionalFloat.ofNullable(null).isPresent());
+        assertTrue(present.filter(v -> v > 1).isPresent());
+        assertEquals(85.0f, present.map(v -> v * 2).get());
+        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
+        assertEquals(42.5, present.mapToDouble(v -> v.doubleValue()).get(), 0.001);
+        assertEquals("42.5", present.mapToObj(String::valueOf).get());
+        assertFalse(present.flatMap(v -> OptionalFloat.empty()).isPresent());
+        assertEquals(42.5f, present.or(() -> OptionalFloat.of(1f)).get());
+        assertEquals(42.5f, present.orElseThrow());
+        assertEquals(1, present.stream().count());
+        assertEquals(Optional.of(42.5f), present.boxed());
+        assertEquals(42.5f, present.toImmutableList().get(0));
+        assertTrue(present.toImmutableSet().contains(42.5f));
+        assertEquals(present, OptionalFloat.of(42.5f));
+        assertEquals("OptionalFloat[42.5]", present.toString());
+
+        assertSame(OptionalFloat.of(0.0f), OptionalFloat.of(0.0f));
+        assertNotSame(OptionalFloat.of(-0.0f), OptionalFloat.of(-0.0f));
+        assertNotEquals(OptionalFloat.of(-0.0f), OptionalFloat.of(0.0f));
+        assertNotEquals(OptionalFloat.of(-0.0f).hashCode(), OptionalFloat.of(0.0f).hashCode());
+        assertTrue(OptionalFloat.of(-0.0f).compareTo(OptionalFloat.of(0.0f)) < 0);
+        assertEquals(OptionalFloat.of(Float.NaN), OptionalFloat.of(Float.NaN));
+        assertEquals(0, OptionalFloat.of(Float.NaN).compareTo(OptionalFloat.of(Float.NaN)));
+    }
+
+    @Test
+    public void testOptionalInt() throws Exception {
+        OptionalInt present = OptionalInt.of(42);
+        assertEquals(42, present.get());
+        assertFalse(OptionalInt.ofNullable(null).isPresent());
+        int[] seen = { 0 };
+        present.ifPresent(v -> seen[0] = v);
+        assertEquals(42, seen[0]);
+        boolean[] emptyCalled = { false };
+        OptionalInt.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
+        assertTrue(emptyCalled[0]);
+        assertTrue(present.mapToBoolean(v -> v > 5).get());
+        assertEquals('A', OptionalInt.of(65).mapToChar(v -> (char) v.intValue()).get());
+        assertEquals(21.0, present.mapToDouble(v -> v / 2.0).get());
+        assertEquals(84, present.flatMap(v -> OptionalInt.of(v * 2)).get());
+        assertEquals(42, present.or(() -> OptionalInt.of(100)).get());
+        assertEquals(100, OptionalInt.empty().or(() -> OptionalInt.of(100)).get());
+        assertEquals(42, present.orElseZero());
+        assertEquals(100, OptionalInt.empty().orElse(100));
+        assertEquals(100, OptionalInt.empty().orElseGet(() -> 100));
+        assertEquals(42, present.orElseThrow());
+        assertEquals(42, present.orElseThrow("No value"));
+        assertEquals(42, present.orElseThrow("Error: %s", "arg1"));
+        assertEquals(42, present.orElseThrow("Error: %s %s", "a", "b"));
+        assertEquals(42, present.orElseThrow("Error: %s %s %s", "a", "b", "c"));
+        assertEquals(42, present.orElseThrow("Error: %s", new Object[] { "arg" }));
+        assertThrows(NoSuchElementException.class, () -> OptionalInt.empty().orElseThrow("Custom error"));
+        assertThrows(IllegalStateException.class, () -> OptionalInt.empty().orElseThrow(() -> new IllegalStateException("not found")));
+        assertEquals(1, present.stream().count());
+        assertEquals(42, present.toList().get(0));
+        assertTrue(present.toSet().contains(42));
+        assertEquals(42, present.toImmutableList().get(0));
+        assertTrue(present.toImmutableSet().contains(42));
+        assertEquals(Optional.of(42), present.boxed());
+        assertEquals(42, present.toJdkOptional().getAsInt());
+        assertTrue(present.compareTo(OptionalInt.of(20)) > 0);
+        assertEquals(present, OptionalInt.of(42));
+        assertEquals("OptionalInt[42]", present.toString());
+    }
+
+    @Test
+    public void testOptionalLong() throws Exception {
+        OptionalLong present = OptionalLong.of(42L);
+        assertEquals(42L, present.get());
+        assertFalse(OptionalLong.ofNullable(null).isPresent());
+        assertEquals(42L, OptionalLong.from(java.util.OptionalLong.of(42L)).get());
+        assertFalse(OptionalLong.from(java.util.OptionalLong.empty()).isPresent());
+        long[] seen = { 0 };
+        present.ifPresent(v -> seen[0] = v);
+        assertEquals(42L, seen[0]);
+        boolean[] emptyCalled = { false };
+        OptionalLong.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
+        assertTrue(emptyCalled[0]);
+        assertTrue(present.filter(v -> v > 5).isPresent());
+        assertEquals(84L, present.map(v -> v * 2).get());
+        assertEquals(42, present.mapToInt(v -> v.intValue()).get());
+        assertEquals(42.0, present.mapToDouble(v -> v.doubleValue()).get());
+        assertEquals("42", present.mapToObj(String::valueOf).get());
+        assertEquals(43L, present.flatMap(v -> OptionalLong.of(v + 1)).get());
+        assertEquals(42L, present.or(() -> OptionalLong.of(1L)).get());
+        assertEquals(42L, present.orElseZero());
+        assertEquals(100L, OptionalLong.empty().orElseGet(() -> 100L));
+        assertEquals(42L, present.orElseThrow());
+        assertEquals(1, present.stream().count());
+        assertEquals(42L, present.toList().get(0));
+        assertTrue(present.toImmutableSet().contains(42L));
+        assertEquals(Optional.of(42L), present.boxed());
+        assertEquals(42L, present.toJdkOptional().getAsLong());
+        assertEquals(present, OptionalLong.of(42L));
+        assertEquals("OptionalLong[42]", present.toString());
+    }
+
+    @Test
+    public void testOptionalShort() throws Exception {
+        OptionalShort present = OptionalShort.of((short) 100);
+        assertEquals((short) 100, present.get());
+        assertFalse(OptionalShort.ofNullable(null).isPresent());
+        short[] seen = { 0 };
+        present.ifPresent(v -> seen[0] = v);
+        assertEquals((short) 100, seen[0]);
+        boolean[] emptyCalled = { false };
+        OptionalShort.empty().ifPresentOrElse(v -> seen[0] = 1, () -> emptyCalled[0] = true);
+        assertTrue(emptyCalled[0]);
+        assertTrue(present.filter(v -> v > 50).isPresent());
+        assertEquals((short) 200, present.map(v -> (short) (v * 2)).get());
+        assertEquals(100, present.mapToInt(v -> v.intValue()).get());
+        assertEquals("100", present.mapToObj(String::valueOf).get());
+        assertEquals((short) 101, present.flatMap(v -> OptionalShort.of((short) (v + 1))).get());
+        assertEquals((short) 100, present.orElseZero());
+        assertEquals((short) 9, OptionalShort.empty().orElse((short) 9));
+        assertEquals((short) 100, present.orElseThrow());
+        assertEquals(1, present.stream().count());
+        assertTrue(present.toSet().contains((short) 100));
+        assertEquals(Optional.of((short) 100), present.boxed());
+        assertEquals(present, OptionalShort.of((short) 100));
+        assertEquals("OptionalShort[100]", present.toString());
+        assertEquals("OptionalShort.empty", OptionalShort.empty().toString());
+    }
+
+
+
+    /** The one-argument declared overloads of {@code name} on {@code cls}, by parameter type, name-sorted. */
+    private static List<Class<?>> oneArgParamTypes(final Class<?> cls, final String name) {
+        return java.util.Arrays.stream(cls.getDeclaredMethods())
+                .filter(m -> m.getName().equals(name) && m.getParameterCount() == 1)
+                .map(m -> m.getParameterTypes()[0])
+                .sorted(java.util.Comparator.comparing(Class::getName))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
 }

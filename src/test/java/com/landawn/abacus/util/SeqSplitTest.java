@@ -22,37 +22,7 @@ import com.landawn.abacus.util.stream.Collectors;
 
 public class SeqSplitTest extends SeqTestSupport {
 
-    @Test
-    public void testSplit_CharSequence() throws Exception {
-        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a,b,c", ',').toList());
-        assertEquals(Collections.singletonList(""), Seq.split("", ',').toList());
-        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a::b::c", "::").toList());
-        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a1b2c", Pattern.compile("\\d")).toList());
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.split("a123b456c789d", Pattern.compile("\\d+")).toList());
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.split("a.b.c.d", Pattern.compile("\\.")).toList());
-    }
-
-    @Test
-    public void testSplitToLines() throws Exception {
-        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.splitToLines("line1\nline2\r\nline3").toList());
-        assertEquals(Arrays.asList("line1", "line2"), Seq.splitToLines("  line1  \n\n  line2  \n", true, true).toList());
-        assertEquals(Arrays.asList("line1", "", "line2", "", "line3"), Seq.splitToLines("  line1  \n\n  line2  \n  \n  line3  ", true, false).toList());
-        assertEquals(Arrays.asList("  line1  ", "  line2  ", "  ", "  line3  "),
-                Seq.splitToLines("  line1  \n\n  line2  \n  \n  line3  ", false, true).toList());
-        assertEquals(Arrays.asList("line1", "", "line2", ""), Seq.splitToLines("line1\n\nline2\n", false, false).toList());
-    }
-
-    @Test
-    public void testSplitByChunkCount() throws Exception {
-        assertEquals(Arrays.asList(Pair.of(0, 3), Pair.of(3, 5), Pair.of(5, 7)), Seq.splitByChunkCount(7, 3, Pair::of).toList());
-        assertEquals(Arrays.asList(Pair.of(0, 2), Pair.of(2, 4), Pair.of(4, 7)), Seq.splitByChunkCount(7, 3, true, Pair::of).toList());
-        assertEquals(Arrays.asList(Pair.of(0, 1), Pair.of(1, 2)), Seq.splitByChunkCount(2, 5, Pair::of).toList());
-        assertTrue(Seq.splitByChunkCount(0, 3, Pair::of).toList().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> Seq.splitByChunkCount(-1, 3, Pair::of));
-        assertThrows(IllegalArgumentException.class, () -> Seq.splitByChunkCount(5, 0, Pair::of));
-        assertEquals(Arrays.asList("0-2", "2-4", "4-6"), Seq.splitByChunkCount(6, 3, true, (from, to) -> from + "-" + to).toList());
-        assertEquals("0-3", Seq.splitByChunkCount(7, 3, false, (from, to) -> from + "-" + to).toList().get(0));
-    }
+    // split
 
     @Test
     public void testSplit() throws Exception {
@@ -68,6 +38,16 @@ public class SeqSplitTest extends SeqTestSupport {
     }
 
     @Test
+    public void testSplit_CharSequence() throws Exception {
+        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a,b,c", ',').toList());
+        assertEquals(Collections.singletonList(""), Seq.split("", ',').toList());
+        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a::b::c", "::").toList());
+        assertEquals(Arrays.asList("a", "b", "c"), Seq.split("a1b2c", Pattern.compile("\\d")).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.split("a123b456c789d", Pattern.compile("\\d+")).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.split("a.b.c.d", Pattern.compile("\\.")).toList());
+    }
+
+    @Test
     public void testSplit_Predicate() throws Exception {
         List<List<Integer>> chunks = Seq.of(1, 2, 3, 0, 4, 5, 0, 6).split(x -> x == 0).toList();
         assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(0), Arrays.asList(4, 5), Arrays.asList(0), Arrays.asList(6)), chunks);
@@ -79,6 +59,8 @@ public class SeqSplitTest extends SeqTestSupport {
         assertEquals(3, maxValues.get(0).get().intValue());
         assertEquals(8, maxValues.get(1).get().intValue());
     }
+
+    // splitAt
 
     @Test
     public void testSplitAt() throws Exception {
@@ -97,6 +79,31 @@ public class SeqSplitTest extends SeqTestSupport {
         Seq<String, RuntimeException>[] parts = Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").splitAt(3).toArray(Seq[]::new);
         assertArrayEquals(new String[] { "a", "b", "c" }, parts[0].toArray(String[]::new));
         assertArrayEquals(new String[] { "d", "e" }, parts[1].toArray(String[]::new));
+    }
+
+    @Test
+    public void testSplitAt_FileLifetimeAndBufferedPredicateBoundary() throws Exception {
+        final File file = tempDir.resolve("splitAt-lifetime.txt").toFile();
+        for (final List<String> input : Arrays.asList(Collections.<String> emptyList(), Arrays.asList("", "\u00e9", "\ud83d\ude42", "last"))) {
+            IOUtil.writeLines(input, file);
+            for (final int position : new int[] { 0, 2, 6 }) {
+                final List<Seq<String, IOException>> parts = Seq.ofLines(file).splitAt(position).toList();
+                assertEquals(input.subList(0, Math.min(position, input.size())), parts.get(0).toList());
+                assertTrue(parts.get(1).toList().isEmpty());
+
+                final List<String> inPlace = new ArrayList<>();
+                Seq.ofLines(file).splitAt(position).forEach(part -> inPlace.addAll(part.toList()));
+                assertEquals(input, inPlace);
+            }
+
+            final List<Seq<String, IOException>> parts = Seq.ofLines(file).splitAt("\u00e9"::equals).toList();
+            assertEquals(input.isEmpty() ? Collections.emptyList() : Collections.singletonList(""), parts.get(0).toList());
+            // The predicate has already read its matching boundary, but closure exhausts the remaining file iterator.
+            assertEquals(input.isEmpty() ? Collections.emptyList() : Collections.singletonList("\u00e9"), parts.get(1).toList());
+            final List<String> inPlace = new ArrayList<>();
+            Seq.ofLines(file).splitAt("\u00e9"::equals).forEach(part -> inPlace.addAll(part.toList()));
+            assertEquals(input, inPlace);
+        }
     }
 
     @Test
@@ -129,27 +136,25 @@ public class SeqSplitTest extends SeqTestSupport {
     }
 
     @Test
-    public void testSplitAt_FileLifetimeAndBufferedPredicateBoundary() throws Exception {
-        final File file = tempDir.resolve("splitAt-lifetime.txt").toFile();
-        for (final List<String> input : Arrays.asList(Collections.<String> emptyList(), Arrays.asList("", "\u00e9", "\ud83d\ude42", "last"))) {
-            IOUtil.writeLines(input, file);
-            for (final int position : new int[] { 0, 2, 6 }) {
-                final List<Seq<String, IOException>> parts = Seq.ofLines(file).splitAt(position).toList();
-                assertEquals(input.subList(0, Math.min(position, input.size())), parts.get(0).toList());
-                assertTrue(parts.get(1).toList().isEmpty());
-
-                final List<String> inPlace = new ArrayList<>();
-                Seq.ofLines(file).splitAt(position).forEach(part -> inPlace.addAll(part.toList()));
-                assertEquals(input, inPlace);
-            }
-
-            final List<Seq<String, IOException>> parts = Seq.ofLines(file).splitAt("\u00e9"::equals).toList();
-            assertEquals(input.isEmpty() ? Collections.emptyList() : Collections.singletonList(""), parts.get(0).toList());
-            // The predicate has already read its matching boundary, but closure exhausts the remaining file iterator.
-            assertEquals(input.isEmpty() ? Collections.emptyList() : Collections.singletonList("\u00e9"), parts.get(1).toList());
-            final List<String> inPlace = new ArrayList<>();
-            Seq.ofLines(file).splitAt("\u00e9"::equals).forEach(part -> inPlace.addAll(part.toList()));
-            assertEquals(input, inPlace);
-        }
+    public void testSplitByChunkCount() throws Exception {
+        assertEquals(Arrays.asList(Pair.of(0, 3), Pair.of(3, 5), Pair.of(5, 7)), Seq.splitByChunkCount(7, 3, Pair::of).toList());
+        assertEquals(Arrays.asList(Pair.of(0, 2), Pair.of(2, 4), Pair.of(4, 7)), Seq.splitByChunkCount(7, 3, true, Pair::of).toList());
+        assertEquals(Arrays.asList(Pair.of(0, 1), Pair.of(1, 2)), Seq.splitByChunkCount(2, 5, Pair::of).toList());
+        assertTrue(Seq.splitByChunkCount(0, 3, Pair::of).toList().isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> Seq.splitByChunkCount(-1, 3, Pair::of));
+        assertThrows(IllegalArgumentException.class, () -> Seq.splitByChunkCount(5, 0, Pair::of));
+        assertEquals(Arrays.asList("0-2", "2-4", "4-6"), Seq.splitByChunkCount(6, 3, true, (from, to) -> from + "-" + to).toList());
+        assertEquals("0-3", Seq.splitByChunkCount(7, 3, false, (from, to) -> from + "-" + to).toList().get(0));
     }
+
+    @Test
+    public void testSplitToLines() throws Exception {
+        assertEquals(Arrays.asList("line1", "line2", "line3"), Seq.splitToLines("line1\nline2\r\nline3").toList());
+        assertEquals(Arrays.asList("line1", "line2"), Seq.splitToLines("  line1  \n\n  line2  \n", true, true).toList());
+        assertEquals(Arrays.asList("line1", "", "line2", "", "line3"), Seq.splitToLines("  line1  \n\n  line2  \n  \n  line3  ", true, false).toList());
+        assertEquals(Arrays.asList("  line1  ", "  line2  ", "  ", "  line3  "),
+                Seq.splitToLines("  line1  \n\n  line2  \n  \n  line3  ", false, true).toList());
+        assertEquals(Arrays.asList("line1", "", "line2", ""), Seq.splitToLines("line1\n\nline2\n", false, false).toList());
+    }
+
 }

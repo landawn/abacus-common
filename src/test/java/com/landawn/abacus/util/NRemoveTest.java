@@ -50,55 +50,17 @@ public class NRemoveTest extends NTestSupport {
     }
 
     @Test
-    public void testRemoveAt() {
-        assertArrayEquals(new boolean[] { true, true }, N.removeAt(new boolean[] { true, false, true }, 1));
-        assertArrayEquals(new boolean[] { true, true, false }, N.removeAt(new boolean[] { true, false, true, false }, new int[] { 1 }));
-        assertArrayEquals(new char[] { 'b', 'c' }, N.removeAt(new char[] { 'a', 'b', 'c' }, 0));
-        assertArrayEquals(new char[] { 'a', 'c', 'e' }, N.removeAt(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 3));
-        assertArrayEquals(new char[] { 'a', 'c', 'e' }, N.removeAt(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 1, 3));
-        char[] chars = { 'a', 'b', 'c' };
-        assertArrayEquals(chars.clone(), N.removeAt(chars));
-        assertArrayEquals(new byte[] { 1, 2 }, N.removeAt(new byte[] { 1, 2, 3 }, 2));
-        assertArrayEquals(new byte[] { 2, 4 }, N.removeAt(new byte[] { 1, 2, 3, 4, 5 }, 0, 2, 4));
-        assertArrayEquals(new short[] { 10, 30 }, N.removeAt(new short[] { 10, 20, 30 }, 1));
-        assertArrayEquals(new int[] { 1, 2, 4, 5 }, N.removeAt(new int[] { 1, 2, 3, 4, 5 }, 2));
-        assertArrayEquals(new int[] { 2, 4 }, N.removeAt(new int[] { 1, 2, 3, 4, 5 }, 0, 2, 4));
-        assertArrayEquals(new int[0], N.removeAt(new int[] { 42 }, 0));
-        assertArrayEquals(new int[] { 10, 30, 50 }, N.removeAt(new int[] { 10, 20, 30, 40, 50 }, 3, 1, 1));
-        assertArrayEquals(new long[] { 200L, 300L }, N.removeAt(new long[] { 100L, 200L, 300L }, 0));
-        assertArrayEquals(new float[] { 1.0f, 3.0f }, N.removeAt(new float[] { 1.0f, 2.0f, 3.0f }, 1), DELTAf);
-        assertArrayEquals(new double[] { 1.0, 2.0 }, N.removeAt(new double[] { 1.0, 2.0, 3.0 }, 2), DELTA);
-        assertArrayEquals(new String[] { "a", "c" }, N.removeAt(new String[] { "a", "b", "c" }, 1));
-        String[] generic = { "A", "B", "C", "D", "E" };
-        assertArrayEquals(new String[] { "A", "C", "E" }, N.removeAt(generic, 1, 3));
-        String[] cloned = N.removeAt(generic, new int[0]);
-        assertArrayEquals(generic, cloned);
-        assertNotSame(generic, cloned);
-
-        assertThrows(IllegalArgumentException.class, () -> N.removeAt((int[]) null, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[] { 1, 2, 3 }, 5));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new char[] { 'a', 'b', 'c' }, new int[] { 0, 10 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[0], 0));
-
-        final boolean[] ba = { true, false };
-        assertArrayEquals(new boolean[] { true, false }, N.removeAt(ba, (int[]) null));
-        assertNotSame(ba, N.removeAt(ba, (int[]) null));
-        assertArrayEquals(new int[0], N.removeAt((int[]) null, (int[]) null));
-
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((boolean[]) null, new int[] { 0 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((String[]) null, new int[] { 0 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((int[]) null, new int[] { 0, 1 }));
-        assertThrows(IllegalArgumentException.class, () -> N.removeAt((int[]) null, 0));
-        assertArrayEquals(new int[] {}, N.removeAt((int[]) null, new int[0]));
-
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        assertTrue(N.removeAt(list, 1, 3));
-        assertEquals(Arrays.asList("a", "c"), list);
-        assertFalse(N.removeAt(new ArrayList<>(Arrays.asList("a", "b")), new int[0]));
-        List<Integer> ints = new ArrayList<>(Arrays.asList(10, 20, 30));
-        assertTrue(N.removeAt(ints, 1));
-        assertEquals(Arrays.asList(10, 30), ints);
+    public void testRemove_floatDoubleSignedZeroAndNaN() {
+        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f), 0f);
+        assertArrayEquals(new float[] { 1.0f }, N.remove(new float[] { Float.NaN, 1.0f }, Float.NaN), 0f);
+        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, 1.0f }, -0.0f), 0f);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(N.remove(new float[] { 0.0f, 1.0f }, -0.0f)[0]));
+        assertArrayEquals(new double[] { 0.0, 1.0 }, N.remove(new double[] { 0.0, -0.0, 1.0 }, -0.0), 0d);
+        assertArrayEquals(new double[] { 1.0 }, N.remove(new double[] { Double.NaN, 1.0 }, Double.NaN), 0d);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.remove(new double[] { 0.0, 1.0 }, -0.0)[0]));
     }
+
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -167,6 +129,53 @@ public class NRemoveTest extends NTestSupport {
     }
 
     @Test
+    public void testRemoveAll_emptyIteratorOnUnmodifiableCollectionReturnsFalse() {
+        final List<Integer> list = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1, 2)));
+
+        assertFalse(N.removeAll(list, java.util.Collections.<Integer> emptyIterator()));
+        assertEquals(Arrays.asList(1, 2), list);
+        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(list, Arrays.asList(1).iterator()));
+    }
+
+    @Test
+    public void testRemoveAll_floatDoubleSignedZeroAndNaN() {
+        final float[] fr = N.removeAll(new float[] { 0.0f, -0.0f, Float.NaN, 1.0f }, -0.0f, Float.NaN);
+        assertEquals(2, fr.length);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr[0]));
+        assertEquals(1.0f, fr[1], 0f);
+        final float[] fr1 = N.removeAll(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f);
+        assertEquals(2, fr1.length);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr1[0]));
+
+        final double[] dr = N.removeAll(new double[] { 0.0, -0.0, Double.NaN, 1.0 }, -0.0, Double.NaN);
+        assertEquals(2, dr.length);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr[0]));
+        assertEquals(1.0, dr[1], 0d);
+        final double[] dr1 = N.removeAll(new double[] { 0.0, -0.0, 1.0 }, -0.0);
+        assertEquals(2, dr1.length);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr1[0]));
+    }
+
+    @Test
+    public void testRemoveAll_unmodifiableReceiverThrowsEvenWhenNothingMatches() {
+        final List<String> unmodifiable = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList("a")));
+
+        // Both argument shapes behave alike now: the removal is attempted, so an unmodifiable receiver reports
+        // that it does not support it - exactly as Collection.removeAll and N.retainAll do.
+        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, java.util.Set.of("z")));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, Arrays.asList("z")));
+
+        // An empty value set still short-circuits before touching the receiver.
+        assertFalse(N.removeAll(unmodifiable, java.util.Collections.emptyList()));
+
+        // A modifiable receiver is unaffected by the change.
+        final List<String> modifiable = new ArrayList<>(Arrays.asList("a", "b"));
+        assertFalse(N.removeAll(modifiable, java.util.Set.of("z")));
+        assertTrue(N.removeAll(modifiable, java.util.Set.of("a")));
+        assertEquals(Arrays.asList("b"), modifiable);
+    }
+
+    @Test
     public void testRemoveAllOccurrences() {
         assertArrayEquals(new boolean[] { false }, N.removeAllOccurrences(new boolean[] { true, false, true }, true));
         assertArrayEquals(new boolean[0], N.removeAllOccurrences((boolean[]) null, true));
@@ -192,6 +201,68 @@ public class NRemoveTest extends NTestSupport {
         assertEquals(Arrays.asList("b", "c"), coll);
         assertFalse(N.removeAllOccurrences(coll, "d"));
         assertFalse(N.removeAllOccurrences(new ArrayList<String>(), "a"));
+    }
+
+    @Test
+    public void testRemoveAllOccurrences_floatAndDoubleUseCompareSemantics() {
+        assertArrayEquals(new float[] { -0.0f, Float.NaN }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, 0.0f), 0.0f);
+        assertArrayEquals(new float[] { 0.0f, -0.0f }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, Float.NaN), 0.0f);
+        assertEquals(Float.floatToIntBits(-0.0f), Float.floatToIntBits(N.removeAllOccurrences(new float[] { 0.0f, -0.0f }, 0.0f)[0]));
+
+        assertArrayEquals(new double[] { -0.0, Double.NaN }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, 0.0), 0.0);
+        assertArrayEquals(new double[] { 0.0, -0.0 }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, Double.NaN), 0.0);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.removeAllOccurrences(new double[] { 0.0, -0.0 }, -0.0)[0]));
+    }
+
+    @Test
+    public void testRemoveAt() {
+        assertArrayEquals(new boolean[] { true, true }, N.removeAt(new boolean[] { true, false, true }, 1));
+        assertArrayEquals(new boolean[] { true, true, false }, N.removeAt(new boolean[] { true, false, true, false }, new int[] { 1 }));
+        assertArrayEquals(new char[] { 'b', 'c' }, N.removeAt(new char[] { 'a', 'b', 'c' }, 0));
+        assertArrayEquals(new char[] { 'a', 'c', 'e' }, N.removeAt(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 3));
+        assertArrayEquals(new char[] { 'a', 'c', 'e' }, N.removeAt(new char[] { 'a', 'b', 'c', 'd', 'e' }, 1, 1, 3));
+        char[] chars = { 'a', 'b', 'c' };
+        assertArrayEquals(chars.clone(), N.removeAt(chars));
+        assertArrayEquals(new byte[] { 1, 2 }, N.removeAt(new byte[] { 1, 2, 3 }, 2));
+        assertArrayEquals(new byte[] { 2, 4 }, N.removeAt(new byte[] { 1, 2, 3, 4, 5 }, 0, 2, 4));
+        assertArrayEquals(new short[] { 10, 30 }, N.removeAt(new short[] { 10, 20, 30 }, 1));
+        assertArrayEquals(new int[] { 1, 2, 4, 5 }, N.removeAt(new int[] { 1, 2, 3, 4, 5 }, 2));
+        assertArrayEquals(new int[] { 2, 4 }, N.removeAt(new int[] { 1, 2, 3, 4, 5 }, 0, 2, 4));
+        assertArrayEquals(new int[0], N.removeAt(new int[] { 42 }, 0));
+        assertArrayEquals(new int[] { 10, 30, 50 }, N.removeAt(new int[] { 10, 20, 30, 40, 50 }, 3, 1, 1));
+        assertArrayEquals(new long[] { 200L, 300L }, N.removeAt(new long[] { 100L, 200L, 300L }, 0));
+        assertArrayEquals(new float[] { 1.0f, 3.0f }, N.removeAt(new float[] { 1.0f, 2.0f, 3.0f }, 1), DELTAf);
+        assertArrayEquals(new double[] { 1.0, 2.0 }, N.removeAt(new double[] { 1.0, 2.0, 3.0 }, 2), DELTA);
+        assertArrayEquals(new String[] { "a", "c" }, N.removeAt(new String[] { "a", "b", "c" }, 1));
+        String[] generic = { "A", "B", "C", "D", "E" };
+        assertArrayEquals(new String[] { "A", "C", "E" }, N.removeAt(generic, 1, 3));
+        String[] cloned = N.removeAt(generic, new int[0]);
+        assertArrayEquals(generic, cloned);
+        assertNotSame(generic, cloned);
+
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((int[]) null, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[] { 1, 2, 3 }, 5));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new char[] { 'a', 'b', 'c' }, new int[] { 0, 10 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt(new int[0], 0));
+
+        final boolean[] ba = { true, false };
+        assertArrayEquals(new boolean[] { true, false }, N.removeAt(ba, (int[]) null));
+        assertNotSame(ba, N.removeAt(ba, (int[]) null));
+        assertArrayEquals(new int[0], N.removeAt((int[]) null, (int[]) null));
+
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((boolean[]) null, new int[] { 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((String[]) null, new int[] { 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> N.removeAt((int[]) null, new int[] { 0, 1 }));
+        assertThrows(IllegalArgumentException.class, () -> N.removeAt((int[]) null, 0));
+        assertArrayEquals(new int[] {}, N.removeAt((int[]) null, new int[0]));
+
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        assertTrue(N.removeAt(list, 1, 3));
+        assertEquals(Arrays.asList("a", "c"), list);
+        assertFalse(N.removeAt(new ArrayList<>(Arrays.asList("a", "b")), new int[0]));
+        List<Integer> ints = new ArrayList<>(Arrays.asList(10, 20, 30));
+        assertTrue(N.removeAt(ints, 1));
+        assertEquals(Arrays.asList(10, 30), ints);
     }
 
     @Test
@@ -275,72 +346,4 @@ public class NRemoveTest extends NTestSupport {
         assertEquals("", N.removeRange("abc", 0, 3));
     }
 
-    @Test
-    public void testRemoveAll_unmodifiableReceiverThrowsEvenWhenNothingMatches() {
-        final List<String> unmodifiable = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList("a")));
-
-        // Both argument shapes behave alike now: the removal is attempted, so an unmodifiable receiver reports
-        // that it does not support it - exactly as Collection.removeAll and N.retainAll do.
-        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, java.util.Set.of("z")));
-        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, Arrays.asList("z")));
-
-        // An empty value set still short-circuits before touching the receiver.
-        assertFalse(N.removeAll(unmodifiable, java.util.Collections.emptyList()));
-
-        // A modifiable receiver is unaffected by the change.
-        final List<String> modifiable = new ArrayList<>(Arrays.asList("a", "b"));
-        assertFalse(N.removeAll(modifiable, java.util.Set.of("z")));
-        assertTrue(N.removeAll(modifiable, java.util.Set.of("a")));
-        assertEquals(Arrays.asList("b"), modifiable);
-    }
-
-    @Test
-    public void testRemove_floatDoubleSignedZeroAndNaN() {
-        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f), 0f);
-        assertArrayEquals(new float[] { 1.0f }, N.remove(new float[] { Float.NaN, 1.0f }, Float.NaN), 0f);
-        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, 1.0f }, -0.0f), 0f);
-        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(N.remove(new float[] { 0.0f, 1.0f }, -0.0f)[0]));
-        assertArrayEquals(new double[] { 0.0, 1.0 }, N.remove(new double[] { 0.0, -0.0, 1.0 }, -0.0), 0d);
-        assertArrayEquals(new double[] { 1.0 }, N.remove(new double[] { Double.NaN, 1.0 }, Double.NaN), 0d);
-        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.remove(new double[] { 0.0, 1.0 }, -0.0)[0]));
-    }
-
-    @Test
-    public void testRemoveAll_floatDoubleSignedZeroAndNaN() {
-        final float[] fr = N.removeAll(new float[] { 0.0f, -0.0f, Float.NaN, 1.0f }, -0.0f, Float.NaN);
-        assertEquals(2, fr.length);
-        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr[0]));
-        assertEquals(1.0f, fr[1], 0f);
-        final float[] fr1 = N.removeAll(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f);
-        assertEquals(2, fr1.length);
-        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr1[0]));
-
-        final double[] dr = N.removeAll(new double[] { 0.0, -0.0, Double.NaN, 1.0 }, -0.0, Double.NaN);
-        assertEquals(2, dr.length);
-        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr[0]));
-        assertEquals(1.0, dr[1], 0d);
-        final double[] dr1 = N.removeAll(new double[] { 0.0, -0.0, 1.0 }, -0.0);
-        assertEquals(2, dr1.length);
-        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr1[0]));
-    }
-
-    @Test
-    public void testRemoveAll_emptyIteratorOnUnmodifiableCollectionReturnsFalse() {
-        final List<Integer> list = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1, 2)));
-
-        assertFalse(N.removeAll(list, java.util.Collections.<Integer> emptyIterator()));
-        assertEquals(Arrays.asList(1, 2), list);
-        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(list, Arrays.asList(1).iterator()));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_floatAndDoubleUseCompareSemantics() {
-        assertArrayEquals(new float[] { -0.0f, Float.NaN }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, 0.0f), 0.0f);
-        assertArrayEquals(new float[] { 0.0f, -0.0f }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, Float.NaN), 0.0f);
-        assertEquals(Float.floatToIntBits(-0.0f), Float.floatToIntBits(N.removeAllOccurrences(new float[] { 0.0f, -0.0f }, 0.0f)[0]));
-
-        assertArrayEquals(new double[] { -0.0, Double.NaN }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, 0.0), 0.0);
-        assertArrayEquals(new double[] { 0.0, -0.0 }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, Double.NaN), 0.0);
-        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.removeAllOccurrences(new double[] { 0.0, -0.0 }, -0.0)[0]));
-    }
 }

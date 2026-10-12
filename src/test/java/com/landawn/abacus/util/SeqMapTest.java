@@ -30,14 +30,6 @@ public class SeqMapTest extends SeqTestSupport {
     }
 
     @Test
-    public void testMapIfNotNull() throws Exception {
-        assertEquals(Arrays.asList(2, 6), Seq.of(1, null, 3).mapIfNotNull(x -> x * 2).toList());
-        assertEquals(Arrays.asList("aa", "bb", "cc"), Seq.of("a", null, "b", null, "c").mapIfNotNull(s -> s + s).toList());
-        assertArrayEquals(new String[] { "E" },
-                Seq.<String, RuntimeException> of("a", null, "c", null, "e").mapIfNotNull(String::toUpperCase).skip(2).toArray(String[]::new));
-    }
-
-    @Test
     public void testMapFirst() throws Exception {
         assertEquals(Arrays.asList(10, 2, 3), Seq.of(1, 2, 3).mapFirst(x -> x * 10).toList());
         assertTrue(Seq.<Integer, Exception> empty().mapFirst(x -> x * 10).toList().isEmpty());
@@ -55,6 +47,14 @@ public class SeqMapTest extends SeqTestSupport {
         assertTrue(Seq.<Integer, Exception> empty().mapFirstOrElse(x -> "first:" + x, x -> "other:" + x).toList().isEmpty());
         assertArrayEquals(new String[] { "FIRST", "b!", "c!", "d!", "e!" },
                 Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").mapFirstOrElse(s -> "FIRST", s -> s + "!").toArray(String[]::new));
+    }
+
+    @Test
+    public void testMapIfNotNull() throws Exception {
+        assertEquals(Arrays.asList(2, 6), Seq.of(1, null, 3).mapIfNotNull(x -> x * 2).toList());
+        assertEquals(Arrays.asList("aa", "bb", "cc"), Seq.of("a", null, "b", null, "c").mapIfNotNull(s -> s + s).toList());
+        assertArrayEquals(new String[] { "E" },
+                Seq.<String, RuntimeException> of("a", null, "c", null, "e").mapIfNotNull(String::toUpperCase).skip(2).toArray(String[]::new));
     }
 
     @Test
@@ -78,6 +78,26 @@ public class SeqMapTest extends SeqTestSupport {
     }
 
     @Test
+    public void testMapMulti() throws Exception {
+        List<Object> doubled = Seq.of(1, 2, 3).mapMulti((n, consumer) -> {
+            consumer.accept(n);
+            consumer.accept(n * 10);
+        }).toList();
+        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), doubled);
+
+        assertEquals(Arrays.asList("N:1", "N:2", "Even:2", "N:3"), Seq.of(1, 2, 3).mapMulti((num, consumer) -> {
+            consumer.accept("N:" + num);
+            if (num % 2 == 0) {
+                consumer.accept("Even:" + num);
+            }
+        }).toList());
+        assertArrayEquals(new String[] { "c", "C", "d", "D", "e", "E" }, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").mapMulti((s, consumer) -> {
+            consumer.accept(s);
+            consumer.accept(s.toUpperCase());
+        }).skip(4).toArray(String[]::new));
+    }
+
+    @Test
     public void testMapPartial() throws Exception {
         assertEquals(Arrays.asList(20, 40), Seq.of(1, 2, 3, 4, 5).mapPartial(x -> x % 2 == 0 ? Optional.of(x * 10) : Optional.<Integer> empty()).toList());
         assertEquals(Arrays.asList(1, 2), Seq.of("1", "x", "2", "y").mapPartial(s -> {
@@ -92,6 +112,22 @@ public class SeqMapTest extends SeqTestSupport {
                 Seq.<String, RuntimeException> of("a", "b", "c", "d", "e")
                         .mapPartial(s -> s.compareTo("c") >= 0 ? Optional.of(s.toUpperCase()) : Optional.<String> empty())
                         .toArray(String[]::new));
+    }
+
+    @Test
+    public void testMapPartialToDouble() throws Exception {
+        assertEquals(Arrays.asList(1.5, 3.5), Seq.of("1.5", "a", "3.5", "b").mapPartialToDouble(s -> {
+            try {
+                return OptionalDouble.of(Double.parseDouble(s));
+            } catch (NumberFormatException e) {
+                return OptionalDouble.empty();
+            }
+        }).toList());
+        assertArrayEquals(new Double[] { 99.0, 100.0, 101.0 },
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e")
+                        .mapPartialToDouble(s -> OptionalDouble.of(s.charAt(0)))
+                        .skip(2)
+                        .toArray(Double[]::new));
     }
 
     @Test
@@ -121,39 +157,4 @@ public class SeqMapTest extends SeqTestSupport {
                 Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").mapPartialToLong(s -> OptionalLong.of(s.charAt(0))).skip(2).toArray(Long[]::new));
     }
 
-    @Test
-    public void testMapPartialToDouble() throws Exception {
-        assertEquals(Arrays.asList(1.5, 3.5), Seq.of("1.5", "a", "3.5", "b").mapPartialToDouble(s -> {
-            try {
-                return OptionalDouble.of(Double.parseDouble(s));
-            } catch (NumberFormatException e) {
-                return OptionalDouble.empty();
-            }
-        }).toList());
-        assertArrayEquals(new Double[] { 99.0, 100.0, 101.0 },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e")
-                        .mapPartialToDouble(s -> OptionalDouble.of(s.charAt(0)))
-                        .skip(2)
-                        .toArray(Double[]::new));
-    }
-
-    @Test
-    public void testMapMulti() throws Exception {
-        List<Object> doubled = Seq.of(1, 2, 3).mapMulti((n, consumer) -> {
-            consumer.accept(n);
-            consumer.accept(n * 10);
-        }).toList();
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), doubled);
-
-        assertEquals(Arrays.asList("N:1", "N:2", "Even:2", "N:3"), Seq.of(1, 2, 3).mapMulti((num, consumer) -> {
-            consumer.accept("N:" + num);
-            if (num % 2 == 0) {
-                consumer.accept("Even:" + num);
-            }
-        }).toList());
-        assertArrayEquals(new String[] { "c", "C", "d", "D", "e", "E" }, Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").mapMulti((s, consumer) -> {
-            consumer.accept(s);
-            consumer.accept(s.toUpperCase());
-        }).skip(4).toArray(String[]::new));
-    }
 }

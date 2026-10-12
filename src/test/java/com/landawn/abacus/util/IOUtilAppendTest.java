@@ -16,6 +16,49 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
 public class IOUtilAppendTest extends IOUtilTestSupport {
+
+    // append
+
+    @Test
+    public void testAppend_byteArrayOffsetCountFile() throws Exception {
+        File target = Files.createTempFile(tempFolder, "append-bytes", ".bin").toFile();
+        byte[] data = "Hello World!".getBytes(UTF_8);
+        IOUtil.append(data, 6, 5, target);
+        byte[] result = IOUtil.readAllBytes(target);
+        assertEquals("World", new String(result, UTF_8));
+    }
+
+    @Test
+    public void testAppend_byteArrayOffsetCountFile_appendsToExisting() throws Exception {
+        File target = Files.createTempFile(tempFolder, "append-bytes-existing", ".bin").toFile();
+        Files.write(target.toPath(), "Hello ".getBytes(UTF_8));
+        byte[] data = "World!".getBytes(UTF_8);
+        IOUtil.append(data, 0, data.length, target);
+        byte[] result = IOUtil.readAllBytes(target);
+        assertEquals("Hello World!", new String(result, UTF_8));
+    }
+
+    @Test
+    public void testAppend_byteArrayOffsetCountFile_zeroCount() throws Exception {
+        File target = Files.createTempFile(tempFolder, "append-bytes-zero", ".bin").toFile();
+        byte[] data = "Hello".getBytes(UTF_8);
+        IOUtil.append(data, 0, 0, target);
+        assertEquals(0, target.length());
+    }
+
+    @Test
+    public void testAppend_emptyInputNeverTruncates() throws Exception {
+        final File f = new File(tempFolder.toFile(), "append-empty.txt");
+        Files.write(f.toPath(), "PRECIOUS".getBytes(UTF_8));
+
+        IOUtil.append("", f);
+        IOUtil.append((CharSequence) null, f);
+        IOUtil.append(new byte[0], f);
+        IOUtil.append(new char[0], f);
+
+        assertEquals("PRECIOUS", new String(Files.readAllBytes(f.toPath()), UTF_8));
+    }
+
     @Test
     public void testAppend_FileToItself_isRejectedWithoutGrowth() throws IOException {
         // Regression: append(File, File) opens the target in append mode while reading the same
@@ -29,6 +72,40 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.append(tempFile, tempFile));
         assertEquals(originalLen, tempFile.length());
         assertEquals(TEST_CONTENT, IOUtil.readAllToString(tempFile));
+    }
+
+    @Test
+    public void testAppendBytes_EmptyArray() throws IOException {
+        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
+
+        IOUtil.append(new byte[0], appendFile);
+
+        String result = IOUtil.readAllToString(appendFile, UTF_8);
+        assertEquals("Content", result);
+    }
+
+    @Test
+    public void testAppendBytes_MultipleAppends() throws IOException {
+        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+        Files.write(appendFile.toPath(), "A".getBytes(UTF_8));
+
+        IOUtil.append("B".getBytes(UTF_8), appendFile);
+        IOUtil.append("C".getBytes(UTF_8), appendFile);
+        IOUtil.append("D".getBytes(UTF_8), appendFile);
+
+        String result = IOUtil.readAllToString(appendFile, UTF_8);
+        assertEquals("ABCD", result);
+    }
+
+    @Test
+    public void testAppendBytes_ToEmptyFile() throws IOException {
+        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+
+        IOUtil.append("New Content".getBytes(UTF_8), appendFile);
+
+        String result = IOUtil.readAllToString(appendFile, UTF_8);
+        assertEquals("New Content", result);
     }
 
     @Test
@@ -55,17 +132,6 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendBytes_EmptyArray() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
-
-        IOUtil.append(new byte[0], appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Content", result);
-    }
-
-    @Test
     public void testAppendBytes_ZeroCount() throws IOException {
         File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
         Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
@@ -77,26 +143,14 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendBytes_ToEmptyFile() throws IOException {
+    public void testAppendChars_EmptyArray() throws IOException {
         File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+        Files.write(appendFile.toPath(), "Text".getBytes(UTF_8));
 
-        IOUtil.append("New Content".getBytes(UTF_8), appendFile);
+        IOUtil.append(new char[0], appendFile);
 
         String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("New Content", result);
-    }
-
-    @Test
-    public void testAppendBytes_MultipleAppends() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "A".getBytes(UTF_8));
-
-        IOUtil.append("B".getBytes(UTF_8), appendFile);
-        IOUtil.append("C".getBytes(UTF_8), appendFile);
-        IOUtil.append("D".getBytes(UTF_8), appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("ABCD", result);
+        assertEquals("Text", result);
     }
 
     @Test
@@ -108,6 +162,17 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
 
         String result = IOUtil.readAllToString(appendFile, UTF_8);
         assertEquals("Initial Content", result);
+    }
+
+    @Test
+    public void testAppendChars_UnicodeContent() throws IOException {
+        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+        Files.write(appendFile.toPath(), "Hello ".getBytes(UTF_8));
+
+        IOUtil.append("世界 \uD83D\uDE00".toCharArray(), UTF_8, appendFile);
+
+        String result = IOUtil.readAllToString(appendFile, UTF_8);
+        assertEquals("Hello 世界 \uD83D\uDE00", result);
     }
 
     @Test
@@ -146,25 +211,37 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendChars_EmptyArray() throws IOException {
+    public void testAppendCharSequence_EmptyString() throws IOException {
         File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Text".getBytes(UTF_8));
+        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
 
-        IOUtil.append(new char[0], appendFile);
+        IOUtil.append("", appendFile);
 
         String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Text", result);
+        assertEquals("Content", result);
     }
 
     @Test
-    public void testAppendChars_UnicodeContent() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Hello ".getBytes(UTF_8));
+    public void testAppendCharSequence_nullCharsetUsesDefault() throws Exception {
+        File f = Files.createTempFile(tempFolder, "appendcs", ".txt").toFile();
+        // overwrite with a known prefix using default charset
+        IOUtil.write("PRE-", f);
+        // null charset must be tolerated and behave as DEFAULT_CHARSET (no NPE).
+        IOUtil.append("hello", (Charset) null, f);
+        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
+        assertEquals("PRE-hello", content);
+    }
 
-        IOUtil.append("世界 \uD83D\uDE00".toCharArray(), UTF_8, appendFile);
+    @Test
+    public void testAppendCharSequence_StringBuilder() throws IOException {
+        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
+        Files.write(appendFile.toPath(), "Part1".getBytes(UTF_8));
+
+        StringBuilder sb = new StringBuilder(" Part2");
+        IOUtil.append(sb, UTF_8, appendFile);
 
         String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Hello 世界 \uD83D\uDE00", result);
+        assertEquals("Part1 Part2", result);
     }
 
     @Test
@@ -190,26 +267,44 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendCharSequence_StringBuilder() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Part1".getBytes(UTF_8));
+    public void testAppendEmptyBytesCreatesTargetFile() throws Exception {
+        // regression: append(byte[], File) with empty input did not create the missing target file,
+        // unlike the char[] sibling and the write family
+        final java.io.File f1 = tempFolder.resolve("append_empty_bytes.txt").toFile();
+        IOUtil.append(new byte[0], f1);
+        assertTrue(f1.exists());
 
-        StringBuilder sb = new StringBuilder(" Part2");
-        IOUtil.append(sb, UTF_8, appendFile);
-
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Part1 Part2", result);
+        final java.io.File f2 = tempFolder.resolve("append_zero_count_bytes.txt").toFile();
+        IOUtil.append(new byte[] { 1, 2 }, 0, 0, f2);
+        assertTrue(f2.exists());
     }
 
     @Test
-    public void testAppendCharSequence_EmptyString() throws IOException {
-        File appendFile = Files.createTempFile(tempFolder, "append", ".txt").toFile();
-        Files.write(appendFile.toPath(), "Content".getBytes(UTF_8));
+    public void testAppendFile_EmptySource() throws IOException {
+        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
 
-        IOUtil.append("", appendFile);
+        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
+        Files.write(targetFile.toPath(), "Target".getBytes(UTF_8));
 
-        String result = IOUtil.readAllToString(appendFile, UTF_8);
-        assertEquals("Content", result);
+        long bytesAppended = IOUtil.append(sourceFile, targetFile);
+
+        String result = IOUtil.readAllToString(targetFile, UTF_8);
+        assertEquals("Target", result);
+        assertEquals(0, bytesAppended);
+    }
+
+    @Test
+    public void testAppendFile_ToEmptyTarget() throws IOException {
+        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
+        Files.write(sourceFile.toPath(), "Source data".getBytes(UTF_8));
+
+        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
+
+        long bytesAppended = IOUtil.append(sourceFile, targetFile);
+
+        String result = IOUtil.readAllToString(targetFile, UTF_8);
+        assertEquals("Source data", result);
+        assertEquals("Source data".length(), bytesAppended);
     }
 
     @Test
@@ -243,31 +338,36 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendFile_EmptySource() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-
+    public void testAppendInputStream_EmptyStream() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Target".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Data".getBytes(UTF_8));
 
-        long bytesAppended = IOUtil.append(sourceFile, targetFile);
+        try (InputStream is = new ByteArrayInputStream(new byte[0])) {
+            long bytesAppended = IOUtil.append(is, targetFile);
 
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Target", result);
-        assertEquals(0, bytesAppended);
+            String result = IOUtil.readAllToString(targetFile, UTF_8);
+            assertEquals("Data", result);
+            assertEquals(0, bytesAppended);
+        }
     }
 
     @Test
-    public void testAppendFile_ToEmptyTarget() throws IOException {
-        File sourceFile = Files.createTempFile(tempFolder, "source", ".txt").toFile();
-        Files.write(sourceFile.toPath(), "Source data".getBytes(UTF_8));
-
+    public void testAppendInputStream_LargeStream() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
+        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
 
-        long bytesAppended = IOUtil.append(sourceFile, targetFile);
+        byte[] largeData = new byte[10000];
+        for (int i = 0; i < largeData.length; i++) {
+            largeData[i] = (byte) ('A' + (i % 26));
+        }
 
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Source data", result);
-        assertEquals("Source data".length(), bytesAppended);
+        try (InputStream is = new ByteArrayInputStream(largeData)) {
+            long bytesAppended = IOUtil.append(is, targetFile);
+
+            byte[] result = IOUtil.readAllBytes(targetFile);
+            assertEquals(7 + 10000, result.length);
+            assertEquals(10000, bytesAppended);
+        }
     }
 
     @Test
@@ -299,35 +399,16 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testAppendInputStream_EmptyStream() throws IOException {
+    public void testAppendReader_EmptyReader() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Data".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Content".getBytes(UTF_8));
 
-        try (InputStream is = new ByteArrayInputStream(new byte[0])) {
-            long bytesAppended = IOUtil.append(is, targetFile);
+        try (Reader reader = new StringReader("")) {
+            long charsAppended = IOUtil.append(reader, targetFile);
 
             String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Data", result);
-            assertEquals(0, bytesAppended);
-        }
-    }
-
-    @Test
-    public void testAppendInputStream_LargeStream() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Header\n".getBytes(UTF_8));
-
-        byte[] largeData = new byte[10000];
-        for (int i = 0; i < largeData.length; i++) {
-            largeData[i] = (byte) ('A' + (i % 26));
-        }
-
-        try (InputStream is = new ByteArrayInputStream(largeData)) {
-            long bytesAppended = IOUtil.append(is, targetFile);
-
-            byte[] result = IOUtil.readAllBytes(targetFile);
-            assertEquals(7 + 10000, result.length);
-            assertEquals(10000, bytesAppended);
+            assertEquals("Content", result);
+            assertEquals(0, charsAppended);
         }
     }
 
@@ -387,47 +468,39 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
         }
     }
 
+    // appendLine
+
     @Test
-    public void testAppendReader_EmptyReader() throws IOException {
+    public void testAppendLine_Integer() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Content".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Number:\n".getBytes(UTF_8));
 
-        try (Reader reader = new StringReader("")) {
-            long charsAppended = IOUtil.append(reader, targetFile);
+        IOUtil.appendLine(42, targetFile);
 
-            String result = IOUtil.readAllToString(targetFile, UTF_8);
-            assertEquals("Content", result);
-            assertEquals(0, charsAppended);
-        }
-    }
-
-    // ===== append(byte[], int, int, File) =====
-
-    @Test
-    public void testAppend_byteArrayOffsetCountFile() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes", ".bin").toFile();
-        byte[] data = "Hello World!".getBytes(UTF_8);
-        IOUtil.append(data, 6, 5, target);
-        byte[] result = IOUtil.readAllBytes(target);
-        assertEquals("World", new String(result, UTF_8));
+        String result = IOUtil.readAllToString(targetFile, UTF_8);
+        assertTrue(result.contains("Number:"));
+        assertTrue(result.contains("42"));
     }
 
     @Test
-    public void testAppend_byteArrayOffsetCountFile_appendsToExisting() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes-existing", ".bin").toFile();
-        Files.write(target.toPath(), "Hello ".getBytes(UTF_8));
-        byte[] data = "World!".getBytes(UTF_8);
-        IOUtil.append(data, 0, data.length, target);
-        byte[] result = IOUtil.readAllBytes(target);
-        assertEquals("Hello World!", new String(result, UTF_8));
+    public void testAppendLine_nullCharsetUsesDefault() throws Exception {
+        File f = Files.createTempFile(tempFolder, "appendln", ".txt").toFile();
+        IOUtil.write("first\n", f);
+        // null charset must not NPE; should append "second\n" using default charset.
+        IOUtil.appendLine("second", (Charset) null, f);
+        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
+        assertEquals("first\nsecond\n", content);
     }
 
     @Test
-    public void testAppend_byteArrayOffsetCountFile_zeroCount() throws Exception {
-        File target = Files.createTempFile(tempFolder, "append-bytes-zero", ".bin").toFile();
-        byte[] data = "Hello".getBytes(UTF_8);
-        IOUtil.append(data, 0, 0, target);
-        assertEquals(0, target.length());
+    public void testAppendLine_NullObject() throws IOException {
+        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
+        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
+
+        IOUtil.appendLine(null, targetFile);
+
+        String result = IOUtil.readAllToString(targetFile, UTF_8);
+        assertTrue(result.contains("Start"));
     }
 
     @Test
@@ -454,27 +527,33 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
         assertTrue(result.contains("Second"));
     }
 
-    @Test
-    public void testAppendLine_NullObject() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
+    // appendLines
 
-        IOUtil.appendLine(null, targetFile);
+    @Test
+    public void testAppendLines_EmptyList() throws IOException {
+        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
+        Files.write(targetFile.toPath(), "Existing".getBytes(UTF_8));
+
+        java.util.List<String> lines = java.util.Collections.emptyList();
+        IOUtil.appendLines(lines, targetFile);
 
         String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Start"));
+        assertEquals("Existing", result);
     }
 
     @Test
-    public void testAppendLine_Integer() throws IOException {
+    public void testAppendLines_MixedTypes() throws IOException {
         File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Number:\n".getBytes(UTF_8));
+        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
 
-        IOUtil.appendLine(42, targetFile);
+        java.util.List<Object> lines = java.util.Arrays.asList("Text", 123, true, null);
+        IOUtil.appendLines(lines, targetFile);
 
         String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Number:"));
-        assertTrue(result.contains("42"));
+        assertTrue(result.contains("Start"));
+        assertTrue(result.contains("Text"));
+        assertTrue(result.contains("123"));
+        assertTrue(result.contains("true"));
     }
 
     @Test
@@ -506,77 +585,4 @@ public class IOUtilAppendTest extends IOUtilTestSupport {
         assertTrue(result.contains("Data 2"));
     }
 
-    @Test
-    public void testAppendLines_EmptyList() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Existing".getBytes(UTF_8));
-
-        java.util.List<String> lines = java.util.Collections.emptyList();
-        IOUtil.appendLines(lines, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertEquals("Existing", result);
-    }
-
-    @Test
-    public void testAppendLines_MixedTypes() throws IOException {
-        File targetFile = Files.createTempFile(tempFolder, "target", ".txt").toFile();
-        Files.write(targetFile.toPath(), "Start\n".getBytes(UTF_8));
-
-        java.util.List<Object> lines = java.util.Arrays.asList("Text", 123, true, null);
-        IOUtil.appendLines(lines, targetFile);
-
-        String result = IOUtil.readAllToString(targetFile, UTF_8);
-        assertTrue(result.contains("Start"));
-        assertTrue(result.contains("Text"));
-        assertTrue(result.contains("123"));
-        assertTrue(result.contains("true"));
-    }
-
-    @Test
-    public void testAppendCharSequence_nullCharsetUsesDefault() throws Exception {
-        File f = Files.createTempFile(tempFolder, "appendcs", ".txt").toFile();
-        // overwrite with a known prefix using default charset
-        IOUtil.write("PRE-", f);
-        // null charset must be tolerated and behave as DEFAULT_CHARSET (no NPE).
-        IOUtil.append("hello", (Charset) null, f);
-        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
-        assertEquals("PRE-hello", content);
-    }
-
-    @Test
-    public void testAppendLine_nullCharsetUsesDefault() throws Exception {
-        File f = Files.createTempFile(tempFolder, "appendln", ".txt").toFile();
-        IOUtil.write("first\n", f);
-        // null charset must not NPE; should append "second\n" using default charset.
-        IOUtil.appendLine("second", (Charset) null, f);
-        String content = new String(Files.readAllBytes(f.toPath()), Charset.defaultCharset());
-        assertEquals("first\nsecond\n", content);
-    }
-
-    @Test
-    public void testAppendEmptyBytesCreatesTargetFile() throws Exception {
-        // regression: append(byte[], File) with empty input did not create the missing target file,
-        // unlike the char[] sibling and the write family
-        final java.io.File f1 = tempFolder.resolve("append_empty_bytes.txt").toFile();
-        IOUtil.append(new byte[0], f1);
-        assertTrue(f1.exists());
-
-        final java.io.File f2 = tempFolder.resolve("append_zero_count_bytes.txt").toFile();
-        IOUtil.append(new byte[] { 1, 2 }, 0, 0, f2);
-        assertTrue(f2.exists());
-    }
-
-    @Test
-    public void testAppend_emptyInputNeverTruncates() throws Exception {
-        final File f = new File(tempFolder.toFile(), "append-empty.txt");
-        Files.write(f.toPath(), "PRECIOUS".getBytes(UTF_8));
-
-        IOUtil.append("", f);
-        IOUtil.append((CharSequence) null, f);
-        IOUtil.append(new byte[0], f);
-        IOUtil.append(new char[0], f);
-
-        assertEquals("PRECIOUS", new String(Files.readAllBytes(f.toPath()), UTF_8));
-    }
 }

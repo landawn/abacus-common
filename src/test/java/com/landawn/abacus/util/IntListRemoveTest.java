@@ -21,27 +21,7 @@ public class IntListRemoveTest extends IntListTestSupport {
         assertFalse(list.remove(99));
     }
 
-    @Test
-    public void testRemoveAllOccurrences() {
-        {
-            list = new IntList();
-            IntList list = IntList.of(1, 2, 3, 2, 4, 2);
-            assertTrue(list.removeAllOccurrences(2));
-            assertArrayEquals(new int[] { 1, 3, 4 }, list.toArray());
-            assertFalse(list.removeAllOccurrences(99));
-        }
-        {
-            list = new IntList();
-            list.addAll(new int[] { 1, 2, 3 });
-            assertFalse(list.removeAllOccurrences(5));
-            assertEquals(3, list.size());
-        }
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_Empty() {
-        assertFalse(list.removeAllOccurrences(5));
-    }
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -80,26 +60,42 @@ public class IntListRemoveTest extends IntListTestSupport {
     }
 
     @Test
-    public void testRemoveIf() {
+    public void testRemoveAllOccurrences() {
         {
             list = new IntList();
-            IntList list = IntList.of(1, 2, 3, 4, 5);
-            IntPredicate predicate = (n) -> n % 2 == 0;
-            assertTrue(list.removeIf(predicate));
-            assertArrayEquals(new int[] { 1, 3, 5 }, list.toArray());
+            IntList list = IntList.of(1, 2, 3, 2, 4, 2);
+            assertTrue(list.removeAllOccurrences(2));
+            assertArrayEquals(new int[] { 1, 3, 4 }, list.toArray());
+            assertFalse(list.removeAllOccurrences(99));
         }
         {
             list = new IntList();
             list.addAll(new int[] { 1, 2, 3 });
-            assertFalse(list.removeIf(x -> x > 10));
+            assertFalse(list.removeAllOccurrences(5));
             assertEquals(3, list.size());
         }
     }
 
     @Test
-    public void testRemoveIf_Null() {
+    public void testRemoveAllOccurrences_Empty() {
+        assertFalse(list.removeAllOccurrences(5));
+    }
+
+    @Test
+    public void testRemoveAt() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        list.removeAllAt(1, 3);
+        assertEquals(3, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(3, list.get(1));
+        assertEquals(5, list.get(2));
+    }
+
+    @Test
+    public void testRemoveAt_Empty() {
         IntList list = IntList.of(1, 2, 3);
-        assertThrows(IllegalArgumentException.class, () -> list.removeIf(null));
+        list.removeAllAt();
+        assertEquals(3, list.size());
     }
 
     @Test
@@ -130,47 +126,6 @@ public class IntListRemoveTest extends IntListTestSupport {
     }
 
     @Test
-    public void testRemoveAt() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.removeAllAt(1, 3);
-        assertEquals(3, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(3, list.get(1));
-        assertEquals(5, list.get(2));
-    }
-
-    @Test
-    public void testRemoveAt_Empty() {
-        IntList list = IntList.of(1, 2, 3);
-        list.removeAllAt();
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testRemoveRange() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        list.removeRange(1, 4);
-        assertEquals(2, list.size());
-        assertEquals(1, list.get(0));
-        assertEquals(5, list.get(1));
-    }
-
-    @Test
-    public void testRemoveRange_Empty() {
-        IntList list = IntList.of(1, 2, 3);
-        list.removeRange(1, 1);
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testRemoveRange_OutOfBounds() {
-        IntList list = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 4));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
-    }
-
-    @Test
     public void testRemoveFirst() {
         {
             list = new IntList();
@@ -198,6 +153,29 @@ public class IntListRemoveTest extends IntListTestSupport {
     }
 
     @Test
+    public void testRemoveIf() {
+        {
+            list = new IntList();
+            IntList list = IntList.of(1, 2, 3, 4, 5);
+            IntPredicate predicate = (n) -> n % 2 == 0;
+            assertTrue(list.removeIf(predicate));
+            assertArrayEquals(new int[] { 1, 3, 5 }, list.toArray());
+        }
+        {
+            list = new IntList();
+            list.addAll(new int[] { 1, 2, 3 });
+            assertFalse(list.removeIf(x -> x > 10));
+            assertEquals(3, list.size());
+        }
+    }
+
+    @Test
+    public void testRemoveIf_Null() {
+        IntList list = IntList.of(1, 2, 3);
+        assertThrows(IllegalArgumentException.class, () -> list.removeIf(null));
+    }
+
+    @Test
     public void testRemoveLast() {
         IntList list = IntList.of(1, 2, 3, 4, 5);
         int removed = list.removeLast();
@@ -211,4 +189,31 @@ public class IntListRemoveTest extends IntListTestSupport {
         IntList list = new IntList();
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    // removeRange
+
+    @Test
+    public void testRemoveRange() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        list.removeRange(1, 4);
+        assertEquals(2, list.size());
+        assertEquals(1, list.get(0));
+        assertEquals(5, list.get(1));
+    }
+
+    @Test
+    public void testRemoveRange_Empty() {
+        IntList list = IntList.of(1, 2, 3);
+        list.removeRange(1, 1);
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    public void testRemoveRange_OutOfBounds() {
+        IntList list = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 4));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
+    }
+
 }

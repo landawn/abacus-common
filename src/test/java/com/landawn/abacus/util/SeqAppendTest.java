@@ -16,6 +16,8 @@ import com.landawn.abacus.util.u.Optional;
 
 public class SeqAppendTest extends SeqTestSupport {
 
+    // append
+
     @Test
     public void testAppend() throws Exception {
         assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2).append(3).toList());
@@ -40,13 +42,6 @@ public class SeqAppendTest extends SeqTestSupport {
     }
 
     @Test
-    public void testAppend_Seq() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2).append(Seq.of(3, 4)).toList());
-        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).append(Seq.<Integer, Exception> empty()).toList());
-        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2).append(Seq.of(Arrays.asList(3, 4))).toList());
-    }
-
-    @Test
     public void testAppend_Optional() throws Exception {
         assertEquals(Arrays.asList("hello", "world"), Seq.of("hello").append(Optional.of("world")).toList());
         assertEquals(Arrays.asList("hello"), Seq.of("hello").append(Optional.<String> empty()).toList());
@@ -56,37 +51,12 @@ public class SeqAppendTest extends SeqTestSupport {
     }
 
     @Test
-    public void testAppendIfEmpty() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.<Integer, Exception> empty().appendIfEmpty(1, 2, 3).toList());
-        assertEquals(Arrays.asList(4, 5), Seq.of(4, 5).appendIfEmpty(1, 2, 3).toList());
-        assertEquals(Arrays.asList("default1", "default2"), Seq.<String, Exception> empty().appendIfEmpty(Arrays.asList("default1", "default2")).toList());
-        assertEquals(Arrays.asList("value"), Seq.of("value").appendIfEmpty(Arrays.asList("default1", "default2")).toList());
-        assertTrue(Seq.<String, Exception> empty().appendIfEmpty(Collections.emptyList()).toList().isEmpty());
-        assertEquals(CommonUtil.emptyList(), Seq.<Integer, Exception> empty().appendIfEmpty((Integer[]) null).toList());
-        assertEquals(CommonUtil.asList(1), Seq.<Integer, Exception> of(1).appendIfEmpty((Integer[]) null).toList());
-        assertArrayEquals(new String[] { "c", "d", "e" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").appendIfEmpty("x", "y").skip(2).toArray(String[]::new));
+    public void testAppend_Seq() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2).append(Seq.of(3, 4)).toList());
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).append(Seq.<Integer, Exception> empty()).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2).append(Seq.of(Arrays.asList(3, 4))).toList());
     }
 
-    @Test
-    public void testAppendIfEmpty_Supplier() throws Exception {
-        Supplier<Seq<Integer, Exception>> defaults = () -> Seq.of(1, 2, 3);
-        assertEquals(Arrays.asList(1, 2, 3), Seq.<Integer, Exception> empty().appendIfEmpty(defaults).toList());
-        assertEquals(Arrays.asList(4, 5), Seq.of(4, 5).appendIfEmpty(defaults).toList());
-        assertTrue(Seq.<Integer, Exception> empty().appendIfEmpty(() -> Seq.<Integer, Exception> empty()).toList().isEmpty());
-    }
-
-    @Test
-    public void appendIfEmpty_nonEmptyPathDoesNotReturnReceiver() throws Exception {
-        final Seq<Integer, Exception> seq = Seq.of(4, 5);
-        final Seq<Integer, Exception> derived = seq.appendIfEmpty(1, 2, 3);
-        assertTrue(seq != derived);
-        assertEquals(Arrays.asList(4, 5), derived.toList());
-        assertThrows(IllegalStateException.class, seq::toList);
-    }
-
-    // --- G12-003: append(Seq)/prepend(Seq) used to reject an already-closed receiver before the argument was ever
-    // --- handed to concat(..), stranding it. zipWith/mergeWith close every input on the same failure.
     @Test
     public void testAppend_Seq_closedReceiverStillClosesTheArgument() throws Exception {
         final AtomicInteger argClosed = new AtomicInteger();
@@ -100,15 +70,9 @@ public class SeqAppendTest extends SeqTestSupport {
     }
 
     @Test
-    public void testPrepend_Seq_closedReceiverStillClosesTheArgument() throws Exception {
-        final AtomicInteger argClosed = new AtomicInteger();
-        final Seq<Integer, Exception> arg = Seq.<Integer, Exception> of(8, 9).onClose(argClosed::incrementAndGet);
-
-        final Seq<Integer, Exception> receiver = Seq.of(1, 2, 3);
-        receiver.count();
-
-        assertThrows(IllegalStateException.class, () -> receiver.prepend(arg));
-        assertEquals(1, argClosed.get());
+    public void testAppendPrepend_Seq_nullArgumentIsTolerated() throws Exception {
+        assertEquals(Arrays.asList(1), Seq.<Integer, Exception> of(1).append((Seq<Integer, Exception>) null).toList());
+        assertEquals(Arrays.asList(1), Seq.<Integer, Exception> of(1).prepend((Seq<Integer, Exception>) null).toList());
     }
 
     @Test
@@ -124,11 +88,48 @@ public class SeqAppendTest extends SeqTestSupport {
         assertEquals(1, prependArgClosed.get());
     }
 
-    // --- G12-007 (doc): neither overload can raise IllegalArgumentException - a null sequence is tolerated - so the
-    // --- declared-but-never-thrown IAE was dropped from both signatures.
+    // appendIfEmpty
+
     @Test
-    public void testAppendPrepend_Seq_nullArgumentIsTolerated() throws Exception {
-        assertEquals(Arrays.asList(1), Seq.<Integer, Exception> of(1).append((Seq<Integer, Exception>) null).toList());
-        assertEquals(Arrays.asList(1), Seq.<Integer, Exception> of(1).prepend((Seq<Integer, Exception>) null).toList());
+    public void testAppendIfEmpty() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.<Integer, Exception> empty().appendIfEmpty(1, 2, 3).toList());
+        assertEquals(Arrays.asList(4, 5), Seq.of(4, 5).appendIfEmpty(1, 2, 3).toList());
+        assertEquals(Arrays.asList("default1", "default2"), Seq.<String, Exception> empty().appendIfEmpty(Arrays.asList("default1", "default2")).toList());
+        assertEquals(Arrays.asList("value"), Seq.of("value").appendIfEmpty(Arrays.asList("default1", "default2")).toList());
+        assertTrue(Seq.<String, Exception> empty().appendIfEmpty(Collections.emptyList()).toList().isEmpty());
+        assertEquals(CommonUtil.emptyList(), Seq.<Integer, Exception> empty().appendIfEmpty((Integer[]) null).toList());
+        assertEquals(CommonUtil.asList(1), Seq.<Integer, Exception> of(1).appendIfEmpty((Integer[]) null).toList());
+        assertArrayEquals(new String[] { "c", "d", "e" },
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").appendIfEmpty("x", "y").skip(2).toArray(String[]::new));
     }
+
+    @Test
+    public void appendIfEmpty_nonEmptyPathDoesNotReturnReceiver() throws Exception {
+        final Seq<Integer, Exception> seq = Seq.of(4, 5);
+        final Seq<Integer, Exception> derived = seq.appendIfEmpty(1, 2, 3);
+        assertTrue(seq != derived);
+        assertEquals(Arrays.asList(4, 5), derived.toList());
+        assertThrows(IllegalStateException.class, seq::toList);
+    }
+
+    @Test
+    public void testAppendIfEmpty_Supplier() throws Exception {
+        Supplier<Seq<Integer, Exception>> defaults = () -> Seq.of(1, 2, 3);
+        assertEquals(Arrays.asList(1, 2, 3), Seq.<Integer, Exception> empty().appendIfEmpty(defaults).toList());
+        assertEquals(Arrays.asList(4, 5), Seq.of(4, 5).appendIfEmpty(defaults).toList());
+        assertTrue(Seq.<Integer, Exception> empty().appendIfEmpty(() -> Seq.<Integer, Exception> empty()).toList().isEmpty());
+    }
+
+    @Test
+    public void testPrepend_Seq_closedReceiverStillClosesTheArgument() throws Exception {
+        final AtomicInteger argClosed = new AtomicInteger();
+        final Seq<Integer, Exception> arg = Seq.<Integer, Exception> of(8, 9).onClose(argClosed::incrementAndGet);
+
+        final Seq<Integer, Exception> receiver = Seq.of(1, 2, 3);
+        receiver.count();
+
+        assertThrows(IllegalStateException.class, () -> receiver.prepend(arg));
+        assertEquals(1, argClosed.get());
+    }
+
 }

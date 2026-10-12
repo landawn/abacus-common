@@ -8,20 +8,32 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.IntFunction;
 
 import org.junit.jupiter.api.BeforeEach;
 
 import com.landawn.abacus.AbstractTest;
+import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
 
 public abstract class MapsTestSupport extends AbstractTest {
 
     protected Map<String, String> testMap;
+
     protected Map<String, Integer> intMap;
+
     protected Map<String, Object> objectMap;
+
     protected Map<String, Map<String, String>> nestedMap;
+
     protected Map<String, List<String>> listMap;
+
     protected Map<String, Set<String>> setMap;
 
     @BeforeEach
@@ -286,7 +298,6 @@ public abstract class MapsTestSupport extends AbstractTest {
 
     // zip with empty keys/values and mapSupplier returns empty map
 
-    // ---- Additional tests for previously untested methods/overloads ----
 
     // getAsCharOrDefaultIfAbsent: value is not Character -> converted from its string form
 
@@ -319,7 +330,6 @@ public abstract class MapsTestSupport extends AbstractTest {
     // filter(null map, predicate) returns empty HashMap (L3757)
 
     // flatToMap with entry having empty collection - skips that entry (L4043)
-
     public static class CaseInsensitiveIntegerMap extends HashMap<String, Integer> {
         @Override
         public Integer put(final String key, final Integer value) {
@@ -332,9 +342,7 @@ public abstract class MapsTestSupport extends AbstractTest {
         }
     }
 
-    // --- regression tests for 2026-06-10 deep-review fixes ---
 
-    // ===================== API review 2026-06-15 follow-up =====================
 
     // 3.2 removeEntry(Map, Map.Entry) tolerates a null entry (matches containsEntry)
 
@@ -348,56 +356,35 @@ public abstract class MapsTestSupport extends AbstractTest {
 
     // 5.1 Maps.merge(Map, K, V, BiFunction) — null-safe static mirror of Map.merge
 
-    // ------------------------------------------------------------------------------------------------
     // getAs(Map, key, Class/Type) and getAsOrDefaultIfAbsent: a null conversion result is "absent".
     // N.convert answers null for "" to every numeric wrapper type; Optional.of(null) used to raise a
     // message-less NPE, and getAsOrDefaultIfAbsent used to let that null escape as its return value.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // getAsChar: a Number is a UTF-16 code unit, not the text of one.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // Empty text is absent for the numeric accessors. Numbers.toXxx(Object) falls back to its
     // defaultValue (zero, as these call it) for empty input, which used to surface "" as a parsed 0
     // while " " threw NumberFormatException.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // getByPath: an index segment must carry a number. Numbers.toInt("") answers 0 (a missing-input
     // fallback, not a parse), which silently turned "a[]" into "a[0]".
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // The shared path resolver now reports "not found" with a protected sentinel rather than with the
     // caller's own default value, so a default that the map genuinely contains is no longer ambiguous.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // symmetricDifference must take its key semantics from the map that supplies the keys.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // The mutating methods reject a null map with IllegalArgumentException, matching merge(...) and
     // the rest of this class's argument validation. The no-op mutators still tolerate one.
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // Argument-validation messages
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // Signature widening
-    // ------------------------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------------------------------
     // Result-map construction: a template class that cannot be instantiated reflectively falls back to
     // a correctly-sized HashMap / LinkedHashMap.
-    // ------------------------------------------------------------------------------------------------
 
     //
-    // ============================ review fixes 2026-09-06 ============================
     //
 
     /** Accepts clear() but rejects putAll() - the shape the two replaceKeys javadocs disagreed about. */
@@ -408,5 +395,58 @@ public abstract class MapsTestSupport extends AbstractTest {
         public void putAll(final Map<? extends K, ? extends V> m) {
             throw new UnsupportedOperationException("putAll is not supported");
         }
+    }
+
+    // C-374: symmetricDifference - an empty first map hands the result template to map2, like a null one
+    protected static TreeMap<String, Integer> caseInsensitive(final Object... kvs) {
+        final TreeMap<String, Integer> m = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        for (int i = 0; i < kvs.length; i += 2) {
+            m.put((String) kvs[i], (Integer) kvs[i + 1]);
+        }
+
+        return m;
+    }
+
+    // C-381: a template class never receives a guessed size (LRU subclass)
+
+    /** An LRU map whose int constructor is an eviction cap, not a capacity. */
+    public static class Lru<K, V> extends LinkedHashMap<K, V> {
+        protected static final long serialVersionUID = 1L;
+        protected final int maxEntries;
+
+        public Lru(final int maxEntries) {
+            this.maxEntries = maxEntries;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+            return size() > maxEntries;
+        }
+    }
+
+    protected static LinkedHashMap<String, Integer> ordered(final String... keys) {
+        final LinkedHashMap<String, Integer> m = new LinkedHashMap<>();
+
+        for (int i = 0; i < keys.length; i++) {
+            m.put(keys[i], i);
+        }
+
+        return m;
+    }
+
+    // Recreating this anonymous class used to rerun its initializer and reintroduce removed entries.
+    // Maps.newTargetMap now falls back without constructing the anonymous class.
+    protected Map<String, Integer> g053DoubleBraceMapWithXRemoved() {
+        final Map<String, Integer> m = new LinkedHashMap<>() {
+            {
+                put("x", 1);
+                put("y", 2);
+            }
+        };
+
+        m.remove("x");
+        m.put("z", 3);
+        return m;
     }
 }

@@ -19,16 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
+
+    // call
+
     @Test
     public void testCall_basic() throws Exception {
         ContinuableFuture<String> future = ContinuableFuture.call(() -> "test result");
         assertEquals("test result", future.get());
-    }
-
-    @Test
-    public void testCall_withNull() throws Exception {
-        ContinuableFuture<String> future = ContinuableFuture.call(() -> null);
-        assertNull(future.get());
     }
 
     @Test
@@ -42,39 +39,36 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
     }
 
     @Test
-    public void testCallAfterBothWithCallable_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("1");
-        ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
+    public void testCall_withExecutor() throws Exception {
+        Executor customExecutor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<String> future = ContinuableFuture.call(() -> "custom executor result", customExecutor);
 
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, () -> "combined");
-        assertEquals("combined", combined.get());
+        assertEquals("custom executor result", future.get());
     }
 
     @Test
-    public void testCallAfterBothWithCallable_waitForBoth() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            Thread.sleep(50);
-            return "1";
-        });
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            return "2";
-        });
+    public void testCall_withExecutor_exception() {
+        Executor customExecutor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<String> future = ContinuableFuture.call(() -> {
+            throw new IllegalStateException("executor call error");
+        }, customExecutor);
 
-        long start = System.currentTimeMillis();
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, () -> "done");
-        assertEquals("done", combined.get());
-        long duration = System.currentTimeMillis() - start;
-        assertTrue(duration >= 80);
+        ExecutionException ex = assertThrows(ExecutionException.class, () -> future.get());
+        assertTrue(ex.getCause() instanceof IllegalStateException);
     }
 
     @Test
-    public void testCallAfterBothWithBiFunction_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("Hello");
-        ContinuableFuture<String> future2 = ContinuableFuture.completed("World");
+    public void testCall_withExecutor_null() throws Exception {
+        Executor customExecutor = Executors.newSingleThreadExecutor();
+        ContinuableFuture<String> future = ContinuableFuture.call(() -> null, customExecutor);
 
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + " " + v2);
-        assertEquals("Hello World", combined.get());
+        assertNull(future.get());
+    }
+
+    @Test
+    public void testCall_withNull() throws Exception {
+        ContinuableFuture<String> future = ContinuableFuture.call(() -> null);
+        assertNull(future.get());
     }
 
     @Test
@@ -108,30 +102,21 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
     }
 
     @Test
-    public void testCallAfterBothWithBiFunction_differentTypes() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("Count:");
-        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(42);
+    public void testCallAfterBothWithCallable_waitForBoth() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
+            Thread.sleep(50);
+            return "1";
+        });
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            return "2";
+        });
 
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + v2);
-        assertEquals("Count:42", combined.get());
-    }
-
-    @Test
-    public void testCallAfterBothWithTupleFunction_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
-        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
-
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, tuple -> tuple._1 + tuple._3);
-        assertEquals("A1", combined.get());
-    }
-
-    @Test
-    public void testCallAfterBothWithQuadFunction_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
-        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
-
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, e1, v2, e2) -> v1 + v2);
-        assertEquals("A1", combined.get());
+        long start = System.currentTimeMillis();
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, () -> "done");
+        assertEquals("done", combined.get());
+        long duration = System.currentTimeMillis() - start;
+        assertTrue(duration >= 80);
     }
 
     @Test
@@ -148,16 +133,52 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
     }
 
     @Test
-    public void testCallAfterEitherWithCallable_success() throws Exception {
+    public void testCallAfterEitherWithBiFunction_bothFail() throws InterruptedException, ExecutionException {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            return "1";
+            Thread.sleep(50);
+            throw new RuntimeException("fail1");
         });
-        ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            throw new RuntimeException("fail2");
+        });
 
         ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "either completed");
+
         assertEquals("either completed", either.get());
-        future1.cancel(true);
+        future2.cancel(true);
+    }
+
+    @Test
+    public void testCallAfterEitherWithBiFunction_handlesException() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
+            throw new RuntimeException("error");
+        });
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            return "slow";
+        });
+
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, (value, exception) -> {
+            return exception != null ? "RECOVERED" : value;
+        });
+        assertEquals("RECOVERED", either.get());
+        future2.cancel(true);
+    }
+
+    @Test
+    public void testCallAfterEitherWithBiFunction_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("success");
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            return "slow";
+        });
+
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, (value, exception) -> {
+            return exception == null ? value.toUpperCase() : "ERROR";
+        });
+        assertEquals("SUCCESS", either.get());
+        future2.cancel(true);
     }
 
     @Test
@@ -171,6 +192,19 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
         ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "done");
         assertEquals("done", either.get());
         future2.cancel(true);
+    }
+
+    @Test
+    public void testCallAfterEitherWithCallable_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            return "1";
+        });
+        ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
+
+        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "either completed");
+        assertEquals("either completed", either.get());
+        future1.cancel(true);
     }
 
     @Test
@@ -200,75 +234,33 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
     }
 
     @Test
-    public void testCallAfterEitherWithBiFunction_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("success");
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            return "slow";
-        });
-
-        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, (value, exception) -> {
-            return exception == null ? value.toUpperCase() : "ERROR";
-        });
-        assertEquals("SUCCESS", either.get());
-        future2.cancel(true);
-    }
-
-    @Test
-    public void testCallAfterEitherWithBiFunction_handlesException() throws Exception {
+    public void testCallAfterFirstSuccessWithBiFunction_secondSucceeds() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            throw new RuntimeException("error");
-        });
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            return "slow";
-        });
-
-        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, (value, exception) -> {
-            return exception != null ? "RECOVERED" : value;
-        });
-        assertEquals("RECOVERED", either.get());
-        future2.cancel(true);
-    }
-
-    @Test
-    public void testCallAfterEitherWithBiFunction_bothFail() throws InterruptedException, ExecutionException {
-        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            Thread.sleep(50);
             throw new RuntimeException("fail1");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
             Thread.sleep(100);
-            throw new RuntimeException("fail2");
+            return "second";
         });
 
-        ContinuableFuture<String> either = future1.callAsyncAfterEither(future2, () -> "either completed");
-
-        assertEquals("either completed", either.get());
-        future2.cancel(true);
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, (value, exception) -> {
+            return exception == null ? value.toUpperCase() : "ERROR";
+        });
+        assertEquals("SECOND", result.get());
     }
 
     @Test
-    public void testCallAfterFirstSuccessWithCallable_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            throw new RuntimeException("fail");
-        });
-        ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
-
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, () -> "succeeded");
-        assertEquals("succeeded", result.get());
-    }
-
-    @Test
-    public void testCallAfterFirstSuccessWithCallable_firstSucceeds() throws Exception {
+    public void testCallAfterFirstSuccessWithBiFunction_success() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.completed("first");
         ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            throw new RuntimeException("fail");
+            N.sleep(100);
+            return "second";
         });
 
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, () -> "done");
-        assertEquals("done", result.get());
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, (value, exception) -> {
+            return value != null ? value.toUpperCase() : "ERROR";
+        });
+        assertEquals("FIRST", result.get());
         future2.cancel(true);
     }
 
@@ -290,95 +282,27 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
     }
 
     @Test
-    public void testCallAfterFirstSuccessWithFunction_success() throws Exception {
+    public void testCallAfterFirstSuccessWithCallable_firstSucceeds() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("first");
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(100);
+            throw new RuntimeException("fail");
+        });
+
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, () -> "done");
+        assertEquals("done", result.get());
+        future2.cancel(true);
+    }
+
+    @Test
+    public void testCallAfterFirstSuccessWithCallable_success() throws Exception {
         ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
             throw new RuntimeException("fail");
         });
         ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
 
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
-        assertEquals("SUCCESS", result.get());
-    }
-
-    @Test
-    public void testCallAfterFirstSuccessWithFunction_secondSucceeds() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            throw new RuntimeException("fail1");
-        });
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(50);
-            return "success2";
-        });
-
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
-        assertEquals("SUCCESS2", result.get());
-    }
-
-    @Test
-    public void testCallAfterFirstSuccessWithBiFunction_success() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed("first");
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            N.sleep(100);
-            return "second";
-        });
-
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, (value, exception) -> {
-            return value != null ? value.toUpperCase() : "ERROR";
-        });
-        assertEquals("FIRST", result.get());
-        future2.cancel(true);
-    }
-
-    @Test
-    public void testCallAfterFirstSuccessWithBiFunction_secondSucceeds() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
-            throw new RuntimeException("fail1");
-        });
-        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
-            Thread.sleep(100);
-            return "second";
-        });
-
-        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, (value, exception) -> {
-            return exception == null ? value.toUpperCase() : "ERROR";
-        });
-        assertEquals("SECOND", result.get());
-    }
-
-    @Test
-    public void testCall_withExecutor() throws Exception {
-        Executor customExecutor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<String> future = ContinuableFuture.call(() -> "custom executor result", customExecutor);
-
-        assertEquals("custom executor result", future.get());
-    }
-
-    @Test
-    public void testCall_withExecutor_exception() {
-        Executor customExecutor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-            throw new IllegalStateException("executor call error");
-        }, customExecutor);
-
-        ExecutionException ex = assertThrows(ExecutionException.class, () -> future.get());
-        assertTrue(ex.getCause() instanceof IllegalStateException);
-    }
-
-    @Test
-    public void testCall_withExecutor_null() throws Exception {
-        Executor customExecutor = Executors.newSingleThreadExecutor();
-        ContinuableFuture<String> future = ContinuableFuture.call(() -> null, customExecutor);
-
-        assertNull(future.get());
-    }
-
-    @Test
-    public void testCallAfterBothWithBiFunction_withNull() throws Exception {
-        ContinuableFuture<String> future1 = ContinuableFuture.completed(null);
-        ContinuableFuture<String> future2 = ContinuableFuture.completed("value");
-
-        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> (v1 == null ? "NULL" : v1) + ":" + v2);
-        assertEquals("NULL:value", combined.get());
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, () -> "succeeded");
+        assertEquals("succeeded", result.get());
     }
 
     @Test
@@ -396,4 +320,84 @@ public class ContinuableFutureCallTest extends ContinuableFutureTestSupport {
         assertThrows(ExecutionException.class, () -> result.get());
         future2.cancel(true);
     }
+
+    @Test
+    public void testCallAfterFirstSuccessWithFunction_secondSucceeds() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
+            throw new RuntimeException("fail1");
+        });
+        ContinuableFuture<String> future2 = ContinuableFuture.call(() -> {
+            Thread.sleep(50);
+            return "success2";
+        });
+
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
+        assertEquals("SUCCESS2", result.get());
+    }
+
+    @Test
+    public void testCallAfterFirstSuccessWithFunction_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.call(() -> {
+            throw new RuntimeException("fail");
+        });
+        ContinuableFuture<String> future2 = ContinuableFuture.completed("success");
+
+        ContinuableFuture<String> result = future1.callAsyncAfterFirstSuccess(future2, s -> s.toUpperCase());
+        assertEquals("SUCCESS", result.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithBiFunction_differentTypes() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("Count:");
+        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(42);
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + v2);
+        assertEquals("Count:42", combined.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithBiFunction_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("Hello");
+        ContinuableFuture<String> future2 = ContinuableFuture.completed("World");
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> v1 + " " + v2);
+        assertEquals("Hello World", combined.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithBiFunction_withNull() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed(null);
+        ContinuableFuture<String> future2 = ContinuableFuture.completed("value");
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, v2) -> (v1 == null ? "NULL" : v1) + ":" + v2);
+        assertEquals("NULL:value", combined.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithCallable_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("1");
+        ContinuableFuture<String> future2 = ContinuableFuture.completed("2");
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, () -> "combined");
+        assertEquals("combined", combined.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithQuadFunction_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
+        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, (v1, e1, v2, e2) -> v1 + v2);
+        assertEquals("A1", combined.get());
+    }
+
+    @Test
+    public void testCallAfterBothWithTupleFunction_success() throws Exception {
+        ContinuableFuture<String> future1 = ContinuableFuture.completed("A");
+        ContinuableFuture<Integer> future2 = ContinuableFuture.completed(1);
+
+        ContinuableFuture<String> combined = future1.callAsyncAfterBoth(future2, tuple -> tuple._1 + tuple._3);
+        assertEquals("A1", combined.get());
+    }
+
 }

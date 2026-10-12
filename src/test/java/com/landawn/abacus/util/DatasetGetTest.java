@@ -24,46 +24,15 @@ import org.junit.jupiter.api.Test;
 import testfixtures.entity.extendDirty.basic.Account;
 
 public class DatasetGetTest extends DatasetTestSupport {
-    @Test
-    public void getColumnName() {
-        assertEquals("ID", sampleDataset.getColumnName(0));
-        assertEquals("Name", sampleDataset.getColumnName(1));
-        assertEquals("Age", sampleDataset.getColumnName(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.getColumnName(3));
-        assertThrows(IndexOutOfBoundsException.class, () -> emptyDataset.getColumnName(0));
-    }
+
+    // get
 
     @Test
-    public void testGetColumnNameInvalidIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getColumnName(10));
-    }
-
-    @Test
-    public void getColumnIndex() {
-        assertEquals(0, sampleDataset.getColumnIndex("ID"));
-        assertEquals(1, sampleDataset.getColumnIndex("Name"));
-        assertEquals(2, sampleDataset.getColumnIndex("Age"));
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndex("NonExistent"));
-        assertThrows(IllegalArgumentException.class, () -> emptyDataset.getColumnIndex("Any"));
-    }
-
-    @Test
-    public void testGetColumnIndexInvalidName() {
-        assertThrows(IllegalArgumentException.class, () -> dataset.getColumnIndex("invalid"));
-    }
-
-    @Test
-    public void getColumnIndexes() {
-        Collection<String> namesToGet = Arrays.asList("Name", "ID");
-        int[] indexes = sampleDataset.getColumnIndexes(namesToGet);
-        assertArrayEquals(new int[] { 1, 0 }, indexes);
-
-        Collection<String> allNames = sampleDataset.columnNames();
-        int[] allIndexes = sampleDataset.getColumnIndexes(allNames);
-        assertArrayEquals(new int[] { 0, 1, 2 }, allIndexes);
-
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndexes(Arrays.asList("ID", "NonExistent")));
-        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, sampleDataset.getColumnIndexes(Collections.emptyList()));
+    public void testGet() {
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals("John", dataset.get(0, 1));
+        assertEquals((Integer) 25, dataset.get(0, 2));
+        assertEquals((Double) 50000.0, dataset.get(0, 3));
     }
 
     @Test
@@ -83,40 +52,12 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testGetByIndexes() {
-        assertEquals((Integer) 1, dataset.get(0, 0));
-        assertEquals("John", dataset.get(0, 1));
-        assertEquals((Integer) 25, dataset.get(0, 2));
-        assertEquals(50000.0, dataset.get(0, 3));
-    }
-
-    @Test
-    public void testGetByColumnIndex() {
-        Dataset ds = dataset.moveToRow(1);
-        assertEquals("Jane", ds.get(1));
-        assertEquals((Integer) 30, ds.get(2));
-    }
-
-    @Test
-    public void testGetByColumnName() {
-        Dataset ds = dataset.moveToRow(0);
-        assertEquals("John", ds.get("name"));
-        assertEquals((Integer) 25, ds.get("age"));
-    }
-
-    @Test
-    public void testGet() {
-        assertEquals((Integer) 1, dataset.get(0, 0));
-        assertEquals("John", dataset.get(0, 1));
-        assertEquals((Integer) 25, dataset.get(0, 2));
-        assertEquals((Double) 50000.0, dataset.get(0, 3));
-    }
-
-    @Test
-    public void testGetWithCurrentRow() {
-        dataset.moveToRow(1);
-        assertEquals((Integer) 2, dataset.get(0));
-        assertEquals("Jane", dataset.get(1));
+    public void get_rowIndex_columnIndex() {
+        assertEquals((Integer) 1, sampleDataset.moveToRow(0).get(0));
+        assertEquals("Bob", sampleDataset.moveToRow(1).get(1));
+        assertEquals((Integer) 35, sampleDataset.moveToRow(2).get(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveToRow(3).get(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveToRow(0).get(3));
     }
 
     @Test
@@ -140,12 +81,60 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
-    public void get_rowIndex_columnIndex() {
-        assertEquals((Integer) 1, sampleDataset.moveToRow(0).get(0));
-        assertEquals("Bob", sampleDataset.moveToRow(1).get(1));
-        assertEquals((Integer) 35, sampleDataset.moveToRow(2).get(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveToRow(3).get(0));
-        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.moveToRow(0).get(3));
+    public void testGetByColumnIndex() {
+        Dataset ds = dataset.moveToRow(1);
+        assertEquals("Jane", ds.get(1));
+        assertEquals((Integer) 30, ds.get(2));
+    }
+
+    @Test
+    public void testGetByColumnName() {
+        Dataset ds = dataset.moveToRow(0);
+        assertEquals("John", ds.get("name"));
+        assertEquals((Integer) 25, ds.get("age"));
+    }
+
+    @Test
+    public void testGetByIndexes() {
+        assertEquals((Integer) 1, dataset.get(0, 0));
+        assertEquals("John", dataset.get(0, 1));
+        assertEquals((Integer) 25, dataset.get(0, 2));
+        assertEquals(50000.0, dataset.get(0, 3));
+    }
+
+    @Test
+    public void testGetRowNavigationMethods() {
+        testDataset.moveToRow(0);
+
+        assertEquals(1, testDataset.getByte(0));
+        assertEquals(1, testDataset.getShort(0));
+        assertEquals(1, testDataset.getInt(0));
+        assertEquals(1L, testDataset.getLong(0));
+        assertEquals(1.0f, testDataset.getFloat(0));
+        assertEquals(1.0, testDataset.getDouble(0));
+
+        assertEquals("Alice", testDataset.get(1));
+        assertEquals(30, testDataset.getInt(2));
+        assertEquals(50000.0, testDataset.getDouble(3));
+    }
+
+    @Test
+    public void testGetWithCurrentRow() {
+        dataset.moveToRow(1);
+        assertEquals((Integer) 2, dataset.get(0));
+        assertEquals("Jane", dataset.get(1));
+    }
+
+    // getBoolean
+
+    @Test
+    public void testGetBoolean() {
+        dataset.set(0, 0, true);
+        assertTrue(dataset.getBoolean(0));
+        assertTrue(dataset.getBoolean("id"));
+
+        dataset.set(0, 0, false);
+        assertFalse(dataset.getBoolean(0));
     }
 
     @Test
@@ -164,16 +153,6 @@ public class DatasetGetTest extends DatasetTestSupport {
         assertTrue(ds.getBoolean("flag"));
         ds.moveToRow(1);
         assertFalse(ds.getBoolean("flag"));
-    }
-
-    @Test
-    public void testGetBoolean() {
-        dataset.set(0, 0, true);
-        assertTrue(dataset.getBoolean(0));
-        assertTrue(dataset.getBoolean("id"));
-
-        dataset.set(0, 0, false);
-        assertFalse(dataset.getBoolean(0));
     }
 
     @Test
@@ -199,6 +178,38 @@ public class DatasetGetTest extends DatasetTestSupport {
         assertFalse(boolDs.getBoolean(0));
     }
 
+    // getByte
+
+    @Test
+    public void testGetByte() {
+        dataset.set(0, 0, (byte) 10);
+        assertEquals((byte) 10, dataset.getByte(0));
+        assertEquals((byte) 10, dataset.getByte("id"));
+    }
+
+    @Test
+    public void testGetByte_ByIndex() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
+        ds.moveToRow(0);
+        assertEquals((byte) 1, ds.getByte(0));
+    }
+
+    @Test
+    public void testGetByte_ByName() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
+        ds.moveToRow(0);
+        assertEquals((byte) 1, ds.getByte("num"));
+    }
+
+    // getChar
+
+    @Test
+    public void testGetChar() {
+        dataset.set(0, 0, 'A');
+        assertEquals('A', dataset.getChar(0));
+        assertEquals('A', dataset.getChar("id"));
+    }
+
     @Test
     public void testGetChar_ByIndex() {
         Dataset ds = Dataset.rows(Arrays.asList("letter"), new Object[][] { { 'A' }, { 'B' } });
@@ -213,13 +224,6 @@ public class DatasetGetTest extends DatasetTestSupport {
         Dataset ds = Dataset.rows(Arrays.asList("letter"), new Object[][] { { 'A' }, { 'B' } });
         ds.moveToRow(0);
         assertEquals('A', ds.getChar("letter"));
-    }
-
-    @Test
-    public void testGetChar() {
-        dataset.set(0, 0, 'A');
-        assertEquals('A', dataset.getChar(0));
-        assertEquals('A', dataset.getChar("id"));
     }
 
     @Test
@@ -242,145 +246,23 @@ public class DatasetGetTest extends DatasetTestSupport {
         assertEquals('x', charDs.getChar(0));
     }
 
+    // getColumn
+
     @Test
-    public void testGetByte_ByIndex() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
-        ds.moveToRow(0);
-        assertEquals((byte) 1, ds.getByte(0));
+    public void testGetColumn() {
+        ImmutableList<Object> idColumn = dataset.getColumn(0);
+        assertEquals(5, idColumn.size());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), idColumn);
+
+        ImmutableList<Object> nameColumn = dataset.getColumn("name");
+        assertEquals(Arrays.asList("John", "Jane", "Bob", "Alice", "Charlie"), nameColumn);
     }
 
     @Test
-    public void testGetByte_ByName() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (byte) 1 }, { (byte) 2 } });
-        ds.moveToRow(0);
-        assertEquals((byte) 1, ds.getByte("num"));
-    }
-
-    @Test
-    public void testGetByte() {
-        dataset.set(0, 0, (byte) 10);
-        assertEquals((byte) 10, dataset.getByte(0));
-        assertEquals((byte) 10, dataset.getByte("id"));
-    }
-
-    @Test
-    public void testGetShort_ByIndex() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
-        ds.moveToRow(0);
-        assertEquals((short) 100, ds.getShort(0));
-    }
-
-    @Test
-    public void testGetShort_ByName() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
-        ds.moveToRow(0);
-        assertEquals((short) 100, ds.getShort("num"));
-    }
-
-    @Test
-    public void testGetShort() {
-        dataset.set(0, 0, (short) 100);
-        assertEquals((short) 100, dataset.getShort(0));
-        assertEquals((short) 100, dataset.getShort("id"));
-    }
-
-    @Test
-    public void testGetInt_ByIndex() {
-        dataset.moveToRow(0);
-        assertEquals(25, dataset.getInt(2));
-    }
-
-    @Test
-    public void testGetInt_ByName() {
-        dataset.moveToRow(0);
-        assertEquals(25, dataset.getInt("age"));
-    }
-
-    @Test
-    public void testGetInt() {
-        assertEquals(1, dataset.getInt(0));
-        assertEquals(1, dataset.getInt("id"));
-    }
-
-    @Test
-    public void getInt_primitiveAndObject() {
-        List<String> intNames = List.of("IntCol");
-        List<List<Object>> intVals = List.of(new ArrayList<>(Arrays.asList(10, -5, null, Integer.valueOf(100), Long.valueOf(200L))));
-        RowDataset intDs = new RowDataset(intNames, intVals);
-
-        intDs.moveToRow(0);
-        assertEquals(10, intDs.getInt(0));
-        assertEquals(10, intDs.getInt("IntCol"));
-
-        intDs.moveToRow(1);
-        assertEquals(-5, intDs.getInt(0));
-
-        intDs.moveToRow(2);
-        assertEquals(0, intDs.getInt(0));
-
-        intDs.moveToRow(3);
-        assertEquals(100, intDs.getInt(0));
-
-        intDs.moveToRow(4);
-        assertEquals(200, intDs.getInt(0));
-    }
-
-    @Test
-    public void testGetLong_ByIndex() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
-        ds.moveToRow(0);
-        assertEquals(1000L, ds.getLong(0));
-    }
-
-    @Test
-    public void testGetLong_ByName() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
-        ds.moveToRow(0);
-        assertEquals(1000L, ds.getLong("num"));
-    }
-
-    @Test
-    public void testGetLong() {
-        assertEquals(1L, dataset.getLong(0));
-        assertEquals(1L, dataset.getLong("id"));
-    }
-
-    @Test
-    public void testGetFloat_ByIndex() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
-        ds.moveToRow(0);
-        assertEquals(1.5f, ds.getFloat(0));
-    }
-
-    @Test
-    public void testGetFloat_ByName() {
-        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
-        ds.moveToRow(0);
-        assertEquals(1.5f, ds.getFloat("num"));
-    }
-
-    @Test
-    public void testGetFloat() {
-        assertEquals(50000.0f, dataset.getFloat(3), 0.01);
-        assertEquals(50000.0f, dataset.getFloat("salary"), 0.01);
-    }
-
-    @Test
-    public void testGetDouble_ByIndex() {
-        dataset.moveToRow(0);
-        assertEquals(50000.0, dataset.getDouble(3));
-    }
-
-    @Test
-    public void testGetDouble_ByName() {
-        dataset.moveToRow(0);
-        assertEquals(50000.0, dataset.getDouble("salary"));
-    }
-
-    @Test
-    public void testGetDouble() {
-        assertEquals(50000.0, dataset.getDouble(3), 0.01);
-        assertEquals(50000.0, dataset.getDouble("salary"), 0.01);
+    public void getColumn_byIndex() {
+        List<Object> idColumn = sampleDataset.getColumn(0);
+        assertEquals(Arrays.asList(1, 2, 3), idColumn);
+        assertThrows(UnsupportedOperationException.class, () -> sampleDataset.getColumn(0).add(4));
     }
 
     @Test
@@ -412,20 +294,186 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testGetColumn() {
-        ImmutableList<Object> idColumn = dataset.getColumn(0);
-        assertEquals(5, idColumn.size());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), idColumn);
-
-        ImmutableList<Object> nameColumn = dataset.getColumn("name");
-        assertEquals(Arrays.asList("John", "Jane", "Bob", "Alice", "Charlie"), nameColumn);
+    @DisplayName("getColumn returns an immutable view backed by internal storage (no mutation)")
+    public void testGetColumnImmutability() {
+        ImmutableList<Object> col = dataset.getColumn("name");
+        assertThrows(UnsupportedOperationException.class, () -> col.add("X"));
     }
 
     @Test
-    public void getColumn_byIndex() {
-        List<Object> idColumn = sampleDataset.getColumn(0);
-        assertEquals(Arrays.asList(1, 2, 3), idColumn);
-        assertThrows(UnsupportedOperationException.class, () -> sampleDataset.getColumn(0).add(4));
+    public void getColumnIndex() {
+        assertEquals(0, sampleDataset.getColumnIndex("ID"));
+        assertEquals(1, sampleDataset.getColumnIndex("Name"));
+        assertEquals(2, sampleDataset.getColumnIndex("Age"));
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndex("NonExistent"));
+        assertThrows(IllegalArgumentException.class, () -> emptyDataset.getColumnIndex("Any"));
+    }
+
+    @Test
+    public void testGetColumnIndexInvalidName() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.getColumnIndex("invalid"));
+    }
+
+    @Test
+    public void getColumnIndexes() {
+        Collection<String> namesToGet = Arrays.asList("Name", "ID");
+        int[] indexes = sampleDataset.getColumnIndexes(namesToGet);
+        assertArrayEquals(new int[] { 1, 0 }, indexes);
+
+        Collection<String> allNames = sampleDataset.columnNames();
+        int[] allIndexes = sampleDataset.getColumnIndexes(allNames);
+        assertArrayEquals(new int[] { 0, 1, 2 }, allIndexes);
+
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.getColumnIndexes(Arrays.asList("ID", "NonExistent")));
+        assertArrayEquals(CommonUtil.EMPTY_INT_ARRAY, sampleDataset.getColumnIndexes(Collections.emptyList()));
+    }
+
+    @Test
+    public void getColumnName() {
+        assertEquals("ID", sampleDataset.getColumnName(0));
+        assertEquals("Name", sampleDataset.getColumnName(1));
+        assertEquals("Age", sampleDataset.getColumnName(2));
+        assertThrows(IndexOutOfBoundsException.class, () -> sampleDataset.getColumnName(3));
+        assertThrows(IndexOutOfBoundsException.class, () -> emptyDataset.getColumnName(0));
+    }
+
+    @Test
+    public void testGetColumnNameInvalidIndex() {
+        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getColumnName(10));
+    }
+
+    // getDouble
+
+    @Test
+    public void testGetDouble() {
+        assertEquals(50000.0, dataset.getDouble(3), 0.01);
+        assertEquals(50000.0, dataset.getDouble("salary"), 0.01);
+    }
+
+    @Test
+    public void testGetDouble_ByIndex() {
+        dataset.moveToRow(0);
+        assertEquals(50000.0, dataset.getDouble(3));
+    }
+
+    @Test
+    public void testGetDouble_ByName() {
+        dataset.moveToRow(0);
+        assertEquals(50000.0, dataset.getDouble("salary"));
+    }
+
+    // getFloat
+
+    @Test
+    public void testGetFloat() {
+        assertEquals(50000.0f, dataset.getFloat(3), 0.01);
+        assertEquals(50000.0f, dataset.getFloat("salary"), 0.01);
+    }
+
+    @Test
+    public void testGetFloat_ByIndex() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
+        ds.moveToRow(0);
+        assertEquals(1.5f, ds.getFloat(0));
+    }
+
+    @Test
+    public void testGetFloat_ByName() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1.5f }, { 2.5f } });
+        ds.moveToRow(0);
+        assertEquals(1.5f, ds.getFloat("num"));
+    }
+
+    // getInt
+
+    @Test
+    public void testGetInt() {
+        assertEquals(1, dataset.getInt(0));
+        assertEquals(1, dataset.getInt("id"));
+    }
+
+    @Test
+    public void testGetInt_ByIndex() {
+        dataset.moveToRow(0);
+        assertEquals(25, dataset.getInt(2));
+    }
+
+    @Test
+    public void testGetInt_ByName() {
+        dataset.moveToRow(0);
+        assertEquals(25, dataset.getInt("age"));
+    }
+
+    @Test
+    public void getInt_primitiveAndObject() {
+        List<String> intNames = List.of("IntCol");
+        List<List<Object>> intVals = List.of(new ArrayList<>(Arrays.asList(10, -5, null, Integer.valueOf(100), Long.valueOf(200L))));
+        RowDataset intDs = new RowDataset(intNames, intVals);
+
+        intDs.moveToRow(0);
+        assertEquals(10, intDs.getInt(0));
+        assertEquals(10, intDs.getInt("IntCol"));
+
+        intDs.moveToRow(1);
+        assertEquals(-5, intDs.getInt(0));
+
+        intDs.moveToRow(2);
+        assertEquals(0, intDs.getInt(0));
+
+        intDs.moveToRow(3);
+        assertEquals(100, intDs.getInt(0));
+
+        intDs.moveToRow(4);
+        assertEquals(200, intDs.getInt(0));
+    }
+
+    // getLong
+
+    @Test
+    public void testGetLong() {
+        assertEquals(1L, dataset.getLong(0));
+        assertEquals(1L, dataset.getLong("id"));
+    }
+
+    @Test
+    public void testGetLong_ByIndex() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
+        ds.moveToRow(0);
+        assertEquals(1000L, ds.getLong(0));
+    }
+
+    @Test
+    public void testGetLong_ByName() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { 1000L }, { 2000L } });
+        ds.moveToRow(0);
+        assertEquals(1000L, ds.getLong("num"));
+    }
+
+    @Test
+    public void testGetProperties() {
+        Dataset ds = dataset.copy();
+        Map<String, Object> props = ds.getProperties();
+
+        assertNotNull(props);
+        assertTrue(props.isEmpty() || props.size() >= 0);
+    }
+
+    // getRow
+
+    @Test
+    public void testGetRow() {
+        ImmutableList<Object> row = dataset.getRow(0);
+        assertEquals(4, row.size());
+        assertEquals(1, row.get(0));
+        assertEquals("John", row.get(1));
+    }
+
+    @Test
+    public void testGetRow_AsEntity() {
+        Person person = dataset.getRow(0, Person.class);
+        assertNotNull(person);
+        assertEquals(1, person.getId());
+        assertEquals("John", person.getName());
     }
 
     @Test
@@ -443,6 +491,16 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
+    public void getRow_asSpecificType_Bean() {
+        RowDataset beanFriendlyDs = new RowDataset(Arrays.asList("id", "name", "value"), Arrays.asList(new ArrayList<>(Arrays.asList(101, 102)),
+                new ArrayList<>(Arrays.asList("Bean1", "Bean2")), new ArrayList<>(Arrays.asList(10.5, 20.5))));
+        TestBean bean1 = beanFriendlyDs.getRow(0, TestBean.class);
+        assertEquals(101, bean1.getId());
+        assertEquals("Bean1", bean1.getName());
+        assertEquals(10.5, bean1.getValue(), 0.001);
+    }
+
+    @Test
     public void getRow_asSpecificType_List() {
         List<Object> row2 = sampleDataset.getRow(2, List.class);
         assertEquals(Arrays.asList(3, "Charlie", 35), row2);
@@ -457,13 +515,11 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
-    public void getRow_asSpecificType_Bean() {
-        RowDataset beanFriendlyDs = new RowDataset(Arrays.asList("id", "name", "value"), Arrays.asList(new ArrayList<>(Arrays.asList(101, 102)),
-                new ArrayList<>(Arrays.asList("Bean1", "Bean2")), new ArrayList<>(Arrays.asList(10.5, 20.5))));
-        TestBean bean1 = beanFriendlyDs.getRow(0, TestBean.class);
-        assertEquals(101, bean1.getId());
-        assertEquals("Bean1", bean1.getName());
-        assertEquals(10.5, bean1.getValue(), 0.001);
+    public void testGetRow_WithColumnNames() {
+        Person person = dataset.getRow(0, Arrays.asList("id", "name"), Person.class);
+        assertNotNull(person);
+        assertEquals(1, person.getId());
+        assertEquals("John", person.getName());
     }
 
     @Test
@@ -485,30 +541,6 @@ public class DatasetGetTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testGetRow() {
-        ImmutableList<Object> row = dataset.getRow(0);
-        assertEquals(4, row.size());
-        assertEquals(1, row.get(0));
-        assertEquals("John", row.get(1));
-    }
-
-    @Test
-    public void testGetRowNavigationMethods() {
-        testDataset.moveToRow(0);
-
-        assertEquals(1, testDataset.getByte(0));
-        assertEquals(1, testDataset.getShort(0));
-        assertEquals(1, testDataset.getInt(0));
-        assertEquals(1L, testDataset.getLong(0));
-        assertEquals(1.0f, testDataset.getFloat(0));
-        assertEquals(1.0, testDataset.getDouble(0));
-
-        assertEquals("Alice", testDataset.get(1));
-        assertEquals(30, testDataset.getInt(2));
-        assertEquals(50000.0, testDataset.getDouble(3));
-    }
-
-    @Test
     public void testGetRowWithClass() {
         List<Object> row = dataset.getRow(1, ArrayList.class);
         assertEquals(Arrays.asList(2, "Jane", 30, 60000.0), row);
@@ -518,22 +550,6 @@ public class DatasetGetTest extends DatasetTestSupport {
     public void testGetRowWithColumnNames() {
         Object[] row = dataset.getRow(1, Arrays.asList("name", "age"), Object[].class);
         assertArrayEquals(new Object[] { "Jane", 30 }, row);
-    }
-
-    @Test
-    public void testGetRow_AsEntity() {
-        Person person = dataset.getRow(0, Person.class);
-        assertNotNull(person);
-        assertEquals(1, person.getId());
-        assertEquals("John", person.getName());
-    }
-
-    @Test
-    public void testGetRow_WithColumnNames() {
-        Person person = dataset.getRow(0, Arrays.asList("id", "name"), Person.class);
-        assertNotNull(person);
-        assertEquals(1, person.getId());
-        assertEquals("John", person.getName());
     }
 
     @Test
@@ -563,20 +579,28 @@ public class DatasetGetTest extends DatasetTestSupport {
         assertThrows(IllegalArgumentException.class, () -> nestedDataset.stream(prefixMap, Map.class).toList());
     }
 
-    @Test
-    public void testGetProperties() {
-        Dataset ds = dataset.copy();
-        Map<String, Object> props = ds.getProperties();
+    // getShort
 
-        assertNotNull(props);
-        assertTrue(props.isEmpty() || props.size() >= 0);
+    @Test
+    public void testGetShort() {
+        dataset.set(0, 0, (short) 100);
+        assertEquals((short) 100, dataset.getShort(0));
+        assertEquals((short) 100, dataset.getShort("id"));
     }
 
     @Test
-    @DisplayName("getColumn returns an immutable view backed by internal storage (no mutation)")
-    public void testGetColumnImmutability() {
-        ImmutableList<Object> col = dataset.getColumn("name");
-        assertThrows(UnsupportedOperationException.class, () -> col.add("X"));
+    public void testGetShort_ByIndex() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
+        ds.moveToRow(0);
+        assertEquals((short) 100, ds.getShort(0));
     }
+
+    @Test
+    public void testGetShort_ByName() {
+        Dataset ds = Dataset.rows(Arrays.asList("num"), new Object[][] { { (short) 100 }, { (short) 200 } });
+        ds.moveToRow(0);
+        assertEquals((short) 100, ds.getShort("num"));
+    }
+
 
 }

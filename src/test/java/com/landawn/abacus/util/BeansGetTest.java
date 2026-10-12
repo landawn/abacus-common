@@ -60,6 +60,79 @@ public class BeansGetTest extends BeansTestSupport {
     }
 
     @Test
+    public void testGetIgnoredPropNamesForDiff() {
+        ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(BeanWithDiffIgnore.class);
+        assertEquals(2, ignored.size());
+        assertTrue(ignored.contains("lastModified"));
+        assertTrue(ignored.contains("internalFlag"));
+        assertFalse(ignored.contains("name"));
+
+        assertTrue(Beans.getIgnoredPropNamesForDiff(SimpleBean.class).isEmpty());
+        assertEquals(CommonUtil.asSet("secret"), Beans.getIgnoredPropNamesForDiff(DiffProbeBean.class));
+    }
+
+    @Test
+    public void testGetPropField() {
+        Field field = Beans.getPropField(SimpleBean.class, "name");
+        assertNotNull(field);
+        assertEquals("name", field.getName());
+        assertNotNull(Beans.getPropField(SimpleBean.class, "NAME"));
+        assertNotNull(Beans.getPropField(SimpleBean.class, "NaMe"));
+        assertNull(Beans.getPropField(SimpleBean.class, "nonExistent"));
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropField(NonBean.class, "field"));
+    }
+
+    @Test
+    public void testGetPropFields() {
+        ImmutableMap<String, Field> fields = Beans.getPropFields(SimpleBean.class);
+        assertNotNull(fields.get("name"));
+        assertNotNull(fields.get("age"));
+        assertNotNull(fields.get("active"));
+
+        fields = Beans.getPropFields(EntityBean.class);
+        assertNotNull(fields.get("id"));
+        assertNotNull(fields.get("value"));
+    }
+
+    @Test
+    public void testGetPropGetter() {
+        Method method = Beans.getPropGetter(SimpleBean.class, "name");
+        assertNotNull(method);
+        assertEquals("getName", method.getName());
+        assertNotNull(Beans.getPropGetter(SimpleBean.class, "NAME"));
+        assertNotNull(Beans.getPropGetter(SimpleBean.class, "NaMe"));
+        assertNull(Beans.getPropGetter(SimpleBean.class, "nonExistent"));
+        assertNotNull(Beans.getPropGetter(SimpleBean.class, "active"));
+        assertDoesNotThrow(() -> Beans.getPropGetter(SimpleBean.class, "isActive"));
+        assertDoesNotThrow(() -> Beans.getPropGetter(SimpleBean.class, "setName"));
+
+        method = Beans.getPropGetter(EntityBean.class, "id");
+        assertEquals("getId", method.getName());
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(NonBean.class, "field"));
+    }
+
+    @Test
+    public void testGetPropGetter_OverLongName() {
+        String longName = "a".repeat(129);
+        assertNull(Beans.getPropGetter(SimpleBean.class, longName));
+        assertNull(Beans.getPropSetter(SimpleBean.class, longName));
+        assertNull(Beans.getPropField(SimpleBean.class, longName));
+    }
+
+    @Test
+    public void testGetPropGetters() {
+        ImmutableMap<String, Method> methods = Beans.getPropGetters(SimpleBean.class);
+        assertNotNull(methods.get("name"));
+        assertNotNull(methods.get("age"));
+        assertNotNull(methods.get("active"));
+
+        methods = Beans.getPropGetters(EntityBean.class);
+        assertNotNull(methods.get("id"));
+        assertNotNull(methods.get("value"));
+    }
+
+    @Test
     public void testGetPropNameByMethod() throws Exception {
         assertEquals("name", Beans.getPropNameByMethod(SimpleBean.class.getMethod("getName")));
         assertEquals("age", Beans.getPropNameByMethod(SimpleBean.class.getMethod("getAge")));
@@ -70,6 +143,8 @@ public class BeansGetTest extends BeansTestSupport {
         assertEquals("active", Beans.getPropNameByMethod(HasPrefixBean.class.getMethod("hasActive")));
         assertThrows(IllegalArgumentException.class, () -> Beans.getPropNameByMethod(null));
     }
+
+    // getPropNameList
 
     @Test
     public void testGetPropNameList() {
@@ -100,6 +175,8 @@ public class BeansGetTest extends BeansTestSupport {
         assertNull(Beans.getPropGetter(BeanWithStaticAccessors.class, "version"));
         assertNull(Beans.getPropSetter(BeanWithStaticAccessors.class, "version"));
     }
+
+    // getPropNames
 
     @Test
     public void testGetPropNames() {
@@ -179,79 +256,6 @@ public class BeansGetTest extends BeansTestSupport {
     }
 
     @Test
-    public void testGetIgnoredPropNamesForDiff() {
-        ImmutableSet<String> ignored = Beans.getIgnoredPropNamesForDiff(BeanWithDiffIgnore.class);
-        assertEquals(2, ignored.size());
-        assertTrue(ignored.contains("lastModified"));
-        assertTrue(ignored.contains("internalFlag"));
-        assertFalse(ignored.contains("name"));
-
-        assertTrue(Beans.getIgnoredPropNamesForDiff(SimpleBean.class).isEmpty());
-        assertEquals(CommonUtil.asSet("secret"), Beans.getIgnoredPropNamesForDiff(DiffProbeBean.class));
-    }
-
-    @Test
-    public void testGetPropField() {
-        Field field = Beans.getPropField(SimpleBean.class, "name");
-        assertNotNull(field);
-        assertEquals("name", field.getName());
-        assertNotNull(Beans.getPropField(SimpleBean.class, "NAME"));
-        assertNotNull(Beans.getPropField(SimpleBean.class, "NaMe"));
-        assertNull(Beans.getPropField(SimpleBean.class, "nonExistent"));
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropField(NonBean.class, "field"));
-    }
-
-    @Test
-    public void testGetPropFields() {
-        ImmutableMap<String, Field> fields = Beans.getPropFields(SimpleBean.class);
-        assertNotNull(fields.get("name"));
-        assertNotNull(fields.get("age"));
-        assertNotNull(fields.get("active"));
-
-        fields = Beans.getPropFields(EntityBean.class);
-        assertNotNull(fields.get("id"));
-        assertNotNull(fields.get("value"));
-    }
-
-    @Test
-    public void testGetPropGetter() {
-        Method method = Beans.getPropGetter(SimpleBean.class, "name");
-        assertNotNull(method);
-        assertEquals("getName", method.getName());
-        assertNotNull(Beans.getPropGetter(SimpleBean.class, "NAME"));
-        assertNotNull(Beans.getPropGetter(SimpleBean.class, "NaMe"));
-        assertNull(Beans.getPropGetter(SimpleBean.class, "nonExistent"));
-        assertNotNull(Beans.getPropGetter(SimpleBean.class, "active"));
-        assertDoesNotThrow(() -> Beans.getPropGetter(SimpleBean.class, "isActive"));
-        assertDoesNotThrow(() -> Beans.getPropGetter(SimpleBean.class, "setName"));
-
-        method = Beans.getPropGetter(EntityBean.class, "id");
-        assertEquals("getId", method.getName());
-
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(NonBean.class, "field"));
-    }
-
-    @Test
-    public void testGetPropGetter_OverLongName() {
-        String longName = "a".repeat(129);
-        assertNull(Beans.getPropGetter(SimpleBean.class, longName));
-        assertNull(Beans.getPropSetter(SimpleBean.class, longName));
-        assertNull(Beans.getPropField(SimpleBean.class, longName));
-    }
-
-    @Test
-    public void testGetPropGetters() {
-        ImmutableMap<String, Method> methods = Beans.getPropGetters(SimpleBean.class);
-        assertNotNull(methods.get("name"));
-        assertNotNull(methods.get("age"));
-        assertNotNull(methods.get("active"));
-
-        methods = Beans.getPropGetters(EntityBean.class);
-        assertNotNull(methods.get("id"));
-        assertNotNull(methods.get("value"));
-    }
-
-    @Test
     public void testGetPropSetter() {
         Method method = Beans.getPropSetter(SimpleBean.class, "name");
         assertNotNull(method);
@@ -268,6 +272,21 @@ public class BeansGetTest extends BeansTestSupport {
     }
 
     @Test
+    public void testGetPropSetter_BuilderClassOfABeanWhoseBuilderOmitsAProperty() {
+        assertEquals(Arrays.asList("value", "extra"), new ArrayList<>(Beans.getPropNameList(BuilderOmitsPropBean.class)));
+
+        // The builder's setter model is published while the bean is introspected, so the builder class resolves
+        // its own setters - tolerantly - and answers null, not "not a bean class", for a property it omits.
+        assertEquals("value", Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "value").getName());
+        assertNull(Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "extra"));
+        assertEquals("value", Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "VALUE").getName());
+        assertFalse(Beans.isBeanClass(BuilderOmitsPropBean.Builder.class));
+
+        // A class that really has no setter model of its own is still rejected.
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(NonBean.class, "field"));
+    }
+
+    @Test
     public void testGetPropSetters() {
         ImmutableMap<String, Method> setters = Beans.getPropSetters(SimpleBean.class);
         assertEquals("setName", setters.get("name").getName());
@@ -277,6 +296,25 @@ public class BeansGetTest extends BeansTestSupport {
         setters = Beans.getPropSetters(EntityBean.class);
         assertNotNull(setters.get("id"));
         assertNotNull(setters.get("value"));
+    }
+
+
+
+    /**
+     * Pins the precondition both builder paragraphs state: a builder class is resolvable here only because the
+     * bean it builds was introspected. Looked up on its own first, it has no setter model at all - an empty map,
+     * and "not a bean class" from {@code getPropSetter} - because a standalone scan of a canonical builder
+     * derives no properties.
+     */
+    @Test
+    public void testGetPropSetters_BuilderClassLookedUpBeforeItsBeanHasNoModel() {
+        assertTrue(Beans.getPropSetters(ColdBuilderBean.Builder.class).isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(ColdBuilderBean.Builder.class, "name"));
+
+        // Introspecting the bean publishes the builder's model, and from then on both answer.
+        assertEquals(Arrays.asList("name"), new ArrayList<>(Beans.getPropNameList(ColdBuilderBean.class)));
+        assertEquals(Set.of("name"), Beans.getPropSetters(ColdBuilderBean.Builder.class).keySet());
+        assertEquals("name", Beans.getPropSetter(ColdBuilderBean.Builder.class, "name").getName());
     }
 
     @Test
@@ -335,6 +373,8 @@ public class BeansGetTest extends BeansTestSupport {
         assertTrue(Beans.getPropValueIfPresent(nb2, "address.nope").isEmpty());
     }
 
+
+
     /**
      * A builder-based bean with a property its builder does not expose. {@code scanPropAccessors} promotes a
      * field-backed getter to a property without requiring the builder to be able to set it, so this is a legal
@@ -376,20 +416,7 @@ public class BeansGetTest extends BeansTestSupport {
         }
     }
 
-    @Test
-    public void testGetPropSetter_BuilderClassOfABeanWhoseBuilderOmitsAProperty() {
-        assertEquals(Arrays.asList("value", "extra"), new ArrayList<>(Beans.getPropNameList(BuilderOmitsPropBean.class)));
 
-        // The builder's setter model is published while the bean is introspected, so the builder class resolves
-        // its own setters - tolerantly - and answers null, not "not a bean class", for a property it omits.
-        assertEquals("value", Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "value").getName());
-        assertNull(Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "extra"));
-        assertEquals("value", Beans.getPropSetter(BuilderOmitsPropBean.Builder.class, "VALUE").getName());
-        assertFalse(Beans.isBeanClass(BuilderOmitsPropBean.Builder.class));
-
-        // A class that really has no setter model of its own is still rejected.
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(NonBean.class, "field"));
-    }
 
     /** Its own bean, referenced by no other test, so the lookups below really do see the cold path. */
     public static class ColdBuilderBean {
@@ -421,20 +448,4 @@ public class BeansGetTest extends BeansTestSupport {
         }
     }
 
-    /**
-     * Pins the precondition both builder paragraphs state: a builder class is resolvable here only because the
-     * bean it builds was introspected. Looked up on its own first, it has no setter model at all - an empty map,
-     * and "not a bean class" from {@code getPropSetter} - because a standalone scan of a canonical builder
-     * derives no properties.
-     */
-    @Test
-    public void testGetPropSetters_BuilderClassLookedUpBeforeItsBeanHasNoModel() {
-        assertTrue(Beans.getPropSetters(ColdBuilderBean.Builder.class).isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropSetter(ColdBuilderBean.Builder.class, "name"));
-
-        // Introspecting the bean publishes the builder's model, and from then on both answer.
-        assertEquals(Arrays.asList("name"), new ArrayList<>(Beans.getPropNameList(ColdBuilderBean.class)));
-        assertEquals(Set.of("name"), Beans.getPropSetters(ColdBuilderBean.Builder.class).keySet());
-        assertEquals("name", Beans.getPropSetter(ColdBuilderBean.Builder.class, "name").getName());
-    }
 }

@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -10,7 +12,9 @@ import com.landawn.abacus.AbstractTest;
 public abstract class MultimapTestSupport extends AbstractTest {
 
     protected ListMultimap<String, Integer> listMultimap;
+
     protected Multimap<String, Integer, List<Integer>> multimap;
+
     @SuppressWarnings("rawtypes")
     protected SetMultimap setMultimap;
 
@@ -30,50 +34,13 @@ public abstract class MultimapTestSupport extends AbstractTest {
         return CommonUtil.newSetMultimap();
     }
 
-    //
-    //
-    //
-    //
-    //
-    //
+    protected static ListMultimap<String, Integer> listOf(final Object... keyValues) {
+        final ListMultimap<String, Integer> mm = new ListMultimap<>(LinkedHashMap::new, ArrayList::new);
 
-    //
-    //
-    //
+        for (int i = 0; i < keyValues.length; i += 2) {
+            mm.put((String) keyValues[i], (Integer) keyValues[i + 1]);
+        }
 
-    //
-    //
-
-    //
-
-    // --- Additional missing coverage tests ---
-
-    //
-
-    //
-    //
-    //
-    //
-
-    //
-    //
-
-    //
-
-    //
-
-    //
-    //
-    //
-    //
-    //
-    //
-
-    //
-
-    //
-    //
-    //
-
-    // --- regression tests for 2026-06-10 deep-review fixes ---
+        return mm;
+    }
 }

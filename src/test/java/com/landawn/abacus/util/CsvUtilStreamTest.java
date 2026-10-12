@@ -24,6 +24,8 @@ import com.landawn.abacus.util.stream.Stream;
 
 public class CsvUtilStreamTest extends CsvUtilTestSupport {
 
+    // stream
+
     @Test
     public void testStream_BeanClass() {
         try (Stream<Person> stream = CsvUtil.stream(testCsvFile, Person.class)) {
@@ -48,6 +50,148 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
         }
         try (Stream<Person> stream = CsvUtil.stream(new StringReader(testCsvContent), List.of("id", "name"), 1, 2, Fn.alwaysTrue(), Person.class, true)) {
             assertEquals(2, stream.toList().size());
+        }
+    }
+
+    @Test
+    public void testStream_BeanTargetRejectsUnknownPropertyInWholeHeaderSelection() {
+        // Partial explicit selection naming a column the bean has no property for is rejected ...
+        try (Stream<CsvUtilTestSupport.Person> partial = CsvUtil.stream(new StringReader("id,unknownColumn,name\n1,x,John\n"), List.of("id", "unknownColumn"),
+                CsvUtilTestSupport.Person.class, true)) {
+            assertThrows(IllegalArgumentException.class, partial::toList);
+        }
+
+        // ... and so is an explicit selection that happens to name every header column.
+        try (Stream<CsvUtilTestSupport.Person> whole = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), List.of("unknownColumn", "id"),
+                CsvUtilTestSupport.Person.class, true)) {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, whole::toList);
+            assertTrue(ex.getMessage().contains("unknownColumn"));
+        }
+
+        // A null (unspecified) selection still skips header columns the bean does not have.
+        try (Stream<CsvUtilTestSupport.Person> all = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), null, CsvUtilTestSupport.Person.class, true)) {
+            List<CsvUtilTestSupport.Person> persons = all.toList();
+            assertEquals(1, persons.size());
+            assertEquals("1", persons.get(0).getId());
+        }
+    }
+
+    @Test
+    public void testStream_EdgeCase() throws IOException {
+        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 0, 0, Fn.alwaysTrue(), Person.class)) {
+            assertEquals(0, stream.toList().size());
+        }
+        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 100, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class)) {
+            assertEquals(0, stream.toList().size());
+        }
+        try (Stream<Person> stream = CsvUtil.stream(new StringReader(""), Person.class, true)) {
+            assertEquals(0, stream.toList().size());
+        }
+        try (Stream<String> stream = CsvUtil.stream(new StringReader(""), (columns, row) -> row.get(0), true)) {
+            assertEquals(0, stream.toList().size());
+        }
+        File emptyFile = tempDir.resolve("empty.csv").toFile();
+        Files.writeString(emptyFile.toPath(), "");
+        try (Stream<Map> stream = CsvUtil.stream(emptyFile, Map.class)) {
+            assertEquals(0, stream.toList().size());
+        }
+        File headerOnly = tempDir.resolve("header_only.csv").toFile();
+        Files.writeString(headerOnly.toPath(), "id,name,age\n");
+        try (Stream<Map> stream = CsvUtil.stream(headerOnly, Map.class)) {
+            assertEquals(0, stream.toList().size());
+        }
+
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, -1, 10, Fn.alwaysTrue(), Person.class));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, 0, -1, Fn.alwaysTrue(), Person.class));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, -1, 10, Fn.alwaysTrue(),
+                (BiFunction<List<String>, DisposableArray<String>, String>) (c, r) -> r.get(0)));
+        assertThrows(IllegalArgumentException.class,
+                () -> CsvUtil.stream(new StringReader("id\n1\n"), (BiFunction<List<String>, DisposableArray<String>, String>) null, false));
+
+        try (Stream<Person> stream = CsvUtil.stream(new StringReader("id,name,unknownColumn\n1,John,val"), List.of("unknownColumn"), Person.class, false)) {
+            assertThrows(IllegalArgumentException.class, stream::toList);
+        }
+        try (Stream<Person> stream = CsvUtil.stream(new StringReader("id,name,age\n1,John,25"), List.of("nonexistent"), Person.class, false)) {
+            assertThrows(IllegalArgumentException.class, stream::toList);
+        }
+        try (Stream<String> stream = CsvUtil.stream(new StringReader("id,name\n1,John"), List.of("id", "name"), 0, Long.MAX_VALUE, Fn.alwaysTrue(),
+                String.class, false)) {
+            assertThrows(IllegalArgumentException.class, stream::toList);
+        }
+    }
+
+    @Test
+    public void testStream_EmptySelectColumns() {
+        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, List.of(), Person.class)) {
+            assertNotNull(stream.toList());
+        }
+        try (Stream<Person> stream = CsvUtil.stream(new StringReader(testCsvContent), List.of(), Person.class, true)) {
+            assertNotNull(stream.toList());
+        }
+        try (Stream<String> stream = CsvUtil.stream(testCsvFile, List.of(), (columns, row) -> columns.toString())) {
+            assertNotNull(stream.toList());
+        }
+    }
+
+    @Test
+    public void testStream_EmptySourceRecyclesBorrowedBufferedReader() {
+        List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
+        java.io.BufferedReader markerReader = null;
+        java.io.BufferedReader nextReader = null;
+        try {
+            for (int i = 0; i < 64; i++) {
+                drainedReaders.add(Objectory.createBufferedReader("drain-" + i));
+            }
+            markerReader = Objectory.createBufferedReader("marker");
+            Objectory.recycle(markerReader);
+            try (Stream<String> stream = CsvUtil.stream(new StringReader(""), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (columns, row) -> row.get(0), false)) {
+                assertTrue(stream.toList().isEmpty());
+            }
+            nextReader = Objectory.createBufferedReader("next");
+            assertSame(markerReader, nextReader);
+        } finally {
+            if (nextReader != null && nextReader != markerReader) {
+                Objectory.recycle(nextReader);
+            }
+            if (markerReader != null) {
+                Objectory.recycle(markerReader);
+            }
+            for (java.io.BufferedReader reader : drainedReaders) {
+                Objectory.recycle(reader);
+            }
+        }
+    }
+
+    @Test
+    public void testStream_ParserCaptureAndClose() {
+        CsvUtil.setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON);
+        CsvUtil.setLineParser(CsvUtil.CSV_LINE_PARSER_IN_JSON);
+        Stream<String> stream = CsvUtil.stream(new StringReader("[\"id\",\"name\"]\n[\"1\",\"Ada\"]\n"), (columns, row) -> row.get(1), false);
+        CsvUtil.resetHeaderParser();
+        CsvUtil.resetLineParser();
+        try (stream) {
+            assertEquals(List.of("Ada"), stream.toList());
+        }
+
+        TrackingReader closed = new TrackingReader(new StringReader("id,name\n1,John\n2,Jane\n"));
+        try (Stream<Object[]> s = CsvUtil.stream(closed, Object[].class, true)) {
+            s.toList();
+        }
+        assertTrue(closed.closed);
+
+        TrackingReader kept = new TrackingReader(new StringReader("id,name\n1,John\n"));
+        try (Stream<Object[]> s = CsvUtil.stream(kept, Object[].class, false)) {
+            s.toList();
+        }
+        assertFalse(kept.closed);
+
+        TrackingReader failed = new TrackingReader(new StringReader("id,name\n1,John\n"));
+        Stream<Object[]> failing = CsvUtil.stream(failed, List.of("missing"), Object[].class, true);
+        try {
+            assertThrows(IllegalArgumentException.class, failing::toList);
+            assertTrue(failed.closed);
+        } finally {
+            failing.close();
         }
     }
 
@@ -101,6 +245,41 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
     }
 
     @Test
+    public void testStream_ScalarTargetTypeReportsSelectedColumnCount() {
+        Stream<String> zeroColumns = CsvUtil.stream(new StringReader("a,b\n1,2\n"), List.of(), String.class, true);
+        try {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, zeroColumns::toList);
+            assertTrue(ex.getMessage().contains("only supported when exactly one column is selected"));
+            assertTrue(ex.getMessage().contains("0 column(s) are selected"));
+        } finally {
+            zeroColumns.close();
+        }
+
+        Stream<String> twoColumns = CsvUtil.stream(new StringReader("a,b\n1,2\n"), null, String.class, true);
+        try {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, twoColumns::toList);
+            assertTrue(ex.getMessage().contains("java.lang.String"));
+            assertTrue(ex.getMessage().contains("2 column(s) are selected"));
+        } finally {
+            twoColumns.close();
+        }
+
+        try (Stream<String> oneColumn = CsvUtil.stream(new StringReader("a,b\n1,2\n"), List.of("b"), String.class, true)) {
+            assertEquals(List.of("2"), oneColumn.toList());
+        }
+    }
+
+    @Test
+    public void testStream_SingleValueTargetThatLooksLikeBeanIsConvertedAsOneValue() {
+        try (Stream<java.util.GregorianCalendar> stream = CsvUtil.stream(new StringReader("d,x\n2020-01-01T00:00:00Z,1\n"), List.of("d"),
+                java.util.GregorianCalendar.class, true)) {
+            List<java.util.GregorianCalendar> result = stream.toList();
+            assertEquals(1, result.size());
+            assertEquals(1577836800000L, result.get(0).getTimeInMillis());
+        }
+    }
+
+    @Test
     public void testStream_TargetTypes() {
         try (Stream<Map> stream = CsvUtil.stream(testCsvFile, Map.class)) {
             List<Map> maps = stream.toList();
@@ -131,180 +310,4 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
         }
     }
 
-    @Test
-    public void testStream_EdgeCase() throws IOException {
-        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 0, 0, Fn.alwaysTrue(), Person.class)) {
-            assertEquals(0, stream.toList().size());
-        }
-        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, null, 100, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class)) {
-            assertEquals(0, stream.toList().size());
-        }
-        try (Stream<Person> stream = CsvUtil.stream(new StringReader(""), Person.class, true)) {
-            assertEquals(0, stream.toList().size());
-        }
-        try (Stream<String> stream = CsvUtil.stream(new StringReader(""), (columns, row) -> row.get(0), true)) {
-            assertEquals(0, stream.toList().size());
-        }
-        File emptyFile = tempDir.resolve("empty.csv").toFile();
-        Files.writeString(emptyFile.toPath(), "");
-        try (Stream<Map> stream = CsvUtil.stream(emptyFile, Map.class)) {
-            assertEquals(0, stream.toList().size());
-        }
-        File headerOnly = tempDir.resolve("header_only.csv").toFile();
-        Files.writeString(headerOnly.toPath(), "id,name,age\n");
-        try (Stream<Map> stream = CsvUtil.stream(headerOnly, Map.class)) {
-            assertEquals(0, stream.toList().size());
-        }
-
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, -1, 10, Fn.alwaysTrue(), Person.class));
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, 0, -1, Fn.alwaysTrue(), Person.class));
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.stream(testCsvFile, null, -1, 10, Fn.alwaysTrue(),
-                (BiFunction<List<String>, DisposableArray<String>, String>) (c, r) -> r.get(0)));
-        assertThrows(IllegalArgumentException.class,
-                () -> CsvUtil.stream(new StringReader("id\n1\n"), (BiFunction<List<String>, DisposableArray<String>, String>) null, false));
-
-        try (Stream<Person> stream = CsvUtil.stream(new StringReader("id,name,unknownColumn\n1,John,val"), List.of("unknownColumn"), Person.class, false)) {
-            assertThrows(IllegalArgumentException.class, stream::toList);
-        }
-        try (Stream<Person> stream = CsvUtil.stream(new StringReader("id,name,age\n1,John,25"), List.of("nonexistent"), Person.class, false)) {
-            assertThrows(IllegalArgumentException.class, stream::toList);
-        }
-        try (Stream<String> stream = CsvUtil.stream(new StringReader("id,name\n1,John"), List.of("id", "name"), 0, Long.MAX_VALUE, Fn.alwaysTrue(),
-                String.class, false)) {
-            assertThrows(IllegalArgumentException.class, stream::toList);
-        }
-    }
-
-    @Test
-    public void testStream_ParserCaptureAndClose() {
-        CsvUtil.setHeaderParser(CsvUtil.CSV_HEADER_PARSER_IN_JSON);
-        CsvUtil.setLineParser(CsvUtil.CSV_LINE_PARSER_IN_JSON);
-        Stream<String> stream = CsvUtil.stream(new StringReader("[\"id\",\"name\"]\n[\"1\",\"Ada\"]\n"), (columns, row) -> row.get(1), false);
-        CsvUtil.resetHeaderParser();
-        CsvUtil.resetLineParser();
-        try (stream) {
-            assertEquals(List.of("Ada"), stream.toList());
-        }
-
-        TrackingReader closed = new TrackingReader(new StringReader("id,name\n1,John\n2,Jane\n"));
-        try (Stream<Object[]> s = CsvUtil.stream(closed, Object[].class, true)) {
-            s.toList();
-        }
-        assertTrue(closed.closed);
-
-        TrackingReader kept = new TrackingReader(new StringReader("id,name\n1,John\n"));
-        try (Stream<Object[]> s = CsvUtil.stream(kept, Object[].class, false)) {
-            s.toList();
-        }
-        assertFalse(kept.closed);
-
-        TrackingReader failed = new TrackingReader(new StringReader("id,name\n1,John\n"));
-        Stream<Object[]> failing = CsvUtil.stream(failed, List.of("missing"), Object[].class, true);
-        try {
-            assertThrows(IllegalArgumentException.class, failing::toList);
-            assertTrue(failed.closed);
-        } finally {
-            failing.close();
-        }
-    }
-
-    @Test
-    public void testStream_EmptySourceRecyclesBorrowedBufferedReader() {
-        List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
-        java.io.BufferedReader markerReader = null;
-        java.io.BufferedReader nextReader = null;
-        try {
-            for (int i = 0; i < 64; i++) {
-                drainedReaders.add(Objectory.createBufferedReader("drain-" + i));
-            }
-            markerReader = Objectory.createBufferedReader("marker");
-            Objectory.recycle(markerReader);
-            try (Stream<String> stream = CsvUtil.stream(new StringReader(""), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (columns, row) -> row.get(0), false)) {
-                assertTrue(stream.toList().isEmpty());
-            }
-            nextReader = Objectory.createBufferedReader("next");
-            assertSame(markerReader, nextReader);
-        } finally {
-            if (nextReader != null && nextReader != markerReader) {
-                Objectory.recycle(nextReader);
-            }
-            if (markerReader != null) {
-                Objectory.recycle(markerReader);
-            }
-            for (java.io.BufferedReader reader : drainedReaders) {
-                Objectory.recycle(reader);
-            }
-        }
-    }
-
-    @Test
-    public void testStream_EmptySelectColumns() {
-        try (Stream<Person> stream = CsvUtil.stream(testCsvFile, List.of(), Person.class)) {
-            assertNotNull(stream.toList());
-        }
-        try (Stream<Person> stream = CsvUtil.stream(new StringReader(testCsvContent), List.of(), Person.class, true)) {
-            assertNotNull(stream.toList());
-        }
-        try (Stream<String> stream = CsvUtil.stream(testCsvFile, List.of(), (columns, row) -> columns.toString())) {
-            assertNotNull(stream.toList());
-        }
-    }
-
-    @Test
-    public void testStream_ScalarTargetTypeReportsSelectedColumnCount() {
-        Stream<String> zeroColumns = CsvUtil.stream(new StringReader("a,b\n1,2\n"), List.of(), String.class, true);
-        try {
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, zeroColumns::toList);
-            assertTrue(ex.getMessage().contains("only supported when exactly one column is selected"));
-            assertTrue(ex.getMessage().contains("0 column(s) are selected"));
-        } finally {
-            zeroColumns.close();
-        }
-
-        Stream<String> twoColumns = CsvUtil.stream(new StringReader("a,b\n1,2\n"), null, String.class, true);
-        try {
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, twoColumns::toList);
-            assertTrue(ex.getMessage().contains("java.lang.String"));
-            assertTrue(ex.getMessage().contains("2 column(s) are selected"));
-        } finally {
-            twoColumns.close();
-        }
-
-        try (Stream<String> oneColumn = CsvUtil.stream(new StringReader("a,b\n1,2\n"), List.of("b"), String.class, true)) {
-            assertEquals(List.of("2"), oneColumn.toList());
-        }
-    }
-
-    @Test
-    public void testStream_BeanTargetRejectsUnknownPropertyInWholeHeaderSelection() {
-        // Partial explicit selection naming a column the bean has no property for is rejected ...
-        try (Stream<CsvUtilTestSupport.Person> partial = CsvUtil.stream(new StringReader("id,unknownColumn,name\n1,x,John\n"), List.of("id", "unknownColumn"),
-                CsvUtilTestSupport.Person.class, true)) {
-            assertThrows(IllegalArgumentException.class, partial::toList);
-        }
-
-        // ... and so is an explicit selection that happens to name every header column.
-        try (Stream<CsvUtilTestSupport.Person> whole = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), List.of("unknownColumn", "id"),
-                CsvUtilTestSupport.Person.class, true)) {
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, whole::toList);
-            assertTrue(ex.getMessage().contains("unknownColumn"));
-        }
-
-        // A null (unspecified) selection still skips header columns the bean does not have.
-        try (Stream<CsvUtilTestSupport.Person> all = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), null, CsvUtilTestSupport.Person.class, true)) {
-            List<CsvUtilTestSupport.Person> persons = all.toList();
-            assertEquals(1, persons.size());
-            assertEquals("1", persons.get(0).getId());
-        }
-    }
-
-    @Test
-    public void testStream_SingleValueTargetThatLooksLikeBeanIsConvertedAsOneValue() {
-        try (Stream<java.util.GregorianCalendar> stream = CsvUtil.stream(new StringReader("d,x\n2020-01-01T00:00:00Z,1\n"), List.of("d"),
-                java.util.GregorianCalendar.class, true)) {
-            List<java.util.GregorianCalendar> result = stream.toList();
-            assertEquals(1, result.size());
-            assertEquals(1577836800000L, result.get(0).getTimeInMillis());
-        }
-    }
 }

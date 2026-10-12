@@ -16,6 +16,9 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
 public class IOUtilSkipTest extends IOUtilTestSupport {
+
+    // skip
+
     @Test
     public void testSkip_InputStream() throws IOException {
         byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
@@ -24,17 +27,6 @@ public class IOUtilSkipTest extends IOUtilTestSupport {
 
             assertEquals(5, skipped);
             assertEquals('5', is.read());
-        }
-    }
-
-    @Test
-    public void testSkip_InputStreamZeroBytes() throws IOException {
-        byte[] data = "Test".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            long skipped = IOUtil.skip(is, 0);
-
-            assertEquals(0, skipped);
-            assertEquals('T', is.read());
         }
     }
 
@@ -55,6 +47,16 @@ public class IOUtilSkipTest extends IOUtilTestSupport {
     }
 
     @Test
+    public void testSkip_InputStreamLargeSkip() throws IOException {
+        byte[] largeData = new byte[50000];
+        try (InputStream is = new ByteArrayInputStream(largeData)) {
+            long skipped = IOUtil.skip(is, 30000);
+
+            assertEquals(30000, skipped);
+        }
+    }
+
+    @Test
     public void testSkip_InputStreamNegativeBytes() {
         try (InputStream is = new ByteArrayInputStream("Test".getBytes(UTF_8))) {
             assertThrows(IllegalArgumentException.class, () -> {
@@ -65,22 +67,23 @@ public class IOUtilSkipTest extends IOUtilTestSupport {
     }
 
     @Test
+    public void testSkip_InputStreamZeroBytes() throws IOException {
+        byte[] data = "Test".getBytes(UTF_8);
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            long skipped = IOUtil.skip(is, 0);
+
+            assertEquals(0, skipped);
+            assertEquals('T', is.read());
+        }
+    }
+
+    @Test
     public void testSkip_Reader() throws IOException {
         try (Reader reader = new StringReader("0123456789ABCDEF")) {
             long skipped = IOUtil.skip(reader, 7);
 
             assertEquals(7, skipped);
             assertEquals('7', reader.read());
-        }
-    }
-
-    @Test
-    public void testSkip_ReaderZeroChars() throws IOException {
-        try (Reader reader = new StringReader("Test")) {
-            long skipped = IOUtil.skip(reader, 0);
-
-            assertEquals(0, skipped);
-            assertEquals('T', reader.read());
         }
     }
 
@@ -110,90 +113,33 @@ public class IOUtilSkipTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testSkip_InputStreamLargeSkip() throws IOException {
-        byte[] largeData = new byte[50000];
-        try (InputStream is = new ByteArrayInputStream(largeData)) {
-            long skipped = IOUtil.skip(is, 30000);
+    public void testSkip_ReaderZeroChars() throws IOException {
+        try (Reader reader = new StringReader("Test")) {
+            long skipped = IOUtil.skip(reader, 0);
 
-            assertEquals(30000, skipped);
+            assertEquals(0, skipped);
+            assertEquals('T', reader.read());
         }
     }
 
     @Test
-    public void testSkipFully_InputStream() throws IOException {
-        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 8);
+    public void testSkipRejectsANullSourceRegardlessOfCount() throws IOException {
+        // A null source used to be reported only when the count was positive: skip(null, 0) returned 0 while
+        // skip(null, 1) threw NullPointerException, because the zero-count shortcut ran before anything touched
+        // the stream. Whether a bad argument was reported must not depend on the count.
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((InputStream) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((InputStream) null, 5));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((Reader) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((Reader) null, 5));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skipFully((InputStream) null, 0));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.skipFully((Reader) null, 0));
 
-            assertEquals('8', is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamExactLength() throws IOException {
-        byte[] data = "12345".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 5);
-
-            assertEquals(-1, is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamBeyondEnd() {
-        byte[] data = "Short".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            assertThrows(IOException.class, () -> {
-                IOUtil.skipFully(is, 10);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkipFully_InputStreamZero() throws IOException {
-        byte[] data = "Test".getBytes(UTF_8);
-        try (InputStream is = new ByteArrayInputStream(data)) {
-            IOUtil.skipFully(is, 0);
-
-            assertEquals('T', is.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_Reader() throws IOException {
-        try (Reader reader = new StringReader("0123456789")) {
-            IOUtil.skipFully(reader, 6);
-
-            assertEquals('6', reader.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderExactLength() throws IOException {
-        try (Reader reader = new StringReader("ABC")) {
-            IOUtil.skipFully(reader, 3);
-
-            assertEquals(-1, reader.read());
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderBeyondEnd() {
-        try (Reader reader = new StringReader("Tiny")) {
-            assertThrows(IOException.class, () -> {
-                IOUtil.skipFully(reader, 20);
-            });
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testSkipFully_ReaderZero() throws IOException {
-        try (Reader reader = new StringReader("Data")) {
-            IOUtil.skipFully(reader, 0);
-
-            assertEquals('D', reader.read());
+        // A negative count is still rejected, and a valid call still works.
+        try (InputStream is = new java.io.ByteArrayInputStream("0123456789".getBytes(UTF_8))) {
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.skip(is, -1));
+            assertEquals(0, IOUtil.skip(is, 0));
+            assertEquals(3, IOUtil.skip(is, 3));
+            assertEquals('3', is.read());
         }
     }
 
@@ -258,24 +204,84 @@ public class IOUtilSkipTest extends IOUtilTestSupport {
         assertEquals(100, IOUtil.skip(optimistic, 5_000));
     }
 
-    @Test
-    public void testSkipRejectsANullSourceRegardlessOfCount() throws IOException {
-        // A null source used to be reported only when the count was positive: skip(null, 0) returned 0 while
-        // skip(null, 1) threw NullPointerException, because the zero-count shortcut ran before anything touched
-        // the stream. Whether a bad argument was reported must not depend on the count.
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((InputStream) null, 0));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((InputStream) null, 5));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((Reader) null, 0));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skip((Reader) null, 5));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skipFully((InputStream) null, 0));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.skipFully((Reader) null, 0));
+    // skipFully
 
-        // A negative count is still rejected, and a valid call still works.
-        try (InputStream is = new java.io.ByteArrayInputStream("0123456789".getBytes(UTF_8))) {
-            assertThrows(IllegalArgumentException.class, () -> IOUtil.skip(is, -1));
-            assertEquals(0, IOUtil.skip(is, 0));
-            assertEquals(3, IOUtil.skip(is, 3));
-            assertEquals('3', is.read());
+    @Test
+    public void testSkipFully_InputStream() throws IOException {
+        byte[] data = "0123456789ABCDEF".getBytes(UTF_8);
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            IOUtil.skipFully(is, 8);
+
+            assertEquals('8', is.read());
         }
     }
+
+    @Test
+    public void testSkipFully_InputStreamBeyondEnd() {
+        byte[] data = "Short".getBytes(UTF_8);
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            assertThrows(IOException.class, () -> {
+                IOUtil.skipFully(is, 10);
+            });
+        } catch (IOException e) {
+        }
+    }
+
+    @Test
+    public void testSkipFully_InputStreamExactLength() throws IOException {
+        byte[] data = "12345".getBytes(UTF_8);
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            IOUtil.skipFully(is, 5);
+
+            assertEquals(-1, is.read());
+        }
+    }
+
+    @Test
+    public void testSkipFully_InputStreamZero() throws IOException {
+        byte[] data = "Test".getBytes(UTF_8);
+        try (InputStream is = new ByteArrayInputStream(data)) {
+            IOUtil.skipFully(is, 0);
+
+            assertEquals('T', is.read());
+        }
+    }
+
+    @Test
+    public void testSkipFully_Reader() throws IOException {
+        try (Reader reader = new StringReader("0123456789")) {
+            IOUtil.skipFully(reader, 6);
+
+            assertEquals('6', reader.read());
+        }
+    }
+
+    @Test
+    public void testSkipFully_ReaderBeyondEnd() {
+        try (Reader reader = new StringReader("Tiny")) {
+            assertThrows(IOException.class, () -> {
+                IOUtil.skipFully(reader, 20);
+            });
+        } catch (IOException e) {
+        }
+    }
+
+    @Test
+    public void testSkipFully_ReaderExactLength() throws IOException {
+        try (Reader reader = new StringReader("ABC")) {
+            IOUtil.skipFully(reader, 3);
+
+            assertEquals(-1, reader.read());
+        }
+    }
+
+    @Test
+    public void testSkipFully_ReaderZero() throws IOException {
+        try (Reader reader = new StringReader("Data")) {
+            IOUtil.skipFully(reader, 0);
+
+            assertEquals('D', reader.read());
+        }
+    }
+
 }

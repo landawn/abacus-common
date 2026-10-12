@@ -21,6 +21,57 @@ import com.landawn.abacus.util.Difference.BeanDifference;
 public class DifferenceBeanTest extends DifferenceTestSupport {
 
     @Test
+    public void testArrayProperties() {
+        ArrayPropBean bean1 = new ArrayPropBean();
+        bean1.setName("x");
+        bean1.setData(new byte[] { 1, 2, 3 });
+        bean1.setMatrix(new int[][] { { 1, 2 }, { 3 } });
+        ArrayPropBean bean2 = new ArrayPropBean();
+        bean2.setName("x");
+        bean2.setData(new byte[] { 1, 2, 3 });
+        bean2.setMatrix(new int[][] { { 1, 2 }, { 3 } });
+        assertTrue(BeanDifference.of(bean1, bean2).areEqual());
+
+        ArrayPropBean different = new ArrayPropBean();
+        different.setName("x");
+        different.setData(new byte[] { 1, 2, 4 });
+        assertTrue(BeanDifference.of(bean1, different).differentValues().containsKey("data"));
+
+        ArrayPropBean otherName = new ArrayPropBean();
+        otherName.setName("y");
+        otherName.setData(new byte[] { 1, 2, 3 });
+        assertTrue(BeanDifference.of(bean1, otherName, Arrays.asList("data")).areEqual());
+    }
+
+    @Test
+    public void testBeanVersusNull() {
+        NullPropBean bean = new NullPropBean("John", null, 5);
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> left = BeanDifference.of(bean, (Object) null);
+        assertEquals(CommonUtil.asMap("name", (Object) "John", "email", null, "score", 5), left.onlyOnLeft());
+        assertFalse(left.areEqual());
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> right = BeanDifference.of((Object) null, bean);
+        assertEquals(CommonUtil.asMap("name", (Object) "John", "email", null, "score", 5), right.onlyOnRight());
+    }
+
+    @Test
+    public void testEqualsHashCodeToString() {
+        Account a = new Account();
+        a.setFirstName("John");
+        Account b = new Account();
+        b.setFirstName("Jane");
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> d1 = BeanDifference.of(a, b);
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> d2 = BeanDifference.of(a, b);
+        assertEquals(d1, d1);
+        assertEquals(d1, d2);
+        assertEquals(d1.hashCode(), d2.hashCode());
+        assertNotEquals(d1, null);
+        assertNotEquals(d1, "not a difference");
+        String str = d1.toString();
+        assertTrue(str.contains("areEqual="));
+        assertTrue(str.contains("differentValues="));
+    }
+
+    @Test
     public void testOf() {
         Account a = new Account();
         a.setFirstName("John");
@@ -78,30 +129,17 @@ public class DifferenceBeanTest extends DifferenceTestSupport {
     }
 
     @Test
-    public void testOfCollections() {
-        Account a1 = new Account();
-        a1.setGUI("1");
-        a1.setFirstName("John");
-        a1.setLastName("Doe");
-        a1.setStatus(1);
-        Account b1 = new Account();
-        b1.setGUI("1");
-        b1.setFirstName("John");
-        b1.setLastName("Smith");
-        b1.setStatus(2);
-        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> coll = BeanDifference
-                .of(Arrays.asList(a1), Arrays.asList(b1), Arrays.asList("firstName", "lastName"), Account::getGUI);
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> inner = coll.differentValues().get("1");
-        assertEquals("John", inner.common().get("firstName"));
-        assertEquals(Pair.of("Doe", "Smith"), inner.differentValues().get("lastName"));
-        assertFalse(inner.differentValues().containsKey("status"));
-
-        assertTrue(BeanDifference.of(new ArrayList<Account>(), new ArrayList<Account>(), Account::getGUI).areEqual());
-        Account only = new Account();
-        only.setGUI("1");
-        only.setFirstName("John");
-        assertEquals(1, BeanDifference.of(Arrays.asList(only), new ArrayList<Account>(), Account::getGUI).onlyOnLeft().size());
-        assertEquals(1, BeanDifference.of(new ArrayList<Account>(), Arrays.asList(only), Account::getGUI).onlyOnRight().size());
+    public void testOf_EdgeCase() {
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of("string", "another"));
+        assertThrows(IllegalArgumentException.class,
+                () -> BeanDifference.of(Arrays.asList("not a bean"), Arrays.asList("also not a bean"), Function.identity()));
+        assertThrows(IllegalArgumentException.class,
+                () -> BeanDifference.of(Arrays.asList(new Account(), "not a bean"), Collections.emptyList(), Function.identity()));
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(Arrays.asList(null, "not a bean"), Collections.emptyList(), Function.identity()));
+        Account a = new Account();
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.ofByValues(a, a, (java.util.function.BiPredicate<Object, Object>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> BeanDifference.ofByProps(a, a, (com.landawn.abacus.util.function.TriPredicate<String, Object, Object>) null));
     }
 
     @Test
@@ -145,67 +183,30 @@ public class DifferenceBeanTest extends DifferenceTestSupport {
     }
 
     @Test
-    public void testOf_EdgeCase() {
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of("string", "another"));
-        assertThrows(IllegalArgumentException.class,
-                () -> BeanDifference.of(Arrays.asList("not a bean"), Arrays.asList("also not a bean"), Function.identity()));
-        assertThrows(IllegalArgumentException.class,
-                () -> BeanDifference.of(Arrays.asList(new Account(), "not a bean"), Collections.emptyList(), Function.identity()));
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.of(Arrays.asList(null, "not a bean"), Collections.emptyList(), Function.identity()));
-        Account a = new Account();
-        assertThrows(IllegalArgumentException.class, () -> BeanDifference.ofByValues(a, a, (java.util.function.BiPredicate<Object, Object>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> BeanDifference.ofByProps(a, a, (com.landawn.abacus.util.function.TriPredicate<String, Object, Object>) null));
+    public void testOfCollections() {
+        Account a1 = new Account();
+        a1.setGUI("1");
+        a1.setFirstName("John");
+        a1.setLastName("Doe");
+        a1.setStatus(1);
+        Account b1 = new Account();
+        b1.setGUI("1");
+        b1.setFirstName("John");
+        b1.setLastName("Smith");
+        b1.setStatus(2);
+        BeanDifference<List<Account>, List<Account>, Map<String, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> coll = BeanDifference
+                .of(Arrays.asList(a1), Arrays.asList(b1), Arrays.asList("firstName", "lastName"), Account::getGUI);
+        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> inner = coll.differentValues().get("1");
+        assertEquals("John", inner.common().get("firstName"));
+        assertEquals(Pair.of("Doe", "Smith"), inner.differentValues().get("lastName"));
+        assertFalse(inner.differentValues().containsKey("status"));
+
+        assertTrue(BeanDifference.of(new ArrayList<Account>(), new ArrayList<Account>(), Account::getGUI).areEqual());
+        Account only = new Account();
+        only.setGUI("1");
+        only.setFirstName("John");
+        assertEquals(1, BeanDifference.of(Arrays.asList(only), new ArrayList<Account>(), Account::getGUI).onlyOnLeft().size());
+        assertEquals(1, BeanDifference.of(new ArrayList<Account>(), Arrays.asList(only), Account::getGUI).onlyOnRight().size());
     }
 
-    @Test
-    public void testEqualsHashCodeToString() {
-        Account a = new Account();
-        a.setFirstName("John");
-        Account b = new Account();
-        b.setFirstName("Jane");
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> d1 = BeanDifference.of(a, b);
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> d2 = BeanDifference.of(a, b);
-        assertEquals(d1, d1);
-        assertEquals(d1, d2);
-        assertEquals(d1.hashCode(), d2.hashCode());
-        assertNotEquals(d1, null);
-        assertNotEquals(d1, "not a difference");
-        String str = d1.toString();
-        assertTrue(str.contains("areEqual="));
-        assertTrue(str.contains("differentValues="));
-    }
-
-    @Test
-    public void testArrayProperties() {
-        ArrayPropBean bean1 = new ArrayPropBean();
-        bean1.setName("x");
-        bean1.setData(new byte[] { 1, 2, 3 });
-        bean1.setMatrix(new int[][] { { 1, 2 }, { 3 } });
-        ArrayPropBean bean2 = new ArrayPropBean();
-        bean2.setName("x");
-        bean2.setData(new byte[] { 1, 2, 3 });
-        bean2.setMatrix(new int[][] { { 1, 2 }, { 3 } });
-        assertTrue(BeanDifference.of(bean1, bean2).areEqual());
-
-        ArrayPropBean different = new ArrayPropBean();
-        different.setName("x");
-        different.setData(new byte[] { 1, 2, 4 });
-        assertTrue(BeanDifference.of(bean1, different).differentValues().containsKey("data"));
-
-        ArrayPropBean otherName = new ArrayPropBean();
-        otherName.setName("y");
-        otherName.setData(new byte[] { 1, 2, 3 });
-        assertTrue(BeanDifference.of(bean1, otherName, Arrays.asList("data")).areEqual());
-    }
-
-    @Test
-    public void testBeanVersusNull() {
-        NullPropBean bean = new NullPropBean("John", null, 5);
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> left = BeanDifference.of(bean, (Object) null);
-        assertEquals(CommonUtil.asMap("name", (Object) "John", "email", null, "score", 5), left.onlyOnLeft());
-        assertFalse(left.areEqual());
-        BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> right = BeanDifference.of((Object) null, bean);
-        assertEquals(CommonUtil.asMap("name", (Object) "John", "email", null, "score", 5), right.onlyOnRight());
-    }
 }

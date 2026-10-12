@@ -19,12 +19,6 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.Builder.CollectionBuilder;
 
 public class BuilderCollectionTest extends BuilderTestSupport {
-    @Test
-    public void testCollectionBuilder_add_returnsBuilder() {
-        Set<String> set = new HashSet<>();
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        assertSame(b, b.add("a"));
-    }
 
     @Test
     public void testCollectionBuilder_add() {
@@ -35,11 +29,35 @@ public class BuilderCollectionTest extends BuilderTestSupport {
     }
 
     @Test
+    public void testCollectionBuilder_add_returnsBuilder() {
+        Set<String> set = new HashSet<>();
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        assertSame(b, b.add("a"));
+    }
+
+    // addAll
+
+    @Test
     public void testCollectionBuilder_addAll() {
         Set<String> set = new HashSet<>(Arrays.asList("a"));
         CollectionBuilder<String, Set<String>> builder = Builder.of(set);
         builder.addAll(Arrays.asList("b", "c"));
         assertEquals(3, builder.val().size());
+    }
+
+    @Test
+    public void testCollectionBuilder_addAll_nullCollection() {
+        Set<String> set = new HashSet<>();
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        b.addAll((Collection<String>) null);
+        assertEquals(0, set.size());
+    }
+
+    @Test
+    public void testCollectionBuilder_addAll_returnsBuilder() {
+        Set<String> set = new HashSet<>();
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        assertSame(b, b.addAll(Arrays.asList("a")));
     }
 
     @Test
@@ -51,27 +69,47 @@ public class BuilderCollectionTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testCollectionBuilder_remove() {
-        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
-        builder.remove("b");
-        assertEquals(2, builder.val().size());
+    public void testCollectionBuilder_addAllVarargs_null() {
+        Set<String> set = new HashSet<>();
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        b.addAll((String[]) null);
+        assertEquals(0, set.size());
     }
 
     @Test
-    public void testCollectionBuilder_removeAll() {
-        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
+    public void testCollectionBuilder_addAllVarargs_returnsBuilder() {
+        Set<String> set = new HashSet<>();
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        assertSame(b, b.addAll("a", "b"));
+    }
+
+    // CollectionBuilder
+
+    @Test
+    public void testCollectionBuilder() {
+        Collection<String> coll = new ArrayList<>();
+        CollectionBuilder<String, Collection<String>> builder = Builder.of(coll);
+        builder.add("a").addAll(Arrays.asList("b", "c")).addAll("d", "e");
+        assertEquals(Arrays.asList("a", "b", "c", "d", "e"), coll);
+        builder.remove("a");
+        assertEquals(Arrays.asList("b", "c", "d", "e"), coll);
         builder.removeAll(Arrays.asList("b", "c"));
-        assertEquals(1, builder.val().size());
+        assertEquals(Arrays.asList("d", "e"), coll);
+        builder.removeAll("d", "e");
+        assertTrue(coll.isEmpty());
     }
 
     @Test
-    public void testCollectionBuilder_removeAllVarargs() {
-        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
-        builder.removeAll("b", "c");
-        assertEquals(1, builder.val().size());
+    public void testCollectionBuilderAddAllVarargs() {
+        Set<Integer> set = new LinkedHashSet<>();
+        Builder.CollectionBuilder<Integer, Set<Integer>> builder = Builder.of(set);
+
+        builder.addAll(1, 2, 3);
+        Assertions.assertEquals(3, set.size());
+
+        builder.removeAll(1, 2);
+        Assertions.assertEquals(1, set.size());
+        Assertions.assertTrue(set.contains(3));
     }
 
     @Test
@@ -90,16 +128,11 @@ public class BuilderCollectionTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testCollectionBuilderAddAllVarargs() {
-        Set<Integer> set = new LinkedHashSet<>();
-        Builder.CollectionBuilder<Integer, Set<Integer>> builder = Builder.of(set);
-
-        builder.addAll(1, 2, 3);
-        Assertions.assertEquals(3, set.size());
-
-        builder.removeAll(1, 2);
-        Assertions.assertEquals(1, set.size());
-        Assertions.assertTrue(set.contains(3));
+    public void testCollectionBuilder_of() {
+        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
+        assertNotNull(builder);
+        assertEquals(3, builder.val().size());
     }
 
     @Test
@@ -115,47 +148,11 @@ public class BuilderCollectionTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testCollectionBuilder_of() {
+    public void testCollectionBuilder_remove() {
         Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
         CollectionBuilder<String, Set<String>> builder = Builder.of(set);
-        assertNotNull(builder);
-        assertEquals(3, builder.val().size());
-    }
-
-    @Test
-    public void testCollectionBuilder() {
-        Collection<String> coll = new ArrayList<>();
-        CollectionBuilder<String, Collection<String>> builder = Builder.of(coll);
-        builder.add("a").addAll(Arrays.asList("b", "c")).addAll("d", "e");
-        assertEquals(Arrays.asList("a", "b", "c", "d", "e"), coll);
-        builder.remove("a");
-        assertEquals(Arrays.asList("b", "c", "d", "e"), coll);
-        builder.removeAll(Arrays.asList("b", "c"));
-        assertEquals(Arrays.asList("d", "e"), coll);
-        builder.removeAll("d", "e");
-        assertTrue(coll.isEmpty());
-    }
-
-    @Test
-    public void testCollectionBuilder_removeAllVarargs_empty() {
-        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
-        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
-        builder.removeAll();
-        assertEquals(3, builder.val().size());
-    }
-
-    @Test
-    public void testCollectionBuilder_addAll_returnsBuilder() {
-        Set<String> set = new HashSet<>();
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        assertSame(b, b.addAll(Arrays.asList("a")));
-    }
-
-    @Test
-    public void testCollectionBuilder_addAllVarargs_returnsBuilder() {
-        Set<String> set = new HashSet<>();
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        assertSame(b, b.addAll("a", "b"));
+        builder.remove("b");
+        assertEquals(2, builder.val().size());
     }
 
     @Test
@@ -165,26 +162,14 @@ public class BuilderCollectionTest extends BuilderTestSupport {
         assertSame(b, b.remove("a"));
     }
 
-    @Test
-    public void testCollectionBuilder_removeAll_returnsBuilder() {
-        Set<String> set = new HashSet<>(Arrays.asList("a"));
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        assertSame(b, b.removeAll(Arrays.asList("a")));
-    }
+    // removeAll
 
     @Test
-    public void testCollectionBuilder_removeAllVarargs_returnsBuilder() {
-        Set<String> set = new HashSet<>(Arrays.asList("a", "b"));
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        assertSame(b, b.removeAll("a", "b"));
-    }
-
-    @Test
-    public void testCollectionBuilder_addAll_nullCollection() {
-        Set<String> set = new HashSet<>();
-        CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        b.addAll((Collection<String>) null);
-        assertEquals(0, set.size());
+    public void testCollectionBuilder_removeAll() {
+        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
+        builder.removeAll(Arrays.asList("b", "c"));
+        assertEquals(1, builder.val().size());
     }
 
     @Test
@@ -196,11 +181,26 @@ public class BuilderCollectionTest extends BuilderTestSupport {
     }
 
     @Test
-    public void testCollectionBuilder_addAllVarargs_null() {
-        Set<String> set = new HashSet<>();
+    public void testCollectionBuilder_removeAll_returnsBuilder() {
+        Set<String> set = new HashSet<>(Arrays.asList("a"));
         CollectionBuilder<String, Set<String>> b = Builder.of(set);
-        b.addAll((String[]) null);
-        assertEquals(0, set.size());
+        assertSame(b, b.removeAll(Arrays.asList("a")));
+    }
+
+    @Test
+    public void testCollectionBuilder_removeAllVarargs() {
+        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
+        builder.removeAll("b", "c");
+        assertEquals(1, builder.val().size());
+    }
+
+    @Test
+    public void testCollectionBuilder_removeAllVarargs_empty() {
+        Set<String> set = new HashSet<>(Arrays.asList("a", "b", "c"));
+        CollectionBuilder<String, Set<String>> builder = Builder.of(set);
+        builder.removeAll();
+        assertEquals(3, builder.val().size());
     }
 
     @Test
@@ -210,4 +210,12 @@ public class BuilderCollectionTest extends BuilderTestSupport {
         b.removeAll((String[]) null);
         assertEquals(1, set.size());
     }
+
+    @Test
+    public void testCollectionBuilder_removeAllVarargs_returnsBuilder() {
+        Set<String> set = new HashSet<>(Arrays.asList("a", "b"));
+        CollectionBuilder<String, Set<String>> b = Builder.of(set);
+        assertSame(b, b.removeAll("a", "b"));
+    }
+
 }

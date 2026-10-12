@@ -24,40 +24,6 @@ import com.landawn.abacus.util.function.TriPredicate;
 public class FnCoverageTest extends FnTestSupport {
 
     @Test
-    public void testApplyIfNotNull_threeAndFourMappers() {
-        final Function<String, Integer> len = String::length;
-        final Function<Integer, Integer> times2 = n -> n * 2;
-        final Function<Integer, Integer> plus1 = n -> n + 1;
-        final Function<Integer, String> prefix = n -> "v" + n;
-
-        assertEquals("v10", Fn.applyIfNotNullOrDefault(len, times2, prefix, "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, prefix, "none").apply(null));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(s -> null, times2, prefix, "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(len, n -> null, prefix, "none").apply("hello"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, times2, prefix, "none"));
-
-        assertEquals("v11", Fn.applyIfNotNullOrDefault(len, times2, plus1, prefix, "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, plus1, prefix, "none").apply(null));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(s -> null, times2, plus1, prefix, "none").apply("x"));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(len, n -> null, plus1, prefix, "none").apply("x"));
-        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, n -> null, prefix, "none").apply("x"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(len, times2, plus1, null, "none"));
-
-        assertEquals("v10", Fn.applyIfNotNullOrElseGet(len, times2, prefix, () -> "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, prefix, () -> "none").apply(null));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(s -> null, times2, prefix, () -> "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, n -> null, prefix, () -> "none").apply("hello"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(len, times2, prefix, null));
-
-        assertEquals("v11", Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, () -> "none").apply("hello"));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, () -> "none").apply(null));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(s -> null, times2, plus1, prefix, () -> "none").apply("x"));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, n -> null, plus1, prefix, () -> "none").apply("x"));
-        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, n -> null, prefix, () -> "none").apply("x"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, null));
-    }
-
-    @Test
     public void testAndOr_threeArgs() {
         final Predicate<String> notEmpty = s -> s != null && !s.isEmpty();
         final Predicate<String> shortEnough = s -> s.length() < 5;
@@ -93,67 +59,37 @@ public class FnCoverageTest extends FnTestSupport {
     }
 
     @Test
-    public void testFrom_biPredicateAndBiConsumer() {
-        final java.util.function.BiPredicate<String, Integer> javaBi = (s, n) -> s.length() == n;
-        assertTrue(Fn.from(javaBi).test("ab", 2));
-        assertTrue(Fn.from(Fn.from(javaBi)).test("ab", 2));
-        assertThrows(IllegalArgumentException.class, () -> Fn.from((java.util.function.BiPredicate<String, Integer>) null));
+    public void testApplyIfNotNull_threeAndFourMappers() {
+        final Function<String, Integer> len = String::length;
+        final Function<Integer, Integer> times2 = n -> n * 2;
+        final Function<Integer, Integer> plus1 = n -> n + 1;
+        final Function<Integer, String> prefix = n -> "v" + n;
 
-        final List<String> seen = new ArrayList<>();
-        final java.util.function.BiConsumer<String, Integer> javaC = (s, n) -> seen.add(s + n);
-        Fn.from(javaC).accept("a", 1);
-        assertEquals(List.of("a1"), seen);
-        assertThrows(IllegalArgumentException.class, () -> Fn.from((java.util.function.BiConsumer<String, Integer>) null));
-    }
+        assertEquals("v10", Fn.applyIfNotNullOrDefault(len, times2, prefix, "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, prefix, "none").apply(null));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(s -> null, times2, prefix, "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(len, n -> null, prefix, "none").apply("hello"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(null, times2, prefix, "none"));
 
-    @Test
-    public void testSpScSf_biAndTri() {
-        final Object mutex = new Object();
-        assertTrue(Fn.sp(mutex, "ab", (String prefix, String s) -> s.startsWith(prefix)).test("abc"));
-        assertTrue(Fn.sp(mutex, (BiPredicate<String, Integer>) (s, n) -> s.length() == n).test("ab", 2));
-        assertTrue(Fn.sp(mutex, (TriPredicate<String, Integer, Boolean>) (s, n, b) -> b && s.length() == n).test("ab", 2, true));
+        assertEquals("v11", Fn.applyIfNotNullOrDefault(len, times2, plus1, prefix, "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, plus1, prefix, "none").apply(null));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(s -> null, times2, plus1, prefix, "none").apply("x"));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(len, n -> null, plus1, prefix, "none").apply("x"));
+        assertEquals("none", Fn.applyIfNotNullOrDefault(len, times2, n -> null, prefix, "none").apply("x"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrDefault(len, times2, plus1, null, "none"));
 
-        final AtomicInteger n = new AtomicInteger();
-        Fn.sc(mutex, "pre-", (String prefix, String v) -> n.addAndGet(prefix.length() + v.length())).accept("xy");
-        assertEquals(6, n.get());
-        Fn.sc(mutex, (BiConsumer<String, Integer>) (s, i) -> n.addAndGet(i)).accept("a", 4);
-        assertEquals(10, n.get());
-        Fn.sc(mutex, (TriConsumer<String, Integer, Boolean>) (s, i, b) -> n.addAndGet(b ? i : 0)).accept("a", 3, true);
-        assertEquals(13, n.get());
+        assertEquals("v10", Fn.applyIfNotNullOrElseGet(len, times2, prefix, () -> "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, prefix, () -> "none").apply(null));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(s -> null, times2, prefix, () -> "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, n -> null, prefix, () -> "none").apply("hello"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(len, times2, prefix, null));
 
-        assertEquals("ab2", Fn.sf(mutex, "ab", (String prefix, Integer i) -> prefix + i).apply(2));
-        assertEquals("a1", Fn.sf(mutex, (BiFunction<String, Integer, String>) (s, i) -> s + i).apply("a", 1));
-        assertEquals("a1true", Fn.sf(mutex, (TriFunction<String, Integer, Boolean, String>) (s, i, b) -> s + i + b).apply("a", 1, true));
-
-        assertThrows(IllegalArgumentException.class, () -> Fn.sp(mutex, "x", (BiPredicate<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (BiConsumer<String, Integer>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.sf(mutex, (TriFunction<String, Integer, Boolean, String>) null));
-    }
-
-    @Test
-    public void testCloseQuietlyAndPrintlnSeparators() {
-        final MyCloseable c = new MyCloseable();
-        Fn.<MyCloseable> closeQuietly().accept(c);
-        assertEquals(1, c.getCloseCount());
-
-        Fn.println(": ").accept("k", "v");
-        Fn.println("-").accept("k", "v");
-        Fn.println("_").accept("k", "v");
-        Fn.println(",").accept("k", "v");
-        Fn.println("=").accept("k", "v");
-        Fn.println(":").accept("k", "v");
-        Fn.println(", ").accept("k", "v");
-        Fn.println("").accept("k", "v");
-        Fn.println("|").accept("k", "v");
-    }
-
-    @Test
-    public void testGreaterThanOrEqualAndLessThan() {
-        assertTrue(Fn.<Integer> greaterThanOrEqual().test(5, 5));
-        assertTrue(Fn.<Integer> greaterThanOrEqual().test(6, 5));
-        assertFalse(Fn.<Integer> greaterThanOrEqual().test(4, 5));
-        assertTrue(Fn.<Integer> lessThan().test(4, 5));
-        assertFalse(Fn.<Integer> lessThan().test(5, 5));
+        assertEquals("v11", Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, () -> "none").apply("hello"));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, () -> "none").apply(null));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(s -> null, times2, plus1, prefix, () -> "none").apply("x"));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, n -> null, plus1, prefix, () -> "none").apply("x"));
+        assertEquals("none", Fn.applyIfNotNullOrElseGet(len, times2, n -> null, prefix, () -> "none").apply("x"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyIfNotNullOrElseGet(len, times2, plus1, prefix, null));
     }
 
     @Test
@@ -184,4 +120,69 @@ public class FnCoverageTest extends FnTestSupport {
         assertTrue(Fn.FB.lessThanOrEqual().test((byte) 1, (byte) 1));
         assertTrue(Fn.FB.greaterThanOrEqual().test((byte) 2, (byte) 1));
     }
+
+    @Test
+    public void testFrom_biPredicateAndBiConsumer() {
+        final java.util.function.BiPredicate<String, Integer> javaBi = (s, n) -> s.length() == n;
+        assertTrue(Fn.from(javaBi).test("ab", 2));
+        assertTrue(Fn.from(Fn.from(javaBi)).test("ab", 2));
+        assertThrows(IllegalArgumentException.class, () -> Fn.from((java.util.function.BiPredicate<String, Integer>) null));
+
+        final List<String> seen = new ArrayList<>();
+        final java.util.function.BiConsumer<String, Integer> javaC = (s, n) -> seen.add(s + n);
+        Fn.from(javaC).accept("a", 1);
+        assertEquals(List.of("a1"), seen);
+        assertThrows(IllegalArgumentException.class, () -> Fn.from((java.util.function.BiConsumer<String, Integer>) null));
+    }
+
+    @Test
+    public void testGreaterThanOrEqualAndLessThan() {
+        assertTrue(Fn.<Integer> greaterThanOrEqual().test(5, 5));
+        assertTrue(Fn.<Integer> greaterThanOrEqual().test(6, 5));
+        assertFalse(Fn.<Integer> greaterThanOrEqual().test(4, 5));
+        assertTrue(Fn.<Integer> lessThan().test(4, 5));
+        assertFalse(Fn.<Integer> lessThan().test(5, 5));
+    }
+
+    @Test
+    public void testCloseQuietlyAndPrintlnSeparators() {
+        final MyCloseable c = new MyCloseable();
+        Fn.<MyCloseable> closeQuietly().accept(c);
+        assertEquals(1, c.getCloseCount());
+
+        Fn.println(": ").accept("k", "v");
+        Fn.println("-").accept("k", "v");
+        Fn.println("_").accept("k", "v");
+        Fn.println(",").accept("k", "v");
+        Fn.println("=").accept("k", "v");
+        Fn.println(":").accept("k", "v");
+        Fn.println(", ").accept("k", "v");
+        Fn.println("").accept("k", "v");
+        Fn.println("|").accept("k", "v");
+    }
+
+    @Test
+    public void testSpScSf_biAndTri() {
+        final Object mutex = new Object();
+        assertTrue(Fn.sp(mutex, "ab", (String prefix, String s) -> s.startsWith(prefix)).test("abc"));
+        assertTrue(Fn.sp(mutex, (BiPredicate<String, Integer>) (s, n) -> s.length() == n).test("ab", 2));
+        assertTrue(Fn.sp(mutex, (TriPredicate<String, Integer, Boolean>) (s, n, b) -> b && s.length() == n).test("ab", 2, true));
+
+        final AtomicInteger n = new AtomicInteger();
+        Fn.sc(mutex, "pre-", (String prefix, String v) -> n.addAndGet(prefix.length() + v.length())).accept("xy");
+        assertEquals(6, n.get());
+        Fn.sc(mutex, (BiConsumer<String, Integer>) (s, i) -> n.addAndGet(i)).accept("a", 4);
+        assertEquals(10, n.get());
+        Fn.sc(mutex, (TriConsumer<String, Integer, Boolean>) (s, i, b) -> n.addAndGet(b ? i : 0)).accept("a", 3, true);
+        assertEquals(13, n.get());
+
+        assertEquals("ab2", Fn.sf(mutex, "ab", (String prefix, Integer i) -> prefix + i).apply(2));
+        assertEquals("a1", Fn.sf(mutex, (BiFunction<String, Integer, String>) (s, i) -> s + i).apply("a", 1));
+        assertEquals("a1true", Fn.sf(mutex, (TriFunction<String, Integer, Boolean, String>) (s, i, b) -> s + i + b).apply("a", 1, true));
+
+        assertThrows(IllegalArgumentException.class, () -> Fn.sp(mutex, "x", (BiPredicate<String, String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (BiConsumer<String, Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.sf(mutex, (TriFunction<String, Integer, Boolean, String>) null));
+    }
+
 }

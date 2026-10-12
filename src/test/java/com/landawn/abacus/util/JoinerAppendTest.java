@@ -79,27 +79,6 @@ public class JoinerAppendTest extends JoinerTestSupport {
     }
 
     @Test
-    public void testAppendIfNotNull() {
-        assertEquals("a,b", Joiner.with(",").appendIfNotNull("a").appendIfNotNull(null).appendIfNotNull("b").appendIfNotNull(null).toString());
-        assertEquals("", Joiner.with(",").appendIfNotNull(null).appendIfNotNull(null).toString());
-    }
-
-    @Test
-    public void testAppendIf() {
-        assertEquals("yes,maybe", Joiner.with(",").appendIf(true, () -> "yes").appendIf(false, () -> "no").appendIf(true, () -> "maybe").toString());
-        assertEquals("a,b,c", Joiner.with(",").append("a").appendIf(true, () -> "b").append("c").toString());
-        assertEquals("a,c", Joiner.with(",").append("a").appendIf(false, () -> "b").append("c").toString());
-        assertEquals("before,null,after", Joiner.with(",").append("before").appendIf(true, () -> null).append("after").toString());
-
-        final Supplier<?> exploding = () -> {
-            throw new RuntimeException("Should not be called");
-        };
-        assertEquals("safe", Joiner.with(",").appendIf(false, exploding).append("safe").toString());
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendIf(true, null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendIf(false, null));
-    }
-
-    @Test
     public void testAppendAll() {
         assertEquals("true,false,true", Joiner.with(",").appendAll(new boolean[] { true, false, true }).toString());
         assertEquals("a,b,c", Joiner.with(",").appendAll(new char[] { 'a', 'b', 'c' }).toString());
@@ -238,58 +217,59 @@ public class JoinerAppendTest extends JoinerTestSupport {
     }
 
     @Test
-    public void testAppendEntry() {
-        assertEquals("flag=true,active=false", Joiner.with(",").appendEntry("flag", true).appendEntry("active", false).toString());
-        assertEquals("letter=A,digit=9", Joiner.with(",").appendEntry("letter", 'A').appendEntry("digit", '9').toString());
-        assertEquals("count=42,total=100", Joiner.with(",").appendEntry("count", 42).appendEntry("total", 100).toString());
-        assertEquals("id=1234567890,timestamp=9876543210", Joiner.with(",").appendEntry("id", 1234567890L).appendEntry("timestamp", 9876543210L).toString());
-        assertEquals("pi=3.14,e=2.71", Joiner.with(",").appendEntry("pi", 3.14f).appendEntry("e", 2.71f).toString());
-        assertEquals("pi=3.14159,e=2.71828", Joiner.with(",").appendEntry("pi", 3.14159).appendEntry("e", 2.71828).toString());
-        assertEquals("name=Alice,city=NYC", Joiner.with(",").appendEntry("name", "Alice").appendEntry("city", "NYC").toString());
-        assertEquals("key=test", Joiner.with(",").appendEntry("key", (CharSequence) new StringBuilder("test")).toString());
-        assertEquals("key=builder", Joiner.with(",").appendEntry("key", new StringBuilder("builder")).toString());
-        assertEquals("int=123,double=4.56", Joiner.with(",").appendEntry("int", Integer.valueOf(123)).appendEntry("double", Double.valueOf(4.56)).toString());
-        assertEquals("key=value", Joiner.with(",").appendEntry(new AbstractMap.SimpleEntry<>("key", "value")).toString());
-        assertEquals("key->value", Joiner.with(",", "->").appendEntry("key", "value").toString());
-        assertEquals("key=value", Joiner.with(",").trimBeforeAppend().appendEntry("  key  ", "  value  ").toString());
-        assertEquals("key=value", Joiner.with(",").trimBeforeAppend().appendEntry("  key  ", new StringBuilder("  value  ")).toString());
-        assertEquals("key=[t, e, s, t]", Joiner.with(",").appendEntry("key", new char[] { 't', 'e', 's', 't' }).toString());
-        assertEquals("k=123", Joiner.with(", ").appendEntry("k", 123).toString());
-        assertEquals("a: 1; b: 2", Joiner.with("; ", ": ").appendEntry("a", 1).appendEntry("b", 2).toString());
+    public void testAppendBean() {
+        final Person person = new Person("John", 30, "NYC", 50000.0);
+        final String all = Joiner.with(",").appendBean(person).toString();
+        assertTrue(all.contains("name=John"));
+        assertTrue(all.contains("age=30"));
+        assertTrue(all.contains("city=NYC"));
+        assertTrue(all.contains("salary=50000.0"));
+
+        final String selected = Joiner.with(",").appendBean(person, Arrays.asList("name", "age")).toString();
+        assertTrue(selected.contains("name=John"));
+        assertTrue(selected.contains("age=30"));
+        assertFalse(selected.contains("city"));
+        assertFalse(selected.contains("salary"));
+
+        final String ignored = Joiner.with(",").appendBean(person, false, new HashSet<>(Arrays.asList("city", "salary"))).toString();
+        assertTrue(ignored.contains("name=John"));
+        assertTrue(ignored.contains("age=30"));
+        assertFalse(ignored.contains("city"));
+        assertFalse(ignored.contains("salary"));
+
+        final String filtered = Joiner.with(",").appendBean(person, (propName, propValue) -> "name".equals(propName) || "age".equals(propName)).toString();
+        assertTrue(filtered.contains("name=John"));
+        assertTrue(filtered.contains("age=30"));
+        assertFalse(filtered.contains("city"));
+
+        assertEquals("name=test&value=123", Joiner.with("&").appendBean(new TestBean()).toString());
+        assertEquals("value=123, name=test", Joiner.with(", ").appendBean(new TestBean(), Arrays.asList("value", "name")).toString());
     }
 
     @Test
-    public void testAppendEntry_EdgeCase() {
-        assertEquals("key1=null,key2=value", Joiner.with(",").appendEntry("key1", (String) null).appendEntry("key2", "value").toString());
-        assertEquals("key=null", Joiner.with(",").appendEntry("key", (CharSequence) null).toString());
-        assertEquals("key=null", Joiner.with(",").appendEntry("key", (StringBuilder) null).toString());
-        assertEquals("key=null", Joiner.with(",").appendEntry("key", (Object) null).toString());
-        assertEquals("null", Joiner.with(",").appendEntry((Map.Entry<?, ?>) null).toString());
-        assertEquals("null1=null,null2=null,null3=null,null4=null,null5=null",
-                Joiner.with(",")
-                        .appendEntry("null1", (String) null)
-                        .appendEntry("null2", (CharSequence) null)
-                        .appendEntry("null3", (StringBuilder) null)
-                        .appendEntry("null4", (char[]) null)
-                        .appendEntry("null5", (Object) null)
-                        .toString());
-        assertEquals("keyvalue", Joiner.with(",", "").appendEntry("key", "value").toString());
-        assertEquals("keyvalue", Joiner.with(",", "").appendEntry("key", new StringBuilder("value")).toString());
-        assertEquals("keyvalue", Joiner.with(",", "").trimBeforeAppend().appendEntry("  key  ", new StringBuilder("  value  ")).toString());
-        assertEquals("keynull", Joiner.with(",", "").appendEntry("key", (StringBuilder) null).toString());
-        assertEquals("flagtrue", Joiner.with(",", "").appendEntry("flag", true).toString());
-        assertEquals("letterA", Joiner.with(",", "").appendEntry("letter", 'A').toString());
-        assertEquals("count42", Joiner.with(",", "").appendEntry("count", 42).toString());
-        assertEquals("id123", Joiner.with(",", "").appendEntry("id", 123L).toString());
-        assertEquals("val1.5", Joiner.with(",", "").appendEntry("val", 1.5f).toString());
-        assertEquals("pi3.14", Joiner.with(",", "").appendEntry("pi", 3.14).toString());
-        assertEquals("nameAlice", Joiner.with(",", "").appendEntry("name", "Alice").toString());
-        assertEquals("num99", Joiner.with(",", "").appendEntry("num", (Object) 99).toString());
+    public void testAppendBean_EdgeCase() {
+        assertEquals("before,after", Joiner.with(",").append("before").appendBean((Object) null).append("after").toString());
+        assertEquals("", Joiner.with(",").appendBean(null, Arrays.asList("name")).toString());
+        assertEquals("", Joiner.with(",").appendBean(null, false, new HashSet<>()).toString());
+        assertEquals("", Joiner.with(",").appendBean(null, (k, v) -> true).toString());
+        assertEquals("", Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), Collections.emptyList()).toString());
+        assertEquals("", Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), (prop, val) -> false).toString());
 
-        final String nullText = "  NIL  ";
-        final Map.Entry<String, String> entry = new AbstractMap.SimpleImmutableEntry<>(null, null);
-        assertEquals("  NIL  =  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry(entry).toString());
-        assertEquals("  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry((Map.Entry<?, ?>) null).toString());
+        final String ignoreNull = Joiner.with(",").appendBean(new Person("John", 30, null, null), true, null).toString();
+        assertTrue(ignoreNull.contains("name=John"));
+        assertTrue(ignoreNull.contains("age=30"));
+        assertFalse(ignoreNull.contains("city"));
+        assertFalse(ignoreNull.contains("salary"));
+
+        final String ignoreSet = Joiner.with(",").appendBean(new Person("Bob", null, "LA", 60000.0), true, new HashSet<>(Arrays.asList("salary"))).toString();
+        assertTrue(ignoreSet.contains("name=Bob"));
+        assertFalse(ignoreSet.contains("age="));
+        assertFalse(ignoreSet.contains("salary="));
+
+        assertEquals("name=test&value=123", Joiner.with("&").appendBean(new TestBean(), true, null).toString());
+        assertThrows(IllegalArgumentException.class,
+                () -> Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), (BiPredicate<String, Object>) null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendBean(Map.of("a", "1"), (BiPredicate<String, Object>) null));
     }
 
     @Test
@@ -350,76 +330,82 @@ public class JoinerAppendTest extends JoinerTestSupport {
     }
 
     @Test
-    public void testAppendBean() {
-        final Person person = new Person("John", 30, "NYC", 50000.0);
-        final String all = Joiner.with(",").appendBean(person).toString();
-        assertTrue(all.contains("name=John"));
-        assertTrue(all.contains("age=30"));
-        assertTrue(all.contains("city=NYC"));
-        assertTrue(all.contains("salary=50000.0"));
-
-        final String selected = Joiner.with(",").appendBean(person, Arrays.asList("name", "age")).toString();
-        assertTrue(selected.contains("name=John"));
-        assertTrue(selected.contains("age=30"));
-        assertFalse(selected.contains("city"));
-        assertFalse(selected.contains("salary"));
-
-        final String ignored = Joiner.with(",").appendBean(person, false, new HashSet<>(Arrays.asList("city", "salary"))).toString();
-        assertTrue(ignored.contains("name=John"));
-        assertTrue(ignored.contains("age=30"));
-        assertFalse(ignored.contains("city"));
-        assertFalse(ignored.contains("salary"));
-
-        final String filtered = Joiner.with(",").appendBean(person, (propName, propValue) -> "name".equals(propName) || "age".equals(propName)).toString();
-        assertTrue(filtered.contains("name=John"));
-        assertTrue(filtered.contains("age=30"));
-        assertFalse(filtered.contains("city"));
-
-        assertEquals("name=test&value=123", Joiner.with("&").appendBean(new TestBean()).toString());
-        assertEquals("value=123, name=test", Joiner.with(", ").appendBean(new TestBean(), Arrays.asList("value", "name")).toString());
+    public void testAppendEntry() {
+        assertEquals("flag=true,active=false", Joiner.with(",").appendEntry("flag", true).appendEntry("active", false).toString());
+        assertEquals("letter=A,digit=9", Joiner.with(",").appendEntry("letter", 'A').appendEntry("digit", '9').toString());
+        assertEquals("count=42,total=100", Joiner.with(",").appendEntry("count", 42).appendEntry("total", 100).toString());
+        assertEquals("id=1234567890,timestamp=9876543210", Joiner.with(",").appendEntry("id", 1234567890L).appendEntry("timestamp", 9876543210L).toString());
+        assertEquals("pi=3.14,e=2.71", Joiner.with(",").appendEntry("pi", 3.14f).appendEntry("e", 2.71f).toString());
+        assertEquals("pi=3.14159,e=2.71828", Joiner.with(",").appendEntry("pi", 3.14159).appendEntry("e", 2.71828).toString());
+        assertEquals("name=Alice,city=NYC", Joiner.with(",").appendEntry("name", "Alice").appendEntry("city", "NYC").toString());
+        assertEquals("key=test", Joiner.with(",").appendEntry("key", (CharSequence) new StringBuilder("test")).toString());
+        assertEquals("key=builder", Joiner.with(",").appendEntry("key", new StringBuilder("builder")).toString());
+        assertEquals("int=123,double=4.56", Joiner.with(",").appendEntry("int", Integer.valueOf(123)).appendEntry("double", Double.valueOf(4.56)).toString());
+        assertEquals("key=value", Joiner.with(",").appendEntry(new AbstractMap.SimpleEntry<>("key", "value")).toString());
+        assertEquals("key->value", Joiner.with(",", "->").appendEntry("key", "value").toString());
+        assertEquals("key=value", Joiner.with(",").trimBeforeAppend().appendEntry("  key  ", "  value  ").toString());
+        assertEquals("key=value", Joiner.with(",").trimBeforeAppend().appendEntry("  key  ", new StringBuilder("  value  ")).toString());
+        assertEquals("key=[t, e, s, t]", Joiner.with(",").appendEntry("key", new char[] { 't', 'e', 's', 't' }).toString());
+        assertEquals("k=123", Joiner.with(", ").appendEntry("k", 123).toString());
+        assertEquals("a: 1; b: 2", Joiner.with("; ", ": ").appendEntry("a", 1).appendEntry("b", 2).toString());
     }
 
     @Test
-    public void testAppendBean_EdgeCase() {
-        assertEquals("before,after", Joiner.with(",").append("before").appendBean((Object) null).append("after").toString());
-        assertEquals("", Joiner.with(",").appendBean(null, Arrays.asList("name")).toString());
-        assertEquals("", Joiner.with(",").appendBean(null, false, new HashSet<>()).toString());
-        assertEquals("", Joiner.with(",").appendBean(null, (k, v) -> true).toString());
-        assertEquals("", Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), Collections.emptyList()).toString());
-        assertEquals("", Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), (prop, val) -> false).toString());
+    public void testAppendEntry_EdgeCase() {
+        assertEquals("key1=null,key2=value", Joiner.with(",").appendEntry("key1", (String) null).appendEntry("key2", "value").toString());
+        assertEquals("key=null", Joiner.with(",").appendEntry("key", (CharSequence) null).toString());
+        assertEquals("key=null", Joiner.with(",").appendEntry("key", (StringBuilder) null).toString());
+        assertEquals("key=null", Joiner.with(",").appendEntry("key", (Object) null).toString());
+        assertEquals("null", Joiner.with(",").appendEntry((Map.Entry<?, ?>) null).toString());
+        assertEquals("null1=null,null2=null,null3=null,null4=null,null5=null",
+                Joiner.with(",")
+                        .appendEntry("null1", (String) null)
+                        .appendEntry("null2", (CharSequence) null)
+                        .appendEntry("null3", (StringBuilder) null)
+                        .appendEntry("null4", (char[]) null)
+                        .appendEntry("null5", (Object) null)
+                        .toString());
+        assertEquals("keyvalue", Joiner.with(",", "").appendEntry("key", "value").toString());
+        assertEquals("keyvalue", Joiner.with(",", "").appendEntry("key", new StringBuilder("value")).toString());
+        assertEquals("keyvalue", Joiner.with(",", "").trimBeforeAppend().appendEntry("  key  ", new StringBuilder("  value  ")).toString());
+        assertEquals("keynull", Joiner.with(",", "").appendEntry("key", (StringBuilder) null).toString());
+        assertEquals("flagtrue", Joiner.with(",", "").appendEntry("flag", true).toString());
+        assertEquals("letterA", Joiner.with(",", "").appendEntry("letter", 'A').toString());
+        assertEquals("count42", Joiner.with(",", "").appendEntry("count", 42).toString());
+        assertEquals("id123", Joiner.with(",", "").appendEntry("id", 123L).toString());
+        assertEquals("val1.5", Joiner.with(",", "").appendEntry("val", 1.5f).toString());
+        assertEquals("pi3.14", Joiner.with(",", "").appendEntry("pi", 3.14).toString());
+        assertEquals("nameAlice", Joiner.with(",", "").appendEntry("name", "Alice").toString());
+        assertEquals("num99", Joiner.with(",", "").appendEntry("num", (Object) 99).toString());
 
-        final String ignoreNull = Joiner.with(",").appendBean(new Person("John", 30, null, null), true, null).toString();
-        assertTrue(ignoreNull.contains("name=John"));
-        assertTrue(ignoreNull.contains("age=30"));
-        assertFalse(ignoreNull.contains("city"));
-        assertFalse(ignoreNull.contains("salary"));
-
-        final String ignoreSet = Joiner.with(",").appendBean(new Person("Bob", null, "LA", 60000.0), true, new HashSet<>(Arrays.asList("salary"))).toString();
-        assertTrue(ignoreSet.contains("name=Bob"));
-        assertFalse(ignoreSet.contains("age="));
-        assertFalse(ignoreSet.contains("salary="));
-
-        assertEquals("name=test&value=123", Joiner.with("&").appendBean(new TestBean(), true, null).toString());
-        assertThrows(IllegalArgumentException.class,
-                () -> Joiner.with(",").appendBean(new Person("John", 30, "NYC", 50000.0), (BiPredicate<String, Object>) null));
-        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendBean(Map.of("a", "1"), (BiPredicate<String, Object>) null));
+        final String nullText = "  NIL  ";
+        final Map.Entry<String, String> entry = new AbstractMap.SimpleImmutableEntry<>(null, null);
+        assertEquals("  NIL  =  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry(entry).toString());
+        assertEquals("  NIL  ", Joiner.with(",", "=").trimBeforeAppend().useForNull(nullText).appendEntry((Map.Entry<?, ?>) null).toString());
     }
 
     @Test
-    public void testAppendTo() throws IOException {
-        final StringBuilder sb = new StringBuilder("prefix:");
-        Joiner.with(",").append("a").append("b").append("c").appendTo(sb);
-        assertEquals("prefix:a,b,c", sb.toString());
+    public void testAppendIf() {
+        assertEquals("yes,maybe", Joiner.with(",").appendIf(true, () -> "yes").appendIf(false, () -> "no").appendIf(true, () -> "maybe").toString());
+        assertEquals("a,b,c", Joiner.with(",").append("a").appendIf(true, () -> "b").append("c").toString());
+        assertEquals("a,c", Joiner.with(",").append("a").appendIf(false, () -> "b").append("c").toString());
+        assertEquals("before,null,after", Joiner.with(",").append("before").appendIf(true, () -> null).append("after").toString());
 
-        final StringWriter writer = new StringWriter();
-        writer.write("prefix:");
-        Joiner.with(",").append("a").append("b").append("c").appendTo(writer);
-        assertEquals("prefix:a,b,c", writer.toString());
-
-        final StringBuilder withPrefix = new StringBuilder("data:");
-        Joiner.with(",", "[", "]").append("a").append("b").appendTo(withPrefix);
-        assertEquals("data:[a,b]", withPrefix.toString());
+        final Supplier<?> exploding = () -> {
+            throw new RuntimeException("Should not be called");
+        };
+        assertEquals("safe", Joiner.with(",").appendIf(false, exploding).append("safe").toString());
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendIf(true, null));
+        assertThrows(IllegalArgumentException.class, () -> Joiner.with(",").appendIf(false, null));
     }
+
+    @Test
+    public void testAppendIfNotNull() {
+        assertEquals("a,b", Joiner.with(",").appendIfNotNull("a").appendIfNotNull(null).appendIfNotNull("b").appendIfNotNull(null).toString());
+        assertEquals("", Joiner.with(",").appendIfNotNull(null).appendIfNotNull(null).toString());
+    }
+
+
 
     /**
      * R10 review of r9506: {@code append(Object)} was changed to call {@code assertNotClosed()} before rendering,
@@ -455,6 +441,22 @@ public class JoinerAppendTest extends JoinerTestSupport {
     }
 
     @Test
+    public void testAppendTo() throws IOException {
+        final StringBuilder sb = new StringBuilder("prefix:");
+        Joiner.with(",").append("a").append("b").append("c").appendTo(sb);
+        assertEquals("prefix:a,b,c", sb.toString());
+
+        final StringWriter writer = new StringWriter();
+        writer.write("prefix:");
+        Joiner.with(",").append("a").append("b").append("c").appendTo(writer);
+        assertEquals("prefix:a,b,c", writer.toString());
+
+        final StringBuilder withPrefix = new StringBuilder("data:");
+        Joiner.with(",", "[", "]").append("a").append("b").appendTo(withPrefix);
+        assertEquals("data:[a,b]", withPrefix.toString());
+    }
+
+    @Test
     public void testAppendTo_EdgeCase() throws IOException {
         final StringBuilder empty = new StringBuilder("result:");
         Joiner.with(",").appendTo(empty);
@@ -468,6 +470,8 @@ public class JoinerAppendTest extends JoinerTestSupport {
         Joiner.with(",").setEmptyValue("EMPTY").appendTo(namedEmpty);
         assertEquals("prefix:EMPTY", namedEmpty.toString());
     }
+
+
 
     /**
      * Pins the {@code null}-key rendering that the {@code appendEntry} javadoc now states on the six
@@ -498,4 +502,5 @@ public class JoinerAppendTest extends JoinerTestSupport {
         assertEquals("k=42", Joiner.with(", ").trimBeforeAppend().appendEntry("  k  ", 42).toString());
         assertEquals("k=42", Joiner.with(", ").stripBeforeAppend().appendEntry("  k  ", 42).toString());
     }
+
 }

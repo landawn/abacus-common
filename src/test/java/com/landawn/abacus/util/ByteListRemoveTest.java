@@ -27,25 +27,6 @@ public class ByteListRemoveTest extends ByteListTestSupport {
     }
 
     @Test
-    public void testRemoveAllOccurrences() {
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2, (byte) 4, (byte) 2);
-            assertTrue(list.removeAllOccurrences((byte) 2));
-            assertEquals(3, list.size());
-            assertArrayEquals(new byte[] { 1, 3, 4 }, list.toArray());
-        }
-        {
-            list = new ByteList();
-            ByteList bl = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 2);
-            boolean changed = bl.removeAllOccurrences((byte) 2);
-            assertTrue(changed);
-            assertEquals(2, bl.size());
-            assertFalse(bl.contains((byte) 2));
-        }
-    }
-
-    @Test
     public void testRemoveAll() {
         {
             list = new ByteList();
@@ -76,23 +57,55 @@ public class ByteListRemoveTest extends ByteListTestSupport {
     }
 
     @Test
-    public void testRemoveIf() {
+    public void testRemoveAllOccurrences() {
         {
             list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) -2, (byte) 3, (byte) -4, (byte) 5);
-            assertTrue(list.removeIf(b -> b < 0));
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2, (byte) 4, (byte) 2);
+            assertTrue(list.removeAllOccurrences((byte) 2));
             assertEquals(3, list.size());
-            assertArrayEquals(new byte[] { 1, 3, 5 }, list.toArray());
+            assertArrayEquals(new byte[] { 1, 3, 4 }, list.toArray());
         }
         {
             list = new ByteList();
-            ByteList bl = ByteList.of((byte) 1, (byte) -2, (byte) 3, (byte) -4, (byte) 5);
-            boolean changed = bl.removeIf(b -> b < 0);
+            ByteList bl = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 2);
+            boolean changed = bl.removeAllOccurrences((byte) 2);
             assertTrue(changed);
-            assertEquals(3, bl.size());
-            assertFalse(bl.contains((byte) -2));
-            assertFalse(bl.contains((byte) -4));
+            assertEquals(2, bl.size());
+            assertFalse(bl.contains((byte) 2));
         }
+    }
+
+    @Test
+    public void testRemoveAt() {
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50);
+            list.removeAllAt(1, 3);
+            assertEquals(3, list.size());
+            assertArrayEquals(new byte[] { 10, 30, 50 }, list.toArray());
+        }
+        {
+            list = new ByteList();
+            ByteList bl = ByteList.of((byte) 10, (byte) 20, (byte) 30);
+            bl.removeAt(1);
+            assertEquals(2, bl.size());
+            assertEquals((byte) 10, bl.get(0));
+            assertEquals((byte) 30, bl.get(1));
+        }
+        {
+            list = new ByteList();
+            list.addAll(new byte[] { 10, 20, 30 });
+            byte removed = list.removeAt(1);
+            assertEquals((byte) 20, removed);
+            assertEquals(2, list.size());
+        }
+    }
+
+    @Test
+    public void testRemoveAt_Empty() {
+        ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
+        list.removeAllAt();
+        assertEquals(3, list.size());
     }
 
     @Test
@@ -130,64 +143,6 @@ public class ByteListRemoveTest extends ByteListTestSupport {
     @Test
     public void testRemoveDuplicates_Empty() {
         assertFalse(list.removeDuplicates());
-    }
-
-    @Test
-    public void testRemoveAt() {
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50);
-            list.removeAllAt(1, 3);
-            assertEquals(3, list.size());
-            assertArrayEquals(new byte[] { 10, 30, 50 }, list.toArray());
-        }
-        {
-            list = new ByteList();
-            ByteList bl = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-            bl.removeAt(1);
-            assertEquals(2, bl.size());
-            assertEquals((byte) 10, bl.get(0));
-            assertEquals((byte) 30, bl.get(1));
-        }
-        {
-            list = new ByteList();
-            list.addAll(new byte[] { 10, 20, 30 });
-            byte removed = list.removeAt(1);
-            assertEquals((byte) 20, removed);
-            assertEquals(2, list.size());
-        }
-    }
-
-    @Test
-    public void testRemoveAt_Empty() {
-        ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-        list.removeAllAt();
-        assertEquals(3, list.size());
-    }
-
-    @Test
-    public void testRemoveRange() {
-        {
-            list = new ByteList();
-            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-            list.removeRange(1, 4);
-            assertEquals(2, list.size());
-            assertArrayEquals(new byte[] { 1, 5 }, list.toArray());
-        }
-        {
-            list = new ByteList();
-            list.addAll(new byte[] { 1, 2, 3, 4, 5 });
-            list.removeRange(1, 4);
-            assertEquals(2, list.size());
-            assertArrayEquals(new byte[] { 1, 5 }, list.toArray());
-        }
-    }
-
-    @Test
-    public void testRemoveRange_Empty() {
-        ByteList bl = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-        bl.removeRange(1, 1);
-        assertEquals(3, bl.size());
     }
 
     @Test
@@ -234,6 +189,26 @@ public class ByteListRemoveTest extends ByteListTestSupport {
     }
 
     @Test
+    public void testRemoveIf() {
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) -2, (byte) 3, (byte) -4, (byte) 5);
+            assertTrue(list.removeIf(b -> b < 0));
+            assertEquals(3, list.size());
+            assertArrayEquals(new byte[] { 1, 3, 5 }, list.toArray());
+        }
+        {
+            list = new ByteList();
+            ByteList bl = ByteList.of((byte) 1, (byte) -2, (byte) 3, (byte) -4, (byte) 5);
+            boolean changed = bl.removeIf(b -> b < 0);
+            assertTrue(changed);
+            assertEquals(3, bl.size());
+            assertFalse(bl.contains((byte) -2));
+            assertFalse(bl.contains((byte) -4));
+        }
+    }
+
+    @Test
     public void testRemoveLast() {
         {
             list = new ByteList();
@@ -257,4 +232,30 @@ public class ByteListRemoveTest extends ByteListTestSupport {
         ByteList list = new ByteList();
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    @Test
+    public void testRemoveRange() {
+        {
+            list = new ByteList();
+            ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
+            list.removeRange(1, 4);
+            assertEquals(2, list.size());
+            assertArrayEquals(new byte[] { 1, 5 }, list.toArray());
+        }
+        {
+            list = new ByteList();
+            list.addAll(new byte[] { 1, 2, 3, 4, 5 });
+            list.removeRange(1, 4);
+            assertEquals(2, list.size());
+            assertArrayEquals(new byte[] { 1, 5 }, list.toArray());
+        }
+    }
+
+    @Test
+    public void testRemoveRange_Empty() {
+        ByteList bl = ByteList.of((byte) 1, (byte) 2, (byte) 3);
+        bl.removeRange(1, 1);
+        assertEquals(3, bl.size());
+    }
+
 }

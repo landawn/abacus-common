@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 public class ArrayRepeatTest extends ArrayTestSupport {
 
+    // repeat
+
     @Test
     public void testRepeat_boolean() {
         assertArrayEquals(new boolean[] { true, true, true }, Array.repeat(true, 3));
@@ -23,6 +25,14 @@ public class ArrayRepeatTest extends ArrayTestSupport {
     }
 
     @Test
+    public void testRepeat_byte() {
+        assertArrayEquals(new byte[] { 1, 1, 1 }, Array.repeat((byte) 1, 3));
+        assertArrayEquals(new byte[] { 1, 2, 1, 2 }, Array.repeat(new byte[] { 1, 2 }, 2));
+        assertEquals(0, Array.repeat((byte[]) null, 2).length);
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat((byte) 1, -1));
+    }
+
+    @Test
     public void testRepeat_char() {
         assertArrayEquals(new char[] { 'a', 'a', 'a' }, Array.repeat('a', 3));
         assertEquals(0, Array.repeat('a', 0).length);
@@ -32,18 +42,17 @@ public class ArrayRepeatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRepeat_byte() {
-        assertArrayEquals(new byte[] { 1, 1, 1 }, Array.repeat((byte) 1, 3));
-        assertArrayEquals(new byte[] { 1, 2, 1, 2 }, Array.repeat(new byte[] { 1, 2 }, 2));
-        assertEquals(0, Array.repeat((byte[]) null, 2).length);
-        assertThrows(IllegalArgumentException.class, () -> Array.repeat((byte) 1, -1));
+    public void testRepeat_double() {
+        assertArrayEquals(new double[] { 1.5, 1.5 }, Array.repeat(1.5, 2));
+        assertArrayEquals(new double[] { 1d, 2d, 1d, 2d }, Array.repeat(new double[] { 1d, 2d }, 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1d, -1));
     }
 
     @Test
-    public void testRepeat_short() {
-        assertArrayEquals(new short[] { 1, 1, 1 }, Array.repeat((short) 1, 3));
-        assertArrayEquals(new short[] { 1, 2, 1, 2 }, Array.repeat(new short[] { 1, 2 }, 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.repeat((short) 1, -1));
+    public void testRepeat_float() {
+        assertArrayEquals(new float[] { 1.5f, 1.5f }, Array.repeat(1.5f, 2));
+        assertArrayEquals(new float[] { 1f, 2f, 1f, 2f }, Array.repeat(new float[] { 1f, 2f }, 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1f, -1));
     }
 
     @Test
@@ -64,29 +73,6 @@ public class ArrayRepeatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRepeat_float() {
-        assertArrayEquals(new float[] { 1.5f, 1.5f }, Array.repeat(1.5f, 2));
-        assertArrayEquals(new float[] { 1f, 2f, 1f, 2f }, Array.repeat(new float[] { 1f, 2f }, 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1f, -1));
-    }
-
-    @Test
-    public void testRepeat_double() {
-        assertArrayEquals(new double[] { 1.5, 1.5 }, Array.repeat(1.5, 2));
-        assertArrayEquals(new double[] { 1d, 2d, 1d, 2d }, Array.repeat(new double[] { 1d, 2d }, 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.repeat(1d, -1));
-    }
-
-    @Test
-    public void testRepeat_String() {
-        assertArrayEquals(new String[] { "x", "x", "x" }, Array.repeat("x", 3));
-        assertArrayEquals(new String[] { null, null }, Array.repeat((String) null, 2));
-        assertArrayEquals(new String[] { "a", "b", "a", "b" }, Array.repeat(new String[] { "a", "b" }, 2));
-        assertEquals(0, Array.repeat((String[]) null, 2).length);
-        assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1));
-    }
-
-    @Test
     public void testRepeat_Object() {
         assertArrayEquals(new Integer[] { 1, 1 }, Array.repeat(Integer.valueOf(1), 2, Integer.class));
         assertArrayEquals(new Number[] { 1, 1 }, Array.repeat(Integer.valueOf(1), 2, Number.class));
@@ -99,15 +85,19 @@ public class ArrayRepeatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testRepeatNonNull() {
-        assertArrayEquals(new Integer[] { 42, 42, 42 }, Array.repeatNonNull(42, 3));
-        assertEquals(0, Array.repeatNonNull("x", 0).length);
-        final String s = "same";
-        final String[] repeated = Array.repeatNonNull(s, 3);
-        assertSame(s, repeated[0]);
-        assertSame(s, repeated[2]);
-        assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull(null, 2));
-        assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull("x", -1));
+    public void testRepeat_short() {
+        assertArrayEquals(new short[] { 1, 1, 1 }, Array.repeat((short) 1, 3));
+        assertArrayEquals(new short[] { 1, 2, 1, 2 }, Array.repeat(new short[] { 1, 2 }, 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat((short) 1, -1));
+    }
+
+    @Test
+    public void testRepeat_String() {
+        assertArrayEquals(new String[] { "x", "x", "x" }, Array.repeat("x", 3));
+        assertArrayEquals(new String[] { null, null }, Array.repeat((String) null, 2));
+        assertArrayEquals(new String[] { "a", "b", "a", "b" }, Array.repeat(new String[] { "a", "b" }, 2));
+        assertEquals(0, Array.repeat((String[]) null, 2).length);
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1));
     }
 
     @Test
@@ -129,4 +119,17 @@ public class ArrayRepeatTest extends ArrayTestSupport {
         // a null element is storable in any object array
         assertArrayEquals(new Integer[] { null, null }, Array.<Number> repeat((Number) null, 2, Integer.class));
     }
+
+    @Test
+    public void testRepeatNonNull() {
+        assertArrayEquals(new Integer[] { 42, 42, 42 }, Array.repeatNonNull(42, 3));
+        assertEquals(0, Array.repeatNonNull("x", 0).length);
+        final String s = "same";
+        final String[] repeated = Array.repeatNonNull(s, 3);
+        assertSame(s, repeated[0]);
+        assertSame(s, repeated[2]);
+        assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull(null, 2));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeatNonNull("x", -1));
+    }
+
 }

@@ -14,51 +14,31 @@ import org.junit.jupiter.api.Test;
 
 public class BeansToTest extends BeansTestSupport {
 
+
+
+    /**
+     * Pins the "Key Naming" paragraph of the {@link Beans} class javadoc: the key comes from the matched
+     * property's own name with the {@link NamingPolicy} applied, never from the spelling that was passed, and
+     * {@code CAMEL_CASE} emits exactly the keys the default JSON serialization uses. Every call here is one of
+     * the javadoc's examples, so the examples cannot drift back to an overload that does not exist.
+     */
     @Test
-    public void testToCamelCase() {
-        assertEquals("userName", Beans.toCamelCase("user_name"));
-        assertEquals("firstName", Beans.toCamelCase("FIRST_NAME"));
-        assertEquals("firstName", Beans.toCamelCase("first_name"));
-        assertEquals("addressLine1", Beans.toCamelCase("address-line-1"));
-        assertEquals("addressLine", Beans.toCamelCase("address-line"));
-        assertEquals("userId", Beans.toCamelCase("user_id"));
-        assertEquals("userId", Beans.toCamelCase("USER_ID"));
-        assertEquals("id", Beans.toCamelCase("id"));
-        assertEquals("name", Beans.toCamelCase("name"));
-        assertEquals("name", Beans.toCamelCase("NAME"));
-        assertEquals("address1", Beans.toCamelCase("address_1"));
-        assertEquals("line2Value", Beans.toCamelCase("line_2_value"));
-        assertEquals("", Beans.toCamelCase(""));
-        assertNull(Beans.toCamelCase((String) null));
+    public void testBeanToMap_KeyNamingExamplesFromTheClassJavadoc() {
+        final KeyNamingBean user = new KeyNamingBean();
+        user.setFirstName("John");
+
+        assertEquals("{first_name=John}",
+                Beans.beanToMap(user, java.util.List.of("getFirstName"), NamingPolicy.SNAKE_CASE, IntFunctions.ofLinkedHashMap()).toString());
+        assertEquals("{first_name=John}", Beans.beanToMap(user, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofLinkedHashMap()).toString());
+
+        assertEquals("{firstName=John}", Beans.beanToMap(user, null, NamingPolicy.CAMEL_CASE, IntFunctions.ofLinkedHashMap()).toString());
+        assertEquals("{\"firstName\": \"John\"}", N.toJson(user));
+
+        // Two spellings of one property collapse to a single entry.
+        assertEquals("{firstName=John}", Beans.beanToMap(user, java.util.List.of("firstName", "first_name")).toString());
     }
 
-    @Test
-    public void testToSnakeCase() {
-        assertEquals("user_name", Beans.toSnakeCase("userName"));
-        assertEquals("first_name", Beans.toSnakeCase("FirstName"));
-        assertEquals("first_name", Beans.toSnakeCase("firstName"));
-        assertEquals("user_id", Beans.toSnakeCase("userID"));
-        assertEquals("url", Beans.toSnakeCase("URL"));
-        assertEquals("simple", Beans.toSnakeCase("simple"));
-        assertEquals("a", Beans.toSnakeCase("a"));
-        assertEquals("a", Beans.toSnakeCase("A"));
-        assertEquals("", Beans.toSnakeCase(""));
-        assertNull(Beans.toSnakeCase((String) null));
-    }
-
-    @Test
-    public void testToScreamingSnakeCase() {
-        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
-        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
-        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("UserName"));
-        assertEquals("USER_ID", Beans.toScreamingSnakeCase("userID"));
-        assertEquals("URL", Beans.toScreamingSnakeCase("URL"));
-        assertEquals("SIMPLE", Beans.toScreamingSnakeCase("SIMPLE"));
-        assertEquals("A", Beans.toScreamingSnakeCase("a"));
-        assertEquals("A", Beans.toScreamingSnakeCase("A"));
-        assertEquals("", Beans.toScreamingSnakeCase(""));
-        assertNull(Beans.toScreamingSnakeCase((String) null));
-    }
+    // mapBuilder
 
     @Test
     public void testMapBuilder() {
@@ -79,6 +59,30 @@ public class BeansToTest extends BeansTestSupport {
         assertFalse(exc.containsKey("active"));
 
         assertThrows(IllegalArgumentException.class, () -> Beans.mapBuilder(simpleBean).select("nope").toMap());
+    }
+
+    @Test
+    public void testMapBuilder_DeepAndFlat() {
+        NestedBean bean = new NestedBean();
+        bean.setId("u1");
+        bean.setAddress(new Address("NYC"));
+        bean.setSimpleBean(null);
+        bean.setTags(null);
+
+        Map<String, Object> deep = Beans.mapBuilder(bean).skipNulls().deep().toMap();
+        assertEquals("u1", deep.get("id"));
+        assertTrue(deep.get("address") instanceof Map);
+        assertEquals("NYC", ((Map<?, ?>) deep.get("address")).get("city"));
+
+        Map<String, Object> flat = Beans.mapBuilder(bean).skipNulls().flat().toMap();
+        assertEquals("u1", flat.get("id"));
+        assertEquals("NYC", flat.get("address.city"));
+
+        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).flat().deep());
+        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).deep().flat());
+
+        Map<String, Object> repeated = Beans.mapBuilder(bean).skipNulls().deep().deep().toMap();
+        assertTrue(repeated.get("address") instanceof Map);
     }
 
     @Test
@@ -120,30 +124,6 @@ public class BeansToTest extends BeansTestSupport {
     }
 
     @Test
-    public void testMapBuilder_DeepAndFlat() {
-        NestedBean bean = new NestedBean();
-        bean.setId("u1");
-        bean.setAddress(new Address("NYC"));
-        bean.setSimpleBean(null);
-        bean.setTags(null);
-
-        Map<String, Object> deep = Beans.mapBuilder(bean).skipNulls().deep().toMap();
-        assertEquals("u1", deep.get("id"));
-        assertTrue(deep.get("address") instanceof Map);
-        assertEquals("NYC", ((Map<?, ?>) deep.get("address")).get("city"));
-
-        Map<String, Object> flat = Beans.mapBuilder(bean).skipNulls().flat().toMap();
-        assertEquals("u1", flat.get("id"));
-        assertEquals("NYC", flat.get("address.city"));
-
-        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).flat().deep());
-        assertThrows(IllegalStateException.class, () -> Beans.mapBuilder(bean).deep().flat());
-
-        Map<String, Object> repeated = Beans.mapBuilder(bean).skipNulls().deep().deep().toMap();
-        assertTrue(repeated.get("address") instanceof Map);
-    }
-
-    @Test
     public void testMapBuilder_NullBean() {
         assertTrue(Beans.mapBuilder((Object) null).toMap().isEmpty());
 
@@ -152,6 +132,54 @@ public class BeansToTest extends BeansTestSupport {
         assertTrue(Beans.mapBuilder((Object) null).into(out) == out);
         assertEquals(1, out.size());
     }
+
+    @Test
+    public void testToCamelCase() {
+        assertEquals("userName", Beans.toCamelCase("user_name"));
+        assertEquals("firstName", Beans.toCamelCase("FIRST_NAME"));
+        assertEquals("firstName", Beans.toCamelCase("first_name"));
+        assertEquals("addressLine1", Beans.toCamelCase("address-line-1"));
+        assertEquals("addressLine", Beans.toCamelCase("address-line"));
+        assertEquals("userId", Beans.toCamelCase("user_id"));
+        assertEquals("userId", Beans.toCamelCase("USER_ID"));
+        assertEquals("id", Beans.toCamelCase("id"));
+        assertEquals("name", Beans.toCamelCase("name"));
+        assertEquals("name", Beans.toCamelCase("NAME"));
+        assertEquals("address1", Beans.toCamelCase("address_1"));
+        assertEquals("line2Value", Beans.toCamelCase("line_2_value"));
+        assertEquals("", Beans.toCamelCase(""));
+        assertNull(Beans.toCamelCase((String) null));
+    }
+
+    @Test
+    public void testToScreamingSnakeCase() {
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("userName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("USER_NAME", Beans.toScreamingSnakeCase("UserName"));
+        assertEquals("USER_ID", Beans.toScreamingSnakeCase("userID"));
+        assertEquals("URL", Beans.toScreamingSnakeCase("URL"));
+        assertEquals("SIMPLE", Beans.toScreamingSnakeCase("SIMPLE"));
+        assertEquals("A", Beans.toScreamingSnakeCase("a"));
+        assertEquals("A", Beans.toScreamingSnakeCase("A"));
+        assertEquals("", Beans.toScreamingSnakeCase(""));
+        assertNull(Beans.toScreamingSnakeCase((String) null));
+    }
+
+    @Test
+    public void testToSnakeCase() {
+        assertEquals("user_name", Beans.toSnakeCase("userName"));
+        assertEquals("first_name", Beans.toSnakeCase("FirstName"));
+        assertEquals("first_name", Beans.toSnakeCase("firstName"));
+        assertEquals("user_id", Beans.toSnakeCase("userID"));
+        assertEquals("url", Beans.toSnakeCase("URL"));
+        assertEquals("simple", Beans.toSnakeCase("simple"));
+        assertEquals("a", Beans.toSnakeCase("a"));
+        assertEquals("a", Beans.toSnakeCase("A"));
+        assertEquals("", Beans.toSnakeCase(""));
+        assertNull(Beans.toSnakeCase((String) null));
+    }
+
+
 
     /** Single-property bean for the key-derivation examples in the {@link Beans} class javadoc. */
     public static class KeyNamingBean {
@@ -166,25 +194,4 @@ public class BeansToTest extends BeansTestSupport {
         }
     }
 
-    /**
-     * Pins the "Key Naming" paragraph of the {@link Beans} class javadoc: the key comes from the matched
-     * property's own name with the {@link NamingPolicy} applied, never from the spelling that was passed, and
-     * {@code CAMEL_CASE} emits exactly the keys the default JSON serialization uses. Every call here is one of
-     * the javadoc's examples, so the examples cannot drift back to an overload that does not exist.
-     */
-    @Test
-    public void testBeanToMap_KeyNamingExamplesFromTheClassJavadoc() {
-        final KeyNamingBean user = new KeyNamingBean();
-        user.setFirstName("John");
-
-        assertEquals("{first_name=John}",
-                Beans.beanToMap(user, java.util.List.of("getFirstName"), NamingPolicy.SNAKE_CASE, IntFunctions.ofLinkedHashMap()).toString());
-        assertEquals("{first_name=John}", Beans.beanToMap(user, null, NamingPolicy.SNAKE_CASE, IntFunctions.ofLinkedHashMap()).toString());
-
-        assertEquals("{firstName=John}", Beans.beanToMap(user, null, NamingPolicy.CAMEL_CASE, IntFunctions.ofLinkedHashMap()).toString());
-        assertEquals("{\"firstName\": \"John\"}", N.toJson(user));
-
-        // Two spellings of one property collapse to a single entry.
-        assertEquals("{firstName=John}", Beans.beanToMap(user, java.util.List.of("firstName", "first_name")).toString());
-    }
 }

@@ -31,37 +31,26 @@ import org.junit.jupiter.api.Test;
 public class NForTest extends NTestSupport {
 
     @Test
-    public void testForEach_intRange() {
-        AtomicInteger count = new AtomicInteger(0);
-        N.forEach(0, 5, count::incrementAndGet);
-        assertEquals(5, count.get());
-        count.set(0);
-        N.forEach(5, 0, count::incrementAndGet);
-        assertEquals(0, count.get());
-
-        AtomicInteger sum = new AtomicInteger(0);
-        N.forEach(0, 5, sum::addAndGet);
-        assertEquals(10, sum.get());
-
-        List<Integer> stepped = new ArrayList<>();
-        N.forEach(0, 6, 2, stepped::add);
-        assertEquals(Arrays.asList(0, 2, 4), stepped);
-        stepped.clear();
-        N.forEach(5, -1, -2, stepped::add);
-        assertEquals(Arrays.asList(5, 3, 1), stepped);
-        stepped.clear();
-        N.forEach(0, 5, 10, stepped::add);
-        assertEquals(Arrays.asList(0), stepped);
-        stepped.clear();
-        N.forEach(5, 5, stepped::add);
-        assertTrue(stepped.isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> N.forEach(0, 10, 0, i -> {
-        }));
-
-        StringBuilder sb = new StringBuilder();
-        N.forEach(0, 3, "val:", (i, p) -> sb.append(p).append(i).append(" "));
-        assertEquals("val:0 val:1 val:2 ", sb.toString());
+    public void testForClass() {
+        assertEquals(int.class, ClassUtil.forName("int"));
+        assertEquals(char.class, ClassUtil.forName("char"));
+        assertEquals(boolean.class, ClassUtil.forName("boolean"));
+        assertEquals(String.class, ClassUtil.forName("String"));
+        assertEquals(Object.class, ClassUtil.forName("Object"));
+        assertEquals(java.lang.Math.class, ClassUtil.forName("Math"));
+        assertEquals(java.util.Date.class, ClassUtil.forName("java.util.Date"));
+        assertEquals(int[].class, ClassUtil.forName("int[]"));
+        assertEquals(String[].class, ClassUtil.forName("String[]"));
+        assertEquals(int[][].class, ClassUtil.forName("int[][]"));
+        assertEquals(String[][].class, ClassUtil.forName("String[][]"));
+        assertEquals(int[][][].class, ClassUtil.forName("int[][][]"));
+        assertEquals(java.util.Date[][][].class, ClassUtil.forName("java.util.Date[][][]"));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("string"));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("object[]"));
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("int[];[]"));
     }
+
+    // forEach
 
     @Test
     public void testForEach_arrayCollectionIterator() {
@@ -149,6 +138,73 @@ public class NForTest extends NTestSupport {
     }
 
     @Test
+    public void testForEach_flatMapper() {
+        String[] array = { "ab", "cd", "ef" };
+        List<Character> result = new ArrayList<>();
+        N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+
+        result.clear();
+        N.forEach(CommonUtil.toList("ab", "cd", "ef"), s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+
+        result.clear();
+        N.forEach(CommonUtil.toList("ab", "cd", "ef").iterator(), s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
+
+        result.clear();
+        N.forEach(new String[] { "ab", null, "cd" }, s -> s != null ? Arrays.asList(s.charAt(0), s.charAt(1)) : null, (s, c) -> result.add(c));
+        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
+
+        List<Character> nested = new ArrayList<>();
+        N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), e -> CommonUtil.toList(e, e), (s, c, x) -> nested.add(c));
+        assertEquals(Arrays.asList('a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'e', 'e', 'f', 'f'), nested);
+
+        List<String> twoLevel = new ArrayList<>();
+        N.forEach(new String[] { "ab", "cd" }, s -> charsOf(s), c -> Arrays.asList(c.toString().toUpperCase()),
+                (s, c, u) -> twoLevel.add(s + ":" + c + ":" + u));
+        assertEquals(4, twoLevel.size());
+        assertTrue(twoLevel.contains("ab:a:A"));
+        N.forEach(new String[0], s -> charsOf(s), c -> Arrays.asList(c.toString()), (s, c, u) -> {
+        });
+        N.forEach((Iterator<String>) null, s -> charsOf(s), (s, c) -> {
+        });
+    }
+
+    @Test
+    public void testForEach_intRange() {
+        AtomicInteger count = new AtomicInteger(0);
+        N.forEach(0, 5, count::incrementAndGet);
+        assertEquals(5, count.get());
+        count.set(0);
+        N.forEach(5, 0, count::incrementAndGet);
+        assertEquals(0, count.get());
+
+        AtomicInteger sum = new AtomicInteger(0);
+        N.forEach(0, 5, sum::addAndGet);
+        assertEquals(10, sum.get());
+
+        List<Integer> stepped = new ArrayList<>();
+        N.forEach(0, 6, 2, stepped::add);
+        assertEquals(Arrays.asList(0, 2, 4), stepped);
+        stepped.clear();
+        N.forEach(5, -1, -2, stepped::add);
+        assertEquals(Arrays.asList(5, 3, 1), stepped);
+        stepped.clear();
+        N.forEach(0, 5, 10, stepped::add);
+        assertEquals(Arrays.asList(0), stepped);
+        stepped.clear();
+        N.forEach(5, 5, stepped::add);
+        assertTrue(stepped.isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> N.forEach(0, 10, 0, i -> {
+        }));
+
+        StringBuilder sb = new StringBuilder();
+        N.forEach(0, 3, "val:", (i, p) -> sb.append(p).append(i).append(" "));
+        assertEquals("val:0 val:1 val:2 ", sb.toString());
+    }
+
+    @Test
     public void testForEach_map() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("a", 1);
@@ -217,70 +273,6 @@ public class NForTest extends NTestSupport {
         List<String> mixed = new ArrayList<>();
         N.forEach(Arrays.asList(1, 2, 3), new LinkedHashSet<>(Arrays.asList("a", "b", "c")), (i, s) -> mixed.add(i + s));
         assertEquals(Arrays.asList("1a", "2b", "3c"), mixed);
-    }
-
-    @Test
-    public void testForEach_flatMapper() {
-        String[] array = { "ab", "cd", "ef" };
-        List<Character> result = new ArrayList<>();
-        N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
-
-        result.clear();
-        N.forEach(CommonUtil.toList("ab", "cd", "ef"), s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
-
-        result.clear();
-        N.forEach(CommonUtil.toList("ab", "cd", "ef").iterator(), s -> Arrays.asList(s.charAt(0), s.charAt(1)), (s, c) -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd', 'e', 'f'), result);
-
-        result.clear();
-        N.forEach(new String[] { "ab", null, "cd" }, s -> s != null ? Arrays.asList(s.charAt(0), s.charAt(1)) : null, (s, c) -> result.add(c));
-        assertEquals(Arrays.asList('a', 'b', 'c', 'd'), result);
-
-        List<Character> nested = new ArrayList<>();
-        N.forEach(array, s -> Arrays.asList(s.charAt(0), s.charAt(1)), e -> CommonUtil.toList(e, e), (s, c, x) -> nested.add(c));
-        assertEquals(Arrays.asList('a', 'a', 'b', 'b', 'c', 'c', 'd', 'd', 'e', 'e', 'f', 'f'), nested);
-
-        List<String> twoLevel = new ArrayList<>();
-        N.forEach(new String[] { "ab", "cd" }, s -> charsOf(s), c -> Arrays.asList(c.toString().toUpperCase()),
-                (s, c, u) -> twoLevel.add(s + ":" + c + ":" + u));
-        assertEquals(4, twoLevel.size());
-        assertTrue(twoLevel.contains("ab:a:A"));
-        N.forEach(new String[0], s -> charsOf(s), c -> Arrays.asList(c.toString()), (s, c, u) -> {
-        });
-        N.forEach((Iterator<String>) null, s -> charsOf(s), (s, c) -> {
-        });
-    }
-
-    @Test
-    public void testForEachNonNull() {
-        assertEquals(Arrays.asList("a", "b", "c"), collectNonNull(new String[] { "a", null, "b", null, "c" }));
-        assertTrue(collectNonNull(new String[] { null, null, null }).isEmpty());
-
-        List<String> flat = new ArrayList<>();
-        N.forEachNonNull(new String[] { "a", null, "b" }, e -> CommonUtil.toList(e, e), (s, i) -> flat.add(s + i));
-        assertEquals(Arrays.asList("aa", "aa", "bb", "bb"), flat);
-
-        List<String> triple = new ArrayList<>();
-        N.forEachNonNull(new String[] { "ab", null, "cd" }, s -> charsOf(s), c -> Arrays.asList(c.toString().toUpperCase(), c.toString().toLowerCase()),
-                (original, ch, str) -> triple.add(original + ":" + ch + ":" + str));
-        assertEquals(8, triple.size());
-        assertTrue(triple.contains("ab:a:A"));
-
-        List<String> fromList = new ArrayList<>();
-        N.forEachNonNull(CommonUtil.toList("a", null, "b", null, "c"), fromList::add);
-        assertEquals(Arrays.asList("a", "b", "c"), fromList);
-
-        List<String> fromIter = new ArrayList<>();
-        N.forEachNonNull(CommonUtil.toList("a", null, "b").iterator(), fromIter::add);
-        assertEquals(Arrays.asList("a", "b"), fromIter);
-
-        List<String> iterFlat = new ArrayList<>();
-        N.forEachNonNull(Arrays.asList("ab", null, "cd").iterator(), s -> charsOf(s), (s, c) -> iterFlat.add(s + ":" + c));
-        assertEquals(Arrays.asList("ab:a", "ab:b", "cd:c", "cd:d"), iterFlat);
-        N.forEachNonNull((Iterator<String>) null, s -> charsOf(s), (s, c) -> {
-        });
     }
 
     @Test
@@ -381,6 +373,36 @@ public class NForTest extends NTestSupport {
     }
 
     @Test
+    public void testForEachNonNull() {
+        assertEquals(Arrays.asList("a", "b", "c"), collectNonNull(new String[] { "a", null, "b", null, "c" }));
+        assertTrue(collectNonNull(new String[] { null, null, null }).isEmpty());
+
+        List<String> flat = new ArrayList<>();
+        N.forEachNonNull(new String[] { "a", null, "b" }, e -> CommonUtil.toList(e, e), (s, i) -> flat.add(s + i));
+        assertEquals(Arrays.asList("aa", "aa", "bb", "bb"), flat);
+
+        List<String> triple = new ArrayList<>();
+        N.forEachNonNull(new String[] { "ab", null, "cd" }, s -> charsOf(s), c -> Arrays.asList(c.toString().toUpperCase(), c.toString().toLowerCase()),
+                (original, ch, str) -> triple.add(original + ":" + ch + ":" + str));
+        assertEquals(8, triple.size());
+        assertTrue(triple.contains("ab:a:A"));
+
+        List<String> fromList = new ArrayList<>();
+        N.forEachNonNull(CommonUtil.toList("a", null, "b", null, "c"), fromList::add);
+        assertEquals(Arrays.asList("a", "b", "c"), fromList);
+
+        List<String> fromIter = new ArrayList<>();
+        N.forEachNonNull(CommonUtil.toList("a", null, "b").iterator(), fromIter::add);
+        assertEquals(Arrays.asList("a", "b"), fromIter);
+
+        List<String> iterFlat = new ArrayList<>();
+        N.forEachNonNull(Arrays.asList("ab", null, "cd").iterator(), s -> charsOf(s), (s, c) -> iterFlat.add(s + ":" + c));
+        assertEquals(Arrays.asList("ab:a", "ab:b", "cd:c", "cd:d"), iterFlat);
+        N.forEachNonNull((Iterator<String>) null, s -> charsOf(s), (s, c) -> {
+        });
+    }
+
+    @Test
     public void testForEachPair() {
         List<String> result = new ArrayList<>();
         N.forEachPair(new Integer[] { 1, 2, 3, 4, 5 }, (a, b) -> result.add(a + "-" + (b != null ? b : "null")));
@@ -442,26 +464,6 @@ public class NForTest extends NTestSupport {
         assertTrue(result.contains("A-A1-A1a"));
     }
 
-    @Test
-    public void testForClass() {
-        assertEquals(int.class, ClassUtil.forName("int"));
-        assertEquals(char.class, ClassUtil.forName("char"));
-        assertEquals(boolean.class, ClassUtil.forName("boolean"));
-        assertEquals(String.class, ClassUtil.forName("String"));
-        assertEquals(Object.class, ClassUtil.forName("Object"));
-        assertEquals(java.lang.Math.class, ClassUtil.forName("Math"));
-        assertEquals(java.util.Date.class, ClassUtil.forName("java.util.Date"));
-        assertEquals(int[].class, ClassUtil.forName("int[]"));
-        assertEquals(String[].class, ClassUtil.forName("String[]"));
-        assertEquals(int[][].class, ClassUtil.forName("int[][]"));
-        assertEquals(String[][].class, ClassUtil.forName("String[][]"));
-        assertEquals(int[][][].class, ClassUtil.forName("int[][][]"));
-        assertEquals(java.util.Date[][][].class, ClassUtil.forName("java.util.Date[][][]"));
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("string"));
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("object[]"));
-        assertThrows(IllegalArgumentException.class, () -> ClassUtil.forName("int[];[]"));
-    }
-
     private static List<Character> charsOf(String s) {
         List<Character> chars = new ArrayList<>();
         for (char c : s.toCharArray()) {
@@ -479,4 +481,5 @@ public class NForTest extends NTestSupport {
     private static String nz(Object value) {
         return value == null ? "null" : value.toString();
     }
+
 }

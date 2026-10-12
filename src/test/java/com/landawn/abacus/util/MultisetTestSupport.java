@@ -7,6 +7,7 @@ import com.landawn.abacus.AbstractTest;
 public abstract class MultisetTestSupport extends AbstractTest {
 
     protected Multiset<String> multiset;
+
     protected Multiset<Integer> intMultiset;
 
     @BeforeEach
@@ -14,8 +15,4 @@ public abstract class MultisetTestSupport extends AbstractTest {
         multiset = new Multiset<>();
         intMultiset = new Multiset<>();
     }
-
-    // Additional tests for missing coverage
-
-    // -------- 2026-09-06 review fixes --------
 }

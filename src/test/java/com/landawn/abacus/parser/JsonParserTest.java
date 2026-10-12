@@ -41,12 +41,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 
@@ -85,7 +85,6 @@ import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.TypeReference;
 import com.landawn.abacus.util.stream.Stream;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -1262,16 +1261,10 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromReader() {
+    public void testStreamFromReaderRejectsScalarElements() {
         String json = "[\"hello\",\"world\"]";
         Reader reader = new StringReader(json);
-        try (Stream<String> stream = parser.stream(reader, true, Type.of(String.class))) {
-            List<String> list = stream.toList();
-            Assertions.assertEquals(2, list.size());
-            Assertions.assertEquals("hello", list.get(0));
-            Assertions.assertEquals("world", list.get(1));
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.stream(reader, true, Type.of(String.class)));
     }
 
     @Test
@@ -1355,30 +1348,16 @@ public class JsonParserTest extends AbstractJsonParserTest {
     }
 
     @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromStringWithConfig() {
+    public void testStreamFromStringWithConfigRejectsScalarElements() {
         String json = "[\"a\",\"b\",\"c\"]";
-        try (Stream<String> stream = parser.stream(json, null, Type.of(String.class))) {
-            List<String> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals("a", list.get(0));
-            Assertions.assertEquals("b", list.get(1));
-            Assertions.assertEquals("c", list.get(2));
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.stream(json, null, Type.of(String.class)));
     }
 
     @Test
-    @Disabled("This test is disabled due to the element type is not supported type: array/collection/map/bean.")
-    public void testStreamFromInputStream() {
+    public void testStreamFromInputStreamRejectsScalarElements() {
         String json = "[1,2,3]";
         InputStream is = new ByteArrayInputStream(json.getBytes());
-        try (Stream<Integer> stream = parser.stream(is, true, Type.of(Integer.class))) {
-            List<Integer> list = stream.toList();
-            Assertions.assertEquals(3, list.size());
-            Assertions.assertEquals(1, list.get(0));
-            Assertions.assertEquals(2, list.get(1));
-            Assertions.assertEquals(3, list.get(2));
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.stream(is, true, Type.of(Integer.class)));
     }
 
     @Test

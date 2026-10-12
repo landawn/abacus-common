@@ -19,6 +19,8 @@ import org.junit.jupiter.api.Test;
 
 public class BeansCopyTest extends BeansTestSupport {
 
+    // copy
+
     @Test
     public void testCopy() {
         SimpleBean copied = Beans.copy(simpleBean);
@@ -29,38 +31,6 @@ public class BeansCopyTest extends BeansTestSupport {
         assertEquals(true, copied.getActive());
 
         assertNull(Beans.copy((SimpleBean) null));
-    }
-
-    @Test
-    public void testCopy_SelectPropNames() {
-        SimpleBean copied = Beans.copy(simpleBean, Arrays.asList("name"));
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
-        assertNull(copied.getActive());
-
-        copied = Beans.copy(simpleBean, (Collection<String>) null);
-        assertEquals("John", copied.getName());
-        assertEquals(25, copied.getAge());
-        assertEquals(true, copied.getActive());
-
-        copied = Beans.copy(simpleBean, Collections.emptyList());
-        assertNull(copied.getName());
-        assertEquals(0, copied.getAge());
-        assertNull(copied.getActive());
-
-        assertThrows(IllegalArgumentException.class, () -> Beans.copy(simpleBean, Arrays.asList("nonExistentProp")));
-    }
-
-    @Test
-    public void testCopy_PropFilter() {
-        SimpleBean copied = Beans.copy(simpleBean, (name, value) -> value instanceof String);
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
-        assertNull(copied.getActive());
-
-        copied = Beans.copy(simpleBean, (name, value) -> !name.equals("age"));
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
     }
 
     @Test
@@ -94,6 +64,40 @@ public class BeansCopyTest extends BeansTestSupport {
     }
 
     @Test
+    public void testCopy_PropFilter() {
+        SimpleBean copied = Beans.copy(simpleBean, (name, value) -> value instanceof String);
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
+        assertNull(copied.getActive());
+
+        copied = Beans.copy(simpleBean, (name, value) -> !name.equals("age"));
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
+    }
+
+    @Test
+    public void testCopy_SelectPropNames() {
+        SimpleBean copied = Beans.copy(simpleBean, Arrays.asList("name"));
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
+        assertNull(copied.getActive());
+
+        copied = Beans.copy(simpleBean, (Collection<String>) null);
+        assertEquals("John", copied.getName());
+        assertEquals(25, copied.getAge());
+        assertEquals(true, copied.getActive());
+
+        copied = Beans.copy(simpleBean, Collections.emptyList());
+        assertNull(copied.getName());
+        assertEquals(0, copied.getAge());
+        assertNull(copied.getActive());
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.copy(simpleBean, Arrays.asList("nonExistentProp")));
+    }
+
+    // copyAs
+
+    @Test
     public void testCopyAs() {
         SimpleBean source = new SimpleBean("Transfer", 50);
         source.setActive(true);
@@ -114,75 +118,24 @@ public class BeansCopyTest extends BeansTestSupport {
     }
 
     @Test
-    public void testCopyAs_SelectPropNames() {
-        SimpleBean copied = Beans.copyAs(simpleBean, Arrays.asList("name"), SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
+    public void testCopyAs_BuilderBean() {
+        BeansMutableFixture src = new BeansMutableFixture();
+        src.setA("x");
+        src.setB(7);
 
-        copied = Beans.copyAs(simpleBean, Arrays.asList("age"), SimpleBean.class);
-        assertNull(copied.getName());
-        assertEquals(25, copied.getAge());
+        BeansBuilderFixture copied = Beans.copyAs(src, BeansBuilderFixture.class);
+        assertEquals("x", copied.getA());
+        assertEquals(7, copied.getB());
 
-        copied = Beans.copyAs(simpleBean, Collections.emptyList(), SimpleBean.class);
-        assertNull(copied.getName());
-        assertEquals(0, copied.getAge());
+        assertEquals("x", Beans.copyAs(src, CommonUtil.asList("a"), BeansBuilderFixture.class).getA());
 
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name"), Address.class));
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("nonExistentProp"), SimpleBean.class));
-    }
+        src.setA(null);
+        BeansBuilderFixture filtered = Beans.copyAs(src, (name, value) -> value != null, BeansBuilderFixture.class);
+        assertNull(filtered.getA());
+        assertEquals(7, filtered.getB());
 
-    @Test
-    public void testCopyAs_SelectPropNamesAndConverter() {
-        SimpleBean copied = Beans.copyAs(simpleBean, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(25, copied.getAge());
-
-        BeanWithSnakeCase snakeBean = new BeanWithSnakeCase();
-        snakeBean.setFirstName("John");
-        SimpleBean renamed = Beans.copyAs(snakeBean, Arrays.asList("firstName"), name -> "firstName".equals(name) ? "name" : name, SimpleBean.class);
-        assertEquals("John", renamed.getName());
-
-        copied = Beans.copyAs(simpleBean, (Collection<String>) null, name -> name, SimpleBean.class);
-        assertEquals("John", copied.getName());
-
-        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name"), null, SimpleBean.class));
-    }
-
-    @Test
-    public void testCopyAs_PropFilter() {
-        SimpleBean copied = Beans.copyAs(simpleBean, (name, value) -> true, SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(25, copied.getAge());
-
-        copied = Beans.copyAs(simpleBean, (name, value) -> value instanceof String, SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
-
-        copied = Beans.copyAs(simpleBean, (BiPredicate<String, Object>) (name, val) -> !name.equals("age"), SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
-
-        copied = Beans.copyAs(null, (BiPredicate<String, Object>) (name, val) -> true, SimpleBean.class);
-        assertNotNull(copied);
-        assertNull(copied.getName());
-
-        assertThrows(IllegalArgumentException.class,
-                () -> Beans.copyAs(simpleBean, (BiPredicate<String, Object>) (propName, propValue) -> propName.equals("name"), Address.class));
-    }
-
-    @Test
-    public void testCopyAs_PropFilterAndConverter() {
-        SimpleBean copied = Beans.copyAs(simpleBean, (name, value) -> true, Function.identity(), SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(25, copied.getAge());
-
-        copied = Beans.copyAs(simpleBean, (propName, val) -> !propName.equals("age"), Function.identity(), SimpleBean.class);
-        assertEquals("John", copied.getName());
-        assertEquals(0, copied.getAge());
-
-        copied = Beans.copyAs(null, (name, val) -> true, Function.identity(), SimpleBean.class);
-        assertNotNull(copied);
-        assertNull(copied.getName());
+        BeansBuilderFixture built = BeansBuilderFixture.builder().setA("built").setB(3).build();
+        assertEquals("built", Beans.copyAs(built, BeansMutableFixture.class).getA());
     }
 
     @Test
@@ -229,24 +182,40 @@ public class BeansCopyTest extends BeansTestSupport {
     }
 
     @Test
-    public void testCopyAs_BuilderBean() {
-        BeansMutableFixture src = new BeansMutableFixture();
-        src.setA("x");
-        src.setB(7);
+    public void testCopyAs_PropFilter() {
+        SimpleBean copied = Beans.copyAs(simpleBean, (name, value) -> true, SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(25, copied.getAge());
 
-        BeansBuilderFixture copied = Beans.copyAs(src, BeansBuilderFixture.class);
-        assertEquals("x", copied.getA());
-        assertEquals(7, copied.getB());
+        copied = Beans.copyAs(simpleBean, (name, value) -> value instanceof String, SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
 
-        assertEquals("x", Beans.copyAs(src, CommonUtil.asList("a"), BeansBuilderFixture.class).getA());
+        copied = Beans.copyAs(simpleBean, (BiPredicate<String, Object>) (name, val) -> !name.equals("age"), SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
 
-        src.setA(null);
-        BeansBuilderFixture filtered = Beans.copyAs(src, (name, value) -> value != null, BeansBuilderFixture.class);
-        assertNull(filtered.getA());
-        assertEquals(7, filtered.getB());
+        copied = Beans.copyAs(null, (BiPredicate<String, Object>) (name, val) -> true, SimpleBean.class);
+        assertNotNull(copied);
+        assertNull(copied.getName());
 
-        BeansBuilderFixture built = BeansBuilderFixture.builder().setA("built").setB(3).build();
-        assertEquals("built", Beans.copyAs(built, BeansMutableFixture.class).getA());
+        assertThrows(IllegalArgumentException.class,
+                () -> Beans.copyAs(simpleBean, (BiPredicate<String, Object>) (propName, propValue) -> propName.equals("name"), Address.class));
+    }
+
+    @Test
+    public void testCopyAs_PropFilterAndConverter() {
+        SimpleBean copied = Beans.copyAs(simpleBean, (name, value) -> true, Function.identity(), SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(25, copied.getAge());
+
+        copied = Beans.copyAs(simpleBean, (propName, val) -> !propName.equals("age"), Function.identity(), SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
+
+        copied = Beans.copyAs(null, (name, val) -> true, Function.identity(), SimpleBean.class);
+        assertNotNull(copied);
+        assertNull(copied.getName());
     }
 
     @Test
@@ -261,4 +230,40 @@ public class BeansCopyTest extends BeansTestSupport {
         assertEquals("Johnny", copy.getName());
         assertEquals("John", copy.getNickName());
     }
+
+    @Test
+    public void testCopyAs_SelectPropNames() {
+        SimpleBean copied = Beans.copyAs(simpleBean, Arrays.asList("name"), SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(0, copied.getAge());
+
+        copied = Beans.copyAs(simpleBean, Arrays.asList("age"), SimpleBean.class);
+        assertNull(copied.getName());
+        assertEquals(25, copied.getAge());
+
+        copied = Beans.copyAs(simpleBean, Collections.emptyList(), SimpleBean.class);
+        assertNull(copied.getName());
+        assertEquals(0, copied.getAge());
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name"), Address.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("nonExistentProp"), SimpleBean.class));
+    }
+
+    @Test
+    public void testCopyAs_SelectPropNamesAndConverter() {
+        SimpleBean copied = Beans.copyAs(simpleBean, Arrays.asList("name", "age"), name -> name, SimpleBean.class);
+        assertEquals("John", copied.getName());
+        assertEquals(25, copied.getAge());
+
+        BeanWithSnakeCase snakeBean = new BeanWithSnakeCase();
+        snakeBean.setFirstName("John");
+        SimpleBean renamed = Beans.copyAs(snakeBean, Arrays.asList("firstName"), name -> "firstName".equals(name) ? "name" : name, SimpleBean.class);
+        assertEquals("John", renamed.getName());
+
+        copied = Beans.copyAs(simpleBean, (Collection<String>) null, name -> name, SimpleBean.class);
+        assertEquals("John", copied.getName());
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.copyAs(simpleBean, Arrays.asList("name"), null, SimpleBean.class));
+    }
+
 }

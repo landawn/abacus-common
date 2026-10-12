@@ -1,9 +1,10 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,7 +60,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     static final String FALSE = Boolean.FALSE.toString().intern();
     static final char[] FALSE_CHAR_ARRAY = FALSE.toCharArray();
 
-    protected static final Random rand = new Random();
+    protected static final Random rand = new Random(0x5EEDL);
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
     protected static final AvroParser avroParser = ParserFactory.createAvroParser();
     // Positive round-trip fixtures opt in explicitly. Security tests create separate restrictive parsers.
@@ -430,8 +431,8 @@ public abstract class AbstractParserTest extends AbstractTest {
         for (final XmlParser xmlParser : parsers) {
             final String xml = xmlParser.serialize(bean, config);
             final ContainerBean back = xmlParser.deserialize(xml, ContainerBean.class);
-            assertEquals(xml, "v", back.getMap().get("k"));
-            assertEquals(xml, "a", back.getList().get(0));
+            assertEquals("v", back.getMap().get("k"), xml);
+            assertEquals("a", back.getList().get(0), xml);
 
             final String emptyXml = xmlParser.serialize(empty, config);
             final ContainerBean emptyBack = xmlParser.deserialize(emptyXml, ContainerBean.class);
@@ -445,7 +446,7 @@ public abstract class AbstractParserTest extends AbstractTest {
         final Type<String[]> stringArray = Type.of(String[].class);
 
         // Legitimate inputs are unchanged.
-        assertEquals(null, AbstractParser.collectionToArray(null, stringArray));
+        assertNull(AbstractParser.collectionToArray(null, stringArray));
         assertArrayEquals(new String[0], (String[]) AbstractParser.collectionToArray(new ArrayList<>(), stringArray));
         assertArrayEquals(new String[] { "a", "b" }, (String[]) AbstractParser.collectionToArray(Arrays.asList("a", "b"), stringArray));
         assertArrayEquals(new String[] { "a", null, "b" }, (String[]) AbstractParser.collectionToArray(Arrays.asList("a", null, "b"), stringArray));

@@ -17,96 +17,21 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.function.Supplier;
 
 public class IterablesFillTest extends IterablesTestSupport {
-    @Test
-    public void testFillArray() {
-        String[] arr = new String[5];
-        Supplier<String> supplier = () -> "test";
 
-        Iterables.fill(arr, supplier);
-
-        for (String s : arr) {
-            assertEquals("test", s);
-        }
-    }
+    // fill
 
     @Test
-    public void testFillListWithRange() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Supplier<String> supplier = () -> "X";
-
-        Iterables.fill(list, 1, 4, supplier);
-
-        assertEquals("a", list.get(0));
-        assertEquals("X", list.get(1));
-        assertEquals("X", list.get(2));
-        assertEquals("X", list.get(3));
-        assertEquals("e", list.get(4));
-    }
-
-    @Test
-    public void testFillArrayRangeWithSupplier() {
-        String[] array = new String[5];
-        Arrays.fill(array, "initial");
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(array, 1, 4, supplier);
-
-        assertArrayEquals(new String[] { "initial", "test", "test", "test", "initial" }, array);
-    }
-
-    @Test
-    public void testFillListRangeWithSupplier() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(list, 1, 4, supplier);
-
-        assertEquals(Arrays.asList("a", "test", "test", "test", "e"), list);
-    }
-
-    @Test
-    public void testFillListExtension() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        Supplier<String> supplier = () -> "test";
-
-        Iterables.fill(list, 0, 5, supplier);
-
-        assertEquals(5, list.size());
-        assertEquals(Arrays.asList("test", "test", "test", "test", "test"), list);
-    }
-
-    // ===================== fill Array/List overloads =====================
-
-    @Test
-    public void testFillArray_Dedicated() {
-        String[] arr = new String[3];
-        Iterables.fill(arr, () -> "x");
-        assertArrayEquals(new String[] { "x", "x", "x" }, arr);
-    }
-
-    @Test
-    public void testFillList_Dedicated() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        Iterables.fill(list, () -> "z");
-        assertEquals(Arrays.asList("z", "z", "z"), list);
-    }
-
-    @Test
-    public void testFillListRange_Dedicated() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        Iterables.fill(list, 1, 3, () -> "z");
-        assertEquals(Arrays.asList("a", "z", "z", "d"), list);
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_ExtendsExistingList() {
-        List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));
-        Supplier<Integer> supplier = () -> 99;
-        Iterables.fill(list, 1, 5, supplier);
-        assertEquals(5, list.size());
-        assertEquals(Integer.valueOf(1), list.get(0));
-        assertEquals(Integer.valueOf(99), list.get(1));
-        assertEquals(Integer.valueOf(99), list.get(4));
+    public void testFill_ListWithSupplier_EmptyAndGap() {
+        List<Integer> list = new ArrayList<>();
+        Supplier<Integer> supplier = () -> 7;
+        // fromIndex > size: the gap [size, fromIndex) is padded with null (aligned with N.fill),
+        // only [fromIndex, toIndex) is populated from the supplier.
+        Iterables.fill(list, 2, 4, supplier);
+        assertEquals(4, list.size());
+        assertNull(list.get(0));
+        assertNull(list.get(1));
+        assertEquals(Integer.valueOf(7), list.get(2));
+        assertEquals(Integer.valueOf(7), list.get(3));
     }
 
     @Test
@@ -122,6 +47,118 @@ public class IterablesFillTest extends IterablesTestSupport {
     }
 
     @Test
+    public void testFill_ListWithSupplier_ExtendsExistingList() {
+        List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));
+        Supplier<Integer> supplier = () -> 99;
+        Iterables.fill(list, 1, 5, supplier);
+        assertEquals(5, list.size());
+        assertEquals(Integer.valueOf(1), list.get(0));
+        assertEquals(Integer.valueOf(99), list.get(1));
+        assertEquals(Integer.valueOf(99), list.get(4));
+    }
+
+    @Test
+    public void testFill_ListWithSupplier_NullList_ThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<Integer>) null, 0, 2, () -> 1));
+    }
+
+    @Test
+    public void testFill_NullSupplierNotEvaluatedForEmptyTargetsAndRanges() {
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
+    }
+
+    @Test
+    public void testFillArray() {
+        String[] arr = new String[5];
+        Supplier<String> supplier = () -> "test";
+
+        Iterables.fill(arr, supplier);
+
+        for (String s : arr) {
+            assertEquals("test", s);
+        }
+    }
+
+    @Test
+    public void testFillArray_Dedicated() {
+        String[] arr = new String[3];
+        Iterables.fill(arr, () -> "x");
+        assertArrayEquals(new String[] { "x", "x", "x" }, arr);
+    }
+
+    @Test
+    public void testFillArrayFromToWithSupplier() {
+        Iterables.fill((String[]) null, 0, 0, () -> "a");
+
+        String[] arr = new String[5];
+        Arrays.fill(arr, "original");
+        Iterables.fill(arr, 1, 4, () -> "filled");
+        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
+
+        Iterables.fill(arr, 1, 1, () -> "no-fill");
+        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
+
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, -1, 2, () -> "fail"));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 6, () -> "fail"));
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 3, 2, () -> "fail"));
+    }
+
+    @Test
+    public void testFillArrayRange_Dedicated() {
+        String[] arr = new String[5];
+        Iterables.fill(arr, 1, 4, () -> "y");
+        assertNull(arr[0]);
+        assertEquals("y", arr[1]);
+        assertEquals("y", arr[2]);
+        assertEquals("y", arr[3]);
+        assertNull(arr[4]);
+    }
+
+    @Test
+    public void testFillArrayRange_NullArray() {
+        assertDoesNotThrow(() -> Iterables.fill((String[]) null, 0, 0, () -> "x"));
+    }
+
+    @Test
+    public void testFillArrayRangeSupplier() {
+        String[] arr = { "a", "b", "c", "d" };
+        Supplier<String> supplier = () -> "x";
+        Iterables.fill(arr, 1, 3, supplier);
+        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
+
+        Iterables.fill(arr, 1, 1, supplier);
+        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
+
+        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 5, supplier));
+    }
+
+    @Test
+    public void testFillArrayRangeWithSupplier() {
+        String[] array = new String[5];
+        Arrays.fill(array, "initial");
+        Supplier<String> supplier = () -> "test";
+
+        Iterables.fill(array, 1, 4, supplier);
+
+        assertArrayEquals(new String[] { "initial", "test", "test", "test", "initial" }, array);
+    }
+
+    @Test
+    public void testFillArraySupplier() {
+        String[] arr = new String[3];
+        Supplier<String> supplier = () -> "test";
+        Iterables.fill(arr, supplier);
+        assertArrayEquals(new String[] { "test", "test", "test" }, arr);
+
+        Iterables.fill((String[]) null, supplier);
+        Iterables.fill(new String[0], supplier);
+    }
+
+    @Test
     public void testFillArrayWithRange() {
         String[] arr = new String[5];
         Supplier<String> supplier = () -> "test";
@@ -133,18 +170,6 @@ public class IterablesFillTest extends IterablesTestSupport {
         assertEquals("test", arr[2]);
         assertEquals("test", arr[3]);
         assertNull(arr[4]);
-    }
-
-    @Test
-    public void testFillList() {
-        List<String> list = new ArrayList<>(Arrays.asList(null, null, null));
-        Supplier<String> supplier = () -> "filled";
-
-        Iterables.fill(list, supplier);
-
-        for (String s : list) {
-            assertEquals("filled", s);
-        }
     }
 
     @Test
@@ -167,75 +192,54 @@ public class IterablesFillTest extends IterablesTestSupport {
     }
 
     @Test
-    public void testFillArraySupplier() {
-        String[] arr = new String[3];
+    public void testFillList() {
+        List<String> list = new ArrayList<>(Arrays.asList(null, null, null));
+        Supplier<String> supplier = () -> "filled";
+
+        Iterables.fill(list, supplier);
+
+        for (String s : list) {
+            assertEquals("filled", s);
+        }
+    }
+
+    @Test
+    public void testFillList_Dedicated() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        Iterables.fill(list, () -> "z");
+        assertEquals(Arrays.asList("z", "z", "z"), list);
+    }
+
+    @Test
+    public void testFillList_invalidRange_messageDoesNotLeakIntegerMaxValue() {
+        final List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+
+        final IndexOutOfBoundsException negative = assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, -1, 2, () -> "z"));
+        assertEquals("Index range [-1, 2) is invalid: expected 0 <= fromIndex <= toIndex", negative.getMessage());
+        assertFalse(negative.getMessage().contains(String.valueOf(Integer.MAX_VALUE)));
+
+        final IndexOutOfBoundsException inverted = assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, 3, 1, () -> "z"));
+        assertEquals("Index range [3, 1) is invalid: expected 0 <= fromIndex <= toIndex", inverted.getMessage());
+
+        assertEquals(Arrays.asList("a", "b"), list, "the list must be untouched when the range is rejected");
+    }
+
+    @Test
+    public void testFillList_toIndexBeyondSizeIsStillAllowed() {
+        final List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
+        Iterables.fill(list, 0, 4, () -> "z");
+        assertEquals(Arrays.asList("z", "z", "z", "z"), list);
+    }
+
+    @Test
+    public void testFillListExtension() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
         Supplier<String> supplier = () -> "test";
-        Iterables.fill(arr, supplier);
-        assertArrayEquals(new String[] { "test", "test", "test" }, arr);
 
-        Iterables.fill((String[]) null, supplier);
-        Iterables.fill(new String[0], supplier);
-    }
+        Iterables.fill(list, 0, 5, supplier);
 
-    @Test
-    public void testFillArrayRange_Dedicated() {
-        String[] arr = new String[5];
-        Iterables.fill(arr, 1, 4, () -> "y");
-        assertNull(arr[0]);
-        assertEquals("y", arr[1]);
-        assertEquals("y", arr[2]);
-        assertEquals("y", arr[3]);
-        assertNull(arr[4]);
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_EmptyAndGap() {
-        List<Integer> list = new ArrayList<>();
-        Supplier<Integer> supplier = () -> 7;
-        // fromIndex > size: the gap [size, fromIndex) is padded with null (aligned with N.fill),
-        // only [fromIndex, toIndex) is populated from the supplier.
-        Iterables.fill(list, 2, 4, supplier);
-        assertEquals(4, list.size());
-        assertNull(list.get(0));
-        assertNull(list.get(1));
-        assertEquals(Integer.valueOf(7), list.get(2));
-        assertEquals(Integer.valueOf(7), list.get(3));
-    }
-
-    @Test
-    public void testFillArrayFromToWithSupplier() {
-        Iterables.fill((String[]) null, 0, 0, () -> "a");
-
-        String[] arr = new String[5];
-        Arrays.fill(arr, "original");
-        Iterables.fill(arr, 1, 4, () -> "filled");
-        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
-
-        Iterables.fill(arr, 1, 1, () -> "no-fill");
-        assertArrayEquals(new String[] { "original", "filled", "filled", "filled", "original" }, arr);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, -1, 2, () -> "fail"));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 6, () -> "fail"));
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 3, 2, () -> "fail"));
-    }
-
-    @Test
-    public void testFillListWithSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, () -> "a"));
-
-        List<String> listEmpty = new ArrayList<>();
-        Iterables.fill(listEmpty, () -> "a");
-        assertTrue(listEmpty.isEmpty());
-
-        List<String> list = new ArrayList<>(Arrays.asList("x", "y", "z"));
-        Iterables.fill(list, () -> "filled");
-        assertEquals(Arrays.asList("filled", "filled", "filled"), list);
-
-        final int[] counter = { 0 };
-        Supplier<Integer> supplier = () -> counter[0]++;
-        List<Integer> listInt = new ArrayList<>(Arrays.asList(0, 0, 0));
-        Iterables.fill(listInt, supplier);
-        assertEquals(Arrays.asList(0, 1, 2), listInt);
+        assertEquals(5, list.size());
+        assertEquals(Arrays.asList("test", "test", "test", "test", "test"), list);
     }
 
     @Test
@@ -286,30 +290,10 @@ public class IterablesFillTest extends IterablesTestSupport {
     }
 
     @Test
-    public void testFillArrayRangeSupplier() {
-        String[] arr = { "a", "b", "c", "d" };
-        Supplier<String> supplier = () -> "x";
-        Iterables.fill(arr, 1, 3, supplier);
-        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
-
-        Iterables.fill(arr, 1, 1, supplier);
-        assertArrayEquals(new String[] { "a", "x", "x", "d" }, arr);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(arr, 0, 5, supplier));
-    }
-
-    @Test
-    public void testFillListSupplier() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
-        Supplier<String> supplier = () -> "test";
-        Iterables.fill(list, supplier);
-        assertEquals(list("test", "test", "test"), list);
-
-        List<String> emptyList = new ArrayList<>();
-        Iterables.fill(emptyList, supplier);
-        assertTrue(emptyList.isEmpty());
-
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, supplier));
+    public void testFillListRange_Dedicated() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        Iterables.fill(list, 1, 3, () -> "z");
+        assertEquals(Arrays.asList("a", "z", "z", "d"), list);
     }
 
     @Test
@@ -334,6 +318,63 @@ public class IterablesFillTest extends IterablesTestSupport {
     }
 
     @Test
+    public void testFillListRangeWithSupplier() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        Supplier<String> supplier = () -> "test";
+
+        Iterables.fill(list, 1, 4, supplier);
+
+        assertEquals(Arrays.asList("a", "test", "test", "test", "e"), list);
+    }
+
+    @Test
+    public void testFillListSupplier() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        Supplier<String> supplier = () -> "test";
+        Iterables.fill(list, supplier);
+        assertEquals(list("test", "test", "test"), list);
+
+        List<String> emptyList = new ArrayList<>();
+        Iterables.fill(emptyList, supplier);
+        assertTrue(emptyList.isEmpty());
+
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, supplier));
+    }
+
+    @Test
+    public void testFillListWithRange() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
+        Supplier<String> supplier = () -> "X";
+
+        Iterables.fill(list, 1, 4, supplier);
+
+        assertEquals("a", list.get(0));
+        assertEquals("X", list.get(1));
+        assertEquals("X", list.get(2));
+        assertEquals("X", list.get(3));
+        assertEquals("e", list.get(4));
+    }
+
+    @Test
+    public void testFillListWithSupplier() {
+        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, () -> "a"));
+
+        List<String> listEmpty = new ArrayList<>();
+        Iterables.fill(listEmpty, () -> "a");
+        assertTrue(listEmpty.isEmpty());
+
+        List<String> list = new ArrayList<>(Arrays.asList("x", "y", "z"));
+        Iterables.fill(list, () -> "filled");
+        assertEquals(Arrays.asList("filled", "filled", "filled"), list);
+
+        final int[] counter = { 0 };
+        Supplier<Integer> supplier = () -> counter[0]++;
+        List<Integer> listInt = new ArrayList<>(Arrays.asList(0, 0, 0));
+        Iterables.fill(listInt, supplier);
+        assertEquals(Arrays.asList(0, 1, 2), listInt);
+    }
+
+    @Test
     public void testFillNullArray() {
         assertDoesNotThrow(() -> Iterables.fill((String[]) null, () -> "test"));
     }
@@ -343,45 +384,4 @@ public class IterablesFillTest extends IterablesTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<String>) null, () -> "test"));
     }
 
-    // ===================== fill edge cases =====================
-
-    @Test
-    public void testFillArrayRange_NullArray() {
-        assertDoesNotThrow(() -> Iterables.fill((String[]) null, 0, 0, () -> "x"));
-    }
-
-    @Test
-    public void testFill_ListWithSupplier_NullList_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> Iterables.fill((List<Integer>) null, 0, 2, () -> 1));
-    }
-
-    @Test
-    public void testFill_NullSupplierNotEvaluatedForEmptyTargetsAndRanges() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new String[0], 0, 0, (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Iterables.fill(new ArrayList<String>(), (Supplier<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> Iterables.fill(new ArrayList<String>(), 0, 0, (Supplier<String>) null));
-    }
-
-    @Test
-    public void testFillList_invalidRange_messageDoesNotLeakIntegerMaxValue() {
-        final List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-
-        final IndexOutOfBoundsException negative = assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, -1, 2, () -> "z"));
-        assertEquals("Index range [-1, 2) is invalid: expected 0 <= fromIndex <= toIndex", negative.getMessage());
-        assertFalse(negative.getMessage().contains(String.valueOf(Integer.MAX_VALUE)));
-
-        final IndexOutOfBoundsException inverted = assertThrows(IndexOutOfBoundsException.class, () -> Iterables.fill(list, 3, 1, () -> "z"));
-        assertEquals("Index range [3, 1) is invalid: expected 0 <= fromIndex <= toIndex", inverted.getMessage());
-
-        assertEquals(Arrays.asList("a", "b"), list, "the list must be untouched when the range is rejected");
-    }
-
-    @Test
-    public void testFillList_toIndexBeyondSizeIsStillAllowed() {
-        final List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        Iterables.fill(list, 0, 4, () -> "z");
-        assertEquals(Arrays.asList("z", "z", "z", "z"), list);
-    }
 }

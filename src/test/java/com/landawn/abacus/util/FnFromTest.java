@@ -27,6 +27,60 @@ import com.landawn.abacus.util.function.UnaryOperator;
 public class FnFromTest extends FnTestSupport {
 
     @Test
+    public void testC() {
+        final List<String> seen = new ArrayList<>();
+        final Consumer<String> c = seen::add;
+        assertSame(c, Fn.c(c));
+        seen.clear();
+        Fn.c("pre-", (String prefix, String v) -> seen.add(prefix + v)).accept("x");
+        assertEquals("pre-x", seen.get(0));
+        assertThrows(IllegalArgumentException.class, () -> Fn.c((Consumer<String>) null));
+    }
+
+    @Test
+    public void testC2fF2c() {
+        final AtomicInteger n = new AtomicInteger();
+        assertEquals(null, Fn.c2f((Consumer<String>) s -> n.incrementAndGet()).apply("x"));
+        assertEquals(42, Fn.c2f((Consumer<String>) s -> n.incrementAndGet(), 42).apply("x"));
+        Fn.f2c((Function<String, Integer>) String::length).accept("ab");
+        assertEquals(2, n.get());
+        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((Consumer<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.f2c((Function<String, String>) null));
+    }
+
+
+
+    // FINDING G20-003 (doc-only contract pin): the class-javadoc conversion table now names the DECLARED source
+    // type of each shorthand. c2f/f2c/r2c declare the JDK interfaces (so the table's "leading j marks the JDK
+    // source" rule does not apply to them); c2r is the one shorthand whose source really is the abacus type.
+    @Test
+    public void testConversionShorthandsDeclareJdkSourceTypes() throws Exception {
+        assertEquals(java.util.function.Consumer.class, Fn.class.getMethod("c2f", java.util.function.Consumer.class).getParameterTypes()[0]);
+        assertEquals(java.util.function.Function.class, Fn.class.getMethod("f2c", java.util.function.Function.class).getParameterTypes()[0]);
+        assertEquals(java.lang.Runnable.class, Fn.class.getMethod("r2c", java.lang.Runnable.class).getParameterTypes()[0]);
+        assertEquals(Callable.class, Fn.class.getMethod("c2r", Callable.class).getParameterTypes()[0]);
+
+        final AtomicInteger n = new AtomicInteger();
+        assertEquals(null, Fn.c2f((java.util.function.Consumer<String>) s -> n.incrementAndGet()).apply("x"));
+        Fn.f2c((java.util.function.Function<String, Integer>) String::length).accept("ab");
+        assertEquals(null, Fn.r2c((java.lang.Runnable) n::incrementAndGet).call());
+        assertEquals(2, n.get());
+    }
+
+    @Test
+    public void testF() {
+        final Function<String, Integer> f = String::length;
+        assertSame(f, Fn.f(f));
+        assertEquals("test-1", Fn.f("test-", (prefix, i) -> prefix + i).apply(1));
+        assertEquals("a-1-true", Fn.f("a", 1, (x, y, z) -> x + "-" + y + "-" + z).apply(true));
+        final BiFunction<String, Integer, String> bi = (s, i) -> s + i;
+        assertSame(bi, Fn.f(bi));
+        final TriFunction<String, Integer, Boolean, String> tri = (s, i, b) -> s + i + b;
+        assertSame(tri, Fn.f(tri));
+        assertThrows(IllegalArgumentException.class, () -> Fn.f((Function<String, String>) null));
+    }
+
+    @Test
     public void testFrom() {
         final java.util.function.Supplier<String> javaSupplier = () -> "x";
         assertEquals("x", Fn.from(javaSupplier).get());
@@ -45,60 +99,6 @@ public class FnFromTest extends FnTestSupport {
     }
 
     @Test
-    public void testS() {
-        final Supplier<String> s = () -> "value";
-        assertSame(s, Fn.s(s));
-        assertEquals(4, Fn.s("test", String::length).get());
-        assertThrows(IllegalArgumentException.class, () -> Fn.s(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.s("x", null));
-    }
-
-    @Test
-    public void testP() {
-        final Predicate<String> p = String::isEmpty;
-        assertSame(p, Fn.p(p));
-        assertTrue(Fn.p("ab", (String prefix, String s) -> s.startsWith(prefix)).test("abc"));
-        assertTrue(Fn.p("a", "b", (x, y, z) -> (x + y).equals(z)).test("ab"));
-        final BiPredicate<String, Integer> bi = (a, b) -> a.length() == b;
-        assertSame(bi, Fn.p(bi));
-        assertThrows(IllegalArgumentException.class, () -> Fn.p((Predicate<String>) null));
-    }
-
-    @Test
-    public void testC() {
-        final List<String> seen = new ArrayList<>();
-        final Consumer<String> c = seen::add;
-        assertSame(c, Fn.c(c));
-        seen.clear();
-        Fn.c("pre-", (String prefix, String v) -> seen.add(prefix + v)).accept("x");
-        assertEquals("pre-x", seen.get(0));
-        assertThrows(IllegalArgumentException.class, () -> Fn.c((Consumer<String>) null));
-    }
-
-    @Test
-    public void testF() {
-        final Function<String, Integer> f = String::length;
-        assertSame(f, Fn.f(f));
-        assertEquals("test-1", Fn.f("test-", (prefix, i) -> prefix + i).apply(1));
-        assertEquals("a-1-true", Fn.f("a", 1, (x, y, z) -> x + "-" + y + "-" + z).apply(true));
-        final BiFunction<String, Integer, String> bi = (s, i) -> s + i;
-        assertSame(bi, Fn.f(bi));
-        final TriFunction<String, Integer, Boolean, String> tri = (s, i, b) -> s + i + b;
-        assertSame(tri, Fn.f(tri));
-        assertThrows(IllegalArgumentException.class, () -> Fn.f((Function<String, String>) null));
-    }
-
-    @Test
-    public void testO() {
-        final UnaryOperator<String> upper = Fn.o((String s) -> s.toUpperCase());
-        assertEquals("HELLO", upper.apply("hello"));
-        final BinaryOperator<String> concat = Fn.o((String a, String b) -> a + b);
-        assertEquals("ab", concat.apply("a", "b"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.o((UnaryOperator<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.o((BinaryOperator<String>) null));
-    }
-
-    @Test
     public void testMc() {
         final java.util.function.BiConsumer<String, java.util.function.Consumer<Character>> mapper = (s, c) -> {
             for (final char ch : s.toCharArray()) {
@@ -112,41 +112,24 @@ public class FnFromTest extends FnTestSupport {
     }
 
     @Test
-    public void testSsPpCc() throws Exception {
-        assertEquals("hello", Fn.ss(() -> "hello").get());
-        assertEquals(123, Fn.ss("123", Integer::parseInt).get());
-        assertThrows(RuntimeException.class, () -> Fn.ss(() -> {
-            throw new IOException("e");
-        }).get());
-
-        assertTrue(Fn.pp((Throwables.Predicate<String, Exception>) String::isEmpty).test(""));
-        Fn.cc((Throwables.Consumer<String, Exception>) s -> {
-        }).accept("x");
-        assertEquals(5, Fn.ff((Throwables.Function<String, Integer, Exception>) String::length).apply("hello"));
+    public void testO() {
+        final UnaryOperator<String> upper = Fn.o((String s) -> s.toUpperCase());
+        assertEquals("HELLO", upper.apply("hello"));
+        final BinaryOperator<String> concat = Fn.o((String a, String b) -> a + b);
+        assertEquals("ab", concat.apply("a", "b"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.o((UnaryOperator<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.o((BinaryOperator<String>) null));
     }
 
     @Test
-    public void testSpScSf() {
-        final Object mutex = new Object();
-        assertTrue(Fn.sp(mutex, (Predicate<String>) String::isEmpty).test(""));
-        final AtomicInteger n = new AtomicInteger();
-        Fn.sc(mutex, (Consumer<Integer>) n::set).accept(3);
-        assertEquals(3, n.get());
-        assertEquals(5, Fn.sf(mutex, (Function<String, Integer>) String::length).apply("hello"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.sp(null, (Predicate<String>) s -> true));
-        assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (Consumer<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.sf(mutex, (Function<String, String>) null));
-    }
-
-    @Test
-    public void testC2fF2c() {
-        final AtomicInteger n = new AtomicInteger();
-        assertEquals(null, Fn.c2f((Consumer<String>) s -> n.incrementAndGet()).apply("x"));
-        assertEquals(42, Fn.c2f((Consumer<String>) s -> n.incrementAndGet(), 42).apply("x"));
-        Fn.f2c((Function<String, Integer>) String::length).accept("ab");
-        assertEquals(2, n.get());
-        assertThrows(IllegalArgumentException.class, () -> Fn.c2f((Consumer<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.f2c((Function<String, String>) null));
+    public void testP() {
+        final Predicate<String> p = String::isEmpty;
+        assertSame(p, Fn.p(p));
+        assertTrue(Fn.p("ab", (String prefix, String s) -> s.startsWith(prefix)).test("abc"));
+        assertTrue(Fn.p("a", "b", (x, y, z) -> (x + y).equals(z)).test("ab"));
+        final BiPredicate<String, Integer> bi = (a, b) -> a.length() == b;
+        assertSame(bi, Fn.p(bi));
+        assertThrows(IllegalArgumentException.class, () -> Fn.p((Predicate<String>) null));
     }
 
     @Test
@@ -168,20 +151,40 @@ public class FnFromTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.jr(null));
     }
 
-    // FINDING G20-003 (doc-only contract pin): the class-javadoc conversion table now names the DECLARED source
-    // type of each shorthand. c2f/f2c/r2c declare the JDK interfaces (so the table's "leading j marks the JDK
-    // source" rule does not apply to them); c2r is the one shorthand whose source really is the abacus type.
     @Test
-    public void testConversionShorthandsDeclareJdkSourceTypes() throws Exception {
-        assertEquals(java.util.function.Consumer.class, Fn.class.getMethod("c2f", java.util.function.Consumer.class).getParameterTypes()[0]);
-        assertEquals(java.util.function.Function.class, Fn.class.getMethod("f2c", java.util.function.Function.class).getParameterTypes()[0]);
-        assertEquals(java.lang.Runnable.class, Fn.class.getMethod("r2c", java.lang.Runnable.class).getParameterTypes()[0]);
-        assertEquals(Callable.class, Fn.class.getMethod("c2r", Callable.class).getParameterTypes()[0]);
-
-        final AtomicInteger n = new AtomicInteger();
-        assertEquals(null, Fn.c2f((java.util.function.Consumer<String>) s -> n.incrementAndGet()).apply("x"));
-        Fn.f2c((java.util.function.Function<String, Integer>) String::length).accept("ab");
-        assertEquals(null, Fn.r2c((java.lang.Runnable) n::incrementAndGet).call());
-        assertEquals(2, n.get());
+    public void testS() {
+        final Supplier<String> s = () -> "value";
+        assertSame(s, Fn.s(s));
+        assertEquals(4, Fn.s("test", String::length).get());
+        assertThrows(IllegalArgumentException.class, () -> Fn.s(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.s("x", null));
     }
+
+    @Test
+    public void testSpScSf() {
+        final Object mutex = new Object();
+        assertTrue(Fn.sp(mutex, (Predicate<String>) String::isEmpty).test(""));
+        final AtomicInteger n = new AtomicInteger();
+        Fn.sc(mutex, (Consumer<Integer>) n::set).accept(3);
+        assertEquals(3, n.get());
+        assertEquals(5, Fn.sf(mutex, (Function<String, Integer>) String::length).apply("hello"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.sp(null, (Predicate<String>) s -> true));
+        assertThrows(IllegalArgumentException.class, () -> Fn.sc(mutex, (Consumer<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.sf(mutex, (Function<String, String>) null));
+    }
+
+    @Test
+    public void testSsPpCc() throws Exception {
+        assertEquals("hello", Fn.ss(() -> "hello").get());
+        assertEquals(123, Fn.ss("123", Integer::parseInt).get());
+        assertThrows(RuntimeException.class, () -> Fn.ss(() -> {
+            throw new IOException("e");
+        }).get());
+
+        assertTrue(Fn.pp((Throwables.Predicate<String, Exception>) String::isEmpty).test(""));
+        Fn.cc((Throwables.Consumer<String, Exception>) s -> {
+        }).accept("x");
+        assertEquals(5, Fn.ff((Throwables.Function<String, Integer, Exception>) String::length).apply("hello"));
+    }
+
 }

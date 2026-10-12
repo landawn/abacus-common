@@ -19,19 +19,16 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 public class IterablesSliceTest extends IterablesTestSupport {
-    // ============================================================
+
+    // Slice
 
     @Test
-    public void testSlice_FromList() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 4);
-        assertEquals(3, slice.size());
-        assertFalse(slice.isEmpty());
-        assertTrue(slice.contains("b"));
-        assertTrue(slice.contains("c"));
-        assertTrue(slice.contains("d"));
-        assertFalse(slice.contains("a"));
-        assertFalse(slice.contains("e"));
+    public void testSlice_ContainsAll() {
+        List<String> list = Arrays.asList("a", "b", "c", "d");
+        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 3);
+        assertTrue(slice.containsAll(Arrays.asList("b", "c")));
+        assertFalse(slice.containsAll(Arrays.asList("b", "c", "d")));
+        assertTrue(slice.containsAll(Arrays.asList()));
     }
 
     @Test
@@ -55,20 +52,45 @@ public class IterablesSliceTest extends IterablesTestSupport {
     }
 
     @Test
+    public void testSlice_FromList() {
+        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 4);
+        assertEquals(3, slice.size());
+        assertFalse(slice.isEmpty());
+        assertTrue(slice.contains("b"));
+        assertTrue(slice.contains("c"));
+        assertTrue(slice.contains("d"));
+        assertFalse(slice.contains("a"));
+        assertFalse(slice.contains("e"));
+    }
+
+    @Test
+    public void testSlice_FromTail() {
+        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
+        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 3, 5);
+        assertEquals(2, slice.size());
+        assertTrue(slice.contains("d"));
+        assertTrue(slice.contains("e"));
+        assertFalse(slice.contains("c"));
+    }
+
+    @Test
+    public void testSlice_FullList() {
+        List<Integer> list = Arrays.asList(10, 20, 30);
+        Iterables.Slice<Integer> slice = new Iterables.Slice<>(list, 0, 3);
+        assertEquals(3, slice.size());
+        Object[] arr = slice.toArray();
+        assertEquals(10, arr[0]);
+        assertEquals(20, arr[1]);
+        assertEquals(30, arr[2]);
+    }
+
+    @Test
     public void testSlice_IsEmpty_EmptySlice() {
         List<String> list = Arrays.asList("a", "b", "c");
         Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 1);
         assertTrue(slice.isEmpty());
         assertEquals(0, slice.size());
-    }
-
-    @Test
-    public void testSlice_ContainsAll() {
-        List<String> list = Arrays.asList("a", "b", "c", "d");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 1, 3);
-        assertTrue(slice.containsAll(Arrays.asList("b", "c")));
-        assertFalse(slice.containsAll(Arrays.asList("b", "c", "d")));
-        assertTrue(slice.containsAll(Arrays.asList()));
     }
 
     @Test
@@ -88,6 +110,12 @@ public class IterablesSliceTest extends IterablesTestSupport {
         Iterables.Slice<String> slice = new Iterables.Slice<>(list, 2, 2);
         Iterator<String> iter = slice.iterator();
         assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testSlice_NullListIsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new Iterables.Slice<>((List<String>) null, 0, 0));
+        assertEquals(0, new Iterables.Slice<>((Collection<String>) null, 0, 0).size());
     }
 
     @Test
@@ -115,12 +143,6 @@ public class IterablesSliceTest extends IterablesTestSupport {
     }
 
     @Test
-    public void testSlice_NullListIsIllegalArgument() {
-        assertThrows(IllegalArgumentException.class, () -> new Iterables.Slice<>((List<String>) null, 0, 0));
-        assertEquals(0, new Iterables.Slice<>((Collection<String>) null, 0, 0).size());
-    }
-
-    @Test
     public void testSlice_ToArray_Typed_LargerArray() {
         List<String> list = Arrays.asList("a", "b", "c");
         Iterables.Slice<String> slice = new Iterables.Slice<>(list, 0, 2);
@@ -130,77 +152,24 @@ public class IterablesSliceTest extends IterablesTestSupport {
     }
 
     @Test
-    public void testSlice_FullList() {
-        List<Integer> list = Arrays.asList(10, 20, 30);
-        Iterables.Slice<Integer> slice = new Iterables.Slice<>(list, 0, 3);
-        assertEquals(3, slice.size());
-        Object[] arr = slice.toArray();
-        assertEquals(10, arr[0]);
-        assertEquals(20, arr[1]);
-        assertEquals(30, arr[2]);
-    }
-
-    @Test
-    public void testSlice_FromTail() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Iterables.Slice<String> slice = new Iterables.Slice<>(list, 3, 5);
-        assertEquals(2, slice.size());
-        assertTrue(slice.contains("d"));
-        assertTrue(slice.contains("e"));
-        assertFalse(slice.contains("c"));
-    }
-
-    @Test
-    public void testSlice_toString_nonListCollection_rendersOnlyTheSlice() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
-
-        assertEquals("[b, c, d]", CommonUtil.slice(set, 1, 4).toString());
-        assertEquals("[a, b, c]", CommonUtil.slice(set, 0, 3).toString());
-        assertEquals("[e]", CommonUtil.slice(set, 4, 5).toString());
-        assertEquals("[a, b, c, d, e]", CommonUtil.slice(set, 0, 5).toString());
-    }
-
-    @Test
-    public void testSlice_toString_emptySlice() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
-        final ImmutableCollection<String> slice = CommonUtil.slice(set, 2, 2);
-
-        assertEquals(0, slice.size());
-        assertTrue(slice.isEmpty());
-        assertEquals("[]", slice.toString());
-    }
-
-    @Test
-    public void testSlice_toString_agreesWithIterationOrder() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
-
-        for (int from = 0; from <= set.size(); from++) {
-            for (int to = from; to <= set.size(); to++) {
-                final ImmutableCollection<String> slice = CommonUtil.slice(set, from, to);
-                assertEquals(new ArrayList<>(slice).toString(), slice.toString(), "slice [" + from + ", " + to + ")");
-                assertEquals(to - from, slice.size());
-            }
-        }
-    }
-
-    @Test
-    public void testSlice_toString_withNullElement() {
-        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
-
-        assertEquals("[null, c]", CommonUtil.slice(set, 1, 3).toString());
-        assertEquals("[a, null]", CommonUtil.slice(set, 0, 2).toString());
-    }
-
-    @Test
-    public void testSlice_toString_listPathStillCorrect() {
-        assertEquals("[b, c, d]", CommonUtil.slice(Arrays.asList("a", "b", "c", "d", "e"), 1, 4).toString());
-    }
-
-    @Test
     public void testSlice_toString_directConstruction() {
         assertEquals("[b, c, d]", new Iterables.Slice<>(Arrays.asList("a", "b", "c", "d", "e"), 1, 4).toString());
         assertEquals("[x, y, z]", new Iterables.Slice<>(new String[] { "x", "y", "z", "w" }, 0, 3).toString());
         assertEquals("[]", new Iterables.Slice<>(Arrays.asList("a", "b", "c"), 1, 1).toString());
+    }
+
+    // slice
+
+    @Test
+    public void testSlice_growingBackingCollectionStillHonoursTheOriginalRange() {
+        final Set<Integer> backing = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4, 5));
+        final Collection<Integer> slice = CommonUtil.slice(backing, 1, 4);
+
+        backing.add(6);
+        backing.add(7);
+
+        assertEquals(3, slice.size());
+        assertArrayEquals(new Object[] { 2, 3, 4 }, slice.toArray());
     }
 
     @Test
@@ -254,14 +223,49 @@ public class IterablesSliceTest extends IterablesTestSupport {
     }
 
     @Test
-    public void testSlice_growingBackingCollectionStillHonoursTheOriginalRange() {
-        final Set<Integer> backing = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4, 5));
-        final Collection<Integer> slice = CommonUtil.slice(backing, 1, 4);
+    public void testSlice_toString_agreesWithIterationOrder() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
 
-        backing.add(6);
-        backing.add(7);
-
-        assertEquals(3, slice.size());
-        assertArrayEquals(new Object[] { 2, 3, 4 }, slice.toArray());
+        for (int from = 0; from <= set.size(); from++) {
+            for (int to = from; to <= set.size(); to++) {
+                final ImmutableCollection<String> slice = CommonUtil.slice(set, from, to);
+                assertEquals(new ArrayList<>(slice).toString(), slice.toString(), "slice [" + from + ", " + to + ")");
+                assertEquals(to - from, slice.size());
+            }
+        }
     }
+
+    @Test
+    public void testSlice_toString_emptySlice() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
+        final ImmutableCollection<String> slice = CommonUtil.slice(set, 2, 2);
+
+        assertEquals(0, slice.size());
+        assertTrue(slice.isEmpty());
+        assertEquals("[]", slice.toString());
+    }
+
+    @Test
+    public void testSlice_toString_listPathStillCorrect() {
+        assertEquals("[b, c, d]", CommonUtil.slice(Arrays.asList("a", "b", "c", "d", "e"), 1, 4).toString());
+    }
+
+    @Test
+    public void testSlice_toString_nonListCollection_rendersOnlyTheSlice() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d", "e"));
+
+        assertEquals("[b, c, d]", CommonUtil.slice(set, 1, 4).toString());
+        assertEquals("[a, b, c]", CommonUtil.slice(set, 0, 3).toString());
+        assertEquals("[e]", CommonUtil.slice(set, 4, 5).toString());
+        assertEquals("[a, b, c, d, e]", CommonUtil.slice(set, 0, 5).toString());
+    }
+
+    @Test
+    public void testSlice_toString_withNullElement() {
+        final Set<String> set = new LinkedHashSet<>(Arrays.asList("a", null, "c"));
+
+        assertEquals("[null, c]", CommonUtil.slice(set, 1, 3).toString());
+        assertEquals("[a, null]", CommonUtil.slice(set, 0, 2).toString());
+    }
+
 }

@@ -17,75 +17,6 @@ import org.junit.jupiter.api.Test;
 public class IntListToTest extends IntListTestSupport {
 
     @Test
-    public void testList() {
-        {
-            list = new IntList();
-            IntList list = IntList.of(1, 2, 3, 4, 5);
-            List<Integer> result = list.toList(1, 4);
-            assertEquals(3, result.size());
-            assertEquals(Integer.valueOf(2), result.get(0));
-            assertEquals(Integer.valueOf(3), result.get(1));
-            assertEquals(Integer.valueOf(4), result.get(2));
-        }
-        {
-            list = new IntList();
-            IntList list = IntList.of(1, 2, 3);
-            List<Integer> result = list.toList();
-            assertEquals(3, result.size());
-            assertEquals(Integer.valueOf(1), result.get(0));
-            assertEquals(Integer.valueOf(2), result.get(1));
-            assertEquals(Integer.valueOf(3), result.get(2));
-        }
-    }
-
-    @Test
-    public void testList_OutOfBounds() {
-        IntList list = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(0, 4));
-    }
-
-    @Test
-    public void testList_Empty() {
-        List<Integer> result = list.toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetSet() {
-        {
-            list = new IntList();
-            IntList list = IntList.of(1, 2, 2, 3, 4);
-            Set<Integer> result = list.toSet(1, 4);
-            assertEquals(2, result.size());
-            assertTrue(result.contains(2));
-            assertTrue(result.contains(3));
-        }
-        {
-            list = new IntList();
-            IntList list = IntList.of(1, 2, 1, 3);
-            Set<Integer> result = list.toSet();
-            assertEquals(3, result.size());
-            assertTrue(result.contains(1));
-            assertTrue(result.contains(2));
-            assertTrue(result.contains(3));
-        }
-    }
-
-    @Test
-    public void testGetSet_OutOfBounds() {
-        IntList list = IntList.of(1, 2, 3);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(0, 4));
-    }
-
-    @Test
-    public void testGetSet_Empty() {
-        Set<Integer> result = list.toSet();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     public void testArray() {
         {
             list = new IntList();
@@ -112,33 +43,6 @@ public class IntListToTest extends IntListTestSupport {
         IntList list = new IntList();
         int[] arr = list.toArray();
         assertEquals(0, arr.length);
-    }
-
-    @Test
-    public void testLong() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        LongList longList = list.toLongList();
-        assertEquals(5, longList.size());
-        assertEquals(1L, longList.get(0));
-        assertEquals(5L, longList.get(4));
-    }
-
-    @Test
-    public void testFloat() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        FloatList floatList = list.toFloatList();
-        assertEquals(5, floatList.size());
-        assertEquals(1.0f, floatList.get(0), 0.001f);
-        assertEquals(5.0f, floatList.get(4), 0.001f);
-    }
-
-    @Test
-    public void testDouble() {
-        IntList list = IntList.of(1, 2, 3, 4, 5);
-        DoubleList doubleList = list.toDoubleList();
-        assertEquals(5, doubleList.size());
-        assertEquals(1.0, doubleList.get(0), 0.001);
-        assertEquals(5.0, doubleList.get(4), 0.001);
     }
 
     @Test
@@ -174,6 +78,102 @@ public class IntListToTest extends IntListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(-1, 2, ArrayList::new));
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(0, 4, ArrayList::new));
         assertThrows(IndexOutOfBoundsException.class, () -> list.toCollection(2, 1, ArrayList::new));
+    }
+
+    @Test
+    public void testDouble() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        DoubleList doubleList = list.toDoubleList();
+        assertEquals(5, doubleList.size());
+        assertEquals(1.0, doubleList.get(0), 0.001);
+        assertEquals(5.0, doubleList.get(4), 0.001);
+    }
+
+    @Test
+    public void testFloat() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        FloatList floatList = list.toFloatList();
+        assertEquals(5, floatList.size());
+        assertEquals(1.0f, floatList.get(0), 0.001f);
+        assertEquals(5.0f, floatList.get(4), 0.001f);
+    }
+
+    @Test
+    public void testGetSet() {
+        {
+            list = new IntList();
+            IntList list = IntList.of(1, 2, 2, 3, 4);
+            Set<Integer> result = list.toSet(1, 4);
+            assertEquals(2, result.size());
+            assertTrue(result.contains(2));
+            assertTrue(result.contains(3));
+        }
+        {
+            list = new IntList();
+            IntList list = IntList.of(1, 2, 1, 3);
+            Set<Integer> result = list.toSet();
+            assertEquals(3, result.size());
+            assertTrue(result.contains(1));
+            assertTrue(result.contains(2));
+            assertTrue(result.contains(3));
+        }
+    }
+
+    @Test
+    public void testGetSet_Empty() {
+        Set<Integer> result = list.toSet();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetSet_OutOfBounds() {
+        IntList list = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toSet(0, 4));
+    }
+
+    @Test
+    public void testList() {
+        {
+            list = new IntList();
+            IntList list = IntList.of(1, 2, 3, 4, 5);
+            List<Integer> result = list.toList(1, 4);
+            assertEquals(3, result.size());
+            assertEquals(Integer.valueOf(2), result.get(0));
+            assertEquals(Integer.valueOf(3), result.get(1));
+            assertEquals(Integer.valueOf(4), result.get(2));
+        }
+        {
+            list = new IntList();
+            IntList list = IntList.of(1, 2, 3);
+            List<Integer> result = list.toList();
+            assertEquals(3, result.size());
+            assertEquals(Integer.valueOf(1), result.get(0));
+            assertEquals(Integer.valueOf(2), result.get(1));
+            assertEquals(Integer.valueOf(3), result.get(2));
+        }
+    }
+
+    @Test
+    public void testList_Empty() {
+        List<Integer> result = list.toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testList_OutOfBounds() {
+        IntList list = IntList.of(1, 2, 3);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.toList(0, 4));
+    }
+
+    @Test
+    public void testLong() {
+        IntList list = IntList.of(1, 2, 3, 4, 5);
+        LongList longList = list.toLongList();
+        assertEquals(5, longList.size());
+        assertEquals(1L, longList.get(0));
+        assertEquals(5L, longList.get(4));
     }
 
     @Test
@@ -261,4 +261,5 @@ public class IntListToTest extends IntListTestSupport {
         String str = list.toString();
         assertNotNull(str);
     }
+
 }

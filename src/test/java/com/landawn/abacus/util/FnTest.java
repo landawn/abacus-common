@@ -40,9 +40,111 @@ import com.landawn.abacus.util.function.Runnable;
 public class FnTest extends FnTestSupport {
 
     @Test
-    public void testUtilityConstructorIsPrivate() throws NoSuchMethodException {
-        assertTrue(Modifier.isPrivate(Fn.class.getDeclaredConstructor().getModifiers()));
+    public void testAndOr() {
+        assertTrue(Fn.and(() -> true, () -> true).getAsBoolean());
+        assertFalse(Fn.and(() -> true, () -> false).getAsBoolean());
+        assertTrue(Fn.and(() -> true, () -> true, () -> true).getAsBoolean());
+        assertTrue(Fn.and((Predicate<String>) s -> s.startsWith("a"), (Predicate<String>) s -> s.length() > 1).test("ab"));
+        assertTrue(Fn.and(List.of((Predicate<String>) s -> true, (Predicate<String>) s -> s.length() > 0)).test("x"));
+        assertTrue(Fn.or(() -> false, () -> true).getAsBoolean());
+        assertTrue(Fn.or((Predicate<String>) s -> s.startsWith("z"), (Predicate<String>) s -> s.length() == 1).test("x"));
+        final BiPredicate<Integer, Integer> andBi = Fn.and((Integer a, Integer b) -> a > 0, (Integer a, Integer b) -> b > 0);
+        assertTrue(andBi.test(1, 2));
+        assertFalse(andBi.test(1, -1));
+        assertThrows(IllegalArgumentException.class, () -> Fn.and((BooleanSupplier) null, () -> true));
+        assertThrows(IllegalArgumentException.class, () -> Fn.and(Collections.<Predicate<String>> emptyList()));
+
+        final List<java.util.function.Predicate<String>> predicates = new ArrayList<>();
+        predicates.add(value -> value.startsWith("a"));
+        predicates.add(value -> {
+            throw new AssertionError("short-circuited predicate");
+        });
+        final Predicate<String> snapshotAnd = Fn.and(predicates);
+        final Predicate<String> snapshotOr = Fn.or(predicates);
+        predicates.clear();
+        predicates.add(value -> {
+            throw new AssertionError("later-added predicate");
+        });
+        assertFalse(snapshotAnd.test("b"));
+        assertTrue(snapshotOr.test("a"));
+
+        final List<java.util.function.BiPredicate<String, String>> biPredicates = new ArrayList<>();
+        biPredicates.add(String::equals);
+        biPredicates.add((left, right) -> {
+            throw new AssertionError("short-circuited bi-predicate");
+        });
+        final BiPredicate<String, String> snapshotBiAnd = Fn.and(biPredicates);
+        final BiPredicate<String, String> snapshotBiOr = Fn.or(biPredicates);
+        biPredicates.clear();
+        assertFalse(snapshotBiAnd.test("a", "b"));
+        assertTrue(snapshotBiOr.test("a", "a"));
     }
+
+
+
+    // G039-01: concurrent callers never accept more than the limit, and accept exactly the limit in total
+    @Test
+    public void testAtMost_concurrentExactLimit() throws Exception {
+        final int threads = 4;
+        final int perThread = 20_000;
+        final int limit = 1_000;
+        final Predicate<Integer> atMost = Fn.atMost(limit);
+        final Predicate<Integer> ltf = Fn.limitThenFilter(limit, n -> true);
+        final Predicate<Integer> ftl = Fn.filterThenLimit(n -> true, limit);
+        final java.util.concurrent.atomic.AtomicInteger acceptedAtMost = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger acceptedLtf = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger acceptedFtl = new java.util.concurrent.atomic.AtomicInteger();
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
+        try {
+            final CountDownLatch start = new CountDownLatch(1);
+            final List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
+            for (int k = 0; k < threads; k++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    for (int i = 0; i < perThread; i++) {
+                        if (atMost.test(i)) {
+                            acceptedAtMost.incrementAndGet();
+                        }
+                        if (ltf.test(i)) {
+                            acceptedLtf.incrementAndGet();
+                        }
+                        if (ftl.test(i)) {
+                            acceptedFtl.incrementAndGet();
+                        }
+                    }
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (final java.util.concurrent.Future<?> f : futures) {
+                f.get(60, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        assertEquals(limit, acceptedAtMost.get());
+        assertEquals(limit, acceptedLtf.get());
+        assertEquals(limit, acceptedFtl.get());
+    }
+
+
+
+    // G039-01: atMost keeps returning false after exhaustion (fast path skips the CAS), incl. count 0
+    @Test
+    public void testAtMost_exhaustionPinned() {
+        final Predicate<String> zero = Fn.atMost(0);
+        for (int i = 0; i < 5; i++) {
+            assertFalse(zero.test("x"));
+        }
+        final Predicate<String> two = Fn.atMost(2);
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            results.add(two.test(null));
+        }
+        assertEquals(List.of(true, true, false, false, false, false), results);
+    }
+
+    // close
 
     @Test
     public void testClose() throws Exception {
@@ -60,6 +162,43 @@ public class FnTest extends FnTestSupport {
         assertThrows(RuntimeException.class, () -> Fn.close(throwing).run());
         assertDoesNotThrow(() -> Fn.closeQuietly(throwing).run());
     }
+
+
+
+    // FINDING G20-006: the eight close/shutdown runnables used to synchronize on `this` - the object handed to
+    // the caller - so caller code holding that monitor could block, or deadlock against, a close in flight. The
+    // project already fixed this class of defect for memoize*/LazyInitializer (finding R09-5); these sites were
+    // missed. Each now locks a private monitor.
+    @Test
+    public void testClose_DoesNotSynchronizeOnTheReturnedRunnable() throws Exception {
+        final MyCloseable c = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.close(c)), "Fn.close(..).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, c.getCloseCount());
+
+        final MyCloseable q = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeQuietly(q)), "Fn.closeQuietly(..).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, q.getCloseCount());
+    }
+
+    @Test
+    public void testClose_WaitsForInFlightClose() throws Exception {
+        final AtomicBoolean closed = new AtomicBoolean();
+        final CountDownLatch inClose = new CountDownLatch(1);
+        final AutoCloseable slow = () -> {
+            inClose.countDown();
+            Thread.sleep(200);
+            closed.set(true);
+        };
+        final Runnable closer = Fn.close(slow);
+        final Thread first = new Thread(closer::run);
+        first.start();
+        assertTrue(inClose.await(5, TimeUnit.SECONDS));
+        closer.run();
+        assertTrue(closed.get());
+        first.join(5_000);
+    }
+
+    // closeAll
 
     @Test
     public void testCloseAll() {
@@ -87,21 +226,83 @@ public class FnTest extends FnTestSupport {
     }
 
     @Test
-    public void testClose_WaitsForInFlightClose() throws Exception {
-        final AtomicBoolean closed = new AtomicBoolean();
-        final CountDownLatch inClose = new CountDownLatch(1);
-        final AutoCloseable slow = () -> {
-            inClose.countDown();
-            Thread.sleep(200);
-            closed.set(true);
-        };
-        final Runnable closer = Fn.close(slow);
-        final Thread first = new Thread(closer::run);
-        first.start();
-        assertTrue(inClose.await(5, TimeUnit.SECONDS));
+    public void testCloseAll_DoesNotSynchronizeOnTheReturnedRunnable() throws Exception {
+        final MyCloseable a1 = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(a1)), "Fn.closeAll(array).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, a1.getCloseCount());
+
+        final MyCloseable a2 = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(List.of(a2))),
+                "Fn.closeAll(Collection).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, a2.getCloseCount());
+
+        final MyCloseable a3 = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(a3)),
+                "Fn.closeAllQuietly(array).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, a3.getCloseCount());
+
+        final MyCloseable a4 = new MyCloseable();
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(List.of(a4))),
+                "Fn.closeAllQuietly(Collection).run() blocked on the caller-held monitor of the returned Runnable");
+        assertEquals(1, a4.getCloseCount());
+    }
+
+
+
+    // FINDING G20-005 (doc-only contract pin): closeAll*/closeAllQuietly read the caller's array or collection
+    // live at run() time, which the javadoc now states explicitly. Passes on both sides of the fix by design.
+    @Test
+    public void testCloseAll_ReadsTheResourcesLiveAtRunTime() {
+        final MyCloseable a1 = new MyCloseable();
+        final MyCloseable a2 = new MyCloseable();
+        final List<AutoCloseable> open = new ArrayList<>(List.of(a1, a2));
+        final Runnable closer = Fn.closeAll(open);
+        open.clear();
         closer.run();
-        assertTrue(closed.get());
-        first.join(5_000);
+        assertEquals(0, a1.getCloseCount());
+        assertEquals(0, a2.getCloseCount());
+
+        final MyCloseable lateAdded = new MyCloseable();
+        final List<AutoCloseable> registerThenFill = new ArrayList<>();
+        final Runnable lateCloser = Fn.closeAllQuietly(registerThenFill);
+        registerThenFill.add(lateAdded);
+        lateCloser.run();
+        assertEquals(1, lateAdded.getCloseCount());
+
+        final MyCloseable replaced = new MyCloseable();
+        final MyCloseable replacement = new MyCloseable();
+        final AutoCloseable[] array = { replaced };
+        final Runnable arrayCloser = Fn.closeAll(array);
+        array[0] = replacement;
+        arrayCloser.run();
+        assertEquals(0, replaced.getCloseCount());
+        assertEquals(1, replacement.getCloseCount());
+    }
+
+    @Test
+    public void testComparisonPredicates() {
+        assertTrue(Fn.greaterThan(1).test(2));
+        assertFalse(Fn.greaterThan(1).test(1));
+        assertTrue(Fn.greaterThanOrEqual(1).test(1));
+        assertTrue(Fn.lessThan(2).test(1));
+        assertTrue(Fn.lessThanOrEqual(1).test(1));
+        assertTrue(Fn.<Integer> greaterThan().test(2, 1));
+        assertTrue(Fn.<Integer> lessThanOrEqual().test(1, 1));
+        assertTrue(Fn.gtAndLt(1, 5).test(3));
+        assertFalse(Fn.gtAndLt(1, 5).test(1));
+        assertTrue(Fn.geAndLt(1, 5).test(1));
+        assertTrue(Fn.geAndLe(1, 5).test(5));
+        assertTrue(Fn.gtAndLe(1, 5).test(5));
+        assertTrue(Fn.between(1, 5).test(3));
+        assertFalse(Fn.between(1, 5).test(1));
+        assertFalse(Fn.between(1, 5).test(5));
+    }
+
+    @Test
+    public void testCreateNumberReturnsNullForNullOrEmptyString() {
+        assertNull(Fn.createNumber().apply(null));
+        assertNull(Fn.createNumber().apply(""));
+        assertEquals(Integer.valueOf(42), Fn.createNumber().apply("42"));
     }
 
     @Test
@@ -113,101 +314,109 @@ public class FnTest extends FnTestSupport {
     }
 
     @Test
-    public void testShutdown() throws InterruptedException {
-        final ExecutorService es = Executors.newSingleThreadExecutor();
-        try {
-            Fn.shutdown(es).run();
-            assertTrue(es.isShutdown());
-            Fn.shutdown(es).run();
-        } finally {
-            es.shutdownNow();
-        }
-        final ExecutorService es2 = Executors.newSingleThreadExecutor();
-        try {
-            Fn.shutdown(es2, 100, TimeUnit.MILLISECONDS).run();
-            assertTrue(es2.isShutdown());
-        } finally {
-            es2.shutdownNow();
-        }
-        assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(null));
-        final ExecutorService unused = Executors.newSingleThreadExecutor();
-        try {
-            assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(unused, -1, TimeUnit.MILLISECONDS));
-            // the rejected argument must be reported under its own name, not 'unit'
-            final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(unused, 1, null));
-            assertTrue(ex.getMessage().contains("timeUnit"), "expected the message to name 'timeUnit' but got: " + ex.getMessage());
-        } finally {
-            unused.shutdownNow();
-        }
+    public void testEntryPairTripleTuple() {
+        assertEquals("k", Fn.<String, Integer> entry().apply("k", 1).getKey());
+        assertEquals("k", Fn.<String, Integer> entry("k").apply(1).getKey());
+        assertEquals("ab", Fn.<String, String> entry(s -> s.substring(0, 2)).apply("abc").getKey());
+        assertEquals("fixed", Fn.<String, Integer> entryWithKey("fixed").apply(1).getKey());
+        assertEquals("ab", Fn.<String, String> entryByKeyMapper(s -> s.substring(0, 2)).apply("abc").getKey());
+        assertEquals(9, Fn.<String, Integer> entryWithValue(9).apply("k").getValue());
+        assertEquals(3, Fn.<String, Integer> entryByValueMapper(String::length).apply("abc").getValue());
+        assertEquals("L", Fn.<String, Integer> pair().apply("L", 1).left());
+        assertEquals("M", Fn.<String, String, Integer> triple().apply("L", "M", 1).middle());
+        assertEquals("a", Fn.<String> tuple1().apply("a")._1);
+        assertEquals("b", Fn.<String, String> tuple2().apply("a", "b")._2);
+        assertEquals("c", Fn.<String, String, String> tuple3().apply("a", "b", "c")._3);
+        assertEquals("d", Fn.<String, String, String, String> tuple4().apply("a", "b", "c", "d")._4);
+        assertThrows(IllegalArgumentException.class, () -> Fn.entryByKeyMapper(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.entryByValueMapper(null));
     }
 
     @Test
-    public void testThrowAndToRuntimeException() {
-        assertThrows(RuntimeException.class, () -> Fn.throwRuntimeException("boom").accept("x"));
-        assertThrows(IllegalStateException.class, () -> Fn.throwException(IllegalStateException::new).accept("x"));
-        final RuntimeException wrapped = Fn.toRuntimeException().apply(new Exception("e"));
-        assertTrue(wrapped.getCause() instanceof Exception || wrapped.getMessage().contains("e") || wrapped instanceof RuntimeException);
-        assertThrows(IllegalArgumentException.class, () -> Fn.throwException(null));
+    public void testAlwaysAndEqual() {
+        assertTrue(Fn.alwaysTrue().test(null));
+        assertFalse(Fn.alwaysFalse().test("x"));
+        assertTrue(Fn.equal("a").test("a"));
+        assertFalse(Fn.equal("a").test("b"));
+        assertTrue(Fn.eqOr("a", "b").test("b"));
+        assertFalse(Fn.eqOr("a", "b").test("c"));
+        assertTrue(Fn.eqOr("a", "b", "c").test("c"));
+        assertTrue(Fn.<String, String> equal().test("a", "a"));
+        assertFalse(Fn.<String, String> equal().test("a", "b"));
+    }
 
-        final IllegalStateException original = new IllegalStateException("original");
-        assertSame(original, Fn.toRuntimeException().apply(original));
-        assertSame(original, Fn.toRuntimeException().apply(new java.lang.reflect.UndeclaredThrowableException(original)));
-        final InterruptedException interruption = new InterruptedException("interrupted");
-        try {
-            Thread.interrupted();
-            assertSame(interruption, Fn.toRuntimeException().apply(new java.util.concurrent.ExecutionException(interruption)).getCause());
-            assertFalse(Thread.currentThread().isInterrupted());
-            assertSame(interruption, Fn.toRuntimeException().apply(interruption).getCause());
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
+
+
+    // G039-01: filterThenLimit still invokes the predicate for every element after the limit is used up
+    @Test
+    public void testFilterThenLimit_predicateCallsPinned() {
+        final List<Integer> seen = new ArrayList<>();
+        final Predicate<Integer> p = Fn.filterThenLimit(n -> {
+            seen.add(n);
+            return n % 2 == 0;
+        }, 2);
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            results.add(p.test(i));
         }
+        assertEquals(List.of(false, true, false, true, false, false, false), results);
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), seen);
+
+        final List<String> seenPairs = new ArrayList<>();
+        final BiPredicate<String, Integer> bp = Fn.filterThenLimit((String s, Integer n) -> {
+            seenPairs.add(s + n);
+            return n > 0;
+        }, 1);
+        assertFalse(bp.test("a", -1));
+        assertTrue(bp.test("b", 1));
+        assertFalse(bp.test("c", 1));
+        assertFalse(bp.test("d", -1));
+        assertEquals(List.of("a-1", "b1", "c1", "d-1"), seenPairs);
+
+        final List<Integer> seenZero = new ArrayList<>();
+        final Predicate<Integer> none = Fn.filterThenLimit(n -> seenZero.add(n), 0);
+        assertFalse(none.test(1));
+        assertFalse(none.test(2));
+        assertEquals(List.of(1, 2), seenZero);
     }
 
     @Test
-    public void testSleepAndRateLimiter() {
-        final long start = System.currentTimeMillis();
-        Fn.sleep(20).accept("x");
-        assertTrue(System.currentTimeMillis() - start >= 15);
-        Fn.sleepUninterruptibly(10).accept("x");
-        assertDoesNotThrow(() -> Fn.rateLimiter(1000).accept("x"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.rateLimiter((RateLimiter) null));
-        assertDoesNotThrow(() -> Fn.sleep(-1).accept("x"));
+    public void testFutureGet() {
+        assertEquals("ok", Fn.futureGet().apply(CompletableFuture.completedFuture("ok")));
+        assertEquals("d", Fn.futureGetOrDefaultOnError("d").apply(CompletableFuture.failedFuture(new RuntimeException("e"))));
+        final AssertionError taskError = new AssertionError("task error");
+        final RuntimeException wrappedError = assertThrows(RuntimeException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskError)));
+        assertSame(taskError, wrappedError.getCause());
+        final IllegalStateException taskFailure = new IllegalStateException("task failure");
+        assertSame(taskFailure, assertThrows(IllegalStateException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskFailure))));
     }
 
-    @Test
-    public void testPrintln() {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final PrintStream original = System.out;
-        System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
-        try {
-            Fn.println().accept("hello");
-            Fn.println("=").accept("key", "value");
-            Fn.println(" -> ").accept(new int[] { 1, 2 }, "x");
-        } finally {
-            System.setOut(original);
-        }
-        final String printed = out.toString(StandardCharsets.UTF_8);
-        assertTrue(printed.contains("hello"));
-        assertTrue(printed.contains("key=value"));
-        assertTrue(printed.contains("[1, 2] -> x"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.println(null));
-        assertDoesNotThrow(() -> Fn.println(":").accept("a", "b"));
-        assertDoesNotThrow(() -> Fn.println(", ").accept("a", "b"));
-        assertDoesNotThrow(() -> Fn.println("").accept("a", "b"));
-    }
 
+
+    // FINDING G20-004 (doc-only contract pin): a cancelled task's CancellationException is unchecked and is not
+    // folded into defaultValue; the InterruptedException path does return it and restores the interrupt flag.
     @Test
-    public void testToStringCaseAndFormat() {
-        assertEquals("123", Fn.toStr().apply(123));
-        assertEquals("null", Fn.toStr().apply(null));
-        assertEquals("foo", Fn.toLowerCase().apply("FOO"));
-        assertEquals("FOO", Fn.toUpperCase().apply("foo"));
-        assertEquals("helloWorld", Fn.toCamelCase().apply("hello_world"));
-        assertEquals("hello_world", Fn.toSnakeCase().apply("helloWorld"));
-        assertEquals("HELLO_WORLD", Fn.toScreamingSnakeCase().apply("helloWorld"));
-        assertTrue(Fn.toJson().apply(Map.of("a", 1)).contains("a"));
-        assertTrue(Fn.toXml().apply("x").length() > 0);
+    public void testFutureGetOrDefaultOnError_CancellationPropagates() throws Exception {
+        final CompletableFuture<String> cancelled = new CompletableFuture<>();
+        assertTrue(cancelled.cancel(true));
+        assertThrows(CancellationException.class, () -> Fn.futureGetOrDefaultOnError("FAILED").apply(cancelled));
+
+        assertEquals("FAILED", Fn.futureGetOrDefaultOnError("FAILED").apply(CompletableFuture.failedFuture(new IllegalStateException("boom"))));
+
+        final FutureTask<String> neverRun = new FutureTask<>(() -> "x");
+        final AtomicReference<String> result = new AtomicReference<>();
+        final AtomicBoolean interruptRestored = new AtomicBoolean();
+        final Thread worker = new Thread(() -> {
+            Thread.currentThread().interrupt();
+            result.set(Fn.futureGetOrDefaultOnError("FAILED").apply(neverRun));
+            interruptRestored.set(Thread.currentThread().isInterrupted());
+        });
+        worker.setDaemon(true);
+        worker.start();
+        worker.join(TimeUnit.SECONDS.toMillis(5));
+        assertFalse(worker.isAlive());
+        assertEquals("FAILED", result.get());
+        assertTrue(interruptRestored.get());
     }
 
     @Test
@@ -236,101 +445,6 @@ public class FnTest extends FnTestSupport {
     }
 
     @Test
-    public void testKeyValueLeftRight() {
-        final Map.Entry<String, Integer> e = CommonUtil.newImmutableEntry("k", 1);
-        assertEquals("k", Fn.<String, Integer> key().apply(e));
-        assertEquals(1, Fn.<String, Integer> value().apply(e));
-        final Pair<String, Integer> p = Pair.of("L", 2);
-        assertEquals("L", Fn.<String, Integer> left().apply(p));
-        assertEquals(2, Fn.<String, Integer> right().apply(p));
-        assertEquals("k", Fn.<String, Integer> invert().apply(e).getValue());
-        assertEquals(1, Fn.<String, Integer> invert().apply(e).getKey());
-    }
-
-    @Test
-    public void testEntryPairTripleTuple() {
-        assertEquals("k", Fn.<String, Integer> entry().apply("k", 1).getKey());
-        assertEquals("k", Fn.<String, Integer> entry("k").apply(1).getKey());
-        assertEquals("ab", Fn.<String, String> entry(s -> s.substring(0, 2)).apply("abc").getKey());
-        assertEquals("fixed", Fn.<String, Integer> entryWithKey("fixed").apply(1).getKey());
-        assertEquals("ab", Fn.<String, String> entryByKeyMapper(s -> s.substring(0, 2)).apply("abc").getKey());
-        assertEquals(9, Fn.<String, Integer> entryWithValue(9).apply("k").getValue());
-        assertEquals(3, Fn.<String, Integer> entryByValueMapper(String::length).apply("abc").getValue());
-        assertEquals("L", Fn.<String, Integer> pair().apply("L", 1).left());
-        assertEquals("M", Fn.<String, String, Integer> triple().apply("L", "M", 1).middle());
-        assertEquals("a", Fn.<String> tuple1().apply("a")._1);
-        assertEquals("b", Fn.<String, String> tuple2().apply("a", "b")._2);
-        assertEquals("c", Fn.<String, String, String> tuple3().apply("a", "b", "c")._3);
-        assertEquals("d", Fn.<String, String, String, String> tuple4().apply("a", "b", "c", "d")._4);
-        assertThrows(IllegalArgumentException.class, () -> Fn.entryByKeyMapper(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.entryByValueMapper(null));
-    }
-
-    @Test
-    public void testStringOperators() {
-        assertEquals("x", Fn.trim().apply(" x "));
-        assertEquals("", Fn.trimToEmpty().apply(null));
-        assertNull(Fn.trimToNull().apply("  "));
-        assertEquals("x", Fn.strip().apply(" x "));
-        assertEquals("", Fn.stripToEmpty().apply(null));
-        assertNull(Fn.stripToNull().apply("  "));
-        assertEquals("", Fn.nullToEmpty().apply(null));
-        assertEquals("x", Fn.nullToEmpty().apply("x"));
-        assertEquals(List.of(), Fn.nullToEmptyList().apply(null));
-        assertEquals(Set.of(), Fn.nullToEmptySet().apply(null));
-        assertEquals(Map.of(), Fn.nullToEmptyMap().apply(null));
-        final List<String> nonempty = List.of("a");
-        assertSame(nonempty, Fn.<String> nullToEmptyList().apply(nonempty));
-    }
-
-    @Test
-    public void testLenSizeCast() {
-        assertEquals(2, Fn.len().apply(new String[] { "a", "b" }));
-        assertEquals(0, Fn.len().apply(null));
-        assertEquals(3, Fn.length().apply("abc"));
-        assertEquals(0, Fn.length().apply(null));
-        assertEquals(2, Fn.size().apply(List.of("a", "b")));
-        assertEquals(0, Fn.size().apply(null));
-        assertEquals(1, Fn.mapSize().apply(Map.of("a", 1)));
-        assertEquals(0, Fn.mapSize().apply(null));
-        assertEquals(1, Fn.cast(Integer.class).apply(1));
-        assertThrows(ClassCastException.class, () -> Fn.cast(Integer.class).apply("x"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.cast(null));
-    }
-
-    @Test
-    public void testAlwaysAndEqual() {
-        assertTrue(Fn.alwaysTrue().test(null));
-        assertFalse(Fn.alwaysFalse().test("x"));
-        assertTrue(Fn.equal("a").test("a"));
-        assertFalse(Fn.equal("a").test("b"));
-        assertTrue(Fn.eqOr("a", "b").test("b"));
-        assertFalse(Fn.eqOr("a", "b").test("c"));
-        assertTrue(Fn.eqOr("a", "b", "c").test("c"));
-        assertTrue(Fn.<String, String> equal().test("a", "a"));
-        assertFalse(Fn.<String, String> equal().test("a", "b"));
-    }
-
-    @Test
-    public void testComparisonPredicates() {
-        assertTrue(Fn.greaterThan(1).test(2));
-        assertFalse(Fn.greaterThan(1).test(1));
-        assertTrue(Fn.greaterThanOrEqual(1).test(1));
-        assertTrue(Fn.lessThan(2).test(1));
-        assertTrue(Fn.lessThanOrEqual(1).test(1));
-        assertTrue(Fn.<Integer> greaterThan().test(2, 1));
-        assertTrue(Fn.<Integer> lessThanOrEqual().test(1, 1));
-        assertTrue(Fn.gtAndLt(1, 5).test(3));
-        assertFalse(Fn.gtAndLt(1, 5).test(1));
-        assertTrue(Fn.geAndLt(1, 5).test(1));
-        assertTrue(Fn.geAndLe(1, 5).test(5));
-        assertTrue(Fn.gtAndLe(1, 5).test(5));
-        assertTrue(Fn.between(1, 5).test(3));
-        assertFalse(Fn.between(1, 5).test(1));
-        assertFalse(Fn.between(1, 5).test(5));
-    }
-
-    @Test
     public void testInInstanceOfAndStrings() {
         assertTrue(Fn.in(List.of("a", "b")).test("a"));
         assertFalse(Fn.in(List.of("a")).test("c"));
@@ -348,6 +462,75 @@ public class FnTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.matches(null));
         assertThrows(IllegalArgumentException.class, () -> Fn.instanceOf(null));
     }
+
+    @Test
+    public void testUtilityConstructorIsPrivate() throws NoSuchMethodException {
+        assertTrue(Modifier.isPrivate(Fn.class.getDeclaredConstructor().getModifiers()));
+    }
+
+    @Test
+    public void testKeyValueLeftRight() {
+        final Map.Entry<String, Integer> e = CommonUtil.newImmutableEntry("k", 1);
+        assertEquals("k", Fn.<String, Integer> key().apply(e));
+        assertEquals(1, Fn.<String, Integer> value().apply(e));
+        final Pair<String, Integer> p = Pair.of("L", 2);
+        assertEquals("L", Fn.<String, Integer> left().apply(p));
+        assertEquals(2, Fn.<String, Integer> right().apply(p));
+        assertEquals("k", Fn.<String, Integer> invert().apply(e).getValue());
+        assertEquals(1, Fn.<String, Integer> invert().apply(e).getKey());
+    }
+
+    @Test
+    public void testLenSizeCast() {
+        assertEquals(2, Fn.len().apply(new String[] { "a", "b" }));
+        assertEquals(0, Fn.len().apply(null));
+        assertEquals(3, Fn.length().apply("abc"));
+        assertEquals(0, Fn.length().apply(null));
+        assertEquals(2, Fn.size().apply(List.of("a", "b")));
+        assertEquals(0, Fn.size().apply(null));
+        assertEquals(1, Fn.mapSize().apply(Map.of("a", 1)));
+        assertEquals(0, Fn.mapSize().apply(null));
+        assertEquals(1, Fn.cast(Integer.class).apply(1));
+        assertThrows(ClassCastException.class, () -> Fn.cast(Integer.class).apply("x"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.cast(null));
+    }
+
+
+
+    // G039-01: limitThenFilter never invokes the predicate once the limit is used up
+    @Test
+    public void testLimitThenFilter_predicateCallsPinned() {
+        final List<Integer> seen = new ArrayList<>();
+        final Predicate<Integer> p = Fn.limitThenFilter(3, n -> {
+            seen.add(n);
+            return n % 2 == 1;
+        });
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            results.add(p.test(i));
+        }
+        assertEquals(List.of(true, false, true, false, false, false, false), results);
+        assertEquals(List.of(1, 2, 3), seen);
+
+        final List<String> seenPairs = new ArrayList<>();
+        final BiPredicate<String, Integer> bp = Fn.limitThenFilter(2, (String s, Integer n) -> {
+            seenPairs.add(s + n);
+            return n > 0;
+        });
+        assertTrue(bp.test("a", 1));
+        assertFalse(bp.test("b", -1));
+        assertFalse(bp.test("c", 1));
+        assertFalse(bp.test("d", 1));
+        assertEquals(List.of("a1", "b-1"), seenPairs);
+
+        final List<Integer> seenZero = new ArrayList<>();
+        final Predicate<Integer> none = Fn.limitThenFilter(0, n -> seenZero.add(n));
+        assertFalse(none.test(1));
+        assertFalse(none.test(2));
+        assertTrue(seenZero.isEmpty());
+    }
+
+
 
     // R07 (2026-09-08): the r9506 memoize javadoc said a swallowed recursion means "the enclosing call fails and
     // nothing is cached". Poisoning is per input, so in a two-input cycle the OTHER input is computed and cached
@@ -416,45 +599,32 @@ public class FnTest extends FnTestSupport {
         assertThrows(NullPointerException.class, () -> Fn.notIn(List.of("a")).test(null));
     }
 
+
+
+    // FINDING G20-001 (doc-only contract pin): numToDouble widens a Float through its decimal spelling rather
+    // than Number#doubleValue(), and all three numTo* functions map null to 0.
     @Test
-    public void testAndOr() {
-        assertTrue(Fn.and(() -> true, () -> true).getAsBoolean());
-        assertFalse(Fn.and(() -> true, () -> false).getAsBoolean());
-        assertTrue(Fn.and(() -> true, () -> true, () -> true).getAsBoolean());
-        assertTrue(Fn.and((Predicate<String>) s -> s.startsWith("a"), (Predicate<String>) s -> s.length() > 1).test("ab"));
-        assertTrue(Fn.and(List.of((Predicate<String>) s -> true, (Predicate<String>) s -> s.length() > 0)).test("x"));
-        assertTrue(Fn.or(() -> false, () -> true).getAsBoolean());
-        assertTrue(Fn.or((Predicate<String>) s -> s.startsWith("z"), (Predicate<String>) s -> s.length() == 1).test("x"));
-        final BiPredicate<Integer, Integer> andBi = Fn.and((Integer a, Integer b) -> a > 0, (Integer a, Integer b) -> b > 0);
-        assertTrue(andBi.test(1, 2));
-        assertFalse(andBi.test(1, -1));
-        assertThrows(IllegalArgumentException.class, () -> Fn.and((BooleanSupplier) null, () -> true));
-        assertThrows(IllegalArgumentException.class, () -> Fn.and(Collections.<Predicate<String>> emptyList()));
+    public void testNumToDouble_FloatIsWidenedViaItsDecimalSpelling() {
+        assertEquals(1.21d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(1.21f)));
+        assertEquals(1.2100000381469727d, Float.valueOf(1.21f).doubleValue());
+        assertEquals(0.1d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(0.1f)));
+        assertEquals(39.5d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(39.50f)));
+        assertEquals(2.5d, Fn.<Number> numToDouble().applyAsDouble(Double.valueOf(2.5d)));
 
-        final List<java.util.function.Predicate<String>> predicates = new ArrayList<>();
-        predicates.add(value -> value.startsWith("a"));
-        predicates.add(value -> {
-            throw new AssertionError("short-circuited predicate");
-        });
-        final Predicate<String> snapshotAnd = Fn.and(predicates);
-        final Predicate<String> snapshotOr = Fn.or(predicates);
-        predicates.clear();
-        predicates.add(value -> {
-            throw new AssertionError("later-added predicate");
-        });
-        assertFalse(snapshotAnd.test("b"));
-        assertTrue(snapshotOr.test("a"));
+        assertEquals(0.0d, Fn.<Number> numToDouble().applyAsDouble(null));
+        assertEquals(0, Fn.<Number> numToInt().applyAsInt(null));
+        assertEquals(0L, Fn.<Number> numToLong().applyAsLong(null));
+    }
 
-        final List<java.util.function.BiPredicate<String, String>> biPredicates = new ArrayList<>();
-        biPredicates.add(String::equals);
-        biPredicates.add((left, right) -> {
-            throw new AssertionError("short-circuited bi-predicate");
-        });
-        final BiPredicate<String, String> snapshotBiAnd = Fn.and(biPredicates);
-        final BiPredicate<String, String> snapshotBiOr = Fn.or(biPredicates);
-        biPredicates.clear();
-        assertFalse(snapshotBiAnd.test("a", "b"));
-        assertTrue(snapshotBiOr.test("a", "a"));
+    @Test
+    public void testOptionalHelpers() {
+        assertEquals(true, Fn.GET_AS_BOOLEAN.applyAsBoolean(OptionalBoolean.of(true)));
+        assertEquals(3, Fn.GET_AS_INT.applyAsInt(OptionalInt.of(3)));
+        assertEquals(3, Fn.GET_AS_INT_JDK.applyAsInt(java.util.OptionalInt.of(3)));
+        assertEquals("x", Fn.<String> getIfPresentOrElseNull().apply(com.landawn.abacus.util.u.Optional.of("x")));
+        assertNull(Fn.<String> getIfPresentOrElseNull().apply(com.landawn.abacus.util.u.Optional.empty()));
+        assertEquals("x", Fn.<String> getIfPresentOrElseNullJdk().apply(java.util.Optional.of("x")));
+        assertNull(Fn.<String> getIfPresentOrElseNullJdk().apply(java.util.Optional.empty()));
     }
 
     @Test
@@ -478,62 +648,54 @@ public class FnTest extends FnTestSupport {
     }
 
     @Test
-    public void testOptionalHelpers() {
-        assertEquals(true, Fn.GET_AS_BOOLEAN.applyAsBoolean(OptionalBoolean.of(true)));
-        assertEquals(3, Fn.GET_AS_INT.applyAsInt(OptionalInt.of(3)));
-        assertEquals(3, Fn.GET_AS_INT_JDK.applyAsInt(java.util.OptionalInt.of(3)));
-        assertEquals("x", Fn.<String> getIfPresentOrElseNull().apply(com.landawn.abacus.util.u.Optional.of("x")));
-        assertNull(Fn.<String> getIfPresentOrElseNull().apply(com.landawn.abacus.util.u.Optional.empty()));
-        assertEquals("x", Fn.<String> getIfPresentOrElseNullJdk().apply(java.util.Optional.of("x")));
-        assertNull(Fn.<String> getIfPresentOrElseNullJdk().apply(java.util.Optional.empty()));
+    public void testPrintln() {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintStream original = System.out;
+        System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+        try {
+            Fn.println().accept("hello");
+            Fn.println("=").accept("key", "value");
+            Fn.println(" -> ").accept(new int[] { 1, 2 }, "x");
+        } finally {
+            System.setOut(original);
+        }
+        final String printed = out.toString(StandardCharsets.UTF_8);
+        assertTrue(printed.contains("hello"));
+        assertTrue(printed.contains("key=value"));
+        assertTrue(printed.contains("[1, 2] -> x"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.println(null));
+        assertDoesNotThrow(() -> Fn.println(":").accept("a", "b"));
+        assertDoesNotThrow(() -> Fn.println(", ").accept("a", "b"));
+        assertDoesNotThrow(() -> Fn.println("").accept("a", "b"));
     }
 
     @Test
-    public void testFutureGet() {
-        assertEquals("ok", Fn.futureGet().apply(CompletableFuture.completedFuture("ok")));
-        assertEquals("d", Fn.futureGetOrDefaultOnError("d").apply(CompletableFuture.failedFuture(new RuntimeException("e"))));
-        final AssertionError taskError = new AssertionError("task error");
-        final RuntimeException wrappedError = assertThrows(RuntimeException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskError)));
-        assertSame(taskError, wrappedError.getCause());
-        final IllegalStateException taskFailure = new IllegalStateException("task failure");
-        assertSame(taskFailure, assertThrows(IllegalStateException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskFailure))));
-    }
-
-    // FINDING G20-006: the eight close/shutdown runnables used to synchronize on `this` - the object handed to
-    // the caller - so caller code holding that monitor could block, or deadlock against, a close in flight. The
-    // project already fixed this class of defect for memoize*/LazyInitializer (finding R09-5); these sites were
-    // missed. Each now locks a private monitor.
-    @Test
-    public void testClose_DoesNotSynchronizeOnTheReturnedRunnable() throws Exception {
-        final MyCloseable c = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.close(c)), "Fn.close(..).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, c.getCloseCount());
-
-        final MyCloseable q = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeQuietly(q)), "Fn.closeQuietly(..).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, q.getCloseCount());
-    }
-
-    @Test
-    public void testCloseAll_DoesNotSynchronizeOnTheReturnedRunnable() throws Exception {
-        final MyCloseable a1 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(a1)), "Fn.closeAll(array).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, a1.getCloseCount());
-
-        final MyCloseable a2 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(List.of(a2))),
-                "Fn.closeAll(Collection).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, a2.getCloseCount());
-
-        final MyCloseable a3 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(a3)),
-                "Fn.closeAllQuietly(array).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, a3.getCloseCount());
-
-        final MyCloseable a4 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(List.of(a4))),
-                "Fn.closeAllQuietly(Collection).run() blocked on the caller-held monitor of the returned Runnable");
-        assertEquals(1, a4.getCloseCount());
+    public void testShutdown() throws InterruptedException {
+        final ExecutorService es = Executors.newSingleThreadExecutor();
+        try {
+            Fn.shutdown(es).run();
+            assertTrue(es.isShutdown());
+            Fn.shutdown(es).run();
+        } finally {
+            es.shutdownNow();
+        }
+        final ExecutorService es2 = Executors.newSingleThreadExecutor();
+        try {
+            Fn.shutdown(es2, 100, TimeUnit.MILLISECONDS).run();
+            assertTrue(es2.isShutdown());
+        } finally {
+            es2.shutdownNow();
+        }
+        assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(null));
+        final ExecutorService unused = Executors.newSingleThreadExecutor();
+        try {
+            assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(unused, -1, TimeUnit.MILLISECONDS));
+            // the rejected argument must be reported under its own name, not 'unit'
+            final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> Fn.shutdown(unused, 1, null));
+            assertTrue(ex.getMessage().contains("timeUnit"), "expected the message to name 'timeUnit' but got: " + ex.getMessage());
+        } finally {
+            unused.shutdownNow();
+        }
     }
 
     @Test
@@ -553,6 +715,90 @@ public class FnTest extends FnTestSupport {
             second.shutdownNow();
         }
     }
+
+    @Test
+    public void testSleepAndRateLimiter() {
+        final long start = System.currentTimeMillis();
+        Fn.sleep(20).accept("x");
+        assertTrue(System.currentTimeMillis() - start >= 15);
+        Fn.sleepUninterruptibly(10).accept("x");
+        assertDoesNotThrow(() -> Fn.rateLimiter(1000).accept("x"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.rateLimiter((RateLimiter) null));
+        assertDoesNotThrow(() -> Fn.sleep(-1).accept("x"));
+    }
+
+    @Test
+    public void testStringOperators() {
+        assertEquals("x", Fn.trim().apply(" x "));
+        assertEquals("", Fn.trimToEmpty().apply(null));
+        assertNull(Fn.trimToNull().apply("  "));
+        assertEquals("x", Fn.strip().apply(" x "));
+        assertEquals("", Fn.stripToEmpty().apply(null));
+        assertNull(Fn.stripToNull().apply("  "));
+        assertEquals("", Fn.nullToEmpty().apply(null));
+        assertEquals("x", Fn.nullToEmpty().apply("x"));
+        assertEquals(List.of(), Fn.nullToEmptyList().apply(null));
+        assertEquals(Set.of(), Fn.nullToEmptySet().apply(null));
+        assertEquals(Map.of(), Fn.nullToEmptyMap().apply(null));
+        final List<String> nonempty = List.of("a");
+        assertSame(nonempty, Fn.<String> nullToEmptyList().apply(nonempty));
+    }
+
+    @Test
+    public void testFlSumWrapsSilentlyOnLongOverflow() {
+        assertEquals(Long.MIN_VALUE, Fn.FL.sum().apply(new long[] { Long.MAX_VALUE, 1L }).longValue());
+        assertThrows(ArithmeticException.class, () -> Fn.FI.sum().apply(new int[] { Integer.MAX_VALUE, 1 }));
+    }
+
+    @Test
+    public void testThrowAndToRuntimeException() {
+        assertThrows(RuntimeException.class, () -> Fn.throwRuntimeException("boom").accept("x"));
+        assertThrows(IllegalStateException.class, () -> Fn.throwException(IllegalStateException::new).accept("x"));
+        final RuntimeException wrapped = Fn.toRuntimeException().apply(new Exception("e"));
+        assertTrue(wrapped.getCause() instanceof Exception || wrapped.getMessage().contains("e") || wrapped instanceof RuntimeException);
+        assertThrows(IllegalArgumentException.class, () -> Fn.throwException(null));
+
+        final IllegalStateException original = new IllegalStateException("original");
+        assertSame(original, Fn.toRuntimeException().apply(original));
+        assertSame(original, Fn.toRuntimeException().apply(new java.lang.reflect.UndeclaredThrowableException(original)));
+        final InterruptedException interruption = new InterruptedException("interrupted");
+        try {
+            Thread.interrupted();
+            assertSame(interruption, Fn.toRuntimeException().apply(new java.util.concurrent.ExecutionException(interruption)).getCause());
+            assertFalse(Thread.currentThread().isInterrupted());
+            assertSame(interruption, Fn.toRuntimeException().apply(interruption).getCause());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testToStringCaseAndFormat() {
+        assertEquals("123", Fn.toStr().apply(123));
+        assertEquals("null", Fn.toStr().apply(null));
+        assertEquals("foo", Fn.toLowerCase().apply("FOO"));
+        assertEquals("FOO", Fn.toUpperCase().apply("foo"));
+        assertEquals("helloWorld", Fn.toCamelCase().apply("hello_world"));
+        assertEquals("hello_world", Fn.toSnakeCase().apply("helloWorld"));
+        assertEquals("HELLO_WORLD", Fn.toScreamingSnakeCase().apply("helloWorld"));
+        assertTrue(Fn.toJson().apply(Map.of("a", 1)).contains("a"));
+        assertTrue(Fn.toXml().apply("x").length() > 0);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testFfWithTypedNullDefaultReturnsNullForMalformedUrl() {
+        final List<java.net.URL> urls = java.util.stream.Stream.of("http://example.com", "not a url")
+                .map(Fn.ff((String s) -> new java.net.URL(s), (java.net.URL) null))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertEquals(2, urls.size());
+        assertEquals("http://example.com", urls.get(0).toString());
+        assertNull(urls.get(1));
+    }
+
+
 
     /**
      * Runs {@code task} on another thread while this thread holds {@code task}'s own monitor and reports whether
@@ -586,227 +832,5 @@ public class FnTest extends FnTestSupport {
         return finished;
     }
 
-    // FINDING G20-005 (doc-only contract pin): closeAll*/closeAllQuietly read the caller's array or collection
-    // live at run() time, which the javadoc now states explicitly. Passes on both sides of the fix by design.
-    @Test
-    public void testCloseAll_ReadsTheResourcesLiveAtRunTime() {
-        final MyCloseable a1 = new MyCloseable();
-        final MyCloseable a2 = new MyCloseable();
-        final List<AutoCloseable> open = new ArrayList<>(List.of(a1, a2));
-        final Runnable closer = Fn.closeAll(open);
-        open.clear();
-        closer.run();
-        assertEquals(0, a1.getCloseCount());
-        assertEquals(0, a2.getCloseCount());
-
-        final MyCloseable lateAdded = new MyCloseable();
-        final List<AutoCloseable> registerThenFill = new ArrayList<>();
-        final Runnable lateCloser = Fn.closeAllQuietly(registerThenFill);
-        registerThenFill.add(lateAdded);
-        lateCloser.run();
-        assertEquals(1, lateAdded.getCloseCount());
-
-        final MyCloseable replaced = new MyCloseable();
-        final MyCloseable replacement = new MyCloseable();
-        final AutoCloseable[] array = { replaced };
-        final Runnable arrayCloser = Fn.closeAll(array);
-        array[0] = replacement;
-        arrayCloser.run();
-        assertEquals(0, replaced.getCloseCount());
-        assertEquals(1, replacement.getCloseCount());
-    }
-
-    // FINDING G20-001 (doc-only contract pin): numToDouble widens a Float through its decimal spelling rather
-    // than Number#doubleValue(), and all three numTo* functions map null to 0.
-    @Test
-    public void testNumToDouble_FloatIsWidenedViaItsDecimalSpelling() {
-        assertEquals(1.21d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(1.21f)));
-        assertEquals(1.2100000381469727d, Float.valueOf(1.21f).doubleValue());
-        assertEquals(0.1d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(0.1f)));
-        assertEquals(39.5d, Fn.<Number> numToDouble().applyAsDouble(Float.valueOf(39.50f)));
-        assertEquals(2.5d, Fn.<Number> numToDouble().applyAsDouble(Double.valueOf(2.5d)));
-
-        assertEquals(0.0d, Fn.<Number> numToDouble().applyAsDouble(null));
-        assertEquals(0, Fn.<Number> numToInt().applyAsInt(null));
-        assertEquals(0L, Fn.<Number> numToLong().applyAsLong(null));
-    }
-
-    // FINDING G20-004 (doc-only contract pin): a cancelled task's CancellationException is unchecked and is not
-    // folded into defaultValue; the InterruptedException path does return it and restores the interrupt flag.
-    @Test
-    public void testFutureGetOrDefaultOnError_CancellationPropagates() throws Exception {
-        final CompletableFuture<String> cancelled = new CompletableFuture<>();
-        assertTrue(cancelled.cancel(true));
-        assertThrows(CancellationException.class, () -> Fn.futureGetOrDefaultOnError("FAILED").apply(cancelled));
-
-        assertEquals("FAILED", Fn.futureGetOrDefaultOnError("FAILED").apply(CompletableFuture.failedFuture(new IllegalStateException("boom"))));
-
-        final FutureTask<String> neverRun = new FutureTask<>(() -> "x");
-        final AtomicReference<String> result = new AtomicReference<>();
-        final AtomicBoolean interruptRestored = new AtomicBoolean();
-        final Thread worker = new Thread(() -> {
-            Thread.currentThread().interrupt();
-            result.set(Fn.futureGetOrDefaultOnError("FAILED").apply(neverRun));
-            interruptRestored.set(Thread.currentThread().isInterrupted());
-        });
-        worker.setDaemon(true);
-        worker.start();
-        worker.join(TimeUnit.SECONDS.toMillis(5));
-        assertFalse(worker.isAlive());
-        assertEquals("FAILED", result.get());
-        assertTrue(interruptRestored.get());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testFfWithTypedNullDefaultReturnsNullForMalformedUrl() {
-        final List<java.net.URL> urls = java.util.stream.Stream.of("http://example.com", "not a url")
-                .map(Fn.ff((String s) -> new java.net.URL(s), (java.net.URL) null))
-                .collect(java.util.stream.Collectors.toList());
-
-        assertEquals(2, urls.size());
-        assertEquals("http://example.com", urls.get(0).toString());
-        assertNull(urls.get(1));
-    }
-
-    @Test
-    public void testFlSumWrapsSilentlyOnLongOverflow() {
-        assertEquals(Long.MIN_VALUE, Fn.FL.sum().apply(new long[] { Long.MAX_VALUE, 1L }).longValue());
-        assertThrows(ArithmeticException.class, () -> Fn.FI.sum().apply(new int[] { Integer.MAX_VALUE, 1 }));
-    }
-
-    @Test
-    public void testCreateNumberReturnsNullForNullOrEmptyString() {
-        assertNull(Fn.createNumber().apply(null));
-        assertNull(Fn.createNumber().apply(""));
-        assertEquals(Integer.valueOf(42), Fn.createNumber().apply("42"));
-    }
-
-    // ---- perf review 2026-09-26 G039 begin ----
-    // G039-01: atMost keeps returning false after exhaustion (fast path skips the CAS), incl. count 0
-    @Test
-    public void testAtMost_exhaustionPinned() {
-        final Predicate<String> zero = Fn.atMost(0);
-        for (int i = 0; i < 5; i++) {
-            assertFalse(zero.test("x"));
-        }
-        final Predicate<String> two = Fn.atMost(2);
-        final List<Boolean> results = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
-            results.add(two.test(null));
-        }
-        assertEquals(List.of(true, true, false, false, false, false), results);
-    }
-
-    // G039-01: limitThenFilter never invokes the predicate once the limit is used up
-    @Test
-    public void testLimitThenFilter_predicateCallsPinned() {
-        final List<Integer> seen = new ArrayList<>();
-        final Predicate<Integer> p = Fn.limitThenFilter(3, n -> {
-            seen.add(n);
-            return n % 2 == 1;
-        });
-        final List<Boolean> results = new ArrayList<>();
-        for (int i = 1; i <= 7; i++) {
-            results.add(p.test(i));
-        }
-        assertEquals(List.of(true, false, true, false, false, false, false), results);
-        assertEquals(List.of(1, 2, 3), seen);
-
-        final List<String> seenPairs = new ArrayList<>();
-        final BiPredicate<String, Integer> bp = Fn.limitThenFilter(2, (String s, Integer n) -> {
-            seenPairs.add(s + n);
-            return n > 0;
-        });
-        assertTrue(bp.test("a", 1));
-        assertFalse(bp.test("b", -1));
-        assertFalse(bp.test("c", 1));
-        assertFalse(bp.test("d", 1));
-        assertEquals(List.of("a1", "b-1"), seenPairs);
-
-        final List<Integer> seenZero = new ArrayList<>();
-        final Predicate<Integer> none = Fn.limitThenFilter(0, n -> seenZero.add(n));
-        assertFalse(none.test(1));
-        assertFalse(none.test(2));
-        assertTrue(seenZero.isEmpty());
-    }
-
-    // G039-01: filterThenLimit still invokes the predicate for every element after the limit is used up
-    @Test
-    public void testFilterThenLimit_predicateCallsPinned() {
-        final List<Integer> seen = new ArrayList<>();
-        final Predicate<Integer> p = Fn.filterThenLimit(n -> {
-            seen.add(n);
-            return n % 2 == 0;
-        }, 2);
-        final List<Boolean> results = new ArrayList<>();
-        for (int i = 1; i <= 7; i++) {
-            results.add(p.test(i));
-        }
-        assertEquals(List.of(false, true, false, true, false, false, false), results);
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), seen);
-
-        final List<String> seenPairs = new ArrayList<>();
-        final BiPredicate<String, Integer> bp = Fn.filterThenLimit((String s, Integer n) -> {
-            seenPairs.add(s + n);
-            return n > 0;
-        }, 1);
-        assertFalse(bp.test("a", -1));
-        assertTrue(bp.test("b", 1));
-        assertFalse(bp.test("c", 1));
-        assertFalse(bp.test("d", -1));
-        assertEquals(List.of("a-1", "b1", "c1", "d-1"), seenPairs);
-
-        final List<Integer> seenZero = new ArrayList<>();
-        final Predicate<Integer> none = Fn.filterThenLimit(n -> seenZero.add(n), 0);
-        assertFalse(none.test(1));
-        assertFalse(none.test(2));
-        assertEquals(List.of(1, 2), seenZero);
-    }
-
-    // G039-01: concurrent callers never accept more than the limit, and accept exactly the limit in total
-    @Test
-    public void testAtMost_concurrentExactLimit() throws Exception {
-        final int threads = 4;
-        final int perThread = 20_000;
-        final int limit = 1_000;
-        final Predicate<Integer> atMost = Fn.atMost(limit);
-        final Predicate<Integer> ltf = Fn.limitThenFilter(limit, n -> true);
-        final Predicate<Integer> ftl = Fn.filterThenLimit(n -> true, limit);
-        final java.util.concurrent.atomic.AtomicInteger acceptedAtMost = new java.util.concurrent.atomic.AtomicInteger();
-        final java.util.concurrent.atomic.AtomicInteger acceptedLtf = new java.util.concurrent.atomic.AtomicInteger();
-        final java.util.concurrent.atomic.AtomicInteger acceptedFtl = new java.util.concurrent.atomic.AtomicInteger();
-        final ExecutorService executor = Executors.newFixedThreadPool(threads);
-        try {
-            final CountDownLatch start = new CountDownLatch(1);
-            final List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
-            for (int k = 0; k < threads; k++) {
-                futures.add(executor.submit(() -> {
-                    start.await();
-                    for (int i = 0; i < perThread; i++) {
-                        if (atMost.test(i)) {
-                            acceptedAtMost.incrementAndGet();
-                        }
-                        if (ltf.test(i)) {
-                            acceptedLtf.incrementAndGet();
-                        }
-                        if (ftl.test(i)) {
-                            acceptedFtl.incrementAndGet();
-                        }
-                    }
-                    return null;
-                }));
-            }
-            start.countDown();
-            for (final java.util.concurrent.Future<?> f : futures) {
-                f.get(60, TimeUnit.SECONDS);
-            }
-        } finally {
-            executor.shutdownNow();
-        }
-        assertEquals(limit, acceptedAtMost.get());
-        assertEquals(limit, acceptedLtf.get());
-        assertEquals(limit, acceptedFtl.get());
-    }
     // ---- perf review 2026-09-26 G039 end ----
 }

@@ -24,213 +24,8 @@ import com.landawn.abacus.util.function.ToIntFunction;
 import com.landawn.abacus.util.function.ToLongFunction;
 
 public class IterablesSumTest extends IterablesTestSupport {
-    @Test
-    public void testSumIntIterable() {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-        OptionalInt result = Iterables.sumInt(numbers);
-        assertTrue(result.isPresent());
-        assertEquals(15, result.getAsInt());
 
-        assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.sumInt(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumIntIterableWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        OptionalInt result = Iterables.sumInt(stringList, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(21, result.getAsInt());
-
-        assertFalse(Iterables.sumInt((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testSumInt_SingleElement() {
-        OptionalInt result = Iterables.sumInt(Arrays.asList(42));
-        assertTrue(result.isPresent());
-        assertEquals(42, result.getAsInt());
-    }
-
-    @Test
-    public void testSumIntToLongIterable() {
-        List<Integer> largeNumbers = Arrays.asList(Integer.MAX_VALUE, 1);
-        OptionalLong result = Iterables.sumIntToLong(largeNumbers);
-        assertTrue(result.isPresent());
-        assertEquals((long) Integer.MAX_VALUE + 1, result.getAsLong());
-
-        assertFalse(Iterables.sumIntToLong((Iterable<Integer>) null).isPresent());
-        assertFalse(Iterables.sumIntToLong(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumIntToLongIterableWithFunction() {
-        ToIntFunction<String> lengthFunction = String::length;
-        OptionalLong result = Iterables.sumIntToLong(stringList, lengthFunction);
-        assertTrue(result.isPresent());
-        assertEquals(21L, result.getAsLong());
-
-        assertFalse(Iterables.sumIntToLong((Iterable<String>) null, lengthFunction).isPresent());
-    }
-
-    @Test
-    public void testSumIntToLongIterableNumber() {
-        assertTrue(Iterables.sumIntToLong((Iterable<Integer>) null).isEmpty());
-        assertTrue(Iterables.sumIntToLong(list()).isEmpty());
-        assertEquals(6L, Iterables.sumIntToLong(list(1, 2, 3)).get());
-        assertEquals(2L * Integer.MAX_VALUE, Iterables.sumIntToLong(list(Integer.MAX_VALUE, Integer.MAX_VALUE)).get());
-    }
-
-    @Test
-    public void testSumIntToLongIterableExtractor() {
-        ToIntFunction<String> len = String::length;
-        assertTrue(Iterables.sumIntToLong((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumIntToLong(list(), len).isEmpty());
-        assertEquals(6L, Iterables.sumIntToLong(list("a", "bb", "ccc"), len).get());
-    }
-
-    @Test
-    public void testSumIntToLong() {
-        List<Integer> list = Arrays.asList(1, 2, 3);
-        OptionalLong result = Iterables.sumIntToLong(list);
-        assertTrue(result.isPresent());
-        assertEquals(6L, result.get());
-    }
-
-    @Test
-    public void testSumIntToLong_EmptyIterable() {
-        assertFalse(Iterables.sumIntToLong(Collections.<Integer> emptyList()).isPresent());
-    }
-
-    @Test
-    public void testSumLong() {
-        List<Long> list = Arrays.asList(1L, 2L, 3L);
-        OptionalLong result = Iterables.sumLong(list);
-        assertTrue(result.isPresent());
-        assertEquals(6L, result.get());
-    }
-
-    @Test
-    public void testSumLongIterable() {
-        List<Long> numbers = Arrays.asList(1L, 2L, 3L, 4L, 5L);
-        OptionalLong result = Iterables.sumLong(numbers);
-        assertTrue(result.isPresent());
-        assertEquals(15L, result.getAsLong());
-
-        assertFalse(Iterables.sumLong((Iterable<Long>) null).isPresent());
-        assertFalse(Iterables.sumLong(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumLongIterableWithFunction() {
-        ToLongFunction<Integer> toLong = i -> i.longValue();
-        OptionalLong result = Iterables.sumLong(intList, toLong);
-        assertTrue(result.isPresent());
-        assertEquals(31L, result.getAsLong());
-
-        assertFalse(Iterables.sumLong((Iterable<Integer>) null, toLong).isPresent());
-    }
-
-    @Test
-    public void testSumLongIterableExtractor() {
-        ToLongFunction<String> len = s -> (long) s.length();
-        assertTrue(Iterables.sumLong((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumLong(list(), len).isEmpty());
-        assertEquals(6L, Iterables.sumLong(list("a", "bb", "ccc"), len).get());
-    }
-
-    @Test
-    public void testSumLong_SingleElement() {
-        OptionalLong result = Iterables.sumLong(Arrays.asList(42L));
-        assertTrue(result.isPresent());
-        assertEquals(42L, result.getAsLong());
-    }
-
-    @Test
-    public void testSumDouble() {
-        List<Double> list = Arrays.asList(1.0, 2.0, 3.0);
-        OptionalDouble result = Iterables.sumDouble(list);
-        assertTrue(result.isPresent());
-        assertEquals(6.0, result.get());
-    }
-
-    @Test
-    public void testSumDoubleIterable() {
-        OptionalDouble result = Iterables.sumDouble(doubleList);
-        assertTrue(result.isPresent());
-        assertEquals(8.99, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.sumDouble((Iterable<Double>) null).isPresent());
-        assertFalse(Iterables.sumDouble(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumDoubleIterableWithFunction() {
-        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
-        OptionalDouble result = Iterables.sumDouble(intList, toDouble);
-        assertTrue(result.isPresent());
-        assertEquals(31.0, result.getAsDouble(), 0.001);
-
-        assertFalse(Iterables.sumDouble((Iterable<Integer>) null, toDouble).isPresent());
-    }
-
-    @Test
-    public void testSumDoubleIterableExtractor() {
-        ToDoubleFunction<String> len = s -> (double) s.length();
-        assertTrue(Iterables.sumDouble((Iterable<String>) null, len).isEmpty());
-        assertTrue(Iterables.sumDouble(list(), len).isEmpty());
-        assertEquals(6.0, Iterables.sumDouble(list("a", "bb", "ccc"), len).get(), 0.001);
-    }
-
-    // ===================== sumInt / sumLong / sumDouble empty iterable =====================
-
-    @Test
-    public void testSumDouble_SingleElement() {
-        OptionalDouble result = Iterables.sumDouble(Arrays.asList(3.14));
-        assertTrue(result.isPresent());
-        assertEquals(3.14, result.getAsDouble(), 0.001);
-    }
-
-    // ===================== sumBigInteger / sumBigDecimal with function =====================
-
-    @Test
-    public void testSumBigIntegerIterable() {
-        Optional<BigInteger> result = Iterables.sumBigInteger(bigIntList);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(600), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.sumBigInteger(new ArrayList<>()).isPresent());
-    }
-
-    @Test
-    public void testSumBigIntegerIterableWithFunction() {
-        Function<Integer, BigInteger> toBigInt = i -> BigInteger.valueOf(i.longValue());
-        Optional<BigInteger> result = Iterables.sumBigInteger(intList, toBigInt);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(31), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<Integer>) null, toBigInt).isPresent());
-    }
-
-    @Test
-    public void testSumBigIntegerIterableExtractor() {
-        Function<String, BigInteger> lenToBi = s -> BigInteger.valueOf(s.length());
-        assertTrue(Iterables.sumBigInteger((Iterable<String>) null, lenToBi).isEmpty());
-        assertTrue(Iterables.sumBigInteger(list(), lenToBi).isEmpty());
-        assertEquals(new BigInteger("6"), Iterables.sumBigInteger(list("a", "bb", "ccc"), lenToBi).get());
-    }
-
-    @Test
-    public void testSumBigInteger() {
-        List<BigInteger> list = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3));
-        Optional<BigInteger> result = Iterables.sumBigInteger(list);
-        assertTrue(result.isPresent());
-        assertEquals(BigInteger.valueOf(6), result.get());
-
-        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
-        assertFalse(Iterables.sumBigInteger(Collections.emptyList()).isPresent());
-    }
+    // sumBigDecimal
 
     @Test
     public void testSumBigDecimal() {
@@ -251,6 +46,14 @@ public class IterablesSumTest extends IterablesTestSupport {
     }
 
     @Test
+    public void testSumBigDecimalIterableExtractor() {
+        Function<String, BigDecimal> lenToBd = s -> BigDecimal.valueOf(s.length());
+        assertTrue(Iterables.sumBigDecimal((Iterable<String>) null, lenToBd).isEmpty());
+        assertTrue(Iterables.sumBigDecimal(list(), lenToBd).isEmpty());
+        assertEquals(new BigDecimal("6"), Iterables.sumBigDecimal(list("a", "bb", "ccc"), lenToBd).get());
+    }
+
+    @Test
     public void testSumBigDecimalIterableWithFunction() {
         Function<Integer, BigDecimal> toBigDec = i -> BigDecimal.valueOf(i.longValue());
         Optional<BigDecimal> result = Iterables.sumBigDecimal(intList, toBigDec);
@@ -260,38 +63,55 @@ public class IterablesSumTest extends IterablesTestSupport {
         assertFalse(Iterables.sumBigDecimal((Iterable<Integer>) null, toBigDec).isPresent());
     }
 
+    // sumBigInteger
+
     @Test
-    public void testSumBigDecimalIterableExtractor() {
-        Function<String, BigDecimal> lenToBd = s -> BigDecimal.valueOf(s.length());
-        assertTrue(Iterables.sumBigDecimal((Iterable<String>) null, lenToBd).isEmpty());
-        assertTrue(Iterables.sumBigDecimal(list(), lenToBd).isEmpty());
-        assertEquals(new BigDecimal("6"), Iterables.sumBigDecimal(list("a", "bb", "ccc"), lenToBd).get());
+    public void testSumBigInteger() {
+        List<BigInteger> list = Arrays.asList(BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3));
+        Optional<BigInteger> result = Iterables.sumBigInteger(list);
+        assertTrue(result.isPresent());
+        assertEquals(BigInteger.valueOf(6), result.get());
+
+        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
+        assertFalse(Iterables.sumBigInteger(Collections.emptyList()).isPresent());
     }
 
     @Test
-    public void testSumIntThrowsOnOverflowLikeNSumInt() {
-        // regression: sumInt accumulated in int and silently wrapped, while N.sumInt throws
-        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.asList(Integer.MAX_VALUE, 1)));
-        assertEquals(3, Iterables.sumInt(Arrays.asList(1, 2)).orElseThrow());
+    public void testSumBigIntegerIterable() {
+        Optional<BigInteger> result = Iterables.sumBigInteger(bigIntList);
+        assertTrue(result.isPresent());
+        assertEquals(BigInteger.valueOf(600), result.get());
+
+        assertFalse(Iterables.sumBigInteger((Iterable<BigInteger>) null).isPresent());
+        assertFalse(Iterables.sumBigInteger(new ArrayList<>()).isPresent());
     }
 
     @Test
-    public void testSumDoubleUsesCompensatedSummation() {
-        // regression: naive accumulation made sumDouble disagree with averageDouble in this class
-        assertEquals(1.0d, Iterables.sumDouble(java.util.Collections.nCopies(10, 0.1d)).orElseThrow(), 0.0d);
+    public void testSumBigIntegerIterableExtractor() {
+        Function<String, BigInteger> lenToBi = s -> BigInteger.valueOf(s.length());
+        assertTrue(Iterables.sumBigInteger((Iterable<String>) null, lenToBi).isEmpty());
+        assertTrue(Iterables.sumBigInteger(list(), lenToBi).isEmpty());
+        assertEquals(new BigInteger("6"), Iterables.sumBigInteger(list("a", "bb", "ccc"), lenToBi).get());
     }
 
     @Test
-    public void testSumLong_overflowWrapsSilently() {
-        assertEquals(OptionalLong.of(Long.MIN_VALUE), Iterables.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)));
-        assertEquals(N.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)), Iterables.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)).get(),
-                "Iterables.sumLong must match N.sumLong");
+    public void testSumBigIntegerIterableWithFunction() {
+        Function<Integer, BigInteger> toBigInt = i -> BigInteger.valueOf(i.longValue());
+        Optional<BigInteger> result = Iterables.sumBigInteger(intList, toBigInt);
+        assertTrue(result.isPresent());
+        assertEquals(BigInteger.valueOf(31), result.get());
+
+        assertFalse(Iterables.sumBigInteger((Iterable<Integer>) null, toBigInt).isPresent());
     }
 
+    // sumDouble
+
     @Test
-    public void testSumInt_overflowThrows() {
-        assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.asList(Integer.MAX_VALUE, 1)));
-        assertEquals(OptionalLong.of(2147483648L), Iterables.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)));
+    public void testSumDouble() {
+        List<Double> list = Arrays.asList(1.0, 2.0, 3.0);
+        OptionalDouble result = Iterables.sumDouble(list);
+        assertTrue(result.isPresent());
+        assertEquals(6.0, result.get());
     }
 
     @Test
@@ -318,4 +138,194 @@ public class IterablesSumTest extends IterablesTestSupport {
         assertTrue(Double.isNaN(Iterables.sumDouble(Arrays.asList(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)).get()));
         assertEquals(Double.POSITIVE_INFINITY, Iterables.sumDouble(Arrays.asList(Double.POSITIVE_INFINITY, 1.0)).get());
     }
+
+    @Test
+    public void testSumDouble_SingleElement() {
+        OptionalDouble result = Iterables.sumDouble(Arrays.asList(3.14));
+        assertTrue(result.isPresent());
+        assertEquals(3.14, result.getAsDouble(), 0.001);
+    }
+
+    @Test
+    public void testSumDoubleIterable() {
+        OptionalDouble result = Iterables.sumDouble(doubleList);
+        assertTrue(result.isPresent());
+        assertEquals(8.99, result.getAsDouble(), 0.001);
+
+        assertFalse(Iterables.sumDouble((Iterable<Double>) null).isPresent());
+        assertFalse(Iterables.sumDouble(new ArrayList<>()).isPresent());
+    }
+
+    @Test
+    public void testSumDoubleIterableExtractor() {
+        ToDoubleFunction<String> len = s -> (double) s.length();
+        assertTrue(Iterables.sumDouble((Iterable<String>) null, len).isEmpty());
+        assertTrue(Iterables.sumDouble(list(), len).isEmpty());
+        assertEquals(6.0, Iterables.sumDouble(list("a", "bb", "ccc"), len).get(), 0.001);
+    }
+
+    @Test
+    public void testSumDoubleIterableWithFunction() {
+        ToDoubleFunction<Integer> toDouble = i -> i.doubleValue();
+        OptionalDouble result = Iterables.sumDouble(intList, toDouble);
+        assertTrue(result.isPresent());
+        assertEquals(31.0, result.getAsDouble(), 0.001);
+
+        assertFalse(Iterables.sumDouble((Iterable<Integer>) null, toDouble).isPresent());
+    }
+
+    @Test
+    public void testSumDoubleUsesCompensatedSummation() {
+        // regression: naive accumulation made sumDouble disagree with averageDouble in this class
+        assertEquals(1.0d, Iterables.sumDouble(java.util.Collections.nCopies(10, 0.1d)).orElseThrow(), 0.0d);
+    }
+
+    // sumInt
+
+    @Test
+    public void testSumInt_overflowThrows() {
+        assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.asList(Integer.MAX_VALUE, 1)));
+        assertEquals(OptionalLong.of(2147483648L), Iterables.sumIntToLong(Arrays.asList(Integer.MAX_VALUE, 1)));
+    }
+
+    @Test
+    public void testSumInt_SingleElement() {
+        OptionalInt result = Iterables.sumInt(Arrays.asList(42));
+        assertTrue(result.isPresent());
+        assertEquals(42, result.getAsInt());
+    }
+
+    @Test
+    public void testSumIntIterable() {
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        OptionalInt result = Iterables.sumInt(numbers);
+        assertTrue(result.isPresent());
+        assertEquals(15, result.getAsInt());
+
+        assertFalse(Iterables.sumInt((Iterable<Integer>) null).isPresent());
+        assertFalse(Iterables.sumInt(new ArrayList<>()).isPresent());
+    }
+
+    @Test
+    public void testSumIntIterableWithFunction() {
+        ToIntFunction<String> lengthFunction = String::length;
+        OptionalInt result = Iterables.sumInt(stringList, lengthFunction);
+        assertTrue(result.isPresent());
+        assertEquals(21, result.getAsInt());
+
+        assertFalse(Iterables.sumInt((Iterable<String>) null, lengthFunction).isPresent());
+    }
+
+    @Test
+    public void testSumIntThrowsOnOverflowLikeNSumInt() {
+        // regression: sumInt accumulated in int and silently wrapped, while N.sumInt throws
+        org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> Iterables.sumInt(Arrays.asList(Integer.MAX_VALUE, 1)));
+        assertEquals(3, Iterables.sumInt(Arrays.asList(1, 2)).orElseThrow());
+    }
+
+    // sumIntToLong
+
+    @Test
+    public void testSumIntToLong() {
+        List<Integer> list = Arrays.asList(1, 2, 3);
+        OptionalLong result = Iterables.sumIntToLong(list);
+        assertTrue(result.isPresent());
+        assertEquals(6L, result.get());
+    }
+
+    @Test
+    public void testSumIntToLong_EmptyIterable() {
+        assertFalse(Iterables.sumIntToLong(Collections.<Integer> emptyList()).isPresent());
+    }
+
+    @Test
+    public void testSumIntToLongIterable() {
+        List<Integer> largeNumbers = Arrays.asList(Integer.MAX_VALUE, 1);
+        OptionalLong result = Iterables.sumIntToLong(largeNumbers);
+        assertTrue(result.isPresent());
+        assertEquals((long) Integer.MAX_VALUE + 1, result.getAsLong());
+
+        assertFalse(Iterables.sumIntToLong((Iterable<Integer>) null).isPresent());
+        assertFalse(Iterables.sumIntToLong(new ArrayList<>()).isPresent());
+    }
+
+    @Test
+    public void testSumIntToLongIterableExtractor() {
+        ToIntFunction<String> len = String::length;
+        assertTrue(Iterables.sumIntToLong((Iterable<String>) null, len).isEmpty());
+        assertTrue(Iterables.sumIntToLong(list(), len).isEmpty());
+        assertEquals(6L, Iterables.sumIntToLong(list("a", "bb", "ccc"), len).get());
+    }
+
+    @Test
+    public void testSumIntToLongIterableNumber() {
+        assertTrue(Iterables.sumIntToLong((Iterable<Integer>) null).isEmpty());
+        assertTrue(Iterables.sumIntToLong(list()).isEmpty());
+        assertEquals(6L, Iterables.sumIntToLong(list(1, 2, 3)).get());
+        assertEquals(2L * Integer.MAX_VALUE, Iterables.sumIntToLong(list(Integer.MAX_VALUE, Integer.MAX_VALUE)).get());
+    }
+
+    @Test
+    public void testSumIntToLongIterableWithFunction() {
+        ToIntFunction<String> lengthFunction = String::length;
+        OptionalLong result = Iterables.sumIntToLong(stringList, lengthFunction);
+        assertTrue(result.isPresent());
+        assertEquals(21L, result.getAsLong());
+
+        assertFalse(Iterables.sumIntToLong((Iterable<String>) null, lengthFunction).isPresent());
+    }
+
+    // sumLong
+
+    @Test
+    public void testSumLong() {
+        List<Long> list = Arrays.asList(1L, 2L, 3L);
+        OptionalLong result = Iterables.sumLong(list);
+        assertTrue(result.isPresent());
+        assertEquals(6L, result.get());
+    }
+
+    @Test
+    public void testSumLong_overflowWrapsSilently() {
+        assertEquals(OptionalLong.of(Long.MIN_VALUE), Iterables.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)));
+        assertEquals(N.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)), Iterables.sumLong(Arrays.asList(Long.MAX_VALUE, 1L)).get(),
+                "Iterables.sumLong must match N.sumLong");
+    }
+
+    @Test
+    public void testSumLong_SingleElement() {
+        OptionalLong result = Iterables.sumLong(Arrays.asList(42L));
+        assertTrue(result.isPresent());
+        assertEquals(42L, result.getAsLong());
+    }
+
+    @Test
+    public void testSumLongIterable() {
+        List<Long> numbers = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+        OptionalLong result = Iterables.sumLong(numbers);
+        assertTrue(result.isPresent());
+        assertEquals(15L, result.getAsLong());
+
+        assertFalse(Iterables.sumLong((Iterable<Long>) null).isPresent());
+        assertFalse(Iterables.sumLong(new ArrayList<>()).isPresent());
+    }
+
+    @Test
+    public void testSumLongIterableExtractor() {
+        ToLongFunction<String> len = s -> (long) s.length();
+        assertTrue(Iterables.sumLong((Iterable<String>) null, len).isEmpty());
+        assertTrue(Iterables.sumLong(list(), len).isEmpty());
+        assertEquals(6L, Iterables.sumLong(list("a", "bb", "ccc"), len).get());
+    }
+
+    @Test
+    public void testSumLongIterableWithFunction() {
+        ToLongFunction<Integer> toLong = i -> i.longValue();
+        OptionalLong result = Iterables.sumLong(intList, toLong);
+        assertTrue(result.isPresent());
+        assertEquals(31L, result.getAsLong());
+
+        assertFalse(Iterables.sumLong((Iterable<Integer>) null, toLong).isPresent());
+    }
+
 }

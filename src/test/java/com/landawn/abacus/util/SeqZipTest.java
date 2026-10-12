@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 public class SeqZipTest extends SeqTestSupport {
 
+    // zip
+
     @Test
     public void testZip_Arrays() throws Exception {
         assertEquals(Arrays.asList("1a", "2b"), Seq.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b" }, (x, y) -> x + y).toList());
@@ -33,6 +35,23 @@ public class SeqZipTest extends SeqTestSupport {
                         .toList());
         assertEquals(Arrays.asList("1a1.1", "2b0.0", "0c0.0"),
                 Seq.zip(new Integer[] { 1, 2 }, new String[] { "a", "b", "c" }, new Double[] { 1.1 }, 0, "X", 0.0, (n, s, d) -> n + s + d).toList());
+    }
+
+    @Test
+    public void zip_arrayZipperThrowDoesNotSkipPair() throws Exception {
+        final java.util.concurrent.atomic.AtomicInteger remainingThrows = new java.util.concurrent.atomic.AtomicInteger(1);
+        final Seq<String, RuntimeException> seq = Seq.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" }, (i, s) -> {
+            if (i == 2 && remainingThrows.getAndDecrement() > 0) {
+                throw new IllegalArgumentException("boom");
+            }
+            return i + s;
+        });
+        final Throwables.Iterator<String, RuntimeException> iter = seq.iteratorEx();
+        assertEquals("1a", iter.next());
+        assertThrows(IllegalArgumentException.class, iter::next);
+        assertEquals("2b", iter.next());
+        assertEquals("3c", iter.next());
+        seq.close();
     }
 
     @Test
@@ -100,6 +119,24 @@ public class SeqZipTest extends SeqTestSupport {
     }
 
     @Test
+    public void zip_tripleArrayZipperThrowDoesNotSkipTriple() throws Exception {
+        final java.util.concurrent.atomic.AtomicInteger remainingThrows = new java.util.concurrent.atomic.AtomicInteger(1);
+        final Seq<String, RuntimeException> seq = Seq.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false }, (i, s, z) -> {
+            if (i == 2 && remainingThrows.getAndDecrement() > 0) {
+                throw new IllegalArgumentException("boom");
+            }
+            return i + s + z;
+        });
+        final Throwables.Iterator<String, RuntimeException> iter = seq.iteratorEx();
+        assertEquals("1atrue", iter.next());
+        assertThrows(IllegalArgumentException.class, iter::next);
+        assertEquals("2bfalse", iter.next());
+        seq.close();
+    }
+
+    // zipWith
+
+    @Test
     public void testZipWith_Collection() throws Exception {
         assertEquals(Arrays.asList("a1", "b2", "c3"), Seq.of("a", "b", "c").zipWith(Arrays.asList(1, 2, 3), (s, i) -> s + i).toList());
         assertEquals(Arrays.asList("1a", "2b"), Seq.of(1, 2).zipWith(Arrays.asList("a", "b", "c"), (i, s) -> i + s).toList());
@@ -116,6 +153,17 @@ public class SeqZipTest extends SeqTestSupport {
                         .zipWith(Arrays.asList("1", "2", "3", "4", "5"), "z", "9", (x, y) -> x + y)
                         .skip(2)
                         .toArray(String[]::new));
+    }
+
+    @Test
+    public void testZipWith_Seq() throws Exception {
+        assertEquals(Arrays.asList("a1", "b2", "c3"), Seq.of("a", "b", "c").zipWith(Seq.of(1, 2, 3), (s, i) -> s + i).toList());
+        assertEquals(Arrays.asList("1a", "2b"), Seq.of(1, 2).zipWith(Seq.of("a", "b", "c"), (i, s) -> i + s).toList());
+        assertEquals(Arrays.asList("1a", "2b", "0c"), Seq.of(1, 2).zipWith(Seq.of("a", "b", "c"), 0, "def", (i, s) -> i + s).toList());
+        assertEquals(Arrays.asList("a1", "b2", "z3"), Seq.of("a", "b").zipWith(Seq.of(1, 2, 3), "z", 0, (s, i) -> s + i).toList());
+        assertEquals(Arrays.asList("a1", "b2", "c99"), Seq.of("a", "b", "c").zipWith(Seq.of(1, 2), "x", 99, (s, i) -> s + i).toList());
+        assertArrayEquals(new String[] { "c3" },
+                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").zipWith(Seq.of("1", "2", "3"), (x, y) -> x + y).skip(2).toArray(String[]::new));
     }
 
     @Test
@@ -136,17 +184,6 @@ public class SeqZipTest extends SeqTestSupport {
     }
 
     @Test
-    public void testZipWith_Seq() throws Exception {
-        assertEquals(Arrays.asList("a1", "b2", "c3"), Seq.of("a", "b", "c").zipWith(Seq.of(1, 2, 3), (s, i) -> s + i).toList());
-        assertEquals(Arrays.asList("1a", "2b"), Seq.of(1, 2).zipWith(Seq.of("a", "b", "c"), (i, s) -> i + s).toList());
-        assertEquals(Arrays.asList("1a", "2b", "0c"), Seq.of(1, 2).zipWith(Seq.of("a", "b", "c"), 0, "def", (i, s) -> i + s).toList());
-        assertEquals(Arrays.asList("a1", "b2", "z3"), Seq.of("a", "b").zipWith(Seq.of(1, 2, 3), "z", 0, (s, i) -> s + i).toList());
-        assertEquals(Arrays.asList("a1", "b2", "c99"), Seq.of("a", "b", "c").zipWith(Seq.of(1, 2), "x", 99, (s, i) -> s + i).toList());
-        assertArrayEquals(new String[] { "c3" },
-                Seq.<String, RuntimeException> of("a", "b", "c", "d", "e").zipWith(Seq.of("1", "2", "3"), (x, y) -> x + y).skip(2).toArray(String[]::new));
-    }
-
-    @Test
     public void testZipWith_TwoSeqs() throws Exception {
         assertEquals(Arrays.asList("1atrue", "2bfalse"),
                 Seq.of(1, 2).zipWith(Seq.of("a", "b", "c"), Seq.of(true, false), (i, s, bool) -> i + s + bool).toList());
@@ -158,36 +195,4 @@ public class SeqZipTest extends SeqTestSupport {
                 Seq.of("a", "b").zipWith(Seq.of(1), Seq.of(true, false, true), "x", 99, false, (s, i, b) -> s + i + b).toList());
     }
 
-    @Test
-    public void zip_arrayZipperThrowDoesNotSkipPair() throws Exception {
-        final java.util.concurrent.atomic.AtomicInteger remainingThrows = new java.util.concurrent.atomic.AtomicInteger(1);
-        final Seq<String, RuntimeException> seq = Seq.zip(new Integer[] { 1, 2, 3 }, new String[] { "a", "b", "c" }, (i, s) -> {
-            if (i == 2 && remainingThrows.getAndDecrement() > 0) {
-                throw new IllegalArgumentException("boom");
-            }
-            return i + s;
-        });
-        final Throwables.Iterator<String, RuntimeException> iter = seq.iteratorEx();
-        assertEquals("1a", iter.next());
-        assertThrows(IllegalArgumentException.class, iter::next);
-        assertEquals("2b", iter.next());
-        assertEquals("3c", iter.next());
-        seq.close();
-    }
-
-    @Test
-    public void zip_tripleArrayZipperThrowDoesNotSkipTriple() throws Exception {
-        final java.util.concurrent.atomic.AtomicInteger remainingThrows = new java.util.concurrent.atomic.AtomicInteger(1);
-        final Seq<String, RuntimeException> seq = Seq.zip(new Integer[] { 1, 2 }, new String[] { "a", "b" }, new Boolean[] { true, false }, (i, s, z) -> {
-            if (i == 2 && remainingThrows.getAndDecrement() > 0) {
-                throw new IllegalArgumentException("boom");
-            }
-            return i + s + z;
-        });
-        final Throwables.Iterator<String, RuntimeException> iter = seq.iteratorEx();
-        assertEquals("1atrue", iter.next());
-        assertThrows(IllegalArgumentException.class, iter::next);
-        assertEquals("2bfalse", iter.next());
-        seq.close();
-    }
 }

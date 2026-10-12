@@ -127,8 +127,8 @@ public class PerformanceCollectionsRegressionTest extends TestBase {
 
     @Test
     public void sparseMapSizingPreservesCustomConstructorBounds() {
-        final MapsReview20260924Test.Lru<Integer, Integer> source = new MapsReview20260924Test.Lru<>(100);
-        final MapsReview20260924Test.Lru<Integer, List<Integer>> columns = new MapsReview20260924Test.Lru<>(100);
+        final MapsTestSupport.Lru<Integer, Integer> source = new MapsTestSupport.Lru<>(100);
+        final MapsTestSupport.Lru<Integer, List<Integer>> columns = new MapsTestSupport.Lru<>(100);
         for (int i = 0; i < 100; i++) {
             source.put(i, i);
             columns.put(i, List.of(i));

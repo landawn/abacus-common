@@ -51,71 +51,6 @@ import com.landawn.abacus.util.N;
 import com.sun.net.httpserver.HttpServer;
 
 public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport {
-    @Test
-    void structuredSubscriberDeliversStreamBeforeReceivingThePayload() throws Exception {
-        final Method method = HttpRequest.class.getDeclaredMethod("createResponseBodyHandler", Class.class);
-        method.setAccessible(true);
-        for (final Class<?> type : new Class<?>[] { TestBean.class, Map.class, String.class, byte[].class }) {
-            @SuppressWarnings("unchecked")
-            final BodyHandler<Object> handler = (BodyHandler<Object>) method.invoke(HttpRequest.url(TEST_URL), type);
-            final BodySubscriber<Object> subscriber = handler.apply(info("application/json", null));
-            final AtomicInteger cancelled = new AtomicInteger();
-            subscriber.onSubscribe(subscription(cancelled));
-            final var body = subscriber.getBody().toCompletableFuture();
-            if (type == String.class || type == byte[].class) {
-                assertFalse(body.isDone());
-                subscriber.onComplete();
-                assertInstanceOf(byte[].class, body.get(2, TimeUnit.SECONDS));
-            } else {
-                assertTrue(body.isDone(), "structured responses must not aggregate bytes before delivery");
-                assertInstanceOf(InputStream.class, body.get(2, TimeUnit.SECONDS)).close();
-                assertEquals(1, cancelled.get());
-            }
-        }
-    }
-
-    @Test
-    void largeJsonAndXmlUseDeclaredCharsetWithAndWithoutCompression() throws Exception {
-        final TestBean bean = new TestBean();
-        bean.setName("caf\u00e9".repeat(40_000));
-        bean.setValue(123);
-        for (final boolean xml : new boolean[] { false, true }) {
-            final Charset charset = xml ? StandardCharsets.UTF_16LE : StandardCharsets.ISO_8859_1;
-            final byte[] plain = (xml ? N.toXml(bean) : N.toJson(bean)).getBytes(charset);
-            for (final boolean compressed : new boolean[] { false, true }) {
-                final HttpServer server = startResponseServer(compressed ? gzip(plain) : plain,
-                        (xml ? "application/xml" : "application/json") + "; charset=" + charset.name(), compressed ? "gzip" : null);
-                try {
-                    final String url = localUrl(server);
-                    final TestBean sync = HttpRequest.url(url).get(TestBean.class);
-                    assertEquals(bean.getName(), sync.getName());
-                    assertEquals(bean.getValue(), sync.getValue());
-                    final TestBean async = HttpRequest.url(url).asyncGet(TestBean.class).get(10, TimeUnit.SECONDS);
-                    assertEquals(bean.getName(), async.getName());
-                    assertEquals(bean.getValue(), async.getValue());
-                } finally {
-                    server.stop(0);
-                }
-            }
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    void internalStreamsRetainBestEffortClientCleanup(final boolean async) throws Exception {
-        final HttpClient client = mock(HttpClient.class);
-        final byte[] json = "{\"name\":\"parsed\",\"value\":7}".getBytes(StandardCharsets.UTF_8);
-        when(client.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenAnswer(invocation -> delivered(invocation.getArgument(1), json));
-        when(client.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class)))
-                .thenAnswer(invocation -> CompletableFuture.completedFuture(delivered(invocation.getArgument(1), json)));
-        doThrow(new IllegalStateException("best-effort client close")).when(client).close();
-        final HttpRequest request = HttpRequest.create(TEST_URL, client).closeHttpClientAfterExecution(true);
-        final TestBean bean = async ? request.asyncGet(TestBean.class).get(5, TimeUnit.SECONDS) : request.get(TestBean.class);
-        assertEquals("parsed", bean.getName());
-        assertEquals(7, bean.getValue());
-        verify(client, times(1)).close();
-    }
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
@@ -175,6 +110,35 @@ public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport
             verify(client, times(1)).close();
         } finally {
             release.countDown();
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void emptyAndInvalidDecodedStreamsCloseTheRawBodyExactlyOnce(final boolean async) throws Exception {
+        for (final int variant : new int[] { 0, 1, 2 }) {
+            final byte[] bytes = variant == 0 ? new byte[0] : variant == 1 ? gzip(new byte[0]) : new byte[] { 1, 2, 3 };
+            final AtomicInteger bodyCloses = new AtomicInteger();
+            final InputStream input = new ByteArrayInputStream(bytes) {
+                @Override
+                public void close() {
+                    bodyCloses.incrementAndGet();
+                }
+            };
+            final HttpResponse<InputStream> response = response(input, "application/xml", variant == 0 ? null : "gzip");
+            final HttpClient client = mock(HttpClient.class);
+            when(client.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenReturn(response);
+            when(client.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class)))
+                    .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+            final HttpRequest request = HttpRequest.create(TEST_URL, client).closeHttpClientAfterExecution(true);
+            if (variant < 2) {
+                assertNull(execute(request, HttpMethod.GET, Map.class, async));
+            } else {
+                assertThrows(RuntimeException.class, () -> execute(request, HttpMethod.GET, Map.class, async));
+            }
+            assertEquals(1, bodyCloses.get());
+            verify(client, times(1)).close();
         }
     }
 
@@ -256,6 +220,72 @@ public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport
 
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void internalStreamsRetainBestEffortClientCleanup(final boolean async) throws Exception {
+        final HttpClient client = mock(HttpClient.class);
+        final byte[] json = "{\"name\":\"parsed\",\"value\":7}".getBytes(StandardCharsets.UTF_8);
+        when(client.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenAnswer(invocation -> delivered(invocation.getArgument(1), json));
+        when(client.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class)))
+                .thenAnswer(invocation -> CompletableFuture.completedFuture(delivered(invocation.getArgument(1), json)));
+        doThrow(new IllegalStateException("best-effort client close")).when(client).close();
+        final HttpRequest request = HttpRequest.create(TEST_URL, client).closeHttpClientAfterExecution(true);
+        final TestBean bean = async ? request.asyncGet(TestBean.class).get(5, TimeUnit.SECONDS) : request.get(TestBean.class);
+        assertEquals("parsed", bean.getName());
+        assertEquals(7, bean.getValue());
+        verify(client, times(1)).close();
+    }
+
+    @Test
+    void largeJsonAndXmlUseDeclaredCharsetWithAndWithoutCompression() throws Exception {
+        final TestBean bean = new TestBean();
+        bean.setName("caf\u00e9".repeat(40_000));
+        bean.setValue(123);
+        for (final boolean xml : new boolean[] { false, true }) {
+            final Charset charset = xml ? StandardCharsets.UTF_16LE : StandardCharsets.ISO_8859_1;
+            final byte[] plain = (xml ? N.toXml(bean) : N.toJson(bean)).getBytes(charset);
+            for (final boolean compressed : new boolean[] { false, true }) {
+                final HttpServer server = startResponseServer(compressed ? gzip(plain) : plain,
+                        (xml ? "application/xml" : "application/json") + "; charset=" + charset.name(), compressed ? "gzip" : null);
+                try {
+                    final String url = localUrl(server);
+                    final TestBean sync = HttpRequest.url(url).get(TestBean.class);
+                    assertEquals(bean.getName(), sync.getName());
+                    assertEquals(bean.getValue(), sync.getValue());
+                    final TestBean async = HttpRequest.url(url).asyncGet(TestBean.class).get(10, TimeUnit.SECONDS);
+                    assertEquals(bean.getName(), async.getName());
+                    assertEquals(bean.getValue(), async.getValue());
+                } finally {
+                    server.stop(0);
+                }
+            }
+        }
+    }
+
+    @Test
+    void structuredSubscriberDeliversStreamBeforeReceivingThePayload() throws Exception {
+        final Method method = HttpRequest.class.getDeclaredMethod("createResponseBodyHandler", Class.class);
+        method.setAccessible(true);
+        for (final Class<?> type : new Class<?>[] { TestBean.class, Map.class, String.class, byte[].class }) {
+            @SuppressWarnings("unchecked")
+            final BodyHandler<Object> handler = (BodyHandler<Object>) method.invoke(HttpRequest.url(TEST_URL), type);
+            final BodySubscriber<Object> subscriber = handler.apply(info("application/json", null));
+            final AtomicInteger cancelled = new AtomicInteger();
+            subscriber.onSubscribe(subscription(cancelled));
+            final var body = subscriber.getBody().toCompletableFuture();
+            if (type == String.class || type == byte[].class) {
+                assertFalse(body.isDone());
+                subscriber.onComplete();
+                assertInstanceOf(byte[].class, body.get(2, TimeUnit.SECONDS));
+            } else {
+                assertTrue(body.isDone(), "structured responses must not aggregate bytes before delivery");
+                assertInstanceOf(InputStream.class, body.get(2, TimeUnit.SECONDS)).close();
+                assertEquals(1, cancelled.get());
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
     void whitespaceXmlAndMalformedCompressionRemainFailuresAndCloseResources(final boolean async) throws Exception {
         final byte[] whitespace = " \t\r\n".getBytes(StandardCharsets.UTF_8);
         for (final boolean compressed : new boolean[] { false, true }) {
@@ -271,35 +301,6 @@ public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport
             final HttpRequest request = responseRequest(bytes, "application/xml", "gzip", 200, closes);
             assertThrows(RuntimeException.class, () -> execute(request, HttpMethod.GET, Map.class, async));
             assertEquals(1, closes.get());
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    void emptyAndInvalidDecodedStreamsCloseTheRawBodyExactlyOnce(final boolean async) throws Exception {
-        for (final int variant : new int[] { 0, 1, 2 }) {
-            final byte[] bytes = variant == 0 ? new byte[0] : variant == 1 ? gzip(new byte[0]) : new byte[] { 1, 2, 3 };
-            final AtomicInteger bodyCloses = new AtomicInteger();
-            final InputStream input = new ByteArrayInputStream(bytes) {
-                @Override
-                public void close() {
-                    bodyCloses.incrementAndGet();
-                }
-            };
-            final HttpResponse<InputStream> response = response(input, "application/xml", variant == 0 ? null : "gzip");
-            final HttpClient client = mock(HttpClient.class);
-            when(client.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenReturn(response);
-            when(client.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class)))
-                    .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
-            final HttpRequest request = HttpRequest.create(TEST_URL, client).closeHttpClientAfterExecution(true);
-            if (variant < 2) {
-                assertNull(execute(request, HttpMethod.GET, Map.class, async));
-            } else {
-                assertThrows(RuntimeException.class, () -> execute(request, HttpMethod.GET, Map.class, async));
-            }
-            assertEquals(1, bodyCloses.get());
-            verify(client, times(1)).close();
         }
     }
 
@@ -384,4 +385,5 @@ public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport
         when(response.request()).thenReturn(request);
         return response;
     }
+
 }

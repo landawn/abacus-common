@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +32,10 @@ public class ScriptTest extends TestBase {
 
     @Test
     public void testClassHasNoPublicMembers() {
-        assertEquals(0, Script.class.getDeclaredMethods().length, "Script should declare no methods");
-        assertEquals(0, Script.class.getDeclaredFields().length, "Script should declare no fields");
+        assertEquals(0, Arrays.stream(Script.class.getDeclaredMethods()).filter(method -> !method.isSynthetic()).count(),
+                "Script should declare no source methods");
+        assertEquals(0, Arrays.stream(Script.class.getDeclaredFields()).filter(field -> !field.isSynthetic()).count(),
+                "Script should declare no source fields");
     }
 
     @Test

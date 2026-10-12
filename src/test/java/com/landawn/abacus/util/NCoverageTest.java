@@ -40,6 +40,159 @@ import com.landawn.abacus.util.function.ToShortFunction;
 public class NCoverageTest extends NTestSupport {
 
     @Test
+    public void testAsyncExecute_collectionAndDelay() throws Exception {
+        final Collection<Callable<Integer>> callables = new LinkedHashSet<>();
+        callables.add(() -> 1);
+        callables.add(() -> 2);
+        final List<Integer> results = new ArrayList<>();
+        for (ContinuableFuture<Integer> future : N.asyncExecute(callables, executorService)) {
+            results.add(future.get());
+        }
+        assertEquals(2, results.size());
+        assertTrue(results.containsAll(Arrays.asList(1, 2)));
+
+        assertEquals(0, N.asyncExecute((Collection<Callable<Integer>>) null, executorService).size());
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(callables, (java.util.concurrent.Executor) null));
+
+        assertEquals("delayed", N.asyncExecute(() -> "delayed", 20L).get());
+    }
+
+    @Test
+    public void testCallAsync_coversTakeCompletion() throws Exception {
+        final ExecutorService exec = Executors.newFixedThreadPool(2);
+        try {
+            final List<Integer> values = N.callAsync(Arrays.<Callable<Integer>> asList(() -> {
+                N.sleepUninterruptibly(30);
+                return 1;
+            }, () -> 2), exec).toList();
+            assertEquals(2, values.size());
+            assertTrue(values.containsAll(Arrays.asList(1, 2)));
+        } finally {
+            exec.shutdown();
+        }
+    }
+
+    @Test
+    public void testCallInParallel_threeAndFourFailure() {
+        Tuple3<String, Integer, Boolean> three = N.callInParallel(() -> "a", () -> 1, () -> true);
+        assertEquals("a", three._1);
+        assertEquals(1, three._2);
+        assertEquals(true, three._3);
+
+        Tuple4<String, Integer, Boolean, Double> four = N.callInParallel(() -> "a", () -> 1, () -> true, () -> 2.0);
+        assertEquals(2.0, four._4, DELTA);
+
+        assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+            throw new RuntimeException("c3");
+        }, () -> 1, () -> true));
+        assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
+            throw new RuntimeException("c4");
+        }, () -> 1, () -> true, () -> 2.0));
+    }
+
+    @Test
+    public void testForEach_collectionRange() {
+        final List<String> seen = new ArrayList<>();
+        N.forEach(Arrays.asList("a", "b", "c", "d"), 1, 3, seen::add);
+        assertEquals(Arrays.asList("b", "c"), seen);
+
+        seen.clear();
+        N.forEach(new LinkedList<>(Arrays.asList("a", "b", "c", "d")), 1, 3, seen::add);
+        assertEquals(Arrays.asList("b", "c"), seen);
+    }
+
+    @Test
+    public void testForEachIndexed_collectionAndArrayRange() {
+        final List<String> seen = new ArrayList<>();
+        N.forEachIndexed(Arrays.asList("a", "b", "c", "d"), 1, 3, (i, v) -> seen.add(i + v));
+        assertEquals(Arrays.asList("1b", "2c"), seen);
+
+        seen.clear();
+        N.forEachIndexed(new LinkedList<>(Arrays.asList("a", "b", "c", "d")), 1, 3, (i, v) -> seen.add(i + v));
+        assertEquals(Arrays.asList("1b", "2c"), seen);
+
+        seen.clear();
+        N.forEachIndexed(new String[] { "a", "b", "c", "d" }, 1, 3, (i, v) -> seen.add(i + v));
+        assertEquals(Arrays.asList("1b", "2c"), seen);
+
+        N.forEachIndexed(Arrays.asList("a", "b"), 0, 0, (i, v) -> seen.add("x"));
+        assertEquals(2, seen.size());
+    }
+
+    @Test
+    public void testForEachNonNull_twoAndThreeLevel() {
+        final List<String> twoLevel = new ArrayList<>();
+        N.forEachNonNull(Arrays.asList("ab", null, "cd"), s -> Arrays.asList(s.charAt(0), null, s.charAt(1)), (s, c) -> twoLevel.add(s + ":" + c));
+        assertEquals(Arrays.asList("ab:a", "ab:b", "cd:c", "cd:d"), twoLevel);
+
+        N.forEachNonNull((Iterable<String>) null, s -> Arrays.asList(s), (s, u) -> twoLevel.add("x"));
+        N.forEachNonNull(Arrays.asList("ab"), s -> null, (s, u) -> twoLevel.add("x"));
+
+        final List<String> tripleFromIterable = new ArrayList<>();
+        N.forEachNonNull(Arrays.asList("ab", null, "cd"), s -> Arrays.asList(s.substring(0, 1), null, s.substring(1)),
+                ch -> Arrays.asList(ch.toUpperCase(), null, ch.toLowerCase()), (orig, mid, leaf) -> tripleFromIterable.add(orig + ":" + mid + ":" + leaf));
+        assertEquals(8, tripleFromIterable.size());
+        assertTrue(tripleFromIterable.contains("ab:a:A"));
+        assertTrue(tripleFromIterable.contains("cd:d:d"));
+
+        final List<String> tripleFromIterator = new ArrayList<>();
+        N.forEachNonNull(Arrays.asList("ab", null, "cd").iterator(), s -> Arrays.asList(s.substring(0, 1), null),
+                ch -> Arrays.asList(ch.toUpperCase(), null, ch), (orig, mid, leaf) -> tripleFromIterator.add(orig + ":" + mid + ":" + leaf));
+        assertEquals(4, tripleFromIterator.size());
+        N.forEachNonNull((Iterator<String>) null, s -> Arrays.asList(s), ch -> Arrays.asList(ch), (a, b, c) -> {
+        });
+
+        final List<String> foreachTriple = new ArrayList<>();
+        N.forEach(Arrays.asList("ab", "cd").iterator(), s -> Arrays.asList(s.charAt(0)), c -> Arrays.asList(c.toString()),
+                (s, c, u) -> foreachTriple.add(s + ":" + c + ":" + u));
+        assertEquals(2, foreachTriple.size());
+        N.forEach((Iterator<String>) null, s -> Arrays.asList(s), c -> Arrays.asList(c), (a, b, c) -> {
+        });
+    }
+
+    @Test
+    public void testForEachPairAndTriple() {
+        final List<String> pairs = new ArrayList<>();
+        N.forEachPair(Arrays.asList("a", "b", "c").iterator(), (x, y) -> pairs.add(x + y));
+        assertEquals(Arrays.asList("ab", "bc"), pairs);
+
+        final List<String> triples = new ArrayList<>();
+        N.forEachTriple(Arrays.asList("a", "b", "c", "d"), (x, y, z) -> triples.add("" + x + y + z));
+        assertEquals(Arrays.asList("abc", "bcd"), triples);
+
+        final List<String> triplesIter = new ArrayList<>();
+        N.forEachTriple(Arrays.asList("a", "b", "c", "d").iterator(), (x, y, z) -> triplesIter.add("" + x + y + z));
+        assertEquals(Arrays.asList("abc", "bcd"), triplesIter);
+
+        final List<String> stepped = new ArrayList<>();
+        N.forEachTriple(Arrays.asList("a", "b", "c", "d", "e").iterator(), 2, (x, y, z) -> stepped.add("" + x + y + z));
+        assertTrue(stepped.size() >= 2);
+    }
+
+    @Test
+    public void testFromJsonAndXml_readerOverloads() {
+        assertEquals(Integer.valueOf(1), N.fromJson(new StringReader("1"), Integer.class));
+        assertEquals(Integer.valueOf(2), N.fromJson(new StringReader("2"), CommonUtil.typeOf(Integer.class)));
+        assertEquals(Integer.valueOf(3), N.fromJson(new StringReader("3"), JsonDeserConfig.create(), Integer.class));
+
+        @SuppressWarnings("unchecked")
+        final Type<List<Integer>> listType = (Type<List<Integer>>) (Type<?>) CommonUtil.typeOf("List<Integer>");
+        assertEquals(Arrays.asList(1, 2, 3), N.fromJson(new StringReader("[1,2,3]"), JsonDeserConfig.create(), listType));
+
+        final String xml = "<map><e><k>a</k><v>1</v></e></map>";
+        assertTrue(N.fromXml(new StringReader(xml), Map.class) instanceof Map);
+        assertTrue(N.fromXml(new StringReader(xml), CommonUtil.typeOf(Map.class)) instanceof Map);
+        assertTrue(N.fromXml(new StringReader(xml), XmlDeserConfig.create(), CommonUtil.typeOf(Map.class)) instanceof Map);
+    }
+
+    @Test
+    public void testMap_iterator() {
+        assertEquals(Arrays.asList("1", "2", "3"), N.map(Arrays.asList(1, 2, 3).iterator(), String::valueOf));
+        assertTrue(N.map((Iterator<Integer>) null, String::valueOf).isEmpty());
+        assertEquals(new HashSet<>(Arrays.asList("1", "2")), N.map(Arrays.asList(1, 2, 1).iterator(), String::valueOf, HashSet::new));
+    }
+
+    @Test
     public void testMapToPrimitives_collectionAndRange() {
         final List<Integer> randomAccess = Arrays.asList(10, 20, 30, 40, 50);
         final LinkedList<Integer> sequential = new LinkedList<>(randomAccess);
@@ -97,60 +250,10 @@ public class NCoverageTest extends NTestSupport {
     }
 
     @Test
-    public void testMap_iterator() {
-        assertEquals(Arrays.asList("1", "2", "3"), N.map(Arrays.asList(1, 2, 3).iterator(), String::valueOf));
-        assertTrue(N.map((Iterator<Integer>) null, String::valueOf).isEmpty());
-        assertEquals(new HashSet<>(Arrays.asList("1", "2")), N.map(Arrays.asList(1, 2, 1).iterator(), String::valueOf, HashSet::new));
-    }
-
-    @Test
-    public void testForEachNonNull_twoAndThreeLevel() {
-        final List<String> twoLevel = new ArrayList<>();
-        N.forEachNonNull(Arrays.asList("ab", null, "cd"), s -> Arrays.asList(s.charAt(0), null, s.charAt(1)), (s, c) -> twoLevel.add(s + ":" + c));
-        assertEquals(Arrays.asList("ab:a", "ab:b", "cd:c", "cd:d"), twoLevel);
-
-        N.forEachNonNull((Iterable<String>) null, s -> Arrays.asList(s), (s, u) -> twoLevel.add("x"));
-        N.forEachNonNull(Arrays.asList("ab"), s -> null, (s, u) -> twoLevel.add("x"));
-
-        final List<String> tripleFromIterable = new ArrayList<>();
-        N.forEachNonNull(Arrays.asList("ab", null, "cd"), s -> Arrays.asList(s.substring(0, 1), null, s.substring(1)),
-                ch -> Arrays.asList(ch.toUpperCase(), null, ch.toLowerCase()), (orig, mid, leaf) -> tripleFromIterable.add(orig + ":" + mid + ":" + leaf));
-        assertEquals(8, tripleFromIterable.size());
-        assertTrue(tripleFromIterable.contains("ab:a:A"));
-        assertTrue(tripleFromIterable.contains("cd:d:d"));
-
-        final List<String> tripleFromIterator = new ArrayList<>();
-        N.forEachNonNull(Arrays.asList("ab", null, "cd").iterator(), s -> Arrays.asList(s.substring(0, 1), null),
-                ch -> Arrays.asList(ch.toUpperCase(), null, ch), (orig, mid, leaf) -> tripleFromIterator.add(orig + ":" + mid + ":" + leaf));
-        assertEquals(4, tripleFromIterator.size());
-        N.forEachNonNull((Iterator<String>) null, s -> Arrays.asList(s), ch -> Arrays.asList(ch), (a, b, c) -> {
-        });
-
-        final List<String> foreachTriple = new ArrayList<>();
-        N.forEach(Arrays.asList("ab", "cd").iterator(), s -> Arrays.asList(s.charAt(0)), c -> Arrays.asList(c.toString()),
-                (s, c, u) -> foreachTriple.add(s + ":" + c + ":" + u));
-        assertEquals(2, foreachTriple.size());
-        N.forEach((Iterator<String>) null, s -> Arrays.asList(s), c -> Arrays.asList(c), (a, b, c) -> {
-        });
-    }
-
-    @Test
-    public void testForEachPairAndTriple() {
-        final List<String> pairs = new ArrayList<>();
-        N.forEachPair(Arrays.asList("a", "b", "c").iterator(), (x, y) -> pairs.add(x + y));
-        assertEquals(Arrays.asList("ab", "bc"), pairs);
-
-        final List<String> triples = new ArrayList<>();
-        N.forEachTriple(Arrays.asList("a", "b", "c", "d"), (x, y, z) -> triples.add("" + x + y + z));
-        assertEquals(Arrays.asList("abc", "bcd"), triples);
-
-        final List<String> triplesIter = new ArrayList<>();
-        N.forEachTriple(Arrays.asList("a", "b", "c", "d").iterator(), (x, y, z) -> triplesIter.add("" + x + y + z));
-        assertEquals(Arrays.asList("abc", "bcd"), triplesIter);
-
-        final List<String> stepped = new ArrayList<>();
-        N.forEachTriple(Arrays.asList("a", "b", "c", "d", "e").iterator(), 2, (x, y, z) -> stepped.add("" + x + y + z));
-        assertTrue(stepped.size() >= 2);
+    public void testMax_collectionRange() {
+        assertEquals(4, N.max(Arrays.asList(1, 4, 2, 3), 0, 4, Integer::compare).intValue());
+        assertEquals(3, N.max(Arrays.asList(1, 4, 2, 3), 2, 4, Integer::compare).intValue());
+        assertEquals(4, N.max(new LinkedList<>(Arrays.asList(1, 4, 2, 3)), 0, 4, Integer::compare).intValue());
     }
 
     @Test
@@ -178,6 +281,19 @@ public class NCoverageTest extends NTestSupport {
         assertEquals(3d, N.maxDoubleOrDefaultIfEmpty(words.iterator(), s -> (double) s.length(), -1d), DELTA);
         assertEquals(-1d, N.maxDoubleOrDefaultIfEmpty((Iterator<String>) null, s -> (double) s.length(), -1d), DELTA);
         assertEquals(-1d, N.maxDoubleOrDefaultIfEmpty(CommonUtil.<String> emptyList(), s -> (double) s.length(), -1d), DELTA);
+    }
+
+    @Test
+    public void testRemoveDuplicates_stringRange() {
+        assertEquals(0, N.removeDuplicates((String[]) null, 0, 0, true).length);
+        assertEquals(0, N.removeDuplicates(new String[] { "a", "b" }, 1, 1, false).length);
+        assertArrayEquals(new String[] { "b" }, N.removeDuplicates(new String[] { "a", "b", "c" }, 1, 2, false));
+        assertArrayEquals(new String[] { "a", "b" }, N.removeDuplicates(new String[] { "a", "a", "b", "b" }, 0, 4, true));
+        assertArrayEquals(new String[] { "a", "b" }, N.removeDuplicates(new String[] { "a", "b", "a" }, 0, 3, false));
+        assertArrayEquals(new String[] { "a", "b", "c" }, N.removeDuplicates(new String[] { "a", "b", "c" }, 0, 3, false));
+        assertArrayEquals(new String[] { "b", "c" }, N.removeDuplicates(new String[] { "a", "b", "b", "c" }, 1, 4, true));
+        assertArrayEquals(new String[] { "x", "y" }, N.removeDuplicates(new String[] { "x", "y", "x" }, false));
+        assertArrayEquals(new String[] { "x", "y" }, N.removeDuplicates(new String[] { "x", "x", "y" }));
     }
 
     @Test
@@ -214,132 +330,6 @@ public class NCoverageTest extends NTestSupport {
     }
 
     @Test
-    public void testCallInParallel_threeAndFourFailure() {
-        Tuple3<String, Integer, Boolean> three = N.callInParallel(() -> "a", () -> 1, () -> true);
-        assertEquals("a", three._1);
-        assertEquals(1, three._2);
-        assertEquals(true, three._3);
-
-        Tuple4<String, Integer, Boolean, Double> four = N.callInParallel(() -> "a", () -> 1, () -> true, () -> 2.0);
-        assertEquals(2.0, four._4, DELTA);
-
-        assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
-            throw new RuntimeException("c3");
-        }, () -> 1, () -> true));
-        assertThrows(RuntimeException.class, () -> N.callInParallel(() -> {
-            throw new RuntimeException("c4");
-        }, () -> 1, () -> true, () -> 2.0));
-    }
-
-    @Test
-    public void testAsyncExecute_collectionAndDelay() throws Exception {
-        final Collection<Callable<Integer>> callables = new LinkedHashSet<>();
-        callables.add(() -> 1);
-        callables.add(() -> 2);
-        final List<Integer> results = new ArrayList<>();
-        for (ContinuableFuture<Integer> future : N.asyncExecute(callables, executorService)) {
-            results.add(future.get());
-        }
-        assertEquals(2, results.size());
-        assertTrue(results.containsAll(Arrays.asList(1, 2)));
-
-        assertEquals(0, N.asyncExecute((Collection<Callable<Integer>>) null, executorService).size());
-        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(callables, (java.util.concurrent.Executor) null));
-
-        assertEquals("delayed", N.asyncExecute(() -> "delayed", 20L).get());
-    }
-
-    @Test
-    public void testZip_threeIterablesWithDefaults_allCollectionCombinations() {
-        final List<String> aCol = Arrays.asList("a", "b");
-        final List<Integer> bCol = Arrays.asList(1, 2, 3);
-        final List<Boolean> cCol = Arrays.asList(true);
-        final CustomIterable<String> aIt = new CustomIterable<>(aCol);
-        final CustomIterable<Integer> bIt = new CustomIterable<>(bCol);
-        final CustomIterable<Boolean> cIt = new CustomIterable<>(cCol);
-
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bCol, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bCol, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bIt, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bIt, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bCol, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bCol, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bIt, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
-        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bIt, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
-
-        assertTrue(N.zip((Iterable<String>) null, (Iterable<Integer>) null, (Iterable<Boolean>) null, "x", 0, false, (s, i, bool) -> s + i + bool).isEmpty());
-        assertEquals(3, N.zip((List<String>) null, bCol, (List<Boolean>) null, "x", 0, false, (s, i, bool) -> s + i + bool).size());
-        assertThrows(IllegalArgumentException.class, () -> N.zip(aCol, bCol, cCol, "x", 0, false, null));
-    }
-
-    @Test
-    public void testFromJsonAndXml_readerOverloads() {
-        assertEquals(Integer.valueOf(1), N.fromJson(new StringReader("1"), Integer.class));
-        assertEquals(Integer.valueOf(2), N.fromJson(new StringReader("2"), CommonUtil.typeOf(Integer.class)));
-        assertEquals(Integer.valueOf(3), N.fromJson(new StringReader("3"), JsonDeserConfig.create(), Integer.class));
-
-        @SuppressWarnings("unchecked")
-        final Type<List<Integer>> listType = (Type<List<Integer>>) (Type<?>) CommonUtil.typeOf("List<Integer>");
-        assertEquals(Arrays.asList(1, 2, 3), N.fromJson(new StringReader("[1,2,3]"), JsonDeserConfig.create(), listType));
-
-        final String xml = "<map><e><k>a</k><v>1</v></e></map>";
-        assertTrue(N.fromXml(new StringReader(xml), Map.class) instanceof Map);
-        assertTrue(N.fromXml(new StringReader(xml), CommonUtil.typeOf(Map.class)) instanceof Map);
-        assertTrue(N.fromXml(new StringReader(xml), XmlDeserConfig.create(), CommonUtil.typeOf(Map.class)) instanceof Map);
-    }
-
-    @Test
-    public void testForEachIndexed_collectionAndArrayRange() {
-        final List<String> seen = new ArrayList<>();
-        N.forEachIndexed(Arrays.asList("a", "b", "c", "d"), 1, 3, (i, v) -> seen.add(i + v));
-        assertEquals(Arrays.asList("1b", "2c"), seen);
-
-        seen.clear();
-        N.forEachIndexed(new LinkedList<>(Arrays.asList("a", "b", "c", "d")), 1, 3, (i, v) -> seen.add(i + v));
-        assertEquals(Arrays.asList("1b", "2c"), seen);
-
-        seen.clear();
-        N.forEachIndexed(new String[] { "a", "b", "c", "d" }, 1, 3, (i, v) -> seen.add(i + v));
-        assertEquals(Arrays.asList("1b", "2c"), seen);
-
-        N.forEachIndexed(Arrays.asList("a", "b"), 0, 0, (i, v) -> seen.add("x"));
-        assertEquals(2, seen.size());
-    }
-
-    @Test
-    public void testForEach_collectionRange() {
-        final List<String> seen = new ArrayList<>();
-        N.forEach(Arrays.asList("a", "b", "c", "d"), 1, 3, seen::add);
-        assertEquals(Arrays.asList("b", "c"), seen);
-
-        seen.clear();
-        N.forEach(new LinkedList<>(Arrays.asList("a", "b", "c", "d")), 1, 3, seen::add);
-        assertEquals(Arrays.asList("b", "c"), seen);
-    }
-
-    @Test
-    public void testMax_collectionRange() {
-        assertEquals(4, N.max(Arrays.asList(1, 4, 2, 3), 0, 4, Integer::compare).intValue());
-        assertEquals(3, N.max(Arrays.asList(1, 4, 2, 3), 2, 4, Integer::compare).intValue());
-        assertEquals(4, N.max(new LinkedList<>(Arrays.asList(1, 4, 2, 3)), 0, 4, Integer::compare).intValue());
-    }
-
-    @Test
-    public void testCallAsync_coversTakeCompletion() throws Exception {
-        final ExecutorService exec = Executors.newFixedThreadPool(2);
-        try {
-            final List<Integer> values = N.callAsync(Arrays.<Callable<Integer>> asList(() -> {
-                N.sleepUninterruptibly(30);
-                return 1;
-            }, () -> 2), exec).toList();
-            assertEquals(2, values.size());
-            assertTrue(values.containsAll(Arrays.asList(1, 2)));
-        } finally {
-            exec.shutdown();
-        }
-    }
-
-    @Test
     public void testSumToBigInteger_range() {
         assertEquals(BigInteger.ZERO, N.sumToBigInteger((long[]) null, 0, 0));
         assertEquals(BigInteger.ZERO, N.sumToBigInteger(new long[] { 1L, 2L }, 1, 1));
@@ -350,36 +340,6 @@ public class NCoverageTest extends NTestSupport {
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(Long.MAX_VALUE)), N.sumToBigInteger(Long.MAX_VALUE, Long.MAX_VALUE));
         assertEquals(BigInteger.ZERO, N.sumToBigInteger());
         assertThrows(IndexOutOfBoundsException.class, () -> N.sumToBigInteger(new long[] { 1L }, 0, 2));
-    }
-
-    @Test
-    public void testRemoveDuplicates_stringRange() {
-        assertEquals(0, N.removeDuplicates((String[]) null, 0, 0, true).length);
-        assertEquals(0, N.removeDuplicates(new String[] { "a", "b" }, 1, 1, false).length);
-        assertArrayEquals(new String[] { "b" }, N.removeDuplicates(new String[] { "a", "b", "c" }, 1, 2, false));
-        assertArrayEquals(new String[] { "a", "b" }, N.removeDuplicates(new String[] { "a", "a", "b", "b" }, 0, 4, true));
-        assertArrayEquals(new String[] { "a", "b" }, N.removeDuplicates(new String[] { "a", "b", "a" }, 0, 3, false));
-        assertArrayEquals(new String[] { "a", "b", "c" }, N.removeDuplicates(new String[] { "a", "b", "c" }, 0, 3, false));
-        assertArrayEquals(new String[] { "b", "c" }, N.removeDuplicates(new String[] { "a", "b", "b", "c" }, 1, 4, true));
-        assertArrayEquals(new String[] { "x", "y" }, N.removeDuplicates(new String[] { "x", "y", "x" }, false));
-        assertArrayEquals(new String[] { "x", "y" }, N.removeDuplicates(new String[] { "x", "x", "y" }));
-    }
-
-    @Test
-    public void testZip_twoIterablesWithDefaults() {
-        final List<String> aCol = Arrays.asList("a", "b");
-        final List<Integer> bCol = Arrays.asList(1, 2, 3);
-        final CustomIterable<String> aIt = new CustomIterable<>(aCol);
-        final CustomIterable<Integer> bIt = new CustomIterable<>(bCol);
-
-        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aCol, bCol, "x", 0, (s, i) -> s + i));
-        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aCol, bIt, "x", 0, (s, i) -> s + i));
-        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aIt, bCol, "x", 0, (s, i) -> s + i));
-        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aIt, bIt, "x", 0, (s, i) -> s + i));
-        assertEquals(Arrays.asList("x1", "x2", "x3"), N.zip((Iterable<String>) null, bCol, "x", 0, (s, i) -> s + i));
-        assertEquals(Arrays.asList("a0", "b0"), N.zip(aCol, (Iterable<Integer>) null, "x", 0, (s, i) -> s + i));
-        assertTrue(N.zip((Iterable<String>) null, (Iterable<Integer>) null, "x", 0, (s, i) -> s + i).isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> N.zip(aCol, bCol, "x", 0, null));
     }
 
     @Test
@@ -416,4 +376,45 @@ public class NCoverageTest extends NTestSupport {
         assertThrows(IllegalArgumentException.class, () -> N.unzip(pairs.iterator(), null));
         assertThrows(IllegalArgumentException.class, () -> N.unzip3(rows.iterator(), null));
     }
+
+    @Test
+    public void testZip_threeIterablesWithDefaults_allCollectionCombinations() {
+        final List<String> aCol = Arrays.asList("a", "b");
+        final List<Integer> bCol = Arrays.asList(1, 2, 3);
+        final List<Boolean> cCol = Arrays.asList(true);
+        final CustomIterable<String> aIt = new CustomIterable<>(aCol);
+        final CustomIterable<Integer> bIt = new CustomIterable<>(bCol);
+        final CustomIterable<Boolean> cIt = new CustomIterable<>(cCol);
+
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bCol, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bCol, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bIt, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aCol, bIt, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bCol, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bCol, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bIt, cCol, "x", 0, false, (s, i, bool) -> s + i + bool));
+        assertEquals(Arrays.asList("a1true", "b2false", "x3false"), N.zip(aIt, bIt, cIt, "x", 0, false, (s, i, bool) -> s + i + bool));
+
+        assertTrue(N.zip((Iterable<String>) null, (Iterable<Integer>) null, (Iterable<Boolean>) null, "x", 0, false, (s, i, bool) -> s + i + bool).isEmpty());
+        assertEquals(3, N.zip((List<String>) null, bCol, (List<Boolean>) null, "x", 0, false, (s, i, bool) -> s + i + bool).size());
+        assertThrows(IllegalArgumentException.class, () -> N.zip(aCol, bCol, cCol, "x", 0, false, null));
+    }
+
+    @Test
+    public void testZip_twoIterablesWithDefaults() {
+        final List<String> aCol = Arrays.asList("a", "b");
+        final List<Integer> bCol = Arrays.asList(1, 2, 3);
+        final CustomIterable<String> aIt = new CustomIterable<>(aCol);
+        final CustomIterable<Integer> bIt = new CustomIterable<>(bCol);
+
+        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aCol, bCol, "x", 0, (s, i) -> s + i));
+        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aCol, bIt, "x", 0, (s, i) -> s + i));
+        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aIt, bCol, "x", 0, (s, i) -> s + i));
+        assertEquals(Arrays.asList("a1", "b2", "x3"), N.zip(aIt, bIt, "x", 0, (s, i) -> s + i));
+        assertEquals(Arrays.asList("x1", "x2", "x3"), N.zip((Iterable<String>) null, bCol, "x", 0, (s, i) -> s + i));
+        assertEquals(Arrays.asList("a0", "b0"), N.zip(aCol, (Iterable<Integer>) null, "x", 0, (s, i) -> s + i));
+        assertTrue(N.zip((Iterable<String>) null, (Iterable<Integer>) null, "x", 0, (s, i) -> s + i).isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> N.zip(aCol, bCol, "x", 0, null));
+    }
+
 }

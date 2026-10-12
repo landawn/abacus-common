@@ -43,43 +43,6 @@ import com.landawn.abacus.util.function.TriFunction;
 public class BuilderTest extends BuilderTestSupport {
 
     @Test
-    public void testOfAndVal() {
-        String value = "test";
-        Builder<String> builder = Builder.of(value);
-        assertEquals(value, builder.val());
-        assertSame(value, builder.val());
-        assertThrows(IllegalArgumentException.class, () -> Builder.of((Object) null));
-
-        assertTrue(Builder.of(new ArrayList<String>()) instanceof ListBuilder);
-        assertTrue(Builder.of(new LinkedList<String>()) instanceof ListBuilder);
-        assertTrue(Builder.of(new HashSet<String>()) instanceof CollectionBuilder);
-        assertTrue(Builder.of(new LinkedHashSet<String>()) instanceof CollectionBuilder);
-        assertTrue(Builder.of(new HashMap<String, Integer>()) instanceof MapBuilder);
-        assertTrue(Builder.of(new TreeMap<String, Integer>()) instanceof MapBuilder);
-        assertTrue(Builder.of(new LinkedHashMap<String, Integer>()) instanceof MapBuilder);
-        assertTrue(Builder.of(Multiset.of()) instanceof MultisetBuilder);
-        assertTrue(Builder.of(CommonUtil.newListMultimap()) instanceof MultimapBuilder);
-        assertTrue(Builder.of(CommonUtil.newSetMultimap()) instanceof MultimapBuilder);
-        assertTrue(Builder.of(CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)))) instanceof DatasetBuilder);
-        assertTrue(Builder.of(Dataset.rows(Arrays.asList("a"), Arrays.asList(Arrays.asList(1)))) instanceof DatasetBuilder);
-        assertTrue(Builder.of(BooleanList.of(true)) instanceof BooleanListBuilder);
-        assertTrue(Builder.of(CharList.of('a')) instanceof CharListBuilder);
-        assertTrue(Builder.of(ByteList.of((byte) 1)) instanceof ByteListBuilder);
-        assertTrue(Builder.of(ShortList.of((short) 1)) instanceof ShortListBuilder);
-        assertTrue(Builder.of(IntList.of(1)) instanceof IntListBuilder);
-        assertTrue(Builder.of(LongList.of(1L)) instanceof LongListBuilder);
-        assertTrue(Builder.of(FloatList.of(1f)) instanceof FloatListBuilder);
-        assertTrue(Builder.of(DoubleList.of(1d)) instanceof DoubleListBuilder);
-
-        StringBuilder sb = new StringBuilder("test");
-        Builder<StringBuilder> generic = Builder.of(sb);
-        assertSame(sb, generic.val());
-        assertFalse(generic instanceof ListBuilder);
-        assertFalse(generic instanceof MapBuilder);
-        assertFalse(generic instanceof CollectionBuilder);
-    }
-
-    @Test
     public void testAcceptApplyStream() {
         List<String> list = new ArrayList<>();
         Builder<List<String>> builder = Builder.of(list);
@@ -91,6 +54,51 @@ public class BuilderTest extends BuilderTestSupport {
         assertNull(Builder.of("test").apply(s -> null));
         assertEquals(1, Builder.of("test").stream().count());
         assertEquals("hello", Builder.of("hello").stream().findFirst().orElse(null));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testDatasetBuilderAddColumnNullTupleFromColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final BiFunction biFunc = (x, y) -> x;
+        final TriFunction triFunc = (x, y, z) -> x;
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple2<String, String>) null, biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple2<String, String>) null, biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple3<String, String, String>) null, triFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple3<String, String, String>) null, triFunc));
+    }
+
+    @Test
+    public void testDatasetBuilderCombineColumnsNullNewColumnClassThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final Dataset noRows = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[0][]);
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(noRows).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testDatasetBuilderCombineColumnsNullTupleColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final BiFunction biFunc = (x, y) -> x;
+        final TriFunction triFunc = (x, y, z) -> x;
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple2<String, String>) null, "x", biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple3<String, String, String>) null, "x", triFunc));
+    }
+
+    @Test
+    public void testDatasetBuilderDivideColumnNullTupleNewColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
+        final BiConsumer<Object, Pair<Object, Object>> pairOutput = (v, p) -> {
+        };
+        final BiConsumer<Object, Triple<Object, Object, Object>> tripleOutput = (v, t) -> {
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple2<String, String>) null, pairOutput));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple3<String, String, String>) null, tripleOutput));
     }
 
     @Test
@@ -168,6 +176,51 @@ public class BuilderTest extends BuilderTestSupport {
     }
 
     @Test
+    public void testDatasetBuilderRenameColumnNullOrEmptyNewNameThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", null));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", ""));
+    }
+
+    @Test
+    public void testOfAndVal() {
+        String value = "test";
+        Builder<String> builder = Builder.of(value);
+        assertEquals(value, builder.val());
+        assertSame(value, builder.val());
+        assertThrows(IllegalArgumentException.class, () -> Builder.of((Object) null));
+
+        assertTrue(Builder.of(new ArrayList<String>()) instanceof ListBuilder);
+        assertTrue(Builder.of(new LinkedList<String>()) instanceof ListBuilder);
+        assertTrue(Builder.of(new HashSet<String>()) instanceof CollectionBuilder);
+        assertTrue(Builder.of(new LinkedHashSet<String>()) instanceof CollectionBuilder);
+        assertTrue(Builder.of(new HashMap<String, Integer>()) instanceof MapBuilder);
+        assertTrue(Builder.of(new TreeMap<String, Integer>()) instanceof MapBuilder);
+        assertTrue(Builder.of(new LinkedHashMap<String, Integer>()) instanceof MapBuilder);
+        assertTrue(Builder.of(Multiset.of()) instanceof MultisetBuilder);
+        assertTrue(Builder.of(CommonUtil.newListMultimap()) instanceof MultimapBuilder);
+        assertTrue(Builder.of(CommonUtil.newSetMultimap()) instanceof MultimapBuilder);
+        assertTrue(Builder.of(CommonUtil.newDataset(Arrays.asList("col1"), Arrays.asList(Arrays.asList(1)))) instanceof DatasetBuilder);
+        assertTrue(Builder.of(Dataset.rows(Arrays.asList("a"), Arrays.asList(Arrays.asList(1)))) instanceof DatasetBuilder);
+        assertTrue(Builder.of(BooleanList.of(true)) instanceof BooleanListBuilder);
+        assertTrue(Builder.of(CharList.of('a')) instanceof CharListBuilder);
+        assertTrue(Builder.of(ByteList.of((byte) 1)) instanceof ByteListBuilder);
+        assertTrue(Builder.of(ShortList.of((short) 1)) instanceof ShortListBuilder);
+        assertTrue(Builder.of(IntList.of(1)) instanceof IntListBuilder);
+        assertTrue(Builder.of(LongList.of(1L)) instanceof LongListBuilder);
+        assertTrue(Builder.of(FloatList.of(1f)) instanceof FloatListBuilder);
+        assertTrue(Builder.of(DoubleList.of(1d)) instanceof DoubleListBuilder);
+
+        StringBuilder sb = new StringBuilder("test");
+        Builder<StringBuilder> generic = Builder.of(sb);
+        assertSame(sb, generic.val());
+        assertFalse(generic instanceof ListBuilder);
+        assertFalse(generic instanceof MapBuilder);
+        assertFalse(generic instanceof CollectionBuilder);
+    }
+
+    @Test
     public void reviewFixes20260906_datasetBuilderPropagatesDelegateArgumentValidation() {
         assertThrows(IllegalArgumentException.class, () -> Builder.of(reviewFixes20260906Dataset()).renameColumn("nope", "x"));
         assertThrows(IllegalArgumentException.class, () -> Builder.of(reviewFixes20260906Dataset()).renameColumn("name", "age"));
@@ -197,56 +250,4 @@ public class BuilderTest extends BuilderTestSupport {
         assertEquals(Arrays.asList("name"), Builder.of(reviewFixes20260906Dataset()).removeColumn("age").val().columnNames());
     }
 
-    @Test
-    public void testDatasetBuilderRenameColumnNullOrEmptyNewNameThrowsIae() {
-        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
-
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", null));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", ""));
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testDatasetBuilderAddColumnNullTupleFromColumnNamesThrowsIae() {
-        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
-        final BiFunction biFunc = (x, y) -> x;
-        final TriFunction triFunc = (x, y, z) -> x;
-
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple2<String, String>) null, biFunc));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple2<String, String>) null, biFunc));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple3<String, String, String>) null, triFunc));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple3<String, String, String>) null, triFunc));
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testDatasetBuilderCombineColumnsNullTupleColumnNamesThrowsIae() {
-        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
-        final BiFunction biFunc = (x, y) -> x;
-        final TriFunction triFunc = (x, y, z) -> x;
-
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple2<String, String>) null, "x", biFunc));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple3<String, String, String>) null, "x", triFunc));
-    }
-
-    @Test
-    public void testDatasetBuilderCombineColumnsNullNewColumnClassThrowsIae() {
-        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
-        final Dataset noRows = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[0][]);
-
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(noRows).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
-    }
-
-    @Test
-    public void testDatasetBuilderDivideColumnNullTupleNewColumnNamesThrowsIae() {
-        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
-        final BiConsumer<Object, Pair<Object, Object>> pairOutput = (v, p) -> {
-        };
-        final BiConsumer<Object, Triple<Object, Object, Object>> tripleOutput = (v, t) -> {
-        };
-
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple2<String, String>) null, pairOutput));
-        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple3<String, String, String>) null, tripleOutput));
-    }
 }

@@ -40,149 +40,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class HttpRequestAsyncTest extends HttpRequestTestSupport {
 
-    @Test
-    public void testAsyncGet() throws Exception {
-        try {
-            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet();
-            assertNotNull(future);
-            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
-            assertNotNull(response);
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncGet_BodyHandler() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
-            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncGet_ResultClass() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(String.class).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncGet_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString(), null));
-    }
-
-    @Test
-    public void testAsyncGet_QueryMap() throws Exception {
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put("page", 1);
-            assertNotNull(HttpRequest.url(TEST_URL).query(params).asyncGet().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPost() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPost_BodyHandler() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
-            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPost_ResultClass() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(String.class).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPost_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString(), null));
-    }
-
-    @Test
-    public void testAsyncPost_FormBody() throws Exception {
-        try {
-            Map<String, String> formData = new HashMap<>();
-            formData.put("key", "value");
-            assertNotNull(HttpRequest.url(POST_URL).formBody(formData).asyncPost().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPut() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPut_BodyHandler() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
-            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPut_ResultClass() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(String.class).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPut_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString(), null));
-    }
-
-    @Test
-    public void testAsyncPatch() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPatch_BodyHandler() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
-            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPatch_ResultClass() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(String.class).get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testAsyncPatch_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class,
-                () -> HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString(), null));
-    }
+    // asyncDelete
 
     @Test
     public void testAsyncDelete() throws Exception {
@@ -202,6 +60,11 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
     }
 
     @Test
+    public void testAsyncDelete_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString(), null));
+    }
+
+    @Test
     public void testAsyncDelete_ResultClass() throws Exception {
         try {
             assertNotNull(HttpRequest.url(DELETE_URL).asyncDelete(String.class).get(5, TimeUnit.SECONDS));
@@ -209,18 +72,7 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
         }
     }
 
-    @Test
-    public void testAsyncDelete_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(DELETE_URL).asyncDelete(BodyHandlers.ofString(), null));
-    }
-
-    @Test
-    public void testAsyncHead() throws Exception {
-        try {
-            assertNotNull(HttpRequest.url(TEST_URL).asyncHead().get(5, TimeUnit.SECONDS));
-        } catch (Exception e) {
-        }
-    }
+    // asyncExecute
 
     @Test
     public void testAsyncExecute() throws Exception {
@@ -232,15 +84,6 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
             assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncExecute(HttpMethod.PATCH).get(5, TimeUnit.SECONDS));
         } catch (Exception e) {
         }
-    }
-
-    @Test
-    public void testAsyncExecute_NullMethod() {
-        HttpRequest request = HttpRequest.url(TEST_URL);
-        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null));
-        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, BodyHandlers.ofString()));
-        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, String.class));
-        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, BodyHandlers.ofString(), null));
     }
 
     @Test
@@ -269,50 +112,6 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
         assertEquals(1, thrown.getSuppressed().length);
         assertSame(cleanupFailure, thrown.getSuppressed()[0]);
         verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecute_NonStreamCleanupErrorClosesOwnedClientOnce() throws Exception {
-        final AssertionError cleanupFailure = new AssertionError("async cleanup failure");
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.body()).thenReturn("body");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
-                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
-
-        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
-
-        assertSame(cleanupFailure, thrown.getCause());
-        assertEquals(0, cleanupFailure.getSuppressed().length);
-        verify((AutoCloseable) ownedClient, times(1)).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecute_CancellationStillCleansOwnedClientAfterUpstreamFailure() throws Exception {
-        final IOException failure = new IOException("upstream failure after cancellation");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure after cancellation");
-        final CompletableFuture<HttpResponse<String>> upstream = new CompletableFuture<>();
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(upstream);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
-
-        assertTrue(future.cancel(false));
-        assertTrue(future.isCancelled());
-        assertTrue(upstream.completeExceptionally(failure));
-
-        assertTrue(future.isCancelled());
-        assertEquals(1, failure.getSuppressed().length);
-        assertSame(cleanupFailure, failure.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient, times(1)).close();
     }
 
     @Test
@@ -346,6 +145,130 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
         assertTrue(future.isCancelled());
         assertEquals(1, delegateCloseCount.get());
         verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecute_CancellationStillCleansOwnedClientAfterUpstreamFailure() throws Exception {
+        final IOException failure = new IOException("upstream failure after cancellation");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure after cancellation");
+        final CompletableFuture<HttpResponse<String>> upstream = new CompletableFuture<>();
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(upstream);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
+
+        assertTrue(future.cancel(false));
+        assertTrue(future.isCancelled());
+        assertTrue(upstream.completeExceptionally(failure));
+
+        assertTrue(future.isCancelled());
+        assertEquals(1, failure.getSuppressed().length);
+        assertSame(cleanupFailure, failure.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    public void testAsyncExecute_InputStreamFutureCompletesBeforeBodyRead() throws Exception {
+        final HttpServer server = startLocalServer("async stream body");
+
+        try {
+            final CompletableFuture<HttpResponse<InputStream>> future = HttpRequest.url(localUrl(server), 1_000L, 5_000L)
+                    .asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
+            final HttpResponse<InputStream> response = future.get(2, TimeUnit.SECONDS);
+
+            assertEquals(200, response.statusCode());
+
+            try (InputStream inputStream = response.body()) {
+                assertEquals("async stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecute_NonStreamCleanupErrorClosesOwnedClientOnce() throws Exception {
+        final AssertionError cleanupFailure = new AssertionError("async cleanup failure");
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.body()).thenReturn("body");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final CompletableFuture<HttpResponse<String>> future = request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString());
+
+        final CompletionException thrown = assertThrows(CompletionException.class, future::join);
+
+        assertSame(cleanupFailure, thrown.getCause());
+        assertEquals(0, cleanupFailure.getSuppressed().length);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    public void testAsyncExecute_NullMethod() {
+        HttpRequest request = HttpRequest.url(TEST_URL);
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null));
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, BodyHandlers.ofString()));
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, String.class));
+        assertThrows(IllegalArgumentException.class, () -> request.asyncExecute(null, BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testAsyncExecute_PushHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("synchronous push send failure");
+        final AssertionError cleanupFailure = new AssertionError("push-handler cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class), any(HttpResponse.PushPromiseHandler.class)))
+                .thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+        final HttpResponse.PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
+        };
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), pushHandler));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    public void testAsyncExecute_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testAsyncExecute_RejectsNullBodyHandlersBeforeBuildingOwnedClient() {
+        final HttpClient.Builder twoArgBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest twoArgRequest = new HttpRequest(TEST_URL, null, null, twoArgBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class, () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        verify(twoArgBuilder, never()).build();
+
+        final HttpClient.Builder pushBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest pushRequest = new HttpRequest(TEST_URL, null, null, pushBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class, () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
+        verify(pushBuilder, never()).build();
+
+        final HttpClient.Builder nullPushHandlerBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class, () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
+        verify(nullPushHandlerBuilder, never()).build();
     }
 
     @Test
@@ -399,74 +322,163 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
         verify((AutoCloseable) ownedClient, times(1)).close();
     }
 
-    @Test
-    public void testAsyncExecute_PushPromiseHandler() {
-        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(TEST_URL).asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
-    }
+    // asyncGet
 
     @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testAsyncExecute_PushHandlerClosesOwnedClientOnSynchronousSendFailure() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("synchronous push send failure");
-        final AssertionError cleanupFailure = new AssertionError("push-handler cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.sendAsync(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class), any(HttpResponse.PushPromiseHandler.class)))
-                .thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-        final HttpResponse.PushPromiseHandler<String> pushHandler = (initiatingRequest, pushPromiseRequest, acceptor) -> {
-        };
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
-                () -> request.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), pushHandler));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    public void testAsyncExecute_RejectsNullBodyHandlersBeforeBuildingOwnedClient() {
-        final HttpClient.Builder twoArgBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest twoArgRequest = new HttpRequest(TEST_URL, null, null, twoArgBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> twoArgRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
-        verify(twoArgBuilder, never()).build();
-
-        final HttpClient.Builder pushBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest pushRequest = new HttpRequest(TEST_URL, null, null, pushBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> pushRequest.asyncExecute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null, null));
-        verify(pushBuilder, never()).build();
-
-        final HttpClient.Builder nullPushHandlerBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest nullPushHandlerRequest = new HttpRequest(TEST_URL, null, null, nullPushHandlerBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> nullPushHandlerRequest.asyncExecute(HttpMethod.GET, BodyHandlers.ofString(), null));
-        verify(nullPushHandlerBuilder, never()).build();
-    }
-
-    @Test
-    public void testAsyncExecute_InputStreamFutureCompletesBeforeBodyRead() throws Exception {
-        final HttpServer server = startLocalServer("async stream body");
-
+    public void testAsyncGet() throws Exception {
         try {
-            final CompletableFuture<HttpResponse<InputStream>> future = HttpRequest.url(localUrl(server), 1_000L, 5_000L)
-                    .asyncExecute(HttpMethod.GET, BodyHandlers.ofInputStream());
-            final HttpResponse<InputStream> response = future.get(2, TimeUnit.SECONDS);
+            CompletableFuture<HttpResponse<String>> future = HttpRequest.url(TEST_URL).asyncGet();
+            assertNotNull(future);
+            HttpResponse<String> response = future.get(5, TimeUnit.SECONDS);
+            assertNotNull(response);
+        } catch (Exception e) {
+        }
+    }
 
-            assertEquals(200, response.statusCode());
+    @Test
+    public void testAsyncGet_BodyHandler() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
+            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
 
-            try (InputStream inputStream = response.body()) {
-                assertEquals("async stream body", new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
-            }
-        } finally {
-            server.stop(0);
+    @Test
+    public void testAsyncGet_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(TEST_URL).asyncGet(BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testAsyncGet_QueryMap() throws Exception {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("page", 1);
+            assertNotNull(HttpRequest.url(TEST_URL).query(params).asyncGet().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncGet_ResultClass() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(TEST_URL).asyncGet(String.class).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncHead() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(TEST_URL).asyncHead().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    // asyncPatch
+
+    @Test
+    public void testAsyncPatch() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPatch_BodyHandler() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
+            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPatch_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class,
+                () -> HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testAsyncPatch_ResultClass() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PATCH_URL).jsonBody("{\"test\":\"data\"}").asyncPatch(String.class).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    // asyncPost
+
+    @Test
+    public void testAsyncPost() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPost_BodyHandler() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
+            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPost_FormBody() throws Exception {
+        try {
+            Map<String, String> formData = new HashMap<>();
+            formData.put("key", "value");
+            assertNotNull(HttpRequest.url(POST_URL).formBody(formData).asyncPost().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPost_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testAsyncPost_ResultClass() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(POST_URL).jsonBody("{\"test\":\"data\"}").asyncPost(String.class).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    // asyncPut
+
+    @Test
+    public void testAsyncPut() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut().get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPut_BodyHandler() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString()).get(5, TimeUnit.SECONDS));
+            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofByteArray()).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
+        }
+    }
+
+    @Test
+    public void testAsyncPut_PushPromiseHandler() {
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testAsyncPut_ResultClass() throws Exception {
+        try {
+            assertNotNull(HttpRequest.url(PUT_URL).jsonBody("{\"test\":\"data\"}").asyncPut(String.class).get(5, TimeUnit.SECONDS));
+        } catch (Exception e) {
         }
     }
 
@@ -556,4 +568,5 @@ public class HttpRequestAsyncTest extends HttpRequestTestSupport {
         assertEquals(1, delegateCloseCount.get());
         verify((AutoCloseable) ownedClient, times(1)).close();
     }
+
 }

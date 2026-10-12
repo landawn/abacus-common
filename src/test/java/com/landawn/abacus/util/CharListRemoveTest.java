@@ -53,20 +53,7 @@ public class CharListRemoveTest extends CharListTestSupport {
         }
     }
 
-    @Test
-    public void testRemoveAllOccurrences() {
-        CharList list = CharList.of('a', 'b', 'c', 'b', 'd', 'b');
-        assertTrue(list.removeAllOccurrences('b'));
-        assertEquals(3, list.size());
-        assertEquals('a', list.get(0));
-        assertEquals('c', list.get(1));
-        assertEquals('d', list.get(2));
-    }
-
-    @Test
-    public void testRemoveAllOccurrences_Empty() {
-        assertFalse(list.removeAllOccurrences('a'));
-    }
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -114,36 +101,18 @@ public class CharListRemoveTest extends CharListTestSupport {
     }
 
     @Test
-    public void testRemoveIf() {
-        {
-            list = new CharList();
-            CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
-            assertTrue(list.removeIf(c -> c == 'b' || c == 'd'));
-            assertEquals(3, list.size());
-            assertEquals('a', list.get(0));
-            assertEquals('c', list.get(1));
-            assertEquals('e', list.get(2));
-        }
-        {
-            list = new CharList();
-            list.add('a');
-            list.add('b');
-            assertFalse(list.removeIf(c -> c == 'z'));
-            assertEquals(2, list.size());
-        }
+    public void testRemoveAllOccurrences() {
+        CharList list = CharList.of('a', 'b', 'c', 'b', 'd', 'b');
+        assertTrue(list.removeAllOccurrences('b'));
+        assertEquals(3, list.size());
+        assertEquals('a', list.get(0));
+        assertEquals('c', list.get(1));
+        assertEquals('d', list.get(2));
     }
 
     @Test
-    public void testRemoveDuplicates() {
-        list.addAll(CharList.of('a', 'b', 'a', 'c', 'b'));
-        assertTrue(list.removeDuplicates());
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, list.toArray());
-        assertFalse(CharList.of('x', 'y', 'z').removeDuplicates());
-    }
-
-    @Test
-    public void testRemoveDuplicates_Empty() {
-        assertFalse(list.removeDuplicates());
+    public void testRemoveAllOccurrences_Empty() {
+        assertFalse(list.removeAllOccurrences('a'));
     }
 
     @Test
@@ -166,12 +135,16 @@ public class CharListRemoveTest extends CharListTestSupport {
     }
 
     @Test
-    public void testRemoveRange() {
-        list.add('a');
-        list.add('b');
-        list.add('c');
-        list.removeRange(0, 3);
-        assertEquals(0, list.size());
+    public void testRemoveDuplicates() {
+        list.addAll(CharList.of('a', 'b', 'a', 'c', 'b'));
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, list.toArray());
+        assertFalse(CharList.of('x', 'y', 'z').removeDuplicates());
+    }
+
+    @Test
+    public void testRemoveDuplicates_Empty() {
+        assertFalse(list.removeDuplicates());
     }
 
     @Test
@@ -209,6 +182,26 @@ public class CharListRemoveTest extends CharListTestSupport {
     }
 
     @Test
+    public void testRemoveIf() {
+        {
+            list = new CharList();
+            CharList list = CharList.of('a', 'b', 'c', 'd', 'e');
+            assertTrue(list.removeIf(c -> c == 'b' || c == 'd'));
+            assertEquals(3, list.size());
+            assertEquals('a', list.get(0));
+            assertEquals('c', list.get(1));
+            assertEquals('e', list.get(2));
+        }
+        {
+            list = new CharList();
+            list.add('a');
+            list.add('b');
+            assertFalse(list.removeIf(c -> c == 'z'));
+            assertEquals(2, list.size());
+        }
+    }
+
+    @Test
     public void testRemoveLast() {
         {
             list = new CharList();
@@ -233,4 +226,14 @@ public class CharListRemoveTest extends CharListTestSupport {
         CharList list = new CharList();
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    @Test
+    public void testRemoveRange() {
+        list.add('a');
+        list.add('b');
+        list.add('c');
+        list.removeRange(0, 3);
+        assertEquals(0, list.size());
+    }
+
 }

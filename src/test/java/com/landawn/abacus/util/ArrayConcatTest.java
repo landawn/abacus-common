@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 
 public class ArrayConcatTest extends ArrayTestSupport {
 
+    // concat
+
     @Test
     public void testConcat_boolean_2D() {
         assertArrayEquals(new boolean[][] { { true, false }, { true } }, Array.concat(new boolean[][] { { true } }, new boolean[][] { { false }, { true } }));
@@ -19,10 +21,10 @@ public class ArrayConcatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testConcat_char_2D() {
-        assertArrayEquals(new char[][] { { 'a', 'b' }, { 'c' } }, Array.concat(new char[][] { { 'a' } }, new char[][] { { 'b' }, { 'c' } }));
-        assertArrayEquals(new char[][] { {} }, Array.concat(new char[][] { null }, new char[0][]));
-        assertEquals(0, Array.concat((char[][]) null, (char[][]) null).length);
+    public void testConcat_boolean_3D() {
+        assertArrayEquals(new boolean[][][] { { { true, false } } }, Array.concat(new boolean[][][] { { { true } } }, new boolean[][][] { { { false } } }));
+        assertArrayEquals(new boolean[][][] { {} }, Array.concat(new boolean[][][] { null }, new boolean[0][][]));
+        assertEquals(0, Array.concat((boolean[][][]) null, (boolean[][][]) null).length);
     }
 
     @Test
@@ -32,9 +34,46 @@ public class ArrayConcatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testConcat_short_2D() {
-        assertArrayEquals(new short[][] { { 1, 2 }, { 3 } }, Array.concat(new short[][] { { 1 } }, new short[][] { { 2 }, { 3 } }));
-        assertArrayEquals(new short[][] { {} }, Array.concat(new short[][] { null }, new short[0][]));
+    public void testConcat_byte_3D() {
+        assertArrayEquals(new byte[][][] { { { 1, 2 } } }, Array.concat(new byte[][][] { { { 1 } } }, new byte[][][] { { { 2 } } }));
+        assertArrayEquals(new byte[][][] { {} }, Array.concat(new byte[][][] { null }, new byte[0][][]));
+    }
+
+    @Test
+    public void testConcat_char_2D() {
+        assertArrayEquals(new char[][] { { 'a', 'b' }, { 'c' } }, Array.concat(new char[][] { { 'a' } }, new char[][] { { 'b' }, { 'c' } }));
+        assertArrayEquals(new char[][] { {} }, Array.concat(new char[][] { null }, new char[0][]));
+        assertEquals(0, Array.concat((char[][]) null, (char[][]) null).length);
+    }
+
+    @Test
+    public void testConcat_char_3D() {
+        assertArrayEquals(new char[][][] { { { 'a', 'b' } } }, Array.concat(new char[][][] { { { 'a' } } }, new char[][][] { { { 'b' } } }));
+        assertArrayEquals(new char[][][] { {} }, Array.concat(new char[][][] { null }, new char[0][][]));
+    }
+
+    @Test
+    public void testConcat_double_2D() {
+        assertArrayEquals(new double[][] { { 1d, 2d }, { 3d } }, Array.concat(new double[][] { { 1d } }, new double[][] { { 2d }, { 3d } }));
+        assertArrayEquals(new double[][] { {} }, Array.concat(new double[][] { null }, new double[0][]));
+    }
+
+    @Test
+    public void testConcat_double_3D() {
+        assertArrayEquals(new double[][][] { { { 1d, 2d } } }, Array.concat(new double[][][] { { { 1d } } }, new double[][][] { { { 2d } } }));
+        assertArrayEquals(new double[][][] { {} }, Array.concat(new double[][][] { null }, new double[0][][]));
+    }
+
+    @Test
+    public void testConcat_float_2D() {
+        assertArrayEquals(new float[][] { { 1f, 2f }, { 3f } }, Array.concat(new float[][] { { 1f } }, new float[][] { { 2f }, { 3f } }));
+        assertArrayEquals(new float[][] { {} }, Array.concat(new float[][] { null }, new float[0][]));
+    }
+
+    @Test
+    public void testConcat_float_3D() {
+        assertArrayEquals(new float[][][] { { { 1f, 2f } } }, Array.concat(new float[][][] { { { 1f } } }, new float[][][] { { { 2f } } }));
+        assertArrayEquals(new float[][][] { {} }, Array.concat(new float[][][] { null }, new float[0][][]));
     }
 
     @Test
@@ -50,49 +89,6 @@ public class ArrayConcatTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testConcat_long_2D() {
-        assertArrayEquals(new long[][] { { 1L, 2L }, { 3L } }, Array.concat(new long[][] { { 1L } }, new long[][] { { 2L }, { 3L } }));
-        assertArrayEquals(new long[][] { {} }, Array.concat(new long[][] { null }, new long[0][]));
-    }
-
-    @Test
-    public void testConcat_float_2D() {
-        assertArrayEquals(new float[][] { { 1f, 2f }, { 3f } }, Array.concat(new float[][] { { 1f } }, new float[][] { { 2f }, { 3f } }));
-        assertArrayEquals(new float[][] { {} }, Array.concat(new float[][] { null }, new float[0][]));
-    }
-
-    @Test
-    public void testConcat_double_2D() {
-        assertArrayEquals(new double[][] { { 1d, 2d }, { 3d } }, Array.concat(new double[][] { { 1d } }, new double[][] { { 2d }, { 3d } }));
-        assertArrayEquals(new double[][] { {} }, Array.concat(new double[][] { null }, new double[0][]));
-    }
-
-    @Test
-    public void testConcat_boolean_3D() {
-        assertArrayEquals(new boolean[][][] { { { true, false } } }, Array.concat(new boolean[][][] { { { true } } }, new boolean[][][] { { { false } } }));
-        assertArrayEquals(new boolean[][][] { {} }, Array.concat(new boolean[][][] { null }, new boolean[0][][]));
-        assertEquals(0, Array.concat((boolean[][][]) null, (boolean[][][]) null).length);
-    }
-
-    @Test
-    public void testConcat_char_3D() {
-        assertArrayEquals(new char[][][] { { { 'a', 'b' } } }, Array.concat(new char[][][] { { { 'a' } } }, new char[][][] { { { 'b' } } }));
-        assertArrayEquals(new char[][][] { {} }, Array.concat(new char[][][] { null }, new char[0][][]));
-    }
-
-    @Test
-    public void testConcat_byte_3D() {
-        assertArrayEquals(new byte[][][] { { { 1, 2 } } }, Array.concat(new byte[][][] { { { 1 } } }, new byte[][][] { { { 2 } } }));
-        assertArrayEquals(new byte[][][] { {} }, Array.concat(new byte[][][] { null }, new byte[0][][]));
-    }
-
-    @Test
-    public void testConcat_short_3D() {
-        assertArrayEquals(new short[][][] { { { 1, 2 } } }, Array.concat(new short[][][] { { { 1 } } }, new short[][][] { { { 2 } } }));
-        assertArrayEquals(new short[][][] { {} }, Array.concat(new short[][][] { null }, new short[0][][]));
-    }
-
-    @Test
     public void testConcat_int_3D() {
         final int[][][] a = { { { 1 } } };
         final int[][][] b = { { { 2 } } };
@@ -104,48 +100,15 @@ public class ArrayConcatTest extends ArrayTestSupport {
     }
 
     @Test
+    public void testConcat_long_2D() {
+        assertArrayEquals(new long[][] { { 1L, 2L }, { 3L } }, Array.concat(new long[][] { { 1L } }, new long[][] { { 2L }, { 3L } }));
+        assertArrayEquals(new long[][] { {} }, Array.concat(new long[][] { null }, new long[0][]));
+    }
+
+    @Test
     public void testConcat_long_3D() {
         assertArrayEquals(new long[][][] { { { 1L, 2L } } }, Array.concat(new long[][][] { { { 1L } } }, new long[][][] { { { 2L } } }));
         assertArrayEquals(new long[][][] { {} }, Array.concat(new long[][][] { null }, new long[0][][]));
-    }
-
-    @Test
-    public void testConcat_float_3D() {
-        assertArrayEquals(new float[][][] { { { 1f, 2f } } }, Array.concat(new float[][][] { { { 1f } } }, new float[][][] { { { 2f } } }));
-        assertArrayEquals(new float[][][] { {} }, Array.concat(new float[][][] { null }, new float[0][][]));
-    }
-
-    @Test
-    public void testConcat_double_3D() {
-        assertArrayEquals(new double[][][] { { { 1d, 2d } } }, Array.concat(new double[][][] { { { 1d } } }, new double[][][] { { { 2d } } }));
-        assertArrayEquals(new double[][][] { {} }, Array.concat(new double[][][] { null }, new double[0][][]));
-    }
-
-    @Test
-    public void testConcat2D() {
-        final String[][] a = { { "a" }, { "b" } };
-        final String[][] b = { { "c" } };
-        assertArrayEquals(new String[][] { { "a", "c" }, { "b" } }, Array.concat2D(a, b));
-        assertNull(Array.concat2D((String[][]) null, (String[][]) null));
-        assertArrayEquals(new String[][] { { "a" }, null }, Array.concat2D(new String[][] { { "a" }, null }, (String[][]) null));
-        assertArrayEquals(new String[][] { { "a" }, null }, Array.concat2D((String[][]) null, new String[][] { { "a" }, null }));
-        assertArrayEquals(new String[0][], Array.concat2D(new String[0][], (String[][]) null));
-        final String[][] result = Array.concat2D(a, b);
-        assertNotSame(a, result);
-        a[0][0] = "z";
-        assertEquals("a", result[0][0]);
-    }
-
-    @Test
-    public void testConcat3D() {
-        final String[][][] a = { { { "a" } } };
-        final String[][][] b = { { { "b" } } };
-        assertArrayEquals(new String[][][] { { { "a", "b" } } }, Array.concat3D(a, b));
-        assertNull(Array.concat3D((String[][][]) null, (String[][][]) null));
-        assertArrayEquals(new String[][][] { { { "a" }, null }, null }, Array.concat3D(new String[][][] { { { "a" }, null }, null }, (String[][][]) null));
-        final String[][][] result = Array.concat3D(a, b);
-        a[0][0][0] = "z";
-        assertEquals("a", result[0][0][0]);
     }
 
     @Test
@@ -166,6 +129,35 @@ public class ArrayConcatTest extends ArrayTestSupport {
 
         assertEquals(3, Array.concat2D(new String[][] { { "a", "b" } }, new String[][] { { "c" } })[0].length);
         assertEquals(3, Array.concat3D(new String[][][] { { { "a", "b" } } }, new String[][][] { { { "c" } } })[0][0].length);
+    }
+
+    @Test
+    public void testConcat_short_2D() {
+        assertArrayEquals(new short[][] { { 1, 2 }, { 3 } }, Array.concat(new short[][] { { 1 } }, new short[][] { { 2 }, { 3 } }));
+        assertArrayEquals(new short[][] { {} }, Array.concat(new short[][] { null }, new short[0][]));
+    }
+
+    @Test
+    public void testConcat_short_3D() {
+        assertArrayEquals(new short[][][] { { { 1, 2 } } }, Array.concat(new short[][][] { { { 1 } } }, new short[][][] { { { 2 } } }));
+        assertArrayEquals(new short[][][] { {} }, Array.concat(new short[][][] { null }, new short[0][][]));
+    }
+
+    // concat2D
+
+    @Test
+    public void testConcat2D() {
+        final String[][] a = { { "a" }, { "b" } };
+        final String[][] b = { { "c" } };
+        assertArrayEquals(new String[][] { { "a", "c" }, { "b" } }, Array.concat2D(a, b));
+        assertNull(Array.concat2D((String[][]) null, (String[][]) null));
+        assertArrayEquals(new String[][] { { "a" }, null }, Array.concat2D(new String[][] { { "a" }, null }, (String[][]) null));
+        assertArrayEquals(new String[][] { { "a" }, null }, Array.concat2D((String[][]) null, new String[][] { { "a" }, null }));
+        assertArrayEquals(new String[0][], Array.concat2D(new String[0][], (String[][]) null));
+        final String[][] result = Array.concat2D(a, b);
+        assertNotSame(a, result);
+        a[0][0] = "z";
+        assertEquals("a", result[0][0]);
     }
 
     @Test
@@ -202,4 +194,17 @@ public class ArrayConcatTest extends ArrayTestSupport {
 
         assertEquals(Object.class, CommonUtil.nullToEmpty((Object[]) null).getClass().getComponentType());
     }
+
+    @Test
+    public void testConcat3D() {
+        final String[][][] a = { { { "a" } } };
+        final String[][][] b = { { { "b" } } };
+        assertArrayEquals(new String[][][] { { { "a", "b" } } }, Array.concat3D(a, b));
+        assertNull(Array.concat3D((String[][][]) null, (String[][][]) null));
+        assertArrayEquals(new String[][][] { { { "a" }, null }, null }, Array.concat3D(new String[][][] { { { "a" }, null }, null }, (String[][][]) null));
+        final String[][][] result = Array.concat3D(a, b);
+        a[0][0][0] = "z";
+        assertEquals("a", result[0][0][0]);
+    }
+
 }

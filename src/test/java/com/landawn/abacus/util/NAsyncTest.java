@@ -26,61 +26,7 @@ import org.junit.jupiter.api.Test;
 
 public class NAsyncTest extends NTestSupport {
 
-    @Test
-    public void testCustomExecutorMayCompleteBeforeReturn() throws Exception {
-        java.util.concurrent.Executor direct = Runnable::run;
-        Thread caller = Thread.currentThread();
-        List<Thread> executions = new ArrayList<>();
-        Throwables.Runnable<Exception> runnable = () -> {
-            executions.add(Thread.currentThread());
-        };
-        Callable<Thread> callable = () -> {
-            executions.add(Thread.currentThread());
-            return Thread.currentThread();
-        };
-
-        ContinuableFuture<Void> run = N.asyncExecute(runnable, direct);
-        assertTrue(run.isDone());
-        assertEquals(List.of(caller), executions);
-        ContinuableFuture<Thread> call = N.asyncExecute(callable, direct);
-        assertTrue(call.isDone());
-        assertEquals(caller, call.get());
-        assertTrue(N.asyncExecute(List.of(runnable), direct).get(0).isDone());
-        assertTrue(N.asyncExecuteAll(List.of(runnable), direct).get(0).isDone());
-        assertTrue(N.asyncExecute(List.of(callable), direct).get(0).isDone());
-        ObjIterator<Void> runs = N.runAsync(List.of(runnable), direct);
-        ObjIterator<Thread> calls = N.callAsync(List.of(callable), direct);
-
-        assertEquals(Collections.nCopies(7, caller), executions);
-        assertNull(runs.next());
-        assertFalse(runs.hasNext());
-        assertEquals(caller, calls.next());
-        assertFalse(calls.hasNext());
-    }
-
-    @Test
-    public void testAsyncExecute_runnableAndCallable() throws Exception {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        N.asyncExecute(() -> executed.set(true)).get();
-        assertTrue(executed.get());
-
-        assertEquals("result", N.asyncExecute(() -> "result").get());
-        assertEquals("done", N.asyncExecute(() -> "done", executorService).get());
-
-        List<Throwables.Runnable<Exception>> runnables = Arrays.asList(() -> executed.set(true), () -> executed.set(true));
-        List<ContinuableFuture<Void>> futures = N.asyncExecute(runnables);
-        assertEquals(2, futures.size());
-        for (ContinuableFuture<Void> future : futures) {
-            future.get();
-        }
-
-        List<Throwables.Runnable<RuntimeException>> one = CommonUtil.asList((Throwables.Runnable<RuntimeException>) () -> {
-        });
-        N.asyncExecute(one).get(0).get();
-
-        List<Callable<Void>> callables = CommonUtil.toList((Callable<Void>) () -> null);
-        assertNull(N.asyncExecute(callables).get(0).get());
-    }
+    // asyncExecute
 
     @Test
     public void testAsyncExecute_delayAndCollection() throws Exception {
@@ -175,27 +121,145 @@ public class NAsyncTest extends NTestSupport {
         assertEquals(Arrays.asList("string", 42, true, null), mixed);
     }
 
-    /** A {@code Collection} whose {@code size()} deliberately disagrees with what its iterator yields. */
-    private static final class InconsistentSizeCollection<T> extends java.util.AbstractCollection<T> {
-        private final List<T> elements;
+    @Test
+    public void testAsyncExecute_runnableAndCallable() throws Exception {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        N.asyncExecute(() -> executed.set(true)).get();
+        assertTrue(executed.get());
 
-        private final int reportedSize;
+        assertEquals("result", N.asyncExecute(() -> "result").get());
+        assertEquals("done", N.asyncExecute(() -> "done", executorService).get());
 
-        InconsistentSizeCollection(final List<T> elements, final int reportedSize) {
-            this.elements = elements;
-            this.reportedSize = reportedSize;
+        List<Throwables.Runnable<Exception>> runnables = Arrays.asList(() -> executed.set(true), () -> executed.set(true));
+        List<ContinuableFuture<Void>> futures = N.asyncExecute(runnables);
+        assertEquals(2, futures.size());
+        for (ContinuableFuture<Void> future : futures) {
+            future.get();
         }
 
-        @Override
-        public java.util.Iterator<T> iterator() {
-            return elements.iterator();
+        List<Throwables.Runnable<RuntimeException>> one = CommonUtil.asList((Throwables.Runnable<RuntimeException>) () -> {
+        });
+        N.asyncExecute(one).get(0).get();
+
+        List<Callable<Void>> callables = CommonUtil.toList((Callable<Void>) () -> null);
+        assertNull(N.asyncExecute(callables).get(0).get());
+    }
+
+    @Test
+    public void testAsyncExecuteWithRetry_invalidRetryArgumentsRejectedOnCallingThread() {
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
+        }, -1, 0, e -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
+        }, 1, -1, e -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", -1, 0, (r, e) -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", 1, -1, (r, e) -> false));
+    }
+
+    @Test
+    public void testCallAsync_collectionIteratorDecidesTheCompletionCount() {
+        final java.util.concurrent.Executor direct = Runnable::run;
+        final List<Callable<String>> twoCommands = Arrays.<Callable<String>> asList(() -> "a", () -> "b");
+
+        // size() smaller than the traversal: no command's result may be discarded.
+        final ObjIterator<String> iter = N.callAsync(new InconsistentSizeCollection<>(twoCommands, 1), direct);
+        final List<String> results = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            results.add(iter.next());
         }
 
-        @Override
-        public int size() {
-            return reportedSize;
+        assertEquals(Arrays.asList("a", "b"), results);
+
+        // size() larger than the traversal: the iterator must end rather than block on a missing completion.
+        final List<Callable<String>> oneCommand = Arrays.<Callable<String>> asList(() -> "only");
+
+        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> {
+            final ObjIterator<String> it = N.callAsync(new InconsistentSizeCollection<>(oneCommand, 2), direct);
+            final List<String> seen = new ArrayList<>();
+
+            while (it.hasNext()) {
+                seen.add(it.next());
+            }
+
+            assertEquals(Arrays.asList("only"), seen);
+        });
+    }
+
+    @Test
+    public void testCustomExecutorMayCompleteBeforeReturn() throws Exception {
+        java.util.concurrent.Executor direct = Runnable::run;
+        Thread caller = Thread.currentThread();
+        List<Thread> executions = new ArrayList<>();
+        Throwables.Runnable<Exception> runnable = () -> {
+            executions.add(Thread.currentThread());
+        };
+        Callable<Thread> callable = () -> {
+            executions.add(Thread.currentThread());
+            return Thread.currentThread();
+        };
+
+        ContinuableFuture<Void> run = N.asyncExecute(runnable, direct);
+        assertTrue(run.isDone());
+        assertEquals(List.of(caller), executions);
+        ContinuableFuture<Thread> call = N.asyncExecute(callable, direct);
+        assertTrue(call.isDone());
+        assertEquals(caller, call.get());
+        assertTrue(N.asyncExecute(List.of(runnable), direct).get(0).isDone());
+        assertTrue(N.asyncExecuteAll(List.of(runnable), direct).get(0).isDone());
+        assertTrue(N.asyncExecute(List.of(callable), direct).get(0).isDone());
+        ObjIterator<Void> runs = N.runAsync(List.of(runnable), direct);
+        ObjIterator<Thread> calls = N.callAsync(List.of(callable), direct);
+
+        assertEquals(Collections.nCopies(7, caller), executions);
+        assertNull(runs.next());
+        assertFalse(runs.hasNext());
+        assertEquals(caller, calls.next());
+        assertFalse(calls.hasNext());
+    }
+
+    @Test
+    public void testForEachInParallel_directExecutorInterruptedExceptionRestoresInterrupt() {
+        final Executor direct = Runnable::run;
+
+        try {
+            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
+                throw new InterruptedException("caller");
+            }, 2, direct));
+            assertEquals("caller", e1.getCause().getMessage());
+            assertTrue(Thread.interrupted());
+
+            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
+                throw new InterruptedException("caller");
+            }, 2, direct));
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
         }
     }
+
+    @Test
+    public void testForEachInParallel_workerInterruptedExceptionDoesNotInterruptCaller() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Thread.interrupted();
+            assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
+                throw new InterruptedException("worker");
+            }, 2, executor));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
+                throw new InterruptedException("worker");
+            }, 2, executor));
+            assertFalse(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    // runAsync
 
     @Test
     public void testRunAsync_collectionIteratorDecidesTheCompletionCount() {
@@ -236,43 +300,38 @@ public class NAsyncTest extends NTestSupport {
     }
 
     @Test
-    public void testCallAsync_collectionIteratorDecidesTheCompletionCount() {
-        final java.util.concurrent.Executor direct = Runnable::run;
-        final List<Callable<String>> twoCommands = Arrays.<Callable<String>> asList(() -> "a", () -> "b");
+    public void testRunAsyncCallAsync_directExecutorInterruptedExceptionRestoresInterrupt() {
+        final Executor direct = Runnable::run;
 
-        // size() smaller than the traversal: no command's result may be discarded.
-        final ObjIterator<String> iter = N.callAsync(new InconsistentSizeCollection<>(twoCommands, 1), direct);
-        final List<String> results = new ArrayList<>();
+        try {
+            final List<Throwables.Runnable<Exception>> commands = new ArrayList<>();
+            commands.add(() -> {
+                throw new InterruptedException("caller");
+            });
 
-        while (iter.hasNext()) {
-            results.add(iter.next());
+            final ObjIterator<Void> runIter = N.runAsync(commands, direct);
+            assertThrows(RuntimeException.class, () -> {
+                while (runIter.hasNext()) {
+                    runIter.next();
+                }
+            });
+            assertTrue(Thread.interrupted());
+
+            final List<Callable<String>> calls = new ArrayList<>();
+            calls.add(() -> {
+                throw new InterruptedException("caller");
+            });
+
+            final ObjIterator<String> callIter = N.callAsync(calls, direct);
+            assertThrows(RuntimeException.class, () -> {
+                while (callIter.hasNext()) {
+                    callIter.next();
+                }
+            });
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
         }
-
-        assertEquals(Arrays.asList("a", "b"), results);
-
-        // size() larger than the traversal: the iterator must end rather than block on a missing completion.
-        final List<Callable<String>> oneCommand = Arrays.<Callable<String>> asList(() -> "only");
-
-        org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> {
-            final ObjIterator<String> it = N.callAsync(new InconsistentSizeCollection<>(oneCommand, 2), direct);
-            final List<String> seen = new ArrayList<>();
-
-            while (it.hasNext()) {
-                seen.add(it.next());
-            }
-
-            assertEquals(Arrays.asList("only"), seen);
-        });
-    }
-
-    @Test
-    public void testAsyncExecuteWithRetry_invalidRetryArgumentsRejectedOnCallingThread() {
-        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
-        }, -1, 0, e -> false));
-        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
-        }, 1, -1, e -> false));
-        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", -1, 0, (r, e) -> false));
-        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", 1, -1, (r, e) -> false));
     }
 
     @Test
@@ -313,80 +372,28 @@ public class NAsyncTest extends NTestSupport {
         }
     }
 
-    @Test
-    public void testRunAsyncCallAsync_directExecutorInterruptedExceptionRestoresInterrupt() {
-        final Executor direct = Runnable::run;
 
-        try {
-            final List<Throwables.Runnable<Exception>> commands = new ArrayList<>();
-            commands.add(() -> {
-                throw new InterruptedException("caller");
-            });
 
-            final ObjIterator<Void> runIter = N.runAsync(commands, direct);
-            assertThrows(RuntimeException.class, () -> {
-                while (runIter.hasNext()) {
-                    runIter.next();
-                }
-            });
-            assertTrue(Thread.interrupted());
+    /** A {@code Collection} whose {@code size()} deliberately disagrees with what its iterator yields. */
+    private static final class InconsistentSizeCollection<T> extends java.util.AbstractCollection<T> {
+        private final List<T> elements;
 
-            final List<Callable<String>> calls = new ArrayList<>();
-            calls.add(() -> {
-                throw new InterruptedException("caller");
-            });
+        private final int reportedSize;
 
-            final ObjIterator<String> callIter = N.callAsync(calls, direct);
-            assertThrows(RuntimeException.class, () -> {
-                while (callIter.hasNext()) {
-                    callIter.next();
-                }
-            });
-            assertTrue(Thread.interrupted());
-        } finally {
-            Thread.interrupted();
+        InconsistentSizeCollection(final List<T> elements, final int reportedSize) {
+            this.elements = elements;
+            this.reportedSize = reportedSize;
+        }
+
+        @Override
+        public java.util.Iterator<T> iterator() {
+            return elements.iterator();
+        }
+
+        @Override
+        public int size() {
+            return reportedSize;
         }
     }
 
-    @Test
-    public void testForEachInParallel_workerInterruptedExceptionDoesNotInterruptCaller() throws Exception {
-        final ExecutorService executor = Executors.newFixedThreadPool(2);
-
-        try {
-            Thread.interrupted();
-            assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
-                throw new InterruptedException("worker");
-            }, 2, executor));
-            assertFalse(Thread.currentThread().isInterrupted());
-
-            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
-                throw new InterruptedException("worker");
-            }, 2, executor));
-            assertFalse(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-            executor.shutdown();
-            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
-        }
-    }
-
-    @Test
-    public void testForEachInParallel_directExecutorInterruptedExceptionRestoresInterrupt() {
-        final Executor direct = Runnable::run;
-
-        try {
-            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
-                throw new InterruptedException("caller");
-            }, 2, direct));
-            assertEquals("caller", e1.getCause().getMessage());
-            assertTrue(Thread.interrupted());
-
-            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
-                throw new InterruptedException("caller");
-            }, 2, direct));
-            assertTrue(Thread.interrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
 }

@@ -202,8 +202,9 @@ public class AbacusXmlDOMParserTest extends AbstractXmlParserTest {
         xdc = XmlDeserConfig.create();
         xdc.setValueType("account", Account.class);
         assertNotNull(abacusXMLDOMParser.deserialize(abacusXMLDOMParser.serialize(map3, xsc), xdc, Map.class));
-        String xBeanXml = abacusXMLDOMParser.serialize(createXBean(), xsc);
-        assertNotNull(abacusXMLDOMParser.deserialize(xBeanXml, XBean.class));
+        XBean originalBean = createXBean();
+        String xBeanXml = abacusXMLDOMParser.serialize(originalBean, xsc);
+        assertEquals(originalBean, abacusXMLDOMParser.deserialize(xBeanXml, XBean.class));
         assertTrue(xBeanXml.contains("firstName"));
     }
 

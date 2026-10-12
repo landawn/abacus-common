@@ -22,13 +22,7 @@ public class BooleanListRemoveTest extends BooleanListTestSupport {
         assertTrue(list.get(1));
     }
 
-    @Test
-    public void testRemoveAllOccurrences() {
-        BooleanList list = BooleanList.of(true, false, true, true, false);
-        assertTrue(list.removeAllOccurrences(true));
-        assertArrayEquals(new boolean[] { false, false }, list.toArray());
-        assertFalse(list.removeAllOccurrences(true));
-    }
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -82,27 +76,11 @@ public class BooleanListRemoveTest extends BooleanListTestSupport {
     }
 
     @Test
-    public void testRemoveIf() {
-        BooleanList list = BooleanList.of(true, false, true, false);
-        list.removeIf(val -> val);
-        assertEquals(2, list.size());
-        assertArrayEquals(new boolean[] { false, false }, list.toArray());
-    }
-
-    @Test
-    public void testRemoveDuplicates() {
+    public void testRemoveAllOccurrences() {
         BooleanList list = BooleanList.of(true, false, true, true, false);
-        list.removeDuplicates();
-        assertArrayEquals(new boolean[] { true, false }, list.toArray());
-
-        BooleanList allSame = BooleanList.of(true, true, true);
-        allSame.removeDuplicates();
-        assertArrayEquals(new boolean[] { true }, allSame.toArray());
-    }
-
-    @Test
-    public void testRemoveDuplicates_Empty() {
-        assertFalse(list.removeDuplicates());
+        assertTrue(list.removeAllOccurrences(true));
+        assertArrayEquals(new boolean[] { false, false }, list.toArray());
+        assertFalse(list.removeAllOccurrences(true));
     }
 
     @Test
@@ -146,30 +124,19 @@ public class BooleanListRemoveTest extends BooleanListTestSupport {
     }
 
     @Test
-    public void testRemoveRange() {
-        {
-            list = new BooleanList();
-            BooleanList list = BooleanList.of(true, false, true, false, true);
-            list.removeRange(1, 4);
-            assertEquals(2, list.size());
-            assertTrue(list.get(0));
-            assertTrue(list.get(1));
-        }
-        {
-            list = new BooleanList();
-            list.add(true);
-            list.add(false);
-            list.add(true);
-            list.removeRange(0, 3);
-            assertEquals(0, list.size());
-        }
+    public void testRemoveDuplicates() {
+        BooleanList list = BooleanList.of(true, false, true, true, false);
+        list.removeDuplicates();
+        assertArrayEquals(new boolean[] { true, false }, list.toArray());
+
+        BooleanList allSame = BooleanList.of(true, true, true);
+        allSame.removeDuplicates();
+        assertArrayEquals(new boolean[] { true }, allSame.toArray());
     }
 
     @Test
-    public void testRemoveRange_InvalidRange() {
-        BooleanList list = BooleanList.of(true, false);
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 3));
-        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
+    public void testRemoveDuplicates_Empty() {
+        assertFalse(list.removeDuplicates());
     }
 
     @Test
@@ -209,6 +176,14 @@ public class BooleanListRemoveTest extends BooleanListTestSupport {
     }
 
     @Test
+    public void testRemoveIf() {
+        BooleanList list = BooleanList.of(true, false, true, false);
+        list.removeIf(val -> val);
+        assertEquals(2, list.size());
+        assertArrayEquals(new boolean[] { false, false }, list.toArray());
+    }
+
+    @Test
     public void testRemoveLast() {
         {
             list = new BooleanList();
@@ -233,4 +208,32 @@ public class BooleanListRemoveTest extends BooleanListTestSupport {
         BooleanList list = new BooleanList();
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    @Test
+    public void testRemoveRange() {
+        {
+            list = new BooleanList();
+            BooleanList list = BooleanList.of(true, false, true, false, true);
+            list.removeRange(1, 4);
+            assertEquals(2, list.size());
+            assertTrue(list.get(0));
+            assertTrue(list.get(1));
+        }
+        {
+            list = new BooleanList();
+            list.add(true);
+            list.add(false);
+            list.add(true);
+            list.removeRange(0, 3);
+            assertEquals(0, list.size());
+        }
+    }
+
+    @Test
+    public void testRemoveRange_InvalidRange() {
+        BooleanList list = BooleanList.of(true, false);
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(0, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.removeRange(2, 1));
+    }
+
 }

@@ -15,98 +15,6 @@ import org.junit.jupiter.api.Test;
 public class DifferenceOfTest extends DifferenceTestSupport {
 
     @Test
-    public void testOfArrays() {
-        Difference<BooleanList, BooleanList> bools = Difference.of(new boolean[] { true, false, true, false }, new boolean[] { false, false, true });
-        assertEquals(BooleanList.of(true, false, false), bools.common());
-        assertEquals(BooleanList.of(true), bools.onlyOnLeft());
-        assertTrue(bools.onlyOnRight().isEmpty());
-        assertTrue(Difference.of(new boolean[] { true, false, true }, new boolean[] { true, false, true }).areEqual());
-
-        Difference<CharList, CharList> chars = Difference.of(new char[] { 'a', 'b', 'c', 'b' }, new char[] { 'b', 'c', 'd', 'c' });
-        assertEquals(CharList.of('b', 'c'), chars.common());
-        assertEquals(CharList.of('a', 'b'), chars.onlyOnLeft());
-        assertEquals(CharList.of('c', 'd'), chars.onlyOnRight());
-
-        Difference<ByteList, ByteList> bytes = Difference.of(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 3, 4, 3 });
-        assertEquals(ByteList.of((byte) 2, (byte) 3), bytes.common());
-        assertEquals(ByteList.of((byte) 1, (byte) 2), bytes.onlyOnLeft());
-        assertEquals(ByteList.of((byte) 3, (byte) 4), bytes.onlyOnRight());
-
-        Difference<ShortList, ShortList> shorts = Difference.of(new short[] { 1, 2, 3, 2 }, new short[] { 2, 3, 4, 3 });
-        assertEquals(ShortList.of((short) 2, (short) 3), shorts.common());
-        assertEquals(ShortList.of((short) 1, (short) 2), shorts.onlyOnLeft());
-        assertEquals(ShortList.of((short) 3, (short) 4), shorts.onlyOnRight());
-
-        Difference<IntList, IntList> ints = Difference.of(new int[] { 1, 2, 3, 2 }, new int[] { 2, 3, 4, 3 });
-        assertEquals(IntList.of(2, 3), ints.common());
-        assertEquals(IntList.of(1, 2), ints.onlyOnLeft());
-        assertEquals(IntList.of(3, 4), ints.onlyOnRight());
-
-        Difference<LongList, LongList> longs = Difference.of(new long[] { 1L, 2L, 3L, 2L }, new long[] { 2L, 3L, 4L, 3L });
-        assertEquals(LongList.of(2L, 3L), longs.common());
-        assertEquals(LongList.of(1L, 2L), longs.onlyOnLeft());
-        assertEquals(LongList.of(3L, 4L), longs.onlyOnRight());
-
-        Difference<FloatList, FloatList> floats = Difference.of(new float[] { 1.0f, 2.0f, 3.0f, 2.0f }, new float[] { 2.0f, 3.0f, 4.0f, 3.0f });
-        assertEquals(FloatList.of(2.0f, 3.0f), floats.common());
-        assertEquals(FloatList.of(1.0f, 2.0f), floats.onlyOnLeft());
-        assertEquals(FloatList.of(3.0f, 4.0f), floats.onlyOnRight());
-
-        Difference<DoubleList, DoubleList> doubles = Difference.of(new double[] { 1.0, 2.0, 3.0, 2.0 }, new double[] { 2.0, 3.0, 4.0, 3.0 });
-        assertEquals(DoubleList.of(2.0, 3.0), doubles.common());
-        assertEquals(DoubleList.of(1.0, 2.0), doubles.onlyOnLeft());
-        assertEquals(DoubleList.of(3.0, 4.0), doubles.onlyOnRight());
-
-        Difference<List<String>, List<String>> objects = Difference.of(new String[] { "a", "b", "c", "b" }, new String[] { "b", "c", "d", "c" });
-        assertEquals(Arrays.asList("b", "c"), objects.common());
-        assertEquals(Arrays.asList("a", "b"), objects.onlyOnLeft());
-        assertEquals(Arrays.asList("c", "d"), objects.onlyOnRight());
-        assertFalse(objects.areEqual());
-    }
-
-    @Test
-    public void testOfLists() {
-        Difference<BooleanList, BooleanList> bools = Difference.of(BooleanList.of(true, false, true, false), BooleanList.of(false, false, true));
-        assertEquals(BooleanList.of(true, false, false), bools.common());
-        assertEquals(BooleanList.of(true), bools.onlyOnLeft());
-
-        Difference<CharList, CharList> chars = Difference.of(CharList.of('a', 'b', 'c', 'b'), CharList.of('b', 'c', 'd', 'c'));
-        assertEquals(CharList.of('b', 'c'), chars.common());
-        assertEquals(CharList.of('a', 'b'), chars.onlyOnLeft());
-        assertEquals(CharList.of('c', 'd'), chars.onlyOnRight());
-
-        Difference<ByteList, ByteList> bytes = Difference.of(ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2),
-                ByteList.of((byte) 2, (byte) 3, (byte) 4, (byte) 3));
-        assertEquals(ByteList.of((byte) 2, (byte) 3), bytes.common());
-        Difference<ShortList, ShortList> shorts = Difference.of(ShortList.of((short) 1, (short) 2, (short) 3, (short) 2),
-                ShortList.of((short) 2, (short) 3, (short) 4, (short) 3));
-        assertEquals(ShortList.of((short) 2, (short) 3), shorts.common());
-        Difference<IntList, IntList> ints = Difference.of(IntList.of(1, 2, 3, 2), IntList.of(2, 3, 4, 3));
-        assertEquals(IntList.of(2, 3), ints.common());
-        Difference<LongList, LongList> longs = Difference.of(LongList.of(1L, 2L, 3L, 2L), LongList.of(2L, 3L, 4L, 3L));
-        assertEquals(LongList.of(2L, 3L), longs.common());
-        Difference<FloatList, FloatList> floats = Difference.of(FloatList.of(1.0f, 2.0f, 3.0f, 2.0f), FloatList.of(2.0f, 3.0f, 4.0f, 3.0f));
-        assertEquals(FloatList.of(2.0f, 3.0f), floats.common());
-        Difference<DoubleList, DoubleList> doubles = Difference.of(DoubleList.of(1.0, 2.0, 3.0, 2.0), DoubleList.of(2.0, 3.0, 4.0, 3.0));
-        assertEquals(DoubleList.of(2.0, 3.0), doubles.common());
-    }
-
-    @Test
-    public void testOfCollections() {
-        Difference<List<String>, List<String>> lists = Difference.of(Arrays.asList("a", "b", "c", "b"), Arrays.asList("b", "c", "d", "c"));
-        assertEquals(Arrays.asList("b", "c"), lists.common());
-        assertEquals(Arrays.asList("a", "b"), lists.onlyOnLeft());
-        assertEquals(Arrays.asList("c", "d"), lists.onlyOnRight());
-
-        Collection<String> a = Arrays.asList("a", "b", "c", "c");
-        Collection<String> b = Arrays.asList("b", "c", "d");
-        Difference<List<String>, List<String>> collections = Difference.of(a, b);
-        assertEquals(Arrays.asList("b", "c"), collections.common());
-        assertEquals(Arrays.asList("a", "c"), collections.onlyOnLeft());
-        assertEquals(Collections.singletonList("d"), collections.onlyOnRight());
-    }
-
-    @Test
     public void testOf_EmptyAndNull() {
         assertTrue(Difference.of(new boolean[] {}, new boolean[] {}).areEqual());
         assertTrue(Difference.of((boolean[]) null, (boolean[]) null).areEqual());
@@ -183,15 +91,57 @@ public class DifferenceOfTest extends DifferenceTestSupport {
         assertEquals(Arrays.asList("a", "b"), Difference.of((String[]) null, objects).onlyOnRight());
     }
 
-    // ---- perf review 2026-09-26 G032 begin ----
-    private static <T> void assertSameDifferenceAsCollections(final List<T> left, final List<T> right,
-            final Difference<? extends PrimitiveList<?, ?, ?>, ? extends PrimitiveList<?, ?, ?>> actual) {
-        final Difference<List<T>, List<T>> expected = Difference.of(left, right);
-        assertEquals(expected.common(), actual.common().boxed());
-        assertEquals(expected.onlyOnLeft(), actual.onlyOnLeft().boxed());
-        assertEquals(expected.onlyOnRight(), actual.onlyOnRight().boxed());
-        assertEquals(expected.areEqual(), actual.areEqual());
+    @Test
+    public void testOfArrays() {
+        Difference<BooleanList, BooleanList> bools = Difference.of(new boolean[] { true, false, true, false }, new boolean[] { false, false, true });
+        assertEquals(BooleanList.of(true, false, false), bools.common());
+        assertEquals(BooleanList.of(true), bools.onlyOnLeft());
+        assertTrue(bools.onlyOnRight().isEmpty());
+        assertTrue(Difference.of(new boolean[] { true, false, true }, new boolean[] { true, false, true }).areEqual());
+
+        Difference<CharList, CharList> chars = Difference.of(new char[] { 'a', 'b', 'c', 'b' }, new char[] { 'b', 'c', 'd', 'c' });
+        assertEquals(CharList.of('b', 'c'), chars.common());
+        assertEquals(CharList.of('a', 'b'), chars.onlyOnLeft());
+        assertEquals(CharList.of('c', 'd'), chars.onlyOnRight());
+
+        Difference<ByteList, ByteList> bytes = Difference.of(new byte[] { 1, 2, 3, 2 }, new byte[] { 2, 3, 4, 3 });
+        assertEquals(ByteList.of((byte) 2, (byte) 3), bytes.common());
+        assertEquals(ByteList.of((byte) 1, (byte) 2), bytes.onlyOnLeft());
+        assertEquals(ByteList.of((byte) 3, (byte) 4), bytes.onlyOnRight());
+
+        Difference<ShortList, ShortList> shorts = Difference.of(new short[] { 1, 2, 3, 2 }, new short[] { 2, 3, 4, 3 });
+        assertEquals(ShortList.of((short) 2, (short) 3), shorts.common());
+        assertEquals(ShortList.of((short) 1, (short) 2), shorts.onlyOnLeft());
+        assertEquals(ShortList.of((short) 3, (short) 4), shorts.onlyOnRight());
+
+        Difference<IntList, IntList> ints = Difference.of(new int[] { 1, 2, 3, 2 }, new int[] { 2, 3, 4, 3 });
+        assertEquals(IntList.of(2, 3), ints.common());
+        assertEquals(IntList.of(1, 2), ints.onlyOnLeft());
+        assertEquals(IntList.of(3, 4), ints.onlyOnRight());
+
+        Difference<LongList, LongList> longs = Difference.of(new long[] { 1L, 2L, 3L, 2L }, new long[] { 2L, 3L, 4L, 3L });
+        assertEquals(LongList.of(2L, 3L), longs.common());
+        assertEquals(LongList.of(1L, 2L), longs.onlyOnLeft());
+        assertEquals(LongList.of(3L, 4L), longs.onlyOnRight());
+
+        Difference<FloatList, FloatList> floats = Difference.of(new float[] { 1.0f, 2.0f, 3.0f, 2.0f }, new float[] { 2.0f, 3.0f, 4.0f, 3.0f });
+        assertEquals(FloatList.of(2.0f, 3.0f), floats.common());
+        assertEquals(FloatList.of(1.0f, 2.0f), floats.onlyOnLeft());
+        assertEquals(FloatList.of(3.0f, 4.0f), floats.onlyOnRight());
+
+        Difference<DoubleList, DoubleList> doubles = Difference.of(new double[] { 1.0, 2.0, 3.0, 2.0 }, new double[] { 2.0, 3.0, 4.0, 3.0 });
+        assertEquals(DoubleList.of(2.0, 3.0), doubles.common());
+        assertEquals(DoubleList.of(1.0, 2.0), doubles.onlyOnLeft());
+        assertEquals(DoubleList.of(3.0, 4.0), doubles.onlyOnRight());
+
+        Difference<List<String>, List<String>> objects = Difference.of(new String[] { "a", "b", "c", "b" }, new String[] { "b", "c", "d", "c" });
+        assertEquals(Arrays.asList("b", "c"), objects.common());
+        assertEquals(Arrays.asList("a", "b"), objects.onlyOnLeft());
+        assertEquals(Arrays.asList("c", "d"), objects.onlyOnRight());
+        assertFalse(objects.areEqual());
     }
+
+
 
     // G032-01: boolean occurrence counting without a Multiset - same partition as the Collection overload
     @Test
@@ -225,6 +175,8 @@ public class DifferenceOfTest extends DifferenceTestSupport {
         }
     }
 
+
+
     // G032-01: byte occurrence counting indexed by the unsigned value - negative bytes and extremes included
     @Test
     public void testOfByteList_countingMatchesCollectionOverload() {
@@ -257,6 +209,8 @@ public class DifferenceOfTest extends DifferenceTestSupport {
             assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
         }
     }
+
+
 
     // G032-01: char counting-array path (dense range; left values below/above the right-hand range) and Multiset fallback (sparse range)
     @Test
@@ -302,6 +256,50 @@ public class DifferenceOfTest extends DifferenceTestSupport {
             assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
         }
     }
+
+    @Test
+    public void testOfCollections() {
+        Difference<List<String>, List<String>> lists = Difference.of(Arrays.asList("a", "b", "c", "b"), Arrays.asList("b", "c", "d", "c"));
+        assertEquals(Arrays.asList("b", "c"), lists.common());
+        assertEquals(Arrays.asList("a", "b"), lists.onlyOnLeft());
+        assertEquals(Arrays.asList("c", "d"), lists.onlyOnRight());
+
+        Collection<String> a = Arrays.asList("a", "b", "c", "c");
+        Collection<String> b = Arrays.asList("b", "c", "d");
+        Difference<List<String>, List<String>> collections = Difference.of(a, b);
+        assertEquals(Arrays.asList("b", "c"), collections.common());
+        assertEquals(Arrays.asList("a", "c"), collections.onlyOnLeft());
+        assertEquals(Collections.singletonList("d"), collections.onlyOnRight());
+    }
+
+    @Test
+    public void testOfLists() {
+        Difference<BooleanList, BooleanList> bools = Difference.of(BooleanList.of(true, false, true, false), BooleanList.of(false, false, true));
+        assertEquals(BooleanList.of(true, false, false), bools.common());
+        assertEquals(BooleanList.of(true), bools.onlyOnLeft());
+
+        Difference<CharList, CharList> chars = Difference.of(CharList.of('a', 'b', 'c', 'b'), CharList.of('b', 'c', 'd', 'c'));
+        assertEquals(CharList.of('b', 'c'), chars.common());
+        assertEquals(CharList.of('a', 'b'), chars.onlyOnLeft());
+        assertEquals(CharList.of('c', 'd'), chars.onlyOnRight());
+
+        Difference<ByteList, ByteList> bytes = Difference.of(ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2),
+                ByteList.of((byte) 2, (byte) 3, (byte) 4, (byte) 3));
+        assertEquals(ByteList.of((byte) 2, (byte) 3), bytes.common());
+        Difference<ShortList, ShortList> shorts = Difference.of(ShortList.of((short) 1, (short) 2, (short) 3, (short) 2),
+                ShortList.of((short) 2, (short) 3, (short) 4, (short) 3));
+        assertEquals(ShortList.of((short) 2, (short) 3), shorts.common());
+        Difference<IntList, IntList> ints = Difference.of(IntList.of(1, 2, 3, 2), IntList.of(2, 3, 4, 3));
+        assertEquals(IntList.of(2, 3), ints.common());
+        Difference<LongList, LongList> longs = Difference.of(LongList.of(1L, 2L, 3L, 2L), LongList.of(2L, 3L, 4L, 3L));
+        assertEquals(LongList.of(2L, 3L), longs.common());
+        Difference<FloatList, FloatList> floats = Difference.of(FloatList.of(1.0f, 2.0f, 3.0f, 2.0f), FloatList.of(2.0f, 3.0f, 4.0f, 3.0f));
+        assertEquals(FloatList.of(2.0f, 3.0f), floats.common());
+        Difference<DoubleList, DoubleList> doubles = Difference.of(DoubleList.of(1.0, 2.0, 3.0, 2.0), DoubleList.of(2.0, 3.0, 4.0, 3.0));
+        assertEquals(DoubleList.of(2.0, 3.0), doubles.common());
+    }
+
+
 
     // G032-01: short counting-array path (negative values, extremes, size-widened threshold) and Multiset fallback (sparse range)
     @Test
@@ -355,5 +353,15 @@ public class DifferenceOfTest extends DifferenceTestSupport {
             assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
         }
     }
+
+    private static <T> void assertSameDifferenceAsCollections(final List<T> left, final List<T> right,
+            final Difference<? extends PrimitiveList<?, ?, ?>, ? extends PrimitiveList<?, ?, ?>> actual) {
+        final Difference<List<T>, List<T>> expected = Difference.of(left, right);
+        assertEquals(expected.common(), actual.common().boxed());
+        assertEquals(expected.onlyOnLeft(), actual.onlyOnLeft().boxed());
+        assertEquals(expected.onlyOnRight(), actual.onlyOnRight().boxed());
+        assertEquals(expected.areEqual(), actual.areEqual());
+    }
+
     // ---- perf review 2026-09-26 G032 end ----
 }

@@ -23,13 +23,24 @@ public class FnIsTest extends FnTestSupport {
     public File tempDir;
 
     @Test
-    public void testIsNull() {
-        assertTrue(Fn.isNull().test(null));
-        assertFalse(Fn.isNull().test("x"));
-        final Predicate<Map.Entry<String, String>> byValue = Fn.isNull(Map.Entry::getValue);
-        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", null)));
-        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "v")));
-        assertThrows(IllegalArgumentException.class, () -> Fn.isNull(null));
+    public void testIsBlank() {
+        assertTrue(Fn.isBlank().test(""));
+        assertTrue(Fn.isBlank().test("   "));
+        assertTrue(Fn.isBlank().test(null));
+        assertFalse(Fn.isBlank().test("x"));
+        final Predicate<Map.Entry<String, String>> byValue = Fn.isBlank(Map.Entry::getValue);
+        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "  ")));
+        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "hello")));
+        assertFalse(byValue.test(Map.entry("k", "\u00A0")));
+        assertTrue(byValue.test(Map.entry("k", "\u3000")));
+        assertThrows(IllegalArgumentException.class, () -> Fn.isBlank(null));
+    }
+
+    @Test
+    public void testIsDirectory() {
+        assertFalse(Fn.isDirectory().test(null));
+        assertTrue(Fn.isDirectory().test(tempDir));
+        assertFalse(Fn.isDirectory().test(new File(tempDir, "missing")));
     }
 
     @Test
@@ -43,20 +54,6 @@ public class FnIsTest extends FnTestSupport {
         assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", null)));
         assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "x")));
         assertThrows(IllegalArgumentException.class, () -> Fn.isEmpty(null));
-    }
-
-    @Test
-    public void testIsBlank() {
-        assertTrue(Fn.isBlank().test(""));
-        assertTrue(Fn.isBlank().test("   "));
-        assertTrue(Fn.isBlank().test(null));
-        assertFalse(Fn.isBlank().test("x"));
-        final Predicate<Map.Entry<String, String>> byValue = Fn.isBlank(Map.Entry::getValue);
-        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "  ")));
-        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "hello")));
-        assertFalse(byValue.test(Map.entry("k", "\u00A0")));
-        assertTrue(byValue.test(Map.entry("k", "\u3000")));
-        assertThrows(IllegalArgumentException.class, () -> Fn.isBlank(null));
     }
 
     @Test
@@ -91,10 +88,13 @@ public class FnIsTest extends FnTestSupport {
     }
 
     @Test
-    public void testIsDirectory() {
-        assertFalse(Fn.isDirectory().test(null));
-        assertTrue(Fn.isDirectory().test(tempDir));
-        assertFalse(Fn.isDirectory().test(new File(tempDir, "missing")));
+    public void testIsNull() {
+        assertTrue(Fn.isNull().test(null));
+        assertFalse(Fn.isNull().test("x"));
+        final Predicate<Map.Entry<String, String>> byValue = Fn.isNull(Map.Entry::getValue);
+        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", null)));
+        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "v")));
+        assertThrows(IllegalArgumentException.class, () -> Fn.isNull(null));
     }
 
     @Test
@@ -110,4 +110,5 @@ public class FnIsTest extends FnTestSupport {
         assertTrue(Fn.<String> isPresentJdk().test(java.util.Optional.of("x")));
         assertFalse(Fn.<String> isPresentJdk().test(java.util.Optional.empty()));
     }
+
 }

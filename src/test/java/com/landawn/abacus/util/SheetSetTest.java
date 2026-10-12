@@ -15,60 +15,8 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.Sheet.Point;
 
 public class SheetSetTest extends SheetTestSupport {
-    @Test
-    public void testSetWithKeys() {
-        Integer old = sheet.set("row1", "col1", 100);
-        assertEquals(Integer.valueOf(1), old);
-        assertEquals(Integer.valueOf(100), sheet.get("row1", "col1"));
-    }
 
-    @Test
-    public void testSetWithIndices() {
-        Integer old = sheet.setAt(0, 0, 100);
-        assertEquals(Integer.valueOf(1), old);
-        assertEquals(Integer.valueOf(100), sheet.getAt(0, 0));
-    }
-
-    @Test
-    public void testSetWithPoint() {
-        Point p = Point.of(1, 2);
-        Integer old = sheet.set(p, 100);
-        assertEquals(Integer.valueOf(6), old);
-        assertEquals(Integer.valueOf(100), sheet.get(p));
-    }
-
-    @Test
-    public void testSetWithKeys_NullValue() {
-        Integer old = sheet.set("row1", "col1", null);
-        assertEquals(Integer.valueOf(1), old);
-        assertNull(sheet.get("row1", "col1"));
-    }
-
-    @Test
-    public void testSetWithKeys_InvalidKey() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.set("invalidRow", "col1", 1));
-        assertThrows(IllegalArgumentException.class, () -> sheet.set("row1", "invalidCol", 1));
-    }
-
-    @Test
-    public void testSetWithKeys_FrozenSheet() {
-        sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> sheet.set("row1", "col1", 100));
-    }
-
-    @Test
-    public void testSetWithIndices_InvalidIndex() {
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(-1, 0, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(0, -1, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(10, 0, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(0, 10, 1));
-    }
-
-    @Test
-    public void testSetWithPoint_FrozenSheet() {
-        sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> sheet.set(Point.of(0, 0), 100));
-    }
+    // set
 
     @Test
     public void testSet_NullValueAllowed() {
@@ -104,67 +52,46 @@ public class SheetSetTest extends SheetTestSupport {
     }
 
     @Test
-    public void testSetRow() {
-        sheet.setRow("row1", Arrays.asList(10, 20, 30));
-        assertEquals(Integer.valueOf(10), sheet.get("row1", "col1"));
-        assertEquals(Integer.valueOf(20), sheet.get("row1", "col2"));
-        assertEquals(Integer.valueOf(30), sheet.get("row1", "col3"));
+    public void testSetWithKeys() {
+        Integer old = sheet.set("row1", "col1", 100);
+        assertEquals(Integer.valueOf(1), old);
+        assertEquals(Integer.valueOf(100), sheet.get("row1", "col1"));
     }
 
     @Test
-    public void testSetRow_UninitializedSheet() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
-        uninitSheet.setRow("row1", Arrays.asList(10, 20, 30));
-        assertEquals(Integer.valueOf(10), uninitSheet.get("row1", "col1"));
-        assertEquals(Integer.valueOf(20), uninitSheet.get("row1", "col2"));
-        assertEquals(Integer.valueOf(30), uninitSheet.get("row1", "col3"));
-    }
-
-    @Test
-    public void testSetRowEmptyCollection() {
-        sheet.setRow("row1", Arrays.asList());
-        assertNull(sheet.get("row1", "col1"));
-        assertNull(sheet.get("row1", "col2"));
-        assertNull(sheet.get("row1", "col3"));
-    }
-
-    @Test
-    public void testSetRow_emptyCollectionToSetNulls() {
-        objectSheet.setRow("R1", Collections.emptyList());
-        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(objectSheet.rowValues("R1")));
-    }
-
-    @Test
-    public void testSetRowSizeMismatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.setRow("row1", Arrays.asList(10, 20));
-        });
-    }
-
-    @Test
-    public void testSetRowOnFrozenSheet() {
+    public void testSetWithKeys_FrozenSheet() {
         sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> {
-            sheet.setRow("row1", Arrays.asList(10, 20, 30));
-        });
+        assertThrows(IllegalStateException.class, () -> sheet.set("row1", "col1", 100));
     }
 
     @Test
-    public void testSetRow_sizeMismatch() {
-        List<Object> newRowDataShort = Arrays.asList("New1", "New2");
-        assertThrows(IllegalArgumentException.class, () -> objectSheet.setRow("R1", newRowDataShort));
+    public void testSetWithKeys_InvalidKey() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.set("invalidRow", "col1", 1));
+        assertThrows(IllegalArgumentException.class, () -> sheet.set("row1", "invalidCol", 1));
     }
 
     @Test
-    public void testSetRow_frozen() {
-        objectSheet.freeze();
-        assertThrows(IllegalStateException.class, () -> objectSheet.setRow("R1", Arrays.asList("a", "b", "c")));
+    public void testSetWithKeys_NullValue() {
+        Integer old = sheet.set("row1", "col1", null);
+        assertEquals(Integer.valueOf(1), old);
+        assertNull(sheet.get("row1", "col1"));
     }
 
     @Test
-    public void testSetRow_InvalidKey() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.setRow("invalidRow", Arrays.asList(1, 2, 3)));
+    public void testSetWithPoint() {
+        Point p = Point.of(1, 2);
+        Integer old = sheet.set(p, 100);
+        assertEquals(Integer.valueOf(6), old);
+        assertEquals(Integer.valueOf(100), sheet.get(p));
     }
+
+    @Test
+    public void testSetWithPoint_FrozenSheet() {
+        sheet.freeze();
+        assertThrows(IllegalStateException.class, () -> sheet.set(Point.of(0, 0), 100));
+    }
+
+    // setColumn
 
     @Test
     public void testSetColumn() {
@@ -175,47 +102,19 @@ public class SheetSetTest extends SheetTestSupport {
     }
 
     @Test
-    public void testSetColumn_UninitializedSheet() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
-        uninitSheet.setColumn("col1", Arrays.asList(10, 20, 30));
-        assertEquals(Integer.valueOf(10), uninitSheet.get("row1", "col1"));
-        assertEquals(Integer.valueOf(20), uninitSheet.get("row2", "col1"));
-        assertEquals(Integer.valueOf(30), uninitSheet.get("row3", "col1"));
-    }
-
-    @Test
-    public void testSetColumnEmptyCollection() {
-        sheet.setColumn("col1", Arrays.asList());
-        assertNull(sheet.get("row1", "col1"));
-        assertNull(sheet.get("row2", "col1"));
-        assertNull(sheet.get("row3", "col1"));
-    }
-
-    @Test
     public void testSetColumn_emptyCollectionToSetNulls() {
         objectSheet.setColumn("C1", Collections.emptyList());
         assertEquals(Arrays.asList(null, null, null), new ArrayList<>(objectSheet.columnValues("C1")));
     }
 
     @Test
-    public void testSetColumnSizeMismatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.setColumn("col1", Arrays.asList(10, 20));
-        });
-    }
-
-    @Test
-    public void testSetColumnOnFrozenSheet() {
-        sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> {
-            sheet.setColumn("col1", Arrays.asList(10, 20, 30));
-        });
-    }
-
-    @Test
-    public void testSetColumn_sizeMismatch() {
-        List<Object> newColDataShort = Arrays.asList("New1", "New2");
-        assertThrows(IllegalArgumentException.class, () -> objectSheet.setColumn("C1", newColDataShort));
+    public void testSetColumn_EmptyKeepsLiveViewConsistent() {
+        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
+        ImmutableList<Integer> view = s.columnValues("col1");
+        s.setColumn("col1", Collections.emptyList());
+        assertNull(view.get(0));
+        assertNull(view.get(1));
+        assertNull(view.get(2));
     }
 
     @Test
@@ -242,13 +141,122 @@ public class SheetSetTest extends SheetTestSupport {
     }
 
     @Test
-    public void testSetColumn_EmptyKeepsLiveViewConsistent() {
-        Sheet<String, String, Integer> s = Sheet.rows(rowKeys, columnKeys, sampleData);
-        ImmutableList<Integer> view = s.columnValues("col1");
-        s.setColumn("col1", Collections.emptyList());
-        assertNull(view.get(0));
-        assertNull(view.get(1));
-        assertNull(view.get(2));
+    public void testSetColumn_sizeMismatch() {
+        List<Object> newColDataShort = Arrays.asList("New1", "New2");
+        assertThrows(IllegalArgumentException.class, () -> objectSheet.setColumn("C1", newColDataShort));
     }
+
+    @Test
+    public void testSetColumn_UninitializedSheet() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
+        uninitSheet.setColumn("col1", Arrays.asList(10, 20, 30));
+        assertEquals(Integer.valueOf(10), uninitSheet.get("row1", "col1"));
+        assertEquals(Integer.valueOf(20), uninitSheet.get("row2", "col1"));
+        assertEquals(Integer.valueOf(30), uninitSheet.get("row3", "col1"));
+    }
+
+    @Test
+    public void testSetColumnEmptyCollection() {
+        sheet.setColumn("col1", Arrays.asList());
+        assertNull(sheet.get("row1", "col1"));
+        assertNull(sheet.get("row2", "col1"));
+        assertNull(sheet.get("row3", "col1"));
+    }
+
+    @Test
+    public void testSetColumnOnFrozenSheet() {
+        sheet.freeze();
+        assertThrows(IllegalStateException.class, () -> {
+            sheet.setColumn("col1", Arrays.asList(10, 20, 30));
+        });
+    }
+
+    @Test
+    public void testSetColumnSizeMismatch() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.setColumn("col1", Arrays.asList(10, 20));
+        });
+    }
+
+    // setRow
+
+    @Test
+    public void testSetRow() {
+        sheet.setRow("row1", Arrays.asList(10, 20, 30));
+        assertEquals(Integer.valueOf(10), sheet.get("row1", "col1"));
+        assertEquals(Integer.valueOf(20), sheet.get("row1", "col2"));
+        assertEquals(Integer.valueOf(30), sheet.get("row1", "col3"));
+    }
+
+    @Test
+    public void testSetRow_emptyCollectionToSetNulls() {
+        objectSheet.setRow("R1", Collections.emptyList());
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(objectSheet.rowValues("R1")));
+    }
+
+    @Test
+    public void testSetRow_frozen() {
+        objectSheet.freeze();
+        assertThrows(IllegalStateException.class, () -> objectSheet.setRow("R1", Arrays.asList("a", "b", "c")));
+    }
+
+    @Test
+    public void testSetRow_InvalidKey() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.setRow("invalidRow", Arrays.asList(1, 2, 3)));
+    }
+
+    @Test
+    public void testSetRow_sizeMismatch() {
+        List<Object> newRowDataShort = Arrays.asList("New1", "New2");
+        assertThrows(IllegalArgumentException.class, () -> objectSheet.setRow("R1", newRowDataShort));
+    }
+
+    @Test
+    public void testSetRow_UninitializedSheet() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(rowKeys, columnKeys);
+        uninitSheet.setRow("row1", Arrays.asList(10, 20, 30));
+        assertEquals(Integer.valueOf(10), uninitSheet.get("row1", "col1"));
+        assertEquals(Integer.valueOf(20), uninitSheet.get("row1", "col2"));
+        assertEquals(Integer.valueOf(30), uninitSheet.get("row1", "col3"));
+    }
+
+    @Test
+    public void testSetRowEmptyCollection() {
+        sheet.setRow("row1", Arrays.asList());
+        assertNull(sheet.get("row1", "col1"));
+        assertNull(sheet.get("row1", "col2"));
+        assertNull(sheet.get("row1", "col3"));
+    }
+
+    @Test
+    public void testSetRowOnFrozenSheet() {
+        sheet.freeze();
+        assertThrows(IllegalStateException.class, () -> {
+            sheet.setRow("row1", Arrays.asList(10, 20, 30));
+        });
+    }
+
+    @Test
+    public void testSetRowSizeMismatch() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.setRow("row1", Arrays.asList(10, 20));
+        });
+    }
+
+    @Test
+    public void testSetWithIndices() {
+        Integer old = sheet.setAt(0, 0, 100);
+        assertEquals(Integer.valueOf(1), old);
+        assertEquals(Integer.valueOf(100), sheet.getAt(0, 0));
+    }
+
+    @Test
+    public void testSetWithIndices_InvalidIndex() {
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(-1, 0, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(0, -1, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(10, 0, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(0, 10, 1));
+    }
+
 
 }

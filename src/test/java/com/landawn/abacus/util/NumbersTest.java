@@ -14,47 +14,17 @@
 
 package com.landawn.abacus.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTimeout;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 
-import com.landawn.abacus.type.Type;
-
 public class NumbersTest extends NumbersTestSupport {
-
-    @Test
-    public void testLcmSignIndependentAcrossNumericTypes() {
-        for (final int signA : new int[] { -1, 1 }) {
-            for (final int signB : new int[] { -1, 1 }) {
-                assertEquals(12, Numbers.lcm(signA * 4, signB * 6));
-                assertEquals(12L, Numbers.lcm(signA * 4L, signB * 6L));
-                assertEquals(BigInteger.valueOf(12), Numbers.lcm(BigInteger.valueOf(signA * 4), BigInteger.valueOf(signB * 6)));
-            }
-        }
-
-        assertEquals(0, Numbers.lcm(Integer.MIN_VALUE, 0));
-        assertEquals(0, Numbers.lcm(0, Integer.MIN_VALUE));
-        assertEquals(0L, Numbers.lcm(Long.MIN_VALUE, 0L));
-        assertEquals(0L, Numbers.lcm(0L, Long.MIN_VALUE));
-        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE, 1));
-        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MIN_VALUE, 1L));
-        assertEquals(BigInteger.ONE.shiftLeft(63), Numbers.lcm(BigInteger.valueOf(Long.MIN_VALUE), BigInteger.ONE));
-        assertEquals(BigInteger.ZERO, Numbers.lcm(BigInteger.ZERO, BigInteger.valueOf(Long.MIN_VALUE)));
-    }
 
     @Test
     public void testConstants() {
@@ -79,380 +49,6 @@ public class NumbersTest extends NumbersTestSupport {
         assertEquals(-1.0d, Numbers.DOUBLE_MINUS_ONE, 0.0d);
     }
 
-    // ===== decode / parse / tryParse =====
-
-    @Test
-    public void testDecodeInteger() {
-        assertEquals(Integer.valueOf(123), Numbers.decodeInteger("123"));
-        assertEquals(Integer.valueOf(255), Numbers.decodeInteger("0xFF"));
-        assertEquals(Integer.valueOf(8), Numbers.decodeInteger("010"));
-        assertNull(Numbers.decodeInteger(null));
-        assertNull(Numbers.decodeInteger(""));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger("abc"));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger("08"));
-        assertEquals("abc is not a valid Integer.", assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger("abc")).getMessage());
-        for (final String token : new String[] { "0", "00", "+00", "010", "+010", "-010", "0x7fffffff", "-0x80000000", "#7f" }) {
-            assertEquals(Integer.decode(token), Numbers.decodeInteger(token), token);
-        }
-    }
-
-    @Test
-    public void testDecodeLong() {
-        assertEquals(Long.valueOf(123L), Numbers.decodeLong("123"));
-        assertEquals(Long.valueOf(255L), Numbers.decodeLong("0xFFL"));
-        assertEquals(Long.valueOf(Long.MIN_VALUE), Numbers.decodeLong("-9223372036854775808"));
-        assertEquals(Long.valueOf(Long.MIN_VALUE), Numbers.decodeLong("-0x8000000000000000"));
-        assertNull(Numbers.decodeLong(null));
-        assertNull(Numbers.decodeLong(""));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeLong("9223372036854775808"));
-        assertEquals("abc is not a valid Long.", assertThrows(NumberFormatException.class, () -> Numbers.decodeLong("abc")).getMessage());
-        for (final String token : new String[] { "0", "010", "0x7fffffffffffffff", "-0x8000000000000000" }) {
-            assertEquals(Long.decode(token), Numbers.decodeLong(token), token);
-        }
-    }
-
-    @Test
-    public void testDecodeBigInteger() {
-        assertEquals(new BigInteger("12345678901234567890"), Numbers.decodeBigInteger("12345678901234567890"));
-        assertEquals(new BigInteger("FF", 16), Numbers.decodeBigInteger("0xFF"));
-        assertEquals(new BigInteger("77", 8), Numbers.decodeBigInteger("077"));
-        assertEquals(BigInteger.valueOf(-1), Numbers.decodeBigInteger("-1"));
-        assertNull(Numbers.decodeBigInteger(null));
-        assertNull(Numbers.decodeBigInteger(""));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("abc"));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("--1"));
-        assertThrows(NumberFormatException.class, () -> Numbers.decodeBigInteger("+-1"));
-    }
-
-    @Test
-    public void testParseFloat() {
-        assertEquals(Float.valueOf(1.5f), Numbers.parseFloat("1.5"));
-        assertEquals(Float.valueOf(0.0f), Numbers.parseFloat("0"));
-        assertNull(Numbers.parseFloat(null));
-        assertNull(Numbers.parseFloat(""));
-        assertTrue(Numbers.parseFloat("NaN").isNaN());
-        assertThrows(NumberFormatException.class, () -> Numbers.parseFloat("abc"));
-        assertEquals("abc is not a valid Float.", assertThrows(NumberFormatException.class, () -> Numbers.parseFloat("abc")).getMessage());
-        assertEquals("\"   \" is not a valid Float.", assertThrows(NumberFormatException.class, () -> Numbers.parseFloat("   ")).getMessage());
-    }
-
-    @Test
-    public void testParseDouble() {
-        assertEquals(Double.valueOf(1.5d), Numbers.parseDouble("1.5"));
-        assertEquals(Double.valueOf(-1.5), Numbers.parseDouble("-1.5"));
-        assertNull(Numbers.parseDouble(null));
-        assertNull(Numbers.parseDouble(""));
-        assertThrows(NumberFormatException.class, () -> Numbers.parseDouble("abc"));
-        assertEquals("abc is not a valid Double.", assertThrows(NumberFormatException.class, () -> Numbers.parseDouble("abc")).getMessage());
-    }
-
-    @Test
-    public void testParseBigDecimal() {
-        assertEquals(new BigDecimal("123.456789"), Numbers.parseBigDecimal("123.456789"));
-        assertEquals(BigDecimal.ZERO, Numbers.parseBigDecimal("0"));
-        assertNull(Numbers.parseBigDecimal(null));
-        assertNull(Numbers.parseBigDecimal(""));
-        assertEquals(0, Numbers.parseBigDecimal("123.").scale());
-        assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("abc"));
-        assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("١٢٣"));
-        assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("0x1.0p2"));
-        assertEquals("1.2.3 is not a valid BigDecimal.", assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("1.2.3")).getMessage());
-        final String overLimit = "1" + "0".repeat(Numbers.MAX_FLOATING_POINT_TOKEN_LENGTH);
-        assertEquals(overLimit.length(), Numbers.parseBigDecimal(overLimit).precision());
-    }
-
-    @Test
-    public void testTryParseInt() {
-        assertEquals(123, Numbers.tryParseInt("123").getAsInt());
-        assertEquals(10, Numbers.tryParseInt("010").getAsInt());
-        assertEquals(16, Numbers.tryParseInt("0x10").getAsInt());
-        assertEquals(123, Numbers.tryParseInt("123L").getAsInt());
-        assertTrue(Numbers.tryParseInt("2147483648").isEmpty());
-        assertTrue(Numbers.tryParseInt("abc").isEmpty());
-        assertTrue(Numbers.tryParseInt("").isEmpty());
-        assertTrue(Numbers.tryParseInt(null).isEmpty());
-        assertTrue(Numbers.tryParseInt("١٢٣").isEmpty());
-    }
-
-    @Test
-    public void testTryParseLong() {
-        assertEquals(123L, Numbers.tryParseLong("123").getAsLong());
-        assertEquals(255L, Numbers.tryParseLong("0xFFL").getAsLong());
-        assertEquals(Long.MIN_VALUE, Numbers.tryParseLong("-9223372036854775808").getAsLong());
-        assertEquals(Long.MIN_VALUE, Numbers.tryParseLong("-0x8000000000000000").getAsLong());
-        assertTrue(Numbers.tryParseLong("9223372036854775808").isEmpty());
-        assertTrue(Numbers.tryParseLong("abc").isEmpty());
-        assertTrue(Numbers.tryParseLong(null).isEmpty());
-    }
-
-    @Test
-    public void testParseIntOrElse() {
-        assertEquals(123, Numbers.parseIntOrElse("123", -1));
-        assertEquals(10, Numbers.parseIntOrElse("010", -1));
-        assertEquals(16, Numbers.parseIntOrElse("0x10", -1));
-        assertEquals(123, Numbers.parseIntOrElse("123L", -1));
-        assertEquals(Integer.MIN_VALUE, Numbers.parseIntOrElse("-2147483648", -1));
-        assertEquals(-1, Numbers.parseIntOrElse("2147483648", -1));
-        assertEquals(-1, Numbers.parseIntOrElse("12F", -1));
-        assertEquals(-1, Numbers.parseIntOrElse("abc", -1));
-        assertEquals(-1, Numbers.parseIntOrElse("", -1));
-        assertEquals(-1, Numbers.parseIntOrElse(null, -1));
-        assertEquals(-1, Numbers.parseIntOrElse("\u0661\u0662\u0663", -1));
-        assertEquals(7, Numbers.parseIntOrElse(" ", 7));
-    }
-
-    @Test
-    public void testParseLongOrElse() {
-        assertEquals(123L, Numbers.parseLongOrElse("123", -1L));
-        assertEquals(255L, Numbers.parseLongOrElse("0xFFL", -1L));
-        assertEquals(Long.MIN_VALUE, Numbers.parseLongOrElse("-9223372036854775808", -1L));
-        assertEquals(Long.MIN_VALUE, Numbers.parseLongOrElse("-0x8000000000000000", -1L));
-        assertEquals(-1L, Numbers.parseLongOrElse("9223372036854775808", -1L));
-        assertEquals(-1L, Numbers.parseLongOrElse("12D", -1L));
-        assertEquals(-1L, Numbers.parseLongOrElse("abc", -1L));
-        assertEquals(-1L, Numbers.parseLongOrElse("", -1L));
-        assertEquals(-1L, Numbers.parseLongOrElse(null, -1L));
-    }
-
-    @Test
-    public void testParseOrElseAgreesWithTryParseAndToNumber() {
-        final List<String> inputs = new ArrayList<>(List.of("0", "-0", "+0", "1", "-1", "007", "+42", "-128", "127", "128", "-32768", "32767", "65535",
-                "2147483647", "-2147483648", "2147483648", "-2147483649", "9223372036854775807", "-9223372036854775808", "9223372036854775808",
-                "-9223372036854775809", "0x7fffffff", "0x80000000", "-0x80000000", "#FF", "-#ff", "0X1F", "0x", "#", "0xG", "1L", "1l", "1LL", "L", "12F",
-                "12D", "1.5", "1e5", " 1", "1 ", "+", "-", "--1", "+-1", "00000000000000000000000000001", "\u0661"));
-        final Random random = new Random(20261008);
-        final String alphabet = "0123456789000999+-xX#LlFfDdaE. ";
-
-        for (int i = 0; i < 20_000; i++) {
-            final StringBuilder sb = new StringBuilder();
-
-            for (int j = 1 + random.nextInt(random.nextInt(4) == 0 ? 24 : 8); j > 0; j--) {
-                sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
-            }
-
-            inputs.add(sb.toString());
-        }
-
-        for (final String text : inputs) {
-            final u.OptionalInt asInt = Numbers.tryParseInt(text);
-            final u.OptionalLong asLong = Numbers.tryParseLong(text);
-
-            for (final int defaultValue : new int[] { -1, 0, Integer.MIN_VALUE }) {
-                assertEquals(asInt.orElse(defaultValue), Numbers.parseIntOrElse(text, defaultValue), text);
-                assertEquals(asLong.orElse(defaultValue), Numbers.parseLongOrElse(text, defaultValue), text);
-            }
-
-            if (asInt.isPresent()) {
-                assertEquals(Numbers.toInt(text), asInt.getAsInt(), text);
-            } else if (!text.isEmpty()) {
-                assertThrows(RuntimeException.class, () -> Numbers.toInt(text), text);
-            }
-
-            if (asLong.isPresent()) {
-                assertEquals(Numbers.toLong(text), asLong.getAsLong(), text);
-            } else if (!text.isEmpty()) {
-                assertThrows(RuntimeException.class, () -> Numbers.toLong(text), text);
-            }
-        }
-    }
-
-    @Test
-    public void testTryParseFloat() {
-        for (final String value : new String[] { "0", "123.45", "NaN", "-Infinity", "0x1.0p2", "1e39" }) {
-            final u.OptionalFloat result = assertDoesNotThrow(() -> Numbers.tryParseFloat(value), value);
-            assertTrue(result.isPresent(), value);
-            assertEquals(Float.parseFloat(value), result.getAsFloat(), value);
-        }
-        for (final String value : new String[] { null, "", " ", "abc", "123L", "0xFF", "١٢٣" }) {
-            assertTrue(Numbers.tryParseFloat(value).isEmpty(), String.valueOf(value));
-        }
-    }
-
-    @Test
-    public void testTryParseDouble() {
-        for (final String value : new String[] { "0", "123.45", "NaN", "-Infinity", "0x1.0p2", "1e309" }) {
-            final u.OptionalDouble result = assertDoesNotThrow(() -> Numbers.tryParseDouble(value), value);
-            assertTrue(result.isPresent(), value);
-            assertEquals(Double.parseDouble(value), result.getAsDouble(), value);
-        }
-        for (final String value : new String[] { null, "", "abc", "123L", "0xFF" }) {
-            assertTrue(Numbers.tryParseDouble(value).isEmpty(), String.valueOf(value));
-        }
-    }
-
-    @Test
-    public void testNullableCreationTreatsOnlyEmptyAsNull() {
-        assertNull(Numbers.decodeInteger(null));
-        assertNull(Numbers.parseFloat(""));
-        assertNull(Numbers.createNumber(""));
-        for (final String whitespace : new String[] { " ", "\n" }) {
-            assertThrows(NumberFormatException.class, () -> Numbers.decodeInteger(whitespace));
-            assertThrows(NumberFormatException.class, () -> Numbers.parseFloat(whitespace));
-            assertThrows(NumberFormatException.class, () -> Numbers.createNumber(whitespace));
-            assertTrue(Numbers.tryParseInt(whitespace).isEmpty());
-            assertTrue(Numbers.tryCreateNumber(whitespace).isEmpty());
-        }
-    }
-
-    @Test
-    public void testFloatingPointTokenLengthLimit() {
-        final String atLimit = "0".repeat(Numbers.MAX_FLOATING_POINT_TOKEN_LENGTH);
-        final String overLimit = atLimit + "0";
-        assertTrue(Numbers.isParsable(atLimit));
-        assertEquals(0.0d, Numbers.toDouble(atLimit), 0.0d);
-        assertFalse(Numbers.isParsable(overLimit));
-        assertTrue(Numbers.tryParseDouble(overLimit).isEmpty());
-        final NumberFormatException nfe = assertThrows(NumberFormatException.class, () -> Numbers.parseDouble(overLimit));
-        assertTrue(nfe.getMessage().length() < 128, nfe.getMessage());
-        assertNotNull(nfe.getCause());
-        assertTrue(nfe.getCause().getMessage().contains("exceeds limit"));
-    }
-
-    @Test
-    public void testErrorMessages_BoundedAndEscaped() {
-        final NumberFormatException ctrl = assertThrows(NumberFormatException.class, () -> Numbers.toLong("12\n34"));
-        assertTrue(ctrl.getMessage().contains("\\u000A"), ctrl.getMessage());
-        assertFalse(ctrl.getMessage().contains("\n"), ctrl.getMessage());
-        final NumberFormatException decode = assertThrows(NumberFormatException.class, () -> Numbers.decodeLong("9".repeat(100_000)));
-        assertTrue(decode.getMessage().length() < 128, decode.getMessage());
-        final String hugeDigits = "9".repeat(100_000);
-        final ArithmeticException overflow = assertThrows(ArithmeticException.class, () -> Numbers.toLong(hugeDigits));
-        assertTrue(overflow.getMessage().startsWith("long overflow: 99999999"), overflow.getMessage());
-        assertTrue(overflow.getMessage().length() < 128, overflow.getMessage());
-        assertEquals(1L, Numbers.toLong("0".repeat(100_000) + "1"));
-        assertEquals(Long.MIN_VALUE, Numbers.toLong("-9223372036854775808"));
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt("١٢٣"));
-        assertThrows(NumberFormatException.class, () -> Numbers.toInt("１２３"));
-    }
-
-    @Test
-    public void testBoundedConversion_HugeBigDecimal() {
-        final BigDecimal huge = new BigDecimal("1e2147483647");
-        assertTimeout(java.time.Duration.ofSeconds(2), () -> {
-            assertThrows(ArithmeticException.class, () -> Numbers.convert(huge, int.class));
-            assertThrows(ArithmeticException.class, () -> Numbers.toLong(huge, 0L));
-        });
-        assertEquals("byte overflow: " + huge, assertThrows(ArithmeticException.class, () -> Numbers.convert(huge, byte.class)).getMessage());
-        assertEquals(0L, Numbers.toLong(new BigDecimal("1e-1000000"), 0L));
-    }
-
-    @Test
-    public void testScannerFastPaths_RandomizedRoundTrips() {
-        final Random random = new Random(0x5EED_C0DE_1234_5678L);
-        for (int i = 0; i < 4096; i++) {
-            final int intValue = random.nextInt();
-            final BigInteger expectedInt = BigInteger.valueOf(intValue);
-            final boolean explicitPlus = (i & 1) == 0;
-            final String hexPrefix = (i % 3 == 0) ? "0x" : (i % 3 == 1 ? "0X" : "#");
-            final String intDecimal = signedRadixToken(expectedInt, 10, "", explicitPlus);
-            final String intHex = signedRadixToken(expectedInt, 16, hexPrefix, explicitPlus);
-            assertEquals(intValue, Numbers.toInt(intDecimal), intDecimal);
-            assertEquals(Integer.valueOf(intValue), Numbers.decodeInteger(intHex), intHex);
-
-            final long longValue = random.nextLong();
-            final BigInteger expectedLong = BigInteger.valueOf(longValue);
-            final String longDecimal = signedRadixToken(expectedLong, 10, "", explicitPlus);
-            assertEquals(longValue, Numbers.toLong(longDecimal), longDecimal);
-            assertEquals(Long.valueOf(longValue), Numbers.decodeLong(longDecimal + "L"), longDecimal);
-        }
-    }
-
-    // ===== ceilingPowerOfTwo / floorPowerOfTwo =====
-
-    @Test
-    public void testCeilingPowerOfTwo() {
-        assertEquals(1, Numbers.ceilingPowerOfTwo(1));
-        assertEquals(4, Numbers.ceilingPowerOfTwo(3));
-        assertEquals(1L, Numbers.ceilingPowerOfTwo(1L));
-        assertEquals(4L, Numbers.ceilingPowerOfTwo(3L));
-        assertEquals(1024L, Numbers.ceilingPowerOfTwo(1000L));
-        assertEquals(1L << 62, Numbers.ceilingPowerOfTwo((1L << 62) - 1));
-        assertEquals(BigInteger.valueOf(4), Numbers.ceilingPowerOfTwo(BigInteger.valueOf(3)));
-        assertEquals(BigInteger.ONE.shiftLeft(100), Numbers.ceilingPowerOfTwo(BigInteger.ONE.shiftLeft(100)));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.ceilingPowerOfTwo(0L));
-        assertThrows(ArithmeticException.class, () -> Numbers.ceilingPowerOfTwo((1L << 62) + 1));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.ceilingPowerOfTwo(BigInteger.ZERO));
-    }
-
-    @Test
-    public void testFloorPowerOfTwo() {
-        assertEquals(1, Numbers.floorPowerOfTwo(1));
-        assertEquals(2, Numbers.floorPowerOfTwo(3));
-        assertEquals(1L, Numbers.floorPowerOfTwo(1L));
-        assertEquals(8L, Numbers.floorPowerOfTwo(15L));
-        assertEquals(BigInteger.ONE, Numbers.floorPowerOfTwo(BigInteger.ONE));
-        assertEquals(BigInteger.valueOf(8), Numbers.floorPowerOfTwo(BigInteger.valueOf(15)));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.floorPowerOfTwo(0L));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.floorPowerOfTwo(BigInteger.ZERO));
-    }
-
-    // ===== mod / gcd / lcm =====
-
-    @Test
-    public void testMod() {
-        assertEquals(1, Numbers.mod(7, 3));
-        assertEquals(2, Numbers.mod(-7, 3));
-        assertEquals(1, Numbers.mod(7L, 3));
-        assertEquals(1L, Numbers.mod(7L, 3L));
-        assertThrows(ArithmeticException.class, () -> Numbers.mod(7, 0));
-        assertThrows(ArithmeticException.class, () -> Numbers.mod(7L, 0L));
-    }
-
-    @Test
-    public void testGcd() {
-        assertEquals(4, Numbers.gcd(12, 8));
-        assertEquals(6, Numbers.gcd(54, 24));
-        assertEquals(1, Numbers.gcd(17, 13));
-        assertEquals(5, Numbers.gcd(0, 5));
-        assertEquals(4L, Numbers.gcd(12L, 8L));
-        assertEquals(BigInteger.valueOf(4), Numbers.gcd(BigInteger.valueOf(12), BigInteger.valueOf(8)));
-        assertEquals(BigInteger.ZERO, Numbers.gcd(BigInteger.ZERO, BigInteger.ZERO));
-        assertThrows(ArithmeticException.class, () -> Numbers.gcd(0, Integer.MIN_VALUE));
-        assertEquals("gcd would be 2^31, not representable as int",
-                assertThrows(ArithmeticException.class, () -> Numbers.gcd(0, Integer.MIN_VALUE)).getMessage());
-        assertEquals("gcd would be 2^63, not representable as long",
-                assertThrows(ArithmeticException.class, () -> Numbers.gcd(0L, Long.MIN_VALUE)).getMessage());
-        assertThrows(IllegalArgumentException.class, () -> Numbers.gcd(null, BigInteger.ONE));
-    }
-
-    @Test
-    public void testLcm() {
-        assertEquals(12, Numbers.lcm(4, 6));
-        assertEquals(36, Numbers.lcm(12, 18));
-        assertEquals(0, Numbers.lcm(0, 5));
-        assertEquals(12L, Numbers.lcm(4L, 6L));
-        assertEquals(BigInteger.valueOf(12), Numbers.lcm(BigInteger.valueOf(4), BigInteger.valueOf(6)));
-        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE, 1));
-        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MIN_VALUE, 1L));
-        assertThrows(IllegalArgumentException.class, () -> Numbers.lcm(null, BigInteger.ONE));
-    }
-
-    // ===== exact arithmetic =====
-
-    @Test
-    public void testAddExact() {
-        assertEquals(5, Numbers.addExact(2, 3));
-        assertEquals(5L, Numbers.addExact(2L, 3L));
-        assertThrows(ArithmeticException.class, () -> Numbers.addExact(Integer.MAX_VALUE, 1));
-        assertThrows(ArithmeticException.class, () -> Numbers.addExact(Long.MAX_VALUE, 1L));
-    }
-
-    @Test
-    public void testSubtractExact() {
-        assertEquals(-1, Numbers.subtractExact(2, 3));
-        assertEquals(-1L, Numbers.subtractExact(2L, 3L));
-        assertThrows(ArithmeticException.class, () -> Numbers.subtractExact(Integer.MIN_VALUE, 1));
-        assertThrows(ArithmeticException.class, () -> Numbers.subtractExact(Long.MIN_VALUE, 1L));
-    }
-
-    @Test
-    public void testMultiplyExact() {
-        assertEquals(6, Numbers.multiplyExact(2, 3));
-        assertEquals(6L, Numbers.multiplyExact(2L, 3L));
-        assertThrows(ArithmeticException.class, () -> Numbers.multiplyExact(Integer.MAX_VALUE, 2));
-        assertThrows(ArithmeticException.class, () -> Numbers.multiplyExact(Long.MAX_VALUE, 2L));
-    }
-
     @Test
     public void testClamp() {
         assertEquals(5, Numbers.clamp(5, 1, 10));
@@ -468,32 +64,6 @@ public class NumbersTest extends NumbersTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(0.0, 0.0, -0.0));
     }
 
-    // ===== factorial =====
-
-    @Test
-    public void testFactorial() {
-        assertEquals(1, Numbers.factorialExact(0));
-        assertEquals(120, Numbers.factorialExact(5));
-        assertEquals(479001600, Numbers.factorialExact(12));
-        assertEquals(Integer.MAX_VALUE, Numbers.saturatedFactorial(13));
-        assertEquals("factorialExact(13) overflow", assertThrows(ArithmeticException.class, () -> Numbers.factorialExact(13)).getMessage());
-        assertThrows(IllegalArgumentException.class, () -> Numbers.factorialExact(-1));
-
-        assertEquals(1L, Numbers.factorialExactToLong(0));
-        assertEquals(2432902008176640000L, Numbers.factorialExactToLong(20));
-        assertEquals(Long.MAX_VALUE, Numbers.saturatedFactorialToLong(21));
-        assertEquals("factorialExactToLong(21) overflow", assertThrows(ArithmeticException.class, () -> Numbers.factorialExactToLong(21)).getMessage());
-
-        assertEquals(1.0, Numbers.factorialToDouble(0), 0.0);
-        assertEquals(120.0, Numbers.factorialToDouble(5), 0.0);
-        assertEquals(BigInteger.ONE, Numbers.factorialToBigInteger(0));
-        assertEquals(BigInteger.valueOf(120), Numbers.factorialToBigInteger(5));
-        assertTrue(Numbers.factorialToBigInteger(30).compareTo(BigInteger.valueOf(Long.MAX_VALUE)) > 0);
-
-        assertEquals(BigInteger.ONE, Numbers.listProduct(new ArrayList<>()));
-        assertEquals(BigInteger.valueOf(6), Numbers.listProduct(List.of(BigInteger.TWO, BigInteger.valueOf(3))));
-    }
-
     @Test
     public void testFitsInLong() {
         assertTrue(Numbers.fitsInLong(BigInteger.ZERO));
@@ -503,7 +73,13 @@ public class NumbersTest extends NumbersTestSupport {
         assertFalse(Numbers.fitsInLong(new BigInteger("123456789012345678901234567890")));
     }
 
-    // ===== fuzzyEquals / fuzzyCompare =====
+    @Test
+    public void testFuzzyCompare() {
+        assertEquals(0, Numbers.fuzzyCompare(1.0f, 1.0001f, 0.001f));
+        assertTrue(Numbers.fuzzyCompare(1.0f, 2.0f, 0.001f) < 0);
+        assertEquals(0, Numbers.fuzzyCompare(1.0, 1.0 + 1e-16, 1e-15));
+        assertTrue(Numbers.fuzzyCompare(1.0, 2.0, 0.001) < 0);
+    }
 
     @Test
     public void testFuzzyEquals() {
@@ -518,108 +94,229 @@ public class NumbersTest extends NumbersTestSupport {
     }
 
     @Test
-    public void testFuzzyCompare() {
-        assertEquals(0, Numbers.fuzzyCompare(1.0f, 1.0001f, 0.001f));
-        assertTrue(Numbers.fuzzyCompare(1.0f, 2.0f, 0.001f) < 0);
-        assertEquals(0, Numbers.fuzzyCompare(1.0, 1.0 + 1e-16, 1e-15));
-        assertTrue(Numbers.fuzzyCompare(1.0, 2.0, 0.001) < 0);
-    }
+    public void c068_fuzzyToleranceMessageIsTheSharedOne() {
+        // The message is deliberately the one Builder's eager tolerance check duplicates (BuilderRegressionTest
+        // pins the two equal), so it stays value-free; the round(UNNECESSARY) message above is the class idiom.
+        final String shared = "tolerance must be non-negative and not NaN";
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0, 1.0, -0.1)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0f, 1.0f, -0.1f)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0, 1.0, Double.NaN)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0f, 1.0f, Float.NaN)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyEquals(1.0, 1.0, Double.NEGATIVE_INFINITY)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyCompare(1.0, 2.0, -0.1)).getMessage());
+        assertEquals(shared, assertThrows(IllegalArgumentException.class, () -> Numbers.fuzzyCompare(1.0f, 2.0f, -2.5f)).getMessage());
 
-    // ===== asinh / acosh / atanh =====
-
-    @Test
-    public void testAsinh() {
-        assertEquals(0.0, Numbers.asinh(0.0), DELTA);
-        assertEquals(-Numbers.asinh(0.5), Numbers.asinh(-0.5), 1e-12);
-        assertTrue(Double.isFinite(Numbers.asinh(Double.MAX_VALUE)));
-        final double expected = Math.log(Double.MAX_VALUE) + Math.log(2.0);
-        assertEquals(expected, Numbers.asinh(Double.MAX_VALUE), Math.ulp(expected));
-        assertEquals(-expected, Numbers.asinh(-Double.MAX_VALUE), Math.ulp(expected));
-        for (final double x : new double[] { 0.5, 2.0, 10.0 }) {
-            assertEquals(Math.log(x + Math.sqrt(x * x + 1)), Numbers.asinh(x), 1e-12, "x=" + x);
-        }
-    }
-
-    @Test
-    public void testAcosh() {
-        assertEquals(0.0, Numbers.acosh(1.0), 1e-12);
-        assertTrue(Double.isFinite(Numbers.acosh(Double.MAX_VALUE)));
-        assertTrue(Double.isNaN(Numbers.acosh(0.5)));
+        // valid tolerances, including the boundaries
+        assertTrue(Numbers.fuzzyEquals(1.0, 1.0, 0.0));
+        assertTrue(Numbers.fuzzyEquals(1.0, -1.0, Double.POSITIVE_INFINITY));
+        assertTrue(Numbers.fuzzyEquals(-0.0f, 0.0f, 0.0f));
+        assertEquals(0, Numbers.fuzzyCompare(1.0001, 1.0002, 0.001));
+        assertEquals(-1, Numbers.fuzzyCompare(1.0f, 2.0f, 0.5f));
     }
 
     @Test
-    public void testAtanh() {
-        assertEquals(0.0, Numbers.atanh(0.0), DELTA);
-        assertEquals(-Numbers.atanh(0.5), Numbers.atanh(-0.5), 1e-12);
-        assertTrue(Double.isInfinite(Numbers.atanh(1.0)));
-        assertTrue(Double.isNaN(Numbers.atanh(1.5)));
-        assertTrue(Double.isNaN(Numbers.atanh(Double.NaN)));
-        for (final double x : new double[] { 0.001, 0.003, 0.031, 0.087, 0.15, 0.5 }) {
-            assertEquals(0.5d * Math.log((1 + x) / (1 - x)), Numbers.atanh(x), 1E-12, "x=" + x);
+    public void testIsMathematicalInteger() {
+        assertTrue(Numbers.isMathematicalInteger(0.0));
+        assertTrue(Numbers.isMathematicalInteger(-0.0));
+        assertTrue(Numbers.isMathematicalInteger(1.0));
+        assertTrue(Numbers.isMathematicalInteger(-5.0));
+        assertTrue(Numbers.isMathematicalInteger(1e10));
+        assertFalse(Numbers.isMathematicalInteger(1.5));
+        assertFalse(Numbers.isMathematicalInteger(0.5));
+        assertFalse(Numbers.isMathematicalInteger(Math.PI));
+        assertFalse(Numbers.isMathematicalInteger(Double.NaN));
+        assertFalse(Numbers.isMathematicalInteger(Double.POSITIVE_INFINITY));
+        assertFalse(Numbers.isMathematicalInteger(Double.NEGATIVE_INFINITY));
+
+        final double[] samples = { 0.0d, -0.0d, 1.0d, -1.0d, 0.5d, 1e300d, Double.MIN_VALUE, Double.MAX_VALUE, Math.scalb(1.0d, 52),
+                Math.scalb(1.0d, 52) + 0.5d, Math.scalb(1.0d, 53), Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
+        for (final double x : samples) {
+            assertEquals(!Double.isNaN(x) && !Double.isInfinite(x) && x == Math.rint(x), Numbers.isMathematicalInteger(x), Double.toString(x));
         }
     }
 
     @Test
-    public void testUnknownNumberRenderedOnce() {
-        final CountingNumber20260906 value = new CountingNumber20260906();
-        assertThrows(ArithmeticException.class, () -> Numbers.toInt(value));
-        assertEquals(1, value.toStringCalls);
-
-        final Number blank = new BlankTextNumber20260906(42.0d);
-        assertThrows(NumberFormatException.class, () -> Numbers.convert(blank, AtomicLong.class));
-        assertEquals(Integer.valueOf(42), Numbers.convert(blank, Integer.class));
-        assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NaN, Type.of(BigDecimal.class)));
-        assertTrue(Double.isNaN(Numbers.convert(Double.NaN, Type.of(Double.class))));
+    public void testIsNormal() {
+        assertTrue(Numbers.isNormal(Double.MIN_NORMAL));
+        assertTrue(Numbers.isNormal(1.0d));
+        assertTrue(Numbers.isNormal(-Double.MAX_VALUE));
+        assertFalse(Numbers.isNormal(0.0d));
+        assertFalse(Numbers.isNormal(-0.0d));
+        assertFalse(Numbers.isNormal(Double.MIN_VALUE));
+        assertFalse(Numbers.isNormal(Math.nextDown(Double.MIN_NORMAL)));
+        assertFalse(Numbers.isNormal(Double.POSITIVE_INFINITY));
+        assertFalse(Numbers.isNormal(Double.NaN));
     }
 
-    // ---- perf review 2026-09-26 G060 begin ----
+    // isPerfectSquare
 
-    // G060-01: the integral-float fast path of the Float -> double decimal widening must equal the string round trip bit for bit.
     @Test
-    public void testToDouble_floatIntegralFastPathMatchesDecimalRoundTrip() {
-        final List<Float> values = new ArrayList<>();
-        final float[] specials = { 0.0f, -0.0f, 1.0f, -1.0f, 7.0f, 100.0f, 1e7f, -1e7f, 9999999.0f, 12345678.0f, 0x1p24f - 1, 0x1p24f, -0x1p24f, -(0x1p24f - 1),
-                0x1p24f + 2, -(0x1p24f + 2), 0x1p25f, 0x1p31f, -0x1p31f, 0x1p40f, 3.0e9f, Float.MAX_VALUE, -Float.MAX_VALUE, Float.MIN_VALUE, -Float.MIN_VALUE,
-                Float.MIN_NORMAL, 0.5f, -0.5f, 1.21f, 0.1f, -2.5f, 16777215.5f, 1234.5f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY };
+    public void testIsPerfectSquare() {
+        assertTrue(Numbers.isPerfectSquare(0));
+        assertTrue(Numbers.isPerfectSquare(1));
+        assertTrue(Numbers.isPerfectSquare(4));
+        assertTrue(Numbers.isPerfectSquare(100));
+        assertFalse(Numbers.isPerfectSquare(2));
+        assertFalse(Numbers.isPerfectSquare(-4));
+        assertFalse(Numbers.isPerfectSquare(Integer.MAX_VALUE));
 
-        for (final float f : specials) {
-            values.add(f);
-        }
+        assertTrue(Numbers.isPerfectSquare(0L));
+        assertTrue(Numbers.isPerfectSquare(100000000L * 100000000L));
+        assertFalse(Numbers.isPerfectSquare(Long.MAX_VALUE));
+        assertFalse(Numbers.isPerfectSquare(Long.MIN_VALUE));
 
-        for (int i = -(1 << 24) - 64; i <= -(1 << 24) + 64; i++) {
-            values.add((float) i);
-        }
-
-        for (int i = (1 << 24) - 64; i <= (1 << 24) + 64; i++) {
-            values.add((float) i);
-        }
-
-        final Random random = new Random(20260926L);
-
-        for (int i = 0; i < 20000; i++) {
-            values.add((float) (random.nextInt(1 << 26) - (1 << 25)));
-            values.add(Float.intBitsToFloat(random.nextInt()));
-        }
-
-        for (final Float boxed : values) {
-            final float f = boxed;
-            final long expected = Double.doubleToRawLongBits(Double.parseDouble(Float.toString(f)));
-            final String label = Float.toString(f);
-
-            assertEquals(expected, Double.doubleToRawLongBits(Numbers.toDouble(boxed)), label);
-            assertEquals(expected, Double.doubleToRawLongBits(Numbers.toDouble(boxed, 99.0d)), label);
-            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, Double.class)), label);
-            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, double.class)), label);
-            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, Type.of(Double.class))), label);
-        }
-
-        // Spot checks with literal expectations.
-        assertEquals(Double.doubleToRawLongBits(-0.0d), Double.doubleToRawLongBits(Numbers.toDouble(Float.valueOf(-0.0f))));
-        assertEquals(16777216.0d, Numbers.toDouble(Float.valueOf(0x1p24f)), 0.0d);
-        assertEquals(1.21d, Numbers.toDouble(Float.valueOf(1.21f)), 0.0d);
-        assertEquals(3.4028235E38d, Numbers.toDouble(Float.valueOf(Float.MAX_VALUE)), 0.0d);
-        assertTrue(Double.isNaN(Numbers.toDouble(Float.valueOf(Float.NaN))));
+        final long maxSquare = 3037000499L * 3037000499L;
+        assertTrue(Numbers.isPerfectSquare(maxSquare));
+        assertFalse(Numbers.isPerfectSquare(maxSquare - 1));
     }
 
-    // ---- perf review 2026-09-26 G060 end ----
+    @Test
+    public void testIsPerfectSquare_BigInteger() {
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ZERO));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ONE));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.valueOf(16)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.valueOf(17)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.valueOf(-4)));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.isPerfectSquare((BigInteger) null));
+
+        for (long n = 0; n < 2_000; n++) {
+            assertEquals(Numbers.isPerfectSquare(n), Numbers.isPerfectSquare(BigInteger.valueOf(n)), Long.toString(n));
+        }
+        for (long root = 3_037_000_400L; root <= 3_037_000_499L; root++) {
+            final BigInteger square = BigInteger.valueOf(root).pow(2);
+            assertTrue(Numbers.isPerfectSquare(square), Long.toString(root));
+            assertTrue(Numbers.isPerfectSquare(square.longValueExact()), Long.toString(root));
+            assertFalse(Numbers.isPerfectSquare(square.add(BigInteger.ONE)));
+        }
+        final BigInteger root = BigInteger.TEN.pow(50).add(BigInteger.valueOf(7));
+        assertTrue(Numbers.isPerfectSquare(root.multiply(root)));
+        assertFalse(Numbers.isPerfectSquare(root.multiply(root).add(BigInteger.ONE)));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.TEN.pow(100)));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.TWO.pow(1000)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.TWO.pow(1001)));
+    }
+
+    // G061-01: the mod-16 residue pre-filter must agree with the exact root-and-square test at every magnitude,
+    // including multi-word values whose low 32 bits are what the filter reads.
+    @Test
+    public void testIsPerfectSquare_BigInteger_residueFilterMatchesExactCheck() {
+        final java.util.Random random = new java.util.Random(20260926L);
+        for (final int bits : new int[] { 1, 31, 32, 33, 63, 64, 65, 127, 200, 1000 }) {
+            for (int trial = 0; trial < 20; trial++) {
+                final BigInteger root = new BigInteger(bits, random);
+                final BigInteger square = root.multiply(root);
+                for (int delta = -40; delta <= 40; delta++) {
+                    final BigInteger n = square.add(BigInteger.valueOf(delta));
+                    final boolean expected = n.signum() >= 0 && n.sqrt().pow(2).equals(n);
+                    assertEquals(expected, Numbers.isPerfectSquare(n), n.toString());
+                }
+            }
+        }
+        // Low 32 bits all zero / all ones above a large high part.
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(64)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(65)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(96).subtract(BigInteger.ONE)));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(48).subtract(BigInteger.ONE).pow(2)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.valueOf(Long.MAX_VALUE).pow(2).negate()));
+    }
+
+    @Test
+    public void testIsPowerOfTwo() {
+        assertTrue(Numbers.isPowerOfTwo(1));
+        assertTrue(Numbers.isPowerOfTwo(2));
+        assertTrue(Numbers.isPowerOfTwo(1024));
+        assertFalse(Numbers.isPowerOfTwo(0));
+        assertFalse(Numbers.isPowerOfTwo(3));
+        assertFalse(Numbers.isPowerOfTwo(-2));
+        assertFalse(Numbers.isPowerOfTwo(Integer.MIN_VALUE));
+
+        assertTrue(Numbers.isPowerOfTwo(1L));
+        assertTrue(Numbers.isPowerOfTwo(1L << 30));
+        assertTrue(Numbers.isPowerOfTwo(1099511627776L));
+        assertFalse(Numbers.isPowerOfTwo(0L));
+        assertFalse(Numbers.isPowerOfTwo(Long.MIN_VALUE));
+
+        assertTrue(Numbers.isPowerOfTwo(1.0));
+        assertTrue(Numbers.isPowerOfTwo(0.5));
+        assertTrue(Numbers.isPowerOfTwo(0.25));
+        assertFalse(Numbers.isPowerOfTwo(0.0));
+        assertFalse(Numbers.isPowerOfTwo(3.0));
+        assertFalse(Numbers.isPowerOfTwo(Double.NaN));
+        assertFalse(Numbers.isPowerOfTwo(Double.POSITIVE_INFINITY));
+
+        assertTrue(Numbers.isPowerOfTwo(BigInteger.ONE));
+        assertTrue(Numbers.isPowerOfTwo(BigInteger.valueOf(1024)));
+        assertFalse(Numbers.isPowerOfTwo(BigInteger.ZERO));
+        assertFalse(Numbers.isPowerOfTwo(new BigInteger("3")));
+        assertFalse(Numbers.isPowerOfTwo(new BigInteger("-2")));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.isPowerOfTwo((BigInteger) null));
+    }
+
+    // isPrime
+
+    @Test
+    public void testIsPrime() {
+        assertFalse(Numbers.isPrime(0));
+        assertFalse(Numbers.isPrime(1));
+        assertTrue(Numbers.isPrime(2));
+        assertTrue(Numbers.isPrime(3));
+        assertFalse(Numbers.isPrime(4));
+        assertTrue(Numbers.isPrime(97));
+        assertTrue(Numbers.isPrime(7919));
+        assertFalse(Numbers.isPrime(100));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.isPrime(-1));
+
+        for (int i = 0; i <= 1000; i++) {
+            assertEquals(Numbers.isPrime((long) i), Numbers.isPrime(i));
+        }
+        for (int n = 0; n < 50_000; n++) {
+            assertEquals(BigInteger.valueOf(n).isProbablePrime(100), Numbers.isPrime(n), "n=" + n);
+        }
+    }
+
+    @Test
+    public void testIsPrime_long() {
+        assertFalse(Numbers.isPrime(0L));
+        assertFalse(Numbers.isPrime(1L));
+        assertTrue(Numbers.isPrime(2L));
+        assertTrue(Numbers.isPrime(13L));
+        assertFalse(Numbers.isPrime(14L));
+        assertFalse(Numbers.isPrime(289L));
+        assertTrue(Numbers.isPrime(9007199254740881L));
+        assertFalse(Numbers.isPrime(9007199254740880L));
+        assertTrue(Numbers.isPrime(3215031767L));
+        assertFalse(Numbers.isPrime(3215031751L));
+        assertTrue(Numbers.isPrime(999999999999999877L));
+        assertFalse(Numbers.isPrime(561));
+        assertFalse(Numbers.isPrime(1105));
+        assertFalse(Numbers.isPrime(1729));
+        assertFalse(Numbers.isPrime(41041));
+        assertFalse(Numbers.isPrime(2047));
+        for (final long n : new long[] { 2047, 3277, 4033, 8321, 3215031751L, 3825123056546413051L }) {
+            assertFalse(Numbers.isPrime(n), "strong pseudoprime must be rejected: " + n);
+        }
+    }
+
+    @Test
+    public void c021_isPrimeLargeValuesAfterUnsignedLongsRemoval() {
+        assertFalse(Numbers.isPrime(Long.MAX_VALUE)); // 2^63 - 1 = 7^2 * 73 * 127 * 337 * 92737 * 649657
+        assertTrue(Numbers.isPrime(9223372036854775783L)); // largest prime below 2^63
+        assertTrue(Numbers.isPrime(Long.MAX_VALUE - 24));
+        assertFalse(Numbers.isPrime(Long.MAX_VALUE - 25));
+        assertFalse(Numbers.isPrime(3825123056546413051L)); // strong pseudoprime to the first nine prime bases
+        assertTrue(Numbers.isPrime(3037000493L)); // largest prime not above FLOOR_SQRT_MAX_LONG (SMALL tester)
+        assertTrue(Numbers.isPrime(3037000507L)); // first prime above FLOOR_SQRT_MAX_LONG (LARGE tester)
+
+        final Random random = new Random(20260924L);
+
+        for (int i = 0; i < 3000; i++) {
+            final long n = (random.nextLong() >>> 1) | (1L << 62) | 1L; // odd, in [2^62, 2^63)
+            assertEquals(BigInteger.valueOf(n).isProbablePrime(100), Numbers.isPrime(n), "n=" + n);
+        }
+
+        for (int i = 0; i < 3000; i++) {
+            final long n = 3037000499L + 1 + (random.nextLong() >>> 30); // just above the SMALL/LARGE threshold
+            assertEquals(BigInteger.valueOf(n).isProbablePrime(100), Numbers.isPrime(n), "n=" + n);
+        }
+    }
 }

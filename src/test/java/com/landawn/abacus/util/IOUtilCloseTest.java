@@ -23,36 +23,21 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedInterruptedException;
 
 public class IOUtilCloseTest extends IOUtilTestSupport {
+
+    // close
+
     @Test
-    public void testCloseOperationsPreserveInterrupt() {
-        org.junit.jupiter.api.Assertions.assertAll(() -> {
-            try {
-                IOUtil.closeQuietly(() -> {
-                    throw new InterruptedException();
-                });
-                assertTrue(Thread.currentThread().isInterrupted());
-            } finally {
-                Thread.interrupted();
-            }
-        }, () -> {
-            final IOException firstFailure = new IOException("first");
-            final InterruptedException interruption = new InterruptedException("second");
-            final AtomicInteger closed = new AtomicInteger();
+    public void testClose_AutoCloseable() throws Exception {
+        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
+        IOUtil.close(is);
 
-            try {
-                final UncheckedIOException failure = assertThrows(UncheckedIOException.class, () -> IOUtil.closeAll(Arrays.asList(() -> {
-                    throw firstFailure;
-                }, () -> {
-                    throw interruption;
-                }, () -> closed.incrementAndGet())));
+        assertThrows(IOException.class, () -> is.read());
+    }
 
-                assertEquals(firstFailure, failure.getCause());
-                assertArrayEquals(new Throwable[] { interruption }, firstFailure.getSuppressed());
-                assertEquals(1, closed.get());
-                assertTrue(Thread.currentThread().isInterrupted());
-            } finally {
-                Thread.interrupted();
-            }
+    @Test
+    public void testClose_NullAutoCloseable() {
+        assertDoesNotThrow(() -> {
+            IOUtil.close((AutoCloseable) null);
         });
     }
 
@@ -60,13 +45,6 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     public void testClose_NullURLConnection() {
         assertDoesNotThrow(() -> {
             IOUtil.close((java.net.URLConnection) null);
-        });
-    }
-
-    @Test
-    public void testClose_NullAutoCloseable() {
-        assertDoesNotThrow(() -> {
-            IOUtil.close((AutoCloseable) null);
         });
     }
 
@@ -86,14 +64,6 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
 
             IOUtil.close(conn);
         });
-    }
-
-    @Test
-    public void testClose_AutoCloseable() throws Exception {
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-        IOUtil.close(is);
-
-        assertThrows(IOException.class, () -> is.read());
     }
 
     @Test
@@ -126,10 +96,33 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testCloseAll_EmptyVarArgs() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeAll();
-        });
+    public void testCloseAutoCloseableInterruptRestoresStatus() {
+        final InterruptedException interruption = new InterruptedException("close interrupted");
+
+        try {
+            final UncheckedInterruptedException failure = assertThrows(UncheckedInterruptedException.class, () -> IOUtil.close(() -> {
+                throw interruption;
+            }));
+
+            assertEquals(interruption, failure.getCause());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    // closeAll
+
+    @Test
+    public void testCloseAll_ContinuesOnException() {
+        AutoCloseable problematic = () -> {
+            throw new IOException("Error in first closeable");
+        };
+        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data".getBytes(UTF_8)));
+
+        assertThrows(UncheckedIOException.class, () -> IOUtil.closeAll(problematic, is));
+
+        assertThrows(IOException.class, () -> is.read());
     }
 
     @Test
@@ -141,28 +134,10 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testCloseAll_VarArgs() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAll(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is2.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAll_WithNulls() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = null;
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAll(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
+    public void testCloseAll_EmptyVarArgs() {
+        assertDoesNotThrow(() -> {
+            IOUtil.closeAll();
+        });
     }
 
     @Test
@@ -198,61 +173,31 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testCloseAll_ContinuesOnException() {
-        AutoCloseable problematic = () -> {
-            throw new IOException("Error in first closeable");
-        };
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data".getBytes(UTF_8)));
-
-        assertThrows(UncheckedIOException.class, () -> IOUtil.closeAll(problematic, is));
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testCloseQuietly_Null() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeQuietly((AutoCloseable) null);
-        });
-    }
-
-    @Test
-    public void testCloseQuietly_AutoCloseable() throws Exception {
-        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
-        IOUtil.closeQuietly(is);
-
-        assertThrows(IOException.class, () -> is.read());
-    }
-
-    @Test
-    public void testCloseQuietly_WithException() {
-        assertDoesNotThrow(() -> {
-            AutoCloseable problematic = () -> {
-                throw new IOException("Test exception");
-            };
-
-            IOUtil.closeQuietly(problematic);
-        });
-    }
-
-    @Test
-    public void testCloseQuietly_MultipleResources() throws Exception {
+    public void testCloseAll_VarArgs() throws Exception {
         InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
         InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
+        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
 
-        IOUtil.closeQuietly(is1);
-        IOUtil.closeQuietly(is2);
+        IOUtil.closeAll(is1, is2, is3);
 
         assertThrows(IOException.class, () -> is1.read());
         assertThrows(IOException.class, () -> is2.read());
+        assertThrows(IOException.class, () -> is3.read());
     }
 
     @Test
-    public void testCloseAllQuietly_EmptyVarArgs() {
-        assertDoesNotThrow(() -> {
-            IOUtil.closeAllQuietly();
-        });
+    public void testCloseAll_WithNulls() throws Exception {
+        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
+        InputStream is2 = null;
+        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
+
+        IOUtil.closeAll(is1, is2, is3);
+
+        assertThrows(IOException.class, () -> is1.read());
+        assertThrows(IOException.class, () -> is3.read());
     }
+
+    // closeAllQuietly
 
     @Test
     public void testCloseAllQuietly_EmptyIterable() {
@@ -263,35 +208,10 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testCloseAllQuietly_NullIterable() {
+    public void testCloseAllQuietly_EmptyVarArgs() {
         assertDoesNotThrow(() -> {
-            IOUtil.closeAllQuietly((Iterable<? extends AutoCloseable>) null);
+            IOUtil.closeAllQuietly();
         });
-    }
-
-    @Test
-    public void testCloseAllQuietly_VarArgs() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAllQuietly(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is2.read());
-        assertThrows(IOException.class, () -> is3.read());
-    }
-
-    @Test
-    public void testCloseAllQuietly_WithNulls() throws Exception {
-        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
-        InputStream is2 = null;
-        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
-
-        IOUtil.closeAllQuietly(is1, is2, is3);
-
-        assertThrows(IOException.class, () -> is1.read());
-        assertThrows(IOException.class, () -> is3.read());
     }
 
     @Test
@@ -326,6 +246,38 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
+    public void testCloseAllQuietly_MixedTypes() throws Exception {
+        FileInputStream fis = new FileInputStream(tempFile);
+        java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile);
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+
+        IOUtil.closeAllQuietly(fis, br, baos);
+
+        assertThrows(IOException.class, () -> fis.read());
+        assertThrows(IOException.class, () -> br.read());
+    }
+
+    @Test
+    public void testCloseAllQuietly_NullIterable() {
+        assertDoesNotThrow(() -> {
+            IOUtil.closeAllQuietly((Iterable<? extends AutoCloseable>) null);
+        });
+    }
+
+    @Test
+    public void testCloseAllQuietly_VarArgs() throws Exception {
+        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
+        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
+        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
+
+        IOUtil.closeAllQuietly(is1, is2, is3);
+
+        assertThrows(IOException.class, () -> is1.read());
+        assertThrows(IOException.class, () -> is2.read());
+        assertThrows(IOException.class, () -> is3.read());
+    }
+
+    @Test
     public void testCloseAllQuietly_WithExceptions() {
         AutoCloseable problematic1 = () -> {
             throw new IOException("Error 1");
@@ -341,30 +293,88 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testCloseAllQuietly_MixedTypes() throws Exception {
-        FileInputStream fis = new FileInputStream(tempFile);
-        java.io.BufferedReader br = IOUtil.newBufferedReader(tempFile);
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+    public void testCloseAllQuietly_WithNulls() throws Exception {
+        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
+        InputStream is2 = null;
+        InputStream is3 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data3".getBytes(UTF_8)));
 
-        IOUtil.closeAllQuietly(fis, br, baos);
+        IOUtil.closeAllQuietly(is1, is2, is3);
 
-        assertThrows(IOException.class, () -> fis.read());
-        assertThrows(IOException.class, () -> br.read());
+        assertThrows(IOException.class, () -> is1.read());
+        assertThrows(IOException.class, () -> is3.read());
     }
 
     @Test
-    public void testCloseAutoCloseableInterruptRestoresStatus() {
-        final InterruptedException interruption = new InterruptedException("close interrupted");
+    public void testCloseOperationsPreserveInterrupt() {
+        org.junit.jupiter.api.Assertions.assertAll(() -> {
+            try {
+                IOUtil.closeQuietly(() -> {
+                    throw new InterruptedException();
+                });
+                assertTrue(Thread.currentThread().isInterrupted());
+            } finally {
+                Thread.interrupted();
+            }
+        }, () -> {
+            final IOException firstFailure = new IOException("first");
+            final InterruptedException interruption = new InterruptedException("second");
+            final AtomicInteger closed = new AtomicInteger();
 
-        try {
-            final UncheckedInterruptedException failure = assertThrows(UncheckedInterruptedException.class, () -> IOUtil.close(() -> {
-                throw interruption;
-            }));
+            try {
+                final UncheckedIOException failure = assertThrows(UncheckedIOException.class, () -> IOUtil.closeAll(Arrays.asList(() -> {
+                    throw firstFailure;
+                }, () -> {
+                    throw interruption;
+                }, () -> closed.incrementAndGet())));
 
-            assertEquals(interruption, failure.getCause());
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
+                assertEquals(firstFailure, failure.getCause());
+                assertArrayEquals(new Throwable[] { interruption }, firstFailure.getSuppressed());
+                assertEquals(1, closed.get());
+                assertTrue(Thread.currentThread().isInterrupted());
+            } finally {
+                Thread.interrupted();
+            }
+        });
     }
+
+    // closeQuietly
+
+    @Test
+    public void testCloseQuietly_AutoCloseable() throws Exception {
+        InputStream is = IOUtil.newBufferedInputStream(new ByteArrayInputStream(TEST_CONTENT.getBytes(UTF_8)));
+        IOUtil.closeQuietly(is);
+
+        assertThrows(IOException.class, () -> is.read());
+    }
+
+    @Test
+    public void testCloseQuietly_MultipleResources() throws Exception {
+        InputStream is1 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data1".getBytes(UTF_8)));
+        InputStream is2 = IOUtil.newBufferedInputStream(new ByteArrayInputStream("data2".getBytes(UTF_8)));
+
+        IOUtil.closeQuietly(is1);
+        IOUtil.closeQuietly(is2);
+
+        assertThrows(IOException.class, () -> is1.read());
+        assertThrows(IOException.class, () -> is2.read());
+    }
+
+    @Test
+    public void testCloseQuietly_Null() {
+        assertDoesNotThrow(() -> {
+            IOUtil.closeQuietly((AutoCloseable) null);
+        });
+    }
+
+    @Test
+    public void testCloseQuietly_WithException() {
+        assertDoesNotThrow(() -> {
+            AutoCloseable problematic = () -> {
+                throw new IOException("Test exception");
+            };
+
+            IOUtil.closeQuietly(problematic);
+        });
+    }
+
 }

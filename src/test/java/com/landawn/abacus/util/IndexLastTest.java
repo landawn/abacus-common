@@ -15,6 +15,8 @@ import com.landawn.abacus.util.u.OptionalInt;
 
 public class IndexLastTest extends IndexTestSupport {
 
+    // last
+
     @Test
     public void testLast_BooleanArray() {
         final boolean[] array = { true, false, true, false, true };
@@ -28,14 +30,6 @@ public class IndexLastTest extends IndexTestSupport {
     }
 
     @Test
-    public void testLast_CharArray() {
-        final char[] array = { 'a', 'b', 'c', 'b' };
-        assertEquals(OptionalInt.of(3), Index.last(array, 'b'));
-        assertEquals(OptionalInt.of(1), Index.last(array, 'b', 2));
-        assertEquals(OptionalInt.of(3), Index.last(array, 'b', 10));
-    }
-
-    @Test
     public void testLast_ByteArray() {
         final byte[] array = { 1, 2, 3, 2 };
         assertEquals(OptionalInt.of(3), Index.last(array, (byte) 2));
@@ -44,44 +38,21 @@ public class IndexLastTest extends IndexTestSupport {
     }
 
     @Test
-    public void testLast_ShortArray() {
-        final short[] array = { 1, 2, 3, 2 };
-        assertEquals(OptionalInt.of(3), Index.last(array, (short) 2));
-        assertEquals(OptionalInt.of(1), Index.last(array, (short) 2, 2));
-        assertEquals(OptionalInt.of(3), Index.last(array, (short) 2, 10));
+    public void testLast_CharArray() {
+        final char[] array = { 'a', 'b', 'c', 'b' };
+        assertEquals(OptionalInt.of(3), Index.last(array, 'b'));
+        assertEquals(OptionalInt.of(1), Index.last(array, 'b', 2));
+        assertEquals(OptionalInt.of(3), Index.last(array, 'b', 10));
     }
 
     @Test
-    public void testLast_IntArray() {
-        final int[] array = { 1, 2, 3, 2, 1 };
-        assertEquals(OptionalInt.of(3), Index.last(array, 2));
-        assertEquals(OptionalInt.of(1), Index.last(array, 2, 2));
-        assertEquals(OptionalInt.of(3), Index.last(array, 2, 100));
-        assertEquals(OptionalInt.of(3), Index.last(array, 2, Integer.MAX_VALUE));
-    }
-
-    @Test
-    public void testLast_LongArray() {
-        final long[] array = { 1L, 2L, 3L, 2L };
-        assertEquals(OptionalInt.of(3), Index.last(array, 2L));
-        assertEquals(OptionalInt.of(1), Index.last(array, 2L, 2));
-        assertEquals(OptionalInt.of(3), Index.last(array, 2L, 10));
-    }
-
-    @Test
-    public void testLast_FloatArray() {
-        final float[] array = { 1.0f, 2.0f, 3.0f, 2.0f };
-        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f));
-        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2));
-        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f, 10));
-    }
-
-    @Test
-    public void testLast_FloatArray_Tolerance() {
-        final float[] array = { 1.0f, 2.0f, 3.0f, 2.1f };
-        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2, 0.2f));
-        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f, 10, 0.2f));
-        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2, 0.05f));
+    public void testLast_Collection() {
+        final List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
+        assertEquals(OptionalInt.of(3), Index.last(list, "banana"));
+        assertEquals(OptionalInt.of(1), Index.last(list, "banana", 2));
+        assertEquals(OptionalInt.of(3), Index.last(new LinkedList<>(list), "banana"));
+        assertEquals(OptionalInt.empty(), Index.last((List<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.last(Collections.emptyList(), "a"));
     }
 
     @Test
@@ -103,6 +74,39 @@ public class IndexLastTest extends IndexTestSupport {
     }
 
     @Test
+    public void testLast_FloatArray() {
+        final float[] array = { 1.0f, 2.0f, 3.0f, 2.0f };
+        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f));
+        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2));
+        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f, 10));
+    }
+
+    @Test
+    public void testLast_FloatArray_Tolerance() {
+        final float[] array = { 1.0f, 2.0f, 3.0f, 2.1f };
+        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2, 0.2f));
+        assertEquals(OptionalInt.of(3), Index.last(array, 2.0f, 10, 0.2f));
+        assertEquals(OptionalInt.of(1), Index.last(array, 2.0f, 2, 0.05f));
+    }
+
+    @Test
+    public void testLast_IntArray() {
+        final int[] array = { 1, 2, 3, 2, 1 };
+        assertEquals(OptionalInt.of(3), Index.last(array, 2));
+        assertEquals(OptionalInt.of(1), Index.last(array, 2, 2));
+        assertEquals(OptionalInt.of(3), Index.last(array, 2, 100));
+        assertEquals(OptionalInt.of(3), Index.last(array, 2, Integer.MAX_VALUE));
+    }
+
+    @Test
+    public void testLast_LongArray() {
+        final long[] array = { 1L, 2L, 3L, 2L };
+        assertEquals(OptionalInt.of(3), Index.last(array, 2L));
+        assertEquals(OptionalInt.of(1), Index.last(array, 2L, 2));
+        assertEquals(OptionalInt.of(3), Index.last(array, 2L, 10));
+    }
+
+    @Test
     public void testLast_ObjectArray() {
         final String[] array = { "apple", "banana", "cherry", "banana", "date" };
         assertEquals(OptionalInt.of(3), Index.last(array, "banana"));
@@ -112,13 +116,11 @@ public class IndexLastTest extends IndexTestSupport {
     }
 
     @Test
-    public void testLast_Collection() {
-        final List<String> list = Arrays.asList("apple", "banana", "cherry", "banana", "date");
-        assertEquals(OptionalInt.of(3), Index.last(list, "banana"));
-        assertEquals(OptionalInt.of(1), Index.last(list, "banana", 2));
-        assertEquals(OptionalInt.of(3), Index.last(new LinkedList<>(list), "banana"));
-        assertEquals(OptionalInt.empty(), Index.last((List<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.last(Collections.emptyList(), "a"));
+    public void testLast_ShortArray() {
+        final short[] array = { 1, 2, 3, 2 };
+        assertEquals(OptionalInt.of(3), Index.last(array, (short) 2));
+        assertEquals(OptionalInt.of(1), Index.last(array, (short) 2, 2));
+        assertEquals(OptionalInt.of(3), Index.last(array, (short) 2, 10));
     }
 
     @Test
@@ -161,6 +163,8 @@ public class IndexLastTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(4), Index.lastOfIgnoreCase("aBcAbC", "bc", 10));
         assertFalse(Index.lastOfIgnoreCase((String) null, "a").isPresent());
     }
+
+    // lastOfSubArray
 
     @Test
     public void testLastOfSubArray() {
@@ -215,21 +219,7 @@ public class IndexLastTest extends IndexTestSupport {
         assertFalse(Index.lastOfSubArray(new char[] { 'a' }, -1, new char[0], 0, 0).isPresent());
     }
 
-    @Test
-    public void testLastOfSubList() {
-        final List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
-        assertEquals(OptionalInt.of(2), Index.lastOfSubList(list, Arrays.asList("apple", "banana")));
-        assertEquals(OptionalInt.of(5), Index.lastOfSubList(list, new ArrayList<>()));
-        assertEquals(OptionalInt.of(2), Index.lastOfSubList(new LinkedList<>(list), new LinkedList<>(Arrays.asList("apple", "banana"))));
 
-        final List<Integer> source = Arrays.asList(1, 2, 3, 1, 2, 3, 4);
-        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, Arrays.asList(1, 2, 3)));
-        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 3, Arrays.asList(1, 2, 3)));
-        assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, Arrays.asList(1, 2, 3)));
-        assertFalse(Index.lastOfSubList((List<?>) null, 5, new ArrayList<>(), 0, 0).isPresent());
-        assertFalse(Index.lastOfSubList(Arrays.asList(1), 5, (List<?>) null, 0, 0).isPresent());
-        assertFalse(Index.lastOfSubList(Arrays.asList(1), -1, new ArrayList<>(), 0, 0).isPresent());
-    }
 
     /**
      * G31-001 contract pin: for the indexed {@code lastOfSubArray} forms an empty pattern is a zero-width match at
@@ -265,4 +255,21 @@ public class IndexLastTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, 99, new int[0]));
         assertEquals(OptionalInt.of(3), Index.lastOfSubArray(source, new int[0]));
     }
+
+    @Test
+    public void testLastOfSubList() {
+        final List<String> list = Arrays.asList("apple", "banana", "apple", "banana", "cherry");
+        assertEquals(OptionalInt.of(2), Index.lastOfSubList(list, Arrays.asList("apple", "banana")));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubList(list, new ArrayList<>()));
+        assertEquals(OptionalInt.of(2), Index.lastOfSubList(new LinkedList<>(list), new LinkedList<>(Arrays.asList("apple", "banana"))));
+
+        final List<Integer> source = Arrays.asList(1, 2, 3, 1, 2, 3, 4);
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, Arrays.asList(1, 2, 3)));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 3, Arrays.asList(1, 2, 3)));
+        assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, Arrays.asList(1, 2, 3)));
+        assertFalse(Index.lastOfSubList((List<?>) null, 5, new ArrayList<>(), 0, 0).isPresent());
+        assertFalse(Index.lastOfSubList(Arrays.asList(1), 5, (List<?>) null, 0, 0).isPresent());
+        assertFalse(Index.lastOfSubList(Arrays.asList(1), -1, new ArrayList<>(), 0, 0).isPresent());
+    }
+
 }

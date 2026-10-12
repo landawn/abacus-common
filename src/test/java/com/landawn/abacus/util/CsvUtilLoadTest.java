@@ -24,6 +24,8 @@ import com.landawn.abacus.util.function.TriConsumer;
 
 public class CsvUtilLoadTest extends CsvUtilTestSupport {
 
+    // load
+
     @Test
     public void testLoad() {
         Dataset fromFile = CsvUtil.load(testCsvFile);
@@ -39,52 +41,6 @@ public class CsvUtilLoadTest extends CsvUtilTestSupport {
         assertEquals(5, fromReader.size());
         assertEquals("1", fromReader.get(0, 0));
         assertEquals("John", fromReader.get(0, 1));
-    }
-
-    @Test
-    public void testLoad_SelectColumns() {
-        Dataset fileCols = CsvUtil.load(testCsvFile, List.of("name", "age"));
-        assertEquals(2, fileCols.columnCount());
-        assertEquals(5, fileCols.size());
-        assertEquals(List.of("name", "age"), fileCols.columnNames());
-
-        Dataset readerCols = CsvUtil.load(new StringReader(testCsvContent), List.of("name", "age"));
-        assertEquals(2, readerCols.columnCount());
-        assertEquals(5, readerCols.size());
-
-        Dataset allSelected = CsvUtil.load(testCsvFile, List.of("id", "name", "age", "active"));
-        assertEquals(4, allSelected.columnCount());
-        Dataset single = CsvUtil.load(testCsvFile, List.of("name"));
-        assertEquals(1, single.columnCount());
-        assertEquals("John", single.get(0, 0));
-        assertEquals(1, CsvUtil.load(new StringReader(testCsvContent), List.of("name")).columnCount());
-        assertEquals(4, CsvUtil.load(testCsvFile, (List<String>) null).columnCount());
-    }
-
-    @Test
-    public void testLoad_OffsetCountFilter() {
-        Dataset offset = CsvUtil.load(testCsvFile, List.of("name", "age"), 1, 2);
-        assertEquals(2, offset.size());
-        assertEquals("Jane", offset.get(0, 0));
-        assertEquals("Bob", offset.get(1, 0));
-
-        Dataset readerOffset = CsvUtil.load(new StringReader(testCsvContent), null, 1, 2);
-        assertEquals(4, readerOffset.columnCount());
-        assertEquals(2, readerOffset.size());
-
-        Dataset active = CsvUtil.load(testCsvFile, null, 0, Long.MAX_VALUE, row -> "true".equals(row[3]));
-        assertEquals(3, active.size());
-        Dataset older = CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 30);
-        assertEquals(2, older.size());
-        Dataset fileFilter = CsvUtil.load(testCsvFile, null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 30);
-        assertTrue(fileFilter.size() >= 2);
-        Dataset readerFilter = CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) <= 30);
-        assertTrue(readerFilter.size() >= 3);
-
-        assertEquals(0, CsvUtil.load(testCsvFile, null, 0, 0).size());
-        assertEquals(0, CsvUtil.load(testCsvFile, null, 100, Long.MAX_VALUE).size());
-        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), null, 0, 0).size());
-        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 100).size());
     }
 
     @Test
@@ -135,6 +91,226 @@ public class CsvUtilLoadTest extends CsvUtilTestSupport {
         assertThrows(IllegalArgumentException.class,
                 () -> CsvUtil.load(new StringReader("id,name,age\n1,John,25"), List.of("nonexistent"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class));
         assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), Person.class));
+    }
+
+    @Test
+    public void testLoad_EdgeCase() throws IOException {
+        ParsingException ragged = assertThrows(ParsingException.class, () -> {
+            File raggedFile = tempDir.resolve("ragged.csv").toFile();
+            Files.writeString(raggedFile.toPath(), "a,b,c\n1,2,3\n4,5,6,7\n");
+            CsvUtil.load(raggedFile);
+        });
+        assertTrue(ragged.getMessage().contains("3 column"));
+
+        File emptyFile = tempDir.resolve("empty.csv").toFile();
+        Files.writeString(emptyFile.toPath(), "");
+        assertEquals(0, CsvUtil.load(emptyFile).size());
+        assertEquals(0, CsvUtil.load(new StringReader("")).size());
+
+        File headerOnly = tempDir.resolve("header.csv").toFile();
+        Files.writeString(headerOnly.toPath(), "id,name,age\n");
+        Dataset headerDs = CsvUtil.load(headerOnly);
+        assertEquals(3, headerDs.columnCount());
+        assertEquals(0, headerDs.size());
+        Dataset readerHeader = CsvUtil.load(new StringReader("id,name,age\n"));
+        assertEquals(3, readerHeader.columnCount());
+        assertEquals(0, readerHeader.size());
+
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, null, -1, 10));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, null, 0, -1));
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent")));
+    }
+
+    @Test
+    public void testLoad_EmptySelectColumns() {
+        assertEquals(0, CsvUtil.load(testCsvFile, List.of()).columnCount());
+        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), List.of()).columnCount());
+        assertEquals(0, CsvUtil.load(testCsvFile, List.of(), Person.class).columnCount());
+        Map<String, Type<?>> typeMap = new HashMap<>();
+        typeMap.put("age", Type.of(Integer.class));
+        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), List.of(), 0, Long.MAX_VALUE, Fn.alwaysTrue(), typeMap).columnCount());
+        assertEquals(0, CsvUtil.load(testCsvFile, List.of(), (columns, row, output) -> {
+            for (int i = 0; i < output.length; i++) {
+                output[i] = row.get(i);
+            }
+        }).columnCount());
+    }
+
+    @Test
+    public void testLoad_NonBeanColumnTypeClassRecyclesBorrowedBufferedReader() {
+        List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
+        java.io.BufferedReader markerReader = null;
+        java.io.BufferedReader nextReader = null;
+        try {
+            for (int i = 0; i < 64; i++) {
+                drainedReaders.add(Objectory.createBufferedReader("drain-" + i));
+            }
+            markerReader = Objectory.createBufferedReader("marker");
+            Objectory.recycle(markerReader);
+            assertThrows(IllegalArgumentException.class,
+                    () -> CsvUtil.load(new StringReader("a,b\n1,2\n"), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), String.class));
+            nextReader = Objectory.createBufferedReader("next");
+            assertSame(markerReader, nextReader);
+        } finally {
+            if (nextReader != null && nextReader != markerReader) {
+                Objectory.recycle(nextReader);
+            }
+            if (markerReader != null) {
+                Objectory.recycle(markerReader);
+            }
+            for (java.io.BufferedReader reader : drainedReaders) {
+                Objectory.recycle(reader);
+            }
+        }
+    }
+
+    @Test
+    public void testLoad_OffsetCountFilter() {
+        Dataset offset = CsvUtil.load(testCsvFile, List.of("name", "age"), 1, 2);
+        assertEquals(2, offset.size());
+        assertEquals("Jane", offset.get(0, 0));
+        assertEquals("Bob", offset.get(1, 0));
+
+        Dataset readerOffset = CsvUtil.load(new StringReader(testCsvContent), null, 1, 2);
+        assertEquals(4, readerOffset.columnCount());
+        assertEquals(2, readerOffset.size());
+
+        Dataset active = CsvUtil.load(testCsvFile, null, 0, Long.MAX_VALUE, row -> "true".equals(row[3]));
+        assertEquals(3, active.size());
+        Dataset older = CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 30);
+        assertEquals(2, older.size());
+        Dataset fileFilter = CsvUtil.load(testCsvFile, null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 30);
+        assertTrue(fileFilter.size() >= 2);
+        Dataset readerFilter = CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) <= 30);
+        assertTrue(readerFilter.size() >= 3);
+
+        assertEquals(0, CsvUtil.load(testCsvFile, null, 0, 0).size());
+        assertEquals(0, CsvUtil.load(testCsvFile, null, 100, Long.MAX_VALUE).size());
+        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), null, 0, 0).size());
+        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) > 100).size());
+    }
+
+    @Test
+    public void testLoad_Rfc4180AndBom() throws IOException {
+        File rfc = tempDir.resolve("rfc4180.csv").toFile();
+        Files.writeString(rfc.toPath(), "name,note\n\"Doe, John\",hello\n\"He said \"\"hi\"\"\",end\n");
+        Dataset ds = CsvUtil.load(rfc);
+        assertEquals(2, ds.size());
+        assertEquals("Doe, John", ds.get(0, 0));
+        assertEquals("He said \"hi\"", ds.get(1, 0));
+
+        File noEol = tempDir.resolve("noeol.csv").toFile();
+        Files.writeString(noEol.toPath(), "a,b,c\n1,2,3");
+        Dataset last = CsvUtil.load(noEol);
+        assertEquals(1, last.size());
+        assertEquals("3", last.get(0, 2));
+
+        File dup = tempDir.resolve("dup.csv").toFile();
+        Files.writeString(dup.toPath(), "a,a,b\n1,2,3\n");
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(dup));
+
+        File bom = tempDir.resolve("bom.csv").toFile();
+        byte[] bomBytes = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+        byte[] body = "id,name\n1,John\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        byte[] all = new byte[bomBytes.length + body.length];
+        System.arraycopy(bomBytes, 0, all, 0, bomBytes.length);
+        System.arraycopy(body, 0, all, bomBytes.length, body.length);
+        Files.write(bom.toPath(), all);
+        assertEquals("id", CsvUtil.load(bom).columnNames().get(0));
+    }
+
+    @Test
+    public void testLoad_RowExtractor() {
+        TriConsumer<List<String>, DisposableArray<String>, Object[]> copy = (columns, row, output) -> {
+            for (int i = 0; i < row.length(); i++) {
+                output[i] = row.get(i);
+            }
+        };
+        TriConsumer<List<String>, DisposableArray<String>, Object[]> typed = (columns, row, output) -> {
+            output[0] = row.get(0);
+            output[1] = row.get(1).toUpperCase();
+            output[2] = Integer.parseInt(row.get(2));
+            output[3] = Boolean.parseBoolean(row.get(3));
+        };
+
+        Dataset fileExtracted = CsvUtil.load(testCsvFile, typed);
+        assertEquals(5, fileExtracted.size());
+        assertEquals("JOHN", fileExtracted.get(0, 1));
+        assertEquals(Integer.valueOf(25), fileExtracted.get(0, 2));
+        assertEquals(5, CsvUtil.load(new StringReader(testCsvContent), copy).size());
+
+        Dataset selected = CsvUtil.load(testCsvFile, List.of("name", "age"), (columns, row, output) -> {
+            output[0] = row.get(0);
+            output[1] = Integer.parseInt(row.get(1));
+        });
+        assertEquals(2, selected.columnCount());
+        assertEquals(2, CsvUtil.load(testCsvFile, 1, 2, copy).size());
+        assertEquals(3, CsvUtil.load(testCsvFile, List.of("id", "name"), 0, Long.MAX_VALUE, row -> Integer.parseInt(row[0]) <= 3, (columns, row, output) -> {
+            output[0] = row.get(0);
+            output[1] = row.get(1);
+        }).size());
+        assertEquals(5, CsvUtil.load(new StringReader(testCsvContent), List.of("name", "age"), (columns, row, output) -> {
+            output[0] = row.get(0);
+            output[1] = row.get(1);
+        }).size());
+        assertEquals(3, CsvUtil.load(new StringReader(testCsvContent), 1, 3, copy).size());
+        assertEquals(3, CsvUtil.load(new StringReader(testCsvContent), List.of("id", "age"), 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) >= 30,
+                (columns, row, output) -> {
+                    output[0] = row.get(0);
+                    output[1] = Integer.parseInt(row.get(1));
+                }).size());
+        assertEquals(2, CsvUtil.load(new StringReader(testCsvContent), 2, 2, copy).size());
+
+        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, null,
+                (TriConsumer<List<String>, DisposableArray<String>, Object[]>) null));
+    }
+
+    @Test
+    public void testLoad_RowFieldCountAgainstHeaderContract() {
+        ParsingException tooManyFields = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader("a,b\n1,2,3\n")));
+        assertTrue(tooManyFields.getMessage().contains("more fields than the expected 2 column(s)"));
+
+        Dataset padded = CsvUtil.load(new StringReader("a,b,c\n1,2\n"));
+        assertEquals(1, padded.size());
+        assertEquals(3, padded.columnCount());
+        assertEquals("1", padded.get(0, 0));
+        assertEquals("2", padded.get(0, 1));
+        assertNull(padded.get(0, 2));
+    }
+
+    @Test
+    public void testLoad_RowFilterSeesWholeRawRowInHeaderOrderAfterOffset() {
+        final List<Integer> seenLengths = new ArrayList<>();
+        final Dataset ds = CsvUtil.load(new StringReader("id,name,age\n1,A,30\n2,B,5\n3,C,40\n4,D,50\n"), List.of("name", "age"), 1, 1, row -> {
+            seenLengths.add(row.length);
+            return Integer.parseInt(row[2]) > 18;
+        });
+
+        // offset skipped raw row A before the filter; B was rejected; count stopped after the first accepted row C.
+        assertEquals(List.of(3, 3), seenLengths);
+        assertEquals(List.of("name", "age"), new ArrayList<>(ds.columnNames()));
+        assertEquals(1, ds.size());
+        assertEquals(List.of("C"), new ArrayList<>(ds.<String> getColumn("name")));
+    }
+
+    @Test
+    public void testLoad_SelectColumns() {
+        Dataset fileCols = CsvUtil.load(testCsvFile, List.of("name", "age"));
+        assertEquals(2, fileCols.columnCount());
+        assertEquals(5, fileCols.size());
+        assertEquals(List.of("name", "age"), fileCols.columnNames());
+
+        Dataset readerCols = CsvUtil.load(new StringReader(testCsvContent), List.of("name", "age"));
+        assertEquals(2, readerCols.columnCount());
+        assertEquals(5, readerCols.size());
+
+        Dataset allSelected = CsvUtil.load(testCsvFile, List.of("id", "name", "age", "active"));
+        assertEquals(4, allSelected.columnCount());
+        Dataset single = CsvUtil.load(testCsvFile, List.of("name"));
+        assertEquals(1, single.columnCount());
+        assertEquals("John", single.get(0, 0));
+        assertEquals(1, CsvUtil.load(new StringReader(testCsvContent), List.of("name")).columnCount());
+        assertEquals(4, CsvUtil.load(testCsvFile, (List<String>) null).columnCount());
     }
 
     @Test
@@ -195,177 +371,4 @@ public class CsvUtilLoadTest extends CsvUtilTestSupport {
                 () -> CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), new HashMap<>()));
     }
 
-    @Test
-    public void testLoad_RowExtractor() {
-        TriConsumer<List<String>, DisposableArray<String>, Object[]> copy = (columns, row, output) -> {
-            for (int i = 0; i < row.length(); i++) {
-                output[i] = row.get(i);
-            }
-        };
-        TriConsumer<List<String>, DisposableArray<String>, Object[]> typed = (columns, row, output) -> {
-            output[0] = row.get(0);
-            output[1] = row.get(1).toUpperCase();
-            output[2] = Integer.parseInt(row.get(2));
-            output[3] = Boolean.parseBoolean(row.get(3));
-        };
-
-        Dataset fileExtracted = CsvUtil.load(testCsvFile, typed);
-        assertEquals(5, fileExtracted.size());
-        assertEquals("JOHN", fileExtracted.get(0, 1));
-        assertEquals(Integer.valueOf(25), fileExtracted.get(0, 2));
-        assertEquals(5, CsvUtil.load(new StringReader(testCsvContent), copy).size());
-
-        Dataset selected = CsvUtil.load(testCsvFile, List.of("name", "age"), (columns, row, output) -> {
-            output[0] = row.get(0);
-            output[1] = Integer.parseInt(row.get(1));
-        });
-        assertEquals(2, selected.columnCount());
-        assertEquals(2, CsvUtil.load(testCsvFile, 1, 2, copy).size());
-        assertEquals(3, CsvUtil.load(testCsvFile, List.of("id", "name"), 0, Long.MAX_VALUE, row -> Integer.parseInt(row[0]) <= 3, (columns, row, output) -> {
-            output[0] = row.get(0);
-            output[1] = row.get(1);
-        }).size());
-        assertEquals(5, CsvUtil.load(new StringReader(testCsvContent), List.of("name", "age"), (columns, row, output) -> {
-            output[0] = row.get(0);
-            output[1] = row.get(1);
-        }).size());
-        assertEquals(3, CsvUtil.load(new StringReader(testCsvContent), 1, 3, copy).size());
-        assertEquals(3, CsvUtil.load(new StringReader(testCsvContent), List.of("id", "age"), 0, Long.MAX_VALUE, row -> Integer.parseInt(row[2]) >= 30,
-                (columns, row, output) -> {
-                    output[0] = row.get(0);
-                    output[1] = Integer.parseInt(row.get(1));
-                }).size());
-        assertEquals(2, CsvUtil.load(new StringReader(testCsvContent), 2, 2, copy).size());
-
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(new StringReader(testCsvContent), null, 0, Long.MAX_VALUE, null,
-                (TriConsumer<List<String>, DisposableArray<String>, Object[]>) null));
-    }
-
-    @Test
-    public void testLoad_EdgeCase() throws IOException {
-        ParsingException ragged = assertThrows(ParsingException.class, () -> {
-            File raggedFile = tempDir.resolve("ragged.csv").toFile();
-            Files.writeString(raggedFile.toPath(), "a,b,c\n1,2,3\n4,5,6,7\n");
-            CsvUtil.load(raggedFile);
-        });
-        assertTrue(ragged.getMessage().contains("3 column"));
-
-        File emptyFile = tempDir.resolve("empty.csv").toFile();
-        Files.writeString(emptyFile.toPath(), "");
-        assertEquals(0, CsvUtil.load(emptyFile).size());
-        assertEquals(0, CsvUtil.load(new StringReader("")).size());
-
-        File headerOnly = tempDir.resolve("header.csv").toFile();
-        Files.writeString(headerOnly.toPath(), "id,name,age\n");
-        Dataset headerDs = CsvUtil.load(headerOnly);
-        assertEquals(3, headerDs.columnCount());
-        assertEquals(0, headerDs.size());
-        Dataset readerHeader = CsvUtil.load(new StringReader("id,name,age\n"));
-        assertEquals(3, readerHeader.columnCount());
-        assertEquals(0, readerHeader.size());
-
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, null, -1, 10));
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, null, 0, -1));
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(testCsvFile, List.of("nonexistent")));
-    }
-
-    @Test
-    public void testLoad_Rfc4180AndBom() throws IOException {
-        File rfc = tempDir.resolve("rfc4180.csv").toFile();
-        Files.writeString(rfc.toPath(), "name,note\n\"Doe, John\",hello\n\"He said \"\"hi\"\"\",end\n");
-        Dataset ds = CsvUtil.load(rfc);
-        assertEquals(2, ds.size());
-        assertEquals("Doe, John", ds.get(0, 0));
-        assertEquals("He said \"hi\"", ds.get(1, 0));
-
-        File noEol = tempDir.resolve("noeol.csv").toFile();
-        Files.writeString(noEol.toPath(), "a,b,c\n1,2,3");
-        Dataset last = CsvUtil.load(noEol);
-        assertEquals(1, last.size());
-        assertEquals("3", last.get(0, 2));
-
-        File dup = tempDir.resolve("dup.csv").toFile();
-        Files.writeString(dup.toPath(), "a,a,b\n1,2,3\n");
-        assertThrows(IllegalArgumentException.class, () -> CsvUtil.load(dup));
-
-        File bom = tempDir.resolve("bom.csv").toFile();
-        byte[] bomBytes = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
-        byte[] body = "id,name\n1,John\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        byte[] all = new byte[bomBytes.length + body.length];
-        System.arraycopy(bomBytes, 0, all, 0, bomBytes.length);
-        System.arraycopy(body, 0, all, bomBytes.length, body.length);
-        Files.write(bom.toPath(), all);
-        assertEquals("id", CsvUtil.load(bom).columnNames().get(0));
-    }
-
-    @Test
-    public void testLoad_EmptySelectColumns() {
-        assertEquals(0, CsvUtil.load(testCsvFile, List.of()).columnCount());
-        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), List.of()).columnCount());
-        assertEquals(0, CsvUtil.load(testCsvFile, List.of(), Person.class).columnCount());
-        Map<String, Type<?>> typeMap = new HashMap<>();
-        typeMap.put("age", Type.of(Integer.class));
-        assertEquals(0, CsvUtil.load(new StringReader(testCsvContent), List.of(), 0, Long.MAX_VALUE, Fn.alwaysTrue(), typeMap).columnCount());
-        assertEquals(0, CsvUtil.load(testCsvFile, List.of(), (columns, row, output) -> {
-            for (int i = 0; i < output.length; i++) {
-                output[i] = row.get(i);
-            }
-        }).columnCount());
-    }
-
-    @Test
-    public void testLoad_NonBeanColumnTypeClassRecyclesBorrowedBufferedReader() {
-        List<java.io.BufferedReader> drainedReaders = new ArrayList<>();
-        java.io.BufferedReader markerReader = null;
-        java.io.BufferedReader nextReader = null;
-        try {
-            for (int i = 0; i < 64; i++) {
-                drainedReaders.add(Objectory.createBufferedReader("drain-" + i));
-            }
-            markerReader = Objectory.createBufferedReader("marker");
-            Objectory.recycle(markerReader);
-            assertThrows(IllegalArgumentException.class,
-                    () -> CsvUtil.load(new StringReader("a,b\n1,2\n"), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), String.class));
-            nextReader = Objectory.createBufferedReader("next");
-            assertSame(markerReader, nextReader);
-        } finally {
-            if (nextReader != null && nextReader != markerReader) {
-                Objectory.recycle(nextReader);
-            }
-            if (markerReader != null) {
-                Objectory.recycle(markerReader);
-            }
-            for (java.io.BufferedReader reader : drainedReaders) {
-                Objectory.recycle(reader);
-            }
-        }
-    }
-
-    @Test
-    public void testLoad_RowFieldCountAgainstHeaderContract() {
-        ParsingException tooManyFields = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader("a,b\n1,2,3\n")));
-        assertTrue(tooManyFields.getMessage().contains("more fields than the expected 2 column(s)"));
-
-        Dataset padded = CsvUtil.load(new StringReader("a,b,c\n1,2\n"));
-        assertEquals(1, padded.size());
-        assertEquals(3, padded.columnCount());
-        assertEquals("1", padded.get(0, 0));
-        assertEquals("2", padded.get(0, 1));
-        assertNull(padded.get(0, 2));
-    }
-
-    @Test
-    public void testLoad_RowFilterSeesWholeRawRowInHeaderOrderAfterOffset() {
-        final List<Integer> seenLengths = new ArrayList<>();
-        final Dataset ds = CsvUtil.load(new StringReader("id,name,age\n1,A,30\n2,B,5\n3,C,40\n4,D,50\n"), List.of("name", "age"), 1, 1, row -> {
-            seenLengths.add(row.length);
-            return Integer.parseInt(row[2]) > 18;
-        });
-
-        // offset skipped raw row A before the filter; B was rejected; count stopped after the first accepted row C.
-        assertEquals(List.of(3, 3), seenLengths);
-        assertEquals(List.of("name", "age"), new ArrayList<>(ds.columnNames()));
-        assertEquals(1, ds.size());
-        assertEquals(List.of("C"), new ArrayList<>(ds.<String> getColumn("name")));
-    }
 }

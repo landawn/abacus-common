@@ -23,6 +23,31 @@ public class ArraySetTest extends ArrayTestSupport {
     }
 
     @Test
+    public void testSet_NonStorableValue() {
+        // Contract pin for the corrected javadoc: a value that cannot be stored raises IllegalArgumentException,
+        // never the ArrayStoreException an ordinary array assignment raises for the same mistake.
+        final String[] strings = { "a" };
+        assertThrows(IllegalArgumentException.class, () -> Array.set(strings, 0, Integer.valueOf(1)));
+        assertThrows(IllegalArgumentException.class, () -> Array.set(new Number[1], 0, "s"));
+        assertThrows(IllegalArgumentException.class, () -> Array.set(new int[1], 0, "x"));
+        assertThrows(IllegalArgumentException.class, () -> Array.set(new int[1], 0, null));
+        assertThrows(IllegalArgumentException.class, () -> Array.set(new short[1], 0, Integer.valueOf(3)));
+
+        final Object[] erased = strings;
+        assertThrows(ArrayStoreException.class, () -> {
+            erased[0] = Integer.valueOf(1);
+        });
+
+        final long[] widened = { 1L };
+        Array.set(widened, 0, Integer.valueOf(7));
+        assertArrayEquals(new long[] { 7L }, widened);
+
+        final String[] nullable = { "a" };
+        Array.set(nullable, 0, null);
+        assertArrayEquals(new String[] { null }, nullable);
+    }
+
+    @Test
     public void testSetBoolean() {
         final boolean[] a = { true, false, true };
         Array.setBoolean(a, 1, true);
@@ -51,15 +76,21 @@ public class ArraySetTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testSetShort() {
-        final short[] a = { 1, 2, 3 };
-        Array.setShort(a, 1, (short) 9);
-        assertArrayEquals(new short[] { 1, 9, 3 }, a);
-        final int[] widened = { 1, 2, 3 };
-        Array.setShort(widened, 1, (short) 8);
-        assertArrayEquals(new int[] { 1, 8, 3 }, widened);
-        assertThrows(NullPointerException.class, () -> Array.setShort(null, 0, (short) 1));
-        assertThrows(IllegalArgumentException.class, () -> Array.setShort(new byte[] { 1 }, 0, (short) 1));
+    public void testSetDouble() {
+        final double[] a = { 1d, 2d, 3d };
+        Array.setDouble(a, 1, 9.5);
+        assertArrayEquals(new double[] { 1d, 9.5, 3d }, a);
+        assertThrows(NullPointerException.class, () -> Array.setDouble(null, 0, 1d));
+        assertThrows(IllegalArgumentException.class, () -> Array.setDouble(new Double[] { 1d }, 0, 1d));
+    }
+
+    @Test
+    public void testSetFloat() {
+        final float[] a = { 1f, 2f, 3f };
+        Array.setFloat(a, 1, 9.5f);
+        assertArrayEquals(new float[] { 1f, 9.5f, 3f }, a);
+        assertThrows(NullPointerException.class, () -> Array.setFloat(null, 0, 1f));
+        assertThrows(IllegalArgumentException.class, () -> Array.setFloat(new Float[] { 1f }, 0, 1f));
     }
 
     @Test
@@ -85,45 +116,15 @@ public class ArraySetTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testSetFloat() {
-        final float[] a = { 1f, 2f, 3f };
-        Array.setFloat(a, 1, 9.5f);
-        assertArrayEquals(new float[] { 1f, 9.5f, 3f }, a);
-        assertThrows(NullPointerException.class, () -> Array.setFloat(null, 0, 1f));
-        assertThrows(IllegalArgumentException.class, () -> Array.setFloat(new Float[] { 1f }, 0, 1f));
+    public void testSetShort() {
+        final short[] a = { 1, 2, 3 };
+        Array.setShort(a, 1, (short) 9);
+        assertArrayEquals(new short[] { 1, 9, 3 }, a);
+        final int[] widened = { 1, 2, 3 };
+        Array.setShort(widened, 1, (short) 8);
+        assertArrayEquals(new int[] { 1, 8, 3 }, widened);
+        assertThrows(NullPointerException.class, () -> Array.setShort(null, 0, (short) 1));
+        assertThrows(IllegalArgumentException.class, () -> Array.setShort(new byte[] { 1 }, 0, (short) 1));
     }
 
-    @Test
-    public void testSetDouble() {
-        final double[] a = { 1d, 2d, 3d };
-        Array.setDouble(a, 1, 9.5);
-        assertArrayEquals(new double[] { 1d, 9.5, 3d }, a);
-        assertThrows(NullPointerException.class, () -> Array.setDouble(null, 0, 1d));
-        assertThrows(IllegalArgumentException.class, () -> Array.setDouble(new Double[] { 1d }, 0, 1d));
-    }
-
-    @Test
-    public void testSet_NonStorableValue() {
-        // Contract pin for the corrected javadoc: a value that cannot be stored raises IllegalArgumentException,
-        // never the ArrayStoreException an ordinary array assignment raises for the same mistake.
-        final String[] strings = { "a" };
-        assertThrows(IllegalArgumentException.class, () -> Array.set(strings, 0, Integer.valueOf(1)));
-        assertThrows(IllegalArgumentException.class, () -> Array.set(new Number[1], 0, "s"));
-        assertThrows(IllegalArgumentException.class, () -> Array.set(new int[1], 0, "x"));
-        assertThrows(IllegalArgumentException.class, () -> Array.set(new int[1], 0, null));
-        assertThrows(IllegalArgumentException.class, () -> Array.set(new short[1], 0, Integer.valueOf(3)));
-
-        final Object[] erased = strings;
-        assertThrows(ArrayStoreException.class, () -> {
-            erased[0] = Integer.valueOf(1);
-        });
-
-        final long[] widened = { 1L };
-        Array.set(widened, 0, Integer.valueOf(7));
-        assertArrayEquals(new long[] { 7L }, widened);
-
-        final String[] nullable = { "a" };
-        Array.set(nullable, 0, null);
-        assertArrayEquals(new String[] { null }, nullable);
-    }
 }

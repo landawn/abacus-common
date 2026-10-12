@@ -10,11 +10,18 @@ import org.junit.jupiter.api.Test;
 
 public class HttpRequestUrlTest extends HttpRequestTestSupport {
 
+    // url
+
     @Test
     public void testUrl() {
         HttpRequest request = HttpRequest.url(TEST_URL);
         assertNotNull(request);
         assertNotNull(HttpRequest.url(testUrl));
+    }
+
+    @Test
+    public void testUrl_QueryStringAlreadyInUrl() {
+        assertNotNull(HttpRequest.url("https://httpbin.org/get?existing=param"));
     }
 
     @Test
@@ -38,8 +45,16 @@ public class HttpRequestUrlTest extends HttpRequestTestSupport {
     }
 
     @Test
-    public void testUrl_QueryStringAlreadyInUrl() {
-        assertNotNull(HttpRequest.url("https://httpbin.org/get?existing=param"));
+    public void testUrl_URITimeoutsUsesNewClient() throws Exception {
+        HttpRequest request = HttpRequest.url(URI.create(testUrl), 1000L, 2000L);
+        assertNotNull(request);
+        assertDoesNotThrow(() -> {
+            try {
+                request.get();
+            } catch (Exception e) {
+                // Network errors are expected
+            }
+        });
     }
 
     @Test
@@ -56,19 +71,6 @@ public class HttpRequestUrlTest extends HttpRequestTestSupport {
     }
 
     @Test
-    public void testUrl_URITimeoutsUsesNewClient() throws Exception {
-        HttpRequest request = HttpRequest.url(URI.create(testUrl), 1000L, 2000L);
-        assertNotNull(request);
-        assertDoesNotThrow(() -> {
-            try {
-                request.get();
-            } catch (Exception e) {
-                // Network errors are expected
-            }
-        });
-    }
-
-    @Test
     public void testUrl_URLTimeoutsUsesNewClient() throws Exception {
         HttpRequest request = HttpRequest.url(new URL(testUrl), 1000L, 2000L);
         assertNotNull(request);
@@ -80,4 +82,5 @@ public class HttpRequestUrlTest extends HttpRequestTestSupport {
             }
         });
     }
+
 }

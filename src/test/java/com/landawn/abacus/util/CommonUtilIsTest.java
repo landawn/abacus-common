@@ -19,6 +19,38 @@ import org.junit.jupiter.api.Test;
 public class CommonUtilIsTest extends CommonUtilTestSupport {
 
     @Test
+    public void testIsBetween() {
+        assertTrue(CommonUtil.isBetween(5, 3, 7));
+        assertTrue(CommonUtil.isBetween(3, 3, 7));
+        assertTrue(CommonUtil.isBetween(7, 3, 7));
+        assertFalse(CommonUtil.isBetween(2, 3, 7));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.isBetween(5, 1, 10, null));
+        assertTrue(CommonUtil.isBetween(5, 10, 1, (a, b) -> b.compareTo(a)));
+    }
+
+    @Test
+    public void testIsBlank() {
+        assertTrue(CommonUtil.isBlank(null));
+        assertTrue(CommonUtil.isBlank(""));
+        assertTrue(CommonUtil.isBlank(" "));
+        assertTrue(CommonUtil.isBlank("   "));
+        assertTrue(CommonUtil.isBlank("\t"));
+        assertTrue(CommonUtil.isBlank("\n"));
+        assertFalse(CommonUtil.isBlank("a"));
+        assertFalse(CommonUtil.isBlank(" a "));
+    }
+
+    @Test
+    public void testIsBuiltinClass() {
+        assertTrue(CommonUtil.isBuiltinClass(int[].class));
+        assertTrue(CommonUtil.isBuiltinClass(int[][].class));
+        assertTrue(CommonUtil.isBuiltinClass(String[].class));
+        assertTrue(CommonUtil.isBuiltinClass(String[][].class));
+        assertTrue(CommonUtil.isBuiltinClass(ArrayList.class));
+        assertFalse(CommonUtil.isBuiltinClass(org.junit.jupiter.api.Test.class));
+    }
+
+    @Test
     public void testIsEmpty() {
         assertTrue(CommonUtil.isEmpty((String) null));
         assertTrue(CommonUtil.isEmpty(""));
@@ -71,53 +103,7 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         assertTrue(CommonUtil.isEmpty((Dataset) null));
     }
 
-    @Test
-    public void testIsBlank() {
-        assertTrue(CommonUtil.isBlank(null));
-        assertTrue(CommonUtil.isBlank(""));
-        assertTrue(CommonUtil.isBlank(" "));
-        assertTrue(CommonUtil.isBlank("   "));
-        assertTrue(CommonUtil.isBlank("\t"));
-        assertTrue(CommonUtil.isBlank("\n"));
-        assertFalse(CommonUtil.isBlank("a"));
-        assertFalse(CommonUtil.isBlank(" a "));
-    }
-
-    @Test
-    public void testIsTrueFalse() {
-        assertTrue(CommonUtil.isTrue(true));
-        assertFalse(CommonUtil.isTrue(false));
-        assertFalse(CommonUtil.isTrue(null));
-        assertTrue(CommonUtil.isNotTrue(false));
-        assertTrue(CommonUtil.isNotTrue(null));
-        assertFalse(CommonUtil.isNotTrue(true));
-        assertTrue(CommonUtil.isFalse(false));
-        assertFalse(CommonUtil.isFalse(true));
-        assertFalse(CommonUtil.isFalse(null));
-        assertTrue(CommonUtil.isNotFalse(true));
-        assertTrue(CommonUtil.isNotFalse(null));
-        assertFalse(CommonUtil.isNotFalse(false));
-    }
-
-    @Test
-    public void testIsBuiltinClass() {
-        assertTrue(CommonUtil.isBuiltinClass(int[].class));
-        assertTrue(CommonUtil.isBuiltinClass(int[][].class));
-        assertTrue(CommonUtil.isBuiltinClass(String[].class));
-        assertTrue(CommonUtil.isBuiltinClass(String[][].class));
-        assertTrue(CommonUtil.isBuiltinClass(ArrayList.class));
-        assertFalse(CommonUtil.isBuiltinClass(org.junit.jupiter.api.Test.class));
-    }
-
-    @Test
-    public void testIsBetween() {
-        assertTrue(CommonUtil.isBetween(5, 3, 7));
-        assertTrue(CommonUtil.isBetween(3, 3, 7));
-        assertTrue(CommonUtil.isBetween(7, 3, 7));
-        assertFalse(CommonUtil.isBetween(2, 3, 7));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.isBetween(5, 1, 10, null));
-        assertTrue(CommonUtil.isBetween(5, 10, 1, (a, b) -> b.compareTo(a)));
-    }
+    // isSorted
 
     @Test
     public void testIsSorted() {
@@ -206,7 +192,8 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         assertFalse(CommonUtil.isSorted(byLength, 0, 3, Comparator.naturalOrder()));
     }
 
-    // ---- perf review 2026-09-26 G030 begin ----
+
+
     // G030-01: the range overloads position a List iterator at fromIndex; pin results and the exact comparator call sequence.
     @Test
     public void testIsSortedCollectionRange_listIteratorPositioning() {
@@ -249,6 +236,8 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         }
     }
 
+
+
     // G030-01: nulls sort first in the natural-order range overload, for List and non-List sources.
     @Test
     public void testIsSortedCollectionRange_nullsAndBounds() {
@@ -264,5 +253,22 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.isSorted(list, 1, 3, (Comparator<String>) null));
         assertTrue(CommonUtil.isSorted((List<String>) null, 0, 0));
     }
+
+    @Test
+    public void testIsTrueFalse() {
+        assertTrue(CommonUtil.isTrue(true));
+        assertFalse(CommonUtil.isTrue(false));
+        assertFalse(CommonUtil.isTrue(null));
+        assertTrue(CommonUtil.isNotTrue(false));
+        assertTrue(CommonUtil.isNotTrue(null));
+        assertFalse(CommonUtil.isNotTrue(true));
+        assertTrue(CommonUtil.isFalse(false));
+        assertFalse(CommonUtil.isFalse(true));
+        assertFalse(CommonUtil.isFalse(null));
+        assertTrue(CommonUtil.isNotFalse(true));
+        assertTrue(CommonUtil.isNotFalse(null));
+        assertFalse(CommonUtil.isNotFalse(false));
+    }
+
     // ---- perf review 2026-09-26 G030 end ----
 }

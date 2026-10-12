@@ -15,62 +15,6 @@ import org.junit.jupiter.api.Test;
 public class CharListToTest extends CharListTestSupport {
 
     @Test
-    public void testList() {
-        {
-            list = new CharList();
-            CharList cl = CharList.of('a', 'b', 'c', 'd');
-            List<Character> result = cl.toList(1, 3);
-            assertEquals(2, result.size());
-            assertEquals(Character.valueOf('b'), result.get(0));
-            assertEquals(Character.valueOf('c'), result.get(1));
-        }
-        {
-            list = new CharList();
-            CharList cl = CharList.of('a', 'b', 'c');
-            List<Character> result = cl.toList();
-            assertEquals(3, result.size());
-            assertEquals(Character.valueOf('a'), result.get(0));
-            assertEquals(Character.valueOf('b'), result.get(1));
-            assertEquals(Character.valueOf('c'), result.get(2));
-        }
-    }
-
-    @Test
-    public void testList_OutOfBounds() {
-        CharList cl = CharList.of('a', 'b', 'c');
-        assertThrows(IndexOutOfBoundsException.class, () -> cl.toList(-1, 2));
-        assertThrows(IndexOutOfBoundsException.class, () -> cl.toList(0, 4));
-    }
-
-    @Test
-    public void testList_Empty() {
-        List<Character> result = list.toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetSet() {
-        {
-            list = new CharList();
-            list.addAll(CharList.of('a', 'b', 'b', 'c', 'd'));
-
-            Set<Character> set = list.toSet(1, 4);
-            assertEquals(2, set.size());
-            assertTrue(set.contains('b'));
-            assertTrue(set.contains('c'));
-        }
-        {
-            list = new CharList();
-            list.addAll(CharList.of('a', 'b', 'c', 'b', 'a'));
-            Set<Character> set = list.toSet();
-            assertEquals(3, set.size());
-            assertTrue(set.contains('a'));
-            assertTrue(set.contains('b'));
-            assertTrue(set.contains('c'));
-        }
-    }
-
-    @Test
     public void testArray() {
         CharList list = CharList.of('a', 'b', 'c');
         char[] arr = list.toArray();
@@ -84,34 +28,6 @@ public class CharListToTest extends CharListTestSupport {
     public void testArray_Empty() {
         char[] arr = list.toArray();
         assertEquals(0, arr.length);
-    }
-
-    @Test
-    public void testInt() {
-        {
-            list = new CharList();
-            CharList list = CharList.of('a', 'b', 'c');
-            IntList intList = list.toIntList();
-            assertEquals(3, intList.size());
-            assertEquals('a', intList.get(0));
-            assertEquals('b', intList.get(1));
-            assertEquals('c', intList.get(2));
-        }
-        {
-            list = new CharList();
-            list.add('A');
-            list.add('B');
-            IntList il = list.toIntList();
-            assertEquals(2, il.size());
-            assertEquals('A', il.get(0));
-            assertEquals('B', il.get(1));
-        }
-    }
-
-    @Test
-    public void testInt_Empty() {
-        IntList il = list.toIntList();
-        assertEquals(0, il.size());
     }
 
     @Test
@@ -155,17 +71,6 @@ public class CharListToTest extends CharListTestSupport {
     }
 
     @Test
-    public void testCollection_NaN() {
-        list.addAll(CharList.of('a', 'b', 'a', 'c'));
-
-        ArrayList<Character> arrayList = list.toCollection(ArrayList::new);
-        assertEquals(Arrays.asList('a', 'b', 'a', 'c'), arrayList);
-
-        java.util.Set<Character> set = list.toSet();
-        assertEquals(new java.util.HashSet<>(Arrays.asList('a', 'b', 'c')), set);
-    }
-
-    @Test
     public void testCollection_Empty() {
         {
             list = new CharList();
@@ -177,6 +82,101 @@ public class CharListToTest extends CharListTestSupport {
             ArrayList<Character> result = list.toCollection(ArrayList::new);
             assertTrue(result.isEmpty());
         }
+    }
+
+    @Test
+    public void testCollection_NaN() {
+        list.addAll(CharList.of('a', 'b', 'a', 'c'));
+
+        ArrayList<Character> arrayList = list.toCollection(ArrayList::new);
+        assertEquals(Arrays.asList('a', 'b', 'a', 'c'), arrayList);
+
+        java.util.Set<Character> set = list.toSet();
+        assertEquals(new java.util.HashSet<>(Arrays.asList('a', 'b', 'c')), set);
+    }
+
+    @Test
+    public void testGetSet() {
+        {
+            list = new CharList();
+            list.addAll(CharList.of('a', 'b', 'b', 'c', 'd'));
+
+            Set<Character> set = list.toSet(1, 4);
+            assertEquals(2, set.size());
+            assertTrue(set.contains('b'));
+            assertTrue(set.contains('c'));
+        }
+        {
+            list = new CharList();
+            list.addAll(CharList.of('a', 'b', 'c', 'b', 'a'));
+            Set<Character> set = list.toSet();
+            assertEquals(3, set.size());
+            assertTrue(set.contains('a'));
+            assertTrue(set.contains('b'));
+            assertTrue(set.contains('c'));
+        }
+    }
+
+    @Test
+    public void testInt() {
+        {
+            list = new CharList();
+            CharList list = CharList.of('a', 'b', 'c');
+            IntList intList = list.toIntList();
+            assertEquals(3, intList.size());
+            assertEquals('a', intList.get(0));
+            assertEquals('b', intList.get(1));
+            assertEquals('c', intList.get(2));
+        }
+        {
+            list = new CharList();
+            list.add('A');
+            list.add('B');
+            IntList il = list.toIntList();
+            assertEquals(2, il.size());
+            assertEquals('A', il.get(0));
+            assertEquals('B', il.get(1));
+        }
+    }
+
+    @Test
+    public void testInt_Empty() {
+        IntList il = list.toIntList();
+        assertEquals(0, il.size());
+    }
+
+    @Test
+    public void testList() {
+        {
+            list = new CharList();
+            CharList cl = CharList.of('a', 'b', 'c', 'd');
+            List<Character> result = cl.toList(1, 3);
+            assertEquals(2, result.size());
+            assertEquals(Character.valueOf('b'), result.get(0));
+            assertEquals(Character.valueOf('c'), result.get(1));
+        }
+        {
+            list = new CharList();
+            CharList cl = CharList.of('a', 'b', 'c');
+            List<Character> result = cl.toList();
+            assertEquals(3, result.size());
+            assertEquals(Character.valueOf('a'), result.get(0));
+            assertEquals(Character.valueOf('b'), result.get(1));
+            assertEquals(Character.valueOf('c'), result.get(2));
+        }
+    }
+
+    @Test
+    public void testList_Empty() {
+        List<Character> result = list.toList();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testList_OutOfBounds() {
+        CharList cl = CharList.of('a', 'b', 'c');
+        assertThrows(IndexOutOfBoundsException.class, () -> cl.toList(-1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> cl.toList(0, 4));
     }
 
     @Test
@@ -262,4 +262,5 @@ public class CharListToTest extends CharListTestSupport {
     public void testString_Empty() {
         assertEquals("[]", list.toString());
     }
+
 }

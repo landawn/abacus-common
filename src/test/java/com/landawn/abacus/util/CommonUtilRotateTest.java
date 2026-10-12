@@ -17,6 +17,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class CommonUtilRotateTest extends CommonUtilTestSupport {
+
+    // rotate
+
     @Test
     public void testRotate_BooleanArray() {
         boolean[] arr = { true, false, true, false };
@@ -26,10 +29,79 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
+    public void testRotate_CharArray_WithRange() {
+        char[] arr = { 'a', 'b', 'c', 'd', 'e' };
+        CommonUtil.rotate(arr, 1, 4, 1);
+        assertArrayEquals(new char[] { 'a', 'd', 'b', 'c', 'e' }, arr);
+    }
+
+    @Test
+    public void testRotate_CharArray_WithRange_NegativeDistance() {
+        char[] arr = { 'a', 'b', 'c', 'd', 'e' };
+        CommonUtil.rotate(arr, 1, 4, -1);
+        assertArrayEquals(new char[] { 'a', 'c', 'd', 'b', 'e' }, arr);
+    }
+
+    @Test
+    public void testRotate_DoubleArray_WithRange() {
+        double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        CommonUtil.rotate(arr, 1, 4, 1);
+        assertArrayEquals(new double[] { 1.0, 4.0, 2.0, 3.0, 5.0 }, arr, 0.0);
+    }
+
+    @Test
+    public void testRotate_DoubleArray_WithRange_NegativeDistance() {
+        double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        CommonUtil.rotate(arr, 1, 4, -1);
+        assertArrayEquals(new double[] { 1.0, 3.0, 4.0, 2.0, 5.0 }, arr, 0.0);
+    }
+
+    @Test
+    public void testRotate_effectiveDistanceZeroIsANoOpForNonListCollections() {
+        final Collection<String> unmodifiable = Collections.unmodifiableCollection(new LinkedHashSet<>(Arrays.asList("a", "b", "c")));
+
+        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 0));
+        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 3));
+        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, -3));
+        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 6));
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> CommonUtil.rotate(unmodifiable, 1));
+
+        final Set<String> modifiable = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
+        final Iterator<String> outstanding = modifiable.iterator();
+
+        CommonUtil.rotate(modifiable, 3);
+
+        assertEquals("a", outstanding.next());
+        assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(modifiable));
+    }
+
+    @Test
+    public void testRotate_FloatArray_WithRange() {
+        float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+        CommonUtil.rotate(arr, 1, 4, 1);
+        assertArrayEquals(new float[] { 1.0f, 4.0f, 2.0f, 3.0f, 5.0f }, arr, 0.0f);
+    }
+
+    @Test
+    public void testRotate_FloatArray_WithRange_NegativeDistance() {
+        float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+        CommonUtil.rotate(arr, 1, 4, -1);
+        assertArrayEquals(new float[] { 1.0f, 3.0f, 4.0f, 2.0f, 5.0f }, arr, 0.0f);
+    }
+
+    @Test
     public void testRotate_IntArray() {
         int[] arr = { 1, 2, 3, 4 };
         CommonUtil.rotate(arr, 1);
         int[] expected = { 4, 1, 2, 3 };
+        assertTrue(CommonUtil.equals(arr, expected));
+    }
+
+    @Test
+    public void testRotate_IntArray_NegativeDistance() {
+        int[] arr = { 1, 2, 3, 4 };
+        CommonUtil.rotate(arr, -1);
+        int[] expected = { 2, 3, 4, 1 };
         assertTrue(CommonUtil.equals(arr, expected));
     }
 
@@ -42,6 +114,27 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
+    public void testRotate_List() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        CommonUtil.rotate(list, 1);
+        assertEquals(Arrays.asList("d", "a", "b", "c"), list);
+    }
+
+    @Test
+    public void testRotate_LongArray_WithRange() {
+        long[] arr = { 1L, 2L, 3L, 4L, 5L };
+        CommonUtil.rotate(arr, 1, 4, 1);
+        assertArrayEquals(new long[] { 1L, 4L, 2L, 3L, 5L }, arr);
+    }
+
+    @Test
+    public void testRotate_LongArray_WithRange_NegativeDistance() {
+        long[] arr = { 1L, 2L, 3L, 4L, 5L };
+        CommonUtil.rotate(arr, 1, 4, -1);
+        assertArrayEquals(new long[] { 1L, 3L, 4L, 2L, 5L }, arr);
+    }
+
+    @Test
     public void testRotate_ObjectArray() {
         String[] arr = { "a", "b", "c", "d" };
         CommonUtil.rotate(arr, 1);
@@ -50,10 +143,76 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testRotate_List() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        CommonUtil.rotate(list, 1);
-        assertEquals(Arrays.asList("d", "a", "b", "c"), list);
+    public void testRotate_ShortArray_WithRange() {
+        short[] arr = { 1, 2, 3, 4, 5 };
+        CommonUtil.rotate(arr, 1, 4, 1);
+        assertArrayEquals(new short[] { 1, 4, 2, 3, 5 }, arr);
+    }
+
+    @Test
+    public void testRotate_ShortArray_WithRange_NegativeDistance() {
+        short[] arr = { 1, 2, 3, 4, 5 };
+        CommonUtil.rotate(arr, 1, 4, -1);
+        assertArrayEquals(new short[] { 1, 3, 4, 2, 5 }, arr);
+    }
+
+    @Test
+    public void testRotateBoolean() {
+        boolean[] a = { true, false, true, false };
+        boolean[] expected = { false, true, false, true };
+        CommonUtil.rotate(a, 1);
+        Assertions.assertArrayEquals(expected, a);
+
+        boolean[] b = { true, false, true, false };
+        boolean[] expected2 = { false, true, false, true };
+        CommonUtil.rotate(b, -1);
+        Assertions.assertArrayEquals(expected2, b);
+
+        boolean[] c = { true, false, true, false };
+        boolean[] original = c.clone();
+        CommonUtil.rotate(c, 4);
+        Assertions.assertArrayEquals(original, c);
+
+        boolean[] empty = {};
+        CommonUtil.rotate(empty, 1);
+        Assertions.assertArrayEquals(new boolean[0], empty);
+
+        CommonUtil.rotate((boolean[]) null, 1);
+    }
+
+    @Test
+    public void testRotateBooleanRange() {
+        boolean[] a = { true, false, true, false, true };
+        boolean[] expected = { true, false, true, false, true };
+        CommonUtil.rotate(a, 1, 4, 1);
+        expected[1] = false;
+        expected[2] = false;
+        expected[3] = true;
+        Assertions.assertArrayEquals(expected, a);
+
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.rotate(a, -1, 3, 1));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.rotate(a, 0, 10, 1));
+
+        boolean[] b = { true, false, true };
+        boolean[] original = b.clone();
+        CommonUtil.rotate(b, 1, 1, 1);
+        Assertions.assertArrayEquals(original, b);
+    }
+
+    @Test
+    public void testRotateByte() {
+        byte[] a = { 1, 2, 3, 4 };
+        byte[] expected = { 4, 1, 2, 3 };
+        CommonUtil.rotate(a, 1);
+        Assertions.assertArrayEquals(expected, a);
+    }
+
+    @Test
+    public void testRotateByteRange() {
+        byte[] a = { 1, 2, 3, 4, 5 };
+        byte[] expected = { 1, 4, 2, 3, 5 };
+        CommonUtil.rotate(a, 1, 4, 1);
+        Assertions.assertArrayEquals(expected, a);
     }
 
     @Test
@@ -83,35 +242,56 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testRotateByte() {
-        byte[] a = { 1, 2, 3, 4 };
-        byte[] expected = { 4, 1, 2, 3 };
+    public void testRotateCollection() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        CommonUtil.rotate((Collection<?>) list, 1);
+        Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
+
+        Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d"));
+        CommonUtil.rotate(set, 1);
+        Assertions.assertEquals(4, set.size());
+
+        Collection<String> empty = new ArrayList<>();
+        CommonUtil.rotate(empty, 1);
+        Assertions.assertTrue(empty.isEmpty());
+
+        CommonUtil.rotate((Collection<?>) null, 1);
+
+        Collection<String> single = new ArrayList<>(Arrays.asList("a"));
+        CommonUtil.rotate(single, 1);
+        Assertions.assertEquals(1, single.size());
+    }
+
+    @Test
+    public void testRotateDouble() {
+        double[] a = { 1.0, 2.0, 3.0, 4.0 };
+        double[] expected = { 4.0, 1.0, 2.0, 3.0 };
         CommonUtil.rotate(a, 1);
-        Assertions.assertArrayEquals(expected, a);
+        Assertions.assertArrayEquals(expected, a, 0.0);
     }
 
     @Test
-    public void testRotateByteRange() {
-        byte[] a = { 1, 2, 3, 4, 5 };
-        byte[] expected = { 1, 4, 2, 3, 5 };
+    public void testRotateDoubleRange() {
+        double[] a = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        double[] expected = { 1.0, 4.0, 2.0, 3.0, 5.0 };
         CommonUtil.rotate(a, 1, 4, 1);
-        Assertions.assertArrayEquals(expected, a);
+        Assertions.assertArrayEquals(expected, a, 0.0);
     }
 
     @Test
-    public void testRotateShort() {
-        short[] a = { 1, 2, 3, 4 };
-        short[] expected = { 4, 1, 2, 3 };
+    public void testRotateFloat() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 4.0f };
+        float[] expected = { 4.0f, 1.0f, 2.0f, 3.0f };
         CommonUtil.rotate(a, 1);
-        Assertions.assertArrayEquals(expected, a);
+        Assertions.assertArrayEquals(expected, a, 0.0f);
     }
 
     @Test
-    public void testRotateShortRange() {
-        short[] a = { 1, 2, 3, 4, 5 };
-        short[] expected = { 1, 4, 2, 3, 5 };
+    public void testRotateFloatRange() {
+        float[] a = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+        float[] expected = { 1.0f, 4.0f, 2.0f, 3.0f, 5.0f };
         CommonUtil.rotate(a, 1, 4, 1);
-        Assertions.assertArrayEquals(expected, a);
+        Assertions.assertArrayEquals(expected, a, 0.0f);
     }
 
     @Test
@@ -228,6 +408,23 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
+    public void testRotateList() {
+        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        CommonUtil.rotate(list, 1);
+        Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
+
+        CommonUtil.rotate((List<?>) null, 1);
+
+        List<String> single = new ArrayList<>(Arrays.asList("a"));
+        CommonUtil.rotate(single, 1);
+        Assertions.assertEquals(Arrays.asList("a"), single);
+
+        List<String> list2 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        CommonUtil.rotate(list2, 4);
+        Assertions.assertEquals(Arrays.asList("a", "b", "c", "d"), list2);
+    }
+
+    @Test
     public void testRotateLong() {
         long[] a = { 1L, 2L, 3L, 4L };
         long[] expected = { 4L, 1L, 2L, 3L };
@@ -241,38 +438,6 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
         long[] expected = { 1L, 4L, 2L, 3L, 5L };
         CommonUtil.rotate(a, 1, 4, 1);
         Assertions.assertArrayEquals(expected, a);
-    }
-
-    @Test
-    public void testRotateFloat() {
-        float[] a = { 1.0f, 2.0f, 3.0f, 4.0f };
-        float[] expected = { 4.0f, 1.0f, 2.0f, 3.0f };
-        CommonUtil.rotate(a, 1);
-        Assertions.assertArrayEquals(expected, a, 0.0f);
-    }
-
-    @Test
-    public void testRotateFloatRange() {
-        float[] a = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        float[] expected = { 1.0f, 4.0f, 2.0f, 3.0f, 5.0f };
-        CommonUtil.rotate(a, 1, 4, 1);
-        Assertions.assertArrayEquals(expected, a, 0.0f);
-    }
-
-    @Test
-    public void testRotateDouble() {
-        double[] a = { 1.0, 2.0, 3.0, 4.0 };
-        double[] expected = { 4.0, 1.0, 2.0, 3.0 };
-        CommonUtil.rotate(a, 1);
-        Assertions.assertArrayEquals(expected, a, 0.0);
-    }
-
-    @Test
-    public void testRotateDoubleRange() {
-        double[] a = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        double[] expected = { 1.0, 4.0, 2.0, 3.0, 5.0 };
-        CommonUtil.rotate(a, 1, 4, 1);
-        Assertions.assertArrayEquals(expected, a, 0.0);
     }
 
     @Test
@@ -292,181 +457,20 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testRotate_CharArray_WithRange() {
-        char[] arr = { 'a', 'b', 'c', 'd', 'e' };
-        CommonUtil.rotate(arr, 1, 4, 1);
-        assertArrayEquals(new char[] { 'a', 'd', 'b', 'c', 'e' }, arr);
-    }
-
-    @Test
-    public void testRotate_ShortArray_WithRange() {
-        short[] arr = { 1, 2, 3, 4, 5 };
-        CommonUtil.rotate(arr, 1, 4, 1);
-        assertArrayEquals(new short[] { 1, 4, 2, 3, 5 }, arr);
-    }
-
-    @Test
-    public void testRotate_LongArray_WithRange() {
-        long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        CommonUtil.rotate(arr, 1, 4, 1);
-        assertArrayEquals(new long[] { 1L, 4L, 2L, 3L, 5L }, arr);
-    }
-
-    @Test
-    public void testRotate_FloatArray_WithRange() {
-        float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        CommonUtil.rotate(arr, 1, 4, 1);
-        assertArrayEquals(new float[] { 1.0f, 4.0f, 2.0f, 3.0f, 5.0f }, arr, 0.0f);
-    }
-
-    @Test
-    public void testRotate_DoubleArray_WithRange() {
-        double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        CommonUtil.rotate(arr, 1, 4, 1);
-        assertArrayEquals(new double[] { 1.0, 4.0, 2.0, 3.0, 5.0 }, arr, 0.0);
-    }
-
-    @Test
-    public void testRotate_IntArray_NegativeDistance() {
-        int[] arr = { 1, 2, 3, 4 };
-        CommonUtil.rotate(arr, -1);
-        int[] expected = { 2, 3, 4, 1 };
-        assertTrue(CommonUtil.equals(arr, expected));
-    }
-
-    @Test
-    public void testRotateBoolean() {
-        boolean[] a = { true, false, true, false };
-        boolean[] expected = { false, true, false, true };
+    public void testRotateShort() {
+        short[] a = { 1, 2, 3, 4 };
+        short[] expected = { 4, 1, 2, 3 };
         CommonUtil.rotate(a, 1);
         Assertions.assertArrayEquals(expected, a);
-
-        boolean[] b = { true, false, true, false };
-        boolean[] expected2 = { false, true, false, true };
-        CommonUtil.rotate(b, -1);
-        Assertions.assertArrayEquals(expected2, b);
-
-        boolean[] c = { true, false, true, false };
-        boolean[] original = c.clone();
-        CommonUtil.rotate(c, 4);
-        Assertions.assertArrayEquals(original, c);
-
-        boolean[] empty = {};
-        CommonUtil.rotate(empty, 1);
-        Assertions.assertArrayEquals(new boolean[0], empty);
-
-        CommonUtil.rotate((boolean[]) null, 1);
     }
 
     @Test
-    public void testRotateList() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        CommonUtil.rotate(list, 1);
-        Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
-
-        CommonUtil.rotate((List<?>) null, 1);
-
-        List<String> single = new ArrayList<>(Arrays.asList("a"));
-        CommonUtil.rotate(single, 1);
-        Assertions.assertEquals(Arrays.asList("a"), single);
-
-        List<String> list2 = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        CommonUtil.rotate(list2, 4);
-        Assertions.assertEquals(Arrays.asList("a", "b", "c", "d"), list2);
-    }
-
-    @Test
-    public void testRotateCollection() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
-        CommonUtil.rotate((Collection<?>) list, 1);
-        Assertions.assertEquals(Arrays.asList("d", "a", "b", "c"), list);
-
-        Set<String> set = new LinkedHashSet<>(Arrays.asList("a", "b", "c", "d"));
-        CommonUtil.rotate(set, 1);
-        Assertions.assertEquals(4, set.size());
-
-        Collection<String> empty = new ArrayList<>();
-        CommonUtil.rotate(empty, 1);
-        Assertions.assertTrue(empty.isEmpty());
-
-        CommonUtil.rotate((Collection<?>) null, 1);
-
-        Collection<String> single = new ArrayList<>(Arrays.asList("a"));
-        CommonUtil.rotate(single, 1);
-        Assertions.assertEquals(1, single.size());
-    }
-
-    @Test
-    public void testRotate_CharArray_WithRange_NegativeDistance() {
-        char[] arr = { 'a', 'b', 'c', 'd', 'e' };
-        CommonUtil.rotate(arr, 1, 4, -1);
-        assertArrayEquals(new char[] { 'a', 'c', 'd', 'b', 'e' }, arr);
-    }
-
-    @Test
-    public void testRotate_ShortArray_WithRange_NegativeDistance() {
-        short[] arr = { 1, 2, 3, 4, 5 };
-        CommonUtil.rotate(arr, 1, 4, -1);
-        assertArrayEquals(new short[] { 1, 3, 4, 2, 5 }, arr);
-    }
-
-    @Test
-    public void testRotate_LongArray_WithRange_NegativeDistance() {
-        long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        CommonUtil.rotate(arr, 1, 4, -1);
-        assertArrayEquals(new long[] { 1L, 3L, 4L, 2L, 5L }, arr);
-    }
-
-    @Test
-    public void testRotate_FloatArray_WithRange_NegativeDistance() {
-        float[] arr = { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
-        CommonUtil.rotate(arr, 1, 4, -1);
-        assertArrayEquals(new float[] { 1.0f, 3.0f, 4.0f, 2.0f, 5.0f }, arr, 0.0f);
-    }
-
-    @Test
-    public void testRotate_DoubleArray_WithRange_NegativeDistance() {
-        double[] arr = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        CommonUtil.rotate(arr, 1, 4, -1);
-        assertArrayEquals(new double[] { 1.0, 3.0, 4.0, 2.0, 5.0 }, arr, 0.0);
-    }
-
-    @Test
-    public void testRotateBooleanRange() {
-        boolean[] a = { true, false, true, false, true };
-        boolean[] expected = { true, false, true, false, true };
+    public void testRotateShortRange() {
+        short[] a = { 1, 2, 3, 4, 5 };
+        short[] expected = { 1, 4, 2, 3, 5 };
         CommonUtil.rotate(a, 1, 4, 1);
-        expected[1] = false;
-        expected[2] = false;
-        expected[3] = true;
         Assertions.assertArrayEquals(expected, a);
-
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.rotate(a, -1, 3, 1));
-        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.rotate(a, 0, 10, 1));
-
-        boolean[] b = { true, false, true };
-        boolean[] original = b.clone();
-        CommonUtil.rotate(b, 1, 1, 1);
-        Assertions.assertArrayEquals(original, b);
     }
 
-    @Test
-    public void testRotate_effectiveDistanceZeroIsANoOpForNonListCollections() {
-        final Collection<String> unmodifiable = Collections.unmodifiableCollection(new LinkedHashSet<>(Arrays.asList("a", "b", "c")));
-
-        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 0));
-        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 3));
-        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, -3));
-        Assertions.assertDoesNotThrow(() -> CommonUtil.rotate(unmodifiable, 6));
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> CommonUtil.rotate(unmodifiable, 1));
-
-        final Set<String> modifiable = new LinkedHashSet<>(Arrays.asList("a", "b", "c"));
-        final Iterator<String> outstanding = modifiable.iterator();
-
-        CommonUtil.rotate(modifiable, 3);
-
-        assertEquals("a", outstanding.next());
-        assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(modifiable));
-    }
 
 }

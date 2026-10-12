@@ -1,6 +1,6 @@
 package com.landawn.abacus.parser;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -36,9 +36,9 @@ import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.JsonNameTag;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
 import com.landawn.abacus.parser.ParserUtil.XmlNameTag;
-import com.landawn.abacus.parser.entity.ImmutableBuilderEntity;
 import com.landawn.abacus.parser.entity.ImmutableBuilderEntity2;
 import com.landawn.abacus.parser.entity.ImmutableBuilderEntity3;
+import com.landawn.abacus.parser.entity.ImmutableBuilderEntity;
 import com.landawn.abacus.parser.entity.ImmutableEntity4;
 import com.landawn.abacus.parser.entity.ImmutableEntity5;
 import com.landawn.abacus.parser.entity.ImmutableEntity6;
@@ -69,6 +69,1760 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
+
+
+    // BeanInfo.getPropInfoChain(String)
+    @Test
+    public void testBeanInfoGetPropInfoQueue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        var queue = beanInfo.getPropInfoChain("name");
+        assertEquals(0, queue.size());
+
+        var emptyQueue = beanInfo.getPropInfoChain("nested.property");
+        assertTrue(emptyQueue.isEmpty());
+    }
+
+    @Test
+    public void test_ImmutableBuilderEntity() {
+        assertJsonRoundTrip(ImmutableBuilderEntity.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity.class);
+        assertJsonRoundTrip(ImmutableBuilderEntity2.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity2.class);
+        assertJsonRoundTrip(ImmutableBuilderEntity3.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity3.class);
+        assertJsonRoundTrip(new ImmutableEntity4().id(111).firstName("fn").lastName("ln"), ImmutableEntity4.class);
+        assertJsonRoundTrip(new ImmutableEntity5(111, "fn", "ln"), ImmutableEntity5.class);
+        assertJsonRoundTrip(new ImmutableEntity6(111, "fn", "ln"), ImmutableEntity6.class);
+        assertJsonRoundTrip(new ImmutableEntity7(111, "fn", "ln"), ImmutableEntity7.class);
+        assertJsonRoundTrip(new ImmutableEntity8(111, "fn", "ln"), ImmutableEntity8.class);
+        assertJsonRoundTrip(new ImmutableEntity9(111, "fn", "ln"), ImmutableEntity9.class);
+        assertJsonRoundTrip(new RecordA(111, "fn", "ln"), RecordA.class);
+        assertJsonRoundTrip(new RecordB(111, "fn", "ln"), RecordB.class);
+    }
+
+
+
+    // A FIELD-level dateFormat on long/String still wins under a class-level config; the plain long takes the class-level numberFormat.
+    @Test
+    public void testClassLevelDateFormat_fieldLevelDateFormatOnLongAndStringStillApplied() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G118FieldLevelFormatBean.class);
+        assertNull(beanInfo.getPropInfo("plain").dateFormat);
+        assertEquals("long", beanInfo.getPropInfo("epoch").dateFormat);
+        assertEquals("yyyy", beanInfo.getPropInfo("text").dateFormat);
+
+        final G118FieldLevelFormatBean bean = new G118FieldLevelFormatBean();
+        bean.setPlain(1234);
+        bean.setEpoch(11);
+        bean.setText("zz");
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"plain\": \"1,234\""), json);
+        assertTrue(json.contains("\"epoch\": \"11\""), json);
+        assertTrue(json.contains("\"text\": \"zz\""), json);
+
+        final G118FieldLevelFormatBean copy = N.fromJson(json, G118FieldLevelFormatBean.class);
+        assertEquals(1234L, copy.getPlain());
+        assertEquals(11L, copy.getEpoch());
+        assertEquals("zz", copy.getText());
+    }
+
+
+
+    // G009-01: a class-level @JsonXmlConfig(dateFormat) was offered to long/Long/String properties (they have
+    // propFuncMap entries for a field-level dateFormat): every long was written as a JSON string and the
+    // class-level numberFormat was ignored for long/Long properties.
+    @Test
+    public void testClassLevelDateFormat_notAppliedToLongAndStringProperties() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009ClassDateFormatLongBean.class);
+        assertNull(beanInfo.getPropInfo("id").dateFormat);
+        assertNull(beanInfo.getPropInfo("ref").dateFormat);
+        assertNull(beanInfo.getPropInfo("name").dateFormat);
+        assertEquals("yyyy-MM-dd", beanInfo.getPropInfo("createdOn").dateFormat);
+
+        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
+        bean.setId(123);
+        bean.setRef(4567L);
+        bean.setName("x");
+        bean.setCreatedOn(new Date(0));
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"id\": 123"), json);
+        assertTrue(json.contains("\"ref\": \"4,567\""), json);
+        assertTrue(json.contains("\"createdOn\": \"1970-01-01\""), json);
+
+        final G009ClassDateFormatLongBean copy = N.fromJson(json, G009ClassDateFormatLongBean.class);
+        assertEquals(123L, copy.getId());
+        assertEquals(Long.valueOf(4567L), copy.getRef());
+        assertEquals("x", copy.getName());
+        assertEquals(new Date(0), copy.getCreatedOn());
+    }
+
+
+
+    // XML: the class-level numberFormat now reaches long/Long properties and the value round-trips.
+    @Test
+    public void testClassLevelDateFormat_xmlLongUsesClassLevelNumberFormat() {
+        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
+        bean.setId(1234);
+        bean.setRef(4567L);
+        bean.setName("a<b>&c");
+        bean.setCreatedOn(new Date(0));
+
+        final String xml = N.toXml(bean);
+        assertTrue(xml.contains("<id>1,234</id>"), xml);
+        assertTrue(xml.contains("<ref>4,567</ref>"), xml);
+        assertTrue(xml.contains("<name>a&lt;b&gt;&amp;c</name>"), xml);
+        assertTrue(xml.contains("<createdOn>1970-01-01</createdOn>"), xml);
+
+        final G009ClassDateFormatLongBean copy = N.fromXml(xml, G009ClassDateFormatLongBean.class);
+        assertEquals(1234L, copy.getId());
+        assertEquals(Long.valueOf(4567L), copy.getRef());
+        assertEquals("a<b>&c", copy.getName());
+        assertEquals(new Date(0), copy.getCreatedOn());
+    }
+
+    @Test
+    public void testClassLevelDateFormatAppliesOnlyToCompatibleProperties() {
+        final ClassDateFormatBean dateBean = new ClassDateFormatBean();
+        dateBean.setCount(7);
+        dateBean.setCreatedOn(new Date(0));
+
+        final String dateJson = Assertions.assertDoesNotThrow(() -> N.toJson(dateBean));
+        assertTrue(dateJson.contains("\"count\""));
+    }
+
+    @Test
+    public void testClassLevelNumberFormatAppliesOnlyToCompatibleProperties() {
+        final ClassNumberFormatBean numberBean = new ClassNumberFormatBean();
+        numberBean.setName("widget");
+        numberBean.setPrice(12.5d);
+
+        final String numberJson = Assertions.assertDoesNotThrow(() -> N.toJson(numberBean));
+        assertTrue(numberJson.contains("\"name\""));
+    }
+
+    // createBeanResult
+
+    @Test
+    public void testBeanInfoCreateBeanResult_immutableRecord() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        Object result = beanInfo.createBeanResult();
+        assertNotNull(result);
+        // For immutable beans without builder, returns an Object array
+        assertTrue(result instanceof Object[]);
+    }
+
+    @Test
+    public void testBeanInfoCreateBeanResult_mutableBean() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        Object result = beanInfo.createBeanResult();
+        assertNotNull(result);
+        assertTrue(result instanceof TestBean);
+    }
+
+
+
+    // G07-01: an exception thrown by the no-args constructor reaches the caller exactly as N.newInstance(clazz) delivered it:
+    // a RuntimeException as the same instance, a checked exception wrapped by ExceptionUtil.toRuntimeException.
+    @Test
+    public void testCreateBeanResult_constructorExceptionsKeepNewInstanceWrapping() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G07PlainBean.class);
+        assertFalse(beanInfo.isImmutable);
+
+        G07PlainBean.failConstruction = true;
+
+        try {
+            final IllegalStateException e = assertThrows(IllegalStateException.class, beanInfo::createBeanResult);
+            assertEquals("boom", e.getMessage());
+            assertEquals(IllegalStateException.class, e.getClass());
+        } finally {
+            G07PlainBean.failConstruction = false;
+        }
+
+        G07PlainBean.failConstructionChecked = true;
+
+        try {
+            final RuntimeException e = assertThrows(RuntimeException.class, beanInfo::createBeanResult);
+            assertEquals(com.landawn.abacus.exception.UncheckedIOException.class, e.getClass());
+            assertEquals(java.io.IOException.class, e.getCause().getClass());
+            assertEquals("checked boom", e.getCause().getMessage());
+        } finally {
+            G07PlainBean.failConstructionChecked = false;
+        }
+
+        assertSame(G07PlainBean.class, beanInfo.createBeanResult().getClass());
+    }
+
+
+
+    // G07-01: classes N.newInstance(clazz) does not create through a plain no-args constructor keep their previous path and
+    // result: a non-static member class and an anonymous class are created through an enclosing instance; a class
+    // without a no-args constructor is classified immutable and gets its constructor-argument array.
+    @Test
+    public void testCreateBeanResult_nonPlainClassesKeepNewInstancePath() throws Exception {
+        final BeanInfo inner = ParserUtil.getBeanInfo(G07InnerBean.class);
+        assertFalse(inner.isImmutable);
+        final Object innerBean = inner.createBeanResult();
+        assertSame(G07InnerBean.class, innerBean.getClass());
+        assertNotSame(innerBean, inner.createBeanResult());
+        assertEquals(0, ((G07InnerBean) innerBean).getCount());
+
+        final Class<?> anonymousClass = new G07PlainBean() {
+            @Override
+            public int getCount() {
+                return super.getCount() + 100;
+            }
+        }.getClass();
+        assertTrue(anonymousClass.isAnonymousClass());
+        final BeanInfo anonymous = ParserUtil.getBeanInfo(anonymousClass);
+        assertFalse(anonymous.isImmutable);
+        final Object anonymousBean = anonymous.createBeanResult();
+        assertSame(anonymousClass, anonymousBean.getClass());
+        assertEquals(100, ((G07PlainBean) anonymousBean).getCount());
+        assertNotSame(anonymousBean, anonymous.createBeanResult());
+
+        final BeanInfo noDefault = ParserUtil.getBeanInfo(G07NoDefaultConstructorBean.class);
+        assertTrue(noDefault.isImmutable);
+        final Object args = noDefault.createBeanResult();
+        assertTrue(args instanceof Object[]);
+        assertEquals(1, ((Object[]) args).length);
+        assertNull(((Object[]) args)[0]);
+        assertNotSame(args, noDefault.createBeanResult());
+        final G07NoDefaultConstructorBean finished = noDefault.finishBeanResult(args);
+        assertNull(finished.getName());
+    }
+
+
+
+    // G07-01: createBeanResult() for a plain mutable bean (top-level, static nested, local class in a static context, private
+    // no-args constructor) invokes the no-args constructor exactly once per call and returns a fresh instance of the class.
+    @Test
+    public void testCreateBeanResult_plainMutableBeanInvokesNoArgsConstructorOncePerCall() {
+        final BeanInfo topLevel = ParserUtil.getBeanInfo(Account.class);
+        final Object first = topLevel.createBeanResult();
+        final Object second = topLevel.createBeanResult();
+        assertSame(Account.class, first.getClass());
+        assertSame(Account.class, second.getClass());
+        assertNotSame(first, second);
+        assertSame(first, topLevel.finishBeanResult(first));
+        assertNull(((Account) first).getFirstName());
+        assertEquals(0L, ((Account) first).getId());
+
+        final BeanInfo nested = ParserUtil.getBeanInfo(G07PlainBean.class);
+        assertFalse(nested.isImmutable);
+        G07PlainBean.constructions = 0;
+        final Object bean = nested.createBeanResult();
+        assertEquals(1, G07PlainBean.constructions);
+        assertSame(G07PlainBean.class, bean.getClass());
+        assertEquals(0, ((G07PlainBean) bean).getCount());
+        assertNotSame(bean, nested.createBeanResult());
+        assertEquals(2, G07PlainBean.constructions);
+
+        // through the JSON reader, which creates every mutable bean with createBeanResult()
+        G07PlainBean.constructions = 0;
+        final G07PlainBean fromJson = N.fromJson("{\"count\": 3}", G07PlainBean.class);
+        assertEquals(3, fromJson.getCount());
+        assertEquals(1, G07PlainBean.constructions);
+
+        final Class<?> localClass = g07LocalBeanClass();
+        final BeanInfo local = ParserUtil.getBeanInfo(localClass);
+        assertFalse(local.isImmutable);
+        assertSame(localClass, local.createBeanResult().getClass());
+        assertNotSame(local.createBeanResult(), local.createBeanResult());
+
+        final BeanInfo privateConstructor = ParserUtil.getBeanInfo(G07PrivateConstructorBean.class);
+        assertFalse(privateConstructor.isImmutable);
+        assertSame(G07PrivateConstructorBean.class, privateConstructor.createBeanResult().getClass());
+        assertNotSame(privateConstructor.createBeanResult(), privateConstructor.createBeanResult());
+    }
+
+    // equals
+
+
+
+    // BeanInfo.equals
+    @Test
+    public void testBeanInfoEquals() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+
+        assertTrue(beanInfo1.equals(beanInfo2));
+        assertTrue(beanInfo1.equals(beanInfo1));
+    }
+
+    @Test
+    public void testBeanInfoEquals_differentClasses() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+
+        assertFalse(beanInfo1.equals(beanInfo2));
+    }
+
+    @Test
+    public void testBeanInfoEquals_symmetry() {
+        BeanInfo a = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo b = ParserUtil.getBeanInfo(TestBean.class);
+        assertTrue(a.equals(b));
+        assertTrue(b.equals(a));
+    }
+
+    @Test
+    public void testBeanInfoEquals_withNonBeanInfo() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        assertFalse(beanInfo.equals(null));
+        assertFalse(beanInfo.equals("string"));
+    }
+
+    @Test
+    public void testPropInfoEquals_crossBeanSameName() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+        PropInfo p1 = beanInfo1.getPropInfo("name");
+        PropInfo p2 = beanInfo2.getPropInfo("name");
+        // Same name but different fields
+        assertFalse(p1.equals(p2));
+    }
+
+
+
+    // BeanInfo.createBeanResult / finishBeanResult
+    @Test
+    public void testBeanInfoCreateAndFinishBeanResult() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        Object result = beanInfo.createBeanResult();
+        assertNotNull(result);
+
+        TestBean bean = beanInfo.finishBeanResult(result);
+        assertNotNull(bean);
+
+        TestBean nullBean = beanInfo.finishBeanResult(null);
+        assertNull(nullBean);
+    }
+
+    @Test
+    public void testBeanInfoFinishBeanResult_immutableRecord() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        Object result = beanInfo.createBeanResult();
+        // Set values in the args array
+        Object[] args = (Object[]) result;
+        args[0] = 1;
+        args[1] = "First";
+        args[2] = "Last";
+        RecordA record = beanInfo.finishBeanResult(result);
+        assertNotNull(record);
+        assertEquals(1, record.id());
+        assertEquals("First", record.firstName());
+        assertEquals("Last", record.lastName());
+    }
+
+
+
+    /**
+     * Verifies that {@code @JsonXmlField(numberFormat=...)} produces locale-independent output.
+     * Without an explicit locale, {@code new DecimalFormat(pattern)} uses the JVM default locale,
+     * so the same pattern would render "1.234,56" on de_DE and "1,234.56" on en_US, breaking
+     * cross-locale round-trips.
+     */
+    @Test
+    public void test_numberFormat_isLocaleIndependent() {
+        final java.util.Locale prev = java.util.Locale.getDefault();
+        try {
+            // Switch to a locale whose grouping/decimal separators differ from Locale.ROOT (en_US).
+            // German uses '.' for grouping and ',' for decimal -- the inverse of ROOT.
+            java.util.Locale.setDefault(java.util.Locale.GERMANY);
+
+            final BeanInfo beanInfo = ParserUtil.getBeanInfo(NumberFormatBean.class);
+            final PropInfo propInfo = beanInfo.getPropInfo("price");
+            assertNotNull(propInfo);
+            assertNotNull(propInfo.numberFormat);
+
+            final String formatted;
+            synchronized (propInfo.numberFormat) {
+                formatted = propInfo.numberFormat.format(1234.56d);
+            }
+
+            // Must use Locale.ROOT (en_US) symbols regardless of default locale: comma grouping, dot decimal.
+            assertEquals("1,234.56", formatted);
+        } finally {
+            java.util.Locale.setDefault(prev);
+            // Force the BeanInfo cache to drop the entry so subsequent tests build fresh metadata
+            // tied to whatever locale is active when they run.
+            ParserUtil.refreshBeanPropInfo(NumberFormatBean.class);
+        }
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesParameterizedArrayComponents() {
+        final ParameterizedArrayBean bean = N.fromJson("{\"values\":[[1]],\"nested\":[[[2]]]}", ParameterizedArrayBean.class);
+
+        assertEquals(List.of("1"), bean.values[0]);
+        assertEquals(List.of("2"), bean.nested.get(0)[0]);
+    }
+
+    @Test
+    public void test_get_set_prop_value() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, false);
+        TestBean bean = new TestBean();
+
+        beanInfo.setPropValue(bean, "name", "Alice");
+        beanInfo.setPropValue(bean, "age", 28);
+        beanInfo.setPropValue(bean, "createdDate", new Date());
+
+        String name = (String) beanInfo.getPropValue(bean, "name");
+        int age = (int) beanInfo.getPropValue(bean, "age");
+        Date createdDate = (Date) beanInfo.getPropValue(bean, "createdDate");
+
+        assertEquals("Alice", name);
+        assertEquals(28, age);
+        assertNotNull(createdDate);
+    }
+
+    // getAliases
+
+    @Test
+    public void testGetAliases_fieldWithJsonXmlFieldNoAliases() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        String[] aliases = ParserUtil.getAliases(ageField);
+        // @JsonXmlField(name="customAge") but no aliases
+        assertTrue(aliases == null || aliases.length == 0);
+    }
+
+    @Test
+    public void testGetAliases_fieldWithoutAliases() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        String[] aliases = ParserUtil.getAliases(nameField);
+        // name field does not have alias annotations
+        assertTrue(aliases == null || aliases.length == 0);
+    }
+
+
+
+    // getAliases(Field)
+    @Test
+    public void testGetAliases_nullField() {
+        String[] aliases = ParserUtil.getAliases(null);
+        assertNull(aliases);
+    }
+
+    @Test
+    public void testGetAliases_withJsonAliasAnnotation() throws Exception {
+        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
+        String[] aliases = ParserUtil.getAliases(field);
+        Assertions.assertArrayEquals(new String[] { "fname" }, aliases);
+    }
+
+    // getAnnotation
+
+
+
+    // BeanInfo.getAnnotation
+    @Test
+    public void testBeanInfoGetAnnotation() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        Table tableAnnotation = beanInfo.getAnnotation(Table.class);
+        assertNotNull(tableAnnotation);
+        assertEquals("test_bean", tableAnnotation.value());
+
+        Deprecated deprecatedAnnotation = beanInfo.getAnnotation(Deprecated.class);
+        assertNull(deprecatedAnnotation);
+    }
+
+    @Test
+    public void testBeanInfoGetAnnotation_noAnnotation() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        Table tableAnnotation = beanInfo.getAnnotation(Table.class);
+        assertNull(tableAnnotation);
+    }
+
+
+
+    // PropInfo.getAnnotation
+    @Test
+    public void testPropInfoGetAnnotation() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        Column columnAnnotation = propInfo.getAnnotation(Column.class);
+        assertNotNull(columnAnnotation);
+        assertEquals("name_column", columnAnnotation.value());
+
+        Id idAnnotation = propInfo.getAnnotation(Id.class);
+        assertNull(idAnnotation);
+    }
+
+    @Test
+    public void testPropInfoGetAnnotation_idField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+        Id idAnnotation = propInfo.getAnnotation(Id.class);
+        assertNotNull(idAnnotation);
+    }
+
+    @Test
+    public void testPropInfoGetAnnotation_jsonXmlField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+        JsonXmlField jsonXmlField = propInfo.getAnnotation(JsonXmlField.class);
+        assertNotNull(jsonXmlField);
+        assertEquals("customAge", jsonXmlField.name());
+    }
+
+    // getBeanInfo
+
+
+
+    // getBeanInfo(java.lang.reflect.Type)
+    @Test
+    public void testGetBeanInfo() {
+        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        Assertions.assertNotNull(beanInfo);
+        Assertions.assertEquals(TestBean.class, beanInfo.clazz);
+        Assertions.assertEquals("TestBean", beanInfo.simpleClassName);
+
+        ParserUtil.BeanInfo cachedBeanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        Assertions.assertSame(beanInfo, cachedBeanInfo);
+    }
+
+    @Test
+    public void test_getBeanInfo_aliasRestatingOwnNamingPolicyTagIsAccepted() {
+        // regression: the alias-collision check fired on the property's OWN naming-policy tag
+        // (first_name for firstName), making the whole bean class unusable
+        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(SelfAliasBean.class);
+
+        assertEquals("firstName", bi.getPropInfo("first_name").name);
+    }
+
+    @Test
+    public void testGetBeanInfo_annotations() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.annotations);
+        assertTrue(beanInfo.annotations.containsKey(Table.class));
+    }
+
+    @Test
+    public void testGetBeanInfo_cachedInstance() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+        assertSame(beanInfo1, beanInfo2);
+    }
+
+    @Test
+    public void testGetBeanInfo_canonicalClassName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.canonicalClassName);
+        assertTrue(beanInfo.canonicalClassName.contains("TestBean"));
+    }
+
+
+
+    // getBeanInfo(Class)
+    @Test
+    public void testGetBeanInfo_classVersion() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo);
+        assertEquals(TestBean.class, beanInfo.clazz);
+    }
+
+    @Test
+    public void testGetBeanInfo_classVersion_TestBean2() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean2.class);
+        assertNotNull(beanInfo);
+        assertEquals(TestBean2.class, beanInfo.clazz);
+        assertEquals("TestBean2", beanInfo.simpleClassName);
+    }
+
+    @Test
+    public void test_getBeanInfo_genericArrayWithParameterizedComponent() {
+        final java.lang.reflect.Type beanType = new TypeReference<GenericArrayBean<List<String>>>() {
+            // Capture the complete parameterized bean type.
+        }.javaType();
+
+        final PropInfo values = ParserUtil.getBeanInfo(beanType).getPropInfo("values");
+
+        assertEquals(List[].class, values.type.javaType());
+        assertEquals(String.class, values.type.elementType().elementType().javaType());
+
+        final GenericArrayBean<List<String>> bean = ParserFactory.createJsonParser()
+                .deserialize("{\"values\":[[1]]}", com.landawn.abacus.type.Type.of(beanType));
+        assertEquals(List.of("1"), bean.values[0]);
+    }
+
+    @Test
+    public void testGetBeanInfo_idPropInfoList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.idPropInfoList);
+        assertFalse(beanInfo.idPropInfoList.isEmpty());
+    }
+
+    @Test
+    public void testGetBeanInfo_idPropNameList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.idPropNameList);
+        assertTrue(beanInfo.idPropNameList.contains("id"));
+    }
+
+    @Test
+    public void testGetBeanInfo_immutableEntity() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(ImmutableEntity7.class);
+        assertNotNull(beanInfo);
+        assertTrue(beanInfo.isImmutable);
+    }
+
+    @Test
+    public void test_getBeanInfo_inheritedTypeArgumentOverridesParameterizedOwner() {
+        final java.lang.reflect.Type beanType = new TypeReference<OwnerPrecedenceBean<LocalDate>.InnerBean>() {
+            // The inner bean explicitly inherits OwnerPrecedenceBean<String>; that nearer
+            // superclass binding must override the lexical owner's LocalDate binding.
+        }.javaType();
+
+        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
+
+        assertEquals(String.class, value.type.javaType());
+    }
+
+
+
+    // G009-01 guard: a pattern invalid in the property's own syntax, and a java.time-only rejection on a java.time
+    // property, are still rejected when the BeanInfo is built.
+    @Test
+    public void testGetBeanInfo_invalidDatePatternStillRejected() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009BadPatternDateBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009AmPmLocalDateTimeBean.class));
+    }
+
+    @Test
+    public void testGetBeanInfo_isImmutable() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertFalse(beanInfo.isImmutable);
+    }
+
+    @Test
+    public void testGetBeanInfo_isImmutable_record() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        assertTrue(beanInfo.isImmutable);
+    }
+
+    @Test
+    public void testGetBeanInfo_isMarkedAsBean() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        // TestBean is not annotated with @Entity
+        assertFalse(beanInfo.isMarkedAsBean);
+    }
+
+    @Test
+    public void testGetBeanInfo_javaType() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.javaType);
+        assertEquals(TestBean.class, beanInfo.javaType);
+    }
+
+
+
+    // G009-01: a legacy date/time property uses SimpleDateFormat pattern syntax (JsonXmlField.dateFormat), but the
+    // BeanInfo build rejected SimpleDateFormat patterns java.time does not accept ("Too many pattern letters").
+    @Test
+    public void testGetBeanInfo_legacyDatePropertyAcceptsSimpleDateFormatOnlyPattern() {
+        final G009AmPmDateBean bean = new G009AmPmDateBean();
+        bean.date = new Date(1672671845000L); // 2023-01-02T15:04:05Z
+        bean.calendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        bean.calendar.setTimeInMillis(1672617600000L); // 2023-01-02T00:00:00Z
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009AmPmDateBean.class);
+        assertNull(beanInfo.getPropInfo("date").dateTimeFormatter);
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
+        assertTrue(json.contains("\"02 January 2023\""), json);
+
+        final G009AmPmDateBean fromJson = N.fromJson(json, G009AmPmDateBean.class);
+        assertEquals(1672671845000L, fromJson.date.getTime());
+        assertEquals(1672617600000L, fromJson.calendar.getTimeInMillis());
+
+        final G009AmPmDateBean fromXml = N.fromXml(N.toXml(bean), G009AmPmDateBean.class);
+        assertEquals(1672671845000L, fromXml.date.getTime());
+        assertEquals(1672617600000L, fromXml.calendar.getTimeInMillis());
+    }
+
+    @Test
+    public void test_getBeanInfo_longDateFormat() {
+        // getBeanInfo used to throw IllegalArgumentException("Unknown pattern letter: l") because
+        // DateTimeFormatter.ofPattern("long") was invoked before isLongDateFormat was computed.
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(LongDateFormatBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("createdOn");
+
+        assertTrue(propInfo.isLongDateFormat);
+        assertNull(propInfo.dateTimeFormatter);
+
+        // the epoch-millis machinery is alive: reads a long string as a Date
+        Date d = (Date) propInfo.readPropValue("1700000000000");
+        assertEquals(1700000000000L, d.getTime());
+    }
+
+
+
+    // G120 verify of G009-01 guard: a pattern valid in both syntaxes still builds the java.time formatter and formats as before.
+    @Test
+    public void testGetBeanInfo_patternValidInBothSyntaxesKeepsJavaTimeFormatter() {
+        assertNotNull(ParserUtil.getBeanInfo(G120VBothSyntaxesBean.class).getPropInfo("date").dateTimeFormatter);
+
+        final G120VBothSyntaxesBean bean = new G120VBothSyntaxesBean();
+        bean.date = new Date(1672671845000L);
+        assertEquals("{\"date\": \"2023-01-02 15:04:05\"}", N.toJson(bean));
+        assertEquals(1672671845000L, N.fromJson(N.toJson(bean), G120VBothSyntaxesBean.class).date.getTime());
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesArrayOwnersAndWildcardSubstitution() {
+        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(new TypeReference<ArrayOwnerFields<String>>() {
+        }.javaType());
+        for (final String name : new String[] { "values", "upper", "lower" }) {
+            final java.lang.reflect.Type expected = switch (name) {
+                case "values" -> new TypeReference<ArrayOwner<String>.Member>() {
+                }.javaType();
+                case "upper" -> new TypeReference<ArrayBeanValue<? extends String>>() {
+                }.javaType();
+                case "lower" -> new TypeReference<ArrayBeanValue<? super String>>() {
+                }.javaType();
+                default -> throw new AssertionError();
+            };
+            final java.lang.reflect.Type actual = info.getPropInfo(name).type.elementType().reflectType();
+            assertEquals(expected, actual);
+            assertEquals(actual, expected);
+            assertEquals(expected.hashCode(), actual.hashCode());
+            assertEquals(expected.getTypeName(), actual.getTypeName());
+        }
+        assertEquals(String.class, ParserUtil.getBeanInfo(info.getPropInfo("values").type.elementType().reflectType()).getPropInfo("value").type.javaType());
+        assertEquals(String[].class, info.getPropInfo("arrays").type.elementType().javaType());
+
+        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ArrayOwnerFields.class);
+        assertEquals(Object[].class, rawInfo.getPropInfo("arrays").type.elementType().javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("upper").type.elementType().parameterTypes().get(0).javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_preservesBeanArrayComponentsAndVariableSubstitution() {
+        final TypeReference<ParameterizedBeanArrayFields<String>> reference = new TypeReference<>() {
+        };
+        final ParameterizedBeanArrayFields<String> bean = ParserFactory.createJsonParser()
+                .deserialize("{\"values\":[{\"value\":1},null],\"nested\":[[{\"value\":2}]],\"children\":[{\"values\":[{\"value\":3}]}]}", reference.type());
+
+        assertEquals("1", bean.values[0].value);
+        assertNull(bean.values[1]);
+        assertEquals("2", bean.nested.get(0)[0].value);
+        assertEquals("3", bean.children[0].values[0].value);
+
+        final PropInfo values = ParserUtil.getBeanInfo(reference.javaType()).getPropInfo("values");
+        final java.lang.reflect.Type expected = new TypeReference<ArrayBeanValue<String>>() {
+        }.javaType();
+        assertEquals(expected, values.type.elementType().reflectType());
+        assertEquals(expected.hashCode(), values.type.elementType().reflectType().hashCode());
+        assertEquals(expected.getTypeName(), values.type.elementType().reflectType().getTypeName());
+    }
+
+    @Test
+    public void testGetBeanInfo_propInfoListSize() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        // TestBean has 4 properties: id, name, age, createdDate
+        assertEquals(4, beanInfo.propInfoList.size());
+        assertEquals(4, beanInfo.propNameList.size());
+    }
+
+    @Test
+    public void testGetBeanInfo_propNameListContents() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertTrue(beanInfo.propNameList.contains("id"));
+        assertTrue(beanInfo.propNameList.contains("name"));
+        assertTrue(beanInfo.propNameList.contains("age"));
+        assertTrue(beanInfo.propNameList.contains("createdDate"));
+    }
+
+    @Test
+    public void testGetBeanInfo_publicFields() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.propInfoList);
+        assertFalse(beanInfo.propInfoList.isEmpty());
+        assertNotNull(beanInfo.propNameList);
+        assertFalse(beanInfo.propNameList.isEmpty());
+    }
+
+    @Test
+    public void testGetBeanInfo_readOnlyIdPropInfoList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.readOnlyIdPropInfoList);
+    }
+
+    @Test
+    public void testGetBeanInfo_readOnlyIdPropNameList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.readOnlyIdPropNameList);
+    }
+
+    @Test
+    public void testGetBeanInfo_recordType() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        assertNotNull(beanInfo);
+        assertEquals(RecordA.class, beanInfo.clazz);
+        assertTrue(beanInfo.isImmutable);
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesGenericTypeArgumentsFromParameterizedOwner() {
+        final java.lang.reflect.Type beanType = new TypeReference<GenericOwner<LocalDate>.InnerGenericBean>() {
+            // Capture both the non-static inner class and its parameterized owner.
+        }.javaType();
+
+        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
+
+        assertEquals(LocalDate.class, value.type.javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesInheritedGenericTypeArguments() {
+        final PropInfo value = ParserUtil.getBeanInfo(LocalDateGenericBean.class).getPropInfo("value");
+
+        assertEquals(LocalDate.class, value.type.javaType());
+
+        final LocalDateGenericBean bean = N.fromJson("{\"value\":\"2026-01-02\"}", LocalDateGenericBean.class);
+        assertEquals(LocalDate.of(2026, 1, 2), bean.getValue());
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesRecursiveAndSwappedOwnerVariables() {
+        final java.lang.reflect.Type recursive = new TypeReference<RecursiveArrayOwner<String>.Member<Integer>>() {
+        }.javaType();
+        assertEquals(recursive, ParserUtil.getBeanInfo(recursive).getPropInfo("value").type.reflectType());
+
+        final java.lang.reflect.Type swapped = new TypeReference<SwappedArrayOwner<String, Integer>.Member>() {
+        }.javaType();
+        final ParserUtil.BeanInfo swappedInfo = ParserUtil.getBeanInfo(swapped);
+        assertEquals(Integer.class, swappedInfo.getPropInfo("first").type.javaType());
+        assertEquals(String.class, swappedInfo.getPropInfo("second").type.javaType());
+
+        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(SwappedArrayOwner.Member.class);
+        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
+    }
+
+    @Test
+    public void test_getBeanInfo_resolvesReorderedSuperclassOwnerBeforeUpdatingBindings() {
+        java.lang.reflect.Type beanType = new TypeReference<ReorderedSuperclassOwner<String, Integer>.Swapped>() {
+        }.javaType();
+        ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(beanType);
+        assertEquals(Integer.class, info.getPropInfo("first").type.javaType());
+        assertEquals(String.class, info.getPropInfo("second").type.javaType());
+
+        ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ReorderedSuperclassOwner.Swapped.class);
+        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
+        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
+    }
+
+
+
+    // G120 verify of G009-01: java.sql.Date/Time read their pattern with java.time syntax (Dates.parseToLocalDate/LocalTime),
+    // so a pattern java.time rejects can never be read back; such a property is still rejected when the BeanInfo is built,
+    // and so is a type outside the exact legacy/Joda list (GregorianCalendar).
+    @Test
+    public void testGetBeanInfo_sqlDateAndTimePatternRejectedByJavaTimeStillRejected() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlDateBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlTimeBean.class));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VGregorianCalendarBean.class));
+    }
+
+    @Test
+    public void testGetBeanInfo_subEntityPropInfoList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.subEntityPropInfoList);
+    }
+
+    @Test
+    public void testGetBeanInfo_subEntityPropNameList() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.subEntityPropNameList);
+    }
+
+    @Test
+    public void testGetBeanInfo_tableName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertTrue(beanInfo.tableName.isPresent());
+        assertEquals("test_bean", beanInfo.tableName.get());
+    }
+
+    @Test
+    public void testGetBeanInfo_tableNameNotPresent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        assertFalse(beanInfo.tableName.isPresent());
+    }
+
+    @Test
+    public void testGetBeanInfo_typeField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.type);
+    }
+
+
+
+    // getBeanInfo(Type, boolean) - internal/deprecated
+    @Test
+    public void testGetBeanInfo_withAsmFlag() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, false);
+        assertNotNull(beanInfo);
+        assertEquals(TestBean.class, beanInfo.clazz);
+    }
+
+    @Test
+    public void testGetBeanInfo_withAsmFlagTrue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, true);
+        assertNotNull(beanInfo);
+        assertEquals(TestBean.class, beanInfo.clazz);
+    }
+
+    @Test
+    public void testGetBeanInfo_withJavaLangReflectType() {
+        java.lang.reflect.Type type = TestBean.class;
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(type);
+        assertNotNull(beanInfo);
+        assertEquals(TestBean.class, beanInfo.clazz);
+    }
+
+    @Test
+    public void testGetBeanInfoInvalidClass() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ParserUtil.getBeanInfo(EmptyClass.class);
+        });
+    }
+
+    @Test
+    public void testGetBeanInfoNullBeanClassNamesBeanClassParameter() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((Class<?>) null));
+        assertEquals("'beanClass' cannot be null", e.getMessage());
+    }
+
+
+
+    // Both public metadata lookups and the internal ASM/reflective test entry point reject non-beans.
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testGetBeanInfoRejectsThrowableClasses() {
+        for (final Class<?> type : java.util.List.of(Throwable.class, Exception.class, Error.class, ExceptionWithProperties.class)) {
+            final String expected = "Not a bean class: " + type.getCanonicalName() + " - Throwable subclasses are never treated as beans";
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((java.lang.reflect.Type) type)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
+        }
+    }
+
+    @Test
+    public void testGetBeanInfoThrowsExceptionForNonBeanClass() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            ParserUtil.getBeanInfo(String.class);
+        });
+    }
+
+    @Test
+    public void reviewFixes20260906_getBeanInfoRejectsUnsupportedReflectTypesWithIllegalArgument() throws Exception {
+        java.lang.reflect.Type typeVariable = List.class.getTypeParameters()[0];
+        java.lang.reflect.Type wildcard = ((java.lang.reflect.ParameterizedType) ReflectTypeHolder.class.getField("wildcard").getGenericType())
+                .getActualTypeArguments()[0];
+        java.lang.reflect.Type genericArray = ReflectTypeHolder.class.getField("genericArray").getGenericType();
+        assertTrue(wildcard instanceof java.lang.reflect.WildcardType);
+        assertTrue(genericArray instanceof java.lang.reflect.GenericArrayType);
+
+        for (java.lang.reflect.Type type : new java.lang.reflect.Type[] { typeVariable, wildcard, genericArray, null }) {
+            IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type), String.valueOf(type));
+            assertNotNull(e.getMessage());
+        }
+
+        // A Class and a ParameterizedType with a Class raw type are still accepted.
+        assertEquals(TestBean.class, ParserUtil.getBeanInfo((java.lang.reflect.Type) TestBean.class).clazz);
+        java.lang.reflect.Type parameterized = new TypeReference<GenericArrayBean<List<String>>>() {
+        }.javaType();
+        assertEquals(GenericArrayBean.class, ParserUtil.getBeanInfo(parameterized).clazz);
+
+        // A null property name is an argument error on the chain lookup too, as it already was on getPropInfo.
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfoChain(null));
+        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfo((String) null));
+    }
+
+
+
+    // G009-01: the same for a Joda-Time property, whose pattern syntax is Joda's DateTimeFormat.
+    @Test
+    public void testGetBeanInfo_jodaDatePropertyAcceptsJodaOnlyPattern() {
+        final G009AmPmJodaBean bean = new G009AmPmJodaBean();
+        bean.dateTime = new org.joda.time.DateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
+        assertEquals(1672671845000L, N.fromJson(json, G009AmPmJodaBean.class).dateTime.getMillis());
+    }
+
+    // getDateFormat
+
+    @Test
+    public void testGetDateFormat_fieldWithNoDateFormat() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        // age has @JsonXmlField(name="customAge") but no dateFormat
+        assertNull(ParserUtil.getDateFormat(ageField, null));
+    }
+
+    @Test
+    public void testGetDateFormat_fieldWithoutAnnotation() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertNull(ParserUtil.getDateFormat(nameField, null));
+    }
+
+    @Test
+    public void testGetDateFormat_fromJsonXmlConfig() throws Exception {
+        Field field = ConfigAnnotatedBean.class.getDeclaredField("createdAt");
+        JsonXmlConfig config = ConfigAnnotatedBean.class.getAnnotation(JsonXmlConfig.class);
+        assertEquals("yyyy/MM/dd", ParserUtil.getDateFormat(field, config));
+    }
+
+
+
+    // getDateFormat(Field, JsonXmlConfig)
+    @Test
+    public void testGetDateFormat_nullField() {
+        assertNull(ParserUtil.getDateFormat(null, null));
+    }
+
+    // getEnumerated
+
+    @Test
+    public void test_getEnumerated_fieldAnnotationWithoutEnumerated_inheritsClassConfig() throws Exception {
+        // A field annotated with @JsonXmlField for an unrelated attribute (name) used to always
+        // report the NAME default, silently overriding the class-level enumerated = ORDINAL config.
+        Field field = OrdinalEnumBean.class.getDeclaredField("status");
+        JsonXmlConfig config = OrdinalEnumBean.class.getAnnotation(JsonXmlConfig.class);
+
+        assertEquals(EnumType.ORDINAL, ParserUtil.getEnumerated(field, config));
+    }
+
+    @Test
+    public void testGetEnumerated_fieldWithJsonXmlFieldAnnotation() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        // Has @JsonXmlField but no custom enumerated setting, defaults to NAME
+        assertNotNull(ParserUtil.getEnumerated(ageField, null));
+    }
+
+    @Test
+    public void testGetEnumerated_fieldWithoutAnnotation() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertEquals(com.landawn.abacus.util.EnumType.NAME, ParserUtil.getEnumerated(nameField, null));
+    }
+
+
+
+    // getEnumerated(Field, JsonXmlConfig)
+    @Test
+    public void testGetEnumerated_nullField() {
+        assertEquals(com.landawn.abacus.util.EnumType.NAME, ParserUtil.getEnumerated(null, null));
+    }
+
+    // getJsonNameTags
+
+    @Test
+    public void testGetJsonNameTags_namingPolicies() {
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
+        // UPPER_CAMEL_CASE should produce "FirstName"
+        assertArrayEquals("FirstName".toCharArray(), tags[NamingPolicy.UPPER_CAMEL_CASE.ordinal()].name);
+        // SNAKE_CASE should produce "first_name"
+        assertArrayEquals("first_name".toCharArray(), tags[NamingPolicy.SNAKE_CASE.ordinal()].name);
+    }
+
+
+
+    // getJsonNameTags(String)
+    @Test
+    public void testGetJsonNameTags_simpleName() {
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+        // CAMEL_CASE index should return "firstName"
+        assertArrayEquals("firstName".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
+    }
+
+    @Test
+    public void testGetJsonNameTags_singleWord() {
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("name");
+        assertNotNull(tags);
+        // All naming policies for a single lowercase word should produce "name" or "Name" etc.
+        assertArrayEquals("name".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
+    }
+
+    @Test
+    public void testGetJsonNameTags_withField_customName() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        // @JsonXmlField(name = "customAge")
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("age", ageField);
+        assertNotNull(tags);
+        // All naming policies should use the custom name
+        for (JsonNameTag tag : tags) {
+            assertArrayEquals("customAge".toCharArray(), tag.name);
+        }
+    }
+
+
+
+    // getJsonNameTags(String, Field)
+    @Test
+    public void testGetJsonNameTags_withField_noAnnotation() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("name", nameField);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+        assertArrayEquals("name".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
+    }
+
+    @Test
+    public void testGetJsonNameTags_withJsonPropertyAnnotation() throws Exception {
+        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName", field);
+
+        assertEquals(NamingPolicy.values().length, tags.length);
+
+        for (JsonNameTag tag : tags) {
+            assertEquals("first_name", new String(tag.name));
+        }
+    }
+
+    @Test
+    public void testGetJsonNameTags_withNullField() {
+        JsonNameTag[] tags = ParserUtil.getJsonNameTags("myProp", null);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+        assertArrayEquals("myProp".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
+    }
+
+    // getNumberFormat
+
+    @Test
+    public void testGetNumberFormat_fieldWithNoNumberFormat() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        assertNull(ParserUtil.getNumberFormat(ageField, null));
+    }
+
+    @Test
+    public void testGetNumberFormat_fieldWithoutAnnotation() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertNull(ParserUtil.getNumberFormat(nameField, null));
+    }
+
+
+
+    // getNumberFormat(Field, JsonXmlConfig)
+    @Test
+    public void testGetNumberFormat_nullField() {
+        assertNull(ParserUtil.getNumberFormat(null, null));
+    }
+
+    // getPropInfo
+
+
+
+    // BeanInfo.getPropInfo(String)
+    @Test
+    public void testBeanInfoGetPropInfo() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+        assertNotNull(propInfo);
+        assertEquals("name", propInfo.name);
+
+        PropInfo idPropInfo = beanInfo.getPropInfo("id");
+        assertNotNull(idPropInfo);
+        assertTrue(idPropInfo.isMarkedAsId);
+
+        PropInfo agePropInfo = beanInfo.getPropInfo("age");
+        assertNotNull(agePropInfo);
+        assertArrayEquals("customAge".toCharArray(), agePropInfo.jsonNameTags[0].name);
+
+        PropInfo notExist = beanInfo.getPropInfo("notExist");
+        assertNull(notExist);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfo_allProperties() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotNull(beanInfo.getPropInfo("id"));
+        assertNotNull(beanInfo.getPropInfo("name"));
+        assertNotNull(beanInfo.getPropInfo("age"));
+        assertNotNull(beanInfo.getPropInfo("createdDate"));
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfo_byColumnName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name_column");
+        assertNotNull(propInfo);
+        assertEquals("name", propInfo.name);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfo_caseInsensitiveColumnName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfoUpper = beanInfo.getPropInfo("NAME_COLUMN");
+        assertNotNull(propInfoUpper);
+        assertEquals("name", propInfoUpper.name);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfo_repeatedLookupCached() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo p1 = beanInfo.getPropInfo("name");
+        PropInfo p2 = beanInfo.getPropInfo("name");
+        assertSame(p1, p2);
+    }
+
+
+
+    // BeanInfo.getPropInfo(PropInfo)
+    @Test
+    public void testBeanInfoGetPropInfoFromOtherBean() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+
+        PropInfo namePropFromBean1 = beanInfo1.getPropInfo("name");
+        PropInfo matchedProp = beanInfo2.getPropInfo(namePropFromBean1);
+        assertNotNull(matchedProp);
+        assertEquals("name", matchedProp.name);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfoFromOtherBean_noMatch() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+
+        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
+        PropInfo matchedProp = beanInfo2.getPropInfo(agePropFromBean1);
+        // "age" does not exist in TestBean2
+        assertNull(matchedProp);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfoFromOtherBean_sameBean() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+        PropInfo matched = beanInfo.getPropInfo(propInfo);
+        assertNotNull(matched);
+        assertEquals("name", matched.name);
+    }
+
+    @Test
+    public void test_getPropInfo_negativeCacheDoesNotPoisonFuzzyMatch() {
+        // regression: cached misses (Optional.empty) participated in the fuzzy-match loop and
+        // could shadow the real property, permanently caching a wrong null
+        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(FieldOnlyBean.class);
+
+        assertEquals(null, bi.getPropInfo("GETFIRSTNAME")); // caches a miss
+        org.junit.jupiter.api.Assertions.assertNotNull(bi.getPropInfo("getFirstName"));
+        assertEquals("firstName", bi.getPropInfo("getFirstName").name);
+    }
+
+    // getPropInfoChain
+
+    @Test
+    public void testBeanInfoGetPropInfoChain_cached() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        List<PropInfo> chain1 = beanInfo.getPropInfoChain("name");
+        List<PropInfo> chain2 = beanInfo.getPropInfoChain("name");
+        assertSame(chain1, chain2);
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfoChain_invalidNested() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        List<PropInfo> chain = beanInfo.getPropInfoChain("nonExistent.property");
+        assertTrue(chain.isEmpty());
+    }
+
+    @Test
+    public void testBeanInfoGetPropInfoChain_singleProp() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        // Single property path returns empty list (no chain needed, it's a direct prop)
+        List<PropInfo> chain = beanInfo.getPropInfoChain("id");
+        assertTrue(chain.isEmpty());
+    }
+
+
+
+    // G009-02: refreshing the inner bean's metadata left the outer bean's memoized "inner.city" chain in place.
+    @Test
+    public void testGetPropInfoChain_droppedAfterNestedBeanRefresh() {
+        assertEquals(2, ParserUtil.getBeanInfo(G009RefreshOuter.class).getPropInfoChain("inner.city").size());
+
+        Beans.registerNonPropertyAccessor(G009RefreshInner.class, "city");
+
+        assertNull(ParserUtil.getBeanInfo(G009RefreshInner.class).getPropInfo("city"));
+
+        final BeanInfo outerInfo = ParserUtil.getBeanInfo(G009RefreshOuter.class);
+        assertTrue(outerInfo.getPropInfoChain("inner.city").isEmpty());
+
+        final G009RefreshOuter outer = new G009RefreshOuter();
+        assertFalse(outerInfo.setPropValue(outer, "inner.city", "X", true));
+        assertNull(outer.getInner());
+
+        // The paths the refresh did not affect still resolve.
+        assertEquals(2, outerInfo.getPropInfoChain("inner.zip").size());
+        assertTrue(outerInfo.setPropValue(outer, "inner.zip", "Z", true));
+        assertEquals("Z", outer.getInner().getZip());
+    }
+
+    // getPropValue
+
+
+
+    // BeanInfo.getPropValue(Object, String)
+    @Test
+    public void testBeanInfoGetPropValue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        bean.setName("John");
+        bean.setAge(30);
+
+        String name = beanInfo.getPropValue(bean, "name");
+        assertEquals("John", name);
+
+        int age = beanInfo.getPropValue(bean, "age");
+        assertEquals(30, age);
+    }
+
+    @Test
+    public void testBeanInfoGetPropValue_defaultPrimitive() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        long id = beanInfo.getPropValue(bean, "id");
+        assertEquals(0L, id);
+    }
+
+    @Test
+    public void testBeanInfoGetPropValue_nonExistentProp() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        assertThrows(RuntimeException.class, () -> {
+            beanInfo.getPropValue(bean, "nonExistentProperty");
+        });
+    }
+
+    @Test
+    public void testBeanInfoGetPropValue_nullObjectField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        Date date = beanInfo.getPropValue(bean, "createdDate");
+        assertNull(date);
+    }
+
+
+
+    // PropInfo.getPropValue(Object)
+    @Test
+    public void testPropInfoGetPropValue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        TestBean bean = new TestBean();
+        bean.setName("TestValue");
+
+        String value = propInfo.getPropValue(bean);
+        assertEquals("TestValue", value);
+    }
+
+    @Test
+    public void testPropInfoGetPropValue_dateField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
+
+        TestBean bean = new TestBean();
+        Date now = new Date();
+        bean.setCreatedDate(now);
+
+        Date value = propInfo.getPropValue(bean);
+        assertEquals(now, value);
+    }
+
+    @Test
+    public void testPropInfoGetPropValue_longField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        TestBean bean = new TestBean();
+        bean.setId(12345L);
+
+        long value = propInfo.getPropValue(bean);
+        assertEquals(12345L, value);
+    }
+
+    @Test
+    public void testPropInfoGetPropValue_nullValue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        TestBean bean = new TestBean();
+
+        String value = propInfo.getPropValue(bean);
+        assertNull(value);
+    }
+
+    @Test
+    public void testPropInfoGetPropValue_primitiveDefault() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        TestBean bean = new TestBean();
+
+        int value = propInfo.getPropValue(bean);
+        assertEquals(0, value);
+    }
+
+    // getTimeZone
+
+    @Test
+    public void testGetTimeZone_fieldWithNoTimeZone() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        assertNull(ParserUtil.getTimeZone(ageField, null));
+    }
+
+    @Test
+    public void testGetTimeZone_fieldWithoutAnnotation() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertNull(ParserUtil.getTimeZone(nameField, null));
+    }
+
+
+
+    // getTimeZone(Field, JsonXmlConfig)
+    @Test
+    public void testGetTimeZone_nullField() {
+        assertNull(ParserUtil.getTimeZone(null, null));
+    }
+
+    // getXmlNameTags
+
+
+
+    // getXmlNameTags(String, String, boolean)
+    @Test
+    public void testGetXmlNameTags_simpleName() {
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", "string", false);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+    }
+
+    @Test
+    public void testGetXmlNameTags_withBean() {
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("myBean", "MyBean", true);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+    }
+
+    @Test
+    public void testGetXmlNameTags_withCustomNameField() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("age", ageField, "int", false);
+        assertNotNull(tags);
+        // All naming policies should use the custom name "customAge"
+        for (XmlNameTag tag : tags) {
+            assertNotNull(tag);
+        }
+    }
+
+
+
+    // getXmlNameTags(String, Field, String, boolean)
+    @Test
+    public void testGetXmlNameTags_withField() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("name", nameField, "string", false);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+    }
+
+    @Test
+    public void testGetXmlNameTags_withJsonPropertyAnnotation() throws Exception {
+        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", field, "string", false);
+
+        assertEquals(NamingPolicy.values().length, tags.length);
+
+        for (XmlNameTag tag : tags) {
+            assertEquals("first_name", new String(tag.name));
+        }
+    }
+
+    @Test
+    public void testGetXmlNameTags_withNullField() {
+        XmlNameTag[] tags = ParserUtil.getXmlNameTags("myProp", null, "int", false);
+        assertNotNull(tags);
+        assertEquals(NamingPolicy.values().length, tags.length);
+    }
+
+    // hashCode
+
+
+
+    // BeanInfo.hashCode
+    @Test
+    public void testBeanInfoHashCode() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+
+        assertEquals(beanInfo1.hashCode(), beanInfo2.hashCode());
+    }
+
+    @Test
+    public void testBeanInfoHashCode_consistent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        int hash1 = beanInfo.hashCode();
+        int hash2 = beanInfo.hashCode();
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    public void testBeanInfoHashCode_differentClasses() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+
+        assertNotEquals(beanInfo1.hashCode(), beanInfo2.hashCode());
+    }
+
+
+
+    // hashCode(char[])
+    @Test
+    public void testHashCode_charArray() {
+        char[] a = "hello".toCharArray();
+        int hash = ParserUtil.hashCode(a);
+        // Same input produces same hash
+        assertEquals(hash, ParserUtil.hashCode("hello".toCharArray()));
+    }
+
+    @Test
+    public void testHashCode_charArray_differentStrings() {
+        int hash1 = ParserUtil.hashCode("abc".toCharArray());
+        int hash2 = ParserUtil.hashCode("xyz".toCharArray());
+        assertNotEquals(hash1, hash2);
+    }
+
+    @Test
+    public void testHashCode_charArray_emptyArray() {
+        int hash = ParserUtil.hashCode(new char[0]);
+        assertEquals(1, hash); // hash starts with 1, no iterations
+    }
+
+    @Test
+    public void testHashCode_charArray_singleChar() {
+        int hash = ParserUtil.hashCode("a".toCharArray());
+        assertEquals(31 + 'a', hash);
+    }
+
+
+
+    // hashCode(char[], int, int)
+    @Test
+    public void testHashCode_charArrayRange() {
+        char[] chars = "hello world".toCharArray();
+        int hash = ParserUtil.hashCode(chars, 0, 5);
+        assertEquals(ParserUtil.hashCode("hello".toCharArray(), 0, 5), hash);
+    }
+
+    @Test
+    public void testHashCode_charArrayRange_emptyRange() {
+        char[] chars = "test".toCharArray();
+        int hash = ParserUtil.hashCode(chars, 2, 2);
+        // Empty range
+        assertNotNull(hash);
+    }
+
+    @Test
+    public void testHashCode_charArrayRange_fullArray() {
+        char[] chars = "test".toCharArray();
+        int hashFull = ParserUtil.hashCode(chars, 0, chars.length);
+        assertNotEquals(0, hashFull);
+    }
+
+    @Test
+    public void testHashCode_charArrayRange_partialArray() {
+        char[] chars = "abcdef".toCharArray();
+        int hash1 = ParserUtil.hashCode(chars, 1, 4); // "bcd"
+        int hash2 = ParserUtil.hashCode("bcd".toCharArray(), 0, 3);
+        assertEquals(hash1, hash2);
+    }
+
+    @Test
+    public void testPropInfoHashCode_consistent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+        int h1 = propInfo.hashCode();
+        int h2 = propInfo.hashCode();
+        assertEquals(h1, h2);
+    }
+
+
+
+    // PropInfo.hashCode / equals / toString
+    @Test
+    public void testPropInfoHashCodeAndEquals() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo1 = beanInfo.getPropInfo("name");
+        PropInfo propInfo2 = beanInfo.getPropInfo("name");
+        PropInfo propInfo3 = beanInfo.getPropInfo("age");
+
+        assertEquals(propInfo1.hashCode(), propInfo2.hashCode());
+        assertNotEquals(propInfo1.hashCode(), propInfo3.hashCode());
+
+        assertTrue(propInfo1.equals(propInfo1));
+        assertTrue(propInfo1.equals(propInfo2));
+        assertFalse(propInfo1.equals(propInfo3));
+        assertFalse(propInfo1.equals(null));
+        assertFalse(propInfo1.equals("string"));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testInternalBeanInfoLookupRejectsOtherNonBeans() {
+        for (final Class<?> type : java.util.List.of(String.class, java.util.HashMap.class)) {
+            final String expected = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage();
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
+        }
+    }
+
+    // isAnnotationPresent
+
+
+
+    // BeanInfo.isAnnotationPresent
+    @Test
+    public void testBeanInfoIsAnnotationPresent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        assertTrue(beanInfo.isAnnotationPresent(Table.class));
+        assertFalse(beanInfo.isAnnotationPresent(Deprecated.class));
+    }
+
+    @Test
+    public void testBeanInfoIsAnnotationPresent_noAnnotations() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        assertFalse(beanInfo.isAnnotationPresent(Table.class));
+    }
+
+
+
+    // PropInfo.isAnnotationPresent
+    @Test
+    public void testPropInfoIsAnnotationPresent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertTrue(propInfo.isAnnotationPresent(Column.class));
+        assertFalse(propInfo.isAnnotationPresent(Id.class));
+    }
+
+    @Test
+    public void testPropInfoIsAnnotationPresent_id() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+        assertTrue(propInfo.isAnnotationPresent(Id.class));
+    }
+
+    @Test
+    public void testPropInfoIsAnnotationPresent_jsonXmlField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+        assertTrue(propInfo.isAnnotationPresent(JsonXmlField.class));
+    }
+
+    @Test
+    public void testPropInfoIsAnnotationPresent_noAnnotation() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
+        assertFalse(propInfo.isAnnotationPresent(Column.class));
+        assertFalse(propInfo.isAnnotationPresent(Id.class));
+    }
+
+    // isJsonRawValue
+
+    @Test
+    public void testIsJsonRawValue_annotatedFieldNotRaw() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        // Has @JsonXmlField but isJsonRawValue defaults to false
+        assertFalse(ParserUtil.isJsonRawValue(ageField));
+    }
+
+    @Test
+    public void testIsJsonRawValue_normalField() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertFalse(ParserUtil.isJsonRawValue(nameField));
+    }
+
+
+
+    // isJsonRawValue(Field)
+    @Test
+    public void testIsJsonRawValue_nullField() {
+        assertFalse(ParserUtil.isJsonRawValue(null));
+    }
+
+    // isJsonXmlSerializable
+
+    @Test
+    public void testIsJsonXmlSerializable_ignoredFieldsRegex() throws Exception {
+        Field field = ConfigAnnotatedBean.class.getDeclaredField("internalCode");
+        JsonXmlConfig config = ConfigAnnotatedBean.class.getAnnotation(JsonXmlConfig.class);
+        assertFalse(ParserUtil.isJsonXmlSerializable(field, config));
+    }
+
+    @Test
+    public void testIsJsonXmlSerializable_normalField() throws Exception {
+        Field nameField = TestBean.class.getDeclaredField("name");
+        assertTrue(ParserUtil.isJsonXmlSerializable(nameField, null));
+    }
+
+    @Test
+    public void testIsJsonXmlSerializable_normalFieldNoConfig() throws Exception {
+        Field ageField = TestBean.class.getDeclaredField("age");
+        assertTrue(ParserUtil.isJsonXmlSerializable(ageField, null));
+    }
+
+
+
+    // isJsonXmlSerializable(Field, JsonXmlConfig)
+    @Test
+    public void testIsJsonXmlSerializable_nullField() {
+        assertTrue(ParserUtil.isJsonXmlSerializable(null, null));
+    }
+
+    @Test
+    public void testIsJsonXmlSerializable_staticField() throws Exception {
+        // ParserUtil itself has static fields, e.g., logger
+        Field staticField = ParserUtil.class.getDeclaredField("logger");
+        assertTrue(Modifier.isStatic(staticField.getModifiers()));
+        assertFalse(ParserUtil.isJsonXmlSerializable(staticField, null));
+    }
+
+    @Test
+    public void test_jsonPropertyNamesEscapeQuotesBackslashesAndControls() {
+        final EscapedJsonNameBean bean = new EscapedJsonNameBean();
+        bean.value = "value";
+        final JsonParser parser = ParserFactory.createJsonParser();
+
+        for (boolean pretty : new boolean[] { false, true }) {
+            final String json = parser.serialize(bean, JsonSerConfig.create().setPrettyFormat(pretty));
+            assertEquals(Map.of("a\"b\\c\nd", "value"), parser.deserialize(json, Map.class));
+            assertEquals("value", parser.deserialize(json, EscapedJsonNameBean.class).value);
+        }
+
+        bean.value = null;
+        final String json = parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE));
+        final Map<?, ?> values = parser.deserialize(json, Map.class);
+        assertTrue(values.containsKey("a\"b\\c\nd"));
+        assertNull(values.get("a\"b\\c\nd"));
+    }
+
     @Test
     public void testLocalDateTimeLongFormatRoundTripsWithConfiguredZone() {
         // read() used Timestamp.toLocalDateTime() (JVM-default zone) while write() used the configured
@@ -86,6 +1840,1048 @@ public class ParserUtilTest extends AbstractTest {
             assertEquals(bean.getTs(), back.getTs());
         } finally {
             TimeZone.setDefault(original);
+        }
+    }
+
+
+
+    // G120 verify of G009-01: java.sql.Timestamp (SimpleDateFormat syntax) and Joda MutableDateTime (Joda syntax) accept a
+    // pattern java.time rejects and round-trip through JSON and XML.
+    @Test
+    public void testGetBeanInfo_timestampAndMutableDateTimeAcceptOwnSyntaxPattern() {
+        final G120VTimestampBean bean = new G120VTimestampBean();
+        bean.timestamp = new java.sql.Timestamp(1672671845000L); // 2023-01-02T15:04:05Z
+        bean.mutableDateTime = new org.joda.time.MutableDateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
+
+        final String json = N.toJson(bean);
+        assertEquals("{\"timestamp\": \"01/02/2023 03:04:05 PM\", \"mutableDateTime\": \"01/02/2023 03:04:05 PM\"}", json);
+
+        final G120VTimestampBean fromJson = N.fromJson(json, G120VTimestampBean.class);
+        assertEquals(1672671845000L, fromJson.timestamp.getTime());
+        assertEquals(1672671845000L, fromJson.mutableDateTime.getMillis());
+
+        final G120VTimestampBean fromXml = N.fromXml(N.toXml(bean), G120VTimestampBean.class);
+        assertEquals(1672671845000L, fromXml.timestamp.getTime());
+        assertEquals(1672671845000L, fromXml.mutableDateTime.getMillis());
+    }
+
+    // newInstance
+
+
+
+    // BeanInfo.newInstance
+    @Test
+    public void testBeanInfoNewInstance() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        TestBean bean = beanInfo.newInstance();
+        assertNotNull(bean);
+
+        TestBean beanWithArgs = beanInfo.newInstance();
+        assertNotNull(beanWithArgs);
+    }
+
+    @Test
+    public void testBeanInfoNewInstance_defaultValues() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = beanInfo.newInstance();
+        assertEquals(0L, bean.getId());
+        assertNull(bean.getName());
+        assertEquals(0, bean.getAge());
+        assertNull(bean.getCreatedDate());
+    }
+
+    @Test
+    public void testBeanInfoNewInstance_withArgs() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
+        RecordA record = beanInfo.newInstance(42, "John", "Doe");
+        assertNotNull(record);
+        assertEquals(42, record.id());
+        assertEquals("John", record.firstName());
+        assertEquals("Doe", record.lastName());
+    }
+
+    @Test
+    public void testBeanInfoNewInstance_withEmptyArgs() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = beanInfo.newInstance(new Object[0]);
+        assertNotNull(bean);
+    }
+
+    @Test
+    public void test_numberFormat_rejectsTrailingCharacters() {
+        final PropInfo propInfo = ParserUtil.getBeanInfo(NumberFormatBean.class).getPropInfo("price");
+
+        assertThrows(RuntimeException.class, () -> propInfo.readPropValue("12oops"));
+    }
+
+
+
+    // PropInfo public fields
+    @Test
+    public void testPropInfoPublicFields() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.declaringClass);
+        assertEquals("name", propInfo.name);
+        assertNotNull(propInfo.type);
+        assertNotNull(propInfo.jsonXmlType);
+        assertNotNull(propInfo.dbType);
+        assertNotNull(propInfo.clazz);
+        assertNotNull(propInfo.annotations);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_aliases() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.aliases);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_clazz() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        PropInfo nameProp = beanInfo.getPropInfo("name");
+        assertEquals(String.class, nameProp.clazz);
+
+        PropInfo ageProp = beanInfo.getPropInfo("age");
+        assertEquals(int.class, ageProp.clazz);
+
+        PropInfo idProp = beanInfo.getPropInfo("id");
+        assertEquals(long.class, idProp.clazz);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_columnName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertTrue(propInfo.columnName.isPresent());
+        assertEquals("name_column", propInfo.columnName.get());
+    }
+
+    @Test
+    public void testPropInfoPublicFields_columnNameAbsent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+        assertFalse(propInfo.columnName.isPresent());
+    }
+
+    @Test
+    public void testPropInfoPublicFields_declaringClass() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+        assertEquals(TestBean.class, propInfo.declaringClass);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_field() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+        assertNotNull(propInfo.field);
+        assertEquals("name", propInfo.field.getName());
+    }
+
+    @Test
+    public void testPropInfoPublicFields_getAndSetMethodConsistency() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        for (PropInfo propInfo : beanInfo.propInfoList) {
+            // Each property should have a getter
+            assertNotNull(propInfo.getMethod, "Getter should exist for " + propInfo.name);
+        }
+    }
+
+    @Test
+    public void testPropInfoPublicFields_getMethod() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.getMethod);
+        assertEquals("getName", propInfo.getMethod.getName());
+    }
+
+    @Test
+    public void testPropInfoPublicFields_id() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        assertTrue(propInfo.isMarkedAsId);
+        assertNotNull(propInfo.field);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_isMarkedAsColumn() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertTrue(propInfo.isMarkedAsColumn);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_isMarkedAsColumn_false() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+        assertFalse(propInfo.isMarkedAsColumn);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_isMarkedAsReadOnlyId() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        assertFalse(propInfo.isMarkedAsReadOnlyId);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_isSubEntity() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertFalse(propInfo.isSubEntity);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_isTransient() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertFalse(propInfo.isTransient);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_jsonXmlExpose() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.jsonXmlExpose);
+    }
+
+    @Test
+    public void testPropInfoPublicFields_setMethod() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.setMethod);
+        assertEquals("setName", propInfo.setMethod.getName());
+    }
+
+    @Test
+    public void testPropInfoPublicFields_tablePrefix() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        assertNotNull(propInfo.tablePrefix);
+    }
+
+    // readPropInfo
+
+
+
+    // BeanInfo.readPropInfo(char[], int, int)
+    @Test
+    public void testBeanInfoReadPropInfo() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        char[] nameChars = "name".toCharArray();
+        PropInfo propInfo = beanInfo.readPropInfo(nameChars, 0, nameChars.length);
+        assertNotNull(propInfo);
+        assertEquals("name", propInfo.name);
+
+        char[] notExistChars = "notExist".toCharArray();
+        PropInfo nullPropInfo = beanInfo.readPropInfo(notExistChars, 0, notExistChars.length);
+        assertNull(nullPropInfo);
+    }
+
+    @Test
+    public void testBeanInfoReadPropInfo_ageField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        char[] ageChars = "age".toCharArray();
+        PropInfo propInfo = beanInfo.readPropInfo(ageChars, 0, ageChars.length);
+        assertNotNull(propInfo);
+        assertEquals("age", propInfo.name);
+    }
+
+    @Test
+    public void testBeanInfoReadPropInfo_emptyRange() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.readPropInfo("test".toCharArray(), 0, 0);
+        assertNull(propInfo);
+    }
+
+    @Test
+    public void testBeanInfoReadPropInfo_idField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        char[] idChars = "id".toCharArray();
+        PropInfo propInfo = beanInfo.readPropInfo(idChars, 0, idChars.length);
+        assertNotNull(propInfo);
+        assertEquals("id", propInfo.name);
+    }
+
+    @Test
+    public void testBeanInfoReadPropInfo_partialArray() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+
+        // Read "name" from a larger buffer
+        char[] buffer = "prefix_name_suffix".toCharArray();
+        PropInfo propInfo = beanInfo.readPropInfo(buffer, 7, 11);
+        assertNotNull(propInfo);
+        assertEquals("name", propInfo.name);
+    }
+
+    // readPropValue
+
+
+
+    // PropInfo.readPropValue(String)
+    @Test
+    public void testPropInfoReadPropValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        Object value = propInfo.readPropValue("25");
+        assertEquals(25, value);
+    }
+
+    @Test
+    public void testPropInfoReadPropValue_emptyStringForString() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        Object value = propInfo.readPropValue("");
+        assertEquals("", value);
+    }
+
+    @Test
+    public void testPropInfoReadPropValue_longType() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        Object value = propInfo.readPropValue("12345");
+        assertEquals(12345L, value);
+    }
+
+    @Test
+    public void testPropInfoReadPropValue_negativeValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        Object value = propInfo.readPropValue("-5");
+        assertEquals(-5, value);
+    }
+
+    @Test
+    public void testPropInfoReadPropValue_stringType() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        Object value = propInfo.readPropValue("hello");
+        assertEquals("hello", value);
+    }
+
+    @Test
+    public void testPropInfoReadPropValue_zeroValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        Object value = propInfo.readPropValue("0");
+        assertEquals(0, value);
+    }
+
+    // refreshBeanPropInfo
+
+
+
+    // refreshBeanPropInfo
+    @Test
+    public void testRefreshBeanPropInfo() {
+        ParserUtil.BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+
+        ParserUtil.refreshBeanPropInfo(TestBean.class);
+
+        ParserUtil.BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+
+        Assertions.assertNotSame(beanInfo1, beanInfo2);
+    }
+
+
+
+    // G009-02: refreshBeanPropInfo(Class) left the BeanInfo cached for a parameterized use of the class (Box<String>) stale.
+    @Test
+    public void testRefreshBeanPropInfo_evictsParameterizedTypeBeanInfo() throws Exception {
+        final java.lang.reflect.Type parameterized = G009BoxHolder.class.getDeclaredField("box").getGenericType();
+        final BeanInfo before = ParserUtil.getBeanInfo(parameterized);
+        assertSame(before, ParserUtil.getBeanInfo(parameterized));
+
+        ParserUtil.refreshBeanPropInfo(G009Box.class);
+
+        assertNotSame(before, ParserUtil.getBeanInfo(parameterized));
+    }
+
+
+
+    // G009-02 neighbours: refreshing a class still evicts its raw-class BeanInfo, but keeps the BeanInfos of other classes' parameterized types.
+    @Test
+    public void testRefreshBeanPropInfo_keepsOtherClassesParameterizedBeanInfo() throws Exception {
+        final java.lang.reflect.Type otherParameterized = G116PairHolder.class.getDeclaredField("pair").getGenericType();
+        final BeanInfo otherBefore = ParserUtil.getBeanInfo(otherParameterized);
+        final BeanInfo rawBefore = ParserUtil.getBeanInfo(G009Box.class);
+
+        ParserUtil.refreshBeanPropInfo(G009Box.class);
+
+        assertSame(otherBefore, ParserUtil.getBeanInfo(otherParameterized));
+        assertNotSame(rawBefore, ParserUtil.getBeanInfo(G009Box.class));
+    }
+
+    @Test
+    public void testRefreshBeanPropInfo_multipleRefreshes() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        ParserUtil.refreshBeanPropInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+        ParserUtil.refreshBeanPropInfo(TestBean.class);
+        BeanInfo beanInfo3 = ParserUtil.getBeanInfo(TestBean.class);
+        assertNotSame(beanInfo1, beanInfo2);
+        assertNotSame(beanInfo2, beanInfo3);
+        assertNotSame(beanInfo1, beanInfo3);
+    }
+
+    @Test
+    public void testRefreshBeanPropInfo_preservesProperties() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        int propCount = beanInfo1.propInfoList.size();
+        ParserUtil.refreshBeanPropInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
+        assertEquals(propCount, beanInfo2.propInfoList.size());
+    }
+
+    @Test
+    public void testRefreshBeanPropInfo_recreatesInfo() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean2.class);
+        ParserUtil.refreshBeanPropInfo(TestBean2.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+        assertNotSame(beanInfo1, beanInfo2);
+        assertEquals(beanInfo1.clazz, beanInfo2.clazz);
+    }
+
+    @Test
+    public void reviewFixes20260906_documentNamingAGetterOnlyPropertyIsReadWithoutError() {
+        ComputedUserOpen source = new ComputedUserOpen();
+        source.setFirst("Ada");
+        source.setLast("Lovelace");
+
+        // The bean's own output names the computed property, so its own round trip used to NPE.
+        String selfJson = N.toJson(source);
+        assertTrue(selfJson.contains("fullName"), selfJson);
+
+        String[] jsonDocs = { selfJson, "{\"first\": \"Ada\", \"fullName\": \"x\", \"last\": \"Lovelace\"}",
+                "{\"first\": \"Ada\", \"fullName\": null, \"last\": \"Lovelace\"}",
+                "{\"fullName\": {\"nested\": [1, 2]}, \"first\": \"Ada\", \"last\": \"Lovelace\"}",
+                "{\"first\": \"Ada\", \"last\": \"Lovelace\", \"fullName\": \"\"}" };
+
+        for (boolean ignoreUnmatched : new boolean[] { true, false }) {
+            JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
+
+            for (String json : jsonDocs) {
+                ComputedUserOpen restored = N.fromJson(json, config, ComputedUserOpen.class);
+                assertEquals("Ada", restored.getFirst(), json);
+                assertEquals("Lovelace", restored.getLast(), json);
+                assertEquals("Ada Lovelace", restored.getFullName(), json);
+            }
+
+            // A read-only property is a MATCHED name whose value is skipped (like a declared SERIALIZE_ONLY
+            // direction), so strict mode does not report it; a truly unknown name still is.
+            if (!ignoreUnmatched) {
+                assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                        () -> N.fromJson("{\"first\": \"Ada\", \"nobody\": 1}", config, ComputedUserOpen.class));
+            }
+        }
+
+        for (XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            String selfXml = xmlParser.serialize(source);
+            assertTrue(selfXml.contains("<fullName>Ada Lovelace</fullName>"), selfXml);
+            String[] xmlDocs = { selfXml, selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName></fullName>"),
+                    selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName>null</fullName>") };
+
+            for (boolean ignoreUnmatched : new boolean[] { true, false }) {
+                XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
+
+                for (String xml : xmlDocs) {
+                    ComputedUserOpen restored = xmlParser.deserialize(xml, config, ComputedUserOpen.class);
+                    assertEquals("Ada", restored.getFirst(), xml);
+                    assertEquals("Lovelace", restored.getLast(), xml);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void reviewFixes20260906_ignoredFieldsDropsGetterOnlyComputedProperty() {
+        ComputedUser user = new ComputedUser();
+        user.setFirst("Ada");
+        user.setLast("Lovelace");
+        user.setPassword("s3cret");
+
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(ComputedUser.class);
+        // The property still exists (it can be read), it is just not serialized.
+        assertTrue(beanInfo.propNameList.contains("fullName"));
+        assertEquals(List.of("first", "last"), N.map(beanInfo.jsonXmlSerializablePropInfos, it -> it.name));
+
+        String json = N.toJson(user);
+        assertFalse(json.contains("fullName"), json);
+        assertFalse(json.contains("password"), json);
+        assertTrue(json.contains("\"first\": \"Ada\""), json);
+
+        String xml = N.toXml(user);
+        assertFalse(xml.contains("fullName"), xml);
+        assertFalse(xml.contains("password"), xml);
+        assertTrue(xml.contains("<last>Lovelace</last>"), xml);
+
+        // A regex entry matches the property name too.
+        ComputedUserRegex regexUser = new ComputedUserRegex();
+        regexUser.setFirst("Ada");
+        regexUser.setLast("Lovelace");
+        regexUser.setPassword("s3cret");
+        String regexJson = N.toJson(regexUser);
+        assertFalse(regexJson.contains("fullName"), regexJson);
+        assertTrue(regexJson.contains("password"), regexJson);
+
+        // ignoredFields is a serialization filter: an ignored settable property is still populated on read.
+        ComputedUser restored = N.fromJson("{\"first\": \"A\", \"last\": \"B\", \"password\": \"p\"}", ComputedUser.class);
+        assertEquals("A B", restored.getFullName());
+        assertEquals("p", restored.getPassword());
+
+        // Name-based overload: a null field no longer means "serializable"; the two-arg overload keeps its contract.
+        JsonXmlConfig config = ComputedUser.class.getAnnotation(JsonXmlConfig.class);
+        assertFalse(ParserUtil.isJsonXmlSerializable("fullName", null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable("first", null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable(null, null, config));
+        assertTrue(ParserUtil.isJsonXmlSerializable(null, null));
+        assertTrue(ParserUtil.isJsonXmlSerializable("anything", null, null));
+    }
+
+    @Test
+    public void reviewFixes20260908_xmlNameTagEscapesTheAnnotationNameInAttributePosition() {
+        final EscapedXmlNameBean bean = new EscapedXmlNameBean();
+        bean.value = "v";
+
+        final XmlSerConfig generic = new XmlSerConfig().setTagByPropertyName(false);
+        final String expected = "<bean name=\"escapedXmlNameBean\"><property name=\"a&amp;b&quot;c&lt;d&#xa;e\">v</property></bean>";
+
+        // Before the fix the name went in verbatim: `&`, `"` and `<` made the document unreadable
+        // (`<property name="a&b"c<d`), and the newline was legal but normalised to a space by every XML
+        // reader, so the property name no longer matched and the value was silently dropped.
+        for (final XmlParser parser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            assertEquals(expected, parser.serialize(bean, generic));
+        }
+
+        final EscapedXmlNameBean back = ParserFactory.createXmlParser().deserialize(expected, EscapedXmlNameBean.class);
+        assertEquals("v", back.value);
+
+        // A name needing no escaping is still written byte-for-byte as before.
+        final PlainXmlNameBean plain = new PlainXmlNameBean();
+        plain.value = "v";
+        assertEquals("<bean name=\"plainXmlNameBean\"><property name=\"user_id\">v</property></bean>",
+                ParserFactory.createXmlParser().serialize(plain, generic));
+
+        // Attribute position is escaped; element-name position is not, because XML has no escaping
+        // mechanism there - that name can only be rejected, which is the writers' job.
+        final XmlNameTag tag = new XmlNameTag("a&b", "int", false);
+        assertEquals("a&b", String.valueOf(tag.name));
+        assertEquals("<property name=\"a&amp;b\">", String.valueOf(tag.epStart));
+        assertEquals("<property name=\"a&amp;b\" type=\"int\">", String.valueOf(tag.epStartWithType));
+        assertEquals("<property name=\"a&amp;b\" isNull=\"true\" />", String.valueOf(tag.epNull));
+        assertEquals("<a&b>", String.valueOf(tag.namedStart));
+
+        // Type names keep the escaping they always had.
+        assertEquals("<property name=\"p\" type=\"List&lt;String&gt;\">", String.valueOf(new XmlNameTag("p", "List<String>", false).epStartWithType));
+    }
+
+    @Test
+    public void test_screamingSnakeCase() {
+        assertEquals("A", Beans.toScreamingSnakeCase("A"));
+        assertEquals("A", Beans.toScreamingSnakeCase("a"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("name"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("Name"));
+        assertEquals("NAME", Beans.toScreamingSnakeCase("NAME"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
+        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("FIRSTName"));
+        assertEquals("GUI", Beans.toScreamingSnakeCase("GUI"));
+    }
+
+    @Test
+    public void test_setGetNullBeanProperty() {
+        final Account account = Beans.newRandomBean(Account.class);
+        account.setContact(null);
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
+
+        assertEquals((String) null, beanInfo.getPropValue(account, "contact.email"));
+        assertEquals(Integer.valueOf(0), beanInfo.getPropValue(account, "contact.status"));
+
+        beanInfo.setPropValue(account, "contact.email", "test@email.com");
+        assertEquals("test@email.com", account.getContact().getEmail());
+
+        beanInfo.setPropValue(account, "contact.status", "2");
+        assertEquals(2, account.getContact().getStatus());
+    }
+
+    // setPropValue
+
+
+
+    // BeanInfo.setPropValue(Object, String, Object)
+    @Test
+    public void testBeanInfoSetPropValue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        beanInfo.setPropValue(bean, "name", "Jane");
+        assertEquals("Jane", bean.getName());
+
+        beanInfo.setPropValue(bean, "age", 25);
+        assertEquals(25, bean.getAge());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_allFields() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        Date now = new Date();
+
+        beanInfo.setPropValue(bean, "id", 42L);
+        beanInfo.setPropValue(bean, "name", "Test");
+        beanInfo.setPropValue(bean, "age", 99);
+        beanInfo.setPropValue(bean, "createdDate", now);
+
+        assertEquals(42L, bean.getId());
+        assertEquals("Test", bean.getName());
+        assertEquals(99, bean.getAge());
+        assertEquals(now, bean.getCreatedDate());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_ignoreFalse_matchedReturnsTrue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        boolean result = beanInfo.setPropValue(bean, "age", 55, false);
+        assertTrue(result);
+        assertEquals(55, bean.getAge());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_ignoreTrue_matchedReturnsTrue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        boolean result = beanInfo.setPropValue(bean, "age", 50, true);
+        assertTrue(result);
+        assertEquals(50, bean.getAge());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_matchedReturnsTrue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        boolean result = beanInfo.setPropValue(bean, "name", "TestValue", true);
+        assertTrue(result);
+        assertEquals("TestValue", bean.getName());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValue_nonExistent() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        assertThrows(IllegalArgumentException.class, () -> {
+            beanInfo.setPropValue(bean, "nonExistent", "value");
+        });
+    }
+
+
+
+    // BeanInfo.setPropValue(Object, PropInfo, Object)
+    @Test
+    public void testBeanInfoSetPropValueByPropInfo() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        beanInfo.setPropValue(bean, propInfo, "TestName");
+        assertEquals("TestName", bean.getName());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValueByPropInfo_id() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        beanInfo.setPropValue(bean, propInfo, 100L);
+        assertEquals(100L, bean.getId());
+    }
+
+    @Test
+    public void testBeanInfoSetPropValueByPropInfo_unmatchedIgnored() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+        TestBean2 bean2 = new TestBean2();
+
+        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
+        boolean result = beanInfo2.setPropValue(bean2, agePropFromBean1, 99, true);
+        // "age" doesn't exist in TestBean2, so should return false
+        assertFalse(result);
+    }
+
+    @Test
+    public void testBeanInfoSetPropValueByPropInfo_unmatchedThrows() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+
+        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
+        assertThrows(RuntimeException.class, () -> {
+            beanInfo2.setPropValue(new TestBean2(), agePropFromBean1, 99, false);
+        });
+    }
+
+
+
+    // BeanInfo.setPropValue(Object, PropInfo, Object, boolean)
+    @Test
+    public void testBeanInfoSetPropValueByPropInfo_withIgnoreUnmatchedProperty() {
+        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
+        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
+        TestBean2 bean2 = new TestBean2();
+
+        PropInfo namePropFromBean1 = beanInfo1.getPropInfo("name");
+        boolean result = beanInfo2.setPropValue(bean2, namePropFromBean1, "CrossBeanValue", true);
+        assertTrue(result);
+        assertEquals("CrossBeanValue", bean2.getName());
+    }
+
+
+
+    // BeanInfo.setPropValue(Object, String, Object, boolean)
+    @Test
+    public void testBeanInfoSetPropValueWithIgnoreUnmatchedProperty() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        TestBean bean = new TestBean();
+
+        boolean result = beanInfo.setPropValue(bean, "nonExistent", "value", true);
+        assertFalse(result);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            beanInfo.setPropValue(bean, "nonExistent", "value", false);
+        });
+    }
+
+
+
+    // PropInfo.setPropValue(Object, Object)
+    @Test
+    public void testPropInfoSetPropValue() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        TestBean bean = new TestBean();
+        propInfo.setPropValue(bean, "NewValue");
+
+        assertEquals("NewValue", bean.getName());
+    }
+
+    @Test
+    public void testPropInfoSetPropValue_dateField() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
+
+        TestBean bean = new TestBean();
+        Date now = new Date();
+        propInfo.setPropValue(bean, now);
+
+        assertEquals(now, bean.getCreatedDate());
+    }
+
+    @Test
+    public void testPropInfoSetPropValue_nullForObjectType() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        TestBean bean = new TestBean();
+        bean.setName("Existing");
+        propInfo.setPropValue(bean, null);
+
+        assertNull(bean.getName());
+    }
+
+
+
+    // G009-01: the ASM PropInfo retried a setter that threw its own exception, so a rejecting setter ran twice.
+    @Test
+    public void testPropInfoSetPropValue_rejectingSetterInvokedOnce() {
+        final PropInfo propInfo = ParserUtil.getBeanInfo(G009ValidatingSetterBean.class).getPropInfo("name");
+        final G009ValidatingSetterBean bean = new G009ValidatingSetterBean();
+
+        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> propInfo.setPropValue(bean, "bad value"));
+        assertEquals("rejected: bad value", e.getMessage());
+        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
+        assertNull(bean.getName());
+
+        // A value of the wrong type is still converted and stored, with one successful setter call.
+        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
+        propInfo.setPropValue(bean, 123);
+        assertEquals("123", bean.getName());
+        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
+    }
+
+    @Test
+    public void testPropInfoSetPropValue_stringConversion() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        TestBean bean = new TestBean();
+        propInfo.setPropValue(bean, "999");
+
+        assertEquals(999L, bean.getId());
+    }
+
+    @Test
+    public void testPropInfoSetPropValue_withTypeConversion() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        TestBean bean = new TestBean();
+        propInfo.setPropValue(bean, 42);
+
+        assertEquals(42, bean.getAge());
+    }
+
+
+
+    // Existing integration/feature tests
+    @Test
+    public void test_setPropValue() {
+        final Account account = Beans.newRandomBean(Account.class);
+        assertNotNull(account);
+        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), 1);
+        assertEquals(1, account.getId());
+
+        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), "101");
+        assertEquals(101, account.getId());
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
+        beanInfo.getPropInfo("id").setPropValue(account, 102);
+        assertEquals(102, account.getId());
+        beanInfo.getPropInfo("id").setPropValue(account, "103");
+        assertEquals(103, account.getId());
+
+        beanInfo.getPropInfo("lastName").setPropValue(account, 201);
+        assertEquals("201", account.getLastName());
+        beanInfo.getPropInfo("lastName").setPropValue(account, "202");
+        assertEquals("202", account.getLastName());
+    }
+
+    @Test
+    public void test_toScreamingSnakeCase() {
+        final Account account = createAccount(Account.class);
+
+        Map<String, Object> snake = Beans.beanToMap(account);
+        Maps.replaceKeysWithSnakeCase(snake);
+        assertTrue(snake.containsKey("first_name"));
+        assertTrue(snake.containsKey("email_address"));
+        assertTrue(snake.containsKey("last_name"));
+        assertFalse(snake.containsKey("firstName"));
+
+        Map<String, Object> screaming = Beans.beanToMap(account);
+        Maps.replaceKeysWithScreamingSnakeCase(screaming);
+        assertTrue(screaming.containsKey("FIRST_NAME"));
+        assertTrue(screaming.containsKey("EMAIL_ADDRESS"));
+        assertTrue(screaming.containsKey("LAST_NAME"));
+        assertFalse(screaming.containsKey("firstName"));
+    }
+
+    // toString
+
+
+
+    // BeanInfo.toString
+    @Test
+    public void testBeanInfoToString() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        String str = beanInfo.toString();
+        assertNotNull(str);
+        assertTrue(str.contains("TestBean"));
+    }
+
+    @Test
+    public void testBeanInfoToString_matchesCanonicalName() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertEquals(beanInfo.canonicalClassName, beanInfo.toString());
+    }
+
+    @Test
+    public void testPropInfoToString() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        String str = propInfo.toString();
+        assertNotNull(str);
+        assertEquals("name", str);
+    }
+
+    @Test
+    public void testPropInfoToString_allProps() {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        assertEquals("id", beanInfo.getPropInfo("id").toString());
+        assertEquals("name", beanInfo.getPropInfo("name").toString());
+        assertEquals("age", beanInfo.getPropInfo("age").toString());
+        assertEquals("createdDate", beanInfo.getPropInfo("createdDate").toString());
+    }
+
+    @Test
+    public void testTypeAnnotationEnumeratedAppliesOnlyWithinItsScope() {
+        class ScopedEnumBean {
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.PERSISTENCE)
+            private java.time.DayOfWeek dbOnly;
+
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.SERIALIZATION)
+            private java.time.DayOfWeek serializationOnly;
+
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL)
+            private java.time.DayOfWeek everywhere;
+
+            public java.time.DayOfWeek getDbOnly() {
+                return dbOnly;
+            }
+
+            public void setDbOnly(final java.time.DayOfWeek dbOnly) {
+                this.dbOnly = dbOnly;
+            }
+
+            public java.time.DayOfWeek getSerializationOnly() {
+                return serializationOnly;
+            }
+
+            public void setSerializationOnly(final java.time.DayOfWeek serializationOnly) {
+                this.serializationOnly = serializationOnly;
+            }
+
+            public java.time.DayOfWeek getEverywhere() {
+                return everywhere;
+            }
+
+            public void setEverywhere(final java.time.DayOfWeek everywhere) {
+                this.everywhere = everywhere;
+            }
+        }
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(ScopedEnumBean.class);
+
+        final PropInfo dbOnly = beanInfo.getPropInfo("dbOnly");
+        assertTrue(dbOnly.dbType.name().contains("ORDINAL"), dbOnly.dbType.name());
+        assertFalse(dbOnly.type.name().contains("ORDINAL"), dbOnly.type.name());
+
+        final PropInfo serializationOnly = beanInfo.getPropInfo("serializationOnly");
+        assertTrue(serializationOnly.type.name().contains("ORDINAL"), serializationOnly.type.name());
+        assertFalse(serializationOnly.dbType.name().contains("ORDINAL"), serializationOnly.dbType.name());
+
+        final PropInfo everywhere = beanInfo.getPropInfo("everywhere");
+        assertTrue(everywhere.type.name().contains("ORDINAL"), everywhere.type.name());
+        assertTrue(everywhere.dbType.name().contains("ORDINAL"), everywhere.dbType.name());
+    }
+
+    @Test
+    public void test_underscorePropName() {
+        assertEquals("a", Beans.toSnakeCase("A"));
+        assertEquals("a", Beans.toSnakeCase("a"));
+        assertEquals("name", Beans.toSnakeCase("name"));
+        assertEquals("name", Beans.toSnakeCase("Name"));
+        assertEquals("name", Beans.toSnakeCase("NAME"));
+        assertEquals("first_name", Beans.toSnakeCase("firstName"));
+        assertEquals("first_name", Beans.toSnakeCase("FIRSTName"));
+        assertEquals("gui", Beans.toSnakeCase("GUI"));
+    }
+
+    // writePropValue
+
+
+
+    // PropInfo.writePropValue(CharacterWriter, Object, JsonXmlSerConfig)
+    @Test
+    public void testPropInfoWritePropValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
+        propInfo.writePropValue(writer, "hello", config);
+        String output = writer.toString();
+        assertNotNull(output);
+        assertTrue(output.contains("hello"));
+        com.landawn.abacus.util.Objectory.recycle(writer);
+    }
+
+    @Test
+    public void testPropInfoWritePropValue_intValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("age");
+
+        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
+        propInfo.writePropValue(writer, 42, config);
+        String output = writer.toString();
+        assertNotNull(output);
+        assertTrue(output.contains("42"));
+        com.landawn.abacus.util.Objectory.recycle(writer);
+    }
+
+    @Test
+    public void testPropInfoWritePropValue_longValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("id");
+
+        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
+        propInfo.writePropValue(writer, 99999L, config);
+        String output = writer.toString();
+        assertNotNull(output);
+        assertTrue(output.contains("99999"));
+        com.landawn.abacus.util.Objectory.recycle(writer);
+    }
+
+    @Test
+    public void testPropInfoWritePropValue_nullValue() throws Exception {
+        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
+        PropInfo propInfo = beanInfo.getPropInfo("name");
+
+        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        JsonXmlSerConfig<?> config = JsonSerConfig.create();
+        propInfo.writePropValue(writer, null, config);
+        String output = writer.toString();
+        assertNotNull(output);
+        assertEquals("null", output);
+        com.landawn.abacus.util.Objectory.recycle(writer);
+    }
+
+
+
+    // G009-01: a numberFormat affix holding XML markup characters was written raw, producing XML no reader accepts.
+    @Test
+    public void testWritePropValue_xmlNumberFormatAffixIsEscaped() {
+        final G009AffixNumberBean bean = new G009AffixNumberBean();
+        bean.setLt(1.5);
+        bean.setAmp(7);
+
+        for (final XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
+            final String xml = xmlParser.serialize(bean);
+            assertTrue(xml.contains("&lt;1.50"), xml);
+            assertTrue(xml.contains("R&amp;D 7"), xml);
+
+            final G009AffixNumberBean copy = xmlParser.deserialize(xml, G009AffixNumberBean.class);
+            assertEquals(1.5, copy.getLt());
+            assertEquals(Integer.valueOf(7), copy.getAmp());
         }
     }
 
@@ -229,1902 +3025,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // =====================================================================
-    // isJsonXmlSerializable(Field, JsonXmlConfig)
-    // =====================================================================
-
-    @Test
-    public void testIsJsonXmlSerializable_nullField() {
-        assertTrue(ParserUtil.isJsonXmlSerializable(null, null));
-    }
-
-    @Test
-    public void testIsJsonXmlSerializable_staticField() throws Exception {
-        // ParserUtil itself has static fields, e.g., logger
-        Field staticField = ParserUtil.class.getDeclaredField("logger");
-        assertTrue(Modifier.isStatic(staticField.getModifiers()));
-        assertFalse(ParserUtil.isJsonXmlSerializable(staticField, null));
-    }
-
-    @Test
-    public void testIsJsonXmlSerializable_normalField() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertTrue(ParserUtil.isJsonXmlSerializable(nameField, null));
-    }
-
-    @Test
-    public void testIsJsonXmlSerializable_normalFieldNoConfig() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        assertTrue(ParserUtil.isJsonXmlSerializable(ageField, null));
-    }
-
-    @Test
-    public void testIsJsonXmlSerializable_ignoredFieldsRegex() throws Exception {
-        Field field = ConfigAnnotatedBean.class.getDeclaredField("internalCode");
-        JsonXmlConfig config = ConfigAnnotatedBean.class.getAnnotation(JsonXmlConfig.class);
-        assertFalse(ParserUtil.isJsonXmlSerializable(field, config));
-    }
-
-    // =====================================================================
-    // getDateFormat(Field, JsonXmlConfig)
-    // =====================================================================
-
-    @Test
-    public void testGetDateFormat_nullField() {
-        assertNull(ParserUtil.getDateFormat(null, null));
-    }
-
-    @Test
-    public void testGetDateFormat_fieldWithoutAnnotation() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertNull(ParserUtil.getDateFormat(nameField, null));
-    }
-
-    @Test
-    public void testGetDateFormat_fieldWithNoDateFormat() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        // age has @JsonXmlField(name="customAge") but no dateFormat
-        assertNull(ParserUtil.getDateFormat(ageField, null));
-    }
-
-    @Test
-    public void testGetDateFormat_fromJsonXmlConfig() throws Exception {
-        Field field = ConfigAnnotatedBean.class.getDeclaredField("createdAt");
-        JsonXmlConfig config = ConfigAnnotatedBean.class.getAnnotation(JsonXmlConfig.class);
-        assertEquals("yyyy/MM/dd", ParserUtil.getDateFormat(field, config));
-    }
-
-    // =====================================================================
-    // getTimeZone(Field, JsonXmlConfig)
-    // =====================================================================
-
-    @Test
-    public void testGetTimeZone_nullField() {
-        assertNull(ParserUtil.getTimeZone(null, null));
-    }
-
-    @Test
-    public void testGetTimeZone_fieldWithoutAnnotation() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertNull(ParserUtil.getTimeZone(nameField, null));
-    }
-
-    @Test
-    public void testGetTimeZone_fieldWithNoTimeZone() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        assertNull(ParserUtil.getTimeZone(ageField, null));
-    }
-
-    // =====================================================================
-    // getNumberFormat(Field, JsonXmlConfig)
-    // =====================================================================
-
-    @Test
-    public void testGetNumberFormat_nullField() {
-        assertNull(ParserUtil.getNumberFormat(null, null));
-    }
-
-    @Test
-    public void testGetNumberFormat_fieldWithoutAnnotation() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertNull(ParserUtil.getNumberFormat(nameField, null));
-    }
-
-    @Test
-    public void testGetNumberFormat_fieldWithNoNumberFormat() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        assertNull(ParserUtil.getNumberFormat(ageField, null));
-    }
-
-    // =====================================================================
-    // getEnumerated(Field, JsonXmlConfig)
-    // =====================================================================
-
-    @Test
-    public void testGetEnumerated_nullField() {
-        assertEquals(com.landawn.abacus.util.EnumType.NAME, ParserUtil.getEnumerated(null, null));
-    }
-
-    @Test
-    public void testGetEnumerated_fieldWithoutAnnotation() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertEquals(com.landawn.abacus.util.EnumType.NAME, ParserUtil.getEnumerated(nameField, null));
-    }
-
-    @Test
-    public void testGetEnumerated_fieldWithJsonXmlFieldAnnotation() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        // Has @JsonXmlField but no custom enumerated setting, defaults to NAME
-        assertNotNull(ParserUtil.getEnumerated(ageField, null));
-    }
-
-    // =====================================================================
-    // isJsonRawValue(Field)
-    // =====================================================================
-
-    @Test
-    public void testIsJsonRawValue_nullField() {
-        assertFalse(ParserUtil.isJsonRawValue(null));
-    }
-
-    @Test
-    public void testIsJsonRawValue_normalField() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        assertFalse(ParserUtil.isJsonRawValue(nameField));
-    }
-
-    @Test
-    public void testIsJsonRawValue_annotatedFieldNotRaw() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        // Has @JsonXmlField but isJsonRawValue defaults to false
-        assertFalse(ParserUtil.isJsonRawValue(ageField));
-    }
-
-    // =====================================================================
-    // getJsonNameTags(String)
-    // =====================================================================
-
-    @Test
-    public void testGetJsonNameTags_simpleName() {
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-        // CAMEL_CASE index should return "firstName"
-        assertArrayEquals("firstName".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
-    }
-
-    @Test
-    public void testGetJsonNameTags_singleWord() {
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("name");
-        assertNotNull(tags);
-        // All naming policies for a single lowercase word should produce "name" or "Name" etc.
-        assertArrayEquals("name".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
-    }
-
-    @Test
-    public void testGetJsonNameTags_namingPolicies() {
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName");
-        // UPPER_CAMEL_CASE should produce "FirstName"
-        assertArrayEquals("FirstName".toCharArray(), tags[NamingPolicy.UPPER_CAMEL_CASE.ordinal()].name);
-        // SNAKE_CASE should produce "first_name"
-        assertArrayEquals("first_name".toCharArray(), tags[NamingPolicy.SNAKE_CASE.ordinal()].name);
-    }
-
-    @Test
-    public void testGetJsonNameTags_withNullField() {
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("myProp", null);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-        assertArrayEquals("myProp".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
-    }
-
-    // =====================================================================
-    // getJsonNameTags(String, Field)
-    // =====================================================================
-
-    @Test
-    public void testGetJsonNameTags_withField_noAnnotation() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("name", nameField);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-        assertArrayEquals("name".toCharArray(), tags[NamingPolicy.CAMEL_CASE.ordinal()].name);
-    }
-
-    @Test
-    public void testGetJsonNameTags_withField_customName() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        // @JsonXmlField(name = "customAge")
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("age", ageField);
-        assertNotNull(tags);
-        // All naming policies should use the custom name
-        for (JsonNameTag tag : tags) {
-            assertArrayEquals("customAge".toCharArray(), tag.name);
-        }
-    }
-
-    @Test
-    public void testGetJsonNameTags_withJsonPropertyAnnotation() throws Exception {
-        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
-        JsonNameTag[] tags = ParserUtil.getJsonNameTags("firstName", field);
-
-        assertEquals(NamingPolicy.values().length, tags.length);
-
-        for (JsonNameTag tag : tags) {
-            assertEquals("first_name", new String(tag.name));
-        }
-    }
-
-    // =====================================================================
-    // getXmlNameTags(String, String, boolean)
-    // =====================================================================
-
-    @Test
-    public void testGetXmlNameTags_simpleName() {
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", "string", false);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-    }
-
-    @Test
-    public void testGetXmlNameTags_withBean() {
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("myBean", "MyBean", true);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-    }
-
-    @Test
-    public void testGetXmlNameTags_withNullField() {
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("myProp", null, "int", false);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-    }
-
-    // =====================================================================
-    // getXmlNameTags(String, Field, String, boolean)
-    // =====================================================================
-
-    @Test
-    public void testGetXmlNameTags_withField() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("name", nameField, "string", false);
-        assertNotNull(tags);
-        assertEquals(NamingPolicy.values().length, tags.length);
-    }
-
-    @Test
-    public void testGetXmlNameTags_withCustomNameField() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("age", ageField, "int", false);
-        assertNotNull(tags);
-        // All naming policies should use the custom name "customAge"
-        for (XmlNameTag tag : tags) {
-            assertNotNull(tag);
-        }
-    }
-
-    @Test
-    public void testGetXmlNameTags_withJsonPropertyAnnotation() throws Exception {
-        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
-        XmlNameTag[] tags = ParserUtil.getXmlNameTags("firstName", field, "string", false);
-
-        assertEquals(NamingPolicy.values().length, tags.length);
-
-        for (XmlNameTag tag : tags) {
-            assertEquals("first_name", new String(tag.name));
-        }
-    }
-
-    // =====================================================================
-    // getAliases(Field)
-    // =====================================================================
-
-    @Test
-    public void testGetAliases_nullField() {
-        String[] aliases = ParserUtil.getAliases(null);
-        assertNull(aliases);
-    }
-
-    @Test
-    public void testGetAliases_fieldWithoutAliases() throws Exception {
-        Field nameField = TestBean.class.getDeclaredField("name");
-        String[] aliases = ParserUtil.getAliases(nameField);
-        // name field does not have alias annotations
-        assertTrue(aliases == null || aliases.length == 0);
-    }
-
-    @Test
-    public void testGetAliases_fieldWithJsonXmlFieldNoAliases() throws Exception {
-        Field ageField = TestBean.class.getDeclaredField("age");
-        String[] aliases = ParserUtil.getAliases(ageField);
-        // @JsonXmlField(name="customAge") but no aliases
-        assertTrue(aliases == null || aliases.length == 0);
-    }
-
-    @Test
-    public void testGetAliases_withJsonAliasAnnotation() throws Exception {
-        Field field = JacksonAnnotatedBean.class.getDeclaredField("firstName");
-        String[] aliases = ParserUtil.getAliases(field);
-        Assertions.assertArrayEquals(new String[] { "fname" }, aliases);
-    }
-
-    @Test
-    public void testHashCode_charArray_differentStrings() {
-        int hash1 = ParserUtil.hashCode("abc".toCharArray());
-        int hash2 = ParserUtil.hashCode("xyz".toCharArray());
-        assertNotEquals(hash1, hash2);
-    }
-
-    // =====================================================================
-    // hashCode(char[], int, int)
-    // =====================================================================
-
-    @Test
-    public void testHashCode_charArrayRange() {
-        char[] chars = "hello world".toCharArray();
-        int hash = ParserUtil.hashCode(chars, 0, 5);
-        assertEquals(ParserUtil.hashCode("hello".toCharArray(), 0, 5), hash);
-    }
-
-    @Test
-    public void testHashCode_charArrayRange_fullArray() {
-        char[] chars = "test".toCharArray();
-        int hashFull = ParserUtil.hashCode(chars, 0, chars.length);
-        assertNotEquals(0, hashFull);
-    }
-
-    @Test
-    public void testHashCode_charArrayRange_partialArray() {
-        char[] chars = "abcdef".toCharArray();
-        int hash1 = ParserUtil.hashCode(chars, 1, 4); // "bcd"
-        int hash2 = ParserUtil.hashCode("bcd".toCharArray(), 0, 3);
-        assertEquals(hash1, hash2);
-    }
-
-    // =====================================================================
-    // hashCode(char[])
-    // =====================================================================
-
-    @Test
-    public void testHashCode_charArray() {
-        char[] a = "hello".toCharArray();
-        int hash = ParserUtil.hashCode(a);
-        // Same input produces same hash
-        assertEquals(hash, ParserUtil.hashCode("hello".toCharArray()));
-    }
-
-    @Test
-    public void testHashCode_charArray_emptyArray() {
-        int hash = ParserUtil.hashCode(new char[0]);
-        assertEquals(1, hash); // hash starts with 1, no iterations
-    }
-
-    @Test
-    public void testHashCode_charArray_singleChar() {
-        int hash = ParserUtil.hashCode("a".toCharArray());
-        assertEquals(31 + 'a', hash);
-    }
-
-    @Test
-    public void testHashCode_charArrayRange_emptyRange() {
-        char[] chars = "test".toCharArray();
-        int hash = ParserUtil.hashCode(chars, 2, 2);
-        // Empty range
-        assertNotNull(hash);
-    }
-
-    @Test
-    public void testGetBeanInfo_tableName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertTrue(beanInfo.tableName.isPresent());
-        assertEquals("test_bean", beanInfo.tableName.get());
-    }
-
-    @Test
-    public void testGetBeanInfo_tableNameNotPresent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        assertFalse(beanInfo.tableName.isPresent());
-    }
-
-    @Test
-    public void testGetBeanInfo_isImmutable() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertFalse(beanInfo.isImmutable);
-    }
-
-    @Test
-    public void testGetBeanInfo_isImmutable_record() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        assertTrue(beanInfo.isImmutable);
-    }
-
-    @Test
-    public void testGetBeanInfo_isMarkedAsBean() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        // TestBean is not annotated with @Entity
-        assertFalse(beanInfo.isMarkedAsBean);
-    }
-
-    @Test
-    public void testGetBeanInfo_propInfoListSize() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        // TestBean has 4 properties: id, name, age, createdDate
-        assertEquals(4, beanInfo.propInfoList.size());
-        assertEquals(4, beanInfo.propNameList.size());
-    }
-
-    @Test
-    public void testGetBeanInfo_propNameListContents() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertTrue(beanInfo.propNameList.contains("id"));
-        assertTrue(beanInfo.propNameList.contains("name"));
-        assertTrue(beanInfo.propNameList.contains("age"));
-        assertTrue(beanInfo.propNameList.contains("createdDate"));
-    }
-
-    // =====================================================================
-    // BeanInfo.getPropValue(Object, String)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoGetPropValue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        bean.setName("John");
-        bean.setAge(30);
-
-        String name = beanInfo.getPropValue(bean, "name");
-        assertEquals("John", name);
-
-        int age = beanInfo.getPropValue(bean, "age");
-        assertEquals(30, age);
-    }
-
-    @Test
-    public void testBeanInfoGetPropValue_defaultPrimitive() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        long id = beanInfo.getPropValue(bean, "id");
-        assertEquals(0L, id);
-    }
-
-    // =====================================================================
-    // BeanInfo.setPropValue(Object, String, Object)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoSetPropValue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        beanInfo.setPropValue(bean, "name", "Jane");
-        assertEquals("Jane", bean.getName());
-
-        beanInfo.setPropValue(bean, "age", 25);
-        assertEquals(25, bean.getAge());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValue_allFields() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        Date now = new Date();
-
-        beanInfo.setPropValue(bean, "id", 42L);
-        beanInfo.setPropValue(bean, "name", "Test");
-        beanInfo.setPropValue(bean, "age", 99);
-        beanInfo.setPropValue(bean, "createdDate", now);
-
-        assertEquals(42L, bean.getId());
-        assertEquals("Test", bean.getName());
-        assertEquals(99, bean.getAge());
-        assertEquals(now, bean.getCreatedDate());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValue_matchedReturnsTrue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        boolean result = beanInfo.setPropValue(bean, "name", "TestValue", true);
-        assertTrue(result);
-        assertEquals("TestValue", bean.getName());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValue_ignoreTrue_matchedReturnsTrue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        boolean result = beanInfo.setPropValue(bean, "age", 50, true);
-        assertTrue(result);
-        assertEquals(50, bean.getAge());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValue_ignoreFalse_matchedReturnsTrue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        boolean result = beanInfo.setPropValue(bean, "age", 55, false);
-        assertTrue(result);
-        assertEquals(55, bean.getAge());
-    }
-
-    // =====================================================================
-    // BeanInfo.setPropValue(Object, PropInfo, Object)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoSetPropValueByPropInfo() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        beanInfo.setPropValue(bean, propInfo, "TestName");
-        assertEquals("TestName", bean.getName());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValueByPropInfo_id() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        beanInfo.setPropValue(bean, propInfo, 100L);
-        assertEquals(100L, bean.getId());
-    }
-
-    // =====================================================================
-    // BeanInfo.setPropValue(Object, PropInfo, Object, boolean)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoSetPropValueByPropInfo_withIgnoreUnmatchedProperty() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-        TestBean2 bean2 = new TestBean2();
-
-        PropInfo namePropFromBean1 = beanInfo1.getPropInfo("name");
-        boolean result = beanInfo2.setPropValue(bean2, namePropFromBean1, "CrossBeanValue", true);
-        assertTrue(result);
-        assertEquals("CrossBeanValue", bean2.getName());
-    }
-
-    @Test
-    public void testBeanInfoSetPropValueByPropInfo_unmatchedIgnored() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-        TestBean2 bean2 = new TestBean2();
-
-        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
-        boolean result = beanInfo2.setPropValue(bean2, agePropFromBean1, 99, true);
-        // "age" doesn't exist in TestBean2, so should return false
-        assertFalse(result);
-    }
-
-    // =====================================================================
-    // BeanInfo.isAnnotationPresent
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoIsAnnotationPresent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        assertTrue(beanInfo.isAnnotationPresent(Table.class));
-        assertFalse(beanInfo.isAnnotationPresent(Deprecated.class));
-    }
-
-    @Test
-    public void testBeanInfoIsAnnotationPresent_noAnnotations() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        assertFalse(beanInfo.isAnnotationPresent(Table.class));
-    }
-
-    // =====================================================================
-    // BeanInfo.hashCode
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoHashCode() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-
-        assertEquals(beanInfo1.hashCode(), beanInfo2.hashCode());
-    }
-
-    @Test
-    public void testBeanInfoHashCode_differentClasses() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-
-        assertNotEquals(beanInfo1.hashCode(), beanInfo2.hashCode());
-    }
-
-    @Test
-    public void testBeanInfoHashCode_consistent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        int hash1 = beanInfo.hashCode();
-        int hash2 = beanInfo.hashCode();
-        assertEquals(hash1, hash2);
-    }
-
-    // =====================================================================
-    // BeanInfo.equals
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoEquals() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-
-        assertTrue(beanInfo1.equals(beanInfo2));
-        assertTrue(beanInfo1.equals(beanInfo1));
-    }
-
-    @Test
-    public void testBeanInfoEquals_differentClasses() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-
-        assertFalse(beanInfo1.equals(beanInfo2));
-    }
-
-    @Test
-    public void testBeanInfoEquals_symmetry() {
-        BeanInfo a = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo b = ParserUtil.getBeanInfo(TestBean.class);
-        assertTrue(a.equals(b));
-        assertTrue(b.equals(a));
-    }
-
-    @Test
-    public void testBeanInfoToString_matchesCanonicalName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertEquals(beanInfo.canonicalClassName, beanInfo.toString());
-    }
-
-    // =====================================================================
-    // PropInfo.getPropValue(Object)
-    // =====================================================================
-
-    @Test
-    public void testPropInfoGetPropValue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        TestBean bean = new TestBean();
-        bean.setName("TestValue");
-
-        String value = propInfo.getPropValue(bean);
-        assertEquals("TestValue", value);
-    }
-
-    @Test
-    public void testPropInfoGetPropValue_primitiveDefault() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        TestBean bean = new TestBean();
-
-        int value = propInfo.getPropValue(bean);
-        assertEquals(0, value);
-    }
-
-    @Test
-    public void testPropInfoGetPropValue_longField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        TestBean bean = new TestBean();
-        bean.setId(12345L);
-
-        long value = propInfo.getPropValue(bean);
-        assertEquals(12345L, value);
-    }
-
-    @Test
-    public void testPropInfoGetPropValue_dateField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
-
-        TestBean bean = new TestBean();
-        Date now = new Date();
-        bean.setCreatedDate(now);
-
-        Date value = propInfo.getPropValue(bean);
-        assertEquals(now, value);
-    }
-
-    // =====================================================================
-    // PropInfo.setPropValue(Object, Object)
-    // =====================================================================
-
-    @Test
-    public void testPropInfoSetPropValue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        TestBean bean = new TestBean();
-        propInfo.setPropValue(bean, "NewValue");
-
-        assertEquals("NewValue", bean.getName());
-    }
-
-    @Test
-    public void testPropInfoSetPropValue_withTypeConversion() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        TestBean bean = new TestBean();
-        propInfo.setPropValue(bean, 42);
-
-        assertEquals(42, bean.getAge());
-    }
-
-    @Test
-    public void testPropInfoSetPropValue_dateField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
-
-        TestBean bean = new TestBean();
-        Date now = new Date();
-        propInfo.setPropValue(bean, now);
-
-        assertEquals(now, bean.getCreatedDate());
-    }
-
-    @Test
-    public void testPropInfoSetPropValue_stringConversion() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        TestBean bean = new TestBean();
-        propInfo.setPropValue(bean, "999");
-
-        assertEquals(999L, bean.getId());
-    }
-
-    // =====================================================================
-    // PropInfo.isAnnotationPresent
-    // =====================================================================
-
-    @Test
-    public void testPropInfoIsAnnotationPresent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertTrue(propInfo.isAnnotationPresent(Column.class));
-        assertFalse(propInfo.isAnnotationPresent(Id.class));
-    }
-
-    @Test
-    public void testPropInfoIsAnnotationPresent_id() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-        assertTrue(propInfo.isAnnotationPresent(Id.class));
-    }
-
-    @Test
-    public void testPropInfoIsAnnotationPresent_jsonXmlField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-        assertTrue(propInfo.isAnnotationPresent(JsonXmlField.class));
-    }
-
-    @Test
-    public void testPropInfoIsAnnotationPresent_noAnnotation() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("createdDate");
-        assertFalse(propInfo.isAnnotationPresent(Column.class));
-        assertFalse(propInfo.isAnnotationPresent(Id.class));
-    }
-
-    @Test
-    public void testPropInfoHashCode_consistent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-        int h1 = propInfo.hashCode();
-        int h2 = propInfo.hashCode();
-        assertEquals(h1, h2);
-    }
-
-    @Test
-    public void testPropInfoToString_allProps() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertEquals("id", beanInfo.getPropInfo("id").toString());
-        assertEquals("name", beanInfo.getPropInfo("name").toString());
-        assertEquals("age", beanInfo.getPropInfo("age").toString());
-        assertEquals("createdDate", beanInfo.getPropInfo("createdDate").toString());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_columnName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertTrue(propInfo.columnName.isPresent());
-        assertEquals("name_column", propInfo.columnName.get());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_columnNameAbsent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-        assertFalse(propInfo.columnName.isPresent());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_isTransient() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertFalse(propInfo.isTransient);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_isMarkedAsColumn() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertTrue(propInfo.isMarkedAsColumn);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_isMarkedAsColumn_false() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-        assertFalse(propInfo.isMarkedAsColumn);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_isSubEntity() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertFalse(propInfo.isSubEntity);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_isMarkedAsReadOnlyId() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        assertFalse(propInfo.isMarkedAsReadOnlyId);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_declaringClass() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-        assertEquals(TestBean.class, propInfo.declaringClass);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_clazz() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        PropInfo nameProp = beanInfo.getPropInfo("name");
-        assertEquals(String.class, nameProp.clazz);
-
-        PropInfo ageProp = beanInfo.getPropInfo("age");
-        assertEquals(int.class, ageProp.clazz);
-
-        PropInfo idProp = beanInfo.getPropInfo("id");
-        assertEquals(long.class, idProp.clazz);
-    }
-
-    // =====================================================================
-    // Existing integration/feature tests
-    // =====================================================================
-
-    @Test
-    public void test_setPropValue() {
-        final Account account = Beans.newRandomBean(Account.class);
-        assertNotNull(account);
-        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), 1);
-        assertEquals(1, account.getId());
-
-        Beans.setPropValue(account, Beans.getPropSetter(Account.class, "id"), "101");
-        assertEquals(101, account.getId());
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
-        beanInfo.getPropInfo("id").setPropValue(account, 102);
-        assertEquals(102, account.getId());
-        beanInfo.getPropInfo("id").setPropValue(account, "103");
-        assertEquals(103, account.getId());
-
-        beanInfo.getPropInfo("lastName").setPropValue(account, 201);
-        assertEquals("201", account.getLastName());
-        beanInfo.getPropInfo("lastName").setPropValue(account, "202");
-        assertEquals("202", account.getLastName());
-    }
-
-    // =====================================================================
-    // getBeanInfo(java.lang.reflect.Type)
-    // =====================================================================
-
-    @Test
-    public void testGetBeanInfo() {
-        ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        Assertions.assertNotNull(beanInfo);
-        Assertions.assertEquals(TestBean.class, beanInfo.clazz);
-        Assertions.assertEquals("TestBean", beanInfo.simpleClassName);
-
-        ParserUtil.BeanInfo cachedBeanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        Assertions.assertSame(beanInfo, cachedBeanInfo);
-    }
-
-    @Test
-    public void testGetBeanInfo_withJavaLangReflectType() {
-        java.lang.reflect.Type type = TestBean.class;
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(type);
-        assertNotNull(beanInfo);
-        assertEquals(TestBean.class, beanInfo.clazz);
-    }
-
-    @Test
-    public void testGetBeanInfo_cachedInstance() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-        assertSame(beanInfo1, beanInfo2);
-    }
-
-    @Test
-    public void testGetBeanInfo_publicFields() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.propInfoList);
-        assertFalse(beanInfo.propInfoList.isEmpty());
-        assertNotNull(beanInfo.propNameList);
-        assertFalse(beanInfo.propNameList.isEmpty());
-    }
-
-    @Test
-    public void testGetBeanInfo_canonicalClassName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.canonicalClassName);
-        assertTrue(beanInfo.canonicalClassName.contains("TestBean"));
-    }
-
-    @Test
-    public void testGetBeanInfo_javaType() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.javaType);
-        assertEquals(TestBean.class, beanInfo.javaType);
-    }
-
-    @Test
-    public void testGetBeanInfo_typeField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.type);
-    }
-
-    @Test
-    public void testGetBeanInfo_idPropNameList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.idPropNameList);
-        assertTrue(beanInfo.idPropNameList.contains("id"));
-    }
-
-    @Test
-    public void testGetBeanInfo_idPropInfoList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.idPropInfoList);
-        assertFalse(beanInfo.idPropInfoList.isEmpty());
-    }
-
-    @Test
-    public void testGetBeanInfo_annotations() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.annotations);
-        assertTrue(beanInfo.annotations.containsKey(Table.class));
-    }
-
-    @Test
-    public void testGetBeanInfo_readOnlyIdPropNameList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.readOnlyIdPropNameList);
-    }
-
-    @Test
-    public void testGetBeanInfo_readOnlyIdPropInfoList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.readOnlyIdPropInfoList);
-    }
-
-    @Test
-    public void testGetBeanInfo_subEntityPropNameList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.subEntityPropNameList);
-    }
-
-    @Test
-    public void testGetBeanInfo_subEntityPropInfoList() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.subEntityPropInfoList);
-    }
-
-    // =====================================================================
-    // getBeanInfo(Class)
-    // =====================================================================
-
-    @Test
-    public void testGetBeanInfo_classVersion() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo);
-        assertEquals(TestBean.class, beanInfo.clazz);
-    }
-
-    @Test
-    public void testGetBeanInfo_classVersion_TestBean2() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean2.class);
-        assertNotNull(beanInfo);
-        assertEquals(TestBean2.class, beanInfo.clazz);
-        assertEquals("TestBean2", beanInfo.simpleClassName);
-    }
-
-    @Test
-    public void testGetBeanInfo_recordType() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        assertNotNull(beanInfo);
-        assertEquals(RecordA.class, beanInfo.clazz);
-        assertTrue(beanInfo.isImmutable);
-    }
-
-    @Test
-    public void testGetBeanInfo_immutableEntity() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(ImmutableEntity7.class);
-        assertNotNull(beanInfo);
-        assertTrue(beanInfo.isImmutable);
-    }
-
-    // =====================================================================
-    // getBeanInfo(Type, boolean) - internal/deprecated
-    // =====================================================================
-
-    @Test
-    public void testGetBeanInfo_withAsmFlag() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, false);
-        assertNotNull(beanInfo);
-        assertEquals(TestBean.class, beanInfo.clazz);
-    }
-
-    @Test
-    public void testGetBeanInfo_withAsmFlagTrue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, true);
-        assertNotNull(beanInfo);
-        assertEquals(TestBean.class, beanInfo.clazz);
-    }
-
-    // =====================================================================
-    // BeanInfo.getPropInfo(String)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoGetPropInfo() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-        assertNotNull(propInfo);
-        assertEquals("name", propInfo.name);
-
-        PropInfo idPropInfo = beanInfo.getPropInfo("id");
-        assertNotNull(idPropInfo);
-        assertTrue(idPropInfo.isMarkedAsId);
-
-        PropInfo agePropInfo = beanInfo.getPropInfo("age");
-        assertNotNull(agePropInfo);
-        assertArrayEquals("customAge".toCharArray(), agePropInfo.jsonNameTags[0].name);
-
-        PropInfo notExist = beanInfo.getPropInfo("notExist");
-        assertNull(notExist);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfo_byColumnName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name_column");
-        assertNotNull(propInfo);
-        assertEquals("name", propInfo.name);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfo_caseInsensitiveColumnName() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfoUpper = beanInfo.getPropInfo("NAME_COLUMN");
-        assertNotNull(propInfoUpper);
-        assertEquals("name", propInfoUpper.name);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfo_repeatedLookupCached() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo p1 = beanInfo.getPropInfo("name");
-        PropInfo p2 = beanInfo.getPropInfo("name");
-        assertSame(p1, p2);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfo_allProperties() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotNull(beanInfo.getPropInfo("id"));
-        assertNotNull(beanInfo.getPropInfo("name"));
-        assertNotNull(beanInfo.getPropInfo("age"));
-        assertNotNull(beanInfo.getPropInfo("createdDate"));
-    }
-
-    // =====================================================================
-    // BeanInfo.getPropInfo(PropInfo)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoGetPropInfoFromOtherBean() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-
-        PropInfo namePropFromBean1 = beanInfo1.getPropInfo("name");
-        PropInfo matchedProp = beanInfo2.getPropInfo(namePropFromBean1);
-        assertNotNull(matchedProp);
-        assertEquals("name", matchedProp.name);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfoFromOtherBean_noMatch() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-
-        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
-        PropInfo matchedProp = beanInfo2.getPropInfo(agePropFromBean1);
-        // "age" does not exist in TestBean2
-        assertNull(matchedProp);
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfoFromOtherBean_sameBean() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-        PropInfo matched = beanInfo.getPropInfo(propInfo);
-        assertNotNull(matched);
-        assertEquals("name", matched.name);
-    }
-
-    @Test
-    public void testBeanInfoGetPropValue_nullObjectField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        Date date = beanInfo.getPropValue(bean, "createdDate");
-        assertNull(date);
-    }
-
-    // =====================================================================
-    // BeanInfo.getPropInfoChain(String)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoGetPropInfoQueue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        var queue = beanInfo.getPropInfoChain("name");
-        assertEquals(0, queue.size());
-
-        var emptyQueue = beanInfo.getPropInfoChain("nested.property");
-        assertTrue(emptyQueue.isEmpty());
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfoChain_singleProp() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        // Single property path returns empty list (no chain needed, it's a direct prop)
-        List<PropInfo> chain = beanInfo.getPropInfoChain("id");
-        assertTrue(chain.isEmpty());
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfoChain_cached() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        List<PropInfo> chain1 = beanInfo.getPropInfoChain("name");
-        List<PropInfo> chain2 = beanInfo.getPropInfoChain("name");
-        assertSame(chain1, chain2);
-    }
-
-    // =====================================================================
-    // BeanInfo.readPropInfo(char[], int, int)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoReadPropInfo() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        char[] nameChars = "name".toCharArray();
-        PropInfo propInfo = beanInfo.readPropInfo(nameChars, 0, nameChars.length);
-        assertNotNull(propInfo);
-        assertEquals("name", propInfo.name);
-
-        char[] notExistChars = "notExist".toCharArray();
-        PropInfo nullPropInfo = beanInfo.readPropInfo(notExistChars, 0, notExistChars.length);
-        assertNull(nullPropInfo);
-    }
-
-    @Test
-    public void testBeanInfoReadPropInfo_partialArray() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        // Read "name" from a larger buffer
-        char[] buffer = "prefix_name_suffix".toCharArray();
-        PropInfo propInfo = beanInfo.readPropInfo(buffer, 7, 11);
-        assertNotNull(propInfo);
-        assertEquals("name", propInfo.name);
-    }
-
-    @Test
-    public void testBeanInfoReadPropInfo_emptyRange() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.readPropInfo("test".toCharArray(), 0, 0);
-        assertNull(propInfo);
-    }
-
-    @Test
-    public void testBeanInfoReadPropInfo_idField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        char[] idChars = "id".toCharArray();
-        PropInfo propInfo = beanInfo.readPropInfo(idChars, 0, idChars.length);
-        assertNotNull(propInfo);
-        assertEquals("id", propInfo.name);
-    }
-
-    @Test
-    public void testBeanInfoReadPropInfo_ageField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        char[] ageChars = "age".toCharArray();
-        PropInfo propInfo = beanInfo.readPropInfo(ageChars, 0, ageChars.length);
-        assertNotNull(propInfo);
-        assertEquals("age", propInfo.name);
-    }
-
-    // =====================================================================
-    // BeanInfo.getAnnotation
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoGetAnnotation() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        Table tableAnnotation = beanInfo.getAnnotation(Table.class);
-        assertNotNull(tableAnnotation);
-        assertEquals("test_bean", tableAnnotation.value());
-
-        Deprecated deprecatedAnnotation = beanInfo.getAnnotation(Deprecated.class);
-        assertNull(deprecatedAnnotation);
-    }
-
-    @Test
-    public void testBeanInfoGetAnnotation_noAnnotation() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        Table tableAnnotation = beanInfo.getAnnotation(Table.class);
-        assertNull(tableAnnotation);
-    }
-
-    // =====================================================================
-    // BeanInfo.newInstance
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoNewInstance() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        TestBean bean = beanInfo.newInstance();
-        assertNotNull(bean);
-
-        TestBean beanWithArgs = beanInfo.newInstance();
-        assertNotNull(beanWithArgs);
-    }
-
-    @Test
-    public void testBeanInfoNewInstance_defaultValues() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = beanInfo.newInstance();
-        assertEquals(0L, bean.getId());
-        assertNull(bean.getName());
-        assertEquals(0, bean.getAge());
-        assertNull(bean.getCreatedDate());
-    }
-
-    @Test
-    public void testBeanInfoNewInstance_withArgs() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        RecordA record = beanInfo.newInstance(42, "John", "Doe");
-        assertNotNull(record);
-        assertEquals(42, record.id());
-        assertEquals("John", record.firstName());
-        assertEquals("Doe", record.lastName());
-    }
-
-    @Test
-    public void testBeanInfoNewInstance_withEmptyArgs() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = beanInfo.newInstance(new Object[0]);
-        assertNotNull(bean);
-    }
-
-    // =====================================================================
-    // BeanInfo.createBeanResult / finishBeanResult
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoCreateAndFinishBeanResult() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        Object result = beanInfo.createBeanResult();
-        assertNotNull(result);
-
-        TestBean bean = beanInfo.finishBeanResult(result);
-        assertNotNull(bean);
-
-        TestBean nullBean = beanInfo.finishBeanResult(null);
-        assertNull(nullBean);
-    }
-
-    @Test
-    public void testBeanInfoCreateBeanResult_mutableBean() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        Object result = beanInfo.createBeanResult();
-        assertNotNull(result);
-        assertTrue(result instanceof TestBean);
-    }
-
-    @Test
-    public void testBeanInfoCreateBeanResult_immutableRecord() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        Object result = beanInfo.createBeanResult();
-        assertNotNull(result);
-        // For immutable beans without builder, returns an Object array
-        assertTrue(result instanceof Object[]);
-    }
-
-    @Test
-    public void testBeanInfoFinishBeanResult_immutableRecord() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
-        Object result = beanInfo.createBeanResult();
-        // Set values in the args array
-        Object[] args = (Object[]) result;
-        args[0] = 1;
-        args[1] = "First";
-        args[2] = "Last";
-        RecordA record = beanInfo.finishBeanResult(result);
-        assertNotNull(record);
-        assertEquals(1, record.id());
-        assertEquals("First", record.firstName());
-        assertEquals("Last", record.lastName());
-    }
-
-    @Test
-    public void testBeanInfoEquals_withNonBeanInfo() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-
-        assertFalse(beanInfo.equals(null));
-        assertFalse(beanInfo.equals("string"));
-    }
-
-    // =====================================================================
-    // BeanInfo.toString
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoToString() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        String str = beanInfo.toString();
-        assertNotNull(str);
-        assertTrue(str.contains("TestBean"));
-    }
-
-    @Test
-    public void testPropInfoGetPropValue_nullValue() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        TestBean bean = new TestBean();
-
-        String value = propInfo.getPropValue(bean);
-        assertNull(value);
-    }
-
-    @Test
-    public void testPropInfoSetPropValue_nullForObjectType() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        TestBean bean = new TestBean();
-        bean.setName("Existing");
-        propInfo.setPropValue(bean, null);
-
-        assertNull(bean.getName());
-    }
-
-    // =====================================================================
-    // PropInfo.getAnnotation
-    // =====================================================================
-
-    @Test
-    public void testPropInfoGetAnnotation() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        Column columnAnnotation = propInfo.getAnnotation(Column.class);
-        assertNotNull(columnAnnotation);
-        assertEquals("name_column", columnAnnotation.value());
-
-        Id idAnnotation = propInfo.getAnnotation(Id.class);
-        assertNull(idAnnotation);
-    }
-
-    @Test
-    public void testPropInfoGetAnnotation_idField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-        Id idAnnotation = propInfo.getAnnotation(Id.class);
-        assertNotNull(idAnnotation);
-    }
-
-    @Test
-    public void testPropInfoGetAnnotation_jsonXmlField() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-        JsonXmlField jsonXmlField = propInfo.getAnnotation(JsonXmlField.class);
-        assertNotNull(jsonXmlField);
-        assertEquals("customAge", jsonXmlField.name());
-    }
-
-    // =====================================================================
-    // PropInfo.hashCode / equals / toString
-    // =====================================================================
-
-    @Test
-    public void testPropInfoHashCodeAndEquals() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo1 = beanInfo.getPropInfo("name");
-        PropInfo propInfo2 = beanInfo.getPropInfo("name");
-        PropInfo propInfo3 = beanInfo.getPropInfo("age");
-
-        assertEquals(propInfo1.hashCode(), propInfo2.hashCode());
-        assertNotEquals(propInfo1.hashCode(), propInfo3.hashCode());
-
-        assertTrue(propInfo1.equals(propInfo1));
-        assertTrue(propInfo1.equals(propInfo2));
-        assertFalse(propInfo1.equals(propInfo3));
-        assertFalse(propInfo1.equals(null));
-        assertFalse(propInfo1.equals("string"));
-    }
-
-    @Test
-    public void testPropInfoEquals_crossBeanSameName() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-        PropInfo p1 = beanInfo1.getPropInfo("name");
-        PropInfo p2 = beanInfo2.getPropInfo("name");
-        // Same name but different fields
-        assertFalse(p1.equals(p2));
-    }
-
-    @Test
-    public void testPropInfoToString() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        String str = propInfo.toString();
-        assertNotNull(str);
-        assertEquals("name", str);
-    }
-
-    // =====================================================================
-    // PropInfo public fields
-    // =====================================================================
-
-    @Test
-    public void testPropInfoPublicFields() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.declaringClass);
-        assertEquals("name", propInfo.name);
-        assertNotNull(propInfo.type);
-        assertNotNull(propInfo.jsonXmlType);
-        assertNotNull(propInfo.dbType);
-        assertNotNull(propInfo.clazz);
-        assertNotNull(propInfo.annotations);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_id() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        assertTrue(propInfo.isMarkedAsId);
-        assertNotNull(propInfo.field);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_jsonXmlExpose() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.jsonXmlExpose);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_getMethod() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.getMethod);
-        assertEquals("getName", propInfo.getMethod.getName());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_setMethod() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.setMethod);
-        assertEquals("setName", propInfo.setMethod.getName());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_aliases() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.aliases);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_tablePrefix() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        assertNotNull(propInfo.tablePrefix);
-    }
-
-    @Test
-    public void testPropInfoPublicFields_field() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-        assertNotNull(propInfo.field);
-        assertEquals("name", propInfo.field.getName());
-    }
-
-    @Test
-    public void testPropInfoPublicFields_getAndSetMethodConsistency() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        for (PropInfo propInfo : beanInfo.propInfoList) {
-            // Each property should have a getter
-            assertNotNull(propInfo.getMethod, "Getter should exist for " + propInfo.name);
-        }
-    }
-
-    @Test
-    public void test_setGetNullBeanProperty() {
-        final Account account = Beans.newRandomBean(Account.class);
-        account.setContact(null);
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(Account.class);
-
-        assertEquals((String) null, beanInfo.getPropValue(account, "contact.email"));
-        assertEquals(Integer.valueOf(0), beanInfo.getPropValue(account, "contact.status"));
-
-        beanInfo.setPropValue(account, "contact.email", "test@email.com");
-        assertEquals("test@email.com", account.getContact().getEmail());
-
-        beanInfo.setPropValue(account, "contact.status", "2");
-        assertEquals(2, account.getContact().getStatus());
-    }
-
-    @Test
-    public void test_get_set_prop_value() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class, false);
-        TestBean bean = new TestBean();
-
-        beanInfo.setPropValue(bean, "name", "Alice");
-        beanInfo.setPropValue(bean, "age", 28);
-        beanInfo.setPropValue(bean, "createdDate", new Date());
-
-        String name = (String) beanInfo.getPropValue(bean, "name");
-        int age = (int) beanInfo.getPropValue(bean, "age");
-        Date createdDate = (Date) beanInfo.getPropValue(bean, "createdDate");
-
-        assertEquals("Alice", name);
-        assertEquals(28, age);
-        assertNotNull(createdDate);
-    }
-
-    @Test
-    public void testGetBeanInfoInvalidClass() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            ParserUtil.getBeanInfo(EmptyClass.class);
-        });
-    }
-
-    @Test
-    public void testGetBeanInfoThrowsExceptionForNonBeanClass() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            ParserUtil.getBeanInfo(String.class);
-        });
-    }
-
-    @Test
-    public void testBeanInfoGetPropValue_nonExistentProp() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        assertThrows(RuntimeException.class, () -> {
-            beanInfo.getPropValue(bean, "nonExistentProperty");
-        });
-    }
-
-    @Test
-    public void testBeanInfoSetPropValue_nonExistent() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-        assertThrows(IllegalArgumentException.class, () -> {
-            beanInfo.setPropValue(bean, "nonExistent", "value");
-        });
-    }
-
-    // =====================================================================
-    // BeanInfo.setPropValue(Object, String, Object, boolean)
-    // =====================================================================
-
-    @Test
-    public void testBeanInfoSetPropValueWithIgnoreUnmatchedProperty() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        TestBean bean = new TestBean();
-
-        boolean result = beanInfo.setPropValue(bean, "nonExistent", "value", true);
-        assertFalse(result);
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            beanInfo.setPropValue(bean, "nonExistent", "value", false);
-        });
-    }
-
-    @Test
-    public void testBeanInfoSetPropValueByPropInfo_unmatchedThrows() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-
-        PropInfo agePropFromBean1 = beanInfo1.getPropInfo("age");
-        assertThrows(RuntimeException.class, () -> {
-            beanInfo2.setPropValue(new TestBean2(), agePropFromBean1, 99, false);
-        });
-    }
-
-    @Test
-    public void testBeanInfoGetPropInfoChain_invalidNested() {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        List<PropInfo> chain = beanInfo.getPropInfoChain("nonExistent.property");
-        assertTrue(chain.isEmpty());
-    }
-
-    // =====================================================================
-    // PropInfo.readPropValue(String)
-    // =====================================================================
-
-    @Test
-    public void testPropInfoReadPropValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        Object value = propInfo.readPropValue("25");
-        assertEquals(25, value);
-    }
-
-    @Test
-    public void testPropInfoReadPropValue_stringType() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        Object value = propInfo.readPropValue("hello");
-        assertEquals("hello", value);
-    }
-
-    @Test
-    public void testPropInfoReadPropValue_longType() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        Object value = propInfo.readPropValue("12345");
-        assertEquals(12345L, value);
-    }
-
-    @Test
-    public void testPropInfoReadPropValue_zeroValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        Object value = propInfo.readPropValue("0");
-        assertEquals(0, value);
-    }
-
-    @Test
-    public void testPropInfoReadPropValue_negativeValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        Object value = propInfo.readPropValue("-5");
-        assertEquals(-5, value);
-    }
-
-    @Test
-    public void testPropInfoReadPropValue_emptyStringForString() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        Object value = propInfo.readPropValue("");
-        assertEquals("", value);
-    }
-
-    // =====================================================================
-    // PropInfo.writePropValue(CharacterWriter, Object, JsonXmlSerConfig)
-    // =====================================================================
-
-    @Test
-    public void testPropInfoWritePropValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-        propInfo.writePropValue(writer, "hello", config);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.contains("hello"));
-        com.landawn.abacus.util.Objectory.recycle(writer);
-    }
-
-    @Test
-    public void testPropInfoWritePropValue_nullValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("name");
-
-        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-        propInfo.writePropValue(writer, null, config);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertEquals("null", output);
-        com.landawn.abacus.util.Objectory.recycle(writer);
-    }
-
-    @Test
-    public void testPropInfoWritePropValue_intValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("age");
-
-        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-        propInfo.writePropValue(writer, 42, config);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.contains("42"));
-        com.landawn.abacus.util.Objectory.recycle(writer);
-    }
-
-    @Test
-    public void testPropInfoWritePropValue_longValue() throws Exception {
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("id");
-
-        com.landawn.abacus.util.CharacterWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
-        JsonXmlSerConfig<?> config = JsonSerConfig.create();
-        propInfo.writePropValue(writer, 99999L, config);
-        String output = writer.toString();
-        assertNotNull(output);
-        assertTrue(output.contains("99999"));
-        com.landawn.abacus.util.Objectory.recycle(writer);
-    }
-
-    @Test
-    public void testRefreshBeanPropInfo_preservesProperties() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        int propCount = beanInfo1.propInfoList.size();
-        ParserUtil.refreshBeanPropInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-        assertEquals(propCount, beanInfo2.propInfoList.size());
-    }
-
-    // =====================================================================
-    // refreshBeanPropInfo
-    // =====================================================================
-
-    @Test
-    public void testRefreshBeanPropInfo() {
-        ParserUtil.BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-
-        ParserUtil.refreshBeanPropInfo(TestBean.class);
-
-        ParserUtil.BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-
-        Assertions.assertNotSame(beanInfo1, beanInfo2);
-    }
-
-    @Test
-    public void testRefreshBeanPropInfo_recreatesInfo() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean2.class);
-        ParserUtil.refreshBeanPropInfo(TestBean2.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean2.class);
-        assertNotSame(beanInfo1, beanInfo2);
-        assertEquals(beanInfo1.clazz, beanInfo2.clazz);
-    }
-
-    @Test
-    public void testRefreshBeanPropInfo_multipleRefreshes() {
-        BeanInfo beanInfo1 = ParserUtil.getBeanInfo(TestBean.class);
-        ParserUtil.refreshBeanPropInfo(TestBean.class);
-        BeanInfo beanInfo2 = ParserUtil.getBeanInfo(TestBean.class);
-        ParserUtil.refreshBeanPropInfo(TestBean.class);
-        BeanInfo beanInfo3 = ParserUtil.getBeanInfo(TestBean.class);
-        assertNotSame(beanInfo1, beanInfo2);
-        assertNotSame(beanInfo2, beanInfo3);
-        assertNotSame(beanInfo1, beanInfo3);
-    }
-
-    @Test
-    public void test_underscorePropName() {
-        assertEquals("a", Beans.toSnakeCase("A"));
-        assertEquals("a", Beans.toSnakeCase("a"));
-        assertEquals("name", Beans.toSnakeCase("name"));
-        assertEquals("name", Beans.toSnakeCase("Name"));
-        assertEquals("name", Beans.toSnakeCase("NAME"));
-        assertEquals("first_name", Beans.toSnakeCase("firstName"));
-        assertEquals("first_name", Beans.toSnakeCase("FIRSTName"));
-        assertEquals("gui", Beans.toSnakeCase("GUI"));
-    }
-
-    @Test
-    public void test_screamingSnakeCase() {
-        assertEquals("A", Beans.toScreamingSnakeCase("A"));
-        assertEquals("A", Beans.toScreamingSnakeCase("a"));
-        assertEquals("NAME", Beans.toScreamingSnakeCase("name"));
-        assertEquals("NAME", Beans.toScreamingSnakeCase("Name"));
-        assertEquals("NAME", Beans.toScreamingSnakeCase("NAME"));
-        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("firstName"));
-        assertEquals("FIRST_NAME", Beans.toScreamingSnakeCase("FIRSTName"));
-        assertEquals("GUI", Beans.toScreamingSnakeCase("GUI"));
-    }
-
-    @Test
-    public void test_toScreamingSnakeCase() {
-        final Account account = createAccount(Account.class);
-
-        Map<String, Object> snake = Beans.beanToMap(account);
-        Maps.replaceKeysWithSnakeCase(snake);
-        assertTrue(snake.containsKey("first_name"));
-        assertTrue(snake.containsKey("email_address"));
-        assertTrue(snake.containsKey("last_name"));
-        assertFalse(snake.containsKey("firstName"));
-
-        Map<String, Object> screaming = Beans.beanToMap(account);
-        Maps.replaceKeysWithScreamingSnakeCase(screaming);
-        assertTrue(screaming.containsKey("FIRST_NAME"));
-        assertTrue(screaming.containsKey("EMAIL_ADDRESS"));
-        assertTrue(screaming.containsKey("LAST_NAME"));
-        assertFalse(screaming.containsKey("firstName"));
-    }
-
-    @Test
-    public void test_ImmutableBuilderEntity() {
-        assertJsonRoundTrip(ImmutableBuilderEntity.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity.class);
-        assertJsonRoundTrip(ImmutableBuilderEntity2.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity2.class);
-        assertJsonRoundTrip(ImmutableBuilderEntity3.builder().id(111).firstName("fn").lastName("ln").build(), ImmutableBuilderEntity3.class);
-        assertJsonRoundTrip(new ImmutableEntity4().id(111).firstName("fn").lastName("ln"), ImmutableEntity4.class);
-        assertJsonRoundTrip(new ImmutableEntity5(111, "fn", "ln"), ImmutableEntity5.class);
-        assertJsonRoundTrip(new ImmutableEntity6(111, "fn", "ln"), ImmutableEntity6.class);
-        assertJsonRoundTrip(new ImmutableEntity7(111, "fn", "ln"), ImmutableEntity7.class);
-        assertJsonRoundTrip(new ImmutableEntity8(111, "fn", "ln"), ImmutableEntity8.class);
-        assertJsonRoundTrip(new ImmutableEntity9(111, "fn", "ln"), ImmutableEntity9.class);
-        assertJsonRoundTrip(new RecordA(111, "fn", "ln"), RecordA.class);
-        assertJsonRoundTrip(new RecordB(111, "fn", "ln"), RecordB.class);
-    }
-
     private static <T> void assertJsonRoundTrip(final T bean, final Class<T> type) {
         final String json = N.toJson(bean);
         assertTrue(json.contains("\"id\""));
@@ -2134,8 +3034,9 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(bean, N.fromJson(json, type));
     }
 
-    // TODO: Remaining ParserUtil.ASMPropInfo gaps are ReflectASM-specific generated access paths that are not meaningfully isolated beyond public ParserUtil/PropInfo coverage.
 
+
+    // TODO: Remaining ParserUtil.ASMPropInfo gaps are ReflectASM-specific generated access paths that are not meaningfully isolated beyond public ParserUtil/PropInfo coverage.
     public static class NumberFormatBean {
         @JsonXmlField(numberFormat = "#,##0.00")
         private double price;
@@ -2193,67 +3094,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    @Test
-    public void testClassLevelDateFormatAppliesOnlyToCompatibleProperties() {
-        final ClassDateFormatBean dateBean = new ClassDateFormatBean();
-        dateBean.setCount(7);
-        dateBean.setCreatedOn(new Date(0));
-
-        final String dateJson = Assertions.assertDoesNotThrow(() -> N.toJson(dateBean));
-        assertTrue(dateJson.contains("\"count\""));
-    }
-
-    @Test
-    public void testClassLevelNumberFormatAppliesOnlyToCompatibleProperties() {
-        final ClassNumberFormatBean numberBean = new ClassNumberFormatBean();
-        numberBean.setName("widget");
-        numberBean.setPrice(12.5d);
-
-        final String numberJson = Assertions.assertDoesNotThrow(() -> N.toJson(numberBean));
-        assertTrue(numberJson.contains("\"name\""));
-    }
-
-    @Test
-    public void test_numberFormat_rejectsTrailingCharacters() {
-        final PropInfo propInfo = ParserUtil.getBeanInfo(NumberFormatBean.class).getPropInfo("price");
-
-        assertThrows(RuntimeException.class, () -> propInfo.readPropValue("12oops"));
-    }
-
-    /**
-     * Verifies that {@code @JsonXmlField(numberFormat=...)} produces locale-independent output.
-     * Without an explicit locale, {@code new DecimalFormat(pattern)} uses the JVM default locale,
-     * so the same pattern would render "1.234,56" on de_DE and "1,234.56" on en_US, breaking
-     * cross-locale round-trips.
-     */
-    @Test
-    public void test_numberFormat_isLocaleIndependent() {
-        final java.util.Locale prev = java.util.Locale.getDefault();
-        try {
-            // Switch to a locale whose grouping/decimal separators differ from Locale.ROOT (en_US).
-            // German uses '.' for grouping and ',' for decimal -- the inverse of ROOT.
-            java.util.Locale.setDefault(java.util.Locale.GERMANY);
-
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(NumberFormatBean.class);
-            final PropInfo propInfo = beanInfo.getPropInfo("price");
-            assertNotNull(propInfo);
-            assertNotNull(propInfo.numberFormat);
-
-            final String formatted;
-            synchronized (propInfo.numberFormat) {
-                formatted = propInfo.numberFormat.format(1234.56d);
-            }
-
-            // Must use Locale.ROOT (en_US) symbols regardless of default locale: comma grouping, dot decimal.
-            assertEquals("1,234.56", formatted);
-        } finally {
-            java.util.Locale.setDefault(prev);
-            // Force the BeanInfo cache to drop the entry so subsequent tests build fresh metadata
-            // tied to whatever locale is active when they run.
-            ParserUtil.refreshBeanPropInfo(NumberFormatBean.class);
-        }
-    }
-
     public static class LongDateFormatBean {
         @JsonXmlField(dateFormat = "long")
         private Date createdOn;
@@ -2265,21 +3105,6 @@ public class ParserUtilTest extends AbstractTest {
         public void setCreatedOn(Date createdOn) {
             this.createdOn = createdOn;
         }
-    }
-
-    @Test
-    public void test_getBeanInfo_longDateFormat() {
-        // getBeanInfo used to throw IllegalArgumentException("Unknown pattern letter: l") because
-        // DateTimeFormatter.ofPattern("long") was invoked before isLongDateFormat was computed.
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(LongDateFormatBean.class);
-        PropInfo propInfo = beanInfo.getPropInfo("createdOn");
-
-        assertTrue(propInfo.isLongDateFormat);
-        assertNull(propInfo.dateTimeFormatter);
-
-        // the epoch-millis machinery is alive: reads a long string as a Date
-        Date d = (Date) propInfo.readPropValue("1700000000000");
-        assertEquals(1700000000000L, d.getTime());
     }
 
     @JsonXmlConfig(enumerated = EnumType.ORDINAL)
@@ -2300,65 +3125,17 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    @Test
-    public void test_getEnumerated_fieldAnnotationWithoutEnumerated_inheritsClassConfig() throws Exception {
-        // A field annotated with @JsonXmlField for an unrelated attribute (name) used to always
-        // report the NAME default, silently overriding the class-level enumerated = ORDINAL config.
-        Field field = OrdinalEnumBean.class.getDeclaredField("status");
-        JsonXmlConfig config = OrdinalEnumBean.class.getAnnotation(JsonXmlConfig.class);
-
-        assertEquals(EnumType.ORDINAL, ParserUtil.getEnumerated(field, config));
-    }
-
-    // --- regression tests for 2026-06-11 deep-review fixes ---
-
     public static class SelfAliasBean {
         @com.landawn.abacus.annotation.JsonXmlField(aliases = { "first_name" })
         public String firstName;
-    }
-
-    @Test
-    public void test_getBeanInfo_aliasRestatingOwnNamingPolicyTagIsAccepted() {
-        // regression: the alias-collision check fired on the property's OWN naming-policy tag
-        // (first_name for firstName), making the whole bean class unusable
-        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(SelfAliasBean.class);
-
-        assertEquals("firstName", bi.getPropInfo("first_name").name);
     }
 
     public static class FieldOnlyBean {
         public String firstName;
     }
 
-    @Test
-    public void test_getPropInfo_negativeCacheDoesNotPoisonFuzzyMatch() {
-        // regression: cached misses (Optional.empty) participated in the fuzzy-match loop and
-        // could shadow the real property, permanently caching a wrong null
-        ParserUtil.BeanInfo bi = ParserUtil.getBeanInfo(FieldOnlyBean.class);
-
-        assertEquals(null, bi.getPropInfo("GETFIRSTNAME")); // caches a miss
-        org.junit.jupiter.api.Assertions.assertNotNull(bi.getPropInfo("getFirstName"));
-        assertEquals("firstName", bi.getPropInfo("getFirstName").name);
-    }
-
     public static class GenericArrayBean<T> {
         public T[] values;
-    }
-
-    @Test
-    public void test_getBeanInfo_genericArrayWithParameterizedComponent() {
-        final java.lang.reflect.Type beanType = new TypeReference<GenericArrayBean<List<String>>>() {
-            // Capture the complete parameterized bean type.
-        }.javaType();
-
-        final PropInfo values = ParserUtil.getBeanInfo(beanType).getPropInfo("values");
-
-        assertEquals(List[].class, values.type.javaType());
-        assertEquals(String.class, values.type.elementType().elementType().javaType());
-
-        final GenericArrayBean<List<String>> bean = ParserFactory.createJsonParser()
-                .deserialize("{\"values\":[[1]]}", com.landawn.abacus.type.Type.of(beanType));
-        assertEquals(List.of("1"), bean.values[0]);
     }
 
     public static class ParameterizedArrayBean {
@@ -2417,114 +3194,9 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    @Test
-    public void test_getBeanInfo_resolvesReorderedSuperclassOwnerBeforeUpdatingBindings() {
-        java.lang.reflect.Type beanType = new TypeReference<ReorderedSuperclassOwner<String, Integer>.Swapped>() {
-        }.javaType();
-        ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(beanType);
-        assertEquals(Integer.class, info.getPropInfo("first").type.javaType());
-        assertEquals(String.class, info.getPropInfo("second").type.javaType());
-
-        ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ReorderedSuperclassOwner.Swapped.class);
-        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
-        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
-    }
-
-    @Test
-    public void test_getBeanInfo_resolvesRecursiveAndSwappedOwnerVariables() {
-        final java.lang.reflect.Type recursive = new TypeReference<RecursiveArrayOwner<String>.Member<Integer>>() {
-        }.javaType();
-        assertEquals(recursive, ParserUtil.getBeanInfo(recursive).getPropInfo("value").type.reflectType());
-
-        final java.lang.reflect.Type swapped = new TypeReference<SwappedArrayOwner<String, Integer>.Member>() {
-        }.javaType();
-        final ParserUtil.BeanInfo swappedInfo = ParserUtil.getBeanInfo(swapped);
-        assertEquals(Integer.class, swappedInfo.getPropInfo("first").type.javaType());
-        assertEquals(String.class, swappedInfo.getPropInfo("second").type.javaType());
-
-        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(SwappedArrayOwner.Member.class);
-        assertEquals(Object.class, rawInfo.getPropInfo("first").type.javaType());
-        assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
-    }
-
-    @Test
-    public void test_getBeanInfo_preservesArrayOwnersAndWildcardSubstitution() {
-        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(new TypeReference<ArrayOwnerFields<String>>() {
-        }.javaType());
-        for (final String name : new String[] { "values", "upper", "lower" }) {
-            final java.lang.reflect.Type expected = switch (name) {
-                case "values" -> new TypeReference<ArrayOwner<String>.Member>() {
-                }.javaType();
-                case "upper" -> new TypeReference<ArrayBeanValue<? extends String>>() {
-                }.javaType();
-                case "lower" -> new TypeReference<ArrayBeanValue<? super String>>() {
-                }.javaType();
-                default -> throw new AssertionError();
-            };
-            final java.lang.reflect.Type actual = info.getPropInfo(name).type.elementType().reflectType();
-            assertEquals(expected, actual);
-            assertEquals(actual, expected);
-            assertEquals(expected.hashCode(), actual.hashCode());
-            assertEquals(expected.getTypeName(), actual.getTypeName());
-        }
-        assertEquals(String.class, ParserUtil.getBeanInfo(info.getPropInfo("values").type.elementType().reflectType()).getPropInfo("value").type.javaType());
-        assertEquals(String[].class, info.getPropInfo("arrays").type.elementType().javaType());
-
-        final ParserUtil.BeanInfo rawInfo = ParserUtil.getBeanInfo(ArrayOwnerFields.class);
-        assertEquals(Object[].class, rawInfo.getPropInfo("arrays").type.elementType().javaType());
-        assertEquals(Object.class, rawInfo.getPropInfo("upper").type.elementType().parameterTypes().get(0).javaType());
-    }
-
-    @Test
-    public void test_getBeanInfo_preservesBeanArrayComponentsAndVariableSubstitution() {
-        final TypeReference<ParameterizedBeanArrayFields<String>> reference = new TypeReference<>() {
-        };
-        final ParameterizedBeanArrayFields<String> bean = ParserFactory.createJsonParser()
-                .deserialize("{\"values\":[{\"value\":1},null],\"nested\":[[{\"value\":2}]],\"children\":[{\"values\":[{\"value\":3}]}]}", reference.type());
-
-        assertEquals("1", bean.values[0].value);
-        assertNull(bean.values[1]);
-        assertEquals("2", bean.nested.get(0)[0].value);
-        assertEquals("3", bean.children[0].values[0].value);
-
-        final PropInfo values = ParserUtil.getBeanInfo(reference.javaType()).getPropInfo("values");
-        final java.lang.reflect.Type expected = new TypeReference<ArrayBeanValue<String>>() {
-        }.javaType();
-        assertEquals(expected, values.type.elementType().reflectType());
-        assertEquals(expected.hashCode(), values.type.elementType().reflectType().hashCode());
-        assertEquals(expected.getTypeName(), values.type.elementType().reflectType().getTypeName());
-    }
-
-    @Test
-    public void test_getBeanInfo_preservesParameterizedArrayComponents() {
-        final ParameterizedArrayBean bean = N.fromJson("{\"values\":[[1]],\"nested\":[[[2]]]}", ParameterizedArrayBean.class);
-
-        assertEquals(List.of("1"), bean.values[0]);
-        assertEquals(List.of("2"), bean.nested.get(0)[0]);
-    }
-
     public static class EscapedJsonNameBean {
         @JsonXmlField(name = "a\"b\\c\nd")
         public String value;
-    }
-
-    @Test
-    public void test_jsonPropertyNamesEscapeQuotesBackslashesAndControls() {
-        final EscapedJsonNameBean bean = new EscapedJsonNameBean();
-        bean.value = "value";
-        final JsonParser parser = ParserFactory.createJsonParser();
-
-        for (boolean pretty : new boolean[] { false, true }) {
-            final String json = parser.serialize(bean, JsonSerConfig.create().setPrettyFormat(pretty));
-            assertEquals(Map.of("a\"b\\c\nd", "value"), parser.deserialize(json, Map.class));
-            assertEquals("value", parser.deserialize(json, EscapedJsonNameBean.class).value);
-        }
-
-        bean.value = null;
-        final String json = parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE));
-        final Map<?, ?> values = parser.deserialize(json, Map.class);
-        assertTrue(values.containsKey("a\"b\\c\nd"));
-        assertNull(values.get("a\"b\\c\nd"));
     }
 
     public static class GenericBaseBean<T> {
@@ -2564,41 +3236,6 @@ public class ParserUtilTest extends AbstractTest {
         public class InnerBean extends OwnerPrecedenceBean<String> {
         }
     }
-
-    @Test
-    public void test_getBeanInfo_resolvesInheritedGenericTypeArguments() {
-        final PropInfo value = ParserUtil.getBeanInfo(LocalDateGenericBean.class).getPropInfo("value");
-
-        assertEquals(LocalDate.class, value.type.javaType());
-
-        final LocalDateGenericBean bean = N.fromJson("{\"value\":\"2026-01-02\"}", LocalDateGenericBean.class);
-        assertEquals(LocalDate.of(2026, 1, 2), bean.getValue());
-    }
-
-    @Test
-    public void test_getBeanInfo_resolvesGenericTypeArgumentsFromParameterizedOwner() {
-        final java.lang.reflect.Type beanType = new TypeReference<GenericOwner<LocalDate>.InnerGenericBean>() {
-            // Capture both the non-static inner class and its parameterized owner.
-        }.javaType();
-
-        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
-
-        assertEquals(LocalDate.class, value.type.javaType());
-    }
-
-    @Test
-    public void test_getBeanInfo_inheritedTypeArgumentOverridesParameterizedOwner() {
-        final java.lang.reflect.Type beanType = new TypeReference<OwnerPrecedenceBean<LocalDate>.InnerBean>() {
-            // The inner bean explicitly inherits OwnerPrecedenceBean<String>; that nearer
-            // superclass binding must override the lexical owner's LocalDate binding.
-        }.javaType();
-
-        final PropInfo value = ParserUtil.getBeanInfo(beanType).getPropInfo("value");
-
-        assertEquals(String.class, value.type.javaType());
-    }
-
-    // --- review fixes 2026-09-06 (P3-06): ignoredFields applies to getter-only computed properties ---
 
     @com.landawn.abacus.annotation.Entity
     @JsonXmlConfig(ignoredFields = { "fullName", "password" })
@@ -2642,86 +3279,11 @@ public class ParserUtilTest extends AbstractTest {
     public static class ComputedUserRegex extends ComputedUser {
     }
 
-    @Test
-    public void reviewFixes20260906_ignoredFieldsDropsGetterOnlyComputedProperty() {
-        ComputedUser user = new ComputedUser();
-        user.setFirst("Ada");
-        user.setLast("Lovelace");
-        user.setPassword("s3cret");
-
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(ComputedUser.class);
-        // The property still exists (it can be read), it is just not serialized.
-        assertTrue(beanInfo.propNameList.contains("fullName"));
-        assertEquals(List.of("first", "last"), N.map(beanInfo.jsonXmlSerializablePropInfos, it -> it.name));
-
-        String json = N.toJson(user);
-        assertFalse(json.contains("fullName"), json);
-        assertFalse(json.contains("password"), json);
-        assertTrue(json.contains("\"first\": \"Ada\""), json);
-
-        String xml = N.toXml(user);
-        assertFalse(xml.contains("fullName"), xml);
-        assertFalse(xml.contains("password"), xml);
-        assertTrue(xml.contains("<last>Lovelace</last>"), xml);
-
-        // A regex entry matches the property name too.
-        ComputedUserRegex regexUser = new ComputedUserRegex();
-        regexUser.setFirst("Ada");
-        regexUser.setLast("Lovelace");
-        regexUser.setPassword("s3cret");
-        String regexJson = N.toJson(regexUser);
-        assertFalse(regexJson.contains("fullName"), regexJson);
-        assertTrue(regexJson.contains("password"), regexJson);
-
-        // ignoredFields is a serialization filter: an ignored settable property is still populated on read.
-        ComputedUser restored = N.fromJson("{\"first\": \"A\", \"last\": \"B\", \"password\": \"p\"}", ComputedUser.class);
-        assertEquals("A B", restored.getFullName());
-        assertEquals("p", restored.getPassword());
-
-        // Name-based overload: a null field no longer means "serializable"; the two-arg overload keeps its contract.
-        JsonXmlConfig config = ComputedUser.class.getAnnotation(JsonXmlConfig.class);
-        assertFalse(ParserUtil.isJsonXmlSerializable("fullName", null, config));
-        assertTrue(ParserUtil.isJsonXmlSerializable("first", null, config));
-        assertTrue(ParserUtil.isJsonXmlSerializable(null, null, config));
-        assertTrue(ParserUtil.isJsonXmlSerializable(null, null));
-        assertTrue(ParserUtil.isJsonXmlSerializable("anything", null, null));
-    }
-
-    // --- review fixes 2026-09-06 (P3-07): getBeanInfo(java.lang.reflect.Type) validates its argument ---
-
     public static class ReflectTypeHolder<T> {
         public List<?> wildcard;
         public T[] genericArray;
         public List<String> parameterized;
     }
-
-    @Test
-    public void reviewFixes20260906_getBeanInfoRejectsUnsupportedReflectTypesWithIllegalArgument() throws Exception {
-        java.lang.reflect.Type typeVariable = List.class.getTypeParameters()[0];
-        java.lang.reflect.Type wildcard = ((java.lang.reflect.ParameterizedType) ReflectTypeHolder.class.getField("wildcard").getGenericType())
-                .getActualTypeArguments()[0];
-        java.lang.reflect.Type genericArray = ReflectTypeHolder.class.getField("genericArray").getGenericType();
-        assertTrue(wildcard instanceof java.lang.reflect.WildcardType);
-        assertTrue(genericArray instanceof java.lang.reflect.GenericArrayType);
-
-        for (java.lang.reflect.Type type : new java.lang.reflect.Type[] { typeVariable, wildcard, genericArray, null }) {
-            IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type), String.valueOf(type));
-            assertNotNull(e.getMessage());
-        }
-
-        // A Class and a ParameterizedType with a Class raw type are still accepted.
-        assertEquals(TestBean.class, ParserUtil.getBeanInfo((java.lang.reflect.Type) TestBean.class).clazz);
-        java.lang.reflect.Type parameterized = new TypeReference<GenericArrayBean<List<String>>>() {
-        }.javaType();
-        assertEquals(GenericArrayBean.class, ParserUtil.getBeanInfo(parameterized).clazz);
-
-        // A null property name is an argument error on the chain lookup too, as it already was on getPropInfo.
-        BeanInfo beanInfo = ParserUtil.getBeanInfo(TestBean.class);
-        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfoChain(null));
-        assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfo((String) null));
-    }
-
-    // --- review fixes 2026-09-06 (P3-09): a document naming a getter-only property is read, not NPE'd ---
 
     @com.landawn.abacus.annotation.Entity
     public static class ComputedUserOpen {
@@ -2750,57 +3312,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    @Test
-    public void reviewFixes20260906_documentNamingAGetterOnlyPropertyIsReadWithoutError() {
-        ComputedUserOpen source = new ComputedUserOpen();
-        source.setFirst("Ada");
-        source.setLast("Lovelace");
-
-        // The bean's own output names the computed property, so its own round trip used to NPE.
-        String selfJson = N.toJson(source);
-        assertTrue(selfJson.contains("fullName"), selfJson);
-
-        String[] jsonDocs = { selfJson, "{\"first\": \"Ada\", \"fullName\": \"x\", \"last\": \"Lovelace\"}",
-                "{\"first\": \"Ada\", \"fullName\": null, \"last\": \"Lovelace\"}",
-                "{\"fullName\": {\"nested\": [1, 2]}, \"first\": \"Ada\", \"last\": \"Lovelace\"}",
-                "{\"first\": \"Ada\", \"last\": \"Lovelace\", \"fullName\": \"\"}" };
-
-        for (boolean ignoreUnmatched : new boolean[] { true, false }) {
-            JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
-
-            for (String json : jsonDocs) {
-                ComputedUserOpen restored = N.fromJson(json, config, ComputedUserOpen.class);
-                assertEquals("Ada", restored.getFirst(), json);
-                assertEquals("Lovelace", restored.getLast(), json);
-                assertEquals("Ada Lovelace", restored.getFullName(), json);
-            }
-
-            // A read-only property is a MATCHED name whose value is skipped (like a declared SERIALIZE_ONLY
-            // direction), so strict mode does not report it; a truly unknown name still is.
-            if (!ignoreUnmatched) {
-                assertThrows(com.landawn.abacus.exception.ParsingException.class,
-                        () -> N.fromJson("{\"first\": \"Ada\", \"nobody\": 1}", config, ComputedUserOpen.class));
-            }
-        }
-
-        for (XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
-            String selfXml = xmlParser.serialize(source);
-            assertTrue(selfXml.contains("<fullName>Ada Lovelace</fullName>"), selfXml);
-            String[] xmlDocs = { selfXml, selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName></fullName>"),
-                    selfXml.replace("<fullName>Ada Lovelace</fullName>", "<fullName>null</fullName>") };
-
-            for (boolean ignoreUnmatched : new boolean[] { true, false }) {
-                XmlDeserConfig config = XmlDeserConfig.create().setIgnoreUnmatchedProperty(ignoreUnmatched);
-
-                for (String xml : xmlDocs) {
-                    ComputedUserOpen restored = xmlParser.deserialize(xml, config, ComputedUserOpen.class);
-                    assertEquals("Ada", restored.getFirst(), xml);
-                    assertEquals("Lovelace", restored.getLast(), xml);
-                }
-            }
-        }
-    }
-
     public static class EscapedXmlNameBean {
         @JsonXmlField(name = "a&b\"c<d\ne")
         public String value;
@@ -2811,102 +3322,8 @@ public class ParserUtilTest extends AbstractTest {
         public String value;
     }
 
-    @Test
-    public void reviewFixes20260908_xmlNameTagEscapesTheAnnotationNameInAttributePosition() {
-        final EscapedXmlNameBean bean = new EscapedXmlNameBean();
-        bean.value = "v";
 
-        final XmlSerConfig generic = new XmlSerConfig().setTagByPropertyName(false);
-        final String expected = "<bean name=\"escapedXmlNameBean\"><property name=\"a&amp;b&quot;c&lt;d&#xa;e\">v</property></bean>";
 
-        // Before the fix the name went in verbatim: `&`, `"` and `<` made the document unreadable
-        // (`<property name="a&b"c<d`), and the newline was legal but normalised to a space by every XML
-        // reader, so the property name no longer matched and the value was silently dropped.
-        for (final XmlParser parser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
-            assertEquals(expected, parser.serialize(bean, generic));
-        }
-
-        final EscapedXmlNameBean back = ParserFactory.createXmlParser().deserialize(expected, EscapedXmlNameBean.class);
-        assertEquals("v", back.value);
-
-        // A name needing no escaping is still written byte-for-byte as before.
-        final PlainXmlNameBean plain = new PlainXmlNameBean();
-        plain.value = "v";
-        assertEquals("<bean name=\"plainXmlNameBean\"><property name=\"user_id\">v</property></bean>",
-                ParserFactory.createXmlParser().serialize(plain, generic));
-
-        // Attribute position is escaped; element-name position is not, because XML has no escaping
-        // mechanism there - that name can only be rejected, which is the writers' job.
-        final XmlNameTag tag = new XmlNameTag("a&b", "int", false);
-        assertEquals("a&b", String.valueOf(tag.name));
-        assertEquals("<property name=\"a&amp;b\">", String.valueOf(tag.epStart));
-        assertEquals("<property name=\"a&amp;b\" type=\"int\">", String.valueOf(tag.epStartWithType));
-        assertEquals("<property name=\"a&amp;b\" isNull=\"true\" />", String.valueOf(tag.epNull));
-        assertEquals("<a&b>", String.valueOf(tag.namedStart));
-
-        // Type names keep the escaping they always had.
-        assertEquals("<property name=\"p\" type=\"List&lt;String&gt;\">", String.valueOf(new XmlNameTag("p", "List<String>", false).epStartWithType));
-    }
-
-    @Test
-    public void testGetBeanInfoNullBeanClassNamesBeanClassParameter() {
-        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((Class<?>) null));
-        assertEquals("'beanClass' cannot be null", e.getMessage());
-    }
-
-    @Test
-    public void testTypeAnnotationEnumeratedAppliesOnlyWithinItsScope() {
-        class ScopedEnumBean {
-            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.PERSISTENCE)
-            private java.time.DayOfWeek dbOnly;
-
-            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.SERIALIZATION)
-            private java.time.DayOfWeek serializationOnly;
-
-            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL)
-            private java.time.DayOfWeek everywhere;
-
-            public java.time.DayOfWeek getDbOnly() {
-                return dbOnly;
-            }
-
-            public void setDbOnly(final java.time.DayOfWeek dbOnly) {
-                this.dbOnly = dbOnly;
-            }
-
-            public java.time.DayOfWeek getSerializationOnly() {
-                return serializationOnly;
-            }
-
-            public void setSerializationOnly(final java.time.DayOfWeek serializationOnly) {
-                this.serializationOnly = serializationOnly;
-            }
-
-            public java.time.DayOfWeek getEverywhere() {
-                return everywhere;
-            }
-
-            public void setEverywhere(final java.time.DayOfWeek everywhere) {
-                this.everywhere = everywhere;
-            }
-        }
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(ScopedEnumBean.class);
-
-        final PropInfo dbOnly = beanInfo.getPropInfo("dbOnly");
-        assertTrue(dbOnly.dbType.name().contains("ORDINAL"), dbOnly.dbType.name());
-        assertFalse(dbOnly.type.name().contains("ORDINAL"), dbOnly.type.name());
-
-        final PropInfo serializationOnly = beanInfo.getPropInfo("serializationOnly");
-        assertTrue(serializationOnly.type.name().contains("ORDINAL"), serializationOnly.type.name());
-        assertFalse(serializationOnly.dbType.name().contains("ORDINAL"), serializationOnly.dbType.name());
-
-        final PropInfo everywhere = beanInfo.getPropInfo("everywhere");
-        assertTrue(everywhere.type.name().contains("ORDINAL"), everywhere.type.name());
-        assertTrue(everywhere.dbType.name().contains("ORDINAL"), everywhere.dbType.name());
-    }
-
-    // ---- deep review 2026-09-25 G009 begin ----
     // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
     // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
     @AccessFieldByMethod
@@ -2928,25 +3345,6 @@ public class ParserUtilTest extends AbstractTest {
 
             this.name = name;
         }
-    }
-
-    // G009-01: the ASM PropInfo retried a setter that threw its own exception, so a rejecting setter ran twice.
-    @Test
-    public void testPropInfoSetPropValue_rejectingSetterInvokedOnce() {
-        final PropInfo propInfo = ParserUtil.getBeanInfo(G009ValidatingSetterBean.class).getPropInfo("name");
-        final G009ValidatingSetterBean bean = new G009ValidatingSetterBean();
-
-        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
-        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> propInfo.setPropValue(bean, "bad value"));
-        assertEquals("rejected: bad value", e.getMessage());
-        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
-        assertNull(bean.getName());
-
-        // A value of the wrong type is still converted and stored, with one successful setter call.
-        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
-        propInfo.setPropValue(bean, 123);
-        assertEquals("123", bean.getName());
-        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
     }
 
     public static class G009RefreshInner {
@@ -2982,30 +3380,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // G009-02: refreshing the inner bean's metadata left the outer bean's memoized "inner.city" chain in place.
-    @Test
-    public void testGetPropInfoChain_droppedAfterNestedBeanRefresh() {
-        assertEquals(2, ParserUtil.getBeanInfo(G009RefreshOuter.class).getPropInfoChain("inner.city").size());
-
-        Beans.registerNonPropertyAccessor(G009RefreshInner.class, "city");
-
-        assertNull(ParserUtil.getBeanInfo(G009RefreshInner.class).getPropInfo("city"));
-
-        final BeanInfo outerInfo = ParserUtil.getBeanInfo(G009RefreshOuter.class);
-        assertTrue(outerInfo.getPropInfoChain("inner.city").isEmpty());
-
-        final G009RefreshOuter outer = new G009RefreshOuter();
-        assertFalse(outerInfo.setPropValue(outer, "inner.city", "X", true));
-        assertNull(outer.getInner());
-
-        // The paths the refresh did not affect still resolve.
-        assertEquals(2, outerInfo.getPropInfoChain("inner.zip").size());
-        assertTrue(outerInfo.setPropValue(outer, "inner.zip", "Z", true));
-        assertEquals("Z", outer.getInner().getZip());
-    }
-    // ---- deep review 2026-09-25 G009 end ----
-
-    // ---- bug review 2026-09-27 G009 begin ----
     @JsonXmlConfig(dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#,##0")
     public static class G009ClassDateFormatLongBean {
         private long id;
@@ -3046,37 +3420,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // G009-01: a class-level @JsonXmlConfig(dateFormat) was offered to long/Long/String properties (they have
-    // propFuncMap entries for a field-level dateFormat): every long was written as a JSON string and the
-    // class-level numberFormat was ignored for long/Long properties.
-    @Test
-    public void testClassLevelDateFormat_notAppliedToLongAndStringProperties() {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009ClassDateFormatLongBean.class);
-        assertNull(beanInfo.getPropInfo("id").dateFormat);
-        assertNull(beanInfo.getPropInfo("ref").dateFormat);
-        assertNull(beanInfo.getPropInfo("name").dateFormat);
-        assertEquals("yyyy-MM-dd", beanInfo.getPropInfo("createdOn").dateFormat);
-
-        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
-        bean.setId(123);
-        bean.setRef(4567L);
-        bean.setName("x");
-        bean.setCreatedOn(new Date(0));
-
-        final String json = N.toJson(bean);
-        assertTrue(json.contains("\"id\": 123"), json);
-        assertTrue(json.contains("\"ref\": \"4,567\""), json);
-        assertTrue(json.contains("\"createdOn\": \"1970-01-01\""), json);
-
-        final G009ClassDateFormatLongBean copy = N.fromJson(json, G009ClassDateFormatLongBean.class);
-        assertEquals(123L, copy.getId());
-        assertEquals(Long.valueOf(4567L), copy.getRef());
-        assertEquals("x", copy.getName());
-        assertEquals(new Date(0), copy.getCreatedOn());
-    }
-    // ---- bug review 2026-09-27 G009 end ----
-
-    // ---- bug review 2026-09-27 verify G118 begin ----
     @JsonXmlConfig(dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#,##0")
     public static class G118FieldLevelFormatBean {
         private long plain;
@@ -3110,54 +3453,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // A FIELD-level dateFormat on long/String still wins under a class-level config; the plain long takes the class-level numberFormat.
-    @Test
-    public void testClassLevelDateFormat_fieldLevelDateFormatOnLongAndStringStillApplied() {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G118FieldLevelFormatBean.class);
-        assertNull(beanInfo.getPropInfo("plain").dateFormat);
-        assertEquals("long", beanInfo.getPropInfo("epoch").dateFormat);
-        assertEquals("yyyy", beanInfo.getPropInfo("text").dateFormat);
-
-        final G118FieldLevelFormatBean bean = new G118FieldLevelFormatBean();
-        bean.setPlain(1234);
-        bean.setEpoch(11);
-        bean.setText("zz");
-
-        final String json = N.toJson(bean);
-        assertTrue(json.contains("\"plain\": \"1,234\""), json);
-        assertTrue(json.contains("\"epoch\": \"11\""), json);
-        assertTrue(json.contains("\"text\": \"zz\""), json);
-
-        final G118FieldLevelFormatBean copy = N.fromJson(json, G118FieldLevelFormatBean.class);
-        assertEquals(1234L, copy.getPlain());
-        assertEquals(11L, copy.getEpoch());
-        assertEquals("zz", copy.getText());
-    }
-
-    // XML: the class-level numberFormat now reaches long/Long properties and the value round-trips.
-    @Test
-    public void testClassLevelDateFormat_xmlLongUsesClassLevelNumberFormat() {
-        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
-        bean.setId(1234);
-        bean.setRef(4567L);
-        bean.setName("a<b>&c");
-        bean.setCreatedOn(new Date(0));
-
-        final String xml = N.toXml(bean);
-        assertTrue(xml.contains("<id>1,234</id>"), xml);
-        assertTrue(xml.contains("<ref>4,567</ref>"), xml);
-        assertTrue(xml.contains("<name>a&lt;b&gt;&amp;c</name>"), xml);
-        assertTrue(xml.contains("<createdOn>1970-01-01</createdOn>"), xml);
-
-        final G009ClassDateFormatLongBean copy = N.fromXml(xml, G009ClassDateFormatLongBean.class);
-        assertEquals(1234L, copy.getId());
-        assertEquals(Long.valueOf(4567L), copy.getRef());
-        assertEquals("a<b>&c", copy.getName());
-        assertEquals(new Date(0), copy.getCreatedOn());
-    }
-    // ---- bug review 2026-09-27 verify G118 end ----
-
-    // ---- bug review 2026-09-30 G009 begin ----
     public static class G009AffixNumberBean {
         @JsonXmlField(numberFormat = "'<'0.00")
         private Double lt;
@@ -3205,38 +3500,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // G009-01: a numberFormat affix holding XML markup characters was written raw, producing XML no reader accepts.
-    @Test
-    public void testWritePropValue_xmlNumberFormatAffixIsEscaped() {
-        final G009AffixNumberBean bean = new G009AffixNumberBean();
-        bean.setLt(1.5);
-        bean.setAmp(7);
-
-        for (final XmlParser xmlParser : List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
-            final String xml = xmlParser.serialize(bean);
-            assertTrue(xml.contains("&lt;1.50"), xml);
-            assertTrue(xml.contains("R&amp;D 7"), xml);
-
-            final G009AffixNumberBean copy = xmlParser.deserialize(xml, G009AffixNumberBean.class);
-            assertEquals(1.5, copy.getLt());
-            assertEquals(Integer.valueOf(7), copy.getAmp());
-        }
-    }
-
-    // G009-02: refreshBeanPropInfo(Class) left the BeanInfo cached for a parameterized use of the class (Box<String>) stale.
-    @Test
-    public void testRefreshBeanPropInfo_evictsParameterizedTypeBeanInfo() throws Exception {
-        final java.lang.reflect.Type parameterized = G009BoxHolder.class.getDeclaredField("box").getGenericType();
-        final BeanInfo before = ParserUtil.getBeanInfo(parameterized);
-        assertSame(before, ParserUtil.getBeanInfo(parameterized));
-
-        ParserUtil.refreshBeanPropInfo(G009Box.class);
-
-        assertNotSame(before, ParserUtil.getBeanInfo(parameterized));
-    }
-    // ---- bug review 2026-09-30 G009 end ----
-
-    // ---- bug review 2026-09-30 verify G116 begin ----
     public static class G116Pair<T> {
         private T first;
 
@@ -3261,49 +3524,11 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-    // G009-02 neighbours: refreshing a class still evicts its raw-class BeanInfo, but keeps the BeanInfos of other classes' parameterized types.
-    @Test
-    public void testRefreshBeanPropInfo_keepsOtherClassesParameterizedBeanInfo() throws Exception {
-        final java.lang.reflect.Type otherParameterized = G116PairHolder.class.getDeclaredField("pair").getGenericType();
-        final BeanInfo otherBefore = ParserUtil.getBeanInfo(otherParameterized);
-        final BeanInfo rawBefore = ParserUtil.getBeanInfo(G009Box.class);
-
-        ParserUtil.refreshBeanPropInfo(G009Box.class);
-
-        assertSame(otherBefore, ParserUtil.getBeanInfo(otherParameterized));
-        assertNotSame(rawBefore, ParserUtil.getBeanInfo(G009Box.class));
-    }
-    // ---- bug review 2026-09-30 verify G116 end ----
-
     public static class ExceptionWithProperties extends RuntimeException {
         private static final long serialVersionUID = 1L;
         public String code;
     }
 
-    // Both public metadata lookups and the internal ASM/reflective test entry point reject non-beans.
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testGetBeanInfoRejectsThrowableClasses() {
-        for (final Class<?> type : java.util.List.of(Throwable.class, Exception.class, Error.class, ExceptionWithProperties.class)) {
-            final String expected = "Not a bean class: " + type.getCanonicalName() + " - Throwable subclasses are never treated as beans";
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage());
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((java.lang.reflect.Type) type)).getMessage());
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testInternalBeanInfoLookupRejectsOtherNonBeans() {
-        for (final Class<?> type : java.util.List.of(String.class, java.util.HashMap.class)) {
-            final String expected = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type)).getMessage();
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, false)).getMessage());
-            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(type, true)).getMessage());
-        }
-    }
-
-    // ---- bug review 2026-10-02 G009 begin ----
     public static class G009AmPmDateBean {
         @JsonXmlField(dateFormat = "MM/dd/yyyy hh:mm:ss aa", timeZone = "UTC")
         public Date date;
@@ -3326,52 +3551,6 @@ public class ParserUtilTest extends AbstractTest {
         public LocalDateTime dateTime;
     }
 
-    // G009-01: a legacy date/time property uses SimpleDateFormat pattern syntax (JsonXmlField.dateFormat), but the
-    // BeanInfo build rejected SimpleDateFormat patterns java.time does not accept ("Too many pattern letters").
-    @Test
-    public void testGetBeanInfo_legacyDatePropertyAcceptsSimpleDateFormatOnlyPattern() {
-        final G009AmPmDateBean bean = new G009AmPmDateBean();
-        bean.date = new Date(1672671845000L); // 2023-01-02T15:04:05Z
-        bean.calendar = java.util.Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        bean.calendar.setTimeInMillis(1672617600000L); // 2023-01-02T00:00:00Z
-
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009AmPmDateBean.class);
-        assertNull(beanInfo.getPropInfo("date").dateTimeFormatter);
-
-        final String json = N.toJson(bean);
-        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
-        assertTrue(json.contains("\"02 January 2023\""), json);
-
-        final G009AmPmDateBean fromJson = N.fromJson(json, G009AmPmDateBean.class);
-        assertEquals(1672671845000L, fromJson.date.getTime());
-        assertEquals(1672617600000L, fromJson.calendar.getTimeInMillis());
-
-        final G009AmPmDateBean fromXml = N.fromXml(N.toXml(bean), G009AmPmDateBean.class);
-        assertEquals(1672671845000L, fromXml.date.getTime());
-        assertEquals(1672617600000L, fromXml.calendar.getTimeInMillis());
-    }
-
-    // G009-01: the same for a Joda-Time property, whose pattern syntax is Joda's DateTimeFormat.
-    @Test
-    public void testGetBeanInfo_jodaDatePropertyAcceptsJodaOnlyPattern() {
-        final G009AmPmJodaBean bean = new G009AmPmJodaBean();
-        bean.dateTime = new org.joda.time.DateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
-
-        final String json = N.toJson(bean);
-        assertTrue(json.contains("\"01/02/2023 03:04:05 PM\""), json);
-        assertEquals(1672671845000L, N.fromJson(json, G009AmPmJodaBean.class).dateTime.getMillis());
-    }
-
-    // G009-01 guard: a pattern invalid in the property's own syntax, and a java.time-only rejection on a java.time
-    // property, are still rejected when the BeanInfo is built.
-    @Test
-    public void testGetBeanInfo_invalidDatePatternStillRejected() {
-        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009BadPatternDateBean.class));
-        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G009AmPmLocalDateTimeBean.class));
-    }
-    // ---- bug review 2026-10-02 G009 end ----
-
-    // ---- bug review 2026-10-02 verify G120 begin ----
     public static class G120VSqlDateBean {
         @JsonXmlField(dateFormat = "dd MMMMMM yyyy", timeZone = "UTC")
         public java.sql.Date date;
@@ -3398,50 +3577,6 @@ public class ParserUtilTest extends AbstractTest {
         @JsonXmlField(dateFormat = "yyyy-MM-dd HH:mm:ss", timeZone = "UTC")
         public Date date;
     }
-
-    // G120 verify of G009-01: java.sql.Date/Time read their pattern with java.time syntax (Dates.parseToLocalDate/LocalTime),
-    // so a pattern java.time rejects can never be read back; such a property is still rejected when the BeanInfo is built,
-    // and so is a type outside the exact legacy/Joda list (GregorianCalendar).
-    @Test
-    public void testGetBeanInfo_sqlDateAndTimePatternRejectedByJavaTimeStillRejected() {
-        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlDateBean.class));
-        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VSqlTimeBean.class));
-        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(G120VGregorianCalendarBean.class));
-    }
-
-    // G120 verify of G009-01: java.sql.Timestamp (SimpleDateFormat syntax) and Joda MutableDateTime (Joda syntax) accept a
-    // pattern java.time rejects and round-trip through JSON and XML.
-    @Test
-    public void testGetBeanInfo_timestampAndMutableDateTimeAcceptOwnSyntaxPattern() {
-        final G120VTimestampBean bean = new G120VTimestampBean();
-        bean.timestamp = new java.sql.Timestamp(1672671845000L); // 2023-01-02T15:04:05Z
-        bean.mutableDateTime = new org.joda.time.MutableDateTime(1672671845000L, org.joda.time.DateTimeZone.UTC);
-
-        final String json = N.toJson(bean);
-        assertEquals("{\"timestamp\": \"01/02/2023 03:04:05 PM\", \"mutableDateTime\": \"01/02/2023 03:04:05 PM\"}", json);
-
-        final G120VTimestampBean fromJson = N.fromJson(json, G120VTimestampBean.class);
-        assertEquals(1672671845000L, fromJson.timestamp.getTime());
-        assertEquals(1672671845000L, fromJson.mutableDateTime.getMillis());
-
-        final G120VTimestampBean fromXml = N.fromXml(N.toXml(bean), G120VTimestampBean.class);
-        assertEquals(1672671845000L, fromXml.timestamp.getTime());
-        assertEquals(1672671845000L, fromXml.mutableDateTime.getMillis());
-    }
-
-    // G120 verify of G009-01 guard: a pattern valid in both syntaxes still builds the java.time formatter and formats as before.
-    @Test
-    public void testGetBeanInfo_patternValidInBothSyntaxesKeepsJavaTimeFormatter() {
-        assertNotNull(ParserUtil.getBeanInfo(G120VBothSyntaxesBean.class).getPropInfo("date").dateTimeFormatter);
-
-        final G120VBothSyntaxesBean bean = new G120VBothSyntaxesBean();
-        bean.date = new Date(1672671845000L);
-        assertEquals("{\"date\": \"2023-01-02 15:04:05\"}", N.toJson(bean));
-        assertEquals(1672671845000L, N.fromJson(N.toJson(bean), G120VBothSyntaxesBean.class).date.getTime());
-    }
-    // ---- bug review 2026-10-02 verify G120 end ----
-
-    // ---- perf review 2026-10-07 G07 begin ----
 
     public static class G07PlainBean {
         static int constructions;
@@ -3502,6 +3637,8 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
+
+
     /** A non-static member class: N.newInstance creates it through an enclosing instance of the test class. */
     public class G07InnerBean {
         private int count;
@@ -3533,115 +3670,6 @@ public class ParserUtilTest extends AbstractTest {
         return G07LocalBean.class;
     }
 
-    // G07-01: createBeanResult() for a plain mutable bean (top-level, static nested, local class in a static context, private
-    // no-args constructor) invokes the no-args constructor exactly once per call and returns a fresh instance of the class.
-    @Test
-    public void testCreateBeanResult_plainMutableBeanInvokesNoArgsConstructorOncePerCall() {
-        final BeanInfo topLevel = ParserUtil.getBeanInfo(Account.class);
-        final Object first = topLevel.createBeanResult();
-        final Object second = topLevel.createBeanResult();
-        assertSame(Account.class, first.getClass());
-        assertSame(Account.class, second.getClass());
-        assertNotSame(first, second);
-        assertSame(first, topLevel.finishBeanResult(first));
-        assertNull(((Account) first).getFirstName());
-        assertEquals(0L, ((Account) first).getId());
-
-        final BeanInfo nested = ParserUtil.getBeanInfo(G07PlainBean.class);
-        assertFalse(nested.isImmutable);
-        G07PlainBean.constructions = 0;
-        final Object bean = nested.createBeanResult();
-        assertEquals(1, G07PlainBean.constructions);
-        assertSame(G07PlainBean.class, bean.getClass());
-        assertEquals(0, ((G07PlainBean) bean).getCount());
-        assertNotSame(bean, nested.createBeanResult());
-        assertEquals(2, G07PlainBean.constructions);
-
-        // through the JSON reader, which creates every mutable bean with createBeanResult()
-        G07PlainBean.constructions = 0;
-        final G07PlainBean fromJson = N.fromJson("{\"count\": 3}", G07PlainBean.class);
-        assertEquals(3, fromJson.getCount());
-        assertEquals(1, G07PlainBean.constructions);
-
-        final Class<?> localClass = g07LocalBeanClass();
-        final BeanInfo local = ParserUtil.getBeanInfo(localClass);
-        assertFalse(local.isImmutable);
-        assertSame(localClass, local.createBeanResult().getClass());
-        assertNotSame(local.createBeanResult(), local.createBeanResult());
-
-        final BeanInfo privateConstructor = ParserUtil.getBeanInfo(G07PrivateConstructorBean.class);
-        assertFalse(privateConstructor.isImmutable);
-        assertSame(G07PrivateConstructorBean.class, privateConstructor.createBeanResult().getClass());
-        assertNotSame(privateConstructor.createBeanResult(), privateConstructor.createBeanResult());
-    }
-
-    // G07-01: an exception thrown by the no-args constructor reaches the caller exactly as N.newInstance(clazz) delivered it:
-    // a RuntimeException as the same instance, a checked exception wrapped by ExceptionUtil.toRuntimeException.
-    @Test
-    public void testCreateBeanResult_constructorExceptionsKeepNewInstanceWrapping() {
-        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G07PlainBean.class);
-        assertFalse(beanInfo.isImmutable);
-
-        G07PlainBean.failConstruction = true;
-
-        try {
-            final IllegalStateException e = assertThrows(IllegalStateException.class, beanInfo::createBeanResult);
-            assertEquals("boom", e.getMessage());
-            assertEquals(IllegalStateException.class, e.getClass());
-        } finally {
-            G07PlainBean.failConstruction = false;
-        }
-
-        G07PlainBean.failConstructionChecked = true;
-
-        try {
-            final RuntimeException e = assertThrows(RuntimeException.class, beanInfo::createBeanResult);
-            assertEquals(com.landawn.abacus.exception.UncheckedIOException.class, e.getClass());
-            assertEquals(java.io.IOException.class, e.getCause().getClass());
-            assertEquals("checked boom", e.getCause().getMessage());
-        } finally {
-            G07PlainBean.failConstructionChecked = false;
-        }
-
-        assertSame(G07PlainBean.class, beanInfo.createBeanResult().getClass());
-    }
-
-    // G07-01: classes N.newInstance(clazz) does not create through a plain no-args constructor keep their previous path and
-    // result: a non-static member class and an anonymous class are created through an enclosing instance; a class
-    // without a no-args constructor is classified immutable and gets its constructor-argument array.
-    @Test
-    public void testCreateBeanResult_nonPlainClassesKeepNewInstancePath() throws Exception {
-        final BeanInfo inner = ParserUtil.getBeanInfo(G07InnerBean.class);
-        assertFalse(inner.isImmutable);
-        final Object innerBean = inner.createBeanResult();
-        assertSame(G07InnerBean.class, innerBean.getClass());
-        assertNotSame(innerBean, inner.createBeanResult());
-        assertEquals(0, ((G07InnerBean) innerBean).getCount());
-
-        final Class<?> anonymousClass = new G07PlainBean() {
-            @Override
-            public int getCount() {
-                return super.getCount() + 100;
-            }
-        }.getClass();
-        assertTrue(anonymousClass.isAnonymousClass());
-        final BeanInfo anonymous = ParserUtil.getBeanInfo(anonymousClass);
-        assertFalse(anonymous.isImmutable);
-        final Object anonymousBean = anonymous.createBeanResult();
-        assertSame(anonymousClass, anonymousBean.getClass());
-        assertEquals(100, ((G07PlainBean) anonymousBean).getCount());
-        assertNotSame(anonymousBean, anonymous.createBeanResult());
-
-        final BeanInfo noDefault = ParserUtil.getBeanInfo(G07NoDefaultConstructorBean.class);
-        assertTrue(noDefault.isImmutable);
-        final Object args = noDefault.createBeanResult();
-        assertTrue(args instanceof Object[]);
-        assertEquals(1, ((Object[]) args).length);
-        assertNull(((Object[]) args)[0]);
-        assertNotSame(args, noDefault.createBeanResult());
-        final G07NoDefaultConstructorBean finished = noDefault.finishBeanResult(args);
-        assertNull(finished.getName());
-    }
 
     // ---- perf review 2026-10-07 G07 end ----
 

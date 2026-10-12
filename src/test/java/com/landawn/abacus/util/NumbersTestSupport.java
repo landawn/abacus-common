@@ -14,21 +14,23 @@
 
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
+import org.junit.jupiter.api.Test;
+
 import com.landawn.abacus.TestBase;
 
-/**
- * Shared helpers for {@link Numbers} tests.
- */
 public abstract class NumbersTestSupport extends TestBase {
 
     protected static final double DELTA = 1e-15;
+
     protected static final float FLOAT_DELTA = 1e-7f;
 
     protected static String signedRadixToken(final BigInteger value, final int radix, final String prefix, final boolean explicitPlus) {
@@ -225,4 +227,80 @@ public abstract class NumbersTestSupport extends TestBase {
             return value;
         }
     }
+
+    protected static void assertBoundedAndEscaped(final Throwable t) {
+        for (Throwable cur = t; cur != null && cur != cur.getCause(); cur = cur.getCause()) {
+            final String message = cur.getMessage();
+
+            if (message == null) {
+                continue;
+            }
+
+            assertTrue(message.length() < 256, "message is " + message.length() + " chars: " + message.substring(0, Math.min(60, message.length())));
+
+            for (int i = 0; i < message.length(); i++) {
+                assertTrue(!Character.isISOControl(message.charAt(i)),
+                        "raw control U+" + Integer.toHexString(message.charAt(i)) + " at " + i + " of " + cur.getClass().getSimpleName());
+            }
+        }
+    }
+
+    // Test doubles
+
+    /**
+     * A {@code Number} outside the eight built-in types whose {@code toString()} and {@code doubleValue()}
+     * deliberately disagree, so the recovery route actually taken is observable in the result.
+     */
+    protected static final class SplitNumber extends Number {
+        protected static final long serialVersionUID = 1L;
+
+        protected final String text;
+        protected final double value;
+
+        SplitNumber(final String text, final double value) {
+            this.text = text;
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return (int) value;
+        }
+
+        @Override
+        public long longValue() {
+            return (long) value;
+        }
+
+        @Override
+        public float floatValue() {
+            return (float) value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
+
+    /** The sentinel {@code doubleValue()} used throughout: a value no test text denotes. */
+    protected static final double SENTINEL = -7654321.0d;
+
+    protected static SplitNumber n(final String text) {
+        return new SplitNumber(text, SENTINEL);
+    }
+
+    /** {@code BigDecimal.TWO} is JDK 19+; the build targets 17. */
+    protected static final BigDecimal TWO = BigDecimal.valueOf(2);
+
+    protected static void assertSameDouble(final double expected, final double actual, final String what) {
+        assertEquals(Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(actual), what + ": expected " + expected + " but was " + actual);
+    }
+
+    protected static final String UNNECESSARY_MESSAGE = "mode was UNNECESSARY, but rounding was necessary";
 }

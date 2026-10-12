@@ -18,24 +18,18 @@ import com.landawn.abacus.util.function.TriPredicate;
 public class FnNotTest extends FnTestSupport {
 
     @Test
-    public void testNotNull() {
-        assertFalse(Fn.notNull().test(null));
-        assertTrue(Fn.notNull().test("x"));
-        final Predicate<Map.Entry<String, String>> byValue = Fn.notNull(Map.Entry::getValue);
-        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "v")));
-        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", null)));
-        assertThrows(IllegalArgumentException.class, () -> Fn.notNull(null));
-    }
-
-    @Test
-    public void testNotEmpty() {
-        assertFalse(Fn.notEmpty().test(""));
-        assertFalse(Fn.notEmpty().test(null));
-        assertTrue(Fn.notEmpty().test("x"));
-        final Predicate<Map.Entry<String, String>> byValue = Fn.notEmpty(Map.Entry::getValue);
-        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "hello")));
-        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "")));
-        assertThrows(IllegalArgumentException.class, () -> Fn.notEmpty(null));
+    public void testNot() {
+        assertFalse(Fn.not((Predicate<String>) s -> s.startsWith("a")).test("abc"));
+        assertTrue(Fn.not((Predicate<String>) s -> s.startsWith("a")).test("xbc"));
+        final BiPredicate<Integer, Integer> notGreater = Fn.not((Integer a, Integer b) -> a > b);
+        assertTrue(notGreater.test(1, 2));
+        assertFalse(notGreater.test(3, 1));
+        final TriPredicate<Integer, Integer, Integer> notAllPositive = Fn.not((a, b, c) -> a > 0 && b > 0 && c > 0);
+        assertTrue(notAllPositive.test(1, -1, 1));
+        assertFalse(notAllPositive.test(1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.Predicate<Object>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.BiPredicate<Object, Object>) null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.not((TriPredicate<Object, Object, Object>) null));
     }
 
     @Test
@@ -47,6 +41,24 @@ public class FnNotTest extends FnTestSupport {
         assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "hello")));
         assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "  ")));
         assertThrows(IllegalArgumentException.class, () -> Fn.notBlank(null));
+    }
+
+    @Test
+    public void testNotContains() {
+        assertFalse(Fn.notContains("b").test("abc"));
+        assertTrue(Fn.notContains("z").test("abc"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.notContains(null));
+    }
+
+    @Test
+    public void testNotEmpty() {
+        assertFalse(Fn.notEmpty().test(""));
+        assertFalse(Fn.notEmpty().test(null));
+        assertTrue(Fn.notEmpty().test("x"));
+        final Predicate<Map.Entry<String, String>> byValue = Fn.notEmpty(Map.Entry::getValue);
+        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "hello")));
+        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", "")));
+        assertThrows(IllegalArgumentException.class, () -> Fn.notEmpty(null));
     }
 
     @Test
@@ -71,6 +83,13 @@ public class FnNotTest extends FnTestSupport {
     }
 
     @Test
+    public void testNotEndsWith() {
+        assertFalse(Fn.notEndsWith("bc").test("abc"));
+        assertTrue(Fn.notEndsWith("bc").test("abx"));
+        assertThrows(IllegalArgumentException.class, () -> Fn.notEndsWith(null));
+    }
+
+    @Test
     public void testNotEqual() {
         assertFalse(Fn.notEqual("a").test("a"));
         assertTrue(Fn.notEqual("a").test("b"));
@@ -89,6 +108,16 @@ public class FnNotTest extends FnTestSupport {
     }
 
     @Test
+    public void testNotNull() {
+        assertFalse(Fn.notNull().test(null));
+        assertTrue(Fn.notNull().test("x"));
+        final Predicate<Map.Entry<String, String>> byValue = Fn.notNull(Map.Entry::getValue);
+        assertTrue(byValue.test(new AbstractMap.SimpleEntry<>("k", "v")));
+        assertFalse(byValue.test(new AbstractMap.SimpleEntry<>("k", null)));
+        assertThrows(IllegalArgumentException.class, () -> Fn.notNull(null));
+    }
+
+    @Test
     public void testNotStartsWith() {
         assertFalse(Fn.notStartsWith("ab").test("abc"));
         assertTrue(Fn.notStartsWith("ab").test("xbc"));
@@ -96,32 +125,4 @@ public class FnNotTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.notStartsWith(null));
     }
 
-    @Test
-    public void testNotEndsWith() {
-        assertFalse(Fn.notEndsWith("bc").test("abc"));
-        assertTrue(Fn.notEndsWith("bc").test("abx"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.notEndsWith(null));
-    }
-
-    @Test
-    public void testNotContains() {
-        assertFalse(Fn.notContains("b").test("abc"));
-        assertTrue(Fn.notContains("z").test("abc"));
-        assertThrows(IllegalArgumentException.class, () -> Fn.notContains(null));
-    }
-
-    @Test
-    public void testNot() {
-        assertFalse(Fn.not((Predicate<String>) s -> s.startsWith("a")).test("abc"));
-        assertTrue(Fn.not((Predicate<String>) s -> s.startsWith("a")).test("xbc"));
-        final BiPredicate<Integer, Integer> notGreater = Fn.not((Integer a, Integer b) -> a > b);
-        assertTrue(notGreater.test(1, 2));
-        assertFalse(notGreater.test(3, 1));
-        final TriPredicate<Integer, Integer, Integer> notAllPositive = Fn.not((a, b, c) -> a > 0 && b > 0 && c > 0);
-        assertTrue(notAllPositive.test(1, -1, 1));
-        assertFalse(notAllPositive.test(1, 1, 1));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.Predicate<Object>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((java.util.function.BiPredicate<Object, Object>) null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.not((TriPredicate<Object, Object, Object>) null));
-    }
 }

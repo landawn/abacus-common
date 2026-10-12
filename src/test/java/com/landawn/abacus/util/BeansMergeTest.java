@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Test;
 
 public class BeansMergeTest extends BeansTestSupport {
 
+    // mergeInto
+
     @Test
     public void testMergeInto() {
         SimpleBean source = new SimpleBean("Jane", 30);
@@ -33,23 +35,21 @@ public class BeansMergeTest extends BeansTestSupport {
     }
 
     @Test
-    public void testMergeInto_MergeFunc() {
-        SimpleBean source = new SimpleBean("John", 10);
-        SimpleBean target = new SimpleBean("Jane", 20);
-        Beans.mergeInto(source, target, Fn.o((srcVal, tgtVal) -> {
-            if (srcVal instanceof Integer && tgtVal instanceof Integer) {
-                return ((Integer) srcVal) + ((Integer) tgtVal);
-            }
-            return srcVal;
-        }));
-        assertEquals("John", target.getName());
-        assertEquals(30, target.getAge());
+    public void testMergeInto_BuilderAndNullPreserving() {
+        BeansMutableFixture src = new BeansMutableFixture();
+        src.setA("x");
+        src.setB(7);
 
-        Address unmatched = new Address();
-        unmatched.setCity("NYC");
-        Address result = Beans.mergeInto(simpleBean, unmatched, Fn.o((srcVal, tgtVal) -> srcVal));
-        assertTrue(unmatched == result);
-        assertEquals("NYC", unmatched.getCity());
+        BeansMutableFixture target = new BeansMutableFixture();
+        target.setA("target");
+        Beans.mergeInto(src, target, CommonUtil.asList("a"), (BinaryOperator<Object>) (s, t) -> String.valueOf(s) + "+" + String.valueOf(t));
+        assertEquals("x+target", target.getA());
+        assertEquals(0, target.getB());
+
+        BeansMutableFixture t2 = new BeansMutableFixture();
+        t2.setA("keep");
+        Beans.mergeInto(new BeansMutableFixture(), t2);
+        assertEquals("keep", t2.getA());
     }
 
     @Test
@@ -102,6 +102,50 @@ public class BeansMergeTest extends BeansTestSupport {
 
         Address throwsTarget = new Address();
         assertThrows(IllegalArgumentException.class, () -> Beans.mergeInto(simpleBean, throwsTarget, false, (Set<String>) null));
+    }
+
+    @Test
+    public void testMergeInto_MergeFunc() {
+        SimpleBean source = new SimpleBean("John", 10);
+        SimpleBean target = new SimpleBean("Jane", 20);
+        Beans.mergeInto(source, target, Fn.o((srcVal, tgtVal) -> {
+            if (srcVal instanceof Integer && tgtVal instanceof Integer) {
+                return ((Integer) srcVal) + ((Integer) tgtVal);
+            }
+            return srcVal;
+        }));
+        assertEquals("John", target.getName());
+        assertEquals(30, target.getAge());
+
+        Address unmatched = new Address();
+        unmatched.setCity("NYC");
+        Address result = Beans.mergeInto(simpleBean, unmatched, Fn.o((srcVal, tgtVal) -> srcVal));
+        assertTrue(unmatched == result);
+        assertEquals("NYC", unmatched.getCity());
+    }
+
+
+
+    /**
+     * A {@code null} source is a no-op for every {@code mergeInto}/{@code mergeIntoIf} overload: the target is
+     * returned unchanged and its class is not inspected, so a non-bean target is not rejected either.
+     */
+    @Test
+    public void testMergeInto_NullSourceWithNonBeanTargetReturnsTargetUnchanged() {
+        final String target = "not a bean";
+
+        assertSame(target, Beans.mergeInto(null, target));
+        assertSame(target, Beans.mergeInto(null, target, (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, name -> name, (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, true, null));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x")));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name, (a, b) -> a));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, (a, b) -> a));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name, (a, b) -> a));
     }
 
     @Test
@@ -168,6 +212,8 @@ public class BeansMergeTest extends BeansTestSupport {
         assertEquals("TgtName", target.getName());
         assertEquals(25, target.getAge());
     }
+
+    // mergeIntoIf
 
     @Test
     public void testMergeIntoIf() {
@@ -236,43 +282,4 @@ public class BeansMergeTest extends BeansTestSupport {
                 () -> Beans.mergeIntoIf(simpleBean, new SimpleBean(), (propName, propValue) -> true, propName -> "__bad__", (srcVal, tgtVal) -> srcVal));
     }
 
-    @Test
-    public void testMergeInto_BuilderAndNullPreserving() {
-        BeansMutableFixture src = new BeansMutableFixture();
-        src.setA("x");
-        src.setB(7);
-
-        BeansMutableFixture target = new BeansMutableFixture();
-        target.setA("target");
-        Beans.mergeInto(src, target, CommonUtil.asList("a"), (BinaryOperator<Object>) (s, t) -> String.valueOf(s) + "+" + String.valueOf(t));
-        assertEquals("x+target", target.getA());
-        assertEquals(0, target.getB());
-
-        BeansMutableFixture t2 = new BeansMutableFixture();
-        t2.setA("keep");
-        Beans.mergeInto(new BeansMutableFixture(), t2);
-        assertEquals("keep", t2.getA());
-    }
-
-    /**
-     * A {@code null} source is a no-op for every {@code mergeInto}/{@code mergeIntoIf} overload: the target is
-     * returned unchanged and its class is not inspected, so a non-bean target is not rejected either.
-     */
-    @Test
-    public void testMergeInto_NullSourceWithNonBeanTargetReturnsTargetUnchanged() {
-        final String target = "not a bean";
-
-        assertSame(target, Beans.mergeInto(null, target));
-        assertSame(target, Beans.mergeInto(null, target, (a, b) -> a));
-        assertSame(target, Beans.mergeInto(null, target, name -> name, (a, b) -> a));
-        assertSame(target, Beans.mergeInto(null, target, true, null));
-        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x")));
-        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), (a, b) -> a));
-        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name));
-        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name, (a, b) -> a));
-        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true));
-        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, (a, b) -> a));
-        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name));
-        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name, (a, b) -> a));
-    }
 }

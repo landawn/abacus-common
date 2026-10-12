@@ -1,6 +1,6 @@
 package com.landawn.abacus.util;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

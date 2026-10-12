@@ -1822,7 +1822,7 @@ public class ClassUtilTest extends TestBase {
         final Method virtualMethod = Base.class.getDeclaredMethod("value");
         final MethodHandle virtualHandle = ClassUtil.createMethodHandle(virtualMethod);
 
-        assertEquals("derived", virtualHandle.invokeExact((Base) new Derived()));
+        assertEquals("derived", (String) virtualHandle.invokeExact((Base) new Derived()));
     }
 
     @Test

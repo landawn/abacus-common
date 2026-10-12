@@ -19,59 +19,7 @@ public class CharListContainsTest extends CharListTestSupport {
         assertFalse(list.contains('a'));
     }
 
-    @Test
-    public void testContainsAny() {
-        {
-            list = new CharList();
-            CharList list1 = CharList.of('a', 'b', 'c');
-            CharList list2 = CharList.of('c', 'd', 'e');
-            assertTrue(list1.containsAny(list2));
-
-            CharList list3 = CharList.of('x', 'y', 'z');
-            assertFalse(list1.containsAny(list3));
-        }
-        {
-            list = new CharList();
-            CharList list = CharList.of('a', 'b', 'c');
-            assertTrue(list.containsAny(new char[] { 'c', 'd' }));
-            assertFalse(list.containsAny(new char[] { 'x', 'y' }));
-        }
-        {
-            list = new CharList();
-            list.addAll(CharList.of('a', 'b', 'c'));
-            assertTrue(list.containsAny(CharList.of('c', 'd', 'e')));
-            assertFalse(list.containsAny(CharList.of('x', 'y', 'z')));
-        }
-    }
-
-    @Test
-    public void testContainsAny_LargeData() {
-        {
-            list = new CharList();
-            CharList large = new CharList();
-            for (int i = 0; i < 15; i++) {
-                large.add((char) ('a' + i % 4));
-            }
-            CharList query = CharList.of('a', 'x', 'y', 'z', 'w');
-            assertTrue(large.containsAny(query));
-        }
-        {
-            list = new CharList();
-            CharList large = new CharList();
-            for (int i = 0; i < 15; i++) {
-                large.add((char) ('a' + i % 4));
-            }
-            char[] query = { 'a', 'b' };
-            assertTrue(large.containsAny(query));
-        }
-    }
-
-    @Test
-    public void testContainsAny_Empty() {
-        CharList list1 = CharList.of('a', 'b', 'c');
-        CharList list2 = new CharList();
-        assertFalse(list1.containsAny(list2));
-    }
+    // containsAll
 
     @Test
     public void testContainsAll() {
@@ -108,6 +56,21 @@ public class CharListContainsTest extends CharListTestSupport {
     }
 
     @Test
+    public void testContainsAll_Empty() {
+        {
+            list = new CharList();
+            CharList a = new CharList();
+            CharList b = CharList.of('a');
+            assertFalse(a.containsAll(b));
+        }
+        {
+            list = new CharList();
+            list.add('a');
+            assertTrue(list.containsAll(new char[] {}));
+        }
+    }
+
+    @Test
     public void testContainsAll_LargeData() {
         {
             list = new CharList();
@@ -127,18 +90,59 @@ public class CharListContainsTest extends CharListTestSupport {
         }
     }
 
+    // containsAny
+
     @Test
-    public void testContainsAll_Empty() {
+    public void testContainsAny() {
         {
             list = new CharList();
-            CharList a = new CharList();
-            CharList b = CharList.of('a');
-            assertFalse(a.containsAll(b));
+            CharList list1 = CharList.of('a', 'b', 'c');
+            CharList list2 = CharList.of('c', 'd', 'e');
+            assertTrue(list1.containsAny(list2));
+
+            CharList list3 = CharList.of('x', 'y', 'z');
+            assertFalse(list1.containsAny(list3));
         }
         {
             list = new CharList();
-            list.add('a');
-            assertTrue(list.containsAll(new char[] {}));
+            CharList list = CharList.of('a', 'b', 'c');
+            assertTrue(list.containsAny(new char[] { 'c', 'd' }));
+            assertFalse(list.containsAny(new char[] { 'x', 'y' }));
+        }
+        {
+            list = new CharList();
+            list.addAll(CharList.of('a', 'b', 'c'));
+            assertTrue(list.containsAny(CharList.of('c', 'd', 'e')));
+            assertFalse(list.containsAny(CharList.of('x', 'y', 'z')));
+        }
+    }
+
+    @Test
+    public void testContainsAny_Empty() {
+        CharList list1 = CharList.of('a', 'b', 'c');
+        CharList list2 = new CharList();
+        assertFalse(list1.containsAny(list2));
+    }
+
+    @Test
+    public void testContainsAny_LargeData() {
+        {
+            list = new CharList();
+            CharList large = new CharList();
+            for (int i = 0; i < 15; i++) {
+                large.add((char) ('a' + i % 4));
+            }
+            CharList query = CharList.of('a', 'x', 'y', 'z', 'w');
+            assertTrue(large.containsAny(query));
+        }
+        {
+            list = new CharList();
+            CharList large = new CharList();
+            for (int i = 0; i < 15; i++) {
+                large.add((char) ('a' + i % 4));
+            }
+            char[] query = { 'a', 'b' };
+            assertTrue(large.containsAny(query));
         }
     }
 
@@ -153,4 +157,5 @@ public class CharListContainsTest extends CharListTestSupport {
     public void testContainsDuplicates_Empty() {
         assertFalse(list.containsDuplicates());
     }
+
 }

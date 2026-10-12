@@ -38,6 +38,7 @@ import com.landawn.abacus.TestBase;
  *
  * <p>Each test is named after the finding it locks down and fails against the pre-fix code.</p>
  */
+@Timeout(value = 60, unit = TimeUnit.SECONDS)
 public class CsvAsyncReflectTest extends TestBase {
 
     @TempDir
@@ -545,13 +546,4 @@ public class CsvAsyncReflectTest extends TestBase {
         assertEquals("http://x?a+b", URLEncodedUtil.encode("http://x", "a b"));
     }
 
-    // ------------------------------------------------------------------------------------------------
-    // Timeout guard: none of the above may hang.
-    // ------------------------------------------------------------------------------------------------
-
-    @Test
-    @Timeout(value = 60, unit = TimeUnit.SECONDS)
-    public void guard_suiteDoesNotHang() {
-        assertTrue(true);
-    }
 }

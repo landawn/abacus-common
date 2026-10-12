@@ -36,6 +36,92 @@ import com.landawn.abacus.util.stream.Collectors;
 public class SeqTest extends SeqTestSupport {
 
     @Test
+    public void testSlicingPreservesBulkAdvanceAndZeroConsumptionLaziness() {
+        try (Seq<Integer, RuntimeException> source = Seq.<Integer, RuntimeException> repeat(7, Long.MAX_VALUE);
+             Seq<Integer, RuntimeException> slice = source.limit(Long.MAX_VALUE).skip(Long.MAX_VALUE - 1)) {
+            Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
+            assertTrue(iterator.supportsFailureAtomicAdvance(), "huge arithmetic slices must retain bulk advancement");
+            iterator.advance(1);
+            assertFalse(iterator.hasNext());
+        }
+
+        try (Seq<Integer, RuntimeException> source = Seq.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE);
+             Seq<Integer, RuntimeException> slice = source.skip(4_294_967_294L).limit(2)) {
+            Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
+            assertTrue(iterator.supportsFailureAtomicAdvance());
+            iterator.advance(1);
+            assertEquals(Integer.MAX_VALUE, iterator.next());
+            assertFalse(iterator.hasNext());
+        }
+
+        AtomicInteger initialized = new AtomicInteger();
+        Throwables.Iterator<Integer, RuntimeException> deferred = Throwables.Iterator.defer(() -> {
+            initialized.incrementAndGet();
+            return Throwables.Iterator.of(1, 2);
+        });
+        try (Seq<Integer, RuntimeException> slice = Seq.of(deferred).limit(0).skip(1)) {
+            slice.iteratorEx().advance(0);
+            assertFalse(slice.iteratorEx().hasNext());
+            assertEquals(0, initialized.get());
+        }
+        assertEquals(0, initialized.get());
+    }
+
+    @Test
+    public void testAverageIntPreservesExtremeIntegerTotals() throws Exception {
+        assertEquals(-0.5, Seq.of(Integer.MIN_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
+        assertEquals(Integer.MAX_VALUE, Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
+        assertTrue(Seq.<Integer, Exception> empty().averageInt(value -> value).isEmpty());
+    }
+
+    @Test
+    public void testBufferedIsFasterThanUnbuffered() throws Exception {
+        final int millisToSleep = 50;
+        final int elementCount = 6;
+        long start = System.currentTimeMillis();
+        Seq.range(0, elementCount).delay(Duration.ofMillis(millisToSleep)).buffered().map(it -> it * 2).delay(Duration.ofMillis(millisToSleep)).toList();
+        assertTrue(System.currentTimeMillis() - start < millisToSleep * elementCount * 2);
+    }
+
+    @Test
+    public void testChainedOperationsAndLifecycle() throws Exception {
+        assertEquals(Arrays.asList(12, 8),
+                Seq.of(1, 2, 3, 4, 5, 6).filter(x -> x % 2 == 0).map(x -> x * 2).sorted(Comparator.reverseOrder()).limit(2).toList());
+        assertEquals(Arrays.asList(null, 1, null, 2, null).stream().filter(java.util.Objects::nonNull).toList(),
+                Seq.of(null, 1, null, 2, null).skipNulls().toList());
+        AtomicInteger closed = new AtomicInteger();
+        try (Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(closed::incrementAndGet)) {
+            assertEquals(3, seq.count());
+        }
+        assertEquals(1, closed.get());
+        Seq<Integer, Exception> used = Seq.of(1, 2, 3);
+        used.toList();
+        assertThrows(IllegalStateException.class, used::toList);
+        Throwables.Iterator<Integer, Exception> iter = Seq.of(1, 2).iteratorEx();
+        iter.next();
+        iter.next();
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).step(0));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).buffered(0));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).rateLimited(0.0));
+    }
+
+    @Test
+    public void testClosedStatePrecedesNullFunctionalArgUse() {
+        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
+        seq.close();
+
+        assertThrows(IllegalStateException.class, () -> seq.rateLimited(0));
+        assertThrows(IllegalStateException.class, () -> seq.delay((java.time.Duration) null));
+        assertThrows(IllegalStateException.class, () -> seq.sortedByInt(null));
+        assertThrows(IllegalStateException.class, () -> seq.hasMatchCountBetween(-1, -1, null));
+        assertThrows(IllegalStateException.class, () -> seq.skipUntil(null));
+        assertThrows(IllegalStateException.class, () -> seq.throwIfEmpty(null));
+        assertThrows(IllegalStateException.class, () -> seq.transform(null));
+        assertDoesNotThrow(seq::close);
+    }
+
+    @Test
     public void testConstructionErrorClosesEveryOwnedSourceAndPreservesIdentity() throws Exception {
         for (int variant = 0; variant < 8; variant++) {
             for (boolean cleanupRethrowsPrimary : new boolean[] { false, true }) {
@@ -101,6 +187,95 @@ public class SeqTest extends SeqTestSupport {
         }
     }
 
+    // concat
+
+    @Test
+    public void testConcat() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.concat(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.concat(new Integer[] { 1, 2, 3 }, null, new Integer[] { 4, 5 }).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Arrays.asList("a", "b"), Arrays.asList("c", "d")).toList());
+        assertTrue(Seq.concat((Iterable<String>) null, (Iterable<String>) null).toList().isEmpty());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Arrays.asList("a", "b").iterator(), Arrays.asList("c", "d").iterator()).toList());
+        AtomicBoolean s1Closed = new AtomicBoolean();
+        AtomicBoolean s2Closed = new AtomicBoolean();
+        assertEquals(Arrays.asList("a", "b", "c", "d"),
+                Seq.concat(Seq.of("a", "b").onClose(() -> s1Closed.set(true)), Seq.of("c", "d").onClose(() -> s2Closed.set(true))).toList());
+        assertTrue(s1Closed.get() && s2Closed.get());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), Seq.concat(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5 }, new Integer[] { 6, 7, 8 }).toList());
+    }
+
+    @Test
+    public void test_concat_closeRepeatedFailureDoesNotSkipLaterSources() {
+        RuntimeException repeatedFailure = new RuntimeException("repeated close failure");
+        AtomicInteger laterCloseCalls = new AtomicInteger();
+        Seq<Integer, Exception> first = Seq.<Integer, Exception> of(1).onClose(() -> {
+            throw repeatedFailure;
+        });
+        Seq<Integer, Exception> second = Seq.<Integer, Exception> of(2).onClose(() -> {
+            throw repeatedFailure;
+        });
+        Seq<Integer, Exception> third = Seq.<Integer, Exception> of(3).onClose(laterCloseCalls::incrementAndGet);
+        Seq<Integer, Exception> concatenated = Seq.concat(first, second, third);
+
+        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::close);
+
+        assertSame(repeatedFailure, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, laterCloseCalls.get());
+    }
+
+    @Test
+    public void test_concat_collectionSnapshotPreservesTraversalAndClosing() throws Exception {
+        AtomicInteger closeCount = new AtomicInteger();
+        Seq<Integer, Exception> source = Seq.<Integer, Exception> of(1, 2).onClose(closeCount::incrementAndGet);
+        List<Seq<Integer, Exception>> sources = new ArrayList<>();
+        sources.add(source);
+
+        Seq<Integer, Exception> concatenated = Seq.concat(sources);
+        sources.clear();
+
+        assertEquals(Arrays.asList(1, 2), concatenated.toList());
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testConcatSeqsReusedAfterConsumptionThrows() throws Exception {
+        final Seq<String, Exception> seq1 = Seq.of("a", "b");
+        final Seq<String, Exception> seq2 = Seq.of("c", "d");
+
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(seq1, seq2).toList());
+
+        // Consuming the concatenation closed seq1 and seq2, so they cannot be concatenated again.
+        assertThrows(IllegalStateException.class, () -> Seq.concat(seq1, null, seq2).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Seq.<String, Exception> of("a", "b"), null, Seq.<String, Exception> of("c", "d")).toList());
+    }
+
+    @Test
+    public void testConcurrentCloseHandling() throws Exception {
+        boolean[] handler1Called = { false };
+        boolean[] handler2Called = { false };
+
+        Seq<String, Exception> seq = Seq.of("test").onClose(() -> {
+            handler1Called[0] = true;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }).onClose(() -> handler2Called[0] = true);
+
+        Thread t1 = new Thread(seq::close);
+        Thread t2 = new Thread(seq::close);
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        assertTrue(handler1Called[0]);
+        assertTrue(handler2Called[0]);
+    }
+
     @Test
     public void testConstructionFailurePreservesPrimaryWhenClosingThrowsError() {
         for (int variant = 0; variant < 6; variant++) {
@@ -154,95 +329,270 @@ public class SeqTest extends SeqTestSupport {
     }
 
     @Test
-    public void testSlidingCountPreservesExactCountWhenPrefixPlusRemainingExceedsLongMaxValue() throws Exception {
-        for (final int[] settings : new int[][] { { 2, 1 }, { 3, 1 }, { 3, 2 }, { 5, 3 } }) {
-            final int windowSize = settings[0];
-            final int increment = settings[1];
-            final long expected = java.math.BigInteger.valueOf(Long.MAX_VALUE)
-                    .add(java.math.BigInteger.valueOf(increment - 1))
-                    .divide(java.math.BigInteger.valueOf(increment))
-                    .longValueExact();
+    public void testOptimizedIteratorCountExhaustsRemainingElements() throws Exception {
+        final Throwables.Iterator<String, Exception> partiallyConsumed = Seq.<String, Exception> of("a", "b", "c").iteratorEx();
+        assertEquals("a", partiallyConsumed.next());
+        assertEquals(2, partiallyConsumed.count());
+        assertFalse(partiallyConsumed.hasNext());
 
-            for (boolean collector : new boolean[] { false, true }) {
-                Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
-                    private int cursor;
-                    private java.math.BigInteger remaining = java.math.BigInteger.valueOf(Long.MAX_VALUE).add(java.math.BigInteger.valueOf(windowSize));
+        assertIteratorCountExhausts(Seq.<Boolean, Exception> of(true, false), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new boolean[] { true, false }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new char[] { 'a', 'b' }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new byte[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new short[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new int[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new long[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new float[] { 1, 2 }), 2);
+        assertIteratorCountExhausts(Seq.<Exception> of(new double[] { 1, 2 }), 2);
 
-                    @Override
-                    public boolean hasNext() {
-                        return remaining.signum() > 0;
+        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, true, Pair::of), 3);
+        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, false, Pair::of), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).reversed(), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).rotated(1), 3);
+        assertIteratorCountExhausts(Seq.<Integer, Exception> of(3, 1, 2).sorted(), 3);
+    }
+
+    @Test
+    public void testCountBy() throws Exception {
+        Map<Integer, Integer> counts = Seq.of("a", "bb", "c", "dd").countBy(String::length).toMap(Map.Entry::getKey, Map.Entry::getValue);
+        assertEquals(Integer.valueOf(2), counts.get(1));
+        assertEquals(Integer.valueOf(2), counts.get(2));
+    }
+
+    @Test
+    public void testCycled() throws Exception {
+        assertEquals(Arrays.asList("a", "b", "a", "b", "a"), Seq.of("a", "b").cycled().limit(5).toList());
+        assertEquals(Arrays.asList("a", "b", "a", "b"), Seq.of("a", "b").cycled(2).toList());
+        assertTrue(Seq.of("a").cycled(0).toList().isEmpty());
+    }
+
+    @Test
+    public void testDefaultIfEmpty() throws Exception {
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).defaultIfEmpty(9).toList());
+        assertEquals(Collections.singletonList(9), Seq.<Integer, Exception> empty().defaultIfEmpty(9).toList());
+        assertEquals(Arrays.asList(9, 8), Seq.<Integer, Exception> empty().defaultIfEmpty(() -> Seq.of(9, 8)).toList());
+        assertEquals(Arrays.asList(1), Seq.of(1).defaultIfEmpty(() -> Seq.of(9)).toList());
+    }
+
+    // defer
+
+
+
+    // G143: a self-returning supplier fails with IllegalStateException instead of recursing; a null supplier result is still an
+    // empty sequence. G149: the failure is final - iterating on after it does not invoke the supplier again (a second terminal
+    // operation only fails because the first one closed the sequence).
+    @Test
+    public void testDefer_selfReturningSupplierIsInvokedOnceAndNullIsEmpty() {
+        final int[] calls = new int[1];
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] self = new Seq[1];
+        self[0] = Seq.defer(() -> {
+            calls[0]++;
+            return self[0];
+        });
+
+        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertTrue(first.getMessage().contains("deferred sequence itself"), first.getMessage());
+        final IllegalStateException second = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertTrue(second.getMessage().contains("closed"), second.getMessage());
+        org.junit.jupiter.api.Assertions.assertEquals(1, calls[0]);
+
+        final int[] iterCalls = new int[1];
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] iterSelf = new Seq[1];
+        iterSelf[0] = Seq.defer(() -> {
+            iterCalls[0]++;
+            return iterSelf[0];
+        });
+        final Throwables.Iterator<Object, RuntimeException> iter = iterSelf[0].iteratorEx();
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(1, iterCalls[0]);
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, Seq.<Object, RuntimeException> defer(() -> null).count());
+    }
+
+
+
+    // G142: Seq.defer fails with IllegalStateException when the supplier returns the deferred sequence itself (it flat-mapped
+    // into itself until StackOverflowError), as Stream.defer does; an ordinary supplier is unaffected.
+    @Test
+    public void testDefer_supplierReturningTheDeferredSequenceItself() {
+        @SuppressWarnings("unchecked")
+        final Seq<Object, RuntimeException>[] self = new Seq[1];
+        self[0] = Seq.defer(() -> self[0]);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(1, 2), Seq.<Integer, RuntimeException> defer(() -> Seq.of(1, 2)).toList());
+    }
+
+    @Test
+    public void testSlicingRetriesDeferredSourceInitialization() {
+        for (boolean nullFirst : new boolean[] { false, true }) {
+            AtomicInteger attempts = new AtomicInteger();
+            Throwables.Iterator<Integer, RuntimeException> deferred = Throwables.Iterator.defer(() -> {
+                if (attempts.incrementAndGet() == 1) {
+                    if (nullFirst) {
+                        return null;
                     }
-
-                    @Override
-                    public Integer next() {
-                        if (!hasNext()) {
-                            throw new NoSuchElementException();
-                        }
-                        remaining = remaining.subtract(java.math.BigInteger.ONE);
-                        return ++cursor;
-                    }
-
-                    @Override
-                    public long count() {
-                        final long result = remaining.longValueExact();
-                        remaining = java.math.BigInteger.ZERO;
-                        return result;
-                    }
-                };
-
-                try (Seq<? extends List<Integer>, Exception> windows = collector ? Seq.of(source).sliding(windowSize, increment, Collectors.toList())
-                        : Seq.of(source).sliding(windowSize, increment, ArrayList::new)) {
-                    Throwables.Iterator<? extends List<Integer>, Exception> iter = windows.iteratorEx();
-                    assertEquals(windowSize, iter.next().size());
-                    assertEquals(expected, iter.count());
-                    assertFalse(iter.hasNext());
-                    assertEquals(0, iter.count());
+                    throw new IllegalStateException("source creation failed");
                 }
+                return Throwables.Iterator.of(1, 2, 3, 4);
+            });
+            try (Seq<Integer, RuntimeException> slice = Seq.of(deferred).skip(2).limit(1)) {
+                Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
+                assertThrows(IllegalStateException.class, iterator::hasNext);
+                assertEquals(Arrays.asList(3), iterator.toList());
+                assertEquals(2, attempts.get());
             }
         }
     }
 
     @Test
-    public void testSkipAndLimitHonorsLongMaxValueForUnboundedSource() throws Exception {
-        for (long offset : new long[] { 0, 1 }) {
-            List<Long> advances = new ArrayList<>();
-            Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
+    public void testDifferenceMapperSupportsCheckedException() {
+        final java.io.IOException failure = new java.io.IOException("mapper failure");
+        final Seq<Integer, java.io.IOException> seq = Seq.<Integer, java.io.IOException> of(1, 2, 3);
+
+        final java.io.IOException thrown = assertThrows(java.io.IOException.class,
+                () -> seq.difference((Throwables.Function<Integer, Integer, java.io.IOException>) value -> {
+                    throw failure;
+                }, Arrays.asList(1, 2)).toList());
+
+        org.junit.jupiter.api.Assertions.assertSame(failure, thrown);
+    }
+
+    @Test
+    public void testDistinct() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 2, 3, 1).distinct().toList());
+        assertEquals(Arrays.asList("a", null, "b", "c"), Seq.of("a", null, "b", null, "c").distinct().toList());
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 1, 2, 2, 3).distinct((a, b) -> a).toList());
+        assertEquals(Arrays.asList("a", "bb"), Seq.of("a", "b", "bb", "cc").distinctBy(String::length).toList());
+        assertEquals(Arrays.asList("a", "bb"), Seq.of("a", "bb", "c", "dd").distinctBy(s -> s.length() == 1 ? null : s.length()).toList());
+        assertEquals(Arrays.asList("apple"), Seq.of("apple", "apricot", "avocado").distinctBy(s -> s.charAt(0), (a, b) -> a).toList());
+    }
+
+    @Test
+    public void testDropWhile() throws Exception {
+        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).dropWhile(x -> x < 3).toList());
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).dropWhile(x -> x > 10).toList());
+        List<Integer> dropped = new ArrayList<>();
+        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).dropWhile(x -> x < 4, dropped::add).toList());
+        assertEquals(Arrays.asList(1, 2, 3), dropped);
+    }
+
+    @Test
+    public void testDropWhileContinuesDroppingAfterFailure() {
+        for (boolean predicateFailure : new boolean[] { false, true }) {
+            AtomicBoolean failed = new AtomicBoolean();
+            AtomicInteger delivered = new AtomicInteger();
+            IllegalStateException failure = new IllegalStateException("drop failed");
+            Seq<Integer, RuntimeException> source = Seq.of(new Throwables.Iterator<Integer, RuntimeException>() {
                 @Override
                 public boolean hasNext() {
-                    return true;
+                    return delivered.get() < 4;
                 }
 
                 @Override
                 public Integer next() {
-                    return 1;
+                    if (!predicateFailure && delivered.get() == 1 && failed.compareAndSet(false, true)) {
+                        throw failure;
+                    }
+                    return delivered.incrementAndGet();
                 }
+            });
 
-                @Override
-                public boolean supportsFailureAtomicAdvance() {
-                    return true;
+            try (Seq<Integer, RuntimeException> stream = source.dropWhile(value -> {
+                if (predicateFailure && value == 2 && failed.compareAndSet(false, true)) {
+                    throw failure;
                 }
-
-                @Override
-                public void advance(final long n) {
-                    advances.add(n);
-                }
-            };
-
-            try (Seq<Integer, Exception> limited = Seq.of(source).skipAndLimit(offset, Long.MAX_VALUE)) {
-                Throwables.Iterator<Integer, Exception> iter = limited.iteratorEx();
-                iter.advance(Long.MAX_VALUE);
-                assertFalse(iter.hasNext());
-                assertThrows(NoSuchElementException.class, iter::next);
-                assertEquals(offset == 0 ? List.of(Long.MAX_VALUE) : List.of(offset, Long.MAX_VALUE), advances);
+                return value < 3;
+            })) {
+                Throwables.Iterator<Integer, RuntimeException> iterator = stream.iteratorEx();
+                assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+                assertEquals(Arrays.asList(3, 4), iterator.toList());
             }
         }
     }
 
     @Test
-    public void testAverageIntPreservesExtremeIntegerTotals() throws Exception {
-        assertEquals(-0.5, Seq.of(Integer.MIN_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
-        assertEquals(Integer.MAX_VALUE, Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
-        assertTrue(Seq.<Integer, Exception> empty().averageInt(value -> value).isEmpty());
+    public void testEmpty() throws Exception {
+        assertEquals(0, Seq.empty().count());
+        assertTrue(Seq.<Integer, Exception> empty().toList().isEmpty());
+        assertFalse(Seq.<Integer, Exception> empty().first().isPresent());
+        assertTrue(Seq.<Integer, Exception> empty().filter(n -> n > 0).toList().isEmpty());
+        assertTrue(Seq.<Integer, Exception> empty().map(Object::toString).toList().isEmpty());
+        Seq<Integer, Exception> empty = Seq.empty();
+        assertTrue(empty.filter(n -> n > 0).toList().isEmpty());
+        assertThrows(IllegalStateException.class, () -> empty.map(Object::toString));
+    }
+
+    @Test
+    public void testEmptySequenceCannotBeReusedAcrossPipelines() throws Exception {
+        Seq<Integer, Exception> empty = Seq.empty();
+
+        Assertions.assertTrue(empty.filter(n -> n > 0).toList().isEmpty());
+        // Deriving again from a source that a terminal operation has already closed is rejected, rather than
+        // silently answering over an exhausted iterator.
+        assertThrows(IllegalStateException.class, () -> empty.map(Object::toString));
+    }
+
+    @Test
+    public void testFilter() throws Exception {
+        assertEquals(Arrays.asList(2, 4), Seq.of(1, 2, 3, 4).filter(x -> x % 2 == 0).toList());
+        assertEquals(Arrays.asList("a", "b"), Seq.of("a", null, "b").filter(s -> s != null).toList());
+        List<Integer> dropped = new ArrayList<>();
+        assertEquals(Arrays.asList(2, 4), Seq.of(1, 2, 3, 4).filter(x -> x % 2 == 0, dropped::add).toList());
+        assertEquals(Arrays.asList(1, 3), dropped);
+        assertArrayEquals(new String[] { "c", "d", "e" }, Seq.of("a", "b", "c", "d", "e").filter(s -> s.compareTo("c") >= 0).toArray(String[]::new));
+    }
+
+    @Test
+    public void testFirstMappingWaitsForSuccessfulSourceRead() {
+        for (boolean mapElse : new boolean[] { false, true }) {
+            AtomicInteger attempts = new AtomicInteger();
+            AtomicInteger delivered = new AtomicInteger();
+            IllegalStateException failure = new IllegalStateException("source failed");
+            Seq<Integer, RuntimeException> source = Seq.of(new Throwables.Iterator<Integer, RuntimeException>() {
+                @Override
+                public boolean hasNext() {
+                    return delivered.get() < 2;
+                }
+
+                @Override
+                public Integer next() {
+                    if (attempts.getAndIncrement() == 0) {
+                        throw failure;
+                    }
+                    return delivered.incrementAndGet();
+                }
+            });
+
+            try (Seq<Integer, RuntimeException> mapped = mapElse ? source.mapFirstOrElse(value -> value * 10, value -> value * 100)
+                    : source.mapFirst(value -> value * 10)) {
+                Throwables.Iterator<Integer, RuntimeException> iterator = mapped.iteratorEx();
+                assertSame(failure, assertThrows(IllegalStateException.class, iterator::next));
+                assertEquals(10, iterator.next());
+                assertEquals(mapElse ? 200 : 2, iterator.next());
+                assertFalse(iterator.hasNext());
+            }
+        }
+    }
+
+    @Test
+    public void testFlatMap() throws Exception {
+        assertEquals(Arrays.asList(1, 10, 2, 20), Seq.of(1, 2).flatMap(x -> Seq.of(x, x * 10)).toList());
+        assertEquals(Arrays.asList(1, 2, 2, 3), Seq.of(1, 2).flatmap(x -> Arrays.asList(x, x + 1)).toList());
+        assertEquals(Arrays.asList(1, 3), Seq.of(1, 2, 3).flatMap(x -> x == 2 ? null : Seq.of(x)).toList());
+        assertTrue(Seq.of(1, 2).flatMap(x -> Seq.<Integer, Exception> empty()).toList().isEmpty());
+        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), Seq.of(1, 2, 3).flatMapArray(x -> new Integer[] { x, x * 10 }).toList());
+        assertEquals(Arrays.asList(1, 3, 30, 300),
+                Seq.of(1, 2, 3).flatMapArray(n -> n == 1 ? new Integer[] { n } : n == 2 ? new Integer[0] : new Integer[] { n, n * 10, n * 100 }).toList());
+        assertEquals(Arrays.asList(1, 3), Seq.of(1, 2, 3).flatMapArray(n -> n == 2 ? null : new Integer[] { n }).toList());
+        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
+        closed.close();
+        assertThrows(IllegalStateException.class, () -> closed.flatMapArray(n -> new Integer[] { n }));
+        assertEquals(Arrays.asList("aa", "bb"), Seq.of("a", null, "b").flatmapIfNotNull(s -> Arrays.asList(s + s)).toList());
+        assertEquals(Arrays.asList("a1", "a2"), Seq.of("a", null).flatmapIfNotNull(s -> Arrays.asList(s), s -> Arrays.asList(s + "1", s + "2")).toList());
     }
 
     @Test
@@ -290,880 +640,50 @@ public class SeqTest extends SeqTestSupport {
         assertEquals(3, Seq.of("same", "same", "same").toMultiset().getCount("same"));
     }
 
+    // groupTo
+
+
+
+    // G071-01: groupTo(.., downstream, mapFactory) finished the groups with entry.setValue, which a map with
+    // immutable entry views (ConcurrentSkipListMap) rejects; Stream.groupTo accepts the same map.
     @Test
-    public void testIterableZipObtainsIteratorsBeforeLazyTraversal() throws Exception {
-        for (int variant = 0; variant < 4; variant++) {
-            AtomicInteger created = new AtomicInteger();
-            AtomicInteger pulled = new AtomicInteger();
-            AtomicInteger mapped = new AtomicInteger();
-            Iterable<Integer> source = () -> {
-                created.incrementAndGet();
-                return new java.util.Iterator<>() {
-                    private int remaining = 2;
+    public void testGroupTo_collectorWithConcurrentSkipListMapFactory() throws Exception {
+        final java.util.concurrent.ConcurrentSkipListMap<Integer, Long> counts = Seq.of("a", "bb", "cc")
+                .groupTo(String::length, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new);
+        assertEquals("{1=1, 2=2}", counts.toString());
 
-                    @Override
-                    public boolean hasNext() {
-                        return remaining > 0;
-                    }
+        final java.util.concurrent.ConcurrentSkipListMap<Integer, String> joined = Seq.of("a", "bb", "cc")
+                .groupTo(String::length, s -> s.toUpperCase(), Collectors.joining(","), java.util.concurrent.ConcurrentSkipListMap::new);
+        assertEquals("{1=A, 2=BB,CC}", joined.toString());
 
-                    @Override
-                    public Integer next() {
-                        if (!hasNext()) {
-                            throw new NoSuchElementException();
-                        }
-                        pulled.incrementAndGet();
-                        return remaining--;
-                    }
-                };
-            };
-            Throwables.BiFunction<Integer, Integer, Integer, Exception> pair = (a, b) -> {
-                mapped.incrementAndGet();
-                return a + b;
-            };
-            Throwables.TriFunction<Integer, Integer, Integer, Integer, Exception> triple = (a, b, c) -> {
-                mapped.incrementAndGet();
-                return a + b + c;
-            };
-            Seq<Integer, Exception> zipped;
-            switch (variant) {
-                case 0:
-                    zipped = Seq.zip(source, source, pair);
-                    break;
-                case 1:
-                    zipped = Seq.zip(source, source, source, triple);
-                    break;
-                case 2:
-                    zipped = Seq.zip(source, source, 0, 0, pair);
-                    break;
-                default:
-                    zipped = Seq.zip(source, source, source, 0, 0, 0, triple);
-                    break;
-            }
-            int arity = variant % 2 == 0 ? 2 : 3;
-            try (zipped) {
-                assertEquals(arity, created.get());
-                assertEquals(0, pulled.get());
-                assertEquals(0, mapped.get());
-                assertEquals(Arrays.asList(2 * arity, arity), zipped.toList());
-                assertEquals(2 * arity, pulled.get());
-                assertEquals(2, mapped.get());
-            }
-        }
+        // An empty sequence still accepts an immutable (empty) map from the factory.
+        final Map<Integer, Long> empty = Seq.<String, Exception> empty()
+                .groupTo(String::length, Collectors.counting(), () -> ImmutableMap.<Integer, Long> empty());
+        assertTrue(empty.isEmpty());
     }
 
+
+
+    // groupTo(.., downstream, mapFactory): a failing finisher still propagates its own exception through the replaceAll
+    // pass (HashMap and ConcurrentSkipListMap), and a null finisher result is kept by a HashMap.
     @Test
-    public void testMapLastChecksAvailabilityWithoutPullingFollowingElement() {
-        AtomicInteger pulled = new AtomicInteger();
-        AtomicInteger mapped = new AtomicInteger();
-        Throwables.Iterator<Integer, RuntimeException> source = new Throwables.Iterator<>() {
-            private int next = 1;
+    public void testGroupTo_finisherFailureAndNullResult() throws Exception {
+        assertThrows(IllegalStateException.class,
+                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
+                    throw new IllegalStateException("finisher");
+                }), java.util.HashMap::new));
+        assertThrows(IllegalStateException.class,
+                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
+                    throw new IllegalStateException("finisher");
+                }), java.util.concurrent.ConcurrentSkipListMap::new));
 
-            @Override
-            public boolean hasNext() {
-                return next <= 3;
-            }
-
-            @Override
-            public Integer next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                pulled.incrementAndGet();
-                return next++;
-            }
-        };
-        try (Seq<Integer, RuntimeException> seq = Seq.of(source).mapLast(value -> {
-            mapped.incrementAndGet();
-            return value * 10;
-        })) {
-            Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
-            assertEquals(1, iterator.next());
-            assertEquals(1, pulled.get());
-            assertEquals(0, mapped.get());
-            assertEquals(2, iterator.next());
-            assertEquals(2, pulled.get());
-            assertEquals(0, mapped.get());
-            assertEquals(30, iterator.next());
-            assertEquals(3, pulled.get());
-            assertEquals(1, mapped.get());
-            assertFalse(iterator.hasNext());
-        }
+        final Map<Integer, Object> nulls = Seq.of("a", "bb")
+                .groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> null), java.util.HashMap::new);
+        assertEquals(2, nulls.size());
+        assertTrue(nulls.containsKey(1) && nulls.get(1) == null && nulls.containsKey(2) && nulls.get(2) == null);
     }
 
-    @Test
-    public void testIfEmptyRetriesSourceInspectionAndRunsActionOnce() {
-        for (boolean actionFails : new boolean[] { false, true }) {
-            AtomicInteger inspections = new AtomicInteger();
-            AtomicInteger actions = new AtomicInteger();
-            Throwables.Iterator<Integer, RuntimeException> source = new Throwables.Iterator<>() {
-                @Override
-                public boolean hasNext() {
-                    if (inspections.getAndIncrement() == 0) {
-                        throw new IllegalStateException("empty source inspection failed");
-                    }
-                    return false;
-                }
 
-                @Override
-                public Integer next() {
-                    throw new NoSuchElementException();
-                }
-            };
-            try (Seq<Integer, RuntimeException> seq = Seq.of(source).ifEmpty(() -> {
-                actions.incrementAndGet();
-                if (actionFails) {
-                    throw new IllegalArgumentException("empty action failed");
-                }
-            })) {
-                Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
-                assertThrows(IllegalStateException.class, iterator::hasNext);
-                assertEquals(0, actions.get());
-                if (actionFails) {
-                    assertThrows(IllegalArgumentException.class, iterator::hasNext);
-                } else {
-                    assertFalse(iterator.hasNext());
-                }
-                assertFalse(iterator.hasNext());
-                assertEquals(1, actions.get());
-                assertThrows(NoSuchElementException.class, iterator::next);
-            }
-        }
-    }
-
-    @Test
-    public void testSlicingRetriesDeferredSourceInitialization() {
-        for (boolean nullFirst : new boolean[] { false, true }) {
-            AtomicInteger attempts = new AtomicInteger();
-            Throwables.Iterator<Integer, RuntimeException> deferred = Throwables.Iterator.defer(() -> {
-                if (attempts.incrementAndGet() == 1) {
-                    if (nullFirst) {
-                        return null;
-                    }
-                    throw new IllegalStateException("source creation failed");
-                }
-                return Throwables.Iterator.of(1, 2, 3, 4);
-            });
-            try (Seq<Integer, RuntimeException> slice = Seq.of(deferred).skip(2).limit(1)) {
-                Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
-                assertThrows(IllegalStateException.class, iterator::hasNext);
-                assertEquals(Arrays.asList(3), iterator.toList());
-                assertEquals(2, attempts.get());
-            }
-        }
-    }
-
-    @Test
-    public void testSlicingPreservesBulkAdvanceAndZeroConsumptionLaziness() {
-        try (Seq<Integer, RuntimeException> source = Seq.<Integer, RuntimeException> repeat(7, Long.MAX_VALUE);
-             Seq<Integer, RuntimeException> slice = source.limit(Long.MAX_VALUE).skip(Long.MAX_VALUE - 1)) {
-            Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
-            assertTrue(iterator.supportsFailureAtomicAdvance(), "huge arithmetic slices must retain bulk advancement");
-            iterator.advance(1);
-            assertFalse(iterator.hasNext());
-        }
-
-        try (Seq<Integer, RuntimeException> source = Seq.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE);
-             Seq<Integer, RuntimeException> slice = source.skip(4_294_967_294L).limit(2)) {
-            Throwables.Iterator<Integer, RuntimeException> iterator = slice.iteratorEx();
-            assertTrue(iterator.supportsFailureAtomicAdvance());
-            iterator.advance(1);
-            assertEquals(Integer.MAX_VALUE, iterator.next());
-            assertFalse(iterator.hasNext());
-        }
-
-        AtomicInteger initialized = new AtomicInteger();
-        Throwables.Iterator<Integer, RuntimeException> deferred = Throwables.Iterator.defer(() -> {
-            initialized.incrementAndGet();
-            return Throwables.Iterator.of(1, 2);
-        });
-        try (Seq<Integer, RuntimeException> slice = Seq.of(deferred).limit(0).skip(1)) {
-            slice.iteratorEx().advance(0);
-            assertFalse(slice.iteratorEx().hasNext());
-            assertEquals(0, initialized.get());
-        }
-        assertEquals(0, initialized.get());
-    }
-
-    @Test
-    public void testLimitPreservesQuotaAfterSourceFailure() {
-        for (boolean bulkAdvance : new boolean[] { false, true }) {
-            try (Seq<Integer, RuntimeException> seq = Seq.of(failingSlicingIterator()).limit(3)) {
-                Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
-                if (bulkAdvance) {
-                    assertThrows(IllegalStateException.class, () -> iterator.advance(3));
-                    assertEquals(Arrays.asList(2, 3), iterator.toList());
-                } else {
-                    assertEquals(1, iterator.next());
-                    assertThrows(IllegalStateException.class, iterator::next);
-                    assertEquals(Arrays.asList(2, 3), iterator.toList());
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testFirstMappingWaitsForSuccessfulSourceRead() {
-        for (boolean mapElse : new boolean[] { false, true }) {
-            AtomicInteger attempts = new AtomicInteger();
-            AtomicInteger delivered = new AtomicInteger();
-            IllegalStateException failure = new IllegalStateException("source failed");
-            Seq<Integer, RuntimeException> source = Seq.of(new Throwables.Iterator<Integer, RuntimeException>() {
-                @Override
-                public boolean hasNext() {
-                    return delivered.get() < 2;
-                }
-
-                @Override
-                public Integer next() {
-                    if (attempts.getAndIncrement() == 0) {
-                        throw failure;
-                    }
-                    return delivered.incrementAndGet();
-                }
-            });
-
-            try (Seq<Integer, RuntimeException> mapped = mapElse ? source.mapFirstOrElse(value -> value * 10, value -> value * 100)
-                    : source.mapFirst(value -> value * 10)) {
-                Throwables.Iterator<Integer, RuntimeException> iterator = mapped.iteratorEx();
-                assertSame(failure, assertThrows(IllegalStateException.class, iterator::next));
-                assertEquals(10, iterator.next());
-                assertEquals(mapElse ? 200 : 2, iterator.next());
-                assertFalse(iterator.hasNext());
-            }
-        }
-    }
-
-    @Test
-    public void testDropWhileContinuesDroppingAfterFailure() {
-        for (boolean predicateFailure : new boolean[] { false, true }) {
-            AtomicBoolean failed = new AtomicBoolean();
-            AtomicInteger delivered = new AtomicInteger();
-            IllegalStateException failure = new IllegalStateException("drop failed");
-            Seq<Integer, RuntimeException> source = Seq.of(new Throwables.Iterator<Integer, RuntimeException>() {
-                @Override
-                public boolean hasNext() {
-                    return delivered.get() < 4;
-                }
-
-                @Override
-                public Integer next() {
-                    if (!predicateFailure && delivered.get() == 1 && failed.compareAndSet(false, true)) {
-                        throw failure;
-                    }
-                    return delivered.incrementAndGet();
-                }
-            });
-
-            try (Seq<Integer, RuntimeException> stream = source.dropWhile(value -> {
-                if (predicateFailure && value == 2 && failed.compareAndSet(false, true)) {
-                    throw failure;
-                }
-                return value < 3;
-            })) {
-                Throwables.Iterator<Integer, RuntimeException> iterator = stream.iteratorEx();
-                assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
-                assertEquals(Arrays.asList(3, 4), iterator.toList());
-            }
-        }
-    }
-
-    @Test
-    public void test_empty_seq_with_multiple_onClose_still_closes_all() {
-        AtomicInteger close1Count = new AtomicInteger(0);
-        AtomicInteger close2Count = new AtomicInteger(0);
-
-        Seq<Object, Exception> emptySeq = Seq.<Object, Exception> empty().onClose(close1Count::incrementAndGet).onClose(close2Count::incrementAndGet);
-
-        emptySeq.close();
-
-        assertEquals(1, close1Count.get());
-        assertEquals(1, close2Count.get());
-
-        emptySeq.close();
-        assertEquals(1, close1Count.get());
-        assertEquals(1, close2Count.get());
-    }
-
-    @Test
-    public void testEmptySequenceCannotBeReusedAcrossPipelines() throws Exception {
-        Seq<Integer, Exception> empty = Seq.empty();
-
-        Assertions.assertTrue(empty.filter(n -> n > 0).toList().isEmpty());
-        // Deriving again from a source that a terminal operation has already closed is rejected, rather than
-        // silently answering over an exhausted iterator.
-        assertThrows(IllegalStateException.class, () -> empty.map(Object::toString));
-    }
-
-    @Test
-    public void testClosedStatePrecedesNullFunctionalArgUse() {
-        Seq<Integer, Exception> seq = Seq.of(1, 2, 3);
-        seq.close();
-
-        assertThrows(IllegalStateException.class, () -> seq.rateLimited(0));
-        assertThrows(IllegalStateException.class, () -> seq.delay((java.time.Duration) null));
-        assertThrows(IllegalStateException.class, () -> seq.sortedByInt(null));
-        assertThrows(IllegalStateException.class, () -> seq.hasMatchCountBetween(-1, -1, null));
-        assertThrows(IllegalStateException.class, () -> seq.skipUntil(null));
-        assertThrows(IllegalStateException.class, () -> seq.throwIfEmpty(null));
-        assertThrows(IllegalStateException.class, () -> seq.transform(null));
-        assertDoesNotThrow(seq::close);
-    }
-
-    @Test
-    public void testNullFunctionalArgumentsThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).filter(null).count());
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).map(null).count());
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).forEach(null));
-    }
-
-    @Test
-    public void testOptimizedIteratorCountExhaustsRemainingElements() throws Exception {
-        final Throwables.Iterator<String, Exception> partiallyConsumed = Seq.<String, Exception> of("a", "b", "c").iteratorEx();
-        assertEquals("a", partiallyConsumed.next());
-        assertEquals(2, partiallyConsumed.count());
-        assertFalse(partiallyConsumed.hasNext());
-
-        assertIteratorCountExhausts(Seq.<Boolean, Exception> of(true, false), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new boolean[] { true, false }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new char[] { 'a', 'b' }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new byte[] { 1, 2 }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new short[] { 1, 2 }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new int[] { 1, 2 }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new long[] { 1, 2 }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new float[] { 1, 2 }), 2);
-        assertIteratorCountExhausts(Seq.<Exception> of(new double[] { 1, 2 }), 2);
-
-        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, true, Pair::of), 3);
-        assertIteratorCountExhausts(Seq.<Pair<Integer, Integer>, Exception> splitByChunkCount(7, 3, false, Pair::of), 3);
-        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).reversed(), 3);
-        assertIteratorCountExhausts(Seq.<Integer, Exception> of(1, 2, 3).rotated(1), 3);
-        assertIteratorCountExhausts(Seq.<Integer, Exception> of(3, 1, 2).sorted(), 3);
-    }
-
-    @Test
-    public void testConcurrentCloseHandling() throws Exception {
-        boolean[] handler1Called = { false };
-        boolean[] handler2Called = { false };
-
-        Seq<String, Exception> seq = Seq.of("test").onClose(() -> {
-            handler1Called[0] = true;
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-            }
-        }).onClose(() -> handler2Called[0] = true);
-
-        Thread t1 = new Thread(seq::close);
-        Thread t2 = new Thread(seq::close);
-
-        t1.start();
-        t2.start();
-
-        t1.join();
-        t2.join();
-
-        assertTrue(handler1Called[0]);
-        assertTrue(handler2Called[0]);
-    }
-
-    @Test
-    public void test_concat_collectionSnapshotPreservesTraversalAndClosing() throws Exception {
-        AtomicInteger closeCount = new AtomicInteger();
-        Seq<Integer, Exception> source = Seq.<Integer, Exception> of(1, 2).onClose(closeCount::incrementAndGet);
-        List<Seq<Integer, Exception>> sources = new ArrayList<>();
-        sources.add(source);
-
-        Seq<Integer, Exception> concatenated = Seq.concat(sources);
-        sources.clear();
-
-        assertEquals(Arrays.asList(1, 2), concatenated.toList());
-        assertEquals(1, closeCount.get());
-    }
-
-    @Test
-    public void test_concat_closeRepeatedFailureDoesNotSkipLaterSources() {
-        RuntimeException repeatedFailure = new RuntimeException("repeated close failure");
-        AtomicInteger laterCloseCalls = new AtomicInteger();
-        Seq<Integer, Exception> first = Seq.<Integer, Exception> of(1).onClose(() -> {
-            throw repeatedFailure;
-        });
-        Seq<Integer, Exception> second = Seq.<Integer, Exception> of(2).onClose(() -> {
-            throw repeatedFailure;
-        });
-        Seq<Integer, Exception> third = Seq.<Integer, Exception> of(3).onClose(laterCloseCalls::incrementAndGet);
-        Seq<Integer, Exception> concatenated = Seq.concat(first, second, third);
-
-        RuntimeException thrown = assertThrows(RuntimeException.class, concatenated::close);
-
-        assertSame(repeatedFailure, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
-        assertEquals(1, laterCloseCalls.get());
-    }
-
-    @Test
-    public void testDifferenceMapperSupportsCheckedException() {
-        final java.io.IOException failure = new java.io.IOException("mapper failure");
-        final Seq<Integer, java.io.IOException> seq = Seq.<Integer, java.io.IOException> of(1, 2, 3);
-
-        final java.io.IOException thrown = assertThrows(java.io.IOException.class,
-                () -> seq.difference((Throwables.Function<Integer, Integer, java.io.IOException>) value -> {
-                    throw failure;
-                }, Arrays.asList(1, 2)).toList());
-
-        org.junit.jupiter.api.Assertions.assertSame(failure, thrown);
-    }
-
-    @Test
-    public void testPeekIfBiPredicateActionSupportsCheckedException() {
-        final java.io.IOException failure = new java.io.IOException("peek failure");
-        final Seq<Integer, java.io.IOException> seq = Seq.<Integer, java.io.IOException> of(1, 2, 3);
-
-        final java.io.IOException thrown = assertThrows(java.io.IOException.class,
-                () -> seq.peekIf((value, index) -> true, (Throwables.Consumer<Integer, java.io.IOException>) value -> {
-                    throw failure;
-                }).toList());
-
-        org.junit.jupiter.api.Assertions.assertSame(failure, thrown);
-    }
-
-    @Test
-    public void testTopSupportsNullWhenComparatorDoes() throws Exception {
-        final List<Integer> result = Seq.of(1, null, 2).top(2, Comparator.nullsLast(Comparator.naturalOrder())).toList();
-
-        assertEquals(2, result.size());
-        assertTrue(result.contains(2));
-        assertTrue(result.contains(null));
-    }
-
-    @Test
-    public void testTopHugeLimitDoesNotPreallocateFromLimit() throws Exception {
-        List<Integer> result = Seq.of(3, 1, 2).top(Integer.MAX_VALUE, Comparator.naturalOrder()).toList();
-        assertEquals(3, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 2, 3)));
-    }
-
-    @Test
-    public void testEmpty() throws Exception {
-        assertEquals(0, Seq.empty().count());
-        assertTrue(Seq.<Integer, Exception> empty().toList().isEmpty());
-        assertFalse(Seq.<Integer, Exception> empty().first().isPresent());
-        assertTrue(Seq.<Integer, Exception> empty().filter(n -> n > 0).toList().isEmpty());
-        assertTrue(Seq.<Integer, Exception> empty().map(Object::toString).toList().isEmpty());
-        Seq<Integer, Exception> empty = Seq.empty();
-        assertTrue(empty.filter(n -> n > 0).toList().isEmpty());
-        assertThrows(IllegalStateException.class, () -> empty.map(Object::toString));
-    }
-
-    @Test
-    public void testJust() throws Exception {
-        assertEquals(Collections.singletonList("hello"), Seq.just("hello").toList());
-        assertEquals(Collections.singletonList(null), Seq.just(null).toList());
-        assertEquals(Collections.singletonList("hello"), Seq.just("hello", IOException.class).toList());
-        assertThrows(IllegalArgumentException.class, () -> Seq.defer(null));
-    }
-
-    @Test
-    public void testRepeat() throws Exception {
-        assertEquals(Arrays.asList("r", "r", "r"), Seq.repeat("r", 3).toList());
-        assertTrue(Seq.repeat("r", 0).toList().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> Seq.repeat("r", -1));
-    }
-
-    @Test
-    public void testRange() throws Exception {
-        assertEquals(Arrays.asList(0, 1, 2, 3, 4), Seq.range(0, 5).toList());
-        assertEquals(Arrays.asList(0, 2, 4, 6, 8), Seq.range(0, 10, 2).toList());
-        assertEquals(Arrays.asList(5, 3, 1), Seq.range(5, 0, -2).toList());
-        assertTrue(Seq.range(1, 1).toList().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> Seq.range(1, 5, 0));
-        assertEquals(10000, Seq.range(0, 10000).count());
-        int[] counter = { 0 };
-        assertEquals(Arrays.asList(0, 2, 4, 6, 8, 10, 12, 14, 16, 18), Seq.range(0, 1000000).takeWhile(n -> {
-            counter[0]++;
-            return n < 10;
-        }).map(n -> n * 2).toList());
-        assertTrue(counter[0] < 20);
-    }
-
-    @Test
-    public void testRangeClosed() throws Exception {
-        assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5), Seq.rangeClosed(0, 5).toList());
-        assertEquals(Collections.singletonList(1), Seq.rangeClosed(1, 1).toList());
-        assertEquals(Arrays.asList(1, 3, 5), Seq.rangeClosed(1, 5, 2).toList());
-        assertEquals(Arrays.asList(5, 3, 1), Seq.rangeClosed(5, 1, -2).toList());
-        assertEquals(Arrays.asList(0, 3, 6, 9), Seq.rangeClosed(0, 10, 3).toList());
-        assertThrows(IllegalArgumentException.class, () -> Seq.rangeClosed(1, 5, 0));
-    }
-
-    @Test
-    public void testListFiles() throws Exception {
-        Path root = Files.createDirectory(tempDir.resolve("listFilesRoot"));
-        File sub = root.resolve("sub").toFile();
-        sub.mkdir();
-        File file1 = root.resolve("file1.txt").toFile();
-        file1.createNewFile();
-        File nested = new File(sub, "file2.txt");
-        nested.createNewFile();
-        List<File> nonRecursive = Seq.listFiles(root.toFile()).toList();
-        assertEquals(2, nonRecursive.size());
-        assertTrue(nonRecursive.contains(file1));
-        assertTrue(nonRecursive.contains(sub));
-        Set<String> recursive = Seq.listFiles(root.toFile(), true).map(File::getName).toSet();
-        assertTrue(recursive.containsAll(Arrays.asList("file1.txt", "sub", "file2.txt")));
-        assertTrue(Seq.listFiles(tempDir.resolve("missing").toFile()).toList().isEmpty());
-        assertThrows(java.io.FileNotFoundException.class, () -> Seq.ofLines(new File("non_existent_file.txt")).toList());
-        assertThrows(java.io.FileNotFoundException.class, () -> Seq.ofLines(Paths.get("non_existent_path.txt")).toList());
-    }
-
-    @Test
-    public void testConcat() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.concat(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }).toList());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.concat(new Integer[] { 1, 2, 3 }, null, new Integer[] { 4, 5 }).toList());
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Arrays.asList("a", "b"), Arrays.asList("c", "d")).toList());
-        assertTrue(Seq.concat((Iterable<String>) null, (Iterable<String>) null).toList().isEmpty());
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Arrays.asList("a", "b").iterator(), Arrays.asList("c", "d").iterator()).toList());
-        AtomicBoolean s1Closed = new AtomicBoolean();
-        AtomicBoolean s2Closed = new AtomicBoolean();
-        assertEquals(Arrays.asList("a", "b", "c", "d"),
-                Seq.concat(Seq.of("a", "b").onClose(() -> s1Closed.set(true)), Seq.of("c", "d").onClose(() -> s2Closed.set(true))).toList());
-        assertTrue(s1Closed.get() && s2Closed.get());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), Seq.concat(new Integer[] { 1, 2, 3 }, new Integer[] { 4, 5 }, new Integer[] { 6, 7, 8 }).toList());
-    }
-
-    @Test
-    public void testFilter() throws Exception {
-        assertEquals(Arrays.asList(2, 4), Seq.of(1, 2, 3, 4).filter(x -> x % 2 == 0).toList());
-        assertEquals(Arrays.asList("a", "b"), Seq.of("a", null, "b").filter(s -> s != null).toList());
-        List<Integer> dropped = new ArrayList<>();
-        assertEquals(Arrays.asList(2, 4), Seq.of(1, 2, 3, 4).filter(x -> x % 2 == 0, dropped::add).toList());
-        assertEquals(Arrays.asList(1, 3), dropped);
-        assertArrayEquals(new String[] { "c", "d", "e" }, Seq.of("a", "b", "c", "d", "e").filter(s -> s.compareTo("c") >= 0).toArray(String[]::new));
-    }
-
-    @Test
-    public void testTakeWhile() throws Exception {
-        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2, 3, 4).takeWhile(x -> x < 3).toList());
-        assertArrayEquals(new String[] { "a", "b" }, Seq.of("a", "b", "c", "d").takeWhile(s -> s.compareTo("c") < 0).toArray(String[]::new));
-    }
-
-    @Test
-    public void testDropWhile() throws Exception {
-        assertEquals(Arrays.asList(3, 4, 5), Seq.of(1, 2, 3, 4, 5).dropWhile(x -> x < 3).toList());
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).dropWhile(x -> x > 10).toList());
-        List<Integer> dropped = new ArrayList<>();
-        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).dropWhile(x -> x < 4, dropped::add).toList());
-        assertEquals(Arrays.asList(1, 2, 3), dropped);
-    }
-
-    @Test
-    public void testDistinct() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 2, 3, 1).distinct().toList());
-        assertEquals(Arrays.asList("a", null, "b", "c"), Seq.of("a", null, "b", null, "c").distinct().toList());
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 1, 2, 2, 3).distinct((a, b) -> a).toList());
-        assertEquals(Arrays.asList("a", "bb"), Seq.of("a", "b", "bb", "cc").distinctBy(String::length).toList());
-        assertEquals(Arrays.asList("a", "bb"), Seq.of("a", "bb", "c", "dd").distinctBy(s -> s.length() == 1 ? null : s.length()).toList());
-        assertEquals(Arrays.asList("apple"), Seq.of("apple", "apricot", "avocado").distinctBy(s -> s.charAt(0), (a, b) -> a).toList());
-    }
-
-    @Test
-    public void testFlatMap() throws Exception {
-        assertEquals(Arrays.asList(1, 10, 2, 20), Seq.of(1, 2).flatMap(x -> Seq.of(x, x * 10)).toList());
-        assertEquals(Arrays.asList(1, 2, 2, 3), Seq.of(1, 2).flatmap(x -> Arrays.asList(x, x + 1)).toList());
-        assertEquals(Arrays.asList(1, 3), Seq.of(1, 2, 3).flatMap(x -> x == 2 ? null : Seq.of(x)).toList());
-        assertTrue(Seq.of(1, 2).flatMap(x -> Seq.<Integer, Exception> empty()).toList().isEmpty());
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), Seq.of(1, 2, 3).flatMapArray(x -> new Integer[] { x, x * 10 }).toList());
-        assertEquals(Arrays.asList(1, 3, 30, 300),
-                Seq.of(1, 2, 3).flatMapArray(n -> n == 1 ? new Integer[] { n } : n == 2 ? new Integer[0] : new Integer[] { n, n * 10, n * 100 }).toList());
-        assertEquals(Arrays.asList(1, 3), Seq.of(1, 2, 3).flatMapArray(n -> n == 2 ? null : new Integer[] { n }).toList());
-        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
-        closed.close();
-        assertThrows(IllegalStateException.class, () -> closed.flatMapArray(n -> new Integer[] { n }));
-        assertEquals(Arrays.asList("aa", "bb"), Seq.of("a", null, "b").flatmapIfNotNull(s -> Arrays.asList(s + s)).toList());
-        assertEquals(Arrays.asList("a1", "a2"), Seq.of("a", null).flatmapIfNotNull(s -> Arrays.asList(s), s -> Arrays.asList(s + "1", s + "2")).toList());
-    }
-
-    @Test
-    public void testPartitionBy() throws Exception {
-        Map<Boolean, List<Integer>> parts = Seq.of(1, 2, 3, 4).partitionBy(x -> x % 2 == 0).toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(Arrays.asList(2, 4), parts.get(true));
-        assertEquals(Arrays.asList(1, 3), parts.get(false));
-        assertEquals(2, Seq.of(1, 2, 3, 4).partitionBy(x -> x % 2 == 0, Collectors.counting()).count());
-    }
-
-    @Test
-    public void testCountBy() throws Exception {
-        Map<Integer, Integer> counts = Seq.of("a", "bb", "c", "dd").countBy(String::length).toMap(Map.Entry::getKey, Map.Entry::getValue);
-        assertEquals(Integer.valueOf(2), counts.get(1));
-        assertEquals(Integer.valueOf(2), counts.get(2));
-    }
-
-    @Test
-    public void testIntersection() throws Exception {
-        assertEquals(Arrays.asList(3, 4), Seq.of(1, 2, 3, 4, 5).intersection(Arrays.asList(3, 4, 6)).toList());
-        assertEquals(Arrays.asList("apple", "banana"), Seq.of("apple", "banana", "cherry").intersection(s -> s.length(), Arrays.asList(5, 6)).toList());
-        assertEquals(Arrays.asList("a", "e"), Seq.of("a", "b", "c", "d", "e").difference(Arrays.asList("b", "c", "d", "f")).toList());
-        assertEquals(Arrays.asList("cherry"), Seq.of("apple", "banana", "cherry").difference(s -> s.length(), Arrays.asList(5, 6)).toList());
-        assertEquals(Arrays.asList(1, 2, 6, 7), Seq.of(1, 2, 3, 4, 5).symmetricDifference(Arrays.asList(3, 4, 5, 6, 7)).toList());
-        assertTrue(Seq.of(1, 2).symmetricDifference(Collections.emptyList()).toList().containsAll(Arrays.asList(1, 2)));
-    }
-
-    @Test
-    public void testPrepend() throws Exception {
-        assertEquals(Arrays.asList(0, 1, 2), Seq.of(1, 2).prepend(0).toList());
-        assertEquals(Arrays.asList(-1, 0, 1, 2), Seq.of(1, 2).prepend(-1, 0).toList());
-        assertEquals(Arrays.asList("x", "y", "a", "b"), Seq.of("a", "b").prepend(Arrays.asList("x", "y")).toList());
-        assertEquals(Arrays.asList(0, 1, 2), Seq.of(1, 2).prepend(Seq.of(0)).toList());
-        assertEquals(Arrays.asList("world", "hello"), Seq.of("hello").prepend(Optional.of("world")).toList());
-        assertEquals(Arrays.asList("hello"), Seq.of("hello").prepend(Optional.empty()).toList());
-    }
-
-    @Test
-    public void testDefaultIfEmpty() throws Exception {
-        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).defaultIfEmpty(9).toList());
-        assertEquals(Collections.singletonList(9), Seq.<Integer, Exception> empty().defaultIfEmpty(9).toList());
-        assertEquals(Arrays.asList(9, 8), Seq.<Integer, Exception> empty().defaultIfEmpty(() -> Seq.of(9, 8)).toList());
-        assertEquals(Arrays.asList(1), Seq.of(1).defaultIfEmpty(() -> Seq.of(9)).toList());
-    }
-
-    @Test
-    public void testThrowIfEmpty() throws Exception {
-        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).throwIfEmpty().toList());
-        assertThrows(NoSuchElementException.class, () -> Seq.empty().throwIfEmpty().toList());
-        assertThrows(IllegalStateException.class, () -> Seq.<Integer, Exception> empty().throwIfEmpty(() -> new IllegalStateException("empty")).toList());
-        assertEquals(Arrays.asList(1), Seq.of(1).throwIfEmpty(() -> new IllegalStateException("empty")).toList());
-    }
-
-    @Test
-    public void testIfEmpty() throws Exception {
-        AtomicBoolean ran = new AtomicBoolean();
-        assertEquals(Arrays.asList(1), Seq.of(1).ifEmpty(() -> ran.set(true)).toList());
-        assertFalse(ran.get());
-        Seq.<Integer, Exception> empty().ifEmpty(() -> ran.set(true)).toList();
-        assertTrue(ran.get());
-    }
-
-    @Test
-    public void testPeek() throws Exception {
-        List<Integer> seen = new ArrayList<>();
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peek(seen::add).toList());
-        assertEquals(Arrays.asList(1, 2, 3), seen);
-        seen.clear();
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peekFirst(seen::add).toList());
-        assertEquals(Collections.singletonList(1), seen);
-        seen.clear();
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peekLast(seen::add).toList());
-        assertEquals(Collections.singletonList(3), seen);
-        seen.clear();
-        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2, 3, 4).peekIf(x -> x % 2 == 0, seen::add).toList());
-        assertEquals(Arrays.asList(2, 4), seen);
-        seen.clear();
-        assertEquals(Arrays.asList(10, 20, 30, 40), Seq.of(10, 20, 30, 40).peekIf((v, i) -> i % 2 == 0, seen::add).toList());
-        assertEquals(Arrays.asList(20, 40), seen);
-    }
-
-    @Test
-    public void testLimit() throws Exception {
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3, 4, 5).limit(3).toList());
-        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
-        drainWithException(closed);
-        assertThrows(IllegalStateException.class, () -> closed.limit(1));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).limit(-1));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).skip(-1));
-    }
-
-    @Test
-    public void testLast() throws Exception {
-        assertEquals(Nullable.of(3), Seq.of(1, 2, 3).last());
-        assertTrue(Seq.<Integer, Exception> empty().last().isEmpty());
-        assertEquals(Arrays.asList("d", "e"), Seq.of("a", "b", "c", "d", "e").last(2).toList());
-    }
-
-    @Test
-    public void testTakeLast() throws Exception {
-        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).takeLast(2).toList());
-        assertTrue(Seq.of(1, 2).takeLast(0).toList().isEmpty());
-        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).takeLast(3).toList());
-    }
-
-    @Test
-    public void testTop() throws Exception {
-        assertTrue(Seq.of(5, 2, 8, 1, 9, 3).top(3).toList().containsAll(Arrays.asList(5, 8, 9)));
-        assertEquals(Arrays.asList(9), Seq.of(5, 2, 8, 1, 9, 3).top(1).toList());
-        assertTrue(Seq.of(5, 3, 8, 1, 9, 2).top(3, Comparator.reverseOrder()).toList().containsAll(Arrays.asList(1, 2, 3)));
-        assertTrue(Seq.<Integer, Exception> empty().top(3).toList().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(3, 1, 2).top(2, null));
-    }
-
-    @Test
-    public void testReversedRotatedShuffled() throws Exception {
-        assertEquals(Arrays.asList(3, 2, 1), Seq.of(1, 2, 3).reversed().toList());
-        assertEquals(Arrays.asList(4, 5, 1, 2, 3), Seq.of(1, 2, 3, 4, 5).rotated(2).toList());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.of(1, 2, 3, 4, 5).rotated(0).toList());
-        assertEquals(5, Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList().size());
-        assertEquals(Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList(), Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList());
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).shuffled(null));
-    }
-
-    @Test
-    public void testSorted() throws Exception {
-        assertEquals(Arrays.asList(1, 1, 3, 4, 5), Seq.of(3, 1, 4, 1, 5).sorted().toList());
-        assertEquals(Arrays.asList(5, 4, 3, 1, 1), Seq.of(3, 1, 4, 1, 5).sorted(Comparator.reverseOrder()).toList());
-        assertEquals(Arrays.asList("d", "bb", "aaa", "cccc"), Seq.of("aaa", "bb", "cccc", "d").sorted(Comparator.comparingInt(String::length)).toList());
-        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByInt(String::length).toList());
-        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByLong(s -> (long) s.length()).toList());
-        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByDouble(s -> (double) s.length()).toList());
-        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedBy(String::length).toList());
-        assertEquals(Arrays.asList(5, 4, 3, 1), Seq.of(3, 1, 4, 5).reverseSorted().toList());
-        assertEquals(Arrays.asList("cccc", "aaa", "bb", "d"), Seq.of("aaa", "bb", "cccc", "d").reverseSortedBy(String::length).toList());
-        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).sorted(Comparator.naturalOrder()).sorted(Comparator.naturalOrder()).toList());
-    }
-
-    @Test
-    public void testCycled() throws Exception {
-        assertEquals(Arrays.asList("a", "b", "a", "b", "a"), Seq.of("a", "b").cycled().limit(5).toList());
-        assertEquals(Arrays.asList("a", "b", "a", "b"), Seq.of("a", "b").cycled(2).toList());
-        assertTrue(Seq.of("a").cycled(0).toList().isEmpty());
-    }
-
-    @Test
-    public void testHasMatchCountBetween() throws Exception {
-        assertFalse(Seq.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 3, x -> x % 2 == 0));
-        assertTrue(Seq.of(2, 4, 6, 8, 10).hasMatchCountBetween(3, Long.MAX_VALUE, x -> x % 2 == 0));
-    }
-
-    @Test
-    public void testBufferedIsFasterThanUnbuffered() throws Exception {
-        final int millisToSleep = 50;
-        final int elementCount = 6;
-        long start = System.currentTimeMillis();
-        Seq.range(0, elementCount).delay(Duration.ofMillis(millisToSleep)).buffered().map(it -> it * 2).delay(Duration.ofMillis(millisToSleep)).toList();
-        assertTrue(System.currentTimeMillis() - start < millisToSleep * elementCount * 2);
-    }
-
-    @Test
-    public void testChainedOperationsAndLifecycle() throws Exception {
-        assertEquals(Arrays.asList(12, 8),
-                Seq.of(1, 2, 3, 4, 5, 6).filter(x -> x % 2 == 0).map(x -> x * 2).sorted(Comparator.reverseOrder()).limit(2).toList());
-        assertEquals(Arrays.asList(null, 1, null, 2, null).stream().filter(java.util.Objects::nonNull).toList(),
-                Seq.of(null, 1, null, 2, null).skipNulls().toList());
-        AtomicInteger closed = new AtomicInteger();
-        try (Seq<Integer, Exception> seq = Seq.of(1, 2, 3).onClose(closed::incrementAndGet)) {
-            assertEquals(3, seq.count());
-        }
-        assertEquals(1, closed.get());
-        Seq<Integer, Exception> used = Seq.of(1, 2, 3);
-        used.toList();
-        assertThrows(IllegalStateException.class, used::toList);
-        Throwables.Iterator<Integer, Exception> iter = Seq.of(1, 2).iteratorEx();
-        iter.next();
-        iter.next();
-        assertThrows(NoSuchElementException.class, iter::next);
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).step(0));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).buffered(0));
-        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).rateLimited(0.0));
-    }
-
-    @Test
-    public void testConcatIteratorsExhaustedInputsContributeNothing() throws Exception {
-        final Iterator<String> iter1 = List.of("a", "b").iterator();
-        final Iterator<String> iter2 = List.of("c", "d").iterator();
-
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.<String, Exception> concat(iter1, iter2).toList());
-
-        // Reusing the iterators consumed above yields nothing; fresh iterators are needed, and a null one is skipped.
-        assertEquals(Collections.emptyList(), Seq.<String, Exception> concat(iter1, null, iter2).toList());
-        assertEquals(Arrays.asList("a", "b", "c", "d"),
-                Seq.<String, Exception> concat(List.of("a", "b").iterator(), null, List.of("c", "d").iterator()).toList());
-    }
-
-    @Test
-    public void testConcatSeqsReusedAfterConsumptionThrows() throws Exception {
-        final Seq<String, Exception> seq1 = Seq.of("a", "b");
-        final Seq<String, Exception> seq2 = Seq.of("c", "d");
-
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(seq1, seq2).toList());
-
-        // Consuming the concatenation closed seq1 and seq2, so they cannot be concatenated again.
-        assertThrows(IllegalStateException.class, () -> Seq.concat(seq1, null, seq2).toList());
-        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Seq.<String, Exception> of("a", "b"), null, Seq.<String, Exception> of("c", "d")).toList());
-    }
-
-    @Test
-    public void testRangeFactoriesReturnEmptyWhenStepPointsAway() throws Exception {
-        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(5, 0).toList());
-        assertEquals(Collections.emptyList(), Seq.<Exception> range(0, 10, -1).toList());
-        assertEquals(Collections.emptyList(), Seq.<Exception> range(10, 0, 2).toList());
-        assertEquals(Collections.emptyList(), Seq.<Exception> range(3, 3, 1).toList());
-        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(0, 10, -1).toList());
-        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(10, 0, 2).toList());
-        assertEquals(Arrays.asList(3), Seq.<Exception> rangeClosed(3, 3, -7).toList());
-    }
-
-    // ---- perf review 2026-09-26 G069 begin ----
-    private static List<String> g069Source(final int size) {
-        final List<String> list = new ArrayList<>();
-
-        for (int i = 0; i < size; i++) {
-            list.add(i % 3 == 1 ? null : "e" + i);
-        }
-
-        return list;
-    }
-
-    // G069-01: skipLast buffers in an ArrayDeque with a null sentinel - pins nulls, buffer growth past 16 and manual iteration.
-    @Test
-    public void testSkipLast_nullsGrowthAndManualIteration() throws Exception {
-        for (int size = 0; size <= 40; size++) {
-            final List<String> source = g069Source(size);
-
-            for (final int n : new int[] { 1, 2, 3, 15, 16, 17, 33, 40, 41, Integer.MAX_VALUE }) {
-                final List<String> expected = source.subList(0, Math.max(0, size - Math.min(n, size)));
-                assertEquals(expected, Seq.<String, Exception> of(source).skipLast(n).toList(), "size=" + size + ", n=" + n);
-            }
-        }
-
-        try (Seq<String, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null).skipLast(2)) {
-            final Throwables.Iterator<String, Exception> iter = seq.iteratorEx();
-            assertTrue(iter.hasNext());
-            assertTrue(iter.hasNext());
-            assertEquals(null, iter.next());
-            assertEquals("a", iter.next());
-            assertTrue(iter.hasNext());
-            assertEquals(null, iter.next());
-            assertFalse(iter.hasNext());
-            assertThrows(NoSuchElementException.class, iter::next);
-        }
-
-        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of(null, null, null).skipLast(1).toList());
-        assertEquals(2, Seq.<String, Exception> of(null, "x", null, "y").skipLast(2).count());
-    }
-
-    // G069-02: takeLast keeps a ring buffer and rotates it into order - pins wrap-around at every offset, growth, nulls, count/skip.
-    @Test
-    public void testTakeLast_ringBufferWrapNullsAndCount() throws Exception {
-        for (int size = 0; size <= 40; size++) {
-            final List<String> source = g069Source(size);
-
-            for (final int n : new int[] { 1, 2, 3, 5, 15, 16, 17, 20, 40, 41, Integer.MAX_VALUE }) {
-                final List<String> expected = source.subList(Math.max(0, size - Math.min(n, size)), size);
-                assertEquals(expected, Seq.<String, Exception> of(source).takeLast(n).toList(), "size=" + size + ", n=" + n);
-                assertEquals(expected.size(), Seq.<String, Exception> of(source).takeLast(n).count(), "size=" + size + ", n=" + n);
-            }
-        }
-
-        assertEquals(Arrays.asList(8, 9, 10), Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).takeLast(5).skip(2).toList());
-        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of("a", null, null).takeLast(2).toList());
-
-        try (Seq<Integer, Exception> seq = Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7).takeLast(3)) {
-            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
-            assertEquals(5, iter.next());
-            assertTrue(iter.hasNext());
-            assertEquals(6, iter.next());
-            assertEquals(7, iter.next());
-            assertFalse(iter.hasNext());
-            assertThrows(NoSuchElementException.class, iter::next);
-        }
-    }
 
     // G069-03: groupTo(keyMapper, valueMapper, mapFactory) does a single get() for a known key - pins the map protocol.
     @Test
@@ -1230,75 +750,186 @@ public class SeqTest extends SeqTestSupport {
         assertEquals(2, target.size());
     }
 
-    // ---- perf review 2026-09-26 G069 end ----
-    // ---- perf review 2026-09-26 G112 begin ----
-    // Reference windows for sliding(windowSize, increment): window i covers [i * increment, i * increment + windowSize) clipped to the
-    // source; it is emitted only if it contains at least one element the previous window did not contain.
-    private static <T> List<List<T>> g112Windows(final List<T> source, final int windowSize, final int increment) {
-        final List<List<T>> result = new ArrayList<>();
-        final int size = source.size();
-        int prevEnd = 0;
-
-        for (long start = 0; start < size; start += increment) {
-            final int end = (int) Math.min(start + windowSize, size);
-
-            if (start > 0 && end <= prevEnd) {
-                break;
-            }
-
-            result.add(new ArrayList<>(source.subList((int) start, end)));
-            prevEnd = end;
-        }
-
-        return result;
+    @Test
+    public void testHasMatchCountBetween() throws Exception {
+        assertFalse(Seq.of(1, 2, 3, 4, 5).hasMatchCountBetween(3, 3, x -> x % 2 == 0));
+        assertTrue(Seq.of(2, 4, 6, 8, 10).hasMatchCountBetween(3, Long.MAX_VALUE, x -> x % 2 == 0));
     }
 
-    // G112-03: sliding(..) keeps its overlap in an ArrayDeque with a null sentinel - pins window contents with nulls, gaps, skip and count
     @Test
-    public void testSliding_overlapBufferWithNullsSkipAndCount_G112() throws Exception {
-        for (int size = 0; size <= 11; size++) {
-            final List<String> source = new ArrayList<>();
+    public void testIfEmpty() throws Exception {
+        AtomicBoolean ran = new AtomicBoolean();
+        assertEquals(Arrays.asList(1), Seq.of(1).ifEmpty(() -> ran.set(true)).toList());
+        assertFalse(ran.get());
+        Seq.<Integer, Exception> empty().ifEmpty(() -> ran.set(true)).toList();
+        assertTrue(ran.get());
+    }
 
-            for (int i = 0; i < size; i++) {
-                source.add(i % 3 == 1 ? null : "e" + i);
-            }
-
-            for (int windowSize = 1; windowSize <= 5; windowSize++) {
-                for (int increment = 1; increment <= 6; increment++) {
-                    final List<List<String>> expected = g112Windows(source, windowSize, increment);
-                    final String msg = "size=" + size + ", windowSize=" + windowSize + ", increment=" + increment;
-
-                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment).toList(), msg);
-                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, n -> new java.util.LinkedList<String>()).toList(),
-                            msg);
-                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).toList(), msg);
-                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment).count(), msg);
-                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).count(), msg);
-
-                    for (int skip = 1; skip <= 4; skip++) {
-                        final List<List<String>> expectedAfterSkip = expected.subList(Math.min(skip, expected.size()), expected.size());
-                        assertEquals(expectedAfterSkip, Seq.<String, Exception> of(source).sliding(windowSize, increment).skip(skip).toList(),
-                                msg + ", skip=" + skip);
-                        assertEquals(expectedAfterSkip,
-                                Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).skip(skip).toList(),
-                                msg + ", skip=" + skip);
+    @Test
+    public void testIfEmptyRetriesSourceInspectionAndRunsActionOnce() {
+        for (boolean actionFails : new boolean[] { false, true }) {
+            AtomicInteger inspections = new AtomicInteger();
+            AtomicInteger actions = new AtomicInteger();
+            Throwables.Iterator<Integer, RuntimeException> source = new Throwables.Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    if (inspections.getAndIncrement() == 0) {
+                        throw new IllegalStateException("empty source inspection failed");
                     }
+                    return false;
+                }
+
+                @Override
+                public Integer next() {
+                    throw new NoSuchElementException();
+                }
+            };
+            try (Seq<Integer, RuntimeException> seq = Seq.of(source).ifEmpty(() -> {
+                actions.incrementAndGet();
+                if (actionFails) {
+                    throw new IllegalArgumentException("empty action failed");
+                }
+            })) {
+                Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
+                assertThrows(IllegalStateException.class, iterator::hasNext);
+                assertEquals(0, actions.get());
+                if (actionFails) {
+                    assertThrows(IllegalArgumentException.class, iterator::hasNext);
+                } else {
+                    assertFalse(iterator.hasNext());
+                }
+                assertFalse(iterator.hasNext());
+                assertEquals(1, actions.get());
+                assertThrows(NoSuchElementException.class, iterator::next);
+            }
+        }
+    }
+
+    @Test
+    public void testIntersection() throws Exception {
+        assertEquals(Arrays.asList(3, 4), Seq.of(1, 2, 3, 4, 5).intersection(Arrays.asList(3, 4, 6)).toList());
+        assertEquals(Arrays.asList("apple", "banana"), Seq.of("apple", "banana", "cherry").intersection(s -> s.length(), Arrays.asList(5, 6)).toList());
+        assertEquals(Arrays.asList("a", "e"), Seq.of("a", "b", "c", "d", "e").difference(Arrays.asList("b", "c", "d", "f")).toList());
+        assertEquals(Arrays.asList("cherry"), Seq.of("apple", "banana", "cherry").difference(s -> s.length(), Arrays.asList(5, 6)).toList());
+        assertEquals(Arrays.asList(1, 2, 6, 7), Seq.of(1, 2, 3, 4, 5).symmetricDifference(Arrays.asList(3, 4, 5, 6, 7)).toList());
+        assertTrue(Seq.of(1, 2).symmetricDifference(Collections.emptyList()).toList().containsAll(Arrays.asList(1, 2)));
+    }
+
+    @Test
+    public void testConcatIteratorsExhaustedInputsContributeNothing() throws Exception {
+        final Iterator<String> iter1 = List.of("a", "b").iterator();
+        final Iterator<String> iter2 = List.of("c", "d").iterator();
+
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.<String, Exception> concat(iter1, iter2).toList());
+
+        // Reusing the iterators consumed above yields nothing; fresh iterators are needed, and a null one is skipped.
+        assertEquals(Collections.emptyList(), Seq.<String, Exception> concat(iter1, null, iter2).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"),
+                Seq.<String, Exception> concat(List.of("a", "b").iterator(), null, List.of("c", "d").iterator()).toList());
+    }
+
+    @Test
+    public void testJust() throws Exception {
+        assertEquals(Collections.singletonList("hello"), Seq.just("hello").toList());
+        assertEquals(Collections.singletonList(null), Seq.just(null).toList());
+        assertEquals(Collections.singletonList("hello"), Seq.just("hello", IOException.class).toList());
+        assertThrows(IllegalArgumentException.class, () -> Seq.defer(null));
+    }
+
+    @Test
+    public void testLast() throws Exception {
+        assertEquals(Nullable.of(3), Seq.of(1, 2, 3).last());
+        assertTrue(Seq.<Integer, Exception> empty().last().isEmpty());
+        assertEquals(Arrays.asList("d", "e"), Seq.of("a", "b", "c", "d", "e").last(2).toList());
+    }
+
+    @Test
+    public void testLimit() throws Exception {
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3, 4, 5).limit(3).toList());
+        Seq<Integer, Exception> closed = Seq.of(1, 2, 3);
+        drainWithException(closed);
+        assertThrows(IllegalStateException.class, () -> closed.limit(1));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).limit(-1));
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1).skip(-1));
+    }
+
+    @Test
+    public void testLimitPreservesQuotaAfterSourceFailure() {
+        for (boolean bulkAdvance : new boolean[] { false, true }) {
+            try (Seq<Integer, RuntimeException> seq = Seq.of(failingSlicingIterator()).limit(3)) {
+                Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
+                if (bulkAdvance) {
+                    assertThrows(IllegalStateException.class, () -> iterator.advance(3));
+                    assertEquals(Arrays.asList(2, 3), iterator.toList());
+                } else {
+                    assertEquals(1, iterator.next());
+                    assertThrows(IllegalStateException.class, iterator::next);
+                    assertEquals(Arrays.asList(2, 3), iterator.toList());
                 }
             }
         }
+    }
 
-        // manual iteration interleaving next() and advance()
-        try (Seq<List<String>, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null, "c").sliding(3, 1)) {
-            final Throwables.Iterator<List<String>, Exception> iter = seq.iteratorEx();
-            assertEquals(Arrays.asList(null, "a", null), iter.next());
-            assertTrue(iter.hasNext());
-            assertEquals(Arrays.asList("a", null, "b"), iter.next());
-            iter.advance(1);
-            assertEquals(Arrays.asList("b", null, "c"), iter.next());
-            assertFalse(iter.hasNext());
-            assertThrows(NoSuchElementException.class, iter::next);
+    @Test
+    public void testListFiles() throws Exception {
+        Path root = Files.createDirectory(tempDir.resolve("listFilesRoot"));
+        File sub = root.resolve("sub").toFile();
+        sub.mkdir();
+        File file1 = root.resolve("file1.txt").toFile();
+        file1.createNewFile();
+        File nested = new File(sub, "file2.txt");
+        nested.createNewFile();
+        List<File> nonRecursive = Seq.listFiles(root.toFile()).toList();
+        assertEquals(2, nonRecursive.size());
+        assertTrue(nonRecursive.contains(file1));
+        assertTrue(nonRecursive.contains(sub));
+        Set<String> recursive = Seq.listFiles(root.toFile(), true).map(File::getName).toSet();
+        assertTrue(recursive.containsAll(Arrays.asList("file1.txt", "sub", "file2.txt")));
+        assertTrue(Seq.listFiles(tempDir.resolve("missing").toFile()).toList().isEmpty());
+        assertThrows(java.io.FileNotFoundException.class, () -> Seq.ofLines(new File("non_existent_file.txt")).toList());
+        assertThrows(java.io.FileNotFoundException.class, () -> Seq.ofLines(Paths.get("non_existent_path.txt")).toList());
+    }
+
+    @Test
+    public void testMapLastChecksAvailabilityWithoutPullingFollowingElement() {
+        AtomicInteger pulled = new AtomicInteger();
+        AtomicInteger mapped = new AtomicInteger();
+        Throwables.Iterator<Integer, RuntimeException> source = new Throwables.Iterator<>() {
+            private int next = 1;
+
+            @Override
+            public boolean hasNext() {
+                return next <= 3;
+            }
+
+            @Override
+            public Integer next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                pulled.incrementAndGet();
+                return next++;
+            }
+        };
+        try (Seq<Integer, RuntimeException> seq = Seq.of(source).mapLast(value -> {
+            mapped.incrementAndGet();
+            return value * 10;
+        })) {
+            Throwables.Iterator<Integer, RuntimeException> iterator = seq.iteratorEx();
+            assertEquals(1, iterator.next());
+            assertEquals(1, pulled.get());
+            assertEquals(0, mapped.get());
+            assertEquals(2, iterator.next());
+            assertEquals(2, pulled.get());
+            assertEquals(0, mapped.get());
+            assertEquals(30, iterator.next());
+            assertEquals(3, pulled.get());
+            assertEquals(1, mapped.get());
+            assertFalse(iterator.hasNext());
         }
     }
+
+
 
     // G112-04: mapMulti buffers the emitted elements in an ArrayList read through a cursor - pins nulls, laziness, order, a consumer
     // used after the mapper returned, and a mapper that fails after emitting
@@ -1381,96 +1012,483 @@ public class SeqTest extends SeqTestSupport {
         }
     }
 
-    // ---- perf review 2026-09-26 G112 end ----
-    // ---- bug review 2026-09-30 G071 begin ----
-    // G071-01: groupTo(.., downstream, mapFactory) finished the groups with entry.setValue, which a map with
-    // immutable entry views (ConcurrentSkipListMap) rejects; Stream.groupTo accepts the same map.
     @Test
-    public void testGroupTo_collectorWithConcurrentSkipListMapFactory() throws Exception {
-        final java.util.concurrent.ConcurrentSkipListMap<Integer, Long> counts = Seq.of("a", "bb", "cc")
-                .groupTo(String::length, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new);
-        assertEquals("{1=1, 2=2}", counts.toString());
-
-        final java.util.concurrent.ConcurrentSkipListMap<Integer, String> joined = Seq.of("a", "bb", "cc")
-                .groupTo(String::length, s -> s.toUpperCase(), Collectors.joining(","), java.util.concurrent.ConcurrentSkipListMap::new);
-        assertEquals("{1=A, 2=BB,CC}", joined.toString());
-
-        // An empty sequence still accepts an immutable (empty) map from the factory.
-        final Map<Integer, Long> empty = Seq.<String, Exception> empty()
-                .groupTo(String::length, Collectors.counting(), () -> ImmutableMap.<Integer, Long> empty());
-        assertTrue(empty.isEmpty());
+    public void testNullFunctionalArgumentsThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).filter(null).count());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).map(null).count());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).forEach(null));
     }
 
-    // ---- bug review 2026-09-30 G071 end ----
-    // ---- bug review 2026-09-30 verify G117 begin ----
-    // groupTo(.., downstream, mapFactory): a failing finisher still propagates its own exception through the replaceAll
-    // pass (HashMap and ConcurrentSkipListMap), and a null finisher result is kept by a HashMap.
     @Test
-    public void testGroupTo_finisherFailureAndNullResult() throws Exception {
-        assertThrows(IllegalStateException.class,
-                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
-                    throw new IllegalStateException("finisher");
-                }), java.util.HashMap::new));
-        assertThrows(IllegalStateException.class,
-                () -> Seq.of("a", "bb").groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> {
-                    throw new IllegalStateException("finisher");
-                }), java.util.concurrent.ConcurrentSkipListMap::new));
+    public void test_empty_seq_with_multiple_onClose_still_closes_all() {
+        AtomicInteger close1Count = new AtomicInteger(0);
+        AtomicInteger close2Count = new AtomicInteger(0);
 
-        final Map<Integer, Object> nulls = Seq.of("a", "bb")
-                .groupTo(String::length, Collectors.collectingAndThen(Collectors.<String> toList(), l -> null), java.util.HashMap::new);
-        assertEquals(2, nulls.size());
-        assertTrue(nulls.containsKey(1) && nulls.get(1) == null && nulls.containsKey(2) && nulls.get(2) == null);
+        Seq<Object, Exception> emptySeq = Seq.<Object, Exception> empty().onClose(close1Count::incrementAndGet).onClose(close2Count::incrementAndGet);
+
+        emptySeq.close();
+
+        assertEquals(1, close1Count.get());
+        assertEquals(1, close2Count.get());
+
+        emptySeq.close();
+        assertEquals(1, close1Count.get());
+        assertEquals(1, close2Count.get());
     }
-    // ---- bug review 2026-09-30 verify G117 end ----
 
-    // ---- bug review 2026-09-30 G142 begin ----
-    // G142: Seq.defer fails with IllegalStateException when the supplier returns the deferred sequence itself (it flat-mapped
-    // into itself until StackOverflowError), as Stream.defer does; an ordinary supplier is unaffected.
     @Test
-    public void testDefer_supplierReturningTheDeferredSequenceItself() {
-        @SuppressWarnings("unchecked")
-        final Seq<Object, RuntimeException>[] self = new Seq[1];
-        self[0] = Seq.defer(() -> self[0]);
-
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
-        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(1, 2), Seq.<Integer, RuntimeException> defer(() -> Seq.of(1, 2)).toList());
+    public void testPartitionBy() throws Exception {
+        Map<Boolean, List<Integer>> parts = Seq.of(1, 2, 3, 4).partitionBy(x -> x % 2 == 0).toMap(Map.Entry::getKey, Map.Entry::getValue);
+        assertEquals(Arrays.asList(2, 4), parts.get(true));
+        assertEquals(Arrays.asList(1, 3), parts.get(false));
+        assertEquals(2, Seq.of(1, 2, 3, 4).partitionBy(x -> x % 2 == 0, Collectors.counting()).count());
     }
-    // ---- bug review 2026-09-30 G142 end ----
 
-    // ---- bug review 2026-09-30 G143 begin ----
-    // G143: a self-returning supplier fails with IllegalStateException instead of recursing; a null supplier result is still an
-    // empty sequence. G149: the failure is final - iterating on after it does not invoke the supplier again (a second terminal
-    // operation only fails because the first one closed the sequence).
     @Test
-    public void testDefer_selfReturningSupplierIsInvokedOnceAndNullIsEmpty() {
-        final int[] calls = new int[1];
-        @SuppressWarnings("unchecked")
-        final Seq<Object, RuntimeException>[] self = new Seq[1];
-        self[0] = Seq.defer(() -> {
-            calls[0]++;
-            return self[0];
-        });
-
-        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
-        org.junit.jupiter.api.Assertions.assertTrue(first.getMessage().contains("deferred sequence itself"), first.getMessage());
-        final IllegalStateException second = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> self[0].count());
-        org.junit.jupiter.api.Assertions.assertTrue(second.getMessage().contains("closed"), second.getMessage());
-        org.junit.jupiter.api.Assertions.assertEquals(1, calls[0]);
-
-        final int[] iterCalls = new int[1];
-        @SuppressWarnings("unchecked")
-        final Seq<Object, RuntimeException>[] iterSelf = new Seq[1];
-        iterSelf[0] = Seq.defer(() -> {
-            iterCalls[0]++;
-            return iterSelf[0];
-        });
-        final Throwables.Iterator<Object, RuntimeException> iter = iterSelf[0].iteratorEx();
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext);
-        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
-        org.junit.jupiter.api.Assertions.assertEquals(1, iterCalls[0]);
-
-        org.junit.jupiter.api.Assertions.assertEquals(0, Seq.<Object, RuntimeException> defer(() -> null).count());
+    public void testPeek() throws Exception {
+        List<Integer> seen = new ArrayList<>();
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peek(seen::add).toList());
+        assertEquals(Arrays.asList(1, 2, 3), seen);
+        seen.clear();
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peekFirst(seen::add).toList());
+        assertEquals(Collections.singletonList(1), seen);
+        seen.clear();
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).peekLast(seen::add).toList());
+        assertEquals(Collections.singletonList(3), seen);
+        seen.clear();
+        assertEquals(Arrays.asList(1, 2, 3, 4), Seq.of(1, 2, 3, 4).peekIf(x -> x % 2 == 0, seen::add).toList());
+        assertEquals(Arrays.asList(2, 4), seen);
+        seen.clear();
+        assertEquals(Arrays.asList(10, 20, 30, 40), Seq.of(10, 20, 30, 40).peekIf((v, i) -> i % 2 == 0, seen::add).toList());
+        assertEquals(Arrays.asList(20, 40), seen);
     }
+
+    @Test
+    public void testPeekIfBiPredicateActionSupportsCheckedException() {
+        final java.io.IOException failure = new java.io.IOException("peek failure");
+        final Seq<Integer, java.io.IOException> seq = Seq.<Integer, java.io.IOException> of(1, 2, 3);
+
+        final java.io.IOException thrown = assertThrows(java.io.IOException.class,
+                () -> seq.peekIf((value, index) -> true, (Throwables.Consumer<Integer, java.io.IOException>) value -> {
+                    throw failure;
+                }).toList());
+
+        org.junit.jupiter.api.Assertions.assertSame(failure, thrown);
+    }
+
+    @Test
+    public void testPrepend() throws Exception {
+        assertEquals(Arrays.asList(0, 1, 2), Seq.of(1, 2).prepend(0).toList());
+        assertEquals(Arrays.asList(-1, 0, 1, 2), Seq.of(1, 2).prepend(-1, 0).toList());
+        assertEquals(Arrays.asList("x", "y", "a", "b"), Seq.of("a", "b").prepend(Arrays.asList("x", "y")).toList());
+        assertEquals(Arrays.asList(0, 1, 2), Seq.of(1, 2).prepend(Seq.of(0)).toList());
+        assertEquals(Arrays.asList("world", "hello"), Seq.of("hello").prepend(Optional.of("world")).toList());
+        assertEquals(Arrays.asList("hello"), Seq.of("hello").prepend(Optional.empty()).toList());
+    }
+
+    @Test
+    public void testRange() throws Exception {
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4), Seq.range(0, 5).toList());
+        assertEquals(Arrays.asList(0, 2, 4, 6, 8), Seq.range(0, 10, 2).toList());
+        assertEquals(Arrays.asList(5, 3, 1), Seq.range(5, 0, -2).toList());
+        assertTrue(Seq.range(1, 1).toList().isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> Seq.range(1, 5, 0));
+        assertEquals(10000, Seq.range(0, 10000).count());
+        int[] counter = { 0 };
+        assertEquals(Arrays.asList(0, 2, 4, 6, 8, 10, 12, 14, 16, 18), Seq.range(0, 1000000).takeWhile(n -> {
+            counter[0]++;
+            return n < 10;
+        }).map(n -> n * 2).toList());
+        assertTrue(counter[0] < 20);
+    }
+
+    @Test
+    public void testRangeClosed() throws Exception {
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5), Seq.rangeClosed(0, 5).toList());
+        assertEquals(Collections.singletonList(1), Seq.rangeClosed(1, 1).toList());
+        assertEquals(Arrays.asList(1, 3, 5), Seq.rangeClosed(1, 5, 2).toList());
+        assertEquals(Arrays.asList(5, 3, 1), Seq.rangeClosed(5, 1, -2).toList());
+        assertEquals(Arrays.asList(0, 3, 6, 9), Seq.rangeClosed(0, 10, 3).toList());
+        assertThrows(IllegalArgumentException.class, () -> Seq.rangeClosed(1, 5, 0));
+    }
+
+    @Test
+    public void testRangeFactoriesReturnEmptyWhenStepPointsAway() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(5, 0).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(0, 10, -1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(10, 0, 2).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(3, 3, 1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(0, 10, -1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(10, 0, 2).toList());
+        assertEquals(Arrays.asList(3), Seq.<Exception> rangeClosed(3, 3, -7).toList());
+    }
+
+    @Test
+    public void testRepeat() throws Exception {
+        assertEquals(Arrays.asList("r", "r", "r"), Seq.repeat("r", 3).toList());
+        assertTrue(Seq.repeat("r", 0).toList().isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> Seq.repeat("r", -1));
+    }
+
+    @Test
+    public void testReversedRotatedShuffled() throws Exception {
+        assertEquals(Arrays.asList(3, 2, 1), Seq.of(1, 2, 3).reversed().toList());
+        assertEquals(Arrays.asList(4, 5, 1, 2, 3), Seq.of(1, 2, 3, 4, 5).rotated(2).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Seq.of(1, 2, 3, 4, 5).rotated(0).toList());
+        assertEquals(5, Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList().size());
+        assertEquals(Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList(), Seq.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).shuffled(null));
+    }
+
+    @Test
+    public void testSkipAndLimitHonorsLongMaxValueForUnboundedSource() throws Exception {
+        for (long offset : new long[] { 0, 1 }) {
+            List<Long> advances = new ArrayList<>();
+            Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public Integer next() {
+                    return 1;
+                }
+
+                @Override
+                public boolean supportsFailureAtomicAdvance() {
+                    return true;
+                }
+
+                @Override
+                public void advance(final long n) {
+                    advances.add(n);
+                }
+            };
+
+            try (Seq<Integer, Exception> limited = Seq.of(source).skipAndLimit(offset, Long.MAX_VALUE)) {
+                Throwables.Iterator<Integer, Exception> iter = limited.iteratorEx();
+                iter.advance(Long.MAX_VALUE);
+                assertFalse(iter.hasNext());
+                assertThrows(NoSuchElementException.class, iter::next);
+                assertEquals(offset == 0 ? List.of(Long.MAX_VALUE) : List.of(offset, Long.MAX_VALUE), advances);
+            }
+        }
+    }
+
+
+
+    // G069-01: skipLast buffers in an ArrayDeque with a null sentinel - pins nulls, buffer growth past 16 and manual iteration.
+    @Test
+    public void testSkipLast_nullsGrowthAndManualIteration() throws Exception {
+        for (int size = 0; size <= 40; size++) {
+            final List<String> source = g069Source(size);
+
+            for (final int n : new int[] { 1, 2, 3, 15, 16, 17, 33, 40, 41, Integer.MAX_VALUE }) {
+                final List<String> expected = source.subList(0, Math.max(0, size - Math.min(n, size)));
+                assertEquals(expected, Seq.<String, Exception> of(source).skipLast(n).toList(), "size=" + size + ", n=" + n);
+            }
+        }
+
+        try (Seq<String, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null).skipLast(2)) {
+            final Throwables.Iterator<String, Exception> iter = seq.iteratorEx();
+            assertTrue(iter.hasNext());
+            assertTrue(iter.hasNext());
+            assertEquals(null, iter.next());
+            assertEquals("a", iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(null, iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+
+        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of(null, null, null).skipLast(1).toList());
+        assertEquals(2, Seq.<String, Exception> of(null, "x", null, "y").skipLast(2).count());
+    }
+
+
+
+    // G112-03: sliding(..) keeps its overlap in an ArrayDeque with a null sentinel - pins window contents with nulls, gaps, skip and count
+    @Test
+    public void testSliding_overlapBufferWithNullsSkipAndCount_G112() throws Exception {
+        for (int size = 0; size <= 11; size++) {
+            final List<String> source = new ArrayList<>();
+
+            for (int i = 0; i < size; i++) {
+                source.add(i % 3 == 1 ? null : "e" + i);
+            }
+
+            for (int windowSize = 1; windowSize <= 5; windowSize++) {
+                for (int increment = 1; increment <= 6; increment++) {
+                    final List<List<String>> expected = g112Windows(source, windowSize, increment);
+                    final String msg = "size=" + size + ", windowSize=" + windowSize + ", increment=" + increment;
+
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment).toList(), msg);
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, n -> new java.util.LinkedList<String>()).toList(),
+                            msg);
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).toList(), msg);
+                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment).count(), msg);
+                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).count(), msg);
+
+                    for (int skip = 1; skip <= 4; skip++) {
+                        final List<List<String>> expectedAfterSkip = expected.subList(Math.min(skip, expected.size()), expected.size());
+                        assertEquals(expectedAfterSkip, Seq.<String, Exception> of(source).sliding(windowSize, increment).skip(skip).toList(),
+                                msg + ", skip=" + skip);
+                        assertEquals(expectedAfterSkip,
+                                Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).skip(skip).toList(),
+                                msg + ", skip=" + skip);
+                    }
+                }
+            }
+        }
+
+        // manual iteration interleaving next() and advance()
+        try (Seq<List<String>, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null, "c").sliding(3, 1)) {
+            final Throwables.Iterator<List<String>, Exception> iter = seq.iteratorEx();
+            assertEquals(Arrays.asList(null, "a", null), iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(Arrays.asList("a", null, "b"), iter.next());
+            iter.advance(1);
+            assertEquals(Arrays.asList("b", null, "c"), iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testSlidingCountPreservesExactCountWhenPrefixPlusRemainingExceedsLongMaxValue() throws Exception {
+        for (final int[] settings : new int[][] { { 2, 1 }, { 3, 1 }, { 3, 2 }, { 5, 3 } }) {
+            final int windowSize = settings[0];
+            final int increment = settings[1];
+            final long expected = java.math.BigInteger.valueOf(Long.MAX_VALUE)
+                    .add(java.math.BigInteger.valueOf(increment - 1))
+                    .divide(java.math.BigInteger.valueOf(increment))
+                    .longValueExact();
+
+            for (boolean collector : new boolean[] { false, true }) {
+                Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
+                    private int cursor;
+                    private java.math.BigInteger remaining = java.math.BigInteger.valueOf(Long.MAX_VALUE).add(java.math.BigInteger.valueOf(windowSize));
+
+                    @Override
+                    public boolean hasNext() {
+                        return remaining.signum() > 0;
+                    }
+
+                    @Override
+                    public Integer next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        remaining = remaining.subtract(java.math.BigInteger.ONE);
+                        return ++cursor;
+                    }
+
+                    @Override
+                    public long count() {
+                        final long result = remaining.longValueExact();
+                        remaining = java.math.BigInteger.ZERO;
+                        return result;
+                    }
+                };
+
+                try (Seq<? extends List<Integer>, Exception> windows = collector ? Seq.of(source).sliding(windowSize, increment, Collectors.toList())
+                        : Seq.of(source).sliding(windowSize, increment, ArrayList::new)) {
+                    Throwables.Iterator<? extends List<Integer>, Exception> iter = windows.iteratorEx();
+                    assertEquals(windowSize, iter.next().size());
+                    assertEquals(expected, iter.count());
+                    assertFalse(iter.hasNext());
+                    assertEquals(0, iter.count());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSorted() throws Exception {
+        assertEquals(Arrays.asList(1, 1, 3, 4, 5), Seq.of(3, 1, 4, 1, 5).sorted().toList());
+        assertEquals(Arrays.asList(5, 4, 3, 1, 1), Seq.of(3, 1, 4, 1, 5).sorted(Comparator.reverseOrder()).toList());
+        assertEquals(Arrays.asList("d", "bb", "aaa", "cccc"), Seq.of("aaa", "bb", "cccc", "d").sorted(Comparator.comparingInt(String::length)).toList());
+        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByInt(String::length).toList());
+        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByLong(s -> (long) s.length()).toList());
+        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedByDouble(s -> (double) s.length()).toList());
+        assertEquals(Arrays.asList("a", "bb", "ccc"), Seq.of("a", "ccc", "bb").sortedBy(String::length).toList());
+        assertEquals(Arrays.asList(5, 4, 3, 1), Seq.of(3, 1, 4, 5).reverseSorted().toList());
+        assertEquals(Arrays.asList("cccc", "aaa", "bb", "d"), Seq.of("aaa", "bb", "cccc", "d").reverseSortedBy(String::length).toList());
+        assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).sorted(Comparator.naturalOrder()).sorted(Comparator.naturalOrder()).toList());
+    }
+
+    @Test
+    public void testTakeLast() throws Exception {
+        assertEquals(Arrays.asList(4, 5), Seq.of(1, 2, 3, 4, 5).takeLast(2).toList());
+        assertTrue(Seq.of(1, 2).takeLast(0).toList().isEmpty());
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).takeLast(3).toList());
+    }
+
+
+
+    // G069-02: takeLast keeps a ring buffer and rotates it into order - pins wrap-around at every offset, growth, nulls, count/skip.
+    @Test
+    public void testTakeLast_ringBufferWrapNullsAndCount() throws Exception {
+        for (int size = 0; size <= 40; size++) {
+            final List<String> source = g069Source(size);
+
+            for (final int n : new int[] { 1, 2, 3, 5, 15, 16, 17, 20, 40, 41, Integer.MAX_VALUE }) {
+                final List<String> expected = source.subList(Math.max(0, size - Math.min(n, size)), size);
+                assertEquals(expected, Seq.<String, Exception> of(source).takeLast(n).toList(), "size=" + size + ", n=" + n);
+                assertEquals(expected.size(), Seq.<String, Exception> of(source).takeLast(n).count(), "size=" + size + ", n=" + n);
+            }
+        }
+
+        assertEquals(Arrays.asList(8, 9, 10), Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).takeLast(5).skip(2).toList());
+        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of("a", null, null).takeLast(2).toList());
+
+        try (Seq<Integer, Exception> seq = Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7).takeLast(3)) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertEquals(5, iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(6, iter.next());
+            assertEquals(7, iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testTakeWhile() throws Exception {
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2, 3, 4).takeWhile(x -> x < 3).toList());
+        assertArrayEquals(new String[] { "a", "b" }, Seq.of("a", "b", "c", "d").takeWhile(s -> s.compareTo("c") < 0).toArray(String[]::new));
+    }
+
+    @Test
+    public void testThrowIfEmpty() throws Exception {
+        assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).throwIfEmpty().toList());
+        assertThrows(NoSuchElementException.class, () -> Seq.empty().throwIfEmpty().toList());
+        assertThrows(IllegalStateException.class, () -> Seq.<Integer, Exception> empty().throwIfEmpty(() -> new IllegalStateException("empty")).toList());
+        assertEquals(Arrays.asList(1), Seq.of(1).throwIfEmpty(() -> new IllegalStateException("empty")).toList());
+    }
+
+    // top
+
+    @Test
+    public void testTop() throws Exception {
+        assertTrue(Seq.of(5, 2, 8, 1, 9, 3).top(3).toList().containsAll(Arrays.asList(5, 8, 9)));
+        assertEquals(Arrays.asList(9), Seq.of(5, 2, 8, 1, 9, 3).top(1).toList());
+        assertTrue(Seq.of(5, 3, 8, 1, 9, 2).top(3, Comparator.reverseOrder()).toList().containsAll(Arrays.asList(1, 2, 3)));
+        assertTrue(Seq.<Integer, Exception> empty().top(3).toList().isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> Seq.of(3, 1, 2).top(2, null));
+    }
+
+    @Test
+    public void testTopHugeLimitDoesNotPreallocateFromLimit() throws Exception {
+        List<Integer> result = Seq.of(3, 1, 2).top(Integer.MAX_VALUE, Comparator.naturalOrder()).toList();
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList(1, 2, 3)));
+    }
+
+    @Test
+    public void testTopSupportsNullWhenComparatorDoes() throws Exception {
+        final List<Integer> result = Seq.of(1, null, 2).top(2, Comparator.nullsLast(Comparator.naturalOrder())).toList();
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(2));
+        assertTrue(result.contains(null));
+    }
+
+    @Test
+    public void testIterableZipObtainsIteratorsBeforeLazyTraversal() throws Exception {
+        for (int variant = 0; variant < 4; variant++) {
+            AtomicInteger created = new AtomicInteger();
+            AtomicInteger pulled = new AtomicInteger();
+            AtomicInteger mapped = new AtomicInteger();
+            Iterable<Integer> source = () -> {
+                created.incrementAndGet();
+                return new java.util.Iterator<>() {
+                    private int remaining = 2;
+
+                    @Override
+                    public boolean hasNext() {
+                        return remaining > 0;
+                    }
+
+                    @Override
+                    public Integer next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        pulled.incrementAndGet();
+                        return remaining--;
+                    }
+                };
+            };
+            Throwables.BiFunction<Integer, Integer, Integer, Exception> pair = (a, b) -> {
+                mapped.incrementAndGet();
+                return a + b;
+            };
+            Throwables.TriFunction<Integer, Integer, Integer, Integer, Exception> triple = (a, b, c) -> {
+                mapped.incrementAndGet();
+                return a + b + c;
+            };
+            Seq<Integer, Exception> zipped;
+            switch (variant) {
+                case 0:
+                    zipped = Seq.zip(source, source, pair);
+                    break;
+                case 1:
+                    zipped = Seq.zip(source, source, source, triple);
+                    break;
+                case 2:
+                    zipped = Seq.zip(source, source, 0, 0, pair);
+                    break;
+                default:
+                    zipped = Seq.zip(source, source, source, 0, 0, 0, triple);
+                    break;
+            }
+            int arity = variant % 2 == 0 ? 2 : 3;
+            try (zipped) {
+                assertEquals(arity, created.get());
+                assertEquals(0, pulled.get());
+                assertEquals(0, mapped.get());
+                assertEquals(Arrays.asList(2 * arity, arity), zipped.toList());
+                assertEquals(2 * arity, pulled.get());
+                assertEquals(2, mapped.get());
+            }
+        }
+    }
+
+    private static List<String> g069Source(final int size) {
+        final List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            list.add(i % 3 == 1 ? null : "e" + i);
+        }
+
+        return list;
+    }
+
+
+
+    // Reference windows for sliding(windowSize, increment): window i covers [i * increment, i * increment + windowSize) clipped to the
+    // source; it is emitted only if it contains at least one element the previous window did not contain.
+    private static <T> List<List<T>> g112Windows(final List<T> source, final int windowSize, final int increment) {
+        final List<List<T>> result = new ArrayList<>();
+        final int size = source.size();
+        int prevEnd = 0;
+
+        for (long start = 0; start < size; start += increment) {
+            final int end = (int) Math.min(start + windowSize, size);
+
+            if (start > 0 && end <= prevEnd) {
+                break;
+            }
+
+            result.add(new ArrayList<>(source.subList((int) start, end)));
+            prevEnd = end;
+        }
+
+        return result;
+    }
+
     // ---- bug review 2026-09-30 G143 end ----
 
 }

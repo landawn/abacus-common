@@ -16,6 +16,126 @@ import org.junit.jupiter.api.Test;
 
 public class BeansRegisterTest extends BeansTestSupport {
 
+
+
+    /**
+     * Invalidating a bean drops its builder class's metadata too, and that drop has to cover the same pools as
+     * the bean's own: a partial drop leaves the builder's <i>lookup</i> getter pool answering from the model the
+     * registration just invalidated, and because {@code getPropGetter} reads that pool first, the re-derivation
+     * the drop exists to force never runs.
+     */
+    @Test
+    public void testGetPropGetter_BuilderMetadataIsDroppedSymmetrically() {
+        final BuilderSymmetryBean bean = BuilderSymmetryBean.builder().name("n").build();
+
+        // The builder is introspected in its own right, so its own getter pools are populated too.
+        assertTrue(Beans.getPropGetters(BuilderSymmetryBean.Builder.class).containsKey("note"));
+        assertEquals("getNote", Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "note").getName());
+
+        // Introspecting the bean publishes the builder's setter pools as a side effect.
+        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
+
+        // Invalidates the bean, and with it the builder class's metadata.
+        Beans.registerNonPropertyAccessor(BuilderSymmetryBean.class, "zzzNotAProperty");
+
+        // "note" is no longer a property of the builder. The builder class itself is not in the introspected
+        // index any more, so this registration does not re-publish anything for it.
+        Beans.registerNonPropertyAccessor(BuilderSymmetryBase.class, "note");
+
+        // Asserted before getPropGetters below, which would re-publish both pools and hide the stale entry.
+        assertNull(Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "note"));
+        assertFalse(Beans.getPropGetters(BuilderSymmetryBean.Builder.class).containsKey("note"));
+        assertEquals("getKeptNote", Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "keptNote").getName());
+    }
+
+    // getPropSetters
+
+
+
+    /**
+     * A second registration against the bean must not make {@code getPropSetters(builderClass)} spin forever.
+     *
+     * <p>This is the state the asymmetric drop actually reached: the first {@code getPropSetters(builderClass)}
+     * after a registration re-derives the builder <i>as a bean in its own right</i> and so publishes its getter
+     * pool; the next registration then removed only the setter pools, leaving a pair that
+     * {@code loadPropGetSetMethodList} would not republish and {@code getPropSetters} could not stop waiting for.</p>
+     *
+     * <p>Guarded by a preemptive timeout on purpose: the defect was an unbounded loop, so without the timeout a
+     * regression would hang the whole suite instead of failing this one test.</p>
+     */
+    @Test
+    public void testGetPropSetters_BuilderDoesNotSpinAfterRepeatedRegistration() {
+        final BuilderInvalidationBean2 bean = BuilderInvalidationBean2.builder().name("n").build();
+
+        Beans.beanToMap(bean);
+        Beans.getPropSetters(BuilderInvalidationBean2.Builder.class);
+
+        Beans.registerNonPropertyAccessor(BuilderInvalidationBean2.class, "zzz1");
+        Beans.getPropSetters(BuilderInvalidationBean2.Builder.class);
+        Beans.registerNonPropertyAccessor(BuilderInvalidationBean2.class, "zzz2");
+
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean2.Builder.class)));
+    }
+
+
+
+    /**
+     * A registration against the bean must not change <i>what</i> {@code getPropSetters(builderClass)} answers -
+     * the two sibling tests above pin termination only.
+     *
+     * <p>The builder's setter model is a by-product of introspecting the bean, so the lookup has to re-derive it
+     * through the bean. A standalone scan of a canonical builder (private fields, fluent one-argument methods)
+     * finds no properties at all, and used to publish that empty model in its place: the same call then answered
+     * {@code [name]}, then {@code []}, then {@code [name]} again over the life of one JVM, with no error.</p>
+     */
+    @Test
+    public void testGetPropSetters_BuilderKeepsItsContentAfterBeanRegistration() {
+        final BuilderContentBean bean = BuilderContentBean.builder().name("n").build();
+
+        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
+        assertEquals(1, Beans.getPropSetters(BuilderContentBean.Builder.class).size());
+
+        Beans.registerNonPropertyAccessor(BuilderContentBean.class, "zzzNotAProperty");
+
+        assertEquals(1, Beans.getPropSetters(BuilderContentBean.Builder.class).size());
+        assertEquals("name", Beans.getPropSetter(BuilderContentBean.Builder.class, "name").getName());
+    }
+
+
+
+    /**
+     * A registration against the bean must leave {@code getPropSetters(builderClass)} able to answer.
+     *
+     * <p>Dropping the builder's setter pools is deliberate and is pinned by
+     * {@code BeansRegressionBTest.testD6_registrationInvalidatesTheBuilderClassPoolsToo} - the point of this test
+     * is only that the drop is <i>symmetric</i>. The builder's getter-pool entry used to survive while its setter
+     * entry did not, and {@code loadPropGetSetMethodList} decides "already introspected?" from the getter pool
+     * alone, so the re-derivation never happened. What it asserts is therefore termination, not content.</p>
+     */
+    @Test
+    public void testGetPropSetters_BuilderRederivableAfterBeanRegistration() {
+        final BuilderInvalidationBean bean = BuilderInvalidationBean.builder().name("n").build();
+
+        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
+        assertTrue(Beans.getPropSetters(BuilderInvalidationBean.Builder.class).containsKey("name"));
+
+        Beans.registerNonPropertyAccessor(BuilderInvalidationBean.class, "zzz1");
+
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean.Builder.class)));
+    }
+
+    @Test
+    public void testIsRegisteredXmlBindingClass_NonBeanEntry() {
+        assertTrue(Beans.isBeanClass(XmlRegistryProbeBean.class));
+        Beans.registerNonBeanClass(XmlRegistryProbeBean.class);
+
+        assertFalse(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
+        assertFalse(Beans.isBeanClass(XmlRegistryProbeBean.class));
+
+        Beans.registerXmlBindingClass(XmlRegistryProbeBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
+    }
+
     @Test
     public void testRegisterNonBeanClass() {
         class TestNonBean {
@@ -55,6 +175,37 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertTrue(Beans.getPropNameList(AccessorCacheBean.class).contains("visible"));
     }
 
+
+
+    // G020-01: a registration against a nested bean type must also drop the dotted-path getter chains cached for the
+    // beans that reach it ("inner.city" on the outer class); otherwise the answer depends on whether the path was read
+    // before or after the registration.
+    @Test
+    public void testRegisterNonPropertyAccessor_dropsNestedPathCacheOfOuterBean() {
+        final G020InlineInner inner = new G020InlineInner();
+        inner.setCity("NYC");
+        inner.setZip("10001");
+        final G020InlineOuter outer = new G020InlineOuter();
+        outer.setName("o");
+        outer.setInner(inner);
+
+        // Read the dotted path once before the registration, so the outer class caches its getter chain.
+        assertEquals("NYC", Beans.getPropValue(outer, "inner.city"));
+        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
+
+        Beans.registerNonPropertyAccessor(G020InlineInner.class, "city");
+
+        assertFalse(Beans.getPropNameList(G020InlineInner.class).contains("city"));
+        // Same answer as for a path that was never read before the registration.
+        assertNull(Beans.getPropValue(outer, "inner.city", true));
+        assertFalse(Beans.getPropValueIfPresent(outer, "inner.city").isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropValue(outer, "inner.city"));
+        // An unaffected path through the same nested bean still resolves.
+        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
+    }
+
+    // registerPropertyAccessor
+
     @Test
     public void testRegisterPropertyAccessor() throws Exception {
         Method getName = SimpleBean.class.getMethod("getName");
@@ -87,6 +238,26 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertEquals(getter, Beans.getPropGetter(CustomAccessorBean.class, "alias"));
         assertEquals(setter, Beans.getPropSetter(CustomAccessorBean.class, "alias"));
         assertTrue(Beans.getPropNameList(CustomAccessorBean.class).contains("alias"));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_AmbiguousInterfaces() throws Exception {
+        Beans.registerPropertyAccessor("ambiguousAlias", LeftAmbiguousPropertyAccessor.class.getMethod("getLeftValue"));
+        Beans.registerPropertyAccessor("ambiguousAlias", RightAmbiguousPropertyAccessor.class.getMethod("getRightValue"));
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(AmbiguousPropertyAccessorBean.class, "ambiguousAlias"));
+    }
+
+    @Test
+    public void testRegisterPropertyAccessor_DoesNotDependOnPriorLookup() throws Exception {
+        Beans.registerPropertyAccessor("VALUE", BeansAccessorAFixture.class.getMethod("getOther"));
+        assertEquals("getValue", Beans.getPropGetter(BeansAccessorBFixture.class, "VALUE").getName());
+
+        Beans.registerPropertyAccessor("VALUE", BeansAccessorBFixture.class.getMethod("getOther"));
+        assertEquals("getOther", Beans.getPropGetter(BeansAccessorAFixture.class, "VALUE").getName());
+        assertEquals("getOther", Beans.getPropGetter(BeansAccessorBFixture.class, "VALUE").getName());
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropertyAccessor("value", BeansAccessorAFixture.class.getMethod("getOther")));
+        Beans.registerPropertyAccessor("value", BeansAccessorAFixture.class.getMethod("getValue"));
     }
 
     @Test
@@ -137,26 +308,6 @@ public class BeansRegisterTest extends BeansTestSupport {
     }
 
     @Test
-    public void testRegisterPropertyAccessor_AmbiguousInterfaces() throws Exception {
-        Beans.registerPropertyAccessor("ambiguousAlias", LeftAmbiguousPropertyAccessor.class.getMethod("getLeftValue"));
-        Beans.registerPropertyAccessor("ambiguousAlias", RightAmbiguousPropertyAccessor.class.getMethod("getRightValue"));
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropGetter(AmbiguousPropertyAccessorBean.class, "ambiguousAlias"));
-    }
-
-    @Test
-    public void testRegisterPropertyAccessor_DoesNotDependOnPriorLookup() throws Exception {
-        Beans.registerPropertyAccessor("VALUE", BeansAccessorAFixture.class.getMethod("getOther"));
-        assertEquals("getValue", Beans.getPropGetter(BeansAccessorBFixture.class, "VALUE").getName());
-
-        Beans.registerPropertyAccessor("VALUE", BeansAccessorBFixture.class.getMethod("getOther"));
-        assertEquals("getOther", Beans.getPropGetter(BeansAccessorAFixture.class, "VALUE").getName());
-        assertEquals("getOther", Beans.getPropGetter(BeansAccessorBFixture.class, "VALUE").getName());
-
-        assertThrows(IllegalArgumentException.class, () -> Beans.registerPropertyAccessor("value", BeansAccessorAFixture.class.getMethod("getOther")));
-        Beans.registerPropertyAccessor("value", BeansAccessorAFixture.class.getMethod("getValue"));
-    }
-
-    @Test
     public void testRegisterXmlBindingClass() {
         Beans.registerXmlBindingClass(SimpleBean.class);
         assertTrue(Beans.isRegisteredXmlBindingClass(SimpleBean.class));
@@ -181,17 +332,7 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertFalse(Beans.isRegisteredXmlBindingClass(CollectionBean.class));
     }
 
-    @Test
-    public void testIsRegisteredXmlBindingClass_NonBeanEntry() {
-        assertTrue(Beans.isBeanClass(XmlRegistryProbeBean.class));
-        Beans.registerNonBeanClass(XmlRegistryProbeBean.class);
 
-        assertFalse(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
-        assertFalse(Beans.isBeanClass(XmlRegistryProbeBean.class));
-
-        Beans.registerXmlBindingClass(XmlRegistryProbeBean.class);
-        assertTrue(Beans.isRegisteredXmlBindingClass(XmlRegistryProbeBean.class));
-    }
 
     /**
      * A builder-based bean used only by the builder-invalidation tests below, so that the registrations they
@@ -226,51 +367,7 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-    /**
-     * A registration against the bean must leave {@code getPropSetters(builderClass)} able to answer.
-     *
-     * <p>Dropping the builder's setter pools is deliberate and is pinned by
-     * {@code BeansRegressionBTest.testD6_registrationInvalidatesTheBuilderClassPoolsToo} - the point of this test
-     * is only that the drop is <i>symmetric</i>. The builder's getter-pool entry used to survive while its setter
-     * entry did not, and {@code loadPropGetSetMethodList} decides "already introspected?" from the getter pool
-     * alone, so the re-derivation never happened. What it asserts is therefore termination, not content.</p>
-     */
-    @Test
-    public void testGetPropSetters_BuilderRederivableAfterBeanRegistration() {
-        final BuilderInvalidationBean bean = BuilderInvalidationBean.builder().name("n").build();
 
-        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
-        assertTrue(Beans.getPropSetters(BuilderInvalidationBean.Builder.class).containsKey("name"));
-
-        Beans.registerNonPropertyAccessor(BuilderInvalidationBean.class, "zzz1");
-
-        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean.Builder.class)));
-    }
-
-    /**
-     * A second registration against the bean must not make {@code getPropSetters(builderClass)} spin forever.
-     *
-     * <p>This is the state the asymmetric drop actually reached: the first {@code getPropSetters(builderClass)}
-     * after a registration re-derives the builder <i>as a bean in its own right</i> and so publishes its getter
-     * pool; the next registration then removed only the setter pools, leaving a pair that
-     * {@code loadPropGetSetMethodList} would not republish and {@code getPropSetters} could not stop waiting for.</p>
-     *
-     * <p>Guarded by a preemptive timeout on purpose: the defect was an unbounded loop, so without the timeout a
-     * regression would hang the whole suite instead of failing this one test.</p>
-     */
-    @Test
-    public void testGetPropSetters_BuilderDoesNotSpinAfterRepeatedRegistration() {
-        final BuilderInvalidationBean2 bean = BuilderInvalidationBean2.builder().name("n").build();
-
-        Beans.beanToMap(bean);
-        Beans.getPropSetters(BuilderInvalidationBean2.Builder.class);
-
-        Beans.registerNonPropertyAccessor(BuilderInvalidationBean2.class, "zzz1");
-        Beans.getPropSetters(BuilderInvalidationBean2.Builder.class);
-        Beans.registerNonPropertyAccessor(BuilderInvalidationBean2.class, "zzz2");
-
-        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean2.Builder.class)));
-    }
 
     /** Separate class from {@link BuilderInvalidationBean} so the two tests cannot influence each other. */
     public static class BuilderInvalidationBean2 {
@@ -302,6 +399,8 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
+
+
     /** Separate class again, so no other test's introspection order can reach this one. */
     public static class BuilderContentBean {
         private String name;
@@ -332,27 +431,7 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-    /**
-     * A registration against the bean must not change <i>what</i> {@code getPropSetters(builderClass)} answers -
-     * the two sibling tests above pin termination only.
-     *
-     * <p>The builder's setter model is a by-product of introspecting the bean, so the lookup has to re-derive it
-     * through the bean. A standalone scan of a canonical builder (private fields, fluent one-argument methods)
-     * finds no properties at all, and used to publish that empty model in its place: the same call then answered
-     * {@code [name]}, then {@code []}, then {@code [name]} again over the life of one JVM, with no error.</p>
-     */
-    @Test
-    public void testGetPropSetters_BuilderKeepsItsContentAfterBeanRegistration() {
-        final BuilderContentBean bean = BuilderContentBean.builder().name("n").build();
 
-        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
-        assertEquals(1, Beans.getPropSetters(BuilderContentBean.Builder.class).size());
-
-        Beans.registerNonPropertyAccessor(BuilderContentBean.class, "zzzNotAProperty");
-
-        assertEquals(1, Beans.getPropSetters(BuilderContentBean.Builder.class).size());
-        assertEquals("name", Beans.getPropSetter(BuilderContentBean.Builder.class, "name").getName());
-    }
 
     /**
      * Gives {@link BuilderSymmetryBean.Builder} two properties of its own: one a registration takes away, and one
@@ -378,6 +457,8 @@ public class BeansRegisterTest extends BeansTestSupport {
             this.keptNote = keptNote;
         }
     }
+
+
 
     /** Separate class again, so no other test's introspection order can reach this one. */
     public static class BuilderSymmetryBean {
@@ -409,37 +490,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-    /**
-     * Invalidating a bean drops its builder class's metadata too, and that drop has to cover the same pools as
-     * the bean's own: a partial drop leaves the builder's <i>lookup</i> getter pool answering from the model the
-     * registration just invalidated, and because {@code getPropGetter} reads that pool first, the re-derivation
-     * the drop exists to force never runs.
-     */
-    @Test
-    public void testGetPropGetter_BuilderMetadataIsDroppedSymmetrically() {
-        final BuilderSymmetryBean bean = BuilderSymmetryBean.builder().name("n").build();
-
-        // The builder is introspected in its own right, so its own getter pools are populated too.
-        assertTrue(Beans.getPropGetters(BuilderSymmetryBean.Builder.class).containsKey("note"));
-        assertEquals("getNote", Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "note").getName());
-
-        // Introspecting the bean publishes the builder's setter pools as a side effect.
-        assertEquals("{name=n}", Beans.beanToMap(bean).toString());
-
-        // Invalidates the bean, and with it the builder class's metadata.
-        Beans.registerNonPropertyAccessor(BuilderSymmetryBean.class, "zzzNotAProperty");
-
-        // "note" is no longer a property of the builder. The builder class itself is not in the introspected
-        // index any more, so this registration does not re-publish anything for it.
-        Beans.registerNonPropertyAccessor(BuilderSymmetryBase.class, "note");
-
-        // Asserted before getPropGetters below, which would re-publish both pools and hide the stale entry.
-        assertNull(Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "note"));
-        assertFalse(Beans.getPropGetters(BuilderSymmetryBean.Builder.class).containsKey("note"));
-        assertEquals("getKeptNote", Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "keptNote").getName());
-    }
-
-    // ---- deep review 2026-09-25 G020 begin ----
     public static class G020InlineInner {
         private String city;
         private String zip;
@@ -482,31 +532,5 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-    // G020-01: a registration against a nested bean type must also drop the dotted-path getter chains cached for the
-    // beans that reach it ("inner.city" on the outer class); otherwise the answer depends on whether the path was read
-    // before or after the registration.
-    @Test
-    public void testRegisterNonPropertyAccessor_dropsNestedPathCacheOfOuterBean() {
-        final G020InlineInner inner = new G020InlineInner();
-        inner.setCity("NYC");
-        inner.setZip("10001");
-        final G020InlineOuter outer = new G020InlineOuter();
-        outer.setName("o");
-        outer.setInner(inner);
-
-        // Read the dotted path once before the registration, so the outer class caches its getter chain.
-        assertEquals("NYC", Beans.getPropValue(outer, "inner.city"));
-        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
-
-        Beans.registerNonPropertyAccessor(G020InlineInner.class, "city");
-
-        assertFalse(Beans.getPropNameList(G020InlineInner.class).contains("city"));
-        // Same answer as for a path that was never read before the registration.
-        assertNull(Beans.getPropValue(outer, "inner.city", true));
-        assertFalse(Beans.getPropValueIfPresent(outer, "inner.city").isPresent());
-        assertThrows(IllegalArgumentException.class, () -> Beans.getPropValue(outer, "inner.city"));
-        // An unaffected path through the same nested bean still resolves.
-        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
-    }
     // ---- deep review 2026-09-25 G020 end ----
 }

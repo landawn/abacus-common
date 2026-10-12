@@ -13,32 +13,7 @@ import org.junit.jupiter.api.Test;
 
 public class NMaxTest extends NTestSupport {
 
-    @Test
-    public void testMax_twoAndThreeValues() {
-        assertEquals('b', N.max('a', 'b'));
-        assertEquals((byte) 2, N.max((byte) 1, (byte) 2));
-        assertEquals((short) 2, N.max((short) 1, (short) 2));
-        assertEquals(2, N.max(1, 2));
-        assertEquals(2L, N.max(1L, 2L));
-        assertEquals(2.0f, N.max(1.0f, 2.0f), DELTAf);
-        assertEquals(2.0, N.max(1.0, 2.0), DELTA);
-
-        assertEquals('c', N.max('a', 'b', 'c'));
-        assertEquals((byte) 3, N.max((byte) 1, (byte) 2, (byte) 3));
-        assertEquals((short) 3, N.max((short) 1, (short) 2, (short) 3));
-        assertEquals(3, N.max(1, 2, 3));
-        assertEquals(3L, N.max(1L, 2L, 3L));
-        assertEquals(3.0f, N.max(1.0f, 2.0f, 3.0f), DELTAf);
-        assertEquals(3.0, N.max(1.0, 2.0, 3.0), DELTA);
-
-        assertEquals("b", N.max("a", "b"));
-        assertEquals("c", N.max("a", "b", "c"));
-        assertEquals("a", N.max(null, "a"));
-        assertEquals("a", N.max("a", null));
-        assertEquals(Integer.valueOf(2), N.max(1, 2, Comparator.naturalOrder()));
-        assertEquals("a", N.max("a", "b", Comparator.reverseOrder()));
-        assertEquals("a", N.max("a", "b", "c", Comparator.reverseOrder()));
-    }
+    // max
 
     @Test
     public void testMax_arrays() {
@@ -89,11 +64,40 @@ public class NMaxTest extends NTestSupport {
     }
 
     @Test
-    public void testMaxBy() {
-        Person[] people = { new Person("John", 25), new Person("Jane", 22), new Person("Bob", 30) };
-        assertEquals("Bob", N.maxBy(people, p -> p.age).name);
-        assertEquals("Bob", N.maxBy(Arrays.asList(people), p -> p.age).name);
-        assertEquals("Bob", N.maxBy(Arrays.asList(people).iterator(), p -> p.age).name);
+    public void testMax_nanAndEmpty() {
+        assertEquals(Double.NaN, N.max(new double[] { 3.0, 1.0, Double.NaN, 2.0 }), DELTA);
+        assertEquals(Double.NaN, N.max(new double[] { Double.NaN, 1.0 }), DELTA);
+        assertTrue(Float.isNaN(N.max(new float[] { 1.0f, Float.NaN, 3.0f })));
+        assertEquals(1.0f, N.max(new float[] { 1.0f, Float.NaN, 3.0f }, 0, 1), 0.0f);
+        assertEquals(Integer.valueOf(5), N.max(new Integer[] { 3, 1, null, 5 }));
+        assertEquals("zebra", N.max(Arrays.asList("zebra", "apple", "Banana"), String.CASE_INSENSITIVE_ORDER));
+    }
+
+    @Test
+    public void testMax_twoAndThreeValues() {
+        assertEquals('b', N.max('a', 'b'));
+        assertEquals((byte) 2, N.max((byte) 1, (byte) 2));
+        assertEquals((short) 2, N.max((short) 1, (short) 2));
+        assertEquals(2, N.max(1, 2));
+        assertEquals(2L, N.max(1L, 2L));
+        assertEquals(2.0f, N.max(1.0f, 2.0f), DELTAf);
+        assertEquals(2.0, N.max(1.0, 2.0), DELTA);
+
+        assertEquals('c', N.max('a', 'b', 'c'));
+        assertEquals((byte) 3, N.max((byte) 1, (byte) 2, (byte) 3));
+        assertEquals((short) 3, N.max((short) 1, (short) 2, (short) 3));
+        assertEquals(3, N.max(1, 2, 3));
+        assertEquals(3L, N.max(1L, 2L, 3L));
+        assertEquals(3.0f, N.max(1.0f, 2.0f, 3.0f), DELTAf);
+        assertEquals(3.0, N.max(1.0, 2.0, 3.0), DELTA);
+
+        assertEquals("b", N.max("a", "b"));
+        assertEquals("c", N.max("a", "b", "c"));
+        assertEquals("a", N.max(null, "a"));
+        assertEquals("a", N.max("a", null));
+        assertEquals(Integer.valueOf(2), N.max(1, 2, Comparator.naturalOrder()));
+        assertEquals("a", N.max("a", "b", Comparator.reverseOrder()));
+        assertEquals("a", N.max("a", "b", "c", Comparator.reverseOrder()));
     }
 
     @Test
@@ -106,43 +110,14 @@ public class NMaxTest extends NTestSupport {
         assertEquals(Collections.emptyList(), N.maxAll(Collections.emptyList()));
     }
 
-    @Test
-    public void testMaxOrDefaultIfEmpty() {
-        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
-        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
-        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
-        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
-
-        assertEquals(3, N.maxIntOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
-        assertEquals(99, N.maxIntOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
-        assertEquals(3L, N.maxLongOrDefaultIfEmpty(new Long[] { 1L, 2L, 3L }, x -> x, 99L));
-        assertEquals(99L, N.maxLongOrDefaultIfEmpty(Collections.<Long> emptyList(), x -> x, 99L));
-        assertEquals(3.0, N.maxDoubleOrDefaultIfEmpty(new Double[] { 1.0, 2.0, 3.0 }, x -> x, 99.0), DELTA);
-        assertEquals(99.0, N.maxDoubleOrDefaultIfEmpty(Collections.<Double> emptyIterator(), x -> x, 99.0), DELTA);
-    }
+    // maxBy
 
     @Test
-    public void testMax_nanAndEmpty() {
-        assertEquals(Double.NaN, N.max(new double[] { 3.0, 1.0, Double.NaN, 2.0 }), DELTA);
-        assertEquals(Double.NaN, N.max(new double[] { Double.NaN, 1.0 }), DELTA);
-        assertTrue(Float.isNaN(N.max(new float[] { 1.0f, Float.NaN, 3.0f })));
-        assertEquals(1.0f, N.max(new float[] { 1.0f, Float.NaN, 3.0f }, 0, 1), 0.0f);
-        assertEquals(Integer.valueOf(5), N.max(new Integer[] { 3, 1, null, 5 }));
-        assertEquals("zebra", N.max(Arrays.asList("zebra", "apple", "Banana"), String.CASE_INSENSITIVE_ORDER));
-    }
-
-    @Test
-    public void testMaxBy_returnsNullWhenTheSelectedElementIsNull() {
-        // The input is not all-null, yet the selected element is null: the key of the null element wins.
-        assertNull(N.maxBy(new String[] { null, "x" }, s -> s == null ? "z" : "a"));
-        assertNull(N.maxBy(Arrays.asList(null, "x"), s -> s == null ? "z" : "a"));
-
-        // An all-null input with a null-hostile extractor throws rather than returning null.
-        assertThrows(NullPointerException.class, () -> N.maxBy(new String[] { null, null }, String::length));
-
-        // With a null-tolerant extractor a null element ranks first, so the maximum is the non-null one.
-        assertEquals("x", N.maxBy(new String[] { null, "x" }, s -> s == null ? null : s.length()));
+    public void testMaxBy() {
+        Person[] people = { new Person("John", 25), new Person("Jane", 22), new Person("Bob", 30) };
+        assertEquals("Bob", N.maxBy(people, p -> p.age).name);
+        assertEquals("Bob", N.maxBy(Arrays.asList(people), p -> p.age).name);
+        assertEquals("Bob", N.maxBy(Arrays.asList(people).iterator(), p -> p.age).name);
     }
 
     @Test
@@ -176,4 +151,34 @@ public class NMaxTest extends NTestSupport {
         assertThrows(NullPointerException.class, () -> N.maxBy(Arrays.asList(null, "x"), String::length));
         assertThrows(NullPointerException.class, () -> N.maxBy(Arrays.asList(null, "x").iterator(), String::length));
     }
+
+    @Test
+    public void testMaxBy_returnsNullWhenTheSelectedElementIsNull() {
+        // The input is not all-null, yet the selected element is null: the key of the null element wins.
+        assertNull(N.maxBy(new String[] { null, "x" }, s -> s == null ? "z" : "a"));
+        assertNull(N.maxBy(Arrays.asList(null, "x"), s -> s == null ? "z" : "a"));
+
+        // An all-null input with a null-hostile extractor throws rather than returning null.
+        assertThrows(NullPointerException.class, () -> N.maxBy(new String[] { null, null }, String::length));
+
+        // With a null-tolerant extractor a null element ranks first, so the maximum is the non-null one.
+        assertEquals("x", N.maxBy(new String[] { null, "x" }, s -> s == null ? null : s.length()));
+    }
+
+    @Test
+    public void testMaxOrDefaultIfEmpty() {
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3), x -> x, 99));
+        assertEquals(Integer.valueOf(3), N.maxValueOrDefaultIfEmpty(Arrays.asList(1, 2, 3).iterator(), x -> x, 99));
+        assertEquals(Integer.valueOf(99), N.maxValueOrDefaultIfEmpty(Collections.<Integer> emptyIterator(), x -> x, 99));
+
+        assertEquals(3, N.maxIntOrDefaultIfEmpty(new Integer[] { 1, 2, 3 }, x -> x, 99));
+        assertEquals(99, N.maxIntOrDefaultIfEmpty(new Integer[] {}, x -> x, 99));
+        assertEquals(3L, N.maxLongOrDefaultIfEmpty(new Long[] { 1L, 2L, 3L }, x -> x, 99L));
+        assertEquals(99L, N.maxLongOrDefaultIfEmpty(Collections.<Long> emptyList(), x -> x, 99L));
+        assertEquals(3.0, N.maxDoubleOrDefaultIfEmpty(new Double[] { 1.0, 2.0, 3.0 }, x -> x, 99.0), DELTA);
+        assertEquals(99.0, N.maxDoubleOrDefaultIfEmpty(Collections.<Double> emptyIterator(), x -> x, 99.0), DELTA);
+    }
+
 }

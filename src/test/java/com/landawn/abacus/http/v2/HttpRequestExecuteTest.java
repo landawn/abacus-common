@@ -30,6 +30,8 @@ import com.sun.net.httpserver.HttpServer;
 
 public class HttpRequestExecuteTest extends HttpRequestTestSupport {
 
+    // execute
+
     @Test
     public void testExecute() {
         try {
@@ -43,11 +45,12 @@ public class HttpRequestExecuteTest extends HttpRequestTestSupport {
     }
 
     @Test
-    public void testExecute_NullMethod() {
-        HttpRequest request = HttpRequest.url(TEST_URL);
-        assertThrows(IllegalArgumentException.class, () -> request.execute(null));
-        assertThrows(IllegalArgumentException.class, () -> request.execute(null, BodyHandlers.ofString()));
-        assertThrows(IllegalArgumentException.class, () -> request.execute(null, String.class));
+    public void testExecute_BodyHandler() {
+        try {
+            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofString()));
+            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofByteArray()));
+        } catch (Exception e) {
+        }
     }
 
     @Test
@@ -68,109 +71,6 @@ public class HttpRequestExecuteTest extends HttpRequestTestSupport {
         } finally {
             server.stop(0);
         }
-    }
-
-    @Test
-    public void testExecute_BodyHandler() {
-        try {
-            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofString()));
-            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, BodyHandlers.ofByteArray()));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    public void testExecute_ResultClass() {
-        try {
-            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, String.class));
-            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, byte[].class));
-        } catch (Exception e) {
-        }
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecute_RestoresInterruptStatusWhenSendIsInterrupted() throws Exception {
-        final HttpClient client = mock(HttpClient.class);
-        when(client.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(new InterruptedException("interrupted"));
-
-        Thread.interrupted();
-
-        try {
-            assertThrows(RuntimeException.class, () -> HttpRequest.create("http://localhost", client).execute(HttpMethod.GET, BodyHandlers.ofString()));
-            assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            Thread.interrupted();
-        }
-    }
-
-    @Test
-    public void testExecute_RejectsNullBodyHandlerBeforeBuildingOwnedClient() {
-        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
-        final HttpRequest request = new HttpRequest(TEST_URL, null, null, clientBuilder, java.net.http.HttpRequest.newBuilder())
-                .closeHttpClientAfterExecution(true);
-
-        assertThrows(IllegalArgumentException.class, () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
-        verify(clientBuilder, never()).build();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecute_PreservesIOExceptionWhenOwnedClientCloseThrowsError() throws Exception {
-        final IOException failure = new IOException("send failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown.getCause());
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecute_PreservesRuntimeFailureWhenOwnedClientCloseThrowsError() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("send failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient).close();
-    }
-
-    @Test
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testExecute_PreservesResponseBodyFailureAndClosesOwnedClientOnce() throws Exception {
-        final IllegalStateException failure = new IllegalStateException("response body failure");
-        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
-        final HttpResponse<String> response = mock(HttpResponse.class);
-        when(response.body()).thenThrow(failure);
-        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
-        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
-        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
-
-        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
-
-        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
-
-        assertSame(failure, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
-        verify((AutoCloseable) ownedClient, times(1)).close();
     }
 
     @Test
@@ -210,4 +110,107 @@ public class HttpRequestExecuteTest extends HttpRequestTestSupport {
             server.stop(0);
         }
     }
+
+    @Test
+    public void testExecute_NullMethod() {
+        HttpRequest request = HttpRequest.url(TEST_URL);
+        assertThrows(IllegalArgumentException.class, () -> request.execute(null));
+        assertThrows(IllegalArgumentException.class, () -> request.execute(null, BodyHandlers.ofString()));
+        assertThrows(IllegalArgumentException.class, () -> request.execute(null, String.class));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecute_PreservesIOExceptionWhenOwnedClientCloseThrowsError() throws Exception {
+        final IOException failure = new IOException("send failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown.getCause());
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecute_PreservesResponseBodyFailureAndClosesOwnedClientOnce() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("response body failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpResponse<String> response = mock(HttpResponse.class);
+        when(response.body()).thenThrow(failure);
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenReturn(response);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient, times(1)).close();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecute_PreservesRuntimeFailureWhenOwnedClientCloseThrowsError() throws Exception {
+        final IllegalStateException failure = new IllegalStateException("send failure");
+        final AssertionError cleanupFailure = new AssertionError("cleanup failure");
+        final HttpClient ownedClient = mock(HttpClient.class, withSettings().extraInterfaces(AutoCloseable.class));
+        when(ownedClient.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(failure);
+        doThrow(cleanupFailure).when((AutoCloseable) ownedClient).close();
+
+        final HttpRequest request = newOwnedRequest(ownedClient, java.net.http.HttpRequest.newBuilder());
+
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> request.execute(HttpMethod.GET, BodyHandlers.ofString()));
+
+        assertSame(failure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(cleanupFailure, thrown.getSuppressed()[0]);
+        verify((AutoCloseable) ownedClient).close();
+    }
+
+    @Test
+    public void testExecute_RejectsNullBodyHandlerBeforeBuildingOwnedClient() {
+        final HttpClient.Builder clientBuilder = mock(HttpClient.Builder.class);
+        final HttpRequest request = new HttpRequest(TEST_URL, null, null, clientBuilder, java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+
+        assertThrows(IllegalArgumentException.class, () -> request.execute(HttpMethod.GET, (HttpResponse.BodyHandler<String>) null));
+        verify(clientBuilder, never()).build();
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testExecute_RestoresInterruptStatusWhenSendIsInterrupted() throws Exception {
+        final HttpClient client = mock(HttpClient.class);
+        when(client.send(any(java.net.http.HttpRequest.class), any(HttpResponse.BodyHandler.class))).thenThrow(new InterruptedException("interrupted"));
+
+        Thread.interrupted();
+
+        try {
+            assertThrows(RuntimeException.class, () -> HttpRequest.create("http://localhost", client).execute(HttpMethod.GET, BodyHandlers.ofString()));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testExecute_ResultClass() {
+        try {
+            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, String.class));
+            assertNotNull(HttpRequest.url(TEST_URL).execute(HttpMethod.GET, byte[].class));
+        } catch (Exception e) {
+        }
+    }
+
 }

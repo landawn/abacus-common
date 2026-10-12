@@ -23,44 +23,6 @@ import com.landawn.abacus.util.function.Predicate;
 public class FnApplyTest extends FnTestSupport {
 
     @Test
-    public void testApplyByKey() {
-        final Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
-        assertEquals(3, Fn.<String, Integer, Integer> applyByKey(String::length).apply(entry));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyByKey(null));
-    }
-
-    @Test
-    public void testApplyByValue() {
-        final Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
-        assertEquals(200, Fn.<String, Integer, Integer> applyByValue(v -> v * 2).apply(entry));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyByValue(null));
-    }
-
-    @Test
-    public void testApplyKeyVal() {
-        assertEquals("key=123", Fn.<String, Integer, String> applyKeyVal((k, v) -> k + "=" + v).apply(new AbstractMap.SimpleEntry<>("key", 123)));
-        assertThrows(IllegalArgumentException.class, () -> Fn.applyKeyVal(null));
-    }
-
-    @Test
-    public void testMapKeyAndValue() {
-        assertEquals(CommonUtil.newEntry("KEY", "val"), Fn.<String, String, String> mapKey(String::toUpperCase).apply(Map.entry("key", "val")));
-        assertEquals(CommonUtil.newEntry("k", 10), Fn.<String, Integer, Integer> mapValue(v -> v * 2).apply(Map.entry("k", 5)));
-        assertThrows(IllegalArgumentException.class, () -> Fn.mapKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.mapValue(null));
-    }
-
-    @Test
-    public void testTestByKeyAndValue() {
-        assertTrue(Fn.<Integer, String> testByKey(k -> k > 5).test(Map.entry(10, "v")));
-        assertTrue(Fn.<String, Integer> testByValue(v -> v > 50).test(Map.entry("k", 100)));
-        assertTrue(Fn.<String, Integer> testKeyVal((k, v) -> k.equals("a") && v == 1).test(Map.entry("a", 1)));
-        assertThrows(IllegalArgumentException.class, () -> Fn.testByKey(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.testByValue(null));
-        assertThrows(IllegalArgumentException.class, () -> Fn.testKeyVal(null));
-    }
-
-    @Test
     public void testAcceptByKeyAndValue() {
         final AtomicReference<String> key = new AtomicReference<>();
         final AtomicInteger value = new AtomicInteger();
@@ -112,11 +74,33 @@ public class FnApplyTest extends FnTestSupport {
     }
 
     @Test
+    public void testApplyByKey() {
+        final Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        assertEquals(3, Fn.<String, Integer, Integer> applyByKey(String::length).apply(entry));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyByKey(null));
+    }
+
+    @Test
+    public void testApplyByValue() {
+        final Map.Entry<String, Integer> entry = CommonUtil.newImmutableEntry("key", 100);
+        assertEquals(200, Fn.<String, Integer, Integer> applyByValue(v -> v * 2).apply(entry));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyByValue(null));
+    }
+
+    @Test
+    public void testApplyKeyVal() {
+        assertEquals("key=123", Fn.<String, Integer, String> applyKeyVal((k, v) -> k + "=" + v).apply(new AbstractMap.SimpleEntry<>("key", 123)));
+        assertThrows(IllegalArgumentException.class, () -> Fn.applyKeyVal(null));
+    }
+
+    @Test
     public void testFlatmapValue() {
         final Map<String, List<Integer>> src = Map.of("a", List.of(1, 2), "b", List.of(3));
         final List<Map<String, Integer>> rows = Fn.<String, Integer> flatmapValue().apply(src);
         assertEquals(2, rows.size());
     }
+
+
 
     // FINDING G20-008 (doc-only contract pin): the applyKeyVal javadoc example now builds its source map through
     // a TreeMap, so the element order it prints is reproducible (Map.of alone randomizes it per JVM run).
@@ -137,4 +121,23 @@ public class FnApplyTest extends FnTestSupport {
                 .sum();
         assertEquals(115, totalValue);
     }
+
+    @Test
+    public void testMapKeyAndValue() {
+        assertEquals(CommonUtil.newEntry("KEY", "val"), Fn.<String, String, String> mapKey(String::toUpperCase).apply(Map.entry("key", "val")));
+        assertEquals(CommonUtil.newEntry("k", 10), Fn.<String, Integer, Integer> mapValue(v -> v * 2).apply(Map.entry("k", 5)));
+        assertThrows(IllegalArgumentException.class, () -> Fn.mapKey(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.mapValue(null));
+    }
+
+    @Test
+    public void testTestByKeyAndValue() {
+        assertTrue(Fn.<Integer, String> testByKey(k -> k > 5).test(Map.entry(10, "v")));
+        assertTrue(Fn.<String, Integer> testByValue(v -> v > 50).test(Map.entry("k", 100)));
+        assertTrue(Fn.<String, Integer> testKeyVal((k, v) -> k.equals("a") && v == 1).test(Map.entry("a", 1)));
+        assertThrows(IllegalArgumentException.class, () -> Fn.testByKey(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.testByValue(null));
+        assertThrows(IllegalArgumentException.class, () -> Fn.testKeyVal(null));
+    }
+
 }

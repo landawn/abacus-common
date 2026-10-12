@@ -14,20 +14,92 @@ import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
 public class IOUtilToTest extends IOUtilTestSupport {
+
+    // toFile
+
     @Test
-    public void testToFile_ValidURL() throws Exception {
-        File file = Files.createTempFile(tempFolder, "url-test", ".txt").toFile();
-        java.net.URL url = file.toURI().toURL();
+    public void testToFile_DecodesUtf8AndMalformedPercent() throws Exception {
+        final File file = IOUtil.toFile(new URL("file:/tmp/a%20b/%E2%82%AC%2B%25bad%zz.txt"));
+        final String path = file.getPath();
 
-        File result = IOUtil.toFile(url);
+        assertTrue(path.contains("a b"));
+        assertTrue(path.contains("\u20ac+%bad%zz.txt"));
+    }
 
-        assertNotNull(result);
-        assertEquals(file.getAbsolutePath(), result.getAbsolutePath());
+
+
+
+
+    // G131-01: java.io.File drops EVERY leading separator before a drive letter, so a drive-relative path after four
+    // or more slashes - plain or escaped - is refused like "file:///C:x" (it became File("C:x\\y")); the same spellings
+    // of an absolute path, and a UNC host followed by such a name, are unchanged
+    @Test
+    public void testToFile_driveRelativePathAfterSeveralLeadingSlashesIsRejected() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file:////C:x/y", "file:////C%3Ax/y", "file:////%43:x/y", "file://///C:x/y" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
+        }
+
+        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C:/x")).getPath());
+        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C%3A/x")).getPath());
+        assertEquals("\\\\server\\share\\x", IOUtil.toFile(new URL("file:////server/share/x")).getPath());
+        assertEquals("\\\\server\\C:x", IOUtil.toFile(new URL("file:////server/C:x")).getPath());
     }
 
     @Test
-    public void testToFile_NullURL() {
-        assertThrows(Exception.class, () -> IOUtil.toFile(null));
+    public void testToFile_dropsQueryAndFragment() throws Exception {
+        final File plain = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt").toURL());
+        final File withQuery = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt?v=1").toURL());
+        final File withFragment = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt#frag").toURL());
+
+        assertEquals(plain.getPath(), withQuery.getPath());
+        assertEquals(plain.getPath(), withFragment.getPath());
+        assertFalse(withQuery.getPath().contains("?"));
+        assertFalse(withFragment.getPath().contains("#"));
+    }
+
+
+
+
+    // G045-02: a bare or drive-relative Windows drive spelled with an escaped letter or colon is refused like its plain
+    // spelling; it used to decode to File("C:") / File("C:x"), the process's current directory on drive C:
+    @Test
+    public void testToFile_escapedBareOrDriveRelativeDriveIsRejected() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file:///C%3A", "file:///C%3a", "file:///%43:", "file:///C%3Ax", "file:///%63%3A", "file:C%3A",
+                "file:%43:x" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
+        }
+
+        // an escaped colon in an absolute path is still decoded, as before
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:///C%3A/x")));
+        assertEquals(new File("C:\\x y"), IOUtil.toFile(new URL("file:///%43:/x%20y")));
+    }
+
+
+
+
+
+    // G045-02: the escaped bare / drive-relative drive is refused in the other URL forms that reach the decoded check too
+    // ("localhost" authority, one-slash form, lower-case escaped letter); a decoded colon that does not follow a lone drive
+    // letter stays part of a name, and absolute escaped forms and the UNC form decode as before
+    @Test
+    public void testToFile_escapedDriveIsRejectedInEveryFormAndOtherColonsAreKept() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+
+        for (final String spelling : new String[] { "file://localhost/C%3A", "file:/C%3A", "file:/C%3Ax", "file:///%7A:", "file:///C%3A%3A" }) {
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
+        }
+
+        assertEquals(new File("\\xy:"), IOUtil.toFile(new URL("file:///xy%3A")));
+        assertEquals(new File("\\1:"), IOUtil.toFile(new URL("file:///%31:")));
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file://localhost/C%3A/x")));
+        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:/C%3A/x")));
+        assertEquals(new File("\\\\server\\C:"), IOUtil.toFile(new URL("file://server/C%3A")));
     }
 
     @Test
@@ -41,134 +113,29 @@ public class IOUtilToTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testToFiles_URLArray() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "url1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "url2", ".txt").toFile();
-
-        java.net.URL[] urls = { file1.toURI().toURL(), file2.toURI().toURL() };
-
-        File[] files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(2, files.length);
+    public void testToFile_NullURL() {
+        assertThrows(Exception.class, () -> IOUtil.toFile(null));
     }
 
     @Test
-    public void testToFiles_URLCollection() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "url-c1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "url-c2", ".txt").toFile();
+    public void testToFile_stillPercentDecodesAndRoundTrips() throws Exception {
+        final File original = new File(tempFolder.toFile(), "my docs.txt");
+        Files.write(original.toPath(), "x".getBytes(UTF_8));
 
-        java.util.List<java.net.URL> urls = java.util.Arrays.asList(file1.toURI().toURL(), file2.toURI().toURL());
+        final File roundTripped = IOUtil.toFile(original.toURI().toURL());
 
-        java.util.List<File> files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(2, files.size());
+        assertEquals(original.getCanonicalPath(), roundTripped.getCanonicalPath());
     }
 
     @Test
-    public void testToFiles_EmptyArray() throws Exception {
-        java.net.URL[] urls = {};
+    public void testToFile_ValidURL() throws Exception {
+        File file = Files.createTempFile(tempFolder, "url-test", ".txt").toFile();
+        java.net.URL url = file.toURI().toURL();
 
-        File[] files = IOUtil.toFiles(urls);
+        File result = IOUtil.toFile(url);
 
-        assertNotNull(files);
-        assertEquals(0, files.length);
-    }
-
-    @Test
-    public void testToFiles_EmptyCollection() throws Exception {
-        java.util.List<java.net.URL> urls = new java.util.ArrayList<>();
-
-        java.util.List<File> files = IOUtil.toFiles(urls);
-
-        assertNotNull(files);
-        assertEquals(0, files.size());
-    }
-
-    @Test
-    public void testToFiles_NullURLCollection() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toFiles((java.util.Collection<java.net.URL>) null));
-    }
-
-    @Test
-    public void testToURL_ValidFile() throws Exception {
-        File file = Files.createTempFile(tempFolder, "to-url", ".txt").toFile();
-
-        java.net.URL url = IOUtil.toUrl(file);
-
-        assertNotNull(url);
-        assertTrue(url.toString().contains(file.getName()));
-    }
-
-    @Test
-    public void testToUrl_NullFile() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrl(null));
-    }
-
-    @Test
-    public void testToURLs_FileArray() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "to-urls1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "to-urls2", ".txt").toFile();
-
-        File[] files = { file1, file2 };
-
-        java.net.URL[] urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(2, urls.length);
-    }
-
-    @Test
-    public void testToURLs_FileCollection() throws Exception {
-        File file1 = Files.createTempFile(tempFolder, "to-urls-c1", ".txt").toFile();
-        File file2 = Files.createTempFile(tempFolder, "to-urls-c2", ".txt").toFile();
-
-        java.util.List<File> files = java.util.Arrays.asList(file1, file2);
-
-        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(2, urls.size());
-    }
-
-    @Test
-    public void testToURLs_EmptyArray() throws Exception {
-        File[] files = {};
-
-        java.net.URL[] urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(0, urls.length);
-    }
-
-    @Test
-    public void testToURLs_EmptyCollection() throws Exception {
-        java.util.List<File> files = new java.util.ArrayList<>();
-
-        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
-
-        assertNotNull(urls);
-        assertEquals(0, urls.size());
-    }
-
-    @Test
-    public void testToUrls_NullFileArray() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrls((File[]) null));
-    }
-
-    @Test
-    public void testToUrls_NullFileCollection() throws Exception {
-        assertThrows(Exception.class, () -> IOUtil.toUrls((java.util.Collection<File>) null));
-    }
-
-    @Test
-    public void testToFile_DecodesUtf8AndMalformedPercent() throws Exception {
-        final File file = IOUtil.toFile(new URL("file:/tmp/a%20b/%E2%82%AC%2B%25bad%zz.txt"));
-        final String path = file.getPath();
-
-        assertTrue(path.contains("a b"));
-        assertTrue(path.contains("\u20ac+%bad%zz.txt"));
+        assertNotNull(result);
+        assertEquals(file.getAbsolutePath(), result.getAbsolutePath());
     }
 
     @Test
@@ -212,90 +179,132 @@ public class IOUtilToTest extends IOUtilTestSupport {
         assertFalse(IOUtil.toFile(new java.net.URL("file://localhost/tmp/a.txt")).getPath().contains("localhost"));
     }
 
-    @Test
-    public void testToFile_dropsQueryAndFragment() throws Exception {
-        final File plain = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt").toURL());
-        final File withQuery = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt?v=1").toURL());
-        final File withFragment = IOUtil.toFile(java.net.URI.create("file:///tmp/a.txt#frag").toURL());
+    // toFiles
 
-        assertEquals(plain.getPath(), withQuery.getPath());
-        assertEquals(plain.getPath(), withFragment.getPath());
-        assertFalse(withQuery.getPath().contains("?"));
-        assertFalse(withFragment.getPath().contains("#"));
+    @Test
+    public void testToFiles_EmptyArray() throws Exception {
+        java.net.URL[] urls = {};
+
+        File[] files = IOUtil.toFiles(urls);
+
+        assertNotNull(files);
+        assertEquals(0, files.length);
     }
 
     @Test
-    public void testToFile_stillPercentDecodesAndRoundTrips() throws Exception {
-        final File original = new File(tempFolder.toFile(), "my docs.txt");
-        Files.write(original.toPath(), "x".getBytes(UTF_8));
+    public void testToFiles_EmptyCollection() throws Exception {
+        java.util.List<java.net.URL> urls = new java.util.ArrayList<>();
 
-        final File roundTripped = IOUtil.toFile(original.toURI().toURL());
+        java.util.List<File> files = IOUtil.toFiles(urls);
 
-        assertEquals(original.getCanonicalPath(), roundTripped.getCanonicalPath());
+        assertNotNull(files);
+        assertEquals(0, files.size());
     }
 
-    // ---- bug review 2026-10-02 G045 begin ----
-
-    // G045-02: a bare or drive-relative Windows drive spelled with an escaped letter or colon is refused like its plain
-    // spelling; it used to decode to File("C:") / File("C:x"), the process's current directory on drive C:
     @Test
-    public void testToFile_escapedBareOrDriveRelativeDriveIsRejected() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
-
-        for (final String spelling : new String[] { "file:///C%3A", "file:///C%3a", "file:///%43:", "file:///C%3Ax", "file:///%63%3A", "file:C%3A",
-                "file:%43:x" }) {
-            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
-            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
-        }
-
-        // an escaped colon in an absolute path is still decoded, as before
-        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:///C%3A/x")));
-        assertEquals(new File("C:\\x y"), IOUtil.toFile(new URL("file:///%43:/x%20y")));
+    public void testToFiles_NullURLCollection() throws Exception {
+        assertThrows(Exception.class, () -> IOUtil.toFiles((java.util.Collection<java.net.URL>) null));
     }
 
-    // ---- bug review 2026-10-02 G045 end ----
-
-    // ---- bug review 2026-10-02 verify G122 begin ----
-
-    // G045-02: the escaped bare / drive-relative drive is refused in the other URL forms that reach the decoded check too
-    // ("localhost" authority, one-slash form, lower-case escaped letter); a decoded colon that does not follow a lone drive
-    // letter stays part of a name, and absolute escaped forms and the UNC form decode as before
     @Test
-    public void testToFile_escapedDriveIsRejectedInEveryFormAndOtherColonsAreKept() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+    public void testToFiles_URLArray() throws Exception {
+        File file1 = Files.createTempFile(tempFolder, "url1", ".txt").toFile();
+        File file2 = Files.createTempFile(tempFolder, "url2", ".txt").toFile();
 
-        for (final String spelling : new String[] { "file://localhost/C%3A", "file:/C%3A", "file:/C%3Ax", "file:///%7A:", "file:///C%3A%3A" }) {
-            assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
-        }
+        java.net.URL[] urls = { file1.toURI().toURL(), file2.toURI().toURL() };
 
-        assertEquals(new File("\\xy:"), IOUtil.toFile(new URL("file:///xy%3A")));
-        assertEquals(new File("\\1:"), IOUtil.toFile(new URL("file:///%31:")));
-        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file://localhost/C%3A/x")));
-        assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:/C%3A/x")));
-        assertEquals(new File("\\\\server\\C:"), IOUtil.toFile(new URL("file://server/C%3A")));
+        File[] files = IOUtil.toFiles(urls);
+
+        assertNotNull(files);
+        assertEquals(2, files.length);
     }
 
-    // ---- bug review 2026-10-02 verify G122 end ----
-
-    // ---- bug review 2026-10-02 final G131 begin ----
-
-    // G131-01: java.io.File drops EVERY leading separator before a drive letter, so a drive-relative path after four
-    // or more slashes - plain or escaped - is refused like "file:///C:x" (it became File("C:x\\y")); the same spellings
-    // of an absolute path, and a UNC host followed by such a name, are unchanged
     @Test
-    public void testToFile_driveRelativePathAfterSeveralLeadingSlashesIsRejected() throws Exception {
-        org.junit.jupiter.api.Assumptions.assumeTrue(IOUtil.IS_OS_WINDOWS, "drives exist on Windows only");
+    public void testToFiles_URLCollection() throws Exception {
+        File file1 = Files.createTempFile(tempFolder, "url-c1", ".txt").toFile();
+        File file2 = Files.createTempFile(tempFolder, "url-c2", ".txt").toFile();
 
-        for (final String spelling : new String[] { "file:////C:x/y", "file:////C%3Ax/y", "file:////%43:x/y", "file://///C:x/y" }) {
-            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new URL(spelling)), spelling);
-            assertTrue(e.getMessage().startsWith("A file URL naming a drive must also name an absolute path on it"), e.getMessage());
-        }
+        java.util.List<java.net.URL> urls = java.util.Arrays.asList(file1.toURI().toURL(), file2.toURI().toURL());
 
-        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C:/x")).getPath());
-        assertEquals("C:\\x", IOUtil.toFile(new URL("file:////C%3A/x")).getPath());
-        assertEquals("\\\\server\\share\\x", IOUtil.toFile(new URL("file:////server/share/x")).getPath());
-        assertEquals("\\\\server\\C:x", IOUtil.toFile(new URL("file:////server/C:x")).getPath());
+        java.util.List<File> files = IOUtil.toFiles(urls);
+
+        assertNotNull(files);
+        assertEquals(2, files.size());
     }
+
+    @Test
+    public void testToUrl_NullFile() throws Exception {
+        assertThrows(Exception.class, () -> IOUtil.toUrl(null));
+    }
+
+    @Test
+    public void testToURL_ValidFile() throws Exception {
+        File file = Files.createTempFile(tempFolder, "to-url", ".txt").toFile();
+
+        java.net.URL url = IOUtil.toUrl(file);
+
+        assertNotNull(url);
+        assertTrue(url.toString().contains(file.getName()));
+    }
+
+    // toUrls
+
+    @Test
+    public void testToURLs_EmptyArray() throws Exception {
+        File[] files = {};
+
+        java.net.URL[] urls = IOUtil.toUrls(files);
+
+        assertNotNull(urls);
+        assertEquals(0, urls.length);
+    }
+
+    @Test
+    public void testToURLs_EmptyCollection() throws Exception {
+        java.util.List<File> files = new java.util.ArrayList<>();
+
+        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
+
+        assertNotNull(urls);
+        assertEquals(0, urls.size());
+    }
+
+    @Test
+    public void testToURLs_FileArray() throws Exception {
+        File file1 = Files.createTempFile(tempFolder, "to-urls1", ".txt").toFile();
+        File file2 = Files.createTempFile(tempFolder, "to-urls2", ".txt").toFile();
+
+        File[] files = { file1, file2 };
+
+        java.net.URL[] urls = IOUtil.toUrls(files);
+
+        assertNotNull(urls);
+        assertEquals(2, urls.length);
+    }
+
+    @Test
+    public void testToURLs_FileCollection() throws Exception {
+        File file1 = Files.createTempFile(tempFolder, "to-urls-c1", ".txt").toFile();
+        File file2 = Files.createTempFile(tempFolder, "to-urls-c2", ".txt").toFile();
+
+        java.util.List<File> files = java.util.Arrays.asList(file1, file2);
+
+        java.util.List<java.net.URL> urls = IOUtil.toUrls(files);
+
+        assertNotNull(urls);
+        assertEquals(2, urls.size());
+    }
+
+    @Test
+    public void testToUrls_NullFileArray() throws Exception {
+        assertThrows(Exception.class, () -> IOUtil.toUrls((File[]) null));
+    }
+
+    @Test
+    public void testToUrls_NullFileCollection() throws Exception {
+        assertThrows(Exception.class, () -> IOUtil.toUrls((java.util.Collection<File>) null));
+    }
+
 
     // ---- bug review 2026-10-02 final G131 end ----
 }

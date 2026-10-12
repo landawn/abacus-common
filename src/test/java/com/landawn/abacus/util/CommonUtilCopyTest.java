@@ -98,6 +98,8 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         assertNull(typed[3]);
     }
 
+    // copyOfRange
+
     @Test
     public void testCopyOfRange_arrays() {
         boolean[] boolFull = { true, false, true };
@@ -115,26 +117,6 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         assertArrayEquals(new double[] { 1.0, 2.0 }, CommonUtil.copyOfRange(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 0, 2));
         assertArrayEquals(new String[] { "b", "c", "d" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e" }, 1, 4));
         assertArrayEquals(new Integer[] { 2, 3, 4 }, CommonUtil.copyOfRange(new Number[] { 1, 2, 3, 4, 5 }, 1, 4, Integer[].class));
-    }
-
-    @Test
-    public void testCopyOfRange_withStep() {
-        assertArrayEquals(new boolean[] { true, true, true }, CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true, false }, 0, 6, 2));
-        assertArrayEquals(new boolean[] { true, false, true }, CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true }, 4, 1, -1));
-        assertArrayEquals(new boolean[] { true, false, true, false, true },
-                CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true }, 4, -1, -1));
-
-        assertArrayEquals(new char[] { 'b', 'd', 'f' }, CommonUtil.copyOfRange(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' }, 1, 6, 2));
-        assertArrayEquals(new byte[] { 1, 3, 5 }, CommonUtil.copyOfRange(new byte[] { 1, 2, 3, 4, 5, 6 }, 0, 5, 2));
-        assertArrayEquals(new byte[] { 5, 4, 3 }, CommonUtil.copyOfRange(new byte[] { 1, 2, 3, 4, 5 }, 4, 1, -1));
-        assertArrayEquals(new short[] { 20, 40 }, CommonUtil.copyOfRange(new short[] { 10, 20, 30, 40, 50, 60 }, 1, 5, 2));
-        assertArrayEquals(new int[] { 100, 400 }, CommonUtil.copyOfRange(new int[] { 100, 200, 300, 400, 500, 600 }, 0, 6, 3));
-        assertArrayEquals(new long[] { 5000L, 3000L }, CommonUtil.copyOfRange(new long[] { 1000L, 2000L, 3000L, 4000L, 5000L }, 4, 0, -2));
-        assertArrayEquals(new float[] { 1.0f, 3.0f, 5.0f }, CommonUtil.copyOfRange(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, 0, 6, 2));
-        assertArrayEquals(new double[] { 2.0, 4.0 }, CommonUtil.copyOfRange(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 5, 2));
-        assertArrayEquals(new String[] { "a", "c", "e" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e", "f" }, 0, 6, 2));
-        assertArrayEquals(new Integer[] { 1, 4 }, CommonUtil.copyOfRange(new Number[] { 1, 2, 3, 4, 5, 6 }, 0, 6, 3, Integer[].class));
-        assertArrayEquals(new String[] { "a", "c", "e" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e" }, 0, 5, 2, String[].class));
     }
 
     @Test
@@ -184,14 +166,27 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testCopyOfRangeStringWithStepReturnsEmptyForNullString() {
-        assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0, 2));
-        // C-107 (2026-09-24): a null String behaves exactly like "", which rejects the non-empty descending range (0, -1)
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, -1, -1));
-        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, 1, 1));
+    public void testCopyOfRange_withStep() {
+        assertArrayEquals(new boolean[] { true, true, true }, CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true, false }, 0, 6, 2));
+        assertArrayEquals(new boolean[] { true, false, true }, CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true }, 4, 1, -1));
+        assertArrayEquals(new boolean[] { true, false, true, false, true },
+                CommonUtil.copyOfRange(new boolean[] { true, false, true, false, true }, 4, -1, -1));
+
+        assertArrayEquals(new char[] { 'b', 'd', 'f' }, CommonUtil.copyOfRange(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' }, 1, 6, 2));
+        assertArrayEquals(new byte[] { 1, 3, 5 }, CommonUtil.copyOfRange(new byte[] { 1, 2, 3, 4, 5, 6 }, 0, 5, 2));
+        assertArrayEquals(new byte[] { 5, 4, 3 }, CommonUtil.copyOfRange(new byte[] { 1, 2, 3, 4, 5 }, 4, 1, -1));
+        assertArrayEquals(new short[] { 20, 40 }, CommonUtil.copyOfRange(new short[] { 10, 20, 30, 40, 50, 60 }, 1, 5, 2));
+        assertArrayEquals(new int[] { 100, 400 }, CommonUtil.copyOfRange(new int[] { 100, 200, 300, 400, 500, 600 }, 0, 6, 3));
+        assertArrayEquals(new long[] { 5000L, 3000L }, CommonUtil.copyOfRange(new long[] { 1000L, 2000L, 3000L, 4000L, 5000L }, 4, 0, -2));
+        assertArrayEquals(new float[] { 1.0f, 3.0f, 5.0f }, CommonUtil.copyOfRange(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, 0, 6, 2));
+        assertArrayEquals(new double[] { 2.0, 4.0 }, CommonUtil.copyOfRange(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, 1, 5, 2));
+        assertArrayEquals(new String[] { "a", "c", "e" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e", "f" }, 0, 6, 2));
+        assertArrayEquals(new Integer[] { 1, 4 }, CommonUtil.copyOfRange(new Number[] { 1, 2, 3, 4, 5, 6 }, 0, 6, 3, Integer[].class));
+        assertArrayEquals(new String[] { "a", "c", "e" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e" }, 0, 5, 2, String[].class));
     }
 
-    // ---- perf review 2026-09-26 G030 begin ----
+
+
     // G030-02: copyOfRange(String, from, to, step) reads chars directly; pin every (from, to, step) combination against a reference.
     @Test
     public void testCopyOfRangeStringStep_allRanges() {
@@ -251,5 +246,14 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange("abc", 0, 3, 0));
         assertEquals("", CommonUtil.copyOfRange((String) null, -1, -1, -2));
     }
+
+    @Test
+    public void testCopyOfRangeStringWithStepReturnsEmptyForNullString() {
+        assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0, 2));
+        // C-107 (2026-09-24): a null String behaves exactly like "", which rejects the non-empty descending range (0, -1)
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, -1, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, 1, 1));
+    }
+
     // ---- perf review 2026-09-26 G030 end ----
 }

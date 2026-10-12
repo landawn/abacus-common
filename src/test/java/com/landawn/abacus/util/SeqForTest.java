@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 public class SeqForTest extends SeqTestSupport {
 
+    // forEach
+
     @Test
     public void testForEach() throws Exception {
         List<Integer> collected = new ArrayList<>();
@@ -68,6 +70,58 @@ public class SeqForTest extends SeqTestSupport {
         List<String> collected = new ArrayList<>();
         Seq.of("a", "b", "c").forEachIndexed((i, s) -> collected.add(i + ":" + s));
         assertEquals(Arrays.asList("0:a", "1:b", "2:c"), collected);
+    }
+
+    @Test
+    public void testForEachPair() throws Exception {
+        List<String> collected = new ArrayList<>();
+        Seq.of(1, 2, 3, 4).forEachPair((a, b) -> collected.add(a + "-" + b));
+        assertEquals(Arrays.asList("1-2", "2-3", "3-4"), collected);
+
+        collected.clear();
+        Seq.of(1, 2, 3, 4, 5, 6).forEachPair(2, (a, b) -> collected.add(a + "," + b));
+        assertEquals(Arrays.asList("1,2", "3,4", "5,6"), collected);
+
+        collected.clear();
+        Seq.of(1, 2, 3, 4, 5, 6, 7, 8).forEachPair(3, (a, b) -> collected.add(a + "," + b));
+        assertEquals(Arrays.asList("1,2", "4,5", "7,8"), collected);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of(1, 2, 3).forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
+    }
+
+    @Test
+    public void testForEachTriple() throws Exception {
+        List<String> result = new ArrayList<>();
+        Seq.of(1, 2, 3, 4, 5, 6).forEachTriple((a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5", "4,5,6"), result);
+
+        result.clear();
+        Seq.of(1, 2, 3).forEachTriple((a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3"), result);
+
+        result.clear();
+        Seq.of(1, 2, 3, 4, 5).forEachTriple(1, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), result);
+
+        result.clear();
+        Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9).forEachTriple(3, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "4,5,6", "7,8,9"), result);
+
+        result.clear();
+        Seq.of(1, 2, 3, 4, 5, 6, 7).forEachTriple(2, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "3,4,5", "5,6,7"), result);
+
+        result.clear();
+        Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12).forEachTriple(4, (a, b, c) -> result.add(a + "," + b + "," + c));
+        assertEquals(Arrays.asList("1,2,3", "5,6,7", "9,10,11"), result);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of(1, 2, 3).forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
     }
 
     @Test
@@ -131,55 +185,4 @@ public class SeqForTest extends SeqTestSupport {
         assertTrue(closed.value());
     }
 
-    @Test
-    public void testForEachPair() throws Exception {
-        List<String> collected = new ArrayList<>();
-        Seq.of(1, 2, 3, 4).forEachPair((a, b) -> collected.add(a + "-" + b));
-        assertEquals(Arrays.asList("1-2", "2-3", "3-4"), collected);
-
-        collected.clear();
-        Seq.of(1, 2, 3, 4, 5, 6).forEachPair(2, (a, b) -> collected.add(a + "," + b));
-        assertEquals(Arrays.asList("1,2", "3,4", "5,6"), collected);
-
-        collected.clear();
-        Seq.of(1, 2, 3, 4, 5, 6, 7, 8).forEachPair(3, (a, b) -> collected.add(a + "," + b));
-        assertEquals(Arrays.asList("1,2", "4,5", "7,8"), collected);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of(1, 2, 3).forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of().forEachPair(2, (Throwables.BiConsumer<Integer, Integer, Exception>) null));
-    }
-
-    @Test
-    public void testForEachTriple() throws Exception {
-        List<String> result = new ArrayList<>();
-        Seq.of(1, 2, 3, 4, 5, 6).forEachTriple((a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5", "4,5,6"), result);
-
-        result.clear();
-        Seq.of(1, 2, 3).forEachTriple((a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3"), result);
-
-        result.clear();
-        Seq.of(1, 2, 3, 4, 5).forEachTriple(1, (a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "2,3,4", "3,4,5"), result);
-
-        result.clear();
-        Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9).forEachTriple(3, (a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "4,5,6", "7,8,9"), result);
-
-        result.clear();
-        Seq.of(1, 2, 3, 4, 5, 6, 7).forEachTriple(2, (a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "3,4,5", "5,6,7"), result);
-
-        result.clear();
-        Seq.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12).forEachTriple(4, (a, b, c) -> result.add(a + "," + b + "," + c));
-        assertEquals(Arrays.asList("1,2,3", "5,6,7", "9,10,11"), result);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of(1, 2, 3).forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Seq.<Integer, Exception> of().forEachTriple(3, (Throwables.TriConsumer<Integer, Integer, Integer, Exception>) null));
-    }
 }

@@ -17,62 +17,7 @@ public class BooleanListContainsTest extends BooleanListTestSupport {
         assertTrue(list.containsAll(BooleanList.of(true, true, true)));
     }
 
-    @Test
-    public void testContainsAny() {
-        {
-            list = new BooleanList();
-            BooleanList list1 = BooleanList.of(true, false);
-            BooleanList list2 = BooleanList.of(false, false);
-            assertTrue(list1.containsAny(list2));
-        }
-        {
-            list = new BooleanList();
-            BooleanList list = BooleanList.of(true, true);
-            boolean[] arr = { false };
-            assertFalse(list.containsAny(arr));
-        }
-        {
-            list = new BooleanList();
-            BooleanList a = BooleanList.of(true, true, true);
-            assertFalse(a.containsAny(new boolean[] { false }));
-        }
-        {
-            list = new BooleanList();
-            list.add(true);
-            assertFalse(list.containsAny(new boolean[] {}));
-        }
-    }
-
-    @Test
-    public void testContainsAny_LargeData() {
-        {
-            list = new BooleanList();
-            // Trigger needToSet path: min(lenA, lenB) > 3 && max(lenA, lenB) > 9
-            BooleanList large = new BooleanList();
-            for (int i = 0; i < 15; i++) {
-                large.add(i % 2 == 0);
-            }
-            BooleanList query = BooleanList.of(true, true, true, true, true);
-            assertTrue(large.containsAny(query));
-        }
-        {
-            list = new BooleanList();
-            // All elements are true; query has false
-            BooleanList large = new BooleanList();
-            for (int i = 0; i < 15; i++) {
-                large.add(true);
-            }
-            boolean[] query = { false };
-            assertFalse(large.containsAny(query));
-        }
-    }
-
-    @Test
-    public void testContainsAny_Empty() {
-        BooleanList list1 = BooleanList.of(true, false);
-        BooleanList list2 = new BooleanList();
-        assertFalse(list1.containsAny(list2));
-    }
+    // containsAll
 
     @Test
     public void testContainsAll() {
@@ -103,6 +48,21 @@ public class BooleanListContainsTest extends BooleanListTestSupport {
     }
 
     @Test
+    public void testContainsAll_Empty() {
+        {
+            list = new BooleanList();
+            BooleanList list1 = BooleanList.of(true);
+            BooleanList list2 = new BooleanList();
+            assertTrue(list1.containsAll(list2));
+        }
+        {
+            list = new BooleanList();
+            BooleanList a = BooleanList.of(true, false);
+            assertTrue(a.containsAll(new boolean[0]));
+        }
+    }
+
+    @Test
     public void testContainsAll_LargeData() {
         {
             list = new BooleanList();
@@ -128,18 +88,62 @@ public class BooleanListContainsTest extends BooleanListTestSupport {
         }
     }
 
+    // containsAny
+
     @Test
-    public void testContainsAll_Empty() {
+    public void testContainsAny() {
         {
             list = new BooleanList();
-            BooleanList list1 = BooleanList.of(true);
-            BooleanList list2 = new BooleanList();
-            assertTrue(list1.containsAll(list2));
+            BooleanList list1 = BooleanList.of(true, false);
+            BooleanList list2 = BooleanList.of(false, false);
+            assertTrue(list1.containsAny(list2));
         }
         {
             list = new BooleanList();
-            BooleanList a = BooleanList.of(true, false);
-            assertTrue(a.containsAll(new boolean[0]));
+            BooleanList list = BooleanList.of(true, true);
+            boolean[] arr = { false };
+            assertFalse(list.containsAny(arr));
+        }
+        {
+            list = new BooleanList();
+            BooleanList a = BooleanList.of(true, true, true);
+            assertFalse(a.containsAny(new boolean[] { false }));
+        }
+        {
+            list = new BooleanList();
+            list.add(true);
+            assertFalse(list.containsAny(new boolean[] {}));
+        }
+    }
+
+    @Test
+    public void testContainsAny_Empty() {
+        BooleanList list1 = BooleanList.of(true, false);
+        BooleanList list2 = new BooleanList();
+        assertFalse(list1.containsAny(list2));
+    }
+
+    @Test
+    public void testContainsAny_LargeData() {
+        {
+            list = new BooleanList();
+            // Trigger needToSet path: min(lenA, lenB) > 3 && max(lenA, lenB) > 9
+            BooleanList large = new BooleanList();
+            for (int i = 0; i < 15; i++) {
+                large.add(i % 2 == 0);
+            }
+            BooleanList query = BooleanList.of(true, true, true, true, true);
+            assertTrue(large.containsAny(query));
+        }
+        {
+            list = new BooleanList();
+            // All elements are true; query has false
+            BooleanList large = new BooleanList();
+            for (int i = 0; i < 15; i++) {
+                large.add(true);
+            }
+            boolean[] query = { false };
+            assertFalse(large.containsAny(query));
         }
     }
 
@@ -163,4 +167,5 @@ public class BooleanListContainsTest extends BooleanListTestSupport {
         BooleanList list = new BooleanList();
         assertFalse(list.containsDuplicates());
     }
+
 }

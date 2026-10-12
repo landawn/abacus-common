@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -12,367 +11,536 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
-import java.util.regex.Pattern;
-import java.util.stream.Collector;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
 
-import com.landawn.abacus.AbstractTest;
-import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.ByteIterator;
-import com.landawn.abacus.util.CharIterator;
-import com.landawn.abacus.util.Charsets;
-import com.landawn.abacus.util.Comparators;
-import com.landawn.abacus.util.Dataset;
-import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.Duration;
-import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Fn;
-import com.landawn.abacus.util.Fnn;
-import com.landawn.abacus.util.Holder;
-import com.landawn.abacus.util.IOUtil;
-import com.landawn.abacus.util.ImmutableMap;
-import com.landawn.abacus.util.Indexed;
-import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.IntIterator;
-import com.landawn.abacus.util.IntList;
-import com.landawn.abacus.util.ListMultimap;
-import com.landawn.abacus.util.LongIterator;
-import com.landawn.abacus.util.LongSuppliers;
 import com.landawn.abacus.util.MergeResult;
-import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
-import com.landawn.abacus.util.MutableInt;
-import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
-import com.landawn.abacus.util.NoCachingNoUpdating;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
-import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.PermutationIterator;
 import com.landawn.abacus.util.Profiler;
-import com.landawn.abacus.util.Seq;
-import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Strings;
-import com.landawn.abacus.util.Suppliers;
-import com.landawn.abacus.util.Timed;
-import com.landawn.abacus.util.Tuple;
-import com.landawn.abacus.util.Tuple.Tuple2;
-import com.landawn.abacus.util.WindowAssigner;
-import com.landawn.abacus.util.u;
-import com.landawn.abacus.util.u.Optional;
-import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.BiFunction;
-import com.landawn.abacus.util.function.BooleanSupplier;
-import com.landawn.abacus.util.function.ByteBiFunction;
-import com.landawn.abacus.util.function.ByteNFunction;
-import com.landawn.abacus.util.function.ByteTriFunction;
-import com.landawn.abacus.util.function.CharBiFunction;
-import com.landawn.abacus.util.function.CharNFunction;
-import com.landawn.abacus.util.function.CharTriFunction;
 import com.landawn.abacus.util.function.Consumer;
-import com.landawn.abacus.util.function.DoubleBiFunction;
-import com.landawn.abacus.util.function.DoubleNFunction;
-import com.landawn.abacus.util.function.DoubleTriFunction;
-import com.landawn.abacus.util.function.FloatBiFunction;
-import com.landawn.abacus.util.function.FloatNFunction;
-import com.landawn.abacus.util.function.FloatTriFunction;
 import com.landawn.abacus.util.function.Function;
-import com.landawn.abacus.util.function.IntBiFunction;
-import com.landawn.abacus.util.function.IntNFunction;
-import com.landawn.abacus.util.function.IntTriFunction;
-import com.landawn.abacus.util.function.LongBiFunction;
-import com.landawn.abacus.util.function.LongNFunction;
-import com.landawn.abacus.util.function.LongSupplier;
-import com.landawn.abacus.util.function.LongTriFunction;
 import com.landawn.abacus.util.function.Predicate;
-import com.landawn.abacus.util.function.QuadPredicate;
-import com.landawn.abacus.util.function.ShortBiFunction;
-import com.landawn.abacus.util.function.ShortNFunction;
-import com.landawn.abacus.util.function.ShortTriFunction;
 import com.landawn.abacus.util.function.Supplier;
-import com.landawn.abacus.util.function.ToDoubleFunction;
 import com.landawn.abacus.util.function.ToIntFunction;
-import com.landawn.abacus.util.function.ToLongTriFunction;
-import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Stream.WindowHandler;
+import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u;
 
-public class StreamTest extends AbstractTest {
+/** Stream general contracts. */
+public class StreamTest extends StreamTestSupport {
 
-    @TempDir
-    Path tempDir;
+    @Test
+    public void test_02() {
+        N.println(0 - Long.MIN_VALUE);
+        N.println(-1 - Long.MIN_VALUE);
+        N.println(Long.MAX_VALUE);
+        N.println(Long.MAX_VALUE * 1D + 10);
+        N.println(Double.MAX_VALUE - Long.MAX_VALUE);
+        assertFalse((double) Long.MAX_VALUE + 2 - Long.MAX_VALUE > 0);
 
-    @TempDir
-    Path tempFolder;
+        assertEquals(Integer.MAX_VALUE, ((int) (Integer.MAX_VALUE + 0.9999999999999999999D)));
+        assertEquals(Long.MAX_VALUE, ((long) (Long.MAX_VALUE + 0.999999999999999D)));
 
-    private List<Integer> testData;
-    private List<Integer> testList;
-    private Stream<Integer> stream;
-    private List<Integer> mainStreamResults;
-    private List<Integer> subscriberStreamResults;
-    private ExecutorService customExecutor;
-    private List<Stream<?>> streamsToClose = new ArrayList<>();
+        N.println(Integer.MAX_VALUE - Integer.MIN_VALUE);
+        N.println(Integer.MAX_VALUE * 1L - Integer.MIN_VALUE);
 
-    @BeforeEach
-    public void setUp() {
-        testList = Arrays.asList(1, 2, 3, 4, 5);
-        testData = testList;
-        stream = createStream(testList);
-        mainStreamResults = new ArrayList<>();
-        subscriberStreamResults = new ArrayList<>();
-        customExecutor = Executors.newFixedThreadPool(4);
+        double d = 100;
+        for (int i = 0; i < 100; i++) {
+            N.println(d--);
+        }
+
+        N.println(Long.MAX_VALUE - Long.MIN_VALUE);
+        N.println(Long.MAX_VALUE);
+        N.println(Long.MIN_VALUE);
+        assertEquals(Long.MAX_VALUE, (long) ((Long.MAX_VALUE * 1D - Long.MIN_VALUE) + Long.MIN_VALUE));
+        N.println(String.format("%s", Long.MAX_VALUE * 1D - Long.MIN_VALUE));
+        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.range(1, 6).toArray()));
+        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.rangeClosed(1, 5).toArray()));
+        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.range(1, 6, 2).toArray()));
+        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.rangeClosed(1, 5, 2).toArray()));
+        assertTrue(N.equals(new int[] { 1, 1, 1 }, IntStream.repeat(1, 3).toArray()));
+
+        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.range(0, Integer.MAX_VALUE).count()));
+        assertTrue(N.equals(Integer.MAX_VALUE + 1L, IntStream.rangeClosed(0, Integer.MAX_VALUE).count()));
+        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.repeat(0, Integer.MAX_VALUE).count()));
     }
 
-    @AfterEach
-    public void tearDown() {
-        if (stream != null) {
-            stream.close();
+    @Test
+    public void test_03() {
+        assertEquals(Character.MAX_VALUE, CharStream.range(Character.MIN_VALUE, Character.MAX_VALUE).count());
+        assertEquals(Character.MAX_VALUE + 1, CharStream.rangeClosed(Character.MIN_VALUE, Character.MAX_VALUE).count());
+
+        assertEquals(Byte.MAX_VALUE * 2 + 1, ByteStream.range(Byte.MIN_VALUE, Byte.MAX_VALUE).count());
+        assertEquals(Byte.MAX_VALUE * 2 + 2, ByteStream.rangeClosed(Byte.MIN_VALUE, Byte.MAX_VALUE).count());
+
+        assertEquals(Short.MAX_VALUE * 2 + 1, ShortStream.range(Short.MIN_VALUE, Short.MAX_VALUE).count());
+        assertEquals(Short.MAX_VALUE * 2 + 2, ShortStream.rangeClosed(Short.MIN_VALUE, Short.MAX_VALUE).count());
+
+        assertEquals(Character.MAX_VALUE, Array.range(Character.MIN_VALUE, Character.MAX_VALUE).length);
+        assertEquals(Character.MAX_VALUE + 1, Array.rangeClosed(Character.MIN_VALUE, Character.MAX_VALUE).length);
+
+        assertEquals(Byte.MAX_VALUE * 2 + 1, Array.range(Byte.MIN_VALUE, Byte.MAX_VALUE).length);
+        assertEquals(Byte.MAX_VALUE * 2 + 2, Array.rangeClosed(Byte.MIN_VALUE, Byte.MAX_VALUE).length);
+
+        assertEquals(Short.MAX_VALUE * 2 + 1, Array.range(Short.MIN_VALUE, Short.MAX_VALUE).length);
+        assertEquals(Short.MAX_VALUE * 2 + 2, Array.rangeClosed(Short.MIN_VALUE, Short.MAX_VALUE).length);
+    }
+
+    @Test
+    public void test_04() {
+        Iterator<List<String>> iter = PermutationIterator.of(N.toList("a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
         }
 
-        if (customExecutor != null) {
-            customExecutor.shutdownNow();
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
         }
 
-        for (Stream<?> streamToClose : streamsToClose) {
-            try {
-                streamToClose.close();
-            } catch (Exception e) {
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.of(new ArrayList<String>());
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+        iter = PermutationIterator.ordered(N.toList("a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(new ArrayList<String>());
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+        iter = PermutationIterator.of(N.toList("1", "2", "2", "1"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("1", "2", "2", "1"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
+        while (iter.hasNext()) {
+            N.println(iter.next());
+        }
+
+        N.println("=========================================================");
+
+        final Consumer<? super List<Character>> consumer = N::println;
+
+        CharStream.rangeClosed('a', 'e').boxed().permutations().forEach(consumer);
+        assertNotNull(consumer);
+    }
+
+    // append
+
+    @Test
+    public void testStreamCreatedAfterAppend() {
+        assertEquals(5, Stream.of(1, 2, 3).append(4, 5).count());
+        assertEquals(4, Stream.of(1, 2, 3).append(4, 5).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(4, 5).count());
+        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterAppendCollection() {
+        assertEquals(5, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).count());
+        assertEquals(4, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).count());
+        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterAppendVarargs() {
+        assertEquals(5, Stream.of(1, 2, 3).append(4, 5).count());
+        assertEquals(3, Stream.of(1, 2, 3).append(4, 5).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3).append(4, 5).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(4, 5).count());
+        assertEquals(3, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).toList());
+    }
+
+    // appendIfEmpty
+
+    @Test
+    public void testStreamCreatedAfterAppendIfEmpty() {
+        assertEquals(3, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).count());
+        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().appendIfEmpty(1, 2, 3).toList());
+        assertEquals(N.toList(2, 3), Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).toList());
+        assertEquals(3, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).count());
+        assertEquals(2, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).toList());
+        assertEquals(N.toList(2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).toList());
+
+        assertEquals(2, Stream.of(4, 5).appendIfEmpty(1, 2, 3).count());
+        assertEquals(1, Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(4, 5).appendIfEmpty(1, 2, 3).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).toArray());
+        assertEquals(N.toList(4, 5), Stream.of(4, 5).appendIfEmpty(1, 2, 3).toList());
+        assertEquals(N.toList(5), Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterAppendIfEmptyCollection() {
+        assertEquals(3, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).count());
+        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).toList());
+        assertEquals(N.toList(2, 3), Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toList());
+        assertEquals(3, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).count());
+        assertEquals(2, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).toList());
+        assertEquals(N.toList(2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterAppendIfEmptyVarargs() {
+        assertEquals(3, Stream.of(1, 2, 3).appendIfEmpty(4, 5).count());
+        assertEquals(2, Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3).appendIfEmpty(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).toList());
+
+        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(4, 5).count());
+        assertEquals(1, Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.<Integer> empty().appendIfEmpty(4, 5).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).toArray());
+        assertEquals(N.toList(4, 5), Stream.<Integer> empty().appendIfEmpty(4, 5).toList());
+        assertEquals(N.toList(5), Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).toList());
+    }
+
+    @Test
+    public void test_ArrayDeque() {
+        assertDoesNotThrow(() -> {
+            final ArrayDeque<Integer> queue = new ArrayDeque<>(10);
+
+            for (int i = 0; i < 16; i++) {
+                if (queue.size() > 10) {
+                    queue.removeFirst();
+                }
+
+                queue.add(i);
+                N.println(queue);
             }
+        });
+    }
+
+    // buffered
+
+    @Test
+    public void testStreamCreatedAfterBuffered() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered().count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered().skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered().toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered().skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered().toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered().skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterBufferedWithQueue() {
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered(queue).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(queue).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(queue).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterBufferedWithSize() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered(10).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(10).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(10).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).toList());
+    }
+
+    @Test
+    public void testcallAsync() throws Exception {
+        com.landawn.abacus.util.ContinuableFuture<Integer> future = Stream.of(1, 2, 3).callAsync(s -> s.reduce(0, Integer::sum));
+        assertEquals(Integer.valueOf(6), future.get());
+    }
+
+    @Test
+    public void testComplexNestedOperations() {
+        List<String> result = createStream(Arrays.asList(1, 2, 3, 4, 5)).flatMap(n -> createStream(n, n * 10))
+                .filter(n -> n % 2 == 0)
+                .map(n -> "Value: " + n)
+                .distinct()
+                .sorted()
+                .toList();
+
+        assertEquals(Arrays.asList("Value: 10", "Value: 2", "Value: 20", "Value: 30", "Value: 4", "Value: 40", "Value: 50"), result);
+    }
+
+    @Test
+    public void testComplexStreamOperations() {
+        List<String> result = Stream.range(1, 10).filter(x -> x % 2 == 0).map(x -> "Number: " + x).toList();
+
+        assertEquals(Arrays.asList("Number: 2", "Number: 4", "Number: 6", "Number: 8"), result);
+    }
+
+    @Test
+    public void testComplexStreamPipeline() {
+        List<String> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).filter(n -> n % 2 == 0).map(n -> n * 2).sorted().limit(3).map(String::valueOf).toList();
+
+        assertEquals(Arrays.asList("4", "8", "12"), result);
+    }
+
+    @Test
+    public void testPerformance_LargeConcat() {
+        List<Stream<Integer>> manyStreams = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            final int base = i * 10;
+            manyStreams.add(Stream.range(base, base + 10));
         }
 
-        streamsToClose.clear();
-    }
-
-    protected Stream<Boolean> createStream(final boolean... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Boolean> createStream(final boolean[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Character> createStream(final char... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Character> createStream(final char[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Byte> createStream(final byte... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Byte> createStream(final byte[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Short> createStream(final short... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Short> createStream(final short[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Integer> createStream(final int... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Integer> createStream(final int[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Long> createStream(final long... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Long> createStream(final long[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Float> createStream(final float... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Float> createStream(final float[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected Stream<Double> createStream(final double... data) {
-        return Stream.of(data);
-    }
-
-    protected Stream<Double> createStream(final double[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    @SafeVarargs
-    protected final <T> Stream<T> createStream01(final T... data) {
-        return Stream.of(data);
-    }
-
-    protected <T> Stream<T> createStream(final T[] data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected <T> Stream<T> createStream(final Iterable<? extends T> data) {
-        return Stream.of(data);
-    }
-
-    protected <T> Stream<T> createStream(final Collection<? extends T> data, int fromIndex, int toIndex) {
-        return Stream.of(data, fromIndex, toIndex);
-    }
-
-    protected <T> Stream<T> createStream(final Iterator<? extends T> data) {
-        return Stream.of(data);
-    }
-
-    protected <K, V> Stream<Map.Entry<K, V>> createStream(final Map<? extends K, ? extends V> map) {
-        return Stream.of(map);
-    }
-
-    protected <T> Stream<T> createStream(final Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
-    }
-
-    protected <T> Stream<T> createStream(final java.util.Optional<T> op) {
-        return op == null || op.isEmpty() ? Stream.empty() : Stream.of(op.get());
-    }
-
-    protected <T> Stream<T> createStream(final Enumeration<? extends T> enumeration) {
-        return Stream.of(enumeration);
-    }
-
-    private <T> Stream<T> trackStream(Stream<T> stream) {
-        streamsToClose.add(stream);
-        return stream;
+        long count = Stream.concat(manyStreams).count();
+        assertEquals(1000, count);
     }
 
     @Test
-    public void testNullFunctionalArgumentsRejectedEagerly() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter((Predicate<Integer>) null));
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter(value -> true, (Consumer<Integer>) null));
-        assertThrows(IllegalArgumentException.class, () -> Stream.defer(null));
+    public void testStreamCreatedAfterCycled() {
+        assertEquals(15, Stream.of(1, 2, 3).cycled().limit(15).count());
+        assertEquals(14, Stream.of(1, 2, 3).cycled().limit(15).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).cycled().limit(10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).cycled().limit(10).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled().limit(6).toList());
+        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled().limit(6).skip(1).toList());
+        assertEquals(15, Stream.of(1, 2, 3).map(e -> e).cycled().limit(15).count());
+        assertEquals(14, Stream.of(1, 2, 3).map(e -> e).cycled().limit(15).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).map(e -> e).cycled().limit(10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).map(e -> e).cycled().limit(10).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled().limit(6).toList());
+        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled().limit(6).skip(1).toList());
     }
 
     @Test
-    public void testStreamCreatedAfterFilter() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
+    public void testStreamCreatedAfterCycledWithRounds() {
+        assertEquals(6, Stream.of(1, 2, 3).cycled(2).count());
+        assertEquals(5, Stream.of(1, 2, 3).cycled(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).cycled(2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).cycled(2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled(2).toList());
+        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled(2).skip(1).toList());
+        assertEquals(6, Stream.of(1, 2, 3).map(e -> e).cycled(2).count());
+        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).map(e -> e).cycled(2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled(2).toList());
+        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).toList());
     }
 
     @Test
-    public void testStreamCreatedAfterFilterWithAction() {
-        List<Integer> dropped = new ArrayList<>();
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).count());
-        dropped.clear();
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).count());
-        dropped.clear();
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).toArray());
-        dropped.clear();
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).toArray());
-        dropped.clear();
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).toList());
-        dropped.clear();
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).toList());
-        dropped.clear();
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).count());
-        dropped.clear();
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).count());
-        dropped.clear();
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).toArray());
-        dropped.clear();
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toArray());
-        dropped.clear();
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).toList());
-        dropped.clear();
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toList());
+    public void testDefaultIfEmpty() {
+        List<Integer> result1 = Stream.<Integer> empty().defaultIfEmpty(() -> Stream.of(1, 2, 3)).toList();
+        assertEquals(Arrays.asList(1, 2, 3), result1);
+
+        List<Integer> result2 = Stream.of(1, 2).defaultIfEmpty(() -> Stream.of(3, 4)).toList();
+        assertEquals(Arrays.asList(1, 2), result2);
     }
 
     @Test
-    public void testStreamCreatedAfterTakeWhile() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2 }, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).toArray());
-        assertArrayEquals(new Integer[] { 2 }, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.toList(1, 2), Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).toList());
-        assertEquals(N.toList(2), Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).toList());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).toArray());
-        assertArrayEquals(new Integer[] { 2 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toArray());
-        assertEquals(N.toList(1, 2), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).toList());
-        assertEquals(N.toList(2), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toList());
+    public void testStreamCreatedAfterDefaultIfEmpty() {
+        assertEquals(1, Stream.<Integer> empty().defaultIfEmpty(99).count());
+        assertEquals(0, Stream.<Integer> empty().defaultIfEmpty(99).skip(1).count());
+        assertArrayEquals(new Integer[] { 99 }, Stream.<Integer> empty().defaultIfEmpty(99).toArray());
+        assertArrayEquals(new Integer[] {}, Stream.<Integer> empty().defaultIfEmpty(99).skip(1).toArray());
+        assertEquals(N.toList(99), Stream.<Integer> empty().defaultIfEmpty(99).toList());
+        assertEquals(N.toList(), Stream.<Integer> empty().defaultIfEmpty(99).skip(1).toList());
+        assertEquals(1, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).count());
+        assertEquals(0, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).count());
+        assertArrayEquals(new Integer[] { 99 }, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).toArray());
+        assertArrayEquals(new Integer[] {}, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).toArray());
+        assertEquals(N.toList(99), Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).toList());
+        assertEquals(N.toList(), Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterDifference() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 5 }, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).toArray());
+        assertEquals(N.toList(1, 5), Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).toList());
+        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).toList());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).toArray());
+        assertEquals(N.toList(1, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).toList());
+        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterDistinct() {
+        assertEquals(4, Stream.of(1, 2, 2, 3, 3, 4).distinct().count());
+        assertEquals(3, Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).distinct().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).distinct().toList());
+        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).toList());
+        assertEquals(4, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().count());
+        assertEquals(3, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().toList());
+        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).toList());
     }
 
     @Test
@@ -420,617 +588,76 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testStreamCreatedAfterSkipUntil() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toList());
+    public void testExceptionPropagation() {
+        Iterator<Integer> failingIterator = new Iterator<>() {
+            private int count = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (count == 3) {
+                    throw new RuntimeException("Iterator failed");
+                }
+                return count < 5;
+            }
+
+            @Override
+            public Integer next() {
+                return count++;
+            }
+        };
+
+        Stream<Integer> stream = createStream(failingIterator);
+
+        try {
+            stream.toList();
+            fail("Expected exception");
+        } catch (RuntimeException e) {
+            assertEquals("Iterator failed", e.getMessage());
+        }
     }
 
     @Test
-    public void testStreamCreatedAfterDistinct() {
-        assertEquals(4, Stream.of(1, 2, 2, 3, 3, 4).distinct().count());
-        assertEquals(3, Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).distinct().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).distinct().toList());
-        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).distinct().skip(1).toList());
-        assertEquals(4, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().count());
-        assertEquals(3, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().toList());
-        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 2, 3, 3, 4).map(e -> e).distinct().skip(1).toList());
+    public void testStreamCreatedAfterFilter() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2).skip(1).toList());
     }
 
     @Test
-    public void testStreamCreatedAfterIntersection() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).toArray());
-        assertArrayEquals(new Integer[] { 3, 4 }, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toArray());
-        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).toList());
-        assertEquals(N.toList(3, 4), Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).toArray());
-        assertArrayEquals(new Integer[] { 3, 4 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toArray());
-        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).toList());
-        assertEquals(N.toList(3, 4), Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterDifference() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 5 }, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).toArray());
-        assertEquals(N.toList(1, 5), Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).toList());
-        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).difference(Arrays.asList(2, 3, 4)).skip(1).toList());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).toArray());
-        assertEquals(N.toList(1, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).toList());
-        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).difference(Arrays.asList(2, 3, 4)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSymmetricDifference() {
-        assertEquals(4, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).count());
-        assertEquals(3, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 4, 5 }, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).toArray());
-        assertArrayEquals(new Integer[] { 2, 4, 5 }, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 4, 5), Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).toList());
-        assertEquals(N.toList(2, 4, 5), Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toList());
-        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).count());
-        assertEquals(3, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).toArray());
-        assertArrayEquals(new Integer[] { 2, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 4, 5), Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).toList());
-        assertEquals(N.toList(2, 4, 5), Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReversed() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reversed().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).reversed().skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reversed().toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reversed().skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reversed().toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reversed().skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterRotated() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).rotated(2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).rotated(2).toArray());
-        assertArrayEquals(new Integer[] { 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toArray());
-        assertEquals(N.toList(4, 5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).rotated(2).toList());
-        assertEquals(N.toList(5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toArray());
-        assertArrayEquals(new Integer[] { 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toArray());
-        assertEquals(N.toList(4, 5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toList());
-        assertEquals(N.toList(5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterShuffled() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().toArray().length);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).toArray().length);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().toList().size());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).toList().size());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).count());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().toArray().length);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).toArray().length);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().toList().size());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).toList().size());
-    }
-
-    @Test
-    public void testStreamCreatedAfterShuffledWithRandom() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).count());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toArray().length);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).toArray().length);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList().size());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).toList().size());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).count());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).toArray().length);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).toArray().length);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).toList().size());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).toList().size());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSorted() {
-        assertEquals(5, Stream.of(5, 3, 1, 4, 2).sorted().count());
-        assertEquals(4, Stream.of(5, 3, 1, 4, 2).sorted().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted().toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted().skip(1).toList());
-        assertEquals(5, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().count());
-        assertEquals(4, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSorted() {
-        assertEquals(5, Stream.of(3, 1, 4, 2, 5).reverseSorted().count());
-        assertEquals(4, Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted().toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted().toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toList());
-        assertEquals(5, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().count());
-        assertEquals(4, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterCycled() {
-        assertEquals(15, Stream.of(1, 2, 3).cycled().limit(15).count());
-        assertEquals(14, Stream.of(1, 2, 3).cycled().limit(15).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).cycled().limit(10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).cycled().limit(10).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled().limit(6).toList());
-        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled().limit(6).skip(1).toList());
-        assertEquals(15, Stream.of(1, 2, 3).map(e -> e).cycled().limit(15).count());
-        assertEquals(14, Stream.of(1, 2, 3).map(e -> e).cycled().limit(15).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).map(e -> e).cycled().limit(10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3, 1, 2, 3, 1 }, Stream.of(1, 2, 3).map(e -> e).cycled().limit(10).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled().limit(6).toList());
-        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled().limit(6).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterCycledWithRounds() {
-        assertEquals(6, Stream.of(1, 2, 3).cycled(2).count());
-        assertEquals(5, Stream.of(1, 2, 3).cycled(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).cycled(2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).cycled(2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled(2).toList());
-        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).cycled(2).skip(1).toList());
-        assertEquals(6, Stream.of(1, 2, 3).map(e -> e).cycled(2).count());
-        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).map(e -> e).cycled(2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 1, 2, 3 }, Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled(2).toList());
-        assertEquals(N.toList(2, 3, 1, 2, 3), Stream.of(1, 2, 3).map(e -> e).cycled(2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSkip() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skip(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skip(2).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).toArray());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSkipWithAction() {
-        List<Integer> skipped = new ArrayList<>();
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).count());
-        skipped.clear();
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).count());
-        skipped.clear();
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).toArray());
-        skipped.clear();
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).toArray());
-        skipped.clear();
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).toList());
-        skipped.clear();
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).toList());
-        skipped.clear();
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).count());
-        skipped.clear();
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).count());
-        skipped.clear();
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).toArray());
-        skipped.clear();
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).toArray());
-        skipped.clear();
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).toList());
-        skipped.clear();
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterLimit() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).limit(3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).limit(3).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).limit(3).toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterStep() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).step(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).step(2).toArray());
-        assertArrayEquals(new Integer[] { 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).toArray());
-        assertEquals(N.toList(1, 3, 5), Stream.of(1, 2, 3, 4, 5, 6).step(2).toList());
-        assertEquals(N.toList(3, 5), Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).toArray());
-        assertArrayEquals(new Integer[] { 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).toArray());
-        assertEquals(N.toList(1, 3, 5), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).toList());
-        assertEquals(N.toList(3, 5), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterOnEach() {
-        List<Integer> list = new ArrayList<>();
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peek(list::add).count());
-        list.clear();
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).count());
-        list.clear();
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toArray());
-        list.clear();
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toArray());
-        list.clear();
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toList());
-        list.clear();
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPrepend() {
-        assertEquals(5, Stream.of(3, 4, 5).prepend(1, 2).count());
-        assertEquals(4, Stream.of(3, 4, 5).prepend(1, 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).skip(1).toList());
-        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).count());
-        assertEquals(4, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPrependCollection() {
-        assertEquals(5, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).count());
-        assertEquals(4, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).toList());
-        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).count());
-        assertEquals(4, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppend() {
-        assertEquals(5, Stream.of(1, 2, 3).append(4, 5).count());
-        assertEquals(4, Stream.of(1, 2, 3).append(4, 5).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(4, 5).count());
-        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppendCollection() {
-        assertEquals(5, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).count());
-        assertEquals(4, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).append(Arrays.asList(4, 5)).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).count());
-        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(Arrays.asList(4, 5)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterOnClose() {
-        AtomicBoolean closed = new AtomicBoolean(false);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).count());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).count());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).toArray());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).toArray());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).toList());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onClose(() -> closed.set(true)).skip(1).toList());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).count());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).count());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).toArray());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).toArray());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).toList());
-        assertTrue(closed.get());
-        closed.set(false);
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onClose(() -> closed.set(true)).skip(1).toList());
-        assertTrue(closed.get());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPeek() {
-        List<Integer> list = new ArrayList<>();
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peek(list::add).count());
-        list.clear();
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).count());
-        list.clear();
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peek(list::add).toArray());
-        list.clear();
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).toArray());
-        list.clear();
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peek(list::add).toList());
-        list.clear();
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).toList());
-        list.clear();
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).count());
-        list.clear();
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).count());
-        list.clear();
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toArray());
-        list.clear();
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toArray());
-        list.clear();
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toList());
-        list.clear();
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSelect() {
-        assertEquals(3, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).count());
-        assertEquals(2, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).count());
-        assertArrayEquals(new String[] { "a", "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).toArray());
-        assertArrayEquals(new String[] { "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).toArray());
-        assertEquals(N.toList("a", "b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).toList());
-        assertEquals(N.toList("b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).toList());
-        assertEquals(3, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).count());
-        assertEquals(2, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).count());
-        assertArrayEquals(new String[] { "a", "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).toArray());
-        assertArrayEquals(new String[] { "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).toArray());
-        assertEquals(N.toList("a", "b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).toList());
-        assertEquals(N.toList("b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPairWith() {
-        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).count());
-        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).count());
-        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).toArray().length);
-        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).toArray().length);
-        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).toList().size());
-        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).toList().size());
-        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).count());
-        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).count());
-        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).toArray().length);
-        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).toArray().length);
-        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).toList().size());
-        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).toList().size());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMap() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMapWithIncrementAndIgnore() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 7 }, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).toArray());
-        assertArrayEquals(new Integer[] { 7 }, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.toList(3, 7), Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).toList());
-        assertEquals(N.toList(7), Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).toList());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 7 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).toArray());
-        assertArrayEquals(new Integer[] { 7 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).toArray());
-        assertEquals(N.toList(3, 7), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).toList());
-        assertEquals(N.toList(7), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMapTriWithIncrementAndIgnore() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).count());
-        assertArrayEquals(new Integer[] { 6, 15 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).toArray());
-        assertArrayEquals(new Integer[] { 15 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toArray());
-        assertEquals(N.toList(6, 15), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).toList());
-        assertEquals(N.toList(15), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toList());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).count());
-        assertArrayEquals(new Integer[] { 6, 15 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).toArray());
-        assertArrayEquals(new Integer[] { 15 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toArray());
-        assertEquals(N.toList(6, 15), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).toList());
-        assertEquals(N.toList(15), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterRangeMap() {
-        assertEquals(3, Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).count());
-        assertEquals(2, Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).count());
-        assertArrayEquals(new String[] { "1-2", "5-6", "10-10" },
-                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toArray());
-        assertArrayEquals(new String[] { "5-6", "10-10" },
-                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).toArray());
-        assertEquals(N.toList("1-2", "5-6", "10-10"),
-                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toList());
-        assertEquals(N.toList("5-6", "10-10"),
-                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).toList());
-        assertEquals(3,
-                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).count());
-        assertEquals(2,
-                Stream.of(1, 2, 5, 6, 10)
-                        .map(e -> e)
-                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
-                        .skip(1)
-                        .count());
-        assertArrayEquals(new String[] { "1-2", "5-6", "10-10" },
-                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toArray());
-        assertArrayEquals(new String[] { "5-6", "10-10" },
-                Stream.of(1, 2, 5, 6, 10)
-                        .map(e -> e)
-                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
-                        .skip(1)
-                        .toArray());
-        assertEquals(N.toList("1-2", "5-6", "10-10"),
-                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toList());
-        assertEquals(N.toList("5-6", "10-10"),
-                Stream.of(1, 2, 5, 6, 10)
-                        .map(e -> e)
-                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
-                        .skip(1)
-                        .toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapFirst() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).count());
-        assertArrayEquals(new Integer[] { 10, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).toArray());
-        assertEquals(N.toList(10, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).count());
-        assertArrayEquals(new Integer[] { 10, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).toArray());
-        assertEquals(N.toList(10, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapFirstOrElse() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 10, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(10, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 10, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(10, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapLast() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).toList());
-        assertEquals(N.toList(2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).toList());
-        assertEquals(N.toList(2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapLastOrElse() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).count());
-        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).toArray());
-        assertArrayEquals(new Integer[] { 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
-        assertEquals(N.toList(2, 4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).toList());
-        assertEquals(N.toList(4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
+    public void testStreamCreatedAfterFilterWithAction() {
+        List<Integer> dropped = new ArrayList<>();
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).count());
+        dropped.clear();
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).count());
+        dropped.clear();
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).toArray());
+        dropped.clear();
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).toArray());
+        dropped.clear();
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).toList());
+        dropped.clear();
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).filter(i -> i > 2, dropped::add).skip(1).toList());
+        dropped.clear();
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).count());
+        dropped.clear();
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).count());
+        dropped.clear();
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).toArray());
+        dropped.clear();
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toArray());
+        dropped.clear();
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).toList());
+        dropped.clear();
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).filter(i -> i > 2, dropped::add).skip(1).toList());
     }
 
     @Test
@@ -1075,957 +702,6 @@ public class StreamTest extends AbstractTest {
                 Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flatmap(Fn.identity()).toList());
         assertEquals(N.toList(2, 3, 4, 5, 6),
                 Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flatmap(Fn.identity()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterFlattmap() {
-        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).count());
-        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toList());
-        assertEquals(N.toList(2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toList());
-        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).count());
-        assertEquals(5,
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toList());
-        assertEquals(N.toList(2, 3, 4, 5, 6),
-                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterFlattMap() {
-        assertEquals(6, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).count());
-        assertEquals(5, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).toList());
-        assertEquals(N.toList(2, 3, 4, 5, 6),
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).toList());
-        assertEquals(6, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).count());
-        assertEquals(5, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).toList());
-        assertEquals(N.toList(2, 3, 4, 5, 6),
-                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapMulti() {
-        assertEquals(10, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).count());
-        assertEquals(9, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).toArray());
-        assertArrayEquals(new Integer[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).toArray());
-        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).toList());
-        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).toList());
-        assertEquals(10, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).count());
-        assertEquals(9, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).toArray());
-        assertArrayEquals(new Integer[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).toArray());
-        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).toList());
-        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
-            consumer.accept(e);
-            consumer.accept(e * 10);
-        }).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSortedByComparator() {
-        assertEquals(5, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).count());
-        assertEquals(4, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).toList());
-        assertEquals(5, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).count());
-        assertEquals(4, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSortedBy() {
-        assertEquals(3, Stream.of("bb", "a", "ccc").sortedBy(String::length).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedBy(String::length).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedBy(String::length).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).toList());
-        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSortedByInt() {
-        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByInt(String::length).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByInt(String::length).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByInt(String::length).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).toList());
-        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSortedByLong() {
-        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).toList());
-        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSortedByDouble() {
-        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).toList());
-        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).count());
-        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).count());
-        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).toArray());
-        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).toArray());
-        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).toList());
-        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSortedByComparator() {
-        assertEquals(5, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).count());
-        assertEquals(4, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).toList());
-        assertEquals(5, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).count());
-        assertEquals(4, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSortedByInt() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSortedByLong() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSortedByDouble() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterReverseSortedBy() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).count());
-        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).toArray());
-        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).toArray());
-        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).toList());
-        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterTop() {
-        assertEquals(3, Stream.of(5, 3, 1, 4, 2).top(3).count());
-        assertEquals(2, Stream.of(5, 3, 1, 4, 2).top(3).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3).toArray());
-        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).top(3).toList());
-        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).top(3).skip(1).toList());
-        assertEquals(3, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).count());
-        assertEquals(2, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).toArray());
-        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).toList());
-        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterTopWithComparator() {
-        assertEquals(3, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).count());
-        assertEquals(2, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).toList());
-        assertEquals(3, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).count());
-        assertEquals(2, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).toArray());
-        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).toList());
-        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSkipRange() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).toArray());
-        assertEquals(N.toList(1, 4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).toArray());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).toArray());
-        assertEquals(N.toList(1, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).toList());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSkipLast() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipLast(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).skipLast(2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).skipLast(2).toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterTakeLast() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).takeLast(2).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).takeLast(2).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).toArray());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).takeLast(2).toList());
-        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).toList());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).count());
-        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toArray());
-        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).toList());
-        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toList());
-    }
-
-    @Test
-    public void testSkipLastTakeLastSliding_tolerateNullElements() {
-        // Regression: skipLast/takeLast/sliding are value-agnostic structural ops and must not NPE on a
-        // null element (the iterator-backed impls previously buffered into a null-rejecting ArrayDeque).
-        // map(e -> e) forces the IteratorStream path where the buffer lives.
-        assertEquals(N.asList("a", null), Stream.of("a", null, "c").map(e -> e).skipLast(1).toList());
-        assertEquals(N.asList(null, "c"), Stream.of("a", null, "c").map(e -> e).takeLast(2).toList());
-
-        List<List<String>> windows = Stream.of("a", null, "c").map(e -> e).sliding(2).toList();
-        assertEquals(2, windows.size());
-        assertEquals(N.asList("a", null), windows.get(0));
-        assertEquals(N.asList(null, "c"), windows.get(1));
-    }
-
-    @Test
-    public void testStreamCreatedAfterOnFirst() {
-        List<Integer> firstElements = new ArrayList<>();
-        Consumer<Integer> captureFirst = firstElements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterOnLast() {
-        List<Integer> lastElements = new ArrayList<>();
-        Consumer<Integer> captureLast = lastElements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onLast(captureLast).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPeekFirst() {
-        List<Integer> firstElements = new ArrayList<>();
-        Consumer<Integer> captureFirst = firstElements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPeekLast() {
-        List<Integer> lastElements = new ArrayList<>();
-        Consumer<Integer> captureLast = lastElements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPeekIfWithPredicate() {
-        List<Integer> evenElements = new ArrayList<>();
-        Predicate<Integer> isEven = i -> i % 2 == 0;
-        Consumer<Integer> captureEven = evenElements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPeekIfWithBiPredicate() {
-        List<Integer> elements = new ArrayList<>();
-        BiPredicate<Integer, Long> isSecondElement = (e, count) -> count == 2L;
-        Consumer<Integer> capture = elements::add;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterPrependVarargs() {
-        assertEquals(5, Stream.of(3, 4, 5).prepend(1, 2).count());
-        assertEquals(3, Stream.of(3, 4, 5).prepend(1, 2).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).skip(2).toList());
-        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).count());
-        assertEquals(3, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppendVarargs() {
-        assertEquals(5, Stream.of(1, 2, 3).append(4, 5).count());
-        assertEquals(3, Stream.of(1, 2, 3).append(4, 5).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3).append(4, 5).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).append(4, 5).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3).append(4, 5).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3).map(e -> e).append(4, 5).count());
-        assertEquals(3, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3).map(e -> e).append(4, 5).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterBuffered() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered().count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered().skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered().toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered().skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered().toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered().skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered().skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterBufferedWithSize() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered(10).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(10).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(10).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(10).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(10).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterBufferedWithQueue() {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).buffered(queue).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(queue).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(queue).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).buffered(queue).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).buffered(queue).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMergeWithCollection() {
-        List<Integer> collection = Arrays.asList(2, 4, 6);
-        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
-
-        assertEquals(6, Stream.of(1, 3, 5).mergeWith(collection, selector).count());
-        assertEquals(4, Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(collection, selector).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(collection, selector).toList());
-        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).toList());
-        assertEquals(6, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).count());
-        assertEquals(4, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).toList());
-        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMergeWithStream() {
-        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
-
-        assertEquals(6, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).count());
-        assertEquals(4, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).toList());
-        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toList());
-        assertEquals(6, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).count());
-        assertEquals(4, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).toList());
-        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterZipWithCollection() {
-        List<String> collection = Arrays.asList("a", "b", "c");
-        BiFunction<Integer, String, String> zipFunc = (i, s) -> i + s;
-
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).count());
-        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).toArray());
-        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).toArray());
-        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).toList());
-        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).count());
-        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).toArray());
-        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).toArray());
-        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).toList());
-        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterZipWithStream() {
-        BiFunction<Integer, String, String> zipFunc = (i, s) -> i + s;
-
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).count());
-        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).toArray());
-        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toArray());
-        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).toList());
-        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).count());
-        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).toArray());
-        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toArray());
-        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).toList());
-        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamEx_Inheritance() {
-        assertTrue(Stream.StreamEx.class.getSuperclass().equals(Stream.class));
-    }
-
-    @Test
-    public void test_stream_flatten() {
-        final int[][] a = { { 1, 3, 5 }, { 2, 4, 6, 8, 10 }, { 10, 20 } };
-
-        IntStream.flatten(a).println();
-        IntStream.flatten(a, false).println();
-        IntStream.flatten(a, true).println();
-        IntStream.flatten(a, 0, false).println();
-        IntStream.flatten(a, 0, true).println();
-
-        final int[][][] b = { { { 1, 2, 3 } }, { { 4, 5, 6 } } };
-        IntStream.flatten(b).println();
-
-        final Object[][] c = { { 1, 3, 5 }, { 2, 4, 6, 8, 10 }, { 10, 20 } };
-
-        Stream.flatten(c).println();
-        Stream.flatten(c, false).println();
-        Stream.flatten(c, true).println();
-        Stream.flatten(c, 0, false).println();
-        Stream.flatten(c, 0, true).println();
-
-        final Object[][][] d = { { { 1, 2, 3 } }, { { 4, 5, 6 } } };
-        Stream.flatten(d).println();
-
-        String[][] e = { { "1", "3", "5" }, { "2", "4", "6", "8", "10" }, { "10", "20" } };
-
-        Stream.flatten(e).println();
-        Stream.flatten(e, false).println();
-        Stream.flatten(e, true).println();
-        Stream.flatten(e, 0, false).println();
-        Stream.flatten(e, 0, true).println();
-
-        String[][][] f = { { { "1", "2", "3" } }, { { "4", "5", "6" } } };
-        Stream.flatten(f).println();
-
-        e = null;
-
-        Stream.flatten(e).println();
-        Stream.flatten(e, false).println();
-        Stream.flatten(e, true).println();
-        Stream.flatten(e, 0, false).println();
-        Stream.flatten(e, 0, true).println();
-
-        f = null;
-        Stream.flatten(f).println();
-        assertNull(f);
-    }
-
-    @Test
-    public void testStreamCreatedAfterMaxWaitWithDefaultValue() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMaxWaitWithSupplier() {
-        Supplier<Integer> defaultSupplier = () -> 99;
-
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
-        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
-        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
-    }
-
-    @Test
-    public void testMaxWaitPropagatesUpstreamException() {
-        // An exception thrown while fetching elements asynchronously must be propagated to the consumer,
-        // not silently swallowed by truncating the stream.
-        assertThrows(RuntimeException.class, () -> Stream.of(1, 2, 3, 4, 5).map(e -> {
-            if (e == 3) {
-                throw new IllegalStateException("failed to fetch element: " + e);
-            }
-            return e;
-        }).maxWait(Duration.ofMillis(100), 99).toList());
-
-        final Supplier<Integer> defaultSupplier = () -> 99;
-
-        assertThrows(RuntimeException.class, () -> Stream.of(1, 2, 3, 4, 5).map(e -> {
-            if (e == 3) {
-                throw new IllegalStateException("failed to fetch element: " + e);
-            }
-            return e;
-        }).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppendIfEmpty() {
-        assertEquals(3, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).count());
-        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().appendIfEmpty(1, 2, 3).toList());
-        assertEquals(N.toList(2, 3), Stream.<Integer> empty().appendIfEmpty(1, 2, 3).skip(1).toList());
-        assertEquals(3, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).count());
-        assertEquals(2, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).toList());
-        assertEquals(N.toList(2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(1, 2, 3).skip(1).toList());
-
-        assertEquals(2, Stream.of(4, 5).appendIfEmpty(1, 2, 3).count());
-        assertEquals(1, Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(4, 5).appendIfEmpty(1, 2, 3).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).toArray());
-        assertEquals(N.toList(4, 5), Stream.of(4, 5).appendIfEmpty(1, 2, 3).toList());
-        assertEquals(N.toList(5), Stream.of(4, 5).appendIfEmpty(1, 2, 3).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterAppendIfEmptyCollection() {
-        assertEquals(3, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).count());
-        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).toList());
-        assertEquals(N.toList(2, 3), Stream.<Integer> empty().appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toList());
-        assertEquals(3, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).count());
-        assertEquals(2, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).toList());
-        assertEquals(N.toList(2, 3), Stream.<Integer> empty().map(e -> e).appendIfEmpty(Arrays.asList(1, 2, 3)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterDefaultIfEmpty() {
-        assertEquals(1, Stream.<Integer> empty().defaultIfEmpty(99).count());
-        assertEquals(0, Stream.<Integer> empty().defaultIfEmpty(99).skip(1).count());
-        assertArrayEquals(new Integer[] { 99 }, Stream.<Integer> empty().defaultIfEmpty(99).toArray());
-        assertArrayEquals(new Integer[] {}, Stream.<Integer> empty().defaultIfEmpty(99).skip(1).toArray());
-        assertEquals(N.toList(99), Stream.<Integer> empty().defaultIfEmpty(99).toList());
-        assertEquals(N.toList(), Stream.<Integer> empty().defaultIfEmpty(99).skip(1).toList());
-        assertEquals(1, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).count());
-        assertEquals(0, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).count());
-        assertArrayEquals(new Integer[] { 99 }, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).toArray());
-        assertArrayEquals(new Integer[] {}, Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).toArray());
-        assertEquals(N.toList(99), Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).toList());
-        assertEquals(N.toList(), Stream.<Integer> empty().map(e -> e).defaultIfEmpty(99).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterIfEmpty() {
-        AtomicBoolean flag = new AtomicBoolean(false);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).count());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).count());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toArray());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toArray());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toList());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toList());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).count());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).count());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toArray());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toArray());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toList());
-        assertFalse(flag.get());
-        flag.set(false);
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toList());
-        assertFalse(flag.get());
-    }
-
-    @Test
-    public void testStreamCreatedAfterMapIfNotNull() {
-        assertEquals(3, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).count());
-        assertEquals(2, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).count());
-        assertArrayEquals(new String[] { "A", "B", "C" }, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).toArray());
-        assertArrayEquals(new String[] { "B", "C" }, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).toArray());
-        assertEquals(N.toList("A", "B", "C"), Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).toList());
-        assertEquals(N.toList("B", "C"), Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).toList());
-        assertEquals(3, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).count());
-        assertEquals(2, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).count());
-        assertArrayEquals(new String[] { "A", "B", "C" }, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).toArray());
-        assertArrayEquals(new String[] { "B", "C" }, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).toArray());
-        assertEquals(N.toList("A", "B", "C"), Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).toList());
-        assertEquals(N.toList("B", "C"), Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMap() {
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 7, 9 }, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
-        assertArrayEquals(new Integer[] { 5, 7, 9 },
-                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 7, 9), Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
-        assertEquals(N.toList(5, 7, 9), Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 5, 7, 9 },
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
-        assertArrayEquals(new Integer[] { 5, 7, 9 },
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
-        assertEquals(N.toList(3, 5, 7, 9), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
-        assertEquals(N.toList(5, 7, 9), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMapWithIncrement() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 7, 11 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
-        assertArrayEquals(new Integer[] { 7, 11 },
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
-        assertEquals(N.toList(3, 7, 11), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
-        assertEquals(N.toList(7, 11), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
-        assertArrayEquals(new Integer[] { 3, 7, 11 },
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
-        assertArrayEquals(new Integer[] { 7, 11 },
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
-        assertEquals(N.toList(3, 7, 11), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
-        assertEquals(N.toList(7, 11),
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMapTri() {
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
-        assertArrayEquals(new Integer[] { 6, 9, 12 },
-                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
-        assertArrayEquals(new Integer[] { 9, 12 },
-                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toArray());
-        assertEquals(N.toList(6, 9, 12),
-                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
-        assertEquals(N.toList(9, 12),
-                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
-        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
-        assertEquals(2,
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
-        assertArrayEquals(new Integer[] { 6, 9, 12 },
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
-        assertArrayEquals(new Integer[] { 9, 12 },
-                Stream.of(1, 2, 3, 4, 5)
-                        .map(e -> e)
-                        .slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
-                        .skip(1)
-                        .toArray());
-        assertEquals(N.toList(6, 9, 12),
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
-        assertEquals(N.toList(9, 12),
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
-    }
-
-    @Test
-    public void testStreamCreatedAfterSlidingMapTriWithIncrement() {
-        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
-        assertEquals(1,
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
-        assertArrayEquals(new Integer[] { 6, 15 },
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
-        assertArrayEquals(new Integer[] { 15 },
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toArray());
-        assertEquals(N.toList(6, 15),
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
-        assertEquals(N.toList(15),
-                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
-        assertEquals(2,
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
-        assertEquals(1,
-                Stream.of(1, 2, 3, 4, 5, 6)
-                        .map(e -> e)
-                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
-                        .skip(1)
-                        .count());
-        assertArrayEquals(new Integer[] { 6, 15 },
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
-        assertArrayEquals(new Integer[] { 15 },
-                Stream.of(1, 2, 3, 4, 5, 6)
-                        .map(e -> e)
-                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
-                        .skip(1)
-                        .toArray());
-        assertEquals(N.toList(6, 15),
-                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
-        assertEquals(N.toList(15),
-                Stream.of(1, 2, 3, 4, 5, 6)
-                        .map(e -> e)
-                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
-                        .skip(1)
-                        .toList());
     }
 
     @Test
@@ -2110,91 +786,514 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testStreamCreatedAfterSkipNulls() {
-        assertEquals(3, Stream.of(1, null, 2, null, 3).skipNulls().count());
-        assertEquals(2, Stream.of(1, null, 2, null, 3).skipNulls().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, null, 2, null, 3).skipNulls().toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, null, 2, null, 3).skipNulls().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, null, 2, null, 3).skipNulls().toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, null, 2, null, 3).skipNulls().skip(1).toList());
-        assertEquals(3, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().count());
-        assertEquals(2, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).toList());
+    public void testHasDuplicates() {
+        assertTrue(Stream.of(1, 2, 2, 3).containsDuplicates());
+        assertFalse(Stream.of(1, 2, 3).containsDuplicates());
+        assertFalse(Stream.<Integer> empty().containsDuplicates());
+    }
+
+    // ifEmpty
+
+    @Test
+    public void testIfEmpty() {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Stream.empty().ifEmpty(() -> executed.set(true)).count();
+        assertTrue(executed.get());
     }
 
     @Test
-    public void testStreamCreatedAfterAppendIfEmptyVarargs() {
-        assertEquals(3, Stream.of(1, 2, 3).appendIfEmpty(4, 5).count());
-        assertEquals(2, Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3).appendIfEmpty(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).toList());
-        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3).appendIfEmpty(4, 5).skip(1).toList());
-
-        assertEquals(2, Stream.<Integer> empty().appendIfEmpty(4, 5).count());
-        assertEquals(1, Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).count());
-        assertArrayEquals(new Integer[] { 4, 5 }, Stream.<Integer> empty().appendIfEmpty(4, 5).toArray());
-        assertArrayEquals(new Integer[] { 5 }, Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).toArray());
-        assertEquals(N.toList(4, 5), Stream.<Integer> empty().appendIfEmpty(4, 5).toList());
-        assertEquals(N.toList(5), Stream.<Integer> empty().appendIfEmpty(4, 5).skip(1).toList());
+    public void testIfEmptyNonEmpty() {
+        AtomicBoolean executed = new AtomicBoolean(false);
+        Stream.of(1, 2, 3).ifEmpty(() -> executed.set(true)).count();
+        assertFalse(executed.get());
     }
 
     @Test
-    public void testStreamWithNullHandling() {
-        List<String> input = Arrays.asList("a", null, "b", null, "c");
+    public void testStreamCreatedAfterIfEmpty() {
+        AtomicBoolean flag = new AtomicBoolean(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).ifEmpty(() -> flag.set(true)).skip(1).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).count());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toArray());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).toList());
+        assertFalse(flag.get());
+        flag.set(false);
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).ifEmpty(() -> flag.set(true)).skip(1).toList());
+        assertFalse(flag.get());
+    }
 
-        List<String> result = createStream(input).filter(Objects::nonNull).map(String::toUpperCase).toList();
+    @Test
+    public void testIntegration_AllFactoryMethods() {
 
-        assertEquals(Arrays.asList("A", "B", "C"), result);
+        assertEquals(0, Stream.empty().count());
+
+        assertEquals(1, Stream.just("test").count());
+
+        assertEquals(0, Stream.ofNullable(null).count());
+        assertEquals(1, Stream.ofNullable("test").count());
+
+        assertEquals(3, Stream.defer(() -> createStream(1, 2, 3)).count());
+
+        assertEquals(3, createStream01(new Integer[] { 1, 2, 3 }).count());
+        assertEquals(3, createStream(Arrays.asList(1, 2, 3)).count());
+        assertEquals(3, createStream(Arrays.asList(1, 2, 3).iterator()).count());
+
+        assertEquals(5, Stream.range(0, 5).count());
+        assertEquals(6, Stream.rangeClosed(0, 5).count());
+
+        assertEquals(10, Stream.repeat("X", 10).count());
+
+        assertEquals(5, Stream.generate(() -> "Y").limit(5).count());
+
+        assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
+    }
+
+    @Test
+    public void testStreamCreatedAfterIntersection() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).toArray());
+        assertArrayEquals(new Integer[] { 3, 4 }, Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toArray());
+        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).toList());
+        assertEquals(N.toList(3, 4), Stream.of(1, 2, 3, 4, 5).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 3, 4 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).toArray());
+        assertArrayEquals(new Integer[] { 3, 4 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toArray());
+        assertEquals(N.toList(2, 3, 4), Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).toList());
+        assertEquals(N.toList(3, 4), Stream.of(1, 2, 3, 4, 5).map(e -> e).intersection(Arrays.asList(2, 3, 4, 6)).skip(1).toList());
+    }
+
+    @Test
+    public void testIsParallel() {
+        assertFalse(Stream.of(1, 2, 3).isParallel());
+        assertTrue(Stream.of(1, 2, 3).parallel().isParallel());
+    }
+
+    @Test
+    public void testBooleanSupplierIteratorsStayExhausted() {
+        final AtomicInteger conditionCalls = new AtomicInteger();
+        Iterator<Integer> iter = Stream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, conditionCalls.get());
+
+        conditionCalls.set(0);
+        iter = Stream.iterate(1, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1).iterator();
+
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, conditionCalls.get());
+    }
+
+    // just
+
+    @Test
+    public void testJust() {
+        Stream<String> stream = Stream.just("hello");
+        assertEquals("hello", stream.first().get());
+    }
+
+    @Test
+    public void testJust2() {
+        Stream<String> stream = Stream.just("hello");
+        assertEquals(Arrays.asList("hello"), stream.toList());
+    }
+
+    @Test
+    public void testJust_NullElement() {
+        Stream<String> stream = Stream.just(null);
+
+        List<String> result = stream.toList();
+        assertEquals(1, result.size());
+        assertNull(result.get(0));
+    }
+
+    @Test
+    public void testLargeDataHandling() {
+        int size = 100000;
+
+        long sum = Stream.range(0, size).mapToLong(i -> i).sum();
+
+        long expectedSum = ((long) size * (size - 1)) / 2;
+        assertEquals(expectedSum, sum);
     }
 
     @Test
     @Timeout(10)
-    public void testStreamState_SortingAndComparator() throws Exception {
-        Stream.of(3, 1, 4, 1, 5).sorted().addSubscriber(s -> {
-            s.forEach(subscriberStreamResults::add);
+    public void testLargeDataset_Performance() throws Exception {
+        int size = 10000;
+        List<Integer> data = new ArrayList<>();
+        for (int i = 1; i <= size; i++) {
+            data.add(i);
+        }
+        AtomicInteger mainCount = new AtomicInteger(0);
+        AtomicInteger subscriberCount = new AtomicInteger(0);
+
+        Stream.of(data.toArray(new Integer[0])).addSubscriber(s -> {
+            s.forEach(x -> subscriberCount.incrementAndGet());
         }).forEach(x -> {
-            mainStreamResults.add(x);
+            mainCount.incrementAndGet();
+            if (mainCount.get() == size) {
+            }
         });
-
-        assertEquals(Arrays.asList(1, 1, 3, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 1, 3, 4, 5), subscriberStreamResults);
+        assertEquals(size, mainCount.get());
+        assertEquals(size, subscriberCount.get());
     }
 
     @Test
-    public void testStreamCreatedAfterThrowIfEmpty() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty().toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).toList());
+    public void test_lazyEvalation() throws Exception {
+        final MutableBoolean moved = MutableBoolean.of(false);
+
+        Stream<String> s = Stream.of("a", "b", "c", "d").peek(Fn.println()).peek(it -> {
+            new RuntimeException("Testing lazy evaluation").printStackTrace();
+            moved.setTrue();
+        })
+                .parallel()
+                .map(it -> it + "111")
+                .buffered()
+                .shuffled()
+                .sorted()
+                .rotated(2)
+                .filter(Fn.alwaysTrue())
+                .flatMap(Stream::of)
+                .takeWhile(Fn.alwaysTrue())
+                .dropWhile(Fn.alwaysFalse())
+                .sequential()
+                .map(it -> it + "111")
+                .buffered()
+                .shuffled()
+                .sorted()
+                .rotated(2)
+                .filter(Fn.alwaysTrue())
+                .flatMap(Stream::of)
+                .takeWhile(Fn.alwaysTrue())
+                .dropWhile(Fn.alwaysFalse());
+
+        assertFalse(moved.value());
+
+        s = s.filter(Fn.notNull());
+
+        assertFalse(moved.value());
+
+        s = s.buffered();
+
+        assertFalse(moved.value());
+
+        final ObjIterator<String> iter = s.iterator();
+
+        assertFalse(moved.value());
+
+        s.forEach(Fn.println());
+
+        assertTrue(moved.value());
+
+        assertFalse(iter.hasNext());
+
+        moved.setFalse();
+        final List<ByteStream> list = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            list.add(ByteStream.range((byte) 0, (byte) i).peek(it -> moved.setTrue()).peek(N::println));
+        }
+
+        ByteStream bs = ByteStream.merge(list, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+
+        bs = bs.filter(it -> it < 10);
+
+        assertFalse(moved.value());
+
+        final ByteIterator byteIter = bs.iterator();
+
+        bs.forEach(N::println);
+
+        assertFalse(byteIter.hasNext());
+
+        moved.setFalse();
+
+        final IntStream is = Stream.range(0, 10_000)
+                .peek(it -> moved.setTrue())
+                .parallel(128)
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .peek(it -> {
+                    if (it % 37 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .sequential()
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .reverseSorted()
+                .peek(it -> {
+                    if (it % 79 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(1024)
+                .peek(it -> {
+                    if (it % 137 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .map(it -> it - 0)
+                .parallel(64)
+                .map(it -> it + 0)
+                .flatMap(Stream::of)
+                .map(it -> it + 1)
+                .map(it -> it - 1)
+                .filter(it -> it >= 0)
+                .buffered(137)
+                .peek(it -> {
+                    if (it % 537 == 0) {
+                        N.sleep(3);
+                    }
+                })
+                .mapToInt(ToIntFunction.UNBOX);
+
+        assertFalse(moved.value());
+
+        final IntIterator ii = is.iterator();
+
+        assertFalse(moved.value());
+
+        assertEquals(IntStream.range(0, 10_000).sum(), is.sum());
+
+        assertFalse(ii.hasNext());
     }
 
     @Test
-    public void testStreamCreatedAfterThrowIfEmptyWithSupplier() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toList());
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).count());
-        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).count());
-        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).toArray());
-        assertArrayEquals(new Integer[] { 2, 3, 4, 5 },
-                Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toArray());
-        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).toList());
-        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toList());
+    public void testStreamCreatedAfterLimit() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).limit(3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).limit(3).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).limit(3).toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).limit(3).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).limit(3).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterFlattmap() {
+        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).count());
+        assertEquals(5, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6),
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).flatMapArray(Fn.identity()).skip(1).toList());
+        assertEquals(6, Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).count());
+        assertEquals(5,
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6),
+                Stream.of(new Integer[] { 1, 2 }, new Integer[] { 3, 4 }, new Integer[] { 5, 6 }).map(e -> e).flatMapArray(Fn.identity()).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMap() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(x -> x * 2).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).map(x -> x * 2).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapFirst() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).count());
+        assertArrayEquals(new Integer[] { 10, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).toArray());
+        assertEquals(N.toList(10, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).mapFirst(x -> x * 10).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).count());
+        assertArrayEquals(new Integer[] { 10, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).toArray());
+        assertEquals(N.toList(10, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirst(x -> x * 10).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapFirstOrElse() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 10, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(10, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 10, 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 10 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(10, 4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 10), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapFirstOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapIfNotNull() {
+        assertEquals(3, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).count());
+        assertEquals(2, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).count());
+        assertArrayEquals(new String[] { "A", "B", "C" }, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).toArray());
+        assertArrayEquals(new String[] { "B", "C" }, Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).toArray());
+        assertEquals(N.toList("A", "B", "C"), Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).toList());
+        assertEquals(N.toList("B", "C"), Stream.of("a", null, "b", null, "c").mapIfNotNull(String::toUpperCase).skip(1).toList());
+        assertEquals(3, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).count());
+        assertEquals(2, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).count());
+        assertArrayEquals(new String[] { "A", "B", "C" }, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).toArray());
+        assertArrayEquals(new String[] { "B", "C" }, Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).toArray());
+        assertEquals(N.toList("A", "B", "C"), Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).toList());
+        assertEquals(N.toList("B", "C"), Stream.of("a", null, "b", null, "c").map(e -> e).mapIfNotNull(String::toUpperCase).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapLast() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).toList());
+        assertEquals(N.toList(2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).mapLast(x -> x * 10).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).toList());
+        assertEquals(N.toList(2, 3, 4, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLast(x -> x * 10).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapLastOrElse() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 2, 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).toArray());
+        assertArrayEquals(new Integer[] { 4, 6, 8, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toArray());
+        assertEquals(N.toList(2, 4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).toList());
+        assertEquals(N.toList(4, 6, 8, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapLastOrElse(x -> x * 10, x -> x * 2).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterMapMulti() {
+        assertEquals(10, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).count());
+        assertEquals(9, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).toArray());
+        assertArrayEquals(new Integer[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).toArray());
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).toList());
+        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).toList());
+        assertEquals(10, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).count());
+        assertEquals(9, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).toArray());
+        assertArrayEquals(new Integer[] { 10, 2, 20, 3, 30, 4, 40, 5, 50 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).toArray());
+        assertEquals(N.toList(1, 10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).toList());
+        assertEquals(N.toList(10, 2, 20, 3, 30, 4, 40, 5, 50), Stream.of(1, 2, 3, 4, 5).map(e -> e).mapMulti((e, consumer) -> {
+            consumer.accept(e);
+            consumer.accept(e * 10);
+        }).skip(1).toList());
     }
 
     @Test
@@ -2374,60 +1473,142 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testStreamEx_AbstractClass() {
-        try {
-            Class<?> streamExClass = Stream.StreamEx.class;
-            assertTrue(java.lang.reflect.Modifier.isAbstract(streamExClass.getModifiers()));
-
-            assertEquals(Stream.class, streamExClass.getSuperclass());
-
-            assertEquals(0, streamExClass.getConstructors().length);
-        } catch (Exception e) {
-            fail("Failed to verify StreamEx class structure: " + e.getMessage());
-        }
+    public void testStreamCreatedAfterMaxWaitWithDefaultValue() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), 99).skip(2).toList());
     }
 
     @Test
-    public void testFilter() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).filter(n -> n % 2 == 0);
-        assertEquals(Arrays.asList(2, 4), stream.toList());
+    public void testStreamCreatedAfterMaxWaitWithSupplier() {
+        Supplier<Integer> defaultSupplier = () -> 99;
+
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).maxWait(Duration.ofMillis(100), defaultSupplier).skip(2).toList());
     }
 
     @Test
-    public void testFilterAllMatch() {
-        Stream<Integer> stream = Stream.of(2, 4, 6).filter(n -> n % 2 == 0);
-        assertEquals(Arrays.asList(2, 4, 6), stream.toList());
+    public void testMemoryEfficientOperations() {
+        AtomicInteger generatedCount = new AtomicInteger(0);
+
+        Stream<Integer> infiniteStream = Stream.generate(() -> generatedCount.incrementAndGet());
+
+        List<Integer> result = infiniteStream.limit(5).toList();
+
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+
+        assertTrue(generatedCount.get() <= 10);
     }
 
     @Test
-    public void testFilterWithAction() {
-        List<Integer> dropped = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).filter(n -> n % 2 == 0, dropped::add);
-        assertEquals(Arrays.asList(2, 4), stream.toList());
-        assertEquals(Arrays.asList(1, 3, 5), dropped);
+    public void testPrimitiveMergeNullSelectorThrowsOnConsumption() {
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(new byte[] { 1 }, new byte[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> CharStream.merge(new char[] { 'a' }, new char[] { 'b' }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> ShortStream.merge(new short[] { 1 }, new short[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> IntStream.merge(new int[] { 1 }, new int[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> LongStream.merge(new long[] { 1 }, new long[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> FloatStream.merge(new float[] { 1 }, new float[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> DoubleStream.merge(new double[] { 1 }, new double[] { 2 }, null).count());
+
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.of((byte) 1), ByteIterator.of((byte) 2), null).count());
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.of((byte) 1), ByteStream.of((byte) 2), null).count());
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(N.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), null).count());
     }
 
     @Test
-    public void testFilterEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().filter(n -> n % 2 == 0);
-        assertEquals(0, stream.count());
+    public void testReferenceArrayMergeNullSelectorThrowsOnConsumption() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, null).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, new Integer[] { 3 }, null).count());
     }
 
     @Test
-    public void testFilterNoneMatch() {
-        Stream<Integer> stream = Stream.of(1, 3, 5).filter(n -> n % 2 == 0);
-        assertEquals(0, stream.count());
+    public void testStreamCreatedAfterMergeWithCollection() {
+        List<Integer> collection = Arrays.asList(2, 4, 6);
+        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+
+        assertEquals(6, Stream.of(1, 3, 5).mergeWith(collection, selector).count());
+        assertEquals(4, Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(collection, selector).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(collection, selector).toList());
+        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(collection, selector).skip(2).toList());
+        assertEquals(6, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).count());
+        assertEquals(4, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).toList());
+        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(collection, selector).skip(2).toList());
     }
 
     @Test
-    public void testFilterWithActionOnDroppedItem() {
-        List<Integer> droppedItems = new ArrayList<>();
-        assertEquals(Arrays.asList(2, 4), Stream.of(1, 2, 3, 4, 5).filter(x -> x % 2 == 0, droppedItems::add).toList());
-        assertEquals(Arrays.asList(1, 3, 5), droppedItems);
+    public void testStreamCreatedAfterMergeWithStream() {
+        BiFunction<Integer, Integer, MergeResult> selector = (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
 
-        droppedItems.clear();
-        assertEquals(Collections.emptyList(), Stream.<Integer> empty().filter(x -> x % 2 == 0, droppedItems::add).toList());
-        assertTrue(droppedItems.isEmpty());
+        assertEquals(6, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).count());
+        assertEquals(4, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).toList());
+        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toList());
+        assertEquals(6, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).count());
+        assertEquals(4, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5, 6 }, Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).toList());
+        assertEquals(N.toList(3, 4, 5, 6), Stream.of(1, 3, 5).map(e -> e).mergeWith(Stream.of(2, 4, 6), selector).skip(2).toList());
+    }
+
+    @Test
+    public void testNMatch() {
+        assertTrue(Stream.of(2, 4, 6, 8).hasMatchCountBetween(2, 3, n -> n > 5));
+        assertFalse(Stream.of(2, 4, 6, 8).hasMatchCountBetween(5, 10, n -> n > 5));
+    }
+
+    @Test
+    @Timeout(10)
+    public void testNullElementHandling_InFilters() throws Exception {
+        Stream.of(1, null, 3, null, 5).filterWhileAddSubscriber(x -> x != null && x % 2 == 1, s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 3, 5), mainStreamResults);
+        assertEquals(Arrays.asList(null, null), subscriberStreamResults);
+    }
+
+    @Test
+    public void testNullFunctionalArgumentsRejectedEagerly() {
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter((Predicate<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).filter(value -> true, (Consumer<Integer>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.defer(null));
+    }
+
+    @Test
+    public void testNullHandling() {
+        List<Integer> withNulls = Arrays.asList(1, null, 2, null, 3);
+
+        List<Integer> result = Stream.of(withNulls).filter(n -> n != null).toList();
+        assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
     @Test
@@ -2444,122 +1625,50 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testTakeWhile() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).takeWhile(n -> n < 4);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterOnFirst() {
+        List<Integer> firstElements = new ArrayList<>();
+        Consumer<Integer> captureFirst = firstElements::add;
+
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).onFirst(captureFirst).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onFirst(captureFirst).skip(2).toList());
     }
 
     @Test
-    public void testTakeWhileFirstFalse() {
-        Stream<Integer> stream = Stream.of(5, 6, 7).takeWhile(n -> n < 4);
-        assertEquals(0, stream.count());
+    public void testStreamCreatedAfterOnLast() {
+        List<Integer> lastElements = new ArrayList<>();
+        Consumer<Integer> captureLast = lastElements::add;
+
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).onLast(captureLast).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).onLast(captureLast).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).onLast(captureLast).skip(2).toList());
     }
 
     @Test
-    public void testTakeWhileAllTrue() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).takeWhile(n -> n < 10);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testOrderedPermutations() {
+        List<List<Integer>> result = Stream.of(1, 2, 3).orderedPermutations().toList();
+        assertEquals(6, result.size());
     }
 
-    @Test
-    public void testTakeWhileEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().takeWhile(n -> n < 4);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDropWhile() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).dropWhile(n -> n < 3);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
-    }
-
-    @Test
-    public void testDropWhileAllDrop() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).dropWhile(n -> n < 10);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDropWhileWithAction() {
-        List<Integer> dropped = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).dropWhile(n -> n < 3, dropped::add);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
-        assertEquals(Arrays.asList(1, 2), dropped);
-    }
-
-    @Test
-    public void testDropWhileEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().dropWhile(n -> n < 3);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDropWhileNoneDrop() {
-        Stream<Integer> stream = Stream.of(5, 6, 7).dropWhile(n -> n < 3);
-        assertEquals(Arrays.asList(5, 6, 7), stream.toList());
-    }
-
-    @Test
-    public void testSkipUntil() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).skipUntil(n -> n >= 3);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
-    }
-
-    @Test
-    public void testPeek() {
-        List<Integer> peeked = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3).peek(peeked::add);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-        assertEquals(Arrays.asList(1, 2, 3), peeked);
-    }
-
-    @Test
-    public void testOnEach() {
-        List<Integer> processed = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3).peek(processed::add);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-        assertEquals(Arrays.asList(1, 2, 3), processed);
-    }
-
-    @Test
-    public void testOnEachAndPeek() {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> onEached = new ArrayList<>();
-
-        List<Integer> resultPeek = Stream.of(1, 2).peek(peeked::add).map(x -> x * 2).toList();
-        assertEquals(Arrays.asList(1, 2), peeked);
-        assertEquals(Arrays.asList(2, 4), resultPeek);
-
-        List<Integer> resultOnEach = Stream.of(1, 2).peek(onEached::add).map(x -> x * 2).toList();
-        assertEquals(Arrays.asList(1, 2), onEached);
-        assertEquals(Arrays.asList(2, 4), resultOnEach);
-    }
-
-    @Test
-    public void testSelect() {
-        List<Integer> result = Stream.of(1, "two", 3, "four", 5).select(Integer.class).toList();
-        assertEquals(Arrays.asList(1, 3, 5), result);
-    }
-
-    @Test
-    public void testSelect_Subtype() {
-        List<Number> numbers = new ArrayList<>();
-        numbers.add(1);
-        numbers.add(2L);
-        numbers.add(3.0);
-        numbers.add(4);
-
-        List<Integer> result = Stream.of(numbers).select(Integer.class).toList();
-        assertEquals(Arrays.asList(1, 4), result);
-    }
-
-    // ==================== New tests for untested methods ====================
-
-    @Test
-    public void testSelect_Empty() {
-        List<Integer> result = Stream.of("a", "b", "c").select(Integer.class).toList();
-        assertTrue(result.isEmpty());
-    }
+    // pairWith
 
     @Test
     public void testPairWith() {
@@ -2576,6009 +1685,177 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testMap() {
-        Stream<String> stream = Stream.of(1, 2, 3).map(n -> "num" + n);
-        assertEquals(Arrays.asList("num1", "num2", "num3"), stream.toList());
+    public void testStreamCreatedAfterPairWith() {
+        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).count());
+        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).count());
+        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).toArray().length);
+        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).toArray().length);
+        assertEquals(3, Stream.of("a", "bb", "ccc").pairWith(String::length).toList().size());
+        assertEquals(2, Stream.of("a", "bb", "ccc").pairWith(String::length).skip(1).toList().size());
+        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).count());
+        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).count());
+        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).toArray().length);
+        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).toArray().length);
+        assertEquals(3, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).toList().size());
+        assertEquals(2, Stream.of("a", "bb", "ccc").map(e -> e).pairWith(String::length).skip(1).toList().size());
     }
 
     @Test
-    public void testMapToPrimitiveStreams() {
-        CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
-
-        ByteStream byteStream = stream.mapToByte(n -> n.byteValue());
-        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, byteStream.toArray());
-    }
-
-    @Test
-    public void testMapToPrimitiveStreams2() {
-        CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
-        LongStream longStream = stream.mapToLong(n -> n.longValue());
-        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, longStream.toArray());
-    }
-
-    @Test
-    public void testMapToPrimitiveStreams3() {
-        CharStream charStream = createStream01("a", "b", "c").mapToChar(s -> s.charAt(0));
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, charStream.toArray());
-        DoubleStream doubleStream = stream.mapToDouble(n -> n.doubleValue());
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, doubleStream.toArray(), 0.001);
-    }
-
-    @Test
-    public void testMapEmpty() {
-        Stream<String> stream = Stream.<Integer> empty().map(n -> "num" + n);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testMapIfNotNull() {
-        Stream<String> stream = Stream.of(1, null, 3).mapIfNotNull(n -> "num" + n);
-        assertEquals(Arrays.asList("num1", "num3"), stream.toList());
-    }
-
-    @Test
-    public void testSlidingMap() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).slidingMap((a, b) -> a + b);
-        assertEquals(Arrays.asList(3, 5, 7), stream.toList());
-    }
-
-    @Test
-    public void testSlidingMapTriFunction() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).slidingMap((a, b, c) -> a + b + c);
-        assertEquals(Arrays.asList(6, 9), stream.toList());
-    }
-
-    @Test
-    public void testSlidingMap_BiFunction() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(3, 5, 7, 9), result);
-    }
-
-    @Test
-    public void testSlidingMap_TriFunction() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> a + b + c).toList();
-        assertEquals(Arrays.asList(6, 9, 12), result);
-    }
-
-    @Test
-    public void testSlidingMapBiFunction() {
-        List<String> result = Stream.of(1, 2, 3, 4).slidingMap((a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "2-3", "3-4"), result);
-
-        result = Stream.of(1).slidingMap((a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-null"), result);
-
-        result = Stream.<Integer> empty().slidingMap((a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSlidingMapBiFunctionWithIncrement() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5).slidingMap(2, (a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "3-4", "5-null"), result);
-    }
-
-    @Test
-    public void testSlidingMapBiFunctionWithIncrementAndIgnore() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "3-4"), result);
-
-        result = Stream.of(1, 2, 3, 4).slidingMap(2, false, (a, b) -> (a == null ? "null" : a) + "-" + (b == null ? "null" : b)).toList();
-        assertEquals(Arrays.asList("1-2", "3-4"), result);
-    }
-
-    @Test
-    public void testSlidingMapTriFunctionWithIncrementAndIgnore() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5, 6, 7)
-                .slidingMap(2, true, (a, b, c) -> (a == null ? "N" : a) + "-" + (b == null ? "N" : b) + "-" + (c == null ? "N" : c))
-                .toList();
-        assertEquals(Arrays.asList("1-2-3", "3-4-5", "5-6-7"), result);
-
-        result = Stream.of(1, 2, 3, 4, 5, 6)
-                .slidingMap(2, false, (a, b, c) -> (a == null ? "N" : a) + "-" + (b == null ? "N" : b) + "-" + (c == null ? "N" : c))
-                .toList();
-        assertEquals(Arrays.asList("1-2-3", "3-4-5", "5-6-N"), result);
-    }
-
-    @Test
-    public void testSlidingMap_Empty() {
-        List<Integer> result = Stream.<Integer> empty().slidingMap((a, b) -> a + b).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSlidingMap_WithIncrement() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).slidingMap(2, (a, b) -> a + (b == null ? 0 : b)).toList();
-        assertEquals(Arrays.asList(3, 7, 5), result);
-    }
-
-    @Test
-    public void testRangeMap() {
-        List<Integer> result = Stream.of(1, 2, 2, 3, 3, 3, 4).rangeMap((a, b) -> a.equals(b), (a, b) -> a).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testRangeMapEmpty() {
-        List<Integer> result = Stream.<Integer> empty().rangeMap((a, b) -> a.equals(b), (a, b) -> a).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void test_rangeMap() {
-        assertDoesNotThrow(() -> {
-            Stream.of("a", "ab", "ac", "b", "c", "cb").rangeMap((a, b) -> b.startsWith(a), (a, b) -> a + "<->" + b).println();
-        });
-    }
-
-    @Test
-    public void testMapFirst() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).mapFirst(n -> n * 10);
-        assertEquals(Arrays.asList(10, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testMapFirstEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().mapFirst(n -> n * 10);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testMapFirstOrElse() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5).mapFirstOrElse(n -> "first:" + n, n -> "else:" + n).toList();
-        assertEquals(Arrays.asList("first:1", "else:2", "else:3", "else:4", "else:5"), result);
-    }
-
-    @Test
-    public void testMapFirstOrElseEmpty() {
-        List<String> result = Stream.<Integer> empty().mapFirstOrElse(n -> "first:" + n, n -> "else:" + n).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapLast() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).mapLast(n -> n * 10);
-        assertEquals(Arrays.asList(1, 2, 30), stream.toList());
-    }
-
-    @Test
-    public void testMapLastEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().mapLast(n -> n * 10);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testMapLastOrElse() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5).mapLastOrElse(n -> "last:" + n, n -> "else:" + n).toList();
-        assertEquals(Arrays.asList("else:1", "else:2", "else:3", "else:4", "last:5"), result);
-    }
-
-    @Test
-    public void testMapLastOrElseEmpty() {
-        List<String> result = Stream.<Integer> empty().mapLastOrElse(n -> "last:" + n, n -> "else:" + n).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapToChar() {
-        char[] result = Stream.of("a", "b", "c").mapToChar(s -> s.charAt(0)).toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c' }, result);
-    }
-
-    @Test
-    public void testMapToCharEmpty() {
-        char[] result = Stream.<String> empty().mapToChar(s -> s.charAt(0)).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testMapToByte() {
-        byte[] result = Stream.of(1, 2, 3).mapToByte(Integer::byteValue).toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3 }, result);
-    }
-
-    @Test
-    public void testMapToByteEmpty() {
-        byte[] result = Stream.<Integer> empty().mapToByte(Integer::byteValue).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testMapToShort() {
-        short[] result = Stream.of(1, 2, 3).mapToShort(Integer::shortValue).toArray();
-        assertArrayEquals(new short[] { 1, 2, 3 }, result);
-    }
-
-    @Test
-    public void testMapToShortEmpty() {
-        short[] result = Stream.<Integer> empty().mapToShort(Integer::shortValue).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testMapToInt() {
-        IntStream intStream = Stream.of("a", "bb", "ccc").mapToInt(String::length);
-        assertArrayEquals(new int[] { 1, 2, 3 }, intStream.toArray());
-    }
-
-    @Test
-    public void testMapToLong() {
-        LongStream longStream = Stream.of(1, 2, 3).mapToLong(n -> n * 10L);
-        assertArrayEquals(new long[] { 10, 20, 30 }, longStream.toArray());
-    }
-
-    @Test
-    public void testMapToFloat() {
-        float[] result = Stream.of(1, 2, 3).mapToFloat(Integer::floatValue).toArray();
-        assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, result, 0.001f);
-    }
-
-    @Test
-    public void testMapToFloatEmpty() {
-        float[] result = Stream.<Integer> empty().mapToFloat(Integer::floatValue).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testMapToDouble() {
-        DoubleStream doubleStream = Stream.of(1, 2, 3).mapToDouble(n -> n * 1.5);
-        assertArrayEquals(new double[] { 1.5, 3.0, 4.5 }, doubleStream.toArray(), 0.001);
-    }
-
-    @Test
-    public void testMapToEntry() {
-        List<Map.Entry<String, Integer>> result = Stream.of("a", "bb", "ccc").mapToEntry(s -> s, s -> s.length()).toList();
-        assertEquals(3, result.size());
-        assertEquals("a", result.get(0).getKey());
-        assertEquals(Integer.valueOf(1), result.get(0).getValue());
-        assertEquals("bb", result.get(1).getKey());
-        assertEquals(Integer.valueOf(2), result.get(1).getValue());
-    }
-
-    @Test
-    public void testMapToEntryWithFunction() {
-        List<Map.Entry<Integer, String>> result = Stream.of(1, 2).mapToEntry(x -> N.newEntry(x, "v" + x)).toList();
-        assertEquals(2, result.size());
-        assertEquals(N.newEntry(1, "v1"), result.get(0));
-        assertEquals(N.newEntry(2, "v2"), result.get(1));
-    }
-
-    @Test
-    public void testMapToEntryWithKeyAndValueMappers() {
-        List<Map.Entry<Integer, String>> result = Stream.of(1, 2).mapToEntry(Fn.identity(), x -> "v" + x).toList();
-        assertEquals(2, result.size());
-        assertEquals(N.newEntry(1, "v1"), result.get(0));
-        assertEquals(N.newEntry(2, "v2"), result.get(1));
-    }
-
-    @Test
-    public void testMapToEntry2() {
-        EntryStream<String, Integer> entryStream2 = stream.mapToEntry(n -> "key" + n, n -> n * 10);
-        Map<String, Integer> map2 = entryStream2.toMap();
-        assertEquals(5, map2.size());
-        assertEquals(Integer.valueOf(30), map2.get("key3"));
-    }
-
-    @Test
-    public void testMapToEntryEmpty() {
-        List<Map.Entry<String, Integer>> result = Stream.<String> empty().mapToEntry(s -> s, s -> s.length()).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapToEntry_SingleMapper() {
-        List<Map.Entry<Integer, String>> result = Stream.of("a", "bb", "ccc").mapToEntry(s -> new AbstractMap.SimpleEntry<>(s.length(), s)).toList();
-        assertEquals(3, result.size());
-        assertEquals(1, result.get(0).getKey().intValue());
-        assertEquals("a", result.get(0).getValue());
-    }
-
-    @Test
-    public void testFlatMap() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).flatMap(n -> Stream.of(n, n * 10));
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
-    }
-
-    @Test
-    public void testFlatMapClosesMappedStreamsAcrossImplementations() {
-        assertFlatMapClosesMappedStreams(Stream.of(0, 1));
-        assertFlatMapClosesMappedStreams(Stream.of(Arrays.asList(0, 1).iterator()));
-        assertFlatMapClosesMappedStreams(Stream.of(0, 1).parallel(2));
-        assertFlatMapClosesMappedStreams(Stream.of(Arrays.asList(0, 1).iterator()).parallel(2));
-    }
-
-    private static void assertFlatMapClosesMappedStreams(final Stream<Integer> source) {
-        final List<Stream<Integer>> mappedStreams = Arrays.asList(Stream.empty(), Stream.of(20));
-
-        assertEquals(1, source.flatMap(mappedStreams::get).count());
-
-        for (final Stream<Integer> mappedStream : mappedStreams) {
-            assertThrows(IllegalStateException.class, () -> mappedStream.count());
-        }
-    }
-
-    @Test
-    public void testClosingFlatMapClosesCurrentMappedStream() {
-        final Stream<Integer> mappedStream = Stream.of(10, 20);
-        final Stream<Integer> flattened = Stream.of(1).flatMap(ignored -> mappedStream);
-
-        assertEquals(10, flattened.iteratorEx().next().intValue());
-        flattened.close();
-
-        assertThrows(IllegalStateException.class, () -> mappedStream.count());
-    }
-
-    @Test
-    public void testPrimitiveFlatMapClosesMappedStreamsAcrossArrayAndIteratorSources() {
-        assertByteFlatMapClosesMappedStream(ByteStream.of((byte) 1));
-        assertByteFlatMapClosesMappedStream(ByteStream.of(ByteIterator.of((byte) 1)));
-        assertCharFlatMapClosesMappedStream(CharStream.of('a'));
-        assertCharFlatMapClosesMappedStream(CharStream.of(CharIterator.of('a')));
-        assertShortFlatMapClosesMappedStream(ShortStream.of((short) 1));
-        assertShortFlatMapClosesMappedStream(ShortStream.of(ShortIterator.of((short) 1)));
-        assertIntFlatMapClosesMappedStream(IntStream.of(1));
-        assertIntFlatMapClosesMappedStream(IntStream.of(IntIterator.of(1)));
-        assertLongFlatMapClosesMappedStream(LongStream.of(1L));
-        assertLongFlatMapClosesMappedStream(LongStream.of(LongIterator.of(1L)));
-        assertFloatFlatMapClosesMappedStream(FloatStream.of(1F));
-        assertFloatFlatMapClosesMappedStream(FloatStream.of(FloatIterator.of(1F)));
-        assertDoubleFlatMapClosesMappedStream(DoubleStream.of(1D));
-        assertDoubleFlatMapClosesMappedStream(DoubleStream.of(DoubleIterator.of(1D)));
-    }
-
-    private static void assertByteFlatMapClosesMappedStream(final ByteStream source) {
-        final ByteStream mapped = ByteStream.of((byte) 2);
-        final ByteStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertCharFlatMapClosesMappedStream(final CharStream source) {
-        final CharStream mapped = CharStream.of('b');
-        final CharStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertShortFlatMapClosesMappedStream(final ShortStream source) {
-        final ShortStream mapped = ShortStream.of((short) 2);
-        final ShortStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertIntFlatMapClosesMappedStream(final IntStream source) {
-        final IntStream mapped = IntStream.of(2);
-        final IntStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertLongFlatMapClosesMappedStream(final LongStream source) {
-        final LongStream mapped = LongStream.of(2L);
-        final LongStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertFloatFlatMapClosesMappedStream(final FloatStream source) {
-        final FloatStream mapped = FloatStream.of(2F);
-        final FloatStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    private static void assertDoubleFlatMapClosesMappedStream(final DoubleStream source) {
-        final DoubleStream mapped = DoubleStream.of(2D);
-        final DoubleStream flattened = source.flatMap(ignored -> mapped);
-
-        flattened.iteratorEx().toArray();
-        assertThrows(IllegalStateException.class, mapped::count);
-        flattened.close();
-    }
-
-    @Test
-    public void testFlatMapToPrimitiveClosesMappedStreamsAcrossImplementations() {
-        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(0, 1));
-        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(Arrays.asList(0, 1).iterator()));
-        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(0, 1).parallel(2));
-        assertFlatMapToPrimitiveClosesMappedStreams(() -> Stream.of(Arrays.asList(0, 1).iterator()).parallel(2));
-    }
-
-    private static void assertFlatMapToPrimitiveClosesMappedStreams(final Supplier<Stream<Integer>> sourceFactory) {
-        final List<Runnable> charCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        CharStream charStream = sourceFactory.get().flatMapToChar(value -> {
-            final CharStream mapped = CharStream.of((char) ('a' + value));
-            charCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        charStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(charCloseProbes, 2);
-        charStream.close();
-
-        final List<Runnable> byteCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        ByteStream byteStream = sourceFactory.get().flatMapToByte(value -> {
-            final ByteStream mapped = ByteStream.of(value.byteValue());
-            byteCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        byteStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(byteCloseProbes, 2);
-        byteStream.close();
-
-        final List<Runnable> shortCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        ShortStream shortStream = sourceFactory.get().flatMapToShort(value -> {
-            final ShortStream mapped = ShortStream.of(value.shortValue());
-            shortCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        shortStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(shortCloseProbes, 2);
-        shortStream.close();
-
-        final List<Runnable> intCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        IntStream intStream = sourceFactory.get().flatMapToInt(value -> {
-            final IntStream mapped = IntStream.of(value);
-            intCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        intStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(intCloseProbes, 2);
-        intStream.close();
-
-        final List<Runnable> longCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        LongStream longStream = sourceFactory.get().flatMapToLong(value -> {
-            final LongStream mapped = LongStream.of(value.longValue());
-            longCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        longStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(longCloseProbes, 2);
-        longStream.close();
-
-        final List<Runnable> floatCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        FloatStream floatStream = sourceFactory.get().flatMapToFloat(value -> {
-            final FloatStream mapped = FloatStream.of(value.floatValue());
-            floatCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        floatStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(floatCloseProbes, 2);
-        floatStream.close();
-
-        final List<Runnable> doubleCloseProbes = Collections.synchronizedList(new ArrayList<>());
-        DoubleStream doubleStream = sourceFactory.get().flatMapToDouble(value -> {
-            final DoubleStream mapped = DoubleStream.of(value.doubleValue());
-            doubleCloseProbes.add(mapped::count);
-            return mapped;
-        });
-        doubleStream.iteratorEx().toArray();
-        assertMappedStreamsClosed(doubleCloseProbes, 2);
-        doubleStream.close();
-    }
-
-    private static void assertMappedStreamsClosed(final List<Runnable> closeProbes, final int expectedCount) {
-        assertEquals(expectedCount, closeProbes.size());
-
-        for (final Runnable closeProbe : new ArrayList<>(closeProbes)) {
-            assertThrows(IllegalStateException.class, closeProbe::run);
-        }
-    }
-
-    @Test
-    public void testFlatMapJdkStream() {
-        List<String> result = Stream.of("a", "bb").flatMapJdkStream(s -> java.util.stream.Stream.of(s, s.toUpperCase())).toList();
-
-        assertEquals(Arrays.asList("a", "A", "bb", "BB"), result);
-    }
-
-    @Test
-    public void testFlatMapJdkStream_EmptyInput() {
-        List<String> result = Stream.<String> empty().flatMapJdkStream(s -> java.util.stream.Stream.of(s)).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatmapCollection() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).flatmap(n -> Arrays.asList(n, n * 10));
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
-    }
-
-    @Test
-    public void testFlatmap() {
-        List<Integer> result = Stream.of(1, 2).flatmap(x -> Arrays.asList(x, x * 10)).toList();
-        assertEquals(Arrays.asList(1, 10, 2, 20), result);
-    }
-
-    @Test
-    public void testFlatMapToPrimitiveStreams() {
-        CharStream charStream = createStream01("hello", "world").flatMapToChar(s -> CharStream.of(s.toCharArray()));
-        assertEquals("helloworld", new String(charStream.toArray()));
-
-        CharStream charStream2 = createStream01("hello", "world").flatMapArrayToChar(String::toCharArray);
-        assertEquals("helloworld", new String(charStream2.toArray()));
-
-    }
-
-    @Test
-    public void testFlatMapEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().flatMap(n -> Stream.of(n, n * 10));
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testFlatMapReturnsEmpty() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).flatMap(n -> Stream.<Integer> empty());
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testComplexNestedOperations() {
-        List<String> result = createStream(Arrays.asList(1, 2, 3, 4, 5)).flatMap(n -> createStream(n, n * 10))
-                .filter(n -> n % 2 == 0)
-                .map(n -> "Value: " + n)
-                .distinct()
+    public void testComplexScenarios_NestedParallelism() {
+        List<Integer> result = Stream.range(0, 10)
+                .parallel()
+                .flatMap(i -> Stream.range(i * 10, (i + 1) * 10).parallel())
+                .filter(n -> n % 3 == 0)
                 .sorted()
                 .toList();
 
-        assertEquals(Arrays.asList("Value: 10", "Value: 2", "Value: 20", "Value: 30", "Value: 4", "Value: 40", "Value: 50"), result);
-    }
-
-    @Test
-    public void testFlatMapArray() {
-        List<Integer> result = Stream.of("1,2", "3,4").flatMapArray(s -> {
-            String[] parts = s.split(",");
-            Integer[] nums = new Integer[parts.length];
-            for (int i = 0; i < parts.length; i++) {
-                nums[i] = Integer.parseInt(parts[i]);
-            }
-            return nums;
-        }).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlattmapArray() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).flatMapArray(n -> new Integer[] { n, n * 10 });
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), stream.toList());
-    }
-
-    @Test
-    public void testFlattMap() {
-        List<Integer> result = Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4)).flattMap(list -> list.stream()).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlattMapArray() {
-        List<Integer> result = Stream.of("1,2", "3,4").flatMapArrayToInt(s -> Stream.of(s.split(",")).mapToInt(Integer::parseInt).toArray()).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlattmapJdkStream() {
-        List<Integer> result = Stream.of(1, 2).flattMap(x -> java.util.stream.Stream.of(x, x + 1)).toList();
-        assertEquals(Arrays.asList(1, 2, 2, 3), result);
-    }
-
-    @Test
-    public void testFlattMapEmpty() {
-        List<Integer> result = Stream.<List<Integer>> empty().flattMap(list -> list.stream()).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatmapToChar() {
-        char[] result = Stream.of("ab", "cd", "ef").flatMapArrayToChar(s -> s.toCharArray()).toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd', 'e', 'f' }, result);
-    }
-
-    @Test
-    public void testFlatMapToChar() {
-        char[] result = Stream.of("ab", "cd").flatMapToChar(s -> CharStream.of(s)).toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
-    }
-
-    @Test
-    public void testFlatmapToCharFromArray() {
-        char[] result = Stream.of("ab", "cd").flatMapArrayToChar(s -> s.toCharArray()).toArray();
-        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, result);
-    }
-
-    @Test
-    public void testFlatmapToCharEmpty() {
-        char[] result = Stream.<String> empty().flatMapArrayToChar(s -> s.toCharArray()).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToCharEmpty() {
-        char[] result = Stream.<String> empty().flatMapToChar(s -> CharStream.of(s)).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatmapToByte() {
-        byte[] result = Stream.of(new byte[] { 1, 2 }, new byte[] { 3, 4 }).flatMapArrayToByte(b -> b).toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatMapToByte() {
-        byte[] result = Stream.of(new byte[] { 1, 2 }, new byte[] { 3, 4 }).flatMapToByte(b -> ByteStream.of(b)).toArray();
-        assertArrayEquals(new byte[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatmapToByteEmpty() {
-        byte[] result = Stream.<byte[]> empty().flatMapArrayToByte(b -> b).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToByteEmpty() {
-        byte[] result = Stream.<byte[]> empty().flatMapToByte(b -> ByteStream.of(b)).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatmapToShort() {
-        short[] result = Stream.of(new short[] { 1, 2 }, new short[] { 3, 4 }).flatMapArrayToShort(s -> s).toArray();
-        assertArrayEquals(new short[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatMapToShort() {
-        short[] result = Stream.of(new short[] { 1, 2 }, new short[] { 3, 4 }).flatMapToShort(s -> ShortStream.of(s)).toArray();
-        assertArrayEquals(new short[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatmapToShortEmpty() {
-        short[] result = Stream.<short[]> empty().flatMapArrayToShort(s -> s).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToShortEmpty() {
-        short[] result = Stream.<short[]> empty().flatMapToShort(s -> ShortStream.of(s)).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToInt() {
-        IntStream intStream = Stream.of("a", "bb", "ccc").flatMapToInt(s -> IntStream.of(s.length(), s.length() * 2));
-        assertArrayEquals(new int[] { 1, 2, 2, 4, 3, 6 }, intStream.toArray());
-    }
-
-    @Test
-    public void testFlatmapToIntArray() {
-        int[] result = Stream.of("12", "34")
-                .flatMapArrayToInt(s -> new int[] { Character.getNumericValue(s.charAt(0)), Character.getNumericValue(s.charAt(1)) })
-                .toArray();
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatmapToIntFromArray() {
-        int[] result = Stream.of(Pair.of(1, 2), Pair.of(3, 4)).flatMapArrayToInt(p -> new int[] { p.left(), p.right() }).toArray();
-        assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
-    }
-
-    @Test
-    public void testFlatmapToIntArrayEmpty() {
-        int[] result = Stream.<String> empty().flatMapArrayToInt(s -> new int[] { 1, 2 }).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToLong() {
-        LongStream longStream = Stream.of(1, 2, 3).flatMapToLong(n -> LongStream.of(n, n * 10L));
-        assertArrayEquals(new long[] { 1, 10, 2, 20, 3, 30 }, longStream.toArray());
-    }
-
-    @Test
-    public void testFlatmapToLongArray() {
-        long[] result = Stream.of(new long[] { 1L, 2L }, new long[] { 3L, 4L }).flatMapArrayToLong(arr -> arr).toArray();
-        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L }, result);
-    }
-
-    @Test
-    public void testFlatmapToLongArrayEmpty() {
-        long[] result = Stream.<long[]> empty().flatMapArrayToLong(arr -> arr).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatmapToFloat() {
-        float[] result = Stream.of(new float[] { 1.0f, 2.0f }, new float[] { 3.0f, 4.0f }).flatMapArrayToFloat(f -> f).toArray();
-        assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result, 0.001f);
-    }
-
-    @Test
-    public void testFlatMapToFloat() {
-        float[] result = Stream.of(new float[] { 1.0f, 2.0f }, new float[] { 3.0f, 4.0f }).flatMapToFloat(f -> FloatStream.of(f)).toArray();
-        assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, result, 0.001f);
-    }
-
-    @Test
-    public void testFlatmapToFloatEmpty() {
-        float[] result = Stream.<float[]> empty().flatMapArrayToFloat(f -> f).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToFloatEmpty() {
-        float[] result = Stream.<float[]> empty().flatMapToFloat(f -> FloatStream.of(f)).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToDouble() {
-        DoubleStream doubleStream = Stream.of(1, 2, 3).flatMapToDouble(n -> DoubleStream.of(n, n * 1.5));
-        assertArrayEquals(new double[] { 1, 1.5, 2, 3.0, 3, 4.5 }, doubleStream.toArray(), 0.001);
-    }
-
-    @Test
-    public void testFlatmapToDoubleArray() {
-        double[] result = Stream.of(new double[] { 1.0, 2.0 }, new double[] { 3.0, 4.0 }).flatMapArrayToDouble(arr -> arr).toArray();
-        assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0 }, result, 0.001);
-    }
-
-    @Test
-    public void testFlatmapToDoubleArrayEmpty() {
-        double[] result = Stream.<double[]> empty().flatMapArrayToDouble(arr -> arr).toArray();
-        assertEquals(0, result.length);
-    }
-
-    @Test
-    public void testFlatMapToEntry() {
-        Map<String, Integer> map1 = new LinkedHashMap<>();
-        map1.put("a", 1);
-        map1.put("b", 2);
-        Map<String, Integer> map2 = new LinkedHashMap<>();
-        map2.put("c", 3);
-
-        List<Map.Entry<String, Integer>> result = Stream.of(map1, map2).flatMapToEntry(m -> Stream.of(m.entrySet())).toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testFlatMapToEntryFromStream() {
-        List<Map.Entry<String, Integer>> result = Stream.of("a:1,b:2", "c:3")
-                .flatMapToEntry(str -> Stream.of(str.split(",")).map(pairStr -> N.newEntry(pairStr.split(":")[0], Integer.parseInt(pairStr.split(":")[1]))))
-                .toList();
-        assertEquals(Arrays.asList(N.newEntry("a", 1), N.newEntry("b", 2), N.newEntry("c", 3)), result);
-
-    }
-
-    @Test
-    public void testFlatmapToEntryFromMap() {
-        Map<String, Integer> map1 = N.asMap("a", 1, "b", 2);
-        Map<String, Integer> map2 = N.asMap("c", 3);
-        List<Map.Entry<String, Integer>> result = Stream.of(map1, map2).flatmapToEntry(Fn.identity()).sortedByKey(Comparator.naturalOrder()).toList();
-        assertEquals(Arrays.asList(N.newEntry("a", 1), N.newEntry("b", 2), N.newEntry("c", 3)), result);
-    }
-
-    @Test
-    public void testFlatmapToEntry() {
-        List<Map.Entry<String, Integer>> result = Stream.of("a", "b").flatmapToEntry(s -> {
-            Map<String, Integer> map = new HashMap<>();
-            map.put(s, s.length());
-            return map;
-        }).toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFlatMapToEntryEmpty() {
-        List<Map.Entry<String, Integer>> result = Stream.<Map<String, Integer>> empty().flatMapToEntry(m -> Stream.of(m.entrySet())).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatmapToEntryArray() {
-        List<Map.Entry<String, Integer>> result = Stream.of("ab", "cd")
-                .flatMapToEntry(s -> Stream.of(new AbstractMap.SimpleEntry<>(s, s.length()), new AbstractMap.SimpleEntry<>(s.toUpperCase(), s.length())))
-                .toList();
-        assertEquals(4, result.size());
-        assertEquals("ab", result.get(0).getKey());
-        assertEquals(Integer.valueOf(2), result.get(0).getValue());
-    }
-
-    @Test
-    public void testFlatmapToEntryArrayEmpty() {
-        List<Map.Entry<String, Integer>> result = Stream.<String> empty().flatMapToEntry(s -> Stream.of(new AbstractMap.SimpleEntry<>(s, s.length()))).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlattMapToEntry() {
-        EntryStream<String, Integer> stream1 = EntryStream.of("a", 1);
-        EntryStream<String, Integer> stream2 = EntryStream.of("b", 2);
-
-        List<Map.Entry<String, Integer>> result = Stream.of(stream1, stream2).flattMapToEntry(s -> s).toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testFlattMapToEntryEmpty() {
-        List<Map.Entry<String, Integer>> result = Stream.<EntryStream<String, Integer>> empty().flattMapToEntry(s -> s).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlattMapToEntryFromEntryStream() {
-        List<Map.Entry<String, Integer>> result = Stream.of("a", "b")
-                .flattMapToEntry(s -> EntryStream.of(s, s.hashCode(), s.toUpperCase(), s.toUpperCase().hashCode()))
-                .toList();
-
-        List<Map.Entry<String, Integer>> expected = new ArrayList<>();
-        expected.add(N.newEntry("a", "a".hashCode()));
-        expected.add(N.newEntry("A", "A".hashCode()));
-        expected.add(N.newEntry("b", "b".hashCode()));
-        expected.add(N.newEntry("B", "B".hashCode()));
-
-        assertTrue(result.containsAll(expected) && expected.containsAll(result));
-    }
-
-    @Test
-    public void testFlatmapIfNotNull() {
-        List<Integer> result = Stream.of("1", null, "2", null, "3")
-                .flatmapIfNotNull(s -> Arrays.asList(Integer.parseInt(s), Integer.parseInt(s) * 10))
-                .toList();
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
-    }
-
-    @Test
-    public void testFlatmapIfNotNullAllNull() {
-        List<String> result = Stream.of(null, null, null).flatmapIfNotNull(s -> Arrays.asList((String) s)).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatmapIfNotNullEmpty() {
-        List<Integer> result = Stream.<String> empty().flatmapIfNotNull(s -> Arrays.asList(Integer.parseInt(s))).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatmapIfNotNullSingleMapper() {
-        List<Integer> result = Stream.of(Arrays.asList(1, 2), null, Arrays.asList(3, 4)).flatmapIfNotNull(c -> c).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlatmapIfNotNullTwoMappers() {
-        List<String> data = Arrays.asList("1,2", null, "3,4");
-        List<Integer> result = Stream.of(data, null, Arrays.asList("5,6"))
-                .flatmapIfNotNull(list -> list, (String str) -> str == null ? null : Stream.of(str.split(",")).map(Integer::parseInt).toList())
-                .toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testMapMulti() {
-        List<Object> result = Stream.of(1, 2, 3).mapMulti((n, consumer) -> {
-            consumer.accept(n);
-            consumer.accept(n * 10);
-        }).toList();
-        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result);
-    }
-
-    @Test
-    public void testMapMultiEmpty() {
-        List<Object> result = Stream.<Integer> empty().mapMulti((n, consumer) -> {
-            consumer.accept(n);
-            consumer.accept(n * 10);
-        }).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapMulti_Empty() {
-        List<Object> result = Stream.<String> empty().mapMulti((s, consumer) -> {
-            consumer.accept(s.toUpperCase());
-        }).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapMultiToInt() {
-        int[] result = Stream.of("a", "bb", "ccc").mapMultiToInt((s, consumer) -> {
-            for (int i = 0; i < s.length(); i++) {
-                consumer.accept(s.length());
-            }
-        }).toArray();
-        assertArrayEquals(new int[] { 1, 2, 2, 3, 3, 3 }, result);
-    }
-
-    @Test
-    public void testMapMultiToLong() {
-        long[] result = Stream.of(1, 2, 3).mapMultiToLong((n, consumer) -> {
-            consumer.accept(n.longValue());
-            consumer.accept(n.longValue() * 100L);
-        }).toArray();
-        assertArrayEquals(new long[] { 1L, 100L, 2L, 200L, 3L, 300L }, result);
-    }
-
-    @Test
-    public void testMapMultiToDouble() {
-        double[] result = Stream.of(1, 2, 3).mapMultiToDouble((n, consumer) -> {
-            consumer.accept(n.doubleValue());
-            consumer.accept(n.doubleValue() * 0.5);
-        }).toArray();
-        assertArrayEquals(new double[] { 1.0, 0.5, 2.0, 1.0, 3.0, 1.5 }, result, 0.001);
-    }
-
-    @Test
-    public void testMapPartialEmpty() {
-        List<Integer> result = Stream.<String> empty().mapPartial(s -> u.Optional.of(Integer.parseInt(s))).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMapPartial() {
-        List<Integer> result = Stream.of("1", "abc", "2", "def", "3").mapPartial(s -> {
-            try {
-                return u.Optional.of(Integer.parseInt(s));
-            } catch (NumberFormatException e) {
-                return u.Optional.empty();
-            }
-        }).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testMapPartialToInt() {
-        int[] result = Stream.of("1", "abc", "2", "3").mapPartialToInt(s -> {
-            try {
-                return u.OptionalInt.of(Integer.parseInt(s));
-            } catch (NumberFormatException e) {
-                return u.OptionalInt.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new int[] { 1, 2, 3 }, result);
-    }
-
-    @Test
-    public void testMapPartialToLong() {
-        long[] result = Stream.of("1", "abc", "2", "3").mapPartialToLong(s -> {
-            try {
-                return u.OptionalLong.of(Long.parseLong(s));
-            } catch (NumberFormatException e) {
-                return u.OptionalLong.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
-    }
-
-    @Test
-    public void testMapPartialToDouble() {
-        double[] result = Stream.of("1.5", "abc", "2.5", "3.5").mapPartialToDouble(s -> {
-            try {
-                return u.OptionalDouble.of(Double.parseDouble(s));
-            } catch (NumberFormatException e) {
-                return u.OptionalDouble.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new double[] { 1.5, 2.5, 3.5 }, result, 0.001);
-    }
-
-    @Test
-    public void testMapPartialJdk() {
-        List<Integer> result = Stream.of("1", "abc", "2", "def", "3").mapPartialJdk(s -> {
-            try {
-                return java.util.Optional.of(Integer.parseInt(s));
-            } catch (NumberFormatException e) {
-                return java.util.Optional.empty();
-            }
-        }).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testMapPartialToIntJdk() {
-        int[] result = Stream.of("1", "abc", "2", "3").mapPartialToIntJdk(s -> {
-            try {
-                return java.util.OptionalInt.of(Integer.parseInt(s));
-            } catch (NumberFormatException e) {
-                return java.util.OptionalInt.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new int[] { 1, 2, 3 }, result);
-    }
-
-    @Test
-    public void testMapPartialToLongJdk() {
-        long[] result = Stream.of("1", "abc", "2", "3").mapPartialToLongJdk(s -> {
-            try {
-                return java.util.OptionalLong.of(Long.parseLong(s));
-            } catch (NumberFormatException e) {
-                return java.util.OptionalLong.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new long[] { 1L, 2L, 3L }, result);
-    }
-
-    @Test
-    public void testMapPartialToDoubleJdk() {
-        double[] result = Stream.of("1.5", "abc", "2.5", "3.5").mapPartialToDoubleJdk(s -> {
-            try {
-                return java.util.OptionalDouble.of(Double.parseDouble(s));
-            } catch (NumberFormatException e) {
-                return java.util.OptionalDouble.empty();
-            }
-        }).toArray();
-        assertArrayEquals(new double[] { 1.5, 2.5, 3.5 }, result, 0.001);
-    }
-
-    @Test
-    public void testGroupBy() {
-        Map<Integer, List<String>> map = Stream.of("a", "bb", "c", "dd", "eee").groupBy(String::length).toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(Arrays.asList("a", "c"), map.get(1));
-        assertEquals(Arrays.asList("bb", "dd"), map.get(2));
-        assertEquals(Arrays.asList("eee"), map.get(3));
-    }
-
-    @Test
-    public void testGroupByWithValueMapper() {
-        Map<Integer, List<Integer>> map = Stream.of("a", "bb", "ccc").groupBy(String::length, String::length).toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(Arrays.asList(1), map.get(1));
-        assertEquals(Arrays.asList(2), map.get(2));
-        assertEquals(Arrays.asList(3), map.get(3));
-    }
-
-    @Test
-    public void testGroupByWithCollector() {
-        Map<Integer, Long> map = Stream.of("a", "bb", "c", "dd").groupBy(String::length, Collectors.counting()).toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(Long.valueOf(2), map.get(1));
-        assertEquals(Long.valueOf(2), map.get(2));
-    }
-
-    @Test
-    public void testGroupBySimple() {
-        Stream<Map.Entry<Integer, List<String>>> resultStream = Stream.of("apple", "banana", "apricot", "blueberry", "cherry").groupBy(String::length);
-
-        Map<Integer, List<String>> resultMap = resultStream.toMap(Map.Entry::getKey, Map.Entry::getValue);
-
-        assertEquals(Set.of(5, 6, 7, 9), resultMap.keySet());
-        assertTrue(resultMap.get(5).containsAll(Arrays.asList("apple")));
-        assertTrue(resultMap.get(6).containsAll(Arrays.asList("banana", "cherry")));
-        assertTrue(resultMap.get(7).containsAll(Arrays.asList("apricot")));
-        assertTrue(resultMap.get(9).containsAll(Arrays.asList("blueberry")));
-    }
-
-    @Test
-    public void testGroupBy_WithDownstream() {
-        List<Map.Entry<Integer, Long>> result = Stream.of("a", "bb", "c", "dd", "eee").groupBy(String::length, java.util.stream.Collectors.counting()).toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testGroupByEmpty() {
-        Map<Integer, List<String>> map = Stream.<String> empty().groupBy(String::length).toMap(e -> e.getKey(), e -> e.getValue());
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testGroupByWithKeyMapperValueMapperAndMergeFunction() {
-        Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupBy(s -> s.charAt(0), s -> s.substring(0, Math.min(s.length(), 3)), (v1, v2) -> v1 + ";" + v2)
-                .toMap(Map.Entry::getKey, Map.Entry::getValue);
-
-        assertEquals("app;apr;avo", result.get('a'));
-        assertEquals("ban;blu", result.get('b'));
-    }
-
-    @Test
-    public void testGroupBy_Empty() {
-        List<Map.Entry<Integer, List<String>>> result = Stream.<String> empty().groupBy(String::length).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGroupBy_WithKeyValueAndDownstream() {
-        List<Map.Entry<Integer, Long>> result = Stream.of("a", "bb", "c", "dd", "eee")
-                .groupBy(String::length, String::toUpperCase, java.util.stream.Collectors.counting())
-                .sorted(Map.Entry.comparingByKey())
-                .toList();
-        assertEquals(3, result.size());
-        assertEquals(2L, (long) result.get(0).getValue()); // length=1: "A","C"
-    }
-
-    @Test
-    public void testGroupByToEntry() {
-        List<Map.Entry<Integer, List<String>>> list = Stream.of("a", "bb", "c", "dd").groupByToEntry(String::length).toList();
-        assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testGroupByToEntrySimple() {
-        EntryStream<Integer, List<String>> resultStream = Stream.of("apple", "banana", "apricot", "blueberry", "cherry").groupByToEntry(String::length);
-
-        Map<Integer, List<String>> resultMap = resultStream.toMap();
-        assertEquals(Set.of(5, 6, 7, 9), resultMap.keySet());
-        assertTrue(resultMap.get(5).containsAll(Arrays.asList("apple")));
-    }
-
-    @Test
-    public void testGroupByToEntryWithKeyMapperValueMapperCollectorAndMapFactory() {
-        Map<Character, String> result = Stream.of("apple", "apricot", "banana", "blueberry", "avocado")
-                .groupByToEntry(s -> s.charAt(0), s -> String.valueOf(s.length()), Collectors.joining(",", "[", "]"), TreeMap::new)
-                .toMap();
-
-        assertEquals("[5,7,7]", result.get('a'));
-        assertEquals("[6,9]", result.get('b'));
-    }
-
-    @Test
-    public void testGroupByToEntry_WithKeyValueAndMerge() {
-        List<Map.Entry<Integer, String>> result = Stream.of("a", "bb", "c", "dd", "eee")
-                .groupByToEntry(String::length, s -> s, (s1, s2) -> s1 + "," + s2)
-                .sorted(Map.Entry.comparingByKey())
-                .toList();
-        assertEquals(3, result.size());
-        assertTrue(result.get(0).getValue().contains("a"));
-    }
-
-    @Test
-    public void testGroupByToEntry_WithKeyValueMergeAndMapFactory() {
-        List<Map.Entry<Integer, String>> result = Stream.of("a", "bb", "c", "dd")
-                .groupByToEntry(String::length, s -> s, (s1, s2) -> s1 + "," + s2, LinkedHashMap::new)
-                .toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testPartitionBy() {
-        Map<Boolean, List<Integer>> map = Stream.of(1, 2, 3, 4, 5).partitionBy(n -> n % 2 == 0).toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(Arrays.asList(2, 4), map.get(true));
-        assertEquals(Arrays.asList(1, 3, 5), map.get(false));
-    }
-
-    @Test
-    public void testPartitionByWithCollector() {
-        Map<Boolean, Long> map = Stream.of(1, 2, 3, 4, 5).partitionBy(n -> n % 2 == 0, Collectors.counting()).toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(Long.valueOf(2), map.get(true));
-        assertEquals(Long.valueOf(3), map.get(false));
-    }
-
-    @Test
-    public void testPartitionBySimple() {
-        Stream<Map.Entry<Boolean, List<Integer>>> resultStream = Stream.of(1, 2, 3, 4, 5).partitionBy(x -> x % 2 == 0);
-        Map<Boolean, List<Integer>> resultMap = resultStream.toMap(Map.Entry::getKey, Map.Entry::getValue);
-
-        assertEquals(Arrays.asList(2, 4), resultMap.get(true));
-        assertEquals(Arrays.asList(1, 3, 5), resultMap.get(false));
-    }
-
-    @Test
-    public void testPartitionBy_WithDownstream() {
-        List<Map.Entry<Boolean, Long>> result = Stream.of(1, 2, 3, 4, 5).partitionBy(n -> n % 2 == 0, java.util.stream.Collectors.counting()).toList();
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testPartitionByEmpty() {
-        Map<Boolean, List<Integer>> map = Stream.<Integer> empty().partitionBy(n -> n % 2 == 0).toMap(e -> e.getKey(), e -> e.getValue());
-        assertTrue(map.get(true).isEmpty());
-        assertTrue(map.get(false).isEmpty());
-    }
-
-    @Test
-    public void testPartitionByToEntry() {
-        List<Map.Entry<Boolean, List<Integer>>> list = Stream.of(1, 2, 3, 4, 5).partitionByToEntry(n -> n % 2 == 0).toList();
-        assertEquals(2, list.size());
-    }
-
-    @Test
-    public void testPartitionByToEntrySimple() {
-        EntryStream<Boolean, List<Integer>> resultStream = Stream.of(1, 2, 3, 4, 5).partitionByToEntry(x -> x % 2 == 0);
-        Map<Boolean, List<Integer>> resultMap = resultStream.toMap();
-
-        assertEquals(Arrays.asList(2, 4), resultMap.get(true));
-        assertEquals(Arrays.asList(1, 3, 5), resultMap.get(false));
-    }
-
-    @Test
-    public void testCountBy() {
-        Map<Integer, Long> map = Stream.of("a", "bb", "c", "dd", "eee").countBy(String::length).toMap(e -> e.getKey(), e -> Long.valueOf(e.getValue()));
-        assertEquals(Long.valueOf(2), map.get(1));
-        assertEquals(Long.valueOf(2), map.get(2));
-        assertEquals(Long.valueOf(1), map.get(3));
-    }
-
-    @Test
-    public void testCountBy_WithMapFactory() {
-        Map<Integer, Integer> result = Stream.of("a", "bb", "c", "dd", "eee")
-                .countBy(String::length, LinkedHashMap::new)
-                .toMap(e -> e.getKey(), e -> e.getValue());
-        assertEquals(3, result.size());
-        assertEquals(2, (int) result.get(1));
-        assertEquals(2, (int) result.get(2));
-        assertEquals(1, (int) result.get(3));
-    }
-
-    @Test
-    public void testCountByEmpty() {
-        Map<Integer, Long> map = Stream.<String> empty().countBy(String::length).toMap(e -> e.getKey(), e -> Long.valueOf(e.getValue()));
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testCountByToEntry() {
-        List<Map.Entry<Integer, Integer>> list = Stream.of("a", "bb", "c", "dd", "eee").countByToEntry(String::length).toList();
-        assertEquals(3, list.size());
-        assertTrue(list.stream().anyMatch(e -> e.getKey() == 1 && e.getValue() == 2));
-        assertTrue(list.stream().anyMatch(e -> e.getKey() == 2 && e.getValue() == 2));
-        assertTrue(list.stream().anyMatch(e -> e.getKey() == 3 && e.getValue() == 1));
-    }
-
-    @Test
-    public void testCountByToEntryEmpty() {
-        List<Map.Entry<Integer, Integer>> list = Stream.<String> empty().countByToEntry(String::length).toList();
-        assertTrue(list.isEmpty());
-    }
-
-    @Test
-    public void testCountByToEntry_WithMapFactory() {
-        List<Map.Entry<Integer, Integer>> result = Stream.of("a", "bb", "c", "dd").countByToEntry(String::length, LinkedHashMap::new).toList();
-        assertFalse(result.isEmpty());
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    public void testCollapseBiPredicate() {
-        Stream<List<Integer>> stream = Stream.of(1, 1, 2, 2, 2, 3).collapse((a, b) -> a.equals(b));
-        List<List<Integer>> result = stream.toList();
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(1, 1), result.get(0));
-        assertEquals(Arrays.asList(2, 2, 2), result.get(1));
-        assertEquals(Arrays.asList(3), result.get(2));
-    }
-
-    @Test
-    public void testCollapseWithMergeFunction() {
-        Stream<Integer> stream = Stream.of(1, 1, 2, 2, 2, 3).collapse((a, b) -> a.equals(b), Integer::sum);
-        assertEquals(Arrays.asList(2, 6, 3), stream.toList());
-    }
-
-    @Test
-    public void testCollapseBiPredicateAndMerger() {
-        List<Integer> result = Stream.of(1, 1, 2, 3, 3, 1, 2).collapse((p, c) -> p.equals(c), (r, c) -> r + c).toList();
-        assertEquals(Arrays.asList(2, 2, 6, 1, 2), result);
-    }
-
-    @Test
-    public void testCollapse_BiPredicate() {
-        // Collapse consecutive equal elements into groups
-        List<List<Integer>> result = Stream.of(1, 1, 2, 2, 2, 3, 3, 1).collapse((a, b) -> a.equals(b)).toList();
-        assertEquals(4, result.size());
-        assertEquals(Arrays.asList(1, 1), result.get(0));
-        assertEquals(Arrays.asList(2, 2, 2), result.get(1));
-        assertEquals(Arrays.asList(3, 3), result.get(2));
-        assertEquals(Arrays.asList(1), result.get(3));
-    }
-
-    @Test
-    public void testCollapse_WithMergeFunction() {
-        // Collapse and merge with sum
-        List<Integer> result = Stream.of(1, 1, 2, 2, 2, 3, 3, 1).collapse((a, b) -> a.equals(b), Integer::sum).toList();
-        assertEquals(Arrays.asList(2, 6, 6, 1), result);
-    }
-
-    @Test
-    public void testCollapse_WithCollector() {
-        List<Long> result = Stream.of(1, 1, 2, 2, 2, 3).collapse((a, b) -> a.equals(b), java.util.stream.Collectors.counting()).toList();
-        assertEquals(Arrays.asList(2L, 3L, 1L), result);
-    }
-
-    @Test
-    public void testCollapseWithCollector() {
-        Stream<Integer> stream = Stream.of(1, 1, 2, 2, 2, 3).collapse((a, b) -> a.equals(b), Collectors.summingInt(Integer::intValue));
-        assertEquals(Arrays.asList(2, 6, 3), stream.toList());
-    }
-
-    @Test
-    public void testCollapseTriPredicate() {
-        List<List<Integer>> result = Stream.of(10, 11, 12, 9, 5, 4, 6, 20)
-                .collapse((first, prev, curr) -> Math.abs(curr - first) <= 2 && Math.abs(curr - prev) <= 1)
-                .toList();
-
-        assertEquals(Arrays.asList(Arrays.asList(10, 11, 12), Collections.singletonList(9), Arrays.asList(5, 4), Collections.singletonList(6),
-                Collections.singletonList(20)), result);
-    }
-
-    @Test
-    public void testCollapse() {
-        Stream<List<Integer>> collapsed = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b);
-        List<List<Integer>> result = collapsed.toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3), Arrays.asList(2), Arrays.asList(1)), result);
-
-        Stream<Integer> collapsedWithMerge = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, (a, b) -> a + b);
-        assertEquals(Arrays.asList(6, 3, 2, 1), collapsedWithMerge.toList());
-
-        Stream<Integer> collapsedWithCollector = createStream(1, 2, 3, 3, 2, 1).collapse((a, b) -> a < b, Collectors.summingInt(Integer::intValue));
-        assertEquals(Arrays.asList(6, 3, 2, 1), collapsedWithCollector.toList());
-    }
-
-    @Test
-    public void testCollapseTriPredicateWithMerge() {
-        List<Integer> result = Stream.of(1, 1, 2, 2, 2, 3, 3).collapse((prev, cur, next) -> Objects.equals(prev, cur), Integer::sum).toList();
-        assertNotNull(result);
-        assertTrue(result.size() >= 1);
-    }
-
-    @Test
-    public void testCollapse_BiPredicate_Empty() {
-        List<List<Integer>> result = Stream.<Integer> empty().collapse((a, b) -> a.equals(b)).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testScan() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).scan(Integer::sum);
-        assertEquals(Arrays.asList(1, 3, 6, 10), stream.toList());
-    }
-
-    @Test
-    public void testScanWithInit() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).scan(0, Integer::sum);
-        assertEquals(Arrays.asList(1, 3, 6, 10), stream.toList());
-    }
-
-    @Test
-    public void testScanWithInitIncluded() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).scan(0, true, Integer::sum);
-        assertEquals(Arrays.asList(0, 1, 3, 6, 10), stream.toList());
-    }
-
-    @Test
-    public void testScan_WithInit() {
-        List<Integer> result = Stream.of(1, 2, 3, 4).scan(10, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 13, 16, 20), result);
-    }
-
-    @Test
-    public void testScan_WithInitIncluded() {
-        List<Integer> result = Stream.of(1, 2, 3).scan(10, true, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(10, 11, 13, 16), result);
-    }
-
-    @Test
-    public void testScanSimple() {
-        List<Integer> result = Stream.of(1, 2, 3, 4).scan((a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(1, 3, 6, 10), result);
-        assertTrue(Stream.<Integer> empty().scan((a, b) -> a + b).toList().isEmpty());
-        assertEquals(Arrays.asList(1), Stream.of(1).scan((a, b) -> a + b).toList());
-    }
-
-    @Test
-    public void testScanWithInitialValue() {
-        List<Integer> result = Stream.of(1, 2, 3).scan(10, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 13, 16), result);
-        assertTrue(Stream.<Integer> empty().scan(10, (a, b) -> a + b).toList().isEmpty());
-    }
-
-    @Test
-    public void testScanWithInitialValueAndInclusion() {
-        List<Integer> result = Stream.of(1, 2, 3).scan(10, true, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(10, 11, 13, 16), result);
-
-        result = Stream.of(1, 2, 3).scan(10, false, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 13, 16), result);
-
-        result = Stream.<Integer> empty().scan(10, true, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(10), result);
-
-        result = Stream.<Integer> empty().scan(10, false, (a, b) -> a + b).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testScan_Empty() {
-        List<Integer> result = Stream.<Integer> empty().scan((a, b) -> a + b).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testScan_SingleElement() {
-        List<Integer> result = Stream.of(42).scan((a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(42), result);
-    }
-
-    @Test
-    public void testSplit() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).split(2);
-        List<List<Integer>> result = stream.toList();
-        assertEquals(Arrays.asList(1, 2), result.get(0));
-        assertEquals(Arrays.asList(3, 4), result.get(1));
-        assertEquals(Arrays.asList(5), result.get(2));
-    }
-
-    @Test
-    public void testSplitChunkSizeOne() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3).split(1);
-        List<List<Integer>> result = stream.toList();
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(1), result.get(0));
-    }
-
-    @Test
-    public void testSplitWithPredicate() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5, 6).split(n -> n % 3 == 0);
-        List<List<Integer>> result = stream.toList();
-        assertTrue(result.size() >= 2);
-    }
-
-    @Test
-    public void testSplitByChunkSizeAndSupplier() {
-        List<Set<Integer>> result = Stream.of(1, 2, 3, 4, 5).split(2, IntFunctions.ofLinkedHashSet()).toList();
-        assertEquals(Arrays.asList(N.toLinkedHashSet(1, 2), N.toLinkedHashSet(3, 4), N.toLinkedHashSet(5)), result);
-    }
-
-    @Test
-    public void testSplitWithCharDelimiter() {
-        List<String> result = Stream.split("a,b,c", ',').toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-
-        result = Stream.split("hello world", ' ').toList();
-        assertEquals(Arrays.asList("hello", "world"), result);
-
-        result = Stream.split("", ',').toList();
-        assertEquals(Arrays.asList(""), result);
-
-        result = Stream.split("abc", ',').toList();
-        assertEquals(Arrays.asList("abc"), result);
-    }
-
-    @Test
-    public void testSplitWithCharSequenceDelimiter() {
-        List<String> result = Stream.split("a::b::c", "::").toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-
-        result = Stream.split("hello<br>world", "<br>").toList();
-        assertEquals(Arrays.asList("hello", "world"), result);
-
-        result = Stream.split("test", "::").toList();
-        assertEquals(Arrays.asList("test"), result);
-    }
-
-    @Test
-    public void testSplitWithPattern() {
-        Pattern pattern = Pattern.compile("\\s+");
-        List<String> result = Stream.split("hello   world  test", pattern).toList();
-        assertEquals(Arrays.asList("hello", "world", "test"), result);
-
-        pattern = Pattern.compile("[,;]");
-        result = Stream.split("a,b;c,d", pattern).toList();
-        assertEquals(Arrays.asList("a", "b", "c", "d"), result);
-    }
-
-    @Test
-    public void testSplit_CharDelimiter() {
-        String str = "apple,banana,cherry";
-
-        List<String> parts = Stream.split(str, ',').toList();
-
-        assertEquals(Arrays.asList("apple", "banana", "cherry"), parts);
-    }
-
-    @Test
-    public void testSplit_StringDelimiter() {
-        String str = "one::two::three";
-
-        List<String> parts = Stream.split(str, "::").toList();
-
-        assertEquals(Arrays.asList("one", "two", "three"), parts);
-    }
-
-    @Test
-    public void testSplit_Pattern() {
-        String str = "a1b2c3d";
-        Pattern pattern = Pattern.compile("\\d");
-
-        List<String> parts = Stream.split(str, pattern).toList();
-
-        assertEquals(Arrays.asList("a", "b", "c", "d"), parts);
-    }
-
-    @Test
-    public void testSplitByCharDelimiter() {
-        List<String> result = Stream.split("a,b,c", ',').toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-    }
-
-    @Test
-    public void testSplitByStringDelimiter() {
-        List<String> result = Stream.split("a::b::c", "::").toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-    }
-
-    @Test
-    public void testSplitByPattern() {
-        List<String> result = Stream.split("a  b   c", Pattern.compile("\\s+")).toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-    }
-
-    @Test
-    public void testSplitByChunkSize() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).split(2).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5)), result);
-        assertTrue(Stream.empty().split(2).toList().isEmpty());
-        assertEquals(Arrays.asList(Arrays.asList(1)), Stream.of(1).split(2).toList());
-    }
-
-    @Test
-    public void testSplitByChunkSizeAndCollector() {
-        List<Long> result = Stream.of(1, 2, 3, 4, 5).split(2, Collectors.summingInt(x -> x)).map(Integer::longValue).toList();
-        assertEquals(Arrays.asList(3L, 7L, 5L), result);
-    }
-
-    @Test
-    public void testSplitByPredicate() {
-        List<List<Integer>> result = Stream.of(1, 2, 0, 3, 4, 0, 5).split(x -> x == 0).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2), Collections.singletonList(0), Arrays.asList(3, 4), Collections.singletonList(0),
-                Collections.singletonList(5)), result);
-
-        result = Stream.of(0, 1, 2, 0, 3, 4, 0).split(x -> x == 0).toList();
-        assertEquals(Arrays.asList(Collections.singletonList(0), Arrays.asList(1, 2), Collections.singletonList(0), Arrays.asList(3, 4),
-                Collections.singletonList(0)), result);
-    }
-
-    @Test
-    public void testSplit2() {
-        Stream<List<Integer>> splitBySize = createStream(1, 2, 3, 4, 5, 6, 7).split(3);
-        List<List<Integer>> chunks = splitBySize.toList();
-        assertEquals(3, chunks.size());
-        assertEquals(Arrays.asList(1, 2, 3), chunks.get(0));
-        assertEquals(Arrays.asList(4, 5, 6), chunks.get(1));
-        assertEquals(Arrays.asList(7), chunks.get(2));
-
-        Stream<List<Integer>> splitByPredicate = Stream.range(0, 7).split(n -> n % 3 == 0);
-        List<List<Integer>> predicateChunks = splitByPredicate.toList();
-        assertEquals(Arrays.asList(Arrays.asList(0), Arrays.asList(1, 2), Arrays.asList(3), Arrays.asList(4, 5), Arrays.asList(6)), predicateChunks);
-
-        Stream<Integer> splitWithCollector = createStream(1, 2, 3, 4, 5, 6).split(2, Collectors.summingInt(Integer::intValue));
-        assertEquals(Arrays.asList(3, 7, 11), splitWithCollector.toList());
-    }
-
-    @Test
-    public void testSplit_EdgeCases() {
-        assertEquals("", Stream.split("", ',').onlyOne().orElseThrow());
-
-        assertEquals(Arrays.asList("hello"), Stream.split("hello", ',').toList());
-
-        List<String> onlyDelimiters = Stream.split("::::", ":").toList();
-        assertEquals(5, onlyDelimiters.size());
-        assertTrue(onlyDelimiters.stream().allMatch(String::isEmpty));
-
-        assertEquals(Arrays.asList("a", "b", ""), Stream.split("a,b,", ',').toList());
-    }
-
-    @Test
-    public void test_splitAt() {
-        for (int j = 0; j < 10; j++) {
-            final int[] a = IntList.random(10_000).internalArray();
-            int n = a.length / 2;
-
-            for (int i = 0, len = a.length; i < len; i++) {
-                if (a[i] == a[n]) {
-                    n = i;
-                    break;
-                }
-            }
-
-            final int tmp = a[n];
-
-            Object[] r1 = Stream.of(a).splitAt(n).toArray();
-            Object[] r2 = Stream.of(a).parallel().splitAt(value -> value == tmp).toArray();
-
-            assertTrue(N.deepEquals(((Stream) r1[0]).toArray(), ((Stream) r2[0]).toArray()));
-            assertTrue(N.deepEquals(((Stream) r1[1]).toArray(), ((Stream) r2[1]).toArray()));
-
-            r1 = IntStream.of(a).boxed().splitAt(n).toArray();
-            r2 = IntStream.of(a).boxed().parallel().splitAt(value -> value.intValue() == tmp).toArray();
-
-            assertTrue(N.equals(((Stream<Integer>) r1[0]).toArray(), ((Stream<Integer>) r2[0]).toArray()));
-
-            final Integer[] a1 = ((Stream<Integer>) r1[1]).toArray(value -> new Integer[value]);
-
-            final Integer[] a2 = ((Stream<Integer>) r2[1]).toArray(value -> new Integer[value]);
-
-            N.println("=================");
-            N.println(a);
-            N.println(tmp);
-
-            N.println("=================");
-            N.println(a1);
-            N.println(a2);
-
-            assertTrue(N.equals(a1, a2));
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 0; i < 100; i += 3) {
+            expected.add(i);
         }
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testSplitAt() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5).splitAt(2).map(s -> s.toList()).toList();
-        assertEquals(2, result.size());
-        assertEquals(Arrays.asList(1, 2), result.get(0));
-        assertEquals(Arrays.asList(3, 4, 5), result.get(1));
-    }
-
-    @Test
-    public void testSplitAtPosition() {
-        List<Stream<Integer>> resultStreams = Stream.of(1, 2, 3, 4, 5).splitAt(2).toList();
-        assertEquals(2, resultStreams.size());
-        assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
-        assertEquals(Arrays.asList(3, 4, 5), resultStreams.get(1).toList());
-
-        resultStreams = Stream.of(1, 2).splitAt(2).toList();
-        assertEquals(2, resultStreams.size());
-        assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
-        assertTrue(resultStreams.get(1).toList().isEmpty());
-
-        resultStreams = Stream.of(1, 2).splitAt(0).toList();
-        assertEquals(2, resultStreams.size());
-        assertTrue(resultStreams.get(0).toList().isEmpty());
-        assertEquals(Arrays.asList(1, 2), resultStreams.get(1).toList());
-    }
-
-    @Test
-    public void testSplitAtPositionWithCollector() {
-        List<Long> result = Stream.of(1, 2, 3, 4, 5).splitAt(2, Collectors.summingInt(ToIntFunction.UNBOX)).map(Integer::longValue).toList();
-        assertEquals(N.toList(3L, 12L), result);
-    }
-
-    @Test
-    public void testSplitAtPredicate() {
-        List<Stream<Integer>> resultStreams = Stream.of(1, 2, 99, 4, 5).splitAt(x -> x == 99).toList();
-        assertEquals(2, resultStreams.size());
-        assertEquals(Arrays.asList(1, 2), resultStreams.get(0).toList());
-        assertEquals(Arrays.asList(99, 4, 5), resultStreams.get(1).toList());
-
-        resultStreams = Stream.of(99, 1, 2).splitAt(x -> x == 99).toList();
-        assertEquals(2, resultStreams.size());
-        assertTrue(resultStreams.get(0).toList().isEmpty());
-        assertEquals(Arrays.asList(99, 1, 2), resultStreams.get(1).toList());
-
-        resultStreams = Stream.of(1, 2, 3).splitAt(x -> x == 99).toList();
-        assertEquals(2, resultStreams.size());
-        assertEquals(Arrays.asList(1, 2, 3), resultStreams.get(0).toList());
-        assertTrue(resultStreams.get(1).toList().isEmpty());
-    }
-
-    @Test
-    public void testSlidingWithIncrement() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(2, 2);
-        List<List<Integer>> result = stream.toList();
-        assertEquals(Arrays.asList(1, 2), result.get(0));
-        assertEquals(Arrays.asList(3, 4), result.get(1));
-        assertEquals(Arrays.asList(5), result.get(2));
-    }
-
-    @Test
-    public void testSlidingWindowSizeAndIncrement() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4, 5, 6).sliding(3, 2).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5), Arrays.asList(5, 6)), result);
-    }
-
-    @Test
-    public void test_sliding_3() {
-        assertDoesNotThrow(() -> {
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).skip(11).println();
-
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).skip(11).println();
-
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).skip(11).println();
-        });
-    }
-
-    @Test
-    public void test_sliding_4() {
-        assertDoesNotThrow(() -> {
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 2).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
-
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 3).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
-
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(0).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(1).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(2).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(7).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(8).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(9).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(10).println();
-            IntStream.range(0, 10).boxed().sliding(3, 4).mapFirst(Fn.<List<Integer>> identity()).skip(11).println();
-        });
-    }
-
-    @Test
-    public void testSlidingWindowSize() throws Exception {
-        {
-            assertEquals(Arrays.asList(Arrays.asList(1)), Stream.of(1).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2)), Stream.of(1, 2).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(2, 3)), Stream.of(1, 2, 3).sliding(2).toList());
-
-            assertEquals(Arrays.asList(Arrays.asList(1)), Stream.of(N.toList(1).iterator()).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2)), Stream.of(N.toList(1, 2).iterator()).sliding(2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(2, 3)), Stream.of(N.toList(1, 2, 3).iterator()).sliding(2).toList());
-        }
-        {
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)), Stream.of(1, 2, 3, 4, 5).sliding(3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), Stream.of(1, 2, 3, 4, 5).sliding(3, 2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5)), Stream.of(1, 2, 3, 4, 5).sliding(3, 3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(5)), Stream.of(1, 2, 3, 4, 5).sliding(3, 4).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), Stream.of(1, 2, 3, 4, 5).sliding(3, 5).toList());
-
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(2, 3, 4), Arrays.asList(3, 4, 5)),
-                    Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(3, 4, 5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(5)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).toList());
-            assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).toList());
-
-        }
-
-        {
-            assertEquals(0, Stream.of(1).sliding(2).skip(1).count());
-            assertEquals(0, Stream.of(1, 2).sliding(2).skip(1).count());
-            assertEquals(1, Stream.of(1, 2, 3).sliding(2).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
-
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
-
-        }
-
-        {
-            assertEquals(0, Stream.of(N.toList(1).iterator()).sliding(2).skip(1).count());
-            assertEquals(0, Stream.of(N.toList(1, 2).iterator()).sliding(2).skip(1).count());
-            assertEquals(1, Stream.of(N.toList(1, 2, 3).iterator()).sliding(2).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(1).count());
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4).skip(1).count());
-
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5).skip(1).count());
-
-        }
-
-        {
-            assertEquals(0, Stream.of(N.toList(1).iterator()).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Stream.of(N.toList(1, 2).iterator()).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(1, Stream.of(N.toList(1, 2, 3).iterator()).sliding(2, Collectors.toList()).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, Collectors.toList()).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 2, Collectors.toList()).skip(2).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 3, Collectors.toList()).skip(1).count());
-
-            assertEquals(1, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 4, Collectors.toList()).skip(1).count());
-
-            assertEquals(0, Stream.of(N.toList(1, 2, 3, 4, 5).iterator()).sliding(3, 5, Collectors.toList()).skip(1).count());
-
-        }
-
-        {
-            assertEquals(0, Seq.of(1).sliding(2).skip(1).count());
-            assertEquals(0, Seq.of(1, 2).sliding(2).skip(1).count());
-            assertEquals(1, Seq.of(1, 2, 3).sliding(2).skip(1).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3).skip(2).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(1).count());
-            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2).skip(2).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3).skip(1).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4).skip(1).count());
-
-            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5).skip(1).count());
-
-        }
-
-        {
-            assertEquals(0, Seq.of(1).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Seq.of(1, 2).sliding(2, Collectors.toList()).skip(1).count());
-            assertEquals(1, Seq.of(1, 2, 3).sliding(2, Collectors.toList()).skip(1).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, Collectors.toList()).skip(2).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(1).count());
-            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 2, Collectors.toList()).skip(2).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 3, Collectors.toList()).skip(1).count());
-
-            assertEquals(1, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 4, Collectors.toList()).skip(1).count());
-
-            assertEquals(0, Seq.of(N.toList(1, 2, 3, 4, 5)).sliding(3, 5, Collectors.toList()).skip(1).count());
-
-        }
-    }
-
-    @Test
-    public void test_sliding_window() throws Exception {
-
-        long count = Stream.range(0, 30).rateLimited(10).window(Duration.ofMillis(1000), Suppliers.ofList()).peek(Fn.println()).count();
-        assertEquals(3, count);
-
-        count = Stream.range(0, 30).rateLimited(10).window(Duration.ofMillis(1000), 2, Suppliers.ofList()).peek(Fn.println()).count();
-        assertEquals(15, count);
-
-    }
-
-    @Test
-    public void testIntersperse() {
-        List<Integer> result = Stream.of(1, 2, 3).intersperse(0).toList();
-        assertEquals(Arrays.asList(1, 0, 2, 0, 3), result);
-    }
-
-    @Test
-    public void testIntersperse_TwoElements() {
-        List<Integer> result = Stream.of(1, 2).intersperse(0).toList();
-        assertEquals(Arrays.asList(1, 0, 2), result);
-    }
-
-    @Test
-    public void testIntersperseEmpty() {
-        List<Integer> result = Stream.<Integer> empty().intersperse(0).toList();
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void testIntersperse_SingleElement() {
-        List<Integer> result = Stream.of(1).intersperse(0).toList();
-        assertEquals(Arrays.asList(1), result);
-    }
-
-    @Test
-    public void testIntersperse_Empty() {
-        List<Integer> result = Stream.<Integer> empty().intersperse(0).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testDistinct() {
-        Stream<Integer> stream = Stream.of(1, 2, 2, 3, 3, 3).distinct();
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testDistinctNoDuplicates() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).distinct();
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testDistinctAllDuplicates() {
-        Stream<Integer> stream = Stream.of(1, 1, 1).distinct();
-        assertEquals(Arrays.asList(1), stream.toList());
-    }
-
-    @Test
-    public void testDistinctWithMerge() {
-        List<Pair<String, Integer>> data = Arrays.asList(Pair.of("a", 1), Pair.of("b", 2), Pair.of("a", 3));
-        List<Pair<String, Integer>> result = Stream.of(data)
-                .distinctBy(Pair::left, (p1, p2) -> Pair.of(p1.left(), p1.right() + p2.right()))
-                .sorted(Comparator.comparing(Pair::left))
-                .toList();
-
-        assertEquals(Arrays.asList(Pair.of("a", 4), Pair.of("b", 2)), result);
-    }
-
-    // ==================== Missing test methods below ====================
-
-    @Test
-    public void testDistinctWithMergeFunction() {
-        List<String> result = Stream.of("a1", "b1", "a2", "b2").distinct((s1, s2) -> s1 + "+" + s2).toList();
-        // Since distinct uses identity as key, each string is unique => no merge
-        assertEquals(4, result.size());
-
-        // Test with actual duplicates
-        List<Integer> intResult = Stream.of(1, 2, 1, 3, 2).distinct(Integer::sum).toList();
-        assertEquals(3, intResult.size());
-        assertTrue(intResult.contains(3)); // 1+1=2, but merged as sum
-    }
-
-    // Covers Stream.distinct(BinaryOperator) parallel path
-    @Test
-    public void testDistinct_BinaryOperator_Parallel() {
-        List<Integer> result = Stream.of(1, 2, 1, 3, 2).parallel().distinct(Integer::sum).sorted().toList();
-        assertEquals(3, result.size());
-        assertTrue(result.contains(2)); // 1+1=2? No - distinct uses identity as key, merged value is 1+1=2
-    }
-
-    @Test
-    public void testDistinctEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().distinct();
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDistinctBy() {
-        Stream<String> stream = Stream.of("a", "bb", "c", "dd").distinctBy(String::length);
-        assertEquals(Arrays.asList("a", "bb"), stream.toList());
-    }
-
-    @Test
-    public void testDistinctByWithMerge() {
-        Stream<String> stream = Stream.of("a", "bb", "c", "dd").distinctBy(String::length, (s1, s2) -> s1 + s2);
-        assertEquals(Arrays.asList("ac", "bbdd"), stream.toList());
-    }
-
-    @Test
-    public void testDistinctByWithMergeFunction() {
-        List<String> result = Stream.of("a1", "b1", "a2", "b2").distinctBy(s -> s.charAt(0), (s1, s2) -> s1 + "+" + s2).toList();
-        assertEquals(2, result.size());
-        assertEquals("a1+a2", result.get(0));
-        assertEquals("b1+b2", result.get(1));
-    }
-
-    // Covers Stream.distinctBy(Function, BinaryOperator) parallel path
-    @Test
-    public void testDistinctBy_FunctionAndMerge_Parallel() {
-        List<String> result = Stream.of("a1", "b1", "a2", "b2").parallel().distinctBy(s -> s.charAt(0), (s1, s2) -> s1 + "+" + s2).sorted().toList();
-        assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(s -> s.startsWith("a")));
-        assertTrue(result.stream().anyMatch(s -> s.startsWith("b")));
-    }
-
-    @Test
-    public void testDistinctByFunction() {
-        List<String> result = Stream.of("apple", "apricot", "banana", "blueberry", "Apple").distinctBy(s -> s.toLowerCase().charAt(0)).toList();
-        assertEquals(2, result.size());
-        assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("a")));
-        assertTrue(result.stream().anyMatch(s -> s.toLowerCase().startsWith("b")));
-    }
-
-    @Test
-    public void testSorted() {
-        Stream<Integer> stream = Stream.of(3, 1, 2).sorted();
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testSortedAlreadySorted() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).sorted();
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testSortedComparator() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).sorted(Comparator.reverseOrder());
-        assertEquals(Arrays.asList(3, 2, 1), stream.toList());
-    }
-
-    @Test
-    public void testSortedEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().sorted();
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testSortedBy() {
-        Stream<String> stream = Stream.of("aaa", "b", "cc").sortedBy(String::length);
-        assertEquals(Arrays.asList("b", "cc", "aaa"), stream.toList());
-    }
-
-    @Test
-    public void testSortedByInt() {
-        Stream<String> stream = Stream.of("aaa", "b", "cc").sortedByInt(String::length);
-        assertEquals(Arrays.asList("b", "cc", "aaa"), stream.toList());
-    }
-
-    @Test
-    public void testSortedByLong() {
-        List<String> result = Stream.of("a", "bbb", "cc").sortedByLong(String::length).toList();
-        assertEquals(Arrays.asList("a", "cc", "bbb"), result);
-    }
-
-    @Test
-    public void testSortedByDouble() {
-        List<Integer> result = Stream.of(3, 1, 2).sortedByDouble(n -> n.doubleValue()).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testReverseSorted() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).reverseSorted();
-        assertEquals(Arrays.asList(3, 2, 1), stream.toList());
-    }
-
-    @Test
-    public void testReverseSortedComparator() {
-        Stream<String> stream = Stream.of("a", "bbb", "cc").reverseSorted(Comparator.comparing(String::length));
-        assertEquals(Arrays.asList("bbb", "cc", "a"), stream.toList());
-    }
-
-    @Test
-    public void testReverseSortedByInt() {
-        List<String> result = Stream.of("a", "bbb", "cc").reverseSortedByInt(String::length).toList();
-        assertEquals(Arrays.asList("bbb", "cc", "a"), result);
-    }
-
-    @Test
-    public void testReverseSortedByLong() {
-        List<String> result = Stream.of("a", "bbb", "cc").reverseSortedByLong(String::length).toList();
-        assertEquals(Arrays.asList("bbb", "cc", "a"), result);
-    }
-
-    @Test
-    public void testReverseSortedByDouble() {
-        List<Integer> result = Stream.of(1, 3, 2).reverseSortedByDouble(n -> n.doubleValue()).toList();
-        assertEquals(Arrays.asList(3, 2, 1), result);
-    }
-
-    @Test
-    public void testReverseSortedBy() {
-        List<String> result = Stream.of("a", "bbb", "cc").reverseSortedBy(String::length).toList();
-        assertEquals(Arrays.asList("bbb", "cc", "a"), result);
-    }
-
-    @Test
-    public void testTop() {
-        Stream<Integer> stream = Stream.of(5, 1, 3, 2, 4).top(3);
-        assertEquals(Arrays.asList(3, 5, 4), stream.toList());
-    }
-
-    @Test
-    public void testTopWithComparator() {
-        Stream<Integer> stream = Stream.of(5, 1, 3, 2, 4).top(3, Comparator.naturalOrder());
-        assertEquals(Arrays.asList(3, 5, 4), stream.toList());
-    }
-
-    @Test
-    public void testTopN() {
-        assertEquals(Arrays.asList(4, 5), Stream.of(1, 5, 2, 4, 3).top(2).toList());
-        assertEquals(Arrays.asList(4, 5), Stream.of(1, 5, 2, 4, 3).top(2, Comparator.naturalOrder()).toList());
-        assertEquals(Arrays.asList(2, 1), Stream.of(1, 5, 2, 4, 3).top(2, Comparator.reverseOrder()).toList());
-        assertEquals(Arrays.asList(1, 2, 3), Stream.of(1, 2, 3).top(5).toList());
-    }
-
-    @Test
-    public void testTopGreaterThanSize() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).top(10);
-        assertHaveSameElements(Arrays.asList(3, 2, 1), stream.toList());
-    }
-
-    @Test
-    public void testSkipRange() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).toList();
-        assertEquals(Arrays.asList(1, 4, 5), result);
-    }
-
-    @Test
-    public void testSkipRangeOutOfBounds() {
-        List<Integer> result = Stream.of(1, 2, 3).skipRange(5, 10).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testSkipRangeEmpty() {
-        List<Integer> result = Stream.<Integer> empty().skipRange(1, 3).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSkipRange_FullRange() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).skipRange(0, 5).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSkipRange_EmptyRange() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).skipRange(2, 2).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testSkipNulls() {
-        List<Integer> result = Stream.of(1, null, 2, null, 3).skipNulls().toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testSkipNulls_NoNulls() {
-        List<String> result = Stream.of("a", "b", "c").skipNulls().toList();
-        assertEquals(Arrays.asList("a", "b", "c"), result);
-    }
-
-    @Test
-    public void testSkipLast() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).skipLast(2);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void test_skipLast() {
-        assertDoesNotThrow(() -> {
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 20).boxed().skipLast(0).println();
-            IntStream.range(0, 20).boxed().skipLast(10).println();
-            IntStream.range(0, 20).boxed().skipLast(19).println();
-            IntStream.range(0, 20).boxed().skipLast(20).println();
-            IntStream.range(0, 20).boxed().skipLast(21).println();
-
-            N.println(Strings.repeat("=", 80));
-
-            IntStream.range(0, 20).boxed().parallel().skipLast(0).println();
-            IntStream.range(0, 20).boxed().parallel().skipLast(10).println();
-            IntStream.range(0, 20).boxed().parallel().skipLast(19).println();
-            IntStream.range(0, 20).boxed().parallel().skipLast(20).println();
-            IntStream.range(0, 20).boxed().parallel().skipLast(21).println();
-
-            N.println(Strings.repeat("=", 80));
-        });
-    }
-
-    @Test
-    public void testLastN() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).last(3);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
-    }
-
-    @Test
-    public void testTakeLast() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).takeLast(2);
-        assertEquals(Arrays.asList(4, 5), stream.toList());
-    }
-
-    @Test
-    public void testTakeLast_MoreThanSize() {
-        List<Integer> result = Stream.of(1, 2, 3).takeLast(10).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testTakeLast_Zero() {
-        List<Integer> result = Stream.of(1, 2, 3).takeLast(0).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testOnFirst() {
-        AtomicReference<Integer> first = new AtomicReference<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3).onFirst(first::set);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-        assertEquals(Integer.valueOf(1), first.get());
-    }
-
-    @Test
-    public void testOnFirst_Empty() {
-        List<String> sideEffects = new ArrayList<>();
-        List<Integer> result = Stream.<Integer> empty().onFirst(e -> sideEffects.add("first:" + e)).toList();
-        assertTrue(result.isEmpty());
-        assertTrue(sideEffects.isEmpty());
-    }
-
-    @Test
-    public void testOnLast() {
-        AtomicReference<Integer> last = new AtomicReference<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3).onLast(last::set);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-        assertEquals(Integer.valueOf(3), last.get());
-    }
-
-    @Test
-    public void testPeekFirst() {
-        AtomicReference<Integer> firstRef = new AtomicReference<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).peekFirst(firstRef::set).toList();
-        assertEquals(1, firstRef.get());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testPeekLast() {
-        AtomicReference<Integer> lastRef = new AtomicReference<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).peekLast(lastRef::set).toList();
-        assertEquals(5, lastRef.get());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testPeekIf() {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).peekIf(n -> n % 2 == 0, peeked::add).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-        assertEquals(Arrays.asList(2, 4), peeked);
-    }
-
-    @Test
-    public void testPeekIfWithBiPredicate() {
-        List<Integer> peeked = new ArrayList<>();
-        Stream.of(1, 2, 3, 4, 5, 6).peekIf((val, idx) -> val % 2 == 0 && idx > 1, peeked::add).toList();
-        assertEquals(Arrays.asList(2, 4, 6), peeked);
-    }
-
-    @Test
-    public void testPeekIfWithIndex() {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> result = Stream.of(10, 20, 30, 40, 50).peekIf((e, count) -> count % 2 == 0, peeked::add).toList();
-        assertEquals(Arrays.asList(20, 40), peeked); // count starts at 1, so even counts are 2nd, 4th
-        assertEquals(Arrays.asList(10, 20, 30, 40, 50), result);
-    }
-
-    @Test
-    public void testPeekIf_BiPredicate() {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).peekIf((val, count) -> count % 2 == 0, peeked::add).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-        // count starts at 1 and increments, even counts are 2 and 4 -> elements 2 and 4
-        assertEquals(2, peeked.size());
-        assertTrue(peeked.contains(2));
-        assertTrue(peeked.contains(4));
-    }
-
-    @Test
-    public void testPeekIfEmpty() {
-        List<Integer> peeked = new ArrayList<>();
-        List<Integer> result = Stream.<Integer> empty().peekIf(n -> n % 2 == 0, peeked::add).toList();
-        assertTrue(result.isEmpty());
-        assertTrue(peeked.isEmpty());
-    }
-
-    @Test
-    public void testPeekIf_BiPredicate_Parallel() {
-        // Covers the parallel branch of peekIf(BiPredicate, Consumer)
-        List<Integer> peeked = new java.util.concurrent.CopyOnWriteArrayList<>();
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).parallel().peekIf((val, count) -> count % 2 == 0, peeked::add).sorted().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-        assertFalse(peeked.isEmpty());
-    }
-
-    @Test
-    public void testForEach() {
-        List<Integer> result = new ArrayList<>();
-        Stream.of(1, 2, 3).forEach(result::add);
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testForeachWithCompletion() {
-        List<Integer> result = new ArrayList<>();
-        AtomicBoolean completed = new AtomicBoolean(false);
-        Stream.of(1, 2, 3).forEach(result::add, () -> completed.set(true));
-        assertEquals(Arrays.asList(1, 2, 3), result);
-        assertTrue(completed.get());
-    }
-
-    @Test
-    public void testForEachWithOnComplete() {
-        List<Integer> collected = new ArrayList<>();
-        AtomicBoolean completed = new AtomicBoolean(false);
-        stream.forEach(collected::add, () -> completed.set(true));
-        assertEquals(testList, collected);
-        assertTrue(completed.get());
-    }
-
-    @Test
-    public void testForEachWithFlatMapper() {
-        List<String> collected = new ArrayList<>();
-        stream.forEach(n -> Arrays.asList("a" + n, "b" + n), (n, s) -> collected.add(s));
-        assertEquals(Arrays.asList("a1", "b1", "a2", "b2", "a3", "b3", "a4", "b4", "a5", "b5"), collected);
-    }
-
-    @Test
-    public void testForeach() {
-        List<Integer> collected = new ArrayList<>();
-        Stream.of(1, 2, 3).foreach(collected::add);
-        assertEquals(Arrays.asList(1, 2, 3), collected);
-    }
-
-    @Test
-    public void testForEachEmpty() {
-        List<Integer> result = new ArrayList<>();
-        Stream.<Integer> empty().forEach(result::add);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testForEachThrowing() {
-        List<Integer> collected = new ArrayList<>();
-        Stream.of(1, 2, 3).forEach(collected::add);
-        assertEquals(Arrays.asList(1, 2, 3), collected);
-    }
-
-    @Test
-    public void testForEachIndexed() {
-        List<String> result = new ArrayList<>();
-        Stream.of("a", "b", "c").forEachIndexed((i, s) -> result.add(i + ":" + s));
-        assertEquals(Arrays.asList("0:a", "1:b", "2:c"), result);
-    }
-
-    @Test
-    public void testForEachUntil() {
-        List<Integer> collected = new ArrayList<>();
-        MutableBoolean flagToBreak = MutableBoolean.of(false);
-        Stream.of(1, 2, 3, 4, 5).forEachUntil(flagToBreak, n -> {
-            collected.add(n);
-            if (n >= 3) {
-                flagToBreak.setTrue();
-            }
-        });
-        assertEquals(Arrays.asList(1, 2, 3), collected);
-    }
-
-    @Test
-    public void testForEachUntilBiConsumer() {
-        List<Integer> collected = new ArrayList<>();
-        Stream.of(1, 2, 3, 4, 5).forEachUntil((n, breakCondition) -> {
-            collected.add(n);
-            if (n >= 3) {
-                breakCondition.setTrue();
-            }
-        });
-        assertEquals(Arrays.asList(1, 2, 3), collected);
-    }
-
-    @Test
-    public void testForEachUntilMutableBoolean() {
-        List<Integer> collected = new ArrayList<>();
-        MutableBoolean flag = MutableBoolean.of(false);
-        Stream.of(1, 2, 3, 4, 5).forEachUntil(flag, val -> {
-            collected.add(val);
-            if (val == 3) {
-                flag.setTrue();
-            }
-        });
-        assertEquals(Arrays.asList(1, 2, 3), collected);
-    }
-
-    @Test
-    public void testForEachUntilEmpty() {
-        List<Integer> collected = new ArrayList<>();
-        com.landawn.abacus.util.MutableBoolean flagToBreak = com.landawn.abacus.util.MutableBoolean.of(true);
-        Stream.<Integer> empty().forEachUntil(flagToBreak, n -> {
-            collected.add(n);
-        });
-        assertTrue(collected.isEmpty());
-    }
-
-    @Test
-    public void testForEachPair() {
-        List<String> result = new ArrayList<>();
-        Stream.of(1, 2, 3, 4).forEachPair((a, b) -> result.add(a + "-" + b));
-        assertEquals(Arrays.asList("1-2", "2-3", "3-4"), result);
-    }
-
-    @Test
-    public void testForEachTriple() {
-        List<String> result = new ArrayList<>();
-        Stream.of(1, 2, 3, 4).forEachTriple((a, b, c) -> result.add(a + "-" + b + "-" + c));
-        assertEquals(Arrays.asList("1-2-3", "2-3-4"), result);
-    }
-
-    @Test
-    public void testAnyMatch() {
-        assertTrue(Stream.of(1, 2, 3, 4).anyMatch(n -> n > 3));
-        assertFalse(Stream.of(1, 2, 3).anyMatch(n -> n > 5));
-        assertFalse(Stream.<Integer> empty().anyMatch(n -> true));
-    }
-
-    @Test
-    public void testAllMatch() {
-        assertTrue(Stream.of(2, 4, 6).allMatch(n -> n % 2 == 0));
-        assertFalse(Stream.of(2, 3, 4).allMatch(n -> n % 2 == 0));
-        assertTrue(Stream.<Integer> empty().allMatch(n -> false));
-    }
-
-    @Test
-    public void testNoneMatch() {
-        assertTrue(Stream.of(1, 3, 5).noneMatch(n -> n % 2 == 0));
-        assertFalse(Stream.of(1, 2, 3).noneMatch(n -> n % 2 == 0));
-        assertTrue(Stream.<Integer> empty().noneMatch(n -> true));
-    }
-
-    @Test
-    public void testFindFirstWithPredicate() {
-        assertEquals(Integer.valueOf(3), Stream.of(1, 2, 3, 4).findFirst(n -> n > 2).get());
-        assertFalse(Stream.of(1, 2, 3).findFirst(n -> n > 5).isPresent());
-    }
-
-    @Test
-    public void testFindFirst_alias() {
-        Optional<Integer> result = Stream.of(1, 2, 3).findFirst();
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get().intValue());
-    }
-
-    @Test
-    public void testFindFirst() {
-        assertEquals(Integer.valueOf(1), Stream.of(1, 2, 3).findFirst().get());
-        assertFalse(Stream.<Integer> empty().findFirst().isPresent());
-    }
-
-    @Test
-    public void testFindFirstPredicate() {
-        assertEquals(Optional.of(2), Stream.of(1, 2, 3, 4).findFirst(x -> x % 2 == 0));
-        assertEquals(Optional.empty(), Stream.of(1, 3, 5).findFirst(x -> x % 2 == 0));
-    }
-
-    @Test
-    public void testFindFirst_empty() {
-        Optional<Integer> result = Stream.<Integer> empty().findFirst();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny() {
-        u.Optional<Integer> result = Stream.of(1, 2, 3).findAny();
-        assertTrue(result.isPresent());
-        assertTrue(Arrays.asList(1, 2, 3).contains(result.get()));
-    }
-
-    @Test
-    public void testFindAnyPredicate() {
-        assertEquals(Optional.of(2), Stream.of(1, 2, 3, 4).findAny(x -> x % 2 == 0));
-        Optional<Integer> result = Stream.of(1, 2, 3, 4).parallel().findAny(x -> x % 2 == 0);
-        assertTrue(result.isPresent() && result.get() % 2 == 0);
-    }
-
-    @Test
-    public void testFindAny_alias() {
-        Optional<Integer> result = Stream.of(1, 2, 3).findAny();
-        assertTrue(result.isPresent());
-    }
-
-    @Test
-    public void testFindAny_empty() {
-        Optional<Integer> result = Stream.<Integer> empty().findAny();
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFindLastWithPredicate() {
-        assertEquals(Integer.valueOf(4), Stream.of(1, 2, 3, 4).findLast(n -> n > 2).get());
-        assertFalse(Stream.of(1, 2, 3).findLast(n -> n > 5).isPresent());
-    }
-
-    @Test
-    public void testFindLast() {
-        assertEquals(Integer.valueOf(3), Stream.of(1, 2, 3).last().get());
-        assertFalse(Stream.<Integer> empty().last().isPresent());
-    }
-
-    @Test
-    public void testFindLastPredicate() {
-        assertEquals(Optional.of(4), Stream.of(1, 2, 3, 4).findLast(x -> x % 2 == 0));
-        assertEquals(Optional.empty(), Stream.of(1, 3, 5).findLast(x -> x % 2 == 0));
-        assertEquals(Optional.of(2), Stream.of(2).findLast(x -> x % 2 == 0));
-    }
-
-    @Test
-    public void testContainsAll() {
-        assertTrue(Stream.of(1, 2, 3, 4, 5).containsAll(Arrays.asList(2, 3, 4)));
-        assertFalse(Stream.of(1, 2, 3).containsAll(Arrays.asList(3, 4, 5)));
-    }
-
-    @Test
-    public void testContainsAllArray() {
-        assertTrue(Stream.of(1, 2, 3, 4).containsAll(2, 4));
-        assertFalse(Stream.of(1, 2, 3).containsAll(2, 5));
-        assertTrue(Stream.of(1, 2, 3).containsAll());
-    }
-
-    @Test
-    public void testContainsAllCollection() {
-        assertTrue(Stream.of(1, 2, 3, 4).containsAll(Arrays.asList(2, 4)));
-        assertFalse(Stream.of(1, 2, 3).containsAll(Arrays.asList(2, 5)));
-    }
-
-    @Test
-    public void testContainsAny() {
-        assertTrue(Stream.of(1, 2, 3).containsAny(Arrays.asList(3, 4, 5)));
-        assertFalse(Stream.of(1, 2, 3).containsAny(Arrays.asList(4, 5, 6)));
-    }
-
-    @Test
-    public void testContainsAnyArray() {
-        assertTrue(Stream.of(1, 2, 3).containsAny(3, 5, 6));
-        assertFalse(Stream.of(1, 2, 3).containsAny(4, 5, 6));
-    }
-
-    @Test
-    public void testContainsNone() {
-        assertTrue(Stream.of(1, 2, 3).containsNone(Arrays.asList(4, 5, 6)));
-        assertFalse(Stream.of(1, 2, 3).containsNone(Arrays.asList(3, 4, 5)));
-    }
-
-    @Test
-    public void testContainsNoneArray() {
-        assertTrue(Stream.of(1, 2, 3).containsNone(4, 5, 6));
-        assertFalse(Stream.of(1, 2, 3).containsNone(3, 5, 6));
-    }
-
-    @Test
-    public void testToArray() {
-        Integer[] array = Stream.of(1, 2, 3).toArray(Integer[]::new);
-        assertArrayEquals(new Integer[] { 1, 2, 3 }, array);
-    }
-
-    @Test
-    public void testToArrayGenerator() {
-        String[] result = Stream.of("a", "b").toArray(String[]::new);
-        assertArrayEquals(new String[] { "a", "b" }, result);
-    }
-
-    @Test
-    public void testToImmutableMap() {
-        com.landawn.abacus.util.ImmutableMap<Integer, String> map = Stream.of("a", "bb", "ccc").toImmutableMap(String::length, s -> s);
-        assertEquals(3, map.size());
-        assertEquals("a", map.get(1));
-        assertEquals("bb", map.get(2));
-        assertEquals("ccc", map.get(3));
-    }
-
-    @Test
-    public void testToImmutableMapWithMerge() {
-        ImmutableMap<Integer, String> map = Stream.of("a", "b", "cc").toImmutableMap(String::length, Fn.identity(), (s1, s2) -> s1 + ";" + s2);
-        assertEquals("a;b", map.get(1));
-        assertEquals("cc", map.get(2));
-    }
-
-    @Test
-    public void testToImmutableMapEmpty() {
-        com.landawn.abacus.util.ImmutableMap<Integer, String> map = Stream.<String> empty().toImmutableMap(String::length, s -> s);
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testToMap() {
-        Map<Integer, String> map = Stream.of("a", "bb", "ccc").toMap(String::length, s -> s);
-        assertEquals("a", map.get(1));
-        assertEquals("bb", map.get(2));
-        assertEquals("ccc", map.get(3));
-    }
-
-    @Test
-    public void testToMapWithMerge() {
-        Map<Integer, String> map = Stream.of("a", "b", "cc", "dd").toMap(String::length, s -> s, (s1, s2) -> s1 + s2);
-        assertEquals("ab", map.get(1));
-        assertEquals("ccdd", map.get(2));
-    }
-
-    @Test
-    public void testToMapWithFactory() {
-        Map<Integer, String> map = Stream.of("a", "bb", "ccc").toMap(String::length, Fn.identity(), Suppliers.ofLinkedHashMap());
-        assertEquals("a", map.get(1));
-        assertEquals("bb", map.get(2));
-        Iterator<Map.Entry<Integer, String>> iter = map.entrySet().iterator();
-        assertEquals(1, iter.next().getKey());
-        assertEquals(2, iter.next().getKey());
-    }
-
-    //
-    //
-    //
-    @Test
-    public void testGroupTo() {
-        Map<Integer, List<String>> map = Stream.of("a", "bb", "c", "dd", "eee").groupTo(String::length);
-        assertEquals(2, map.get(1).size());
-        assertEquals(2, map.get(2).size());
-        assertEquals(1, map.get(3).size());
-    }
-
-    @Test
-    public void testGroupToKeyMapper() {
-        Map<Integer, List<String>> map = Stream.of("a", "bb", "c", "ddd").groupTo(String::length);
-        assertEquals(Arrays.asList("a", "c"), map.get(1));
-        assertEquals(Arrays.asList("bb"), map.get(2));
-        assertEquals(Arrays.asList("ddd"), map.get(3));
-    }
-
-    @Test
-    public void testGroupToWithDownstreamCollectorAndMapFactory() {
-        TreeMap<Integer, Long> map = Stream.of("a", "bb", "c", "ddd", "ee").groupTo(String::length, Collectors.counting(), TreeMap::new);
-        assertTrue(map instanceof TreeMap);
-        assertEquals(2L, map.get(1));
-        assertEquals(2L, map.get(2));
-        assertEquals(1L, map.get(3));
-    }
-
-    @Test
-    public void testGroupToEmpty() {
-        Map<Integer, List<String>> map = Stream.<String> empty().groupTo(String::length);
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
-    public void testGroupToKeyAndValueMapper() {
-        Map<Integer, List<String>> map = Stream.of("a", "bb", "c").groupTo(String::length, String::toUpperCase);
-        assertEquals(Arrays.asList("A", "C"), map.get(1));
-        assertEquals(Arrays.asList("BB"), map.get(2));
-    }
-
-    @Test
-    public void testFlatGroupTo() {
-        Map<Integer, List<String>> map = Stream.of("ab", "cd", "efg").flatGroupTo(s -> Arrays.asList(s.length(), s.length()));
-        assertEquals(4, map.get(2).size());
-        assertEquals(2, map.get(3).size());
-    }
-
-    @Test
-    public void testFlatGroupToKeyExtractor() {
-        Map<Character, List<String>> map = Stream.of("ant", "bat", "cat").flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> c).toList());
-        assertEquals(Arrays.asList("ant", "bat", "cat"), map.get('a'));
-        assertEquals(Arrays.asList("ant", "bat", "cat"), map.get('t'));
-        assertEquals(Arrays.asList("bat"), map.get('b'));
-        assertEquals(Arrays.asList("cat"), map.get('c'));
-    }
-
-    @Test
-    public void testFlatGroupToWithDownstreamCollector() {
-        Map<Character, Long> map = Stream.of("apple", "apricot", "banana")
-                .flatGroupTo(s -> Stream.of(s.toCharArray()).map(c -> c).toList(), Collectors.counting());
-
-        assertEquals(Long.valueOf(5), map.get('a'));
-        assertEquals(Long.valueOf(3), map.get('p'));
-        assertEquals(Long.valueOf(1), map.get('l'));
-        assertEquals(Long.valueOf(1), map.get('e'));
-    }
-
-    @Test
-    public void testFlatGroupTo_WithFlatKeyAndValue_Collector() {
-        Map<Integer, Long> result = Stream.of("a", "bb", "ccc", "dd")
-                .flatGroupTo(s -> Arrays.asList(s.length(), s.length() * 10), java.util.stream.Collectors.counting());
-        assertFalse(result.isEmpty());
-        assertTrue(result.containsKey(2));
-    }
-
-    @Test
-    public void testPartitionTo() {
-        Map<Boolean, List<Integer>> map = Stream.of(1, 2, 3, 4, 5).partitionTo(n -> n % 2 == 0);
-        assertEquals(Arrays.asList(2, 4), map.get(true));
-        assertEquals(Arrays.asList(1, 3, 5), map.get(false));
-    }
-
-    @Test
-    public void testPartitionToEmpty() {
-        Map<Boolean, List<Integer>> map = Stream.<Integer> empty().partitionTo(n -> n % 2 == 0);
-        assertTrue(map.get(true).isEmpty());
-        assertTrue(map.get(false).isEmpty());
-    }
-
-    @Test
-    public void testToMultimap() {
-        com.landawn.abacus.util.ListMultimap<Integer, String> multimap = Stream.of("a", "bb", "c", "dd", "eee").toMultimap(String::length);
-        assertEquals(2, multimap.get(1).size());
-        assertEquals(2, multimap.get(2).size());
-        assertEquals(1, multimap.get(3).size());
-    }
-
-    @Test
-    public void testToMultimapKeyMapper() {
-        ListMultimap<Integer, String> multimap = Stream.of("a", "bb", "c", "dd").toMultimap(String::length);
-        assertEquals(Arrays.asList("a", "c"), multimap.get(1));
-        assertEquals(Arrays.asList("bb", "dd"), multimap.get(2));
-    }
-
-    @Test
-    public void testToMultimapKeyAndValueMapperAndFactory() {
-        ListMultimap<Character, Integer> multimap = Stream.of("apple", "apricot").toMultimap(s -> s.charAt(0), String::length, Suppliers.ofListMultimap());
-
-        assertEquals(Arrays.asList(5, 7), multimap.get('a'));
-    }
-
-    @Test
-    public void testToMultimapEmpty() {
-        com.landawn.abacus.util.ListMultimap<Integer, String> multimap = Stream.<String> empty().toMultimap(String::length);
-        assertTrue(multimap.isEmpty());
-    }
-
-    @Test
-    public void testToDataset() {
-        Dataset dataset = Stream.of(Arrays.asList("a", 1), Arrays.asList("b", 2), Arrays.asList("c", 3)).toDataset(N.toList("Column1", "Column2"));
-        assertEquals(3, dataset.size());
-    }
-
-    @Test
-    public void testToDatasetWithColumnNames() {
-        Dataset dataset = Stream.of(Arrays.asList("a", 1), Arrays.asList("b", 2)).toDataset(Arrays.asList("col1", "col2"));
-        assertEquals(2, dataset.size());
-        assertEquals(Arrays.asList("col1", "col2"), dataset.columnNames());
-    }
-
-    @Test
-    public void testToDatasetSimple() {
-        Map<String, Object> row1 = N.asMap("id", 1, "name", "Alice");
-        Map<String, Object> row2 = N.asMap("id", 2, "name", "Bob");
-        Dataset dataset = Stream.of(row1, row2).toDataset();
-
-        assertEquals(2, dataset.size());
-        assertTrue(dataset.columnNames().containsAll(Arrays.asList("id", "name")));
-    }
-
-    @Test
-    public void testToDatasetEmpty() {
-        Dataset dataset = Stream.<List<Object>> empty().toDataset();
-        assertEquals(0, dataset.size());
-    }
-
-    @Test
-    public void testFoldLeft() {
-        String result = Stream.of("a", "b", "c", "d").foldLeft((a, b) -> a + b).get();
-        assertEquals("abcd", result);
-    }
-
-    @Test
-    public void testFoldLeftWithIdentity() {
-        String result = Stream.of("a", "b", "c").foldLeft("start:", (a, b) -> a + b);
-        assertEquals("start:abc", result);
-    }
-
-    @Test
-    public void testFoldLeft_WithIdentity() {
-        String result = Stream.of("a", "b", "c").foldLeft("", (acc, s) -> acc + s);
-        assertEquals("abc", result);
-    }
-
-    @Test
-    public void testFoldLeftEmpty() {
-        assertFalse(Stream.<String> empty().foldLeft((a, b) -> a + b).isPresent());
-    }
-
-    @Test
-    public void testFoldLeft_Empty() {
-        Optional<String> result = Stream.<String> empty().foldLeft((a, b) -> a + b);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testFoldLeft_SingleElement() {
-        Optional<Integer> result = Stream.of(42).foldLeft((a, b) -> a + b);
-        assertTrue(result.isPresent());
-        assertEquals(42, result.get().intValue());
-    }
-
-    @Test
-    public void testFoldRight() {
-        String result = Stream.of("a", "b", "c", "d").foldRight((a, b) -> a + b).get();
-        assertEquals("dcba", result);
-    }
-
-    @Test
-    public void testFoldRightWithIdentity() {
-        String result = Stream.of("a", "b", "c").foldRight(":end", (a, b) -> a + b);
-        assertEquals(":endcba", result);
-    }
-
-    @Test
-    public void testFoldRight_WithIdentity() {
-        String result = Stream.of("a", "b", "c").foldRight("", (acc, s) -> acc + s);
-        assertEquals("cba", result);
-    }
-
-    @Test
-    public void testFoldRightEmpty() {
-        assertFalse(Stream.<String> empty().foldRight((a, b) -> a + b).isPresent());
-    }
-
-    @Test
-    public void testFoldRight_SingleElement() {
-        Optional<Integer> result = Stream.of(42).foldRight((a, b) -> a + b);
-        assertTrue(result.isPresent());
-        assertEquals(42, result.get().intValue());
-    }
-
-    @Test
-    public void testReduceWithIdentityAndCombiner() {
-        assertEquals(Integer.valueOf(15), Stream.of(1, 2, 3, 4, 5).reduce(0, Integer::sum, Integer::sum));
-    }
-
-    @Test
-    public void testReduceIdentityAccumulatorCombiner() {
-        int result = Stream.of("1", "2", "3").reduce(0, (sum, str) -> sum + Integer.parseInt(str), (s1, s2) -> s1 + s2);
-        assertEquals(6, result);
-
-        result = Stream.of("1", "2", "3", "4", "5", "6").parallel().reduce(0, (sum, str) -> sum + Integer.parseInt(str), Integer::sum);
-        assertEquals(21, result);
-    }
-
-    @Test
-    public void testReduce() {
-        assertEquals(Integer.valueOf(15), Stream.of(1, 2, 3, 4, 5).reduce(Integer::sum).get());
-        assertFalse(Stream.<Integer> empty().reduce(Integer::sum).isPresent());
-    }
-
-    @Test
-    public void testReduceWithIdentity() {
-        assertEquals(Integer.valueOf(15), Stream.of(1, 2, 3, 4, 5).reduce(0, Integer::sum));
-        assertEquals(Integer.valueOf(0), Stream.<Integer> empty().reduce(0, Integer::sum));
-    }
-
-    @Test
-    public void testReduceBinaryOperator() {
-        assertEquals(Optional.of(6), Stream.of(1, 2, 3).reduce((a, b) -> a + b));
-        assertEquals(Optional.empty(), Stream.<Integer> empty().reduce((a, b) -> a + b));
-    }
-
-    @Test
-    public void testReduceIdentityBinaryOperator() {
-        assertEquals(10, (int) Stream.of(1, 2, 3).reduce(4, (a, b) -> a + b));
-        assertEquals(4, (int) Stream.<Integer> empty().reduce(4, (a, b) -> a + b));
-    }
-
-    @Test
-    public void testReduceWithIdentity_empty() {
-        int result = Stream.<Integer> empty().reduce(0, Integer::sum);
-        assertEquals(0, result);
-    }
-
-    @Test
-    public void testCollect() {
-        List<Integer> list = Stream.of(1, 2, 3).collect(Collectors.toList());
-        assertEquals(Arrays.asList(1, 2, 3), list);
-    }
-
-    //
-    //
-
-    @Test
-    public void testCollectSupplierAccumulatorCombiner() {
-        ArrayList<Integer> result = Stream.of(1, 2, 3).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testCollectSupplierAccumulator() {
-        List<Integer> result = Stream.of(1, 2, 3).collect(ArrayList::new, ArrayList::add);
-        assertEquals(Arrays.asList(1, 2, 3), result);
-
-        Set<Integer> parallelResult = Stream.of(1, 2, 3, 1, 2).parallel().collect(HashSet::new, HashSet::add);
-        assertEquals(Set.of(1, 2, 3), parallelResult);
-    }
-
-    @Test
-    public void testCollectCollector() {
-        List<Integer> result = Stream.of(1, 2, 3).collect(java.util.stream.Collectors.toList());
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testCollectThenApply() {
-        int result = Stream.of(1, 2, 3).collectThenApply(java.util.stream.Collectors.toList(), List::size);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testCollectThenAccept() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.of(1, 2, 3).collectThenAccept(java.util.stream.Collectors.toList(), holder::addAll);
-        assertEquals(Arrays.asList(1, 2, 3), holder);
-    }
-
-    @Test
-    public void testToListThenApply() {
-        int result = Stream.of(1, 2, 3).toListThenApply(List::size);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testToListThenAccept() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.of(1, 2, 3).toListThenAccept(holder::addAll);
-        assertEquals(Arrays.asList(1, 2, 3), holder);
-    }
-
-    @Test
-    public void testToSetThenApply() {
-        int result = Stream.of(1, 2, 2, 3).toSetThenApply(java.util.Set::size);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testToSetThenAccept() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.of(1, 2, 2, 3).toSetThenAccept(holder::addAll);
-        assertEquals(3, holder.size());
-    }
-
-    @Test
-    public void testToCollectionThenApply() {
-        int result = Stream.of(1, 2, 3).toCollectionThenApply(ArrayList::new, List::size);
-        assertEquals(3, result);
-    }
-
-    @Test
-    public void testToCollectionThenAccept() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.of(1, 2, 3).toCollectionThenAccept(ArrayList::new, holder::addAll);
-        assertEquals(Arrays.asList(1, 2, 3), holder);
-    }
-
-    @Test
-    public void testMin() {
-        assertEquals(Integer.valueOf(1), Stream.of(3, 1, 2).min(Comparator.naturalOrder()).get());
-        assertFalse(Stream.<Integer> empty().min(Comparator.naturalOrder()).isPresent());
-    }
-
-    @Test
-    public void testMinComparator() {
-        assertEquals(Optional.of(1), Stream.of(5, 1, 3).min(Comparator.naturalOrder()));
-        assertEquals(Optional.empty(), Stream.<Integer> empty().min(Comparator.naturalOrder()));
-    }
-
-    @Test
-    public void testMinBy() {
-        assertEquals("c", Stream.of("aaa", "bb", "c").minBy(String::length).get());
-    }
-
-    @Test
-    public void testMinBy_empty() {
-        Optional<String> result = Stream.<String> empty().minBy(String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMinAll() {
-        List<Integer> result = Stream.of(1, 1, 2, 3, 4).minAll(Integer::compareTo);
-        assertEquals(Arrays.asList(1, 1), result);
-    }
-
-    @Test
-    public void testMinAllEmpty() {
-        List<Integer> result = Stream.<Integer> empty().minAll(Integer::compareTo);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMinAll_Empty() {
-        List<Integer> result = Stream.<Integer> empty().minAll(Comparator.naturalOrder());
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMax() {
-        assertEquals(Integer.valueOf(3), Stream.of(1, 3, 2).max(Comparator.naturalOrder()).get());
-        assertFalse(Stream.<Integer> empty().max(Comparator.naturalOrder()).isPresent());
-    }
-
-    @Test
-    public void testMaxComparator() {
-        assertEquals(Optional.of(5), Stream.of(5, 1, 3).max(Comparator.naturalOrder()));
-    }
-
-    @Test
-    public void testMaxBy() {
-        assertEquals("aaa", Stream.of("a", "bb", "aaa").maxBy(String::length).get());
-    }
-
-    @Test
-    public void testMaxBy_empty() {
-        Optional<String> result = Stream.<String> empty().maxBy(String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testMaxAll() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 4).maxAll(Integer::compareTo);
-        assertEquals(Arrays.asList(4, 4), result);
-    }
-
-    @Test
-    public void testMaxAllEmpty() {
-        List<Integer> result = Stream.<Integer> empty().maxAll(Integer::compareTo);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMaxAll_Empty() {
-        List<Integer> result = Stream.<Integer> empty().maxAll(Comparator.naturalOrder());
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSumInt() {
-        assertEquals(15, Stream.of(1, 2, 3, 4, 5).sumInt(n -> n));
-    }
-
-    @Test
-    public void testSumInt_Empty() {
-        long result = Stream.<String> empty().sumInt(String::length);
-        assertEquals(0L, result);
-    }
-
-    @Test
-    public void testSumLong() {
-        assertEquals(15L, Stream.of(1, 2, 3, 4, 5).sumLong(n -> n));
-    }
-
-    @Test
-    public void testSumDouble() {
-        assertEquals(15.0, Stream.of(1, 2, 3, 4, 5).sumDouble(n -> n), 0.001);
-    }
-
-    @Test
-    public void testAverageInt() {
-        assertEquals(u.OptionalDouble.of(3.0), Stream.of(1, 2, 3, 4, 5).averageInt(n -> n));
-    }
-
-    @Test
-    public void testAverageInt_Empty() {
-        OptionalDouble result = Stream.<String> empty().averageInt(String::length);
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testAverageLong() {
-        assertEquals(u.OptionalDouble.of(3.0), Stream.of(1, 2, 3, 4, 5).averageLong(n -> n));
-    }
-
-    @Test
-    public void testAverageDouble() {
-        assertEquals(u.OptionalDouble.of(3.0), Stream.of(1, 2, 3, 4, 5).averageDouble(n -> n));
-    }
-
-    @Test
-    public void testKthLargest() {
-        assertEquals(Integer.valueOf(4), Stream.of(1, 2, 3, 4, 5).kthLargest(2, Comparator.naturalOrder()).get());
-    }
-
-    @Test
-    public void testKthLargest_Third() {
-        Optional<Integer> result = Stream.of(5, 2, 8, 1, 9, 3).kthLargest(3, Comparator.naturalOrder());
-        assertTrue(result.isPresent());
-        assertEquals(5, result.get().intValue());
-    }
-
-    @Test
-    public void testKthLargest_Empty() {
-        Optional<Integer> result = Stream.<Integer> empty().kthLargest(1, Comparator.naturalOrder());
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testPercentiles() {
-        u.Optional<Map<Percentage, Integer>> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).percentiles(Integer::compareTo);
-        assertTrue(result.isPresent());
-        assertFalse(result.get().isEmpty());
-    }
-
-    @Test
-    public void testPercentiles_Empty() {
-        Optional<Map<Percentage, Integer>> result = Stream.<Integer> empty().percentiles(Comparator.naturalOrder());
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testContainsDuplicates() {
-        assertTrue(Stream.of(1, 2, 3, 2, 4).containsDuplicates());
-        assertFalse(Stream.of(1, 2, 3, 4, 5).containsDuplicates());
-        assertFalse(Stream.<Integer> empty().containsDuplicates());
-    }
-
-    @Test
-    public void testContainsDuplicates_SingleElement() {
-        assertFalse(Stream.of(1).containsDuplicates());
-    }
-
-    @Test
-    public void testCombinations() {
-        List<List<Integer>> result = Stream.of(1, 2, 3).combinations(2).toList();
-        assertEquals(3, result.size());
-        assertTrue(result.contains(Arrays.asList(1, 2)));
-        assertTrue(result.contains(Arrays.asList(1, 3)));
-        assertTrue(result.contains(Arrays.asList(2, 3)));
-    }
-
-    @Test
-    public void testCombinationsAll() {
-        List<List<Integer>> result = Stream.of(1, 2).combinations().toList();
-        assertTrue(result.size() >= 3);
-    }
-
-    @Test
-    public void testCombinationsWithLength() {
-        List<List<Integer>> combs = Stream.of(1, 2, 3).combinations(2).toList();
-        assertEquals(3, combs.size());
-        assertTrue(combs.contains(Arrays.asList(1, 2)));
-        assertTrue(combs.contains(Arrays.asList(1, 3)));
-        assertTrue(combs.contains(Arrays.asList(2, 3)));
-    }
-
-    @Test
-    public void testCombinationsWithLengthAndRepeat() {
-        List<List<Integer>> combsWithoutRepeat = Stream.of(1, 2).combinations(2, false).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2)), combsWithoutRepeat);
-
-        List<List<Integer>> combsWithRepeat = Stream.of(1, 2).combinations(2, true).toList();
-        assertEquals(4, combsWithRepeat.size());
-        assertTrue(combsWithRepeat.contains(Arrays.asList(1, 1)));
-        assertTrue(combsWithRepeat.contains(Arrays.asList(1, 2)));
-        assertTrue(combsWithRepeat.contains(Arrays.asList(2, 1)));
-        assertTrue(combsWithRepeat.contains(Arrays.asList(2, 2)));
-    }
-
-    @Test
-    public void testCombinations_WithLen() {
-        List<List<Integer>> result = Stream.of(1, 2, 3).combinations(2).toList();
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(1, 2), result.get(0));
-        assertEquals(Arrays.asList(1, 3), result.get(1));
-        assertEquals(Arrays.asList(2, 3), result.get(2));
-    }
-
-    @Test
-    public void testCombinationsNoLength() {
-        List<List<Integer>> combs = Stream.of(1, 2).combinations().toList();
-        assertEquals(4, combs.size());
-        assertTrue(combs.contains(Collections.emptyList()));
-        assertTrue(combs.contains(Arrays.asList(1)));
-        assertTrue(combs.contains(Arrays.asList(2)));
-        assertTrue(combs.contains(Arrays.asList(1, 2)));
-    }
-
-    @Test
-    public void testCombinations_Zero() {
-        List<List<Integer>> result = Stream.of(1, 2, 3).combinations(0).toList();
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isEmpty());
-    }
-
-    @Test
-    public void testPermutations() {
-        List<List<Integer>> result = Stream.of(1, 2, 3).permutations().toList();
-        assertEquals(6, result.size());
-    }
-
-    @Test
-    public void testOrderedPermutations() {
-        List<List<Integer>> result = Stream.of(1, 2, 3).orderedPermutations().toList();
-        assertEquals(6, result.size());
-    }
-
-    @Test
-    public void testCartesianProduct() {
-        List<List<Integer>> result = Stream.of(1, 2).cartesianProduct(Arrays.asList(3, 4)).toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains(Arrays.asList(1, 3)));
-        assertTrue(result.contains(Arrays.asList(1, 4)));
-        assertTrue(result.contains(Arrays.asList(2, 3)));
-        assertTrue(result.contains(Arrays.asList(2, 4)));
-    }
-
-    @Test
-    public void testCartesianProductVarargs() {
-        List<List<Integer>> result = Stream.of(0, 1).cartesianProduct(Arrays.asList(2, 3)).toList();
-        assertEquals(Arrays.asList(Arrays.asList(0, 2), Arrays.asList(0, 3), Arrays.asList(1, 2), Arrays.asList(1, 3)), result);
-    }
-
-    @Test
-    public void testCartesianProductCollectionOfCollections() {
-        List<List<String>> result = Stream.of("a", "b").cartesianProduct(Arrays.asList(Arrays.asList("1", "2"))).toList();
-        assertEquals(Arrays.asList(Arrays.asList("a", "1"), Arrays.asList("a", "2"), Arrays.asList("b", "1"), Arrays.asList("b", "2")), result);
-
-        List<List<String>> result2 = Stream.of("a", "b").cartesianProduct(Arrays.asList(Arrays.asList("1", "2"), Arrays.asList("true", "false"))).toList();
-        assertEquals(Arrays.asList(Arrays.asList("a", "1", "true"), Arrays.asList("a", "1", "false"), Arrays.asList("a", "2", "true"),
-                Arrays.asList("a", "2", "false"), Arrays.asList("b", "1", "true"), Arrays.asList("b", "1", "false"), Arrays.asList("b", "2", "true"),
-                Arrays.asList("b", "2", "false")), result2);
-    }
-
-    @Test
-    public void testCartesianProductNullCollectionClosesWithoutConsumingSource() {
-        final AtomicInteger consumed = new AtomicInteger();
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> stream = Stream.of(1, 2).peek(value -> consumed.incrementAndGet()).onClose(closed::incrementAndGet);
-
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> stream.cartesianProduct((Collection<Collection<Integer>>) null)).getMessage()
-                .contains("cs"));
-        assertEquals(0, consumed.get());
-        assertEquals(1, closed.get());
-        assertThrows(IllegalStateException.class, stream::count);
-    }
-
-    @Test
-    public void testRollup() {
-        List<List<Integer>> result = Stream.of(1, 2, 3, 4).rollup().toList();
-        assertEquals(5, result.size());
-        assertEquals(Arrays.asList(Arrays.asList(), Arrays.asList(1), Arrays.asList(1, 2), Arrays.asList(1, 2, 3), Arrays.asList(1, 2, 3, 4)), result);
-    }
-
-    @Test
-    public void testRollupEmpty() {
-        List<List<Integer>> result = Stream.<Integer> empty().rollup().toList();
-        assertEquals(1, result.size());
-        assertEquals(Arrays.asList(Arrays.asList()), result);
-    }
-
-    @Test
-    public void testRollupSingleElement() {
-        List<List<Integer>> result = Stream.of(1).rollup().toList();
-        assertEquals(2, result.size());
-        assertEquals(Arrays.asList(Arrays.asList(), Arrays.asList(1)), result);
-    }
-
-    @Test
-    public void testRollup_Empty() {
-        List<List<Integer>> result = Stream.<Integer> empty().rollup().toList();
-        assertEquals(1, result.size());
-        assertTrue(result.get(0).isEmpty());
-    }
-
-    @Test
-    public void testIntersection() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).intersection(Arrays.asList(2, 3, 5));
-        assertEquals(Arrays.asList(2, 3), stream.toList());
-    }
-
-    @Test
-    public void testIntersectionEmpty() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).intersection(Arrays.asList(4, 5, 6));
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testDifference() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4).difference(Arrays.asList(2, 3, 5));
-        assertEquals(Arrays.asList(1, 4), stream.toList());
-    }
-
-    @Test
-    public void testDifferenceNone() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).difference(Arrays.asList(4, 5, 6));
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testPrependStream() {
-        Stream<Integer> stream = Stream.of(3, 4).prepend(Stream.of(1, 2));
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testPrependVarargs() {
-        Stream<Integer> stream = Stream.of(3, 4).prepend(1, 2);
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testPrependCollection() {
-        Stream<Integer> stream = Stream.of(3, 4).prepend(Arrays.asList(1, 2));
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testPrependOptional() {
-        Stream<Integer> stream = Stream.of(2, 3).prepend(u.Optional.of(1));
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testPrepend() {
-        Stream<Integer> prepended = stream.prepend(Arrays.asList(-2, -1, 0));
-        assertEquals(Arrays.asList(-2, -1, 0, 1, 2, 3, 4, 5), prepended.toList());
-
-        Stream<Integer> prependedVarargs = createStream(3, 4, 5).prepend(1, 2);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), prependedVarargs.toList());
-    }
-
-    @Test
-    public void testPrepend_Empty() {
-        List<Integer> result = Stream.of(1, 2, 3).prepend(Collections.emptyList()).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testAppendStream() {
-        Stream<Integer> stream = Stream.of(1, 2).append(Stream.of(3, 4));
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testAppendVarargs() {
-        Stream<Integer> stream = Stream.of(1, 2).append(3, 4);
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testAppendCollection() {
-        Stream<Integer> stream = Stream.of(1, 2).append(Arrays.asList(3, 4));
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testAppendOptional() {
-        Stream<Integer> stream = Stream.of(1, 2).append(u.Optional.of(3));
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testAppend() {
-        Stream<Integer> appended = stream.append(Arrays.asList(6, 7, 8));
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), appended.toList());
-
-        Stream<Integer> appendedVarargs = createStream(1, 2, 3).append(4, 5);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), appendedVarargs.toList());
-    }
-
-    @Test
-    public void testAppend_Empty() {
-        List<Integer> result = Stream.of(1, 2, 3).append(Collections.emptyList()).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testAppendIfEmpty() {
-        Stream<Integer> stream1 = Stream.<Integer> empty().appendIfEmpty(() -> Stream.of(1, 2));
-        assertEquals(Arrays.asList(1, 2), stream1.toList());
-
-        Stream<Integer> stream2 = Stream.of(1, 2).appendIfEmpty(() -> Stream.of(3, 4));
-        assertEquals(Arrays.asList(1, 2), stream2.toList());
-    }
-
-    @Test
-    public void testDefaultIfEmpty() {
-        List<Integer> result1 = Stream.<Integer> empty().defaultIfEmpty(() -> Stream.of(1, 2, 3)).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result1);
-
-        List<Integer> result2 = Stream.of(1, 2).defaultIfEmpty(() -> Stream.of(3, 4)).toList();
-        assertEquals(Arrays.asList(1, 2), result2);
-    }
-
-    @Test
-    public void testBuffered() {
-        List<Integer> result = Stream.of(1, 2, 3).buffered().toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testBufferedWithSize() {
-        List<Integer> result = Stream.of(1, 2, 3).buffered(2).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testBuffered_WithSize() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).buffered(2).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testBuffered_Iterator() {
-        Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5).iterator();
-        // Stream.buffered(Iterator) is a static internal method used via merge
-        // Test via buffered() instance method which internally calls it
-        List<Integer> result = Stream.of(iter).buffered().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testMergeWith() {
-        List<Integer> result = Stream.of(1, 3, 5).mergeWith(Stream.of(2, 4, 6), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testMergeWithEmpty() {
-        List<Integer> result = Stream.<Integer> empty().mergeWith(Stream.of(1, 2, 3), (a, b) -> MergeResult.TAKE_FIRST).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testMergeWith_EmptyStreams() {
-        List<Integer> result = Stream.<Integer> empty().mergeWith(Collections.emptyList(), (a, b) -> MergeResult.TAKE_FIRST).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testZipWithDifferentLengths() {
-        Stream<String> stream = Stream.zip(Arrays.asList(1, 2), Arrays.asList("a", "b", "c"), (i, s) -> i + s);
-        assertEquals(Arrays.asList("1a", "2b"), stream.toList());
-    }
-
-    @Test
-    public void testZipWithDefaultValues() {
-        Stream<String> stream = Stream.zip(Arrays.asList(1, 2), Arrays.asList("a", "b", "c"), 0, "", (i, s) -> i + s);
-        assertEquals(Arrays.asList("1a", "2b", "0c"), stream.toList());
-    }
-
-    @Test
-    public void testZipWith() {
-        List<Integer> list1 = Arrays.asList(10, 20, 30);
-
-        List<Integer> result = Stream.of(1, 2, 3).zipWith(list1, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipWithThreeWay() {
-        List<Integer> list1 = Arrays.asList(10, 20, 30);
-        List<Integer> list2 = Arrays.asList(100, 200, 300);
-
-        List<Integer> result = Stream.of(1, 2, 3).zipWith(list1, list2, (a, b, c) -> a + b + c).toList();
-        assertEquals(Arrays.asList(111, 222, 333), result);
-    }
-
-    @Test
-    public void testZipWithDefaultValue() {
-        List<Integer> list1 = Arrays.asList(10, 20);
-
-        List<Integer> result = Stream.of(1, 2, 3).zipWith(list1, 0, 0, (a, b) -> a + b).toList();
-        assertEquals(Arrays.asList(11, 22, 3), result);
-    }
-
-    @Test
-    public void testZipWith_DifferentLengths() {
-        List<String> result = Stream.of(1, 2, 3).zipWith(Arrays.asList("a", "b"), (i, s) -> i + s).toList();
-        assertEquals(Arrays.asList("1a", "2b"), result);
-    }
-
-    @Test
-    public void testZipWith_WithDefaults() {
-        List<String> result = Stream.of(1, 2, 3).zipWith(Arrays.asList("a", "b"), 0, "z", (i, s) -> i + s).toList();
-        assertEquals(Arrays.asList("1a", "2b", "3z"), result);
-    }
-
-    @Test
-    public void testZipWith_ThreeCollections() {
-        List<String> result = Stream.of(1, 2).zipWith(Arrays.asList("a", "b"), Arrays.asList(true, false), (i, s, b) -> i + s + b).toList();
-        assertEquals(Arrays.asList("1atrue", "2bfalse"), result);
-    }
-
-    @Test
-    public void testZipWith_StreamAndStream_TriFunction() {
-        List<String> result = Stream.of(1, 2, 3).zipWith(Stream.of("a", "b", "c"), Stream.of(true, false, true), (i, s, b) -> i + s + b).toList();
-        assertEquals(3, result.size());
-        assertEquals("1atrue", result.get(0));
-        assertEquals("2bfalse", result.get(1));
-    }
-
-    @Test
-    public void testZipWithEmpty() {
-        List<Integer> list1 = Arrays.asList(10, 20, 30);
-
-        List<Integer> result = Stream.<Integer> empty().zipWith(list1, (a, b) -> a + b).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testZipWith_StreamWithDefaults() {
-        List<String> result = Stream.of(1, 2).zipWith(Stream.of("a", "b", "c"), 0, "x", (i, s) -> i + s).toList();
-        assertEquals(3, result.size());
-        assertEquals("1a", result.get(0));
-        assertEquals("0c", result.get(2)); // uses default for missing left element (0 paired with "c")
-    }
-
-    @Test
-    public void testonEachSaveToFileDefault() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "onEachSaveDefault.txt");
-        Stream.of("hello", "world").onEachSave(tempFile).forEach(e -> {
-        });
-        assertTrue(tempFile.exists());
-        String content = IOUtil.readAllToString(tempFile);
-        assertTrue(content.contains("hello"));
-        assertTrue(content.contains("world"));
-    }
-
-    @Test
-    public void testPersist() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "persist_test.txt");
-        List<String> data = Arrays.asList("line1", "line2", "line3");
-        Stream.of(data).persist(tempFile);
-
-        List<String> readBack = IOUtil.readAllLines(tempFile);
-        assertEquals(data, readBack);
-    }
-
-    @Test
-    public void testPersistToCSV() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "test.csv");
-        List<List<String>> rows = Arrays.asList(Arrays.asList("a", "b", "c"), Arrays.asList("1", "2", "3"));
-        Stream.of(rows).persistToCsv(N.toList("Column1", "Column2", "Column3"), tempFile);
-
-        assertTrue(tempFile.exists());
-        assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testPersistToCsv_WithHeadersAndOutputStream() throws IOException {
-        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-        Map<String, Object> row1 = new LinkedHashMap<>();
-        row1.put("name", "Alice");
-        row1.put("age", 30);
-        Map<String, Object> row2 = new LinkedHashMap<>();
-        row2.put("name", "Bob");
-        row2.put("age", 25);
-        long count = Stream.of(row1, row2).persistToCsv(Arrays.asList("name", "age"), baos);
-        assertEquals(2, count);
-        String output = baos.toString();
-        assertFalse(output.isEmpty());
-    }
-
-    @Test
-    public void testPersistToJSON() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "test.json");
-        List<Map<String, Object>> data = Arrays.asList(new LinkedHashMap<String, Object>() {
-            {
-                put("name", "Alice");
-                put("age", 30);
-            }
-        });
-        Stream.of(data).persistToJson(tempFile);
-
-        assertTrue(tempFile.exists());
-        assertTrue(tempFile.length() > 0);
-    }
-
-    @Test
-    public void testToJdkStream() {
-        java.util.stream.Stream<Integer> jdkStream = Stream.of(1, 2, 3).toJdkStream();
-        assertEquals(Arrays.asList(1, 2, 3), jdkStream.collect(Collectors.toList()));
-    }
-
-    @Test
-    public void testTransformViaJdkStream() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n % 2 == 0)).toList();
-        assertEquals(Arrays.asList(2, 4), result);
-    }
-
-    @Test
-    public void testTransformViaJdkStreamWithMap() {
-        List<Integer> result = Stream.of("a", "bb", "ccc").transformViaJdkStream(jdkStream -> jdkStream.map(String::length)).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testTransformViaJdkStream_Deferred() {
-        // Covers the deferred=true branch in transformViaJdkStream(Function, boolean)
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n % 2 == 0), true).toList();
-        assertEquals(Arrays.asList(2, 4), result);
-    }
-
-    @Test
-    public void testTransformViaJdkStream_NotDeferred() {
-        // Covers the deferred=false branch in transformViaJdkStream(Function, boolean)
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).transformViaJdkStream(jdkStream -> jdkStream.map(n -> n * 3), false).toList();
-        assertEquals(Arrays.asList(3, 6, 9, 12, 15), result);
-    }
-
-    @Test
-    public void testTransformViaJdkStreamEmpty() {
-        List<Integer> result = Stream.<Integer> empty().transformViaJdkStream(jdkStream -> jdkStream.filter(n -> n > 0)).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSps() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).sps(s -> s.filter(n -> n % 2 == 0)).toList();
-        assertHaveSameElements(Arrays.asList(2, 4), result);
-    }
-
-    @Test
-    public void testSps_WithMaxThreadAndChunkSize() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).sps(2, 3, chunk -> Stream.of(chunk).map(i -> i * 2)).sorted().toList();
-        assertEquals(Arrays.asList(2, 4, 6, 8, 10, 12, 14, 16, 18, 20), result);
-    }
-
-    @Test
-    public void testSps_MaxThreadAndChunkSize_AlreadyParallel() {
-        // covers the isParallel() && maxThreadNum == maxThreadNum() branch in sps(int, int, Function)
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallel(2).sps(2, 3, chunk -> Stream.of(chunk).map(i -> i * 2)).sorted().toList();
-        assertEquals(Arrays.asList(2, 4, 6, 8, 10, 12, 14, 16, 18, 20), result);
-    }
-
-    @Test
-    public void testSps_MaxThreadAndChunkSize_DifferentThreadCount() {
-        // covers the else branch: split(chunkSize).parallel(maxThreadNum, ...)
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).parallel(4).sps(2, 3, chunk -> Stream.of(chunk).map(i -> i * 2)).sorted().toList();
-        assertEquals(Arrays.asList(2, 4, 6, 8, 10, 12, 14, 16, 18, 20), result);
-    }
-
-    @Test
-    public void testSpsFilter() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
-        Stream<Integer> filtered = stream.spsFilter(n -> n % 2 == 0);
-        assertNotNull(filtered);
-        assertHaveSameElements(Arrays.asList(2, 4), filtered.toList());
-    }
-
-    @Test
-    public void testSpsFilterEmptyStream() {
-        Stream<Integer> filtered = Stream.<Integer> empty().spsFilter(n -> n > 0);
-        assertTrue(filtered.toList().isEmpty());
-    }
-
-    @Test
-    public void test_spsFilter() {
-        Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
-        List<String> result = strings.spsFilter(it -> it.length() <= 1).toList();
-        assertHaveSameElements(Arrays.asList("a", "e"), result);
-    }
-
-    @Test
-    public void testSpsFilterWithMaxThreadNum() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8).spsFilter(2, x -> x % 2 == 0).toList();
-        assertHaveSameElements(Arrays.asList(2, 4, 6, 8), result);
-    }
-
-    @Test
-    public void testSpsFilter_WithMaxThreadNumAndChunkSize() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).spsFilter(2, 2, n -> n % 2 == 0).sorted().toList();
-        assertEquals(Arrays.asList(2, 4), result);
-    }
-
-    @Test
-    public void testSpsMap() {
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<String> mapped = stream.spsMap(n -> String.valueOf(n * 2));
-        assertNotNull(mapped);
-        assertHaveSameElements(Arrays.asList("2", "4", "6"), mapped.toList());
-    }
-
-    @Test
-    public void testSpsMapEmptyStream() {
-        Stream<String> mapped = Stream.<Integer> empty().spsMap(String::valueOf);
-        assertTrue(mapped.toList().isEmpty());
-    }
-
-    @Test
-    public void testSpsMap_WithMaxThreadNum() {
-        List<String> result = Stream.of("a", "bb", "ccc").spsMap(2, s -> s.toUpperCase()).sorted().toList();
-        assertEquals(3, result.size());
-        assertTrue(result.contains("A"));
-        assertTrue(result.contains("CCC"));
-    }
-
-    @Test
-    public void testSpsMap_WithMaxThreadNumAndChunkSize() {
-        List<String> result = Stream.of(1, 2, 3).spsMap(2, 2, n -> n + "x").sorted().toList();
-        assertEquals(3, result.size());
-        assertTrue(result.contains("1x"));
-        assertTrue(result.contains("3x"));
-    }
-
-    @Test
-    public void testSpsFlatMap() {
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<Integer> flatMapped = stream.spsFlatMap(n -> Stream.of(n, n * 10));
-        assertNotNull(flatMapped);
-        List<Integer> result = flatMapped.toList();
-        assertEquals(6, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 10, 2, 20, 3, 30)));
-    }
-
-    @Test
-    public void testSpsFlatmap_Collection() {
-        List<String> result = Stream.of("a", "bb", "ccc").spsFlatmap(s -> Arrays.asList(s, s.toUpperCase())).sorted().toList();
-        assertEquals(6, result.size());
-        assertTrue(result.contains("A"));
-        assertTrue(result.contains("ccc"));
-    }
-
-    @Test
-    public void testSpsFlatMap_WithMaxThreadNum() {
-        List<String> result = Stream.of("a", "bb").spsFlatMap(2, s -> Stream.of(s, s.toUpperCase())).sorted().toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains("A"));
-        assertTrue(result.contains("bb"));
-    }
-
-    @Test
-    public void testSpsFlatmap_WithMaxThreadNum() {
-        List<String> result = Stream.of("a", "bb").spsFlatmap(2, s -> Arrays.asList(s, s.toUpperCase())).sorted().toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains("A"));
-    }
-
-    @Test
-    public void testSpsFlatMap_WithMaxThreadNumAndChunkSize() {
-        List<Integer> result = Stream.of(1, 2, 3).spsFlatMap(2, 2, n -> Stream.of(n, n * 10)).sorted().toList();
-        assertEquals(6, result.size());
-        assertTrue(result.contains(10));
-        assertTrue(result.contains(30));
-    }
-
-    @Test
-    public void testSpsFlatmap_WithMaxThreadNumAndChunkSize() {
-        List<Integer> result = Stream.of(1, 2, 3).spsFlatmap(2, 2, n -> Arrays.asList(n, n * 10)).sorted().toList();
-        assertEquals(6, result.size());
-        assertTrue(result.contains(10));
-    }
-
-    @Test
-    public void testSpsFilterE() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5);
-        Stream<Integer> filtered = stream.spsFilterE(n -> {
-            if (n == null) {
-                throw new IllegalArgumentException("null value");
-            }
-            return n % 2 == 0;
-        });
-        assertHaveSameElements(Arrays.asList(2, 4), filtered.toList());
-    }
-
-    @Test
-    public void testSpsMapE() {
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<String> mapped = stream.spsMapE(n -> {
-            if (n == null) {
-                throw new IllegalArgumentException("null value");
-            }
-            return String.valueOf(n * 2);
-        });
-        assertHaveSameElements(Arrays.asList("2", "4", "6"), mapped.toList());
-    }
-
-    @Test
-    public void testSpsMapE_WithMaxThreadNum() throws Exception {
-        List<String> result = Stream.of("a", "bb", "ccc").spsMapE(2, s -> s.toUpperCase()).sorted().toList();
-        assertEquals(3, result.size());
-        assertTrue(result.contains("A"));
-    }
-
-    @Test
-    public void testSpsFlatMapE() {
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        Stream<Integer> flatMapped = stream.spsFlatMapE(n -> {
-            if (n == null) {
-                throw new IllegalArgumentException("null value");
-            }
-            return Stream.of(n, n * 10);
-        });
-        List<Integer> result = flatMapped.toList();
-        assertEquals(6, result.size());
-    }
-
-    @Test
-    public void testSpsFlatmapE_Collection() throws Exception {
-        List<String> result = Stream.of("a", "bb", "ccc").spsFlatmapE(s -> Arrays.asList(s, s.toUpperCase())).sorted().toList();
-        assertEquals(6, result.size());
-        assertTrue(result.contains("A"));
-    }
-
-    @Test
-    public void testSpsFlatMapE_WithMaxThreadNum() throws Exception {
-        List<String> result = Stream.of("a", "bb").spsFlatMapE(2, s -> Stream.of(s, s.toUpperCase())).sorted().toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains("A"));
-    }
-
-    @Test
-    public void testSpsFlatmapE_WithMaxThreadNum() throws Exception {
-        List<String> result = Stream.of("a", "bb").spsFlatmapE(2, s -> Arrays.asList(s, s.toUpperCase())).sorted().toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains("A"));
-    }
-
-    @Test
-    public void test_sjps() {
-        {
-            Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
-            List<String> result = strings.sjps(s -> s.filter(it -> it.length() <= 1)).toList();
-            assertHaveSameElements(Arrays.asList("a", "e"), result);
-        }
-        {
-            Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
-            List<String> result = strings.parallel().sjps(s -> s.filter(it -> it.length() <= 1)).toList();
-            assertHaveSameElements(Arrays.asList("a", "e"), result);
-        }
-    }
-
-    @Test
-    public void testSjpsClosesReturnedJdkStream() {
-        {
-            AtomicBoolean closed = new AtomicBoolean(false);
-
-            assertEquals(1, Stream.of(1).sjps(s -> s.onClose(() -> closed.set(true)).map(x -> x)).count());
-            assertTrue(closed.get());
-        }
-        {
-            AtomicBoolean closed = new AtomicBoolean(false);
-
-            assertEquals(1, Stream.of(1).parallel().sjps(s -> s.onClose(() -> closed.set(true)).map(x -> x)).count());
-            assertTrue(closed.get());
-        }
-    }
-
-    @Test
-    public void testFilterE() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).filterE(x -> x > 3).toList();
-        assertEquals(Arrays.asList(4, 5), result);
-    }
-
-    @Test
-    public void testMapE() throws Exception {
-        List<Integer> result = Stream.of("1", "2", "3").mapE(Integer::parseInt).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testMapE_ErrorPath() {
-        assertThrows(NumberFormatException.class, () -> Stream.of("1", "x").mapE(Integer::parseInt).toList());
-    }
-
-    @Test
-    public void testFlatmapE_Collection() throws Exception {
-        List<String> result = Stream.of("a", "bb").flatmapE(s -> Arrays.asList(s, s.toUpperCase())).toList();
-        assertEquals(4, result.size());
-        assertTrue(result.contains("A"));
-        assertTrue(result.contains("bb"));
-    }
-
-    @Test
-    public void testCrossJoin() {
-        List<Pair<Integer, String>> result = Stream.of(1, 2).crossJoin(Arrays.asList("a", "b")).toList();
-        assertEquals(4, result.size());
-        assertEquals(Pair.of(1, "a"), result.get(0));
-        assertEquals(Pair.of(1, "b"), result.get(1));
-        assertEquals(Pair.of(2, "a"), result.get(2));
-        assertEquals(Pair.of(2, "b"), result.get(3));
-    }
-
-    @Test
-    public void testCrossJoin_WithFunction() {
-        List<String> result = Stream.of("A", "B").crossJoin(Arrays.asList(1, 2, 3), (str, num) -> str + num).toList();
-        assertEquals(Arrays.asList("A1", "A2", "A3", "B1", "B2", "B3"), result);
-    }
-
-    @Test
-    public void testCrossJoin_Empty() {
-        List<Pair<String, Integer>> result = Stream.<String> empty().crossJoin(Arrays.asList(1, 2)).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testCrossJoin_EmptyCollection() {
-        List<Pair<String, Integer>> result = Stream.of("A", "B").crossJoin(Collections.<Integer> emptyList()).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testInnerJoin() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 2, 3).innerJoin(Arrays.asList(2, 3, 4), n -> n, n -> n).toList();
-        assertEquals(2, result.size());
-        assertEquals(Pair.of(2, 2), result.get(0));
-        assertEquals(Pair.of(3, 3), result.get(1));
-    }
-
-    @Test
-    public void testInnerJoinWithFunction() {
-        List<String> result = Stream.of(1, 2, 3).innerJoin(Arrays.asList(2, 3, 4), n -> n, n -> n, (a, b) -> a + "-" + b).toList();
-        assertEquals(Arrays.asList("2-2", "3-3"), result);
-    }
-
-    @Test
-    public void testInnerJoin_WithKeyMapper() {
-        List<Pair<String, String>> result = Stream.of("apple", "banana")
-                .innerJoin(Arrays.asList("ant", "bat", "big"), (java.util.function.Function<String, Character>) s -> s.charAt(0))
-                .toList();
-        // "apple" matches "ant" (both start with 'a'), "banana" matches "bat" and "big" (start with 'b')
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testInnerJoinEmpty() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 2, 3).innerJoin(Arrays.asList(4, 5, 6), n -> n, n -> n).toList();
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void testInnerJoin_NoMatch() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 3, 5)
-                .innerJoin(Arrays.asList(2, 4, 6), (java.util.function.Function<Integer, Integer>) i -> i,
-                        (java.util.function.Function<Integer, Integer>) i -> i)
-                .toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFullJoin() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 2, 3).fullJoin(Arrays.asList(2, 3, 4), n -> n, n -> n).toList();
-        assertEquals(4, result.size());
-    }
-
-    @Test
-    public void testLeftJoin() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 2, 3).leftJoin(Arrays.asList(2, 3, 4), n -> n, n -> n).toList();
-        assertEquals(3, result.size());
-        assertEquals(Pair.of(1, null), result.get(0));
-        assertEquals(Pair.of(2, 2), result.get(1));
-        assertEquals(Pair.of(3, 3), result.get(2));
-    }
-
-    @Test
-    public void testRightJoin() {
-        List<Pair<Integer, Integer>> result = Stream.of(1, 2, 3).rightJoin(Arrays.asList(2, 3, 4), n -> n, n -> n).toList();
-        assertEquals(3, result.size());
-        assertEquals(Pair.of(2, 2), result.get(0));
-        assertEquals(Pair.of(3, 3), result.get(1));
-        assertEquals(Pair.of(null, 4), result.get(2));
-    }
-
-    @Test
-    public void testGroupJoin() {
-        List<Integer> list1 = Arrays.asList(1, 2, 3);
-        List<Integer> list2 = Arrays.asList(1, 1, 2, 3, 3);
-
-        List<Pair<Integer, List<Integer>>> result = Stream.of(list1).groupJoin(list2, n -> n, n -> n).toList();
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(1), result.get(0).getLeft());
-        assertEquals(2, result.get(0).getRight().size());
-    }
-
-    @Test
-    public void testGroupJoinWithMapper() {
-        List<String> list1 = Arrays.asList("a", "bb", "ccc");
-        List<Integer> list2 = Arrays.asList(1, 1, 2, 3);
-
-        List<Pair<String, List<Integer>>> result = Stream.of(list1).groupJoin(list2, String::length, n -> n).toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testGroupJoin_WithCollector() {
-        List<Integer> left = Arrays.asList(1, 2);
-        List<Integer> right = Arrays.asList(1, 1, 2, 3);
-        List<com.landawn.abacus.util.Pair<Integer, Long>> result = Stream.of(left)
-                .groupJoin(right, n -> n, java.util.stream.Collectors.counting())
-                .sorted((a, b) -> a.left().compareTo(b.left()))
-                .toList();
-        assertEquals(2, result.size());
-        assertEquals(2L, (long) result.get(0).right()); // key=1 appears twice in right
-        assertEquals(1L, (long) result.get(1).right()); // key=2 appears once in right
-    }
-
-    @Test
-    public void testGroupJoin_WithCollectorAndResultMapper() {
-        List<Integer> left = Arrays.asList(1, 2);
-        List<Integer> right = Arrays.asList(1, 1, 2);
-        List<String> result = Stream.of(left).groupJoin(right, n -> n, java.util.stream.Collectors.counting(), (k, v) -> k + "=" + v).sorted().toList();
-        assertEquals(2, result.size());
-        assertTrue(result.contains("1=2"));
-        assertTrue(result.contains("2=1"));
-    }
-
-    @Test
-    public void testGroupJoinEmpty() {
-        List<Integer> list2 = Arrays.asList(1, 2, 3);
-
-        List<Pair<Integer, List<Integer>>> result = Stream.<Integer> empty().groupJoin(list2, n -> n, n -> n).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testJoinByRange() {
-        List<Integer> list1 = Arrays.asList(1, 2, 3);
-        List<Integer> list2 = Arrays.asList(2, 3, 4);
-
-        List<Pair<Integer, List<Integer>>> result = Stream.of(list1).joinByRange(list2.iterator(), (a, b) -> Math.abs(a - b) <= 1).toList();
-        assertFalse(result.isEmpty());
-    }
-
-    @Test
-    public void testJoinByRangeEmpty() {
-        List<Integer> list2 = Arrays.asList(2, 3, 4);
-
-        List<Pair<Integer, List<Integer>>> result = Stream.<Integer> empty().joinByRange(list2.iterator(), (a, b) -> Math.abs(a - b) <= 1).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMaxWaitWithDurationAndDefaultValue() {
-        Duration duration = Duration.ofMillis(100);
-        Integer defaultValue = -1;
-
-        Stream<Integer> result = stream.maxWait(duration, defaultValue);
-        List<Integer> collected = result.toList();
-
-        Assertions.assertNotNull(collected);
-        Assertions.assertTrue(collected.size() > 0);
-        for (Integer value : collected) {
-            Assertions.assertTrue(testData.contains(value) || value.equals(defaultValue));
-        }
-    }
-
-    @Test
-    public void testMaxWaitWithDurationAndNullDefaultValue() {
-        Duration duration = Duration.ofMillis(100);
-
-        Stream<Integer> result = stream.maxWait(duration, (Integer) null);
-        List<Integer> collected = result.toList();
-
-        Assertions.assertNotNull(collected);
-    }
-
-    @Test
-    public void testMaxWaitWithDurationAndSupplier() {
-        Duration duration = Duration.ofMillis(100);
-        AtomicInteger counter = new AtomicInteger(0);
-        Supplier<Integer> supplier = () -> -counter.incrementAndGet();
-
-        Stream<Integer> result = stream.maxWait(duration, supplier);
-        List<Integer> collected = result.toList();
-
-        Assertions.assertNotNull(collected);
-        Assertions.assertTrue(collected.size() > 0);
-    }
-
-    @Test
-    public void testMaxWait() {
-        List<Integer> input = Arrays.asList(1, 2, 3);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<Integer> result = stream.maxWait(Duration.ofMillis(50), -1).limit(5).toList();
-        assertNotNull(result);
-        assertTrue(result.size() > 0);
-    }
-
-    @Test
-    public void testMaxWaitWithSupplier() {
-        List<Integer> input = Arrays.asList(1, 2, 3);
-        Stream<Integer> stream = Stream.of(input);
-        AtomicInteger counter = new AtomicInteger(0);
-
-        List<Integer> result = stream.maxWait(Duration.ofMillis(50), () -> -counter.incrementAndGet()).limit(5).toList();
-
-        assertNotNull(result);
-        assertTrue(result.size() > 0);
-    }
-
-    @Test
-    public void testMaxWaitPreservesOrder() {
-        Duration duration = Duration.ofMillis(50);
-        Stream<Integer> orderedStream = Stream.of(1, 2, 3, 4, 5);
-
-        List<Integer> result = orderedStream.maxWait(duration, -1).toList();
-
-        int prev = Integer.MIN_VALUE;
-        for (Integer val : result) {
-            if (val > 0) {
-                Assertions.assertTrue(val > prev);
-                prev = val;
-            }
-        }
-    }
-
-    @Test
-    public void testMaxWaitWithNullDuration() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.maxWait(null, 0);
-        });
-    }
-
-    @Test
-    public void testMaxWaitWithNullSupplier() {
-        Duration duration = Duration.ofMillis(50);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).delay(Duration.ofMillis(200)).maxWait(duration, (Supplier<Integer>) null).count();
-        });
-    }
-
-    @Test
-    public void test_window_01() {
-        assertDoesNotThrow(() -> {
-            final MutableBoolean stopSign = MutableBoolean.of(false);
-            final BlockingQueue<String> queue = new LinkedBlockingQueue<>();
-
-            N.asyncExecute(() -> Stream.observe(queue, () -> stopSign.value(), 100)
-                    .flatMapArray(s -> s.split(" "))
-                    .window(Duration.ofMillis(100))
-                    .forEach(ss -> Stream.of(ss).countBy(Fn.identity()).println()));
-
-            for (int i = 0; i < 100; i++) {
-                CharStream.of(Strings.uuid()).mapToObj(String::valueOf).forEach(ch -> queue.add(ch));
-                N.sleep(33);
-            }
-
-            stopSign.setTrue();
-
-            IntStream.range(1, 100).boxed().window(Duration.ofMillis(10)).flatmap(Fn.identity()).groupBy(i -> i % 3).forEach(Fn.println());
-        });
-    }
-
-    @Test
-    public void testWindowWithDuration() {
-        Duration duration = Duration.ofMillis(50);
-
-        Stream<List<Integer>> result = stream.window(duration);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        int totalElements = windows.stream().mapToInt(List::size).sum();
-        Assertions.assertEquals(testData.size(), totalElements);
-    }
-
-    @Test
-    public void testWindowWithDurationAndCollectionSupplier() {
-        Duration duration = Duration.ofMillis(50);
-        Supplier<List<Integer>> supplier = LinkedList::new;
-
-        Stream<List<Integer>> result = stream.window(duration, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window instanceof LinkedList);
-        }
-    }
-
-    @Test
-    public void testWindowWithDurationStartTimeAndCollectionSupplier() {
-        Duration duration = Duration.ofMillis(50);
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> result = stream.window(duration, startTimeSupplier, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window instanceof ArrayList);
-        }
-    }
-
-    @Test
-    public void testWindowWithDurationAndCollector() {
-        Duration duration = Duration.ofMillis(50);
-
-        Stream<Long> result = stream.window(duration, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-        long totalCount = counts.stream().mapToLong(Long::longValue).sum();
-        Assertions.assertEquals(testData.size(), totalCount);
-    }
-
-    @Test
-    public void testWindowWithDurationAndIncrement() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-
-        Stream<List<Integer>> result = stream.window(duration, increment);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithDurationIncrementAndCollectionSupplier() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-        Supplier<HashSet<Integer>> supplier = HashSet::new;
-
-        Stream<Set<Integer>> result = stream.window(duration, increment, supplier);
-        List<Set<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (Set<Integer> window : windows) {
-            Assertions.assertTrue(window instanceof HashSet);
-        }
-    }
-
-    @Test
-    public void testWindowWithDurationIncrementStartTimeAndCollectionSupplier() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-        LongSupplier startTimeSupplier = () -> System.currentTimeMillis() - 1000;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> result = stream.window(duration, increment, startTimeSupplier, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithDurationIncrementAndCollector() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-
-        Stream<String> result = stream.window(duration, increment, Collectors.mapping(Object::toString, Collectors.joining(",")));
-        List<String> joinedWindows = result.toList();
-
-        Assertions.assertNotNull(joinedWindows);
-    }
-
-    @Test
-    public void testWindowWithDurationIncrementStartTimeAndCollector() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-
-        Stream<Long> result = stream.window(duration, increment, startTimeSupplier, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-    }
-
-    @Test
-    public void testWindowWithDurationIncrementStartTimeHandlerAndCollector() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(50);
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        WindowHandler<Integer, Long> handler = null;
-
-        Stream<Long> result = stream.window(duration, increment, startTimeSupplier, handler, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-    }
-
-    @Test
-    public void testWindowWithMaxDurationAndMaxWindowSize() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-
-        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= maxWindowSize);
-        }
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeAndCollectionSupplier() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-        Supplier<List<Integer>> supplier = LinkedList::new;
-
-        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= maxWindowSize);
-            Assertions.assertTrue(window instanceof LinkedList);
-        }
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeStartTimeAndCollectionSupplier() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= maxWindowSize);
-        }
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeAndCollector() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-
-        Stream<Long> result = stream.window(maxDuration, maxWindowSize, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-        for (Long count : counts) {
-            Assertions.assertTrue(count <= maxWindowSize);
-        }
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeStartTimeHandlerAndCollector() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        WindowHandler<Integer, Long> handler = null;
-
-        Stream<Long> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, handler, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-    }
-
-    @Test
-    public void testWindowWithQuadPredicate() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-
-        Stream<List<Integer>> result = stream.window(splitter);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= 3);
-        }
-    }
-
-    @Test
-    public void testWindowWithQuadPredicateAndCollectionSupplier() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        Supplier<List<Integer>> supplier = LinkedList::new;
-
-        Stream<List<Integer>> result = stream.window(splitter, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window instanceof LinkedList);
-        }
-    }
-
-    @Test
-    public void testWindowWithQuadPredicateStartTimeAndCollectionSupplier() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> result = stream.window(splitter, startTimeSupplier, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithQuadPredicateAndCollector() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-
-        Stream<Long> result = stream.window(splitter, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-    }
-
-    @Test
-    public void testWindowWithQuadPredicateStartTimeAndCollector() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-
-        Stream<String> result = stream.window(splitter, startTimeSupplier, Collectors.mapping(Object::toString, Collectors.joining(",")));
-        List<String> joinedWindows = result.toList();
-
-        Assertions.assertNotNull(joinedWindows);
-    }
-
-    @Test
-    public void testWindowWithMaxWaitAndQuadPredicate() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-
-        Stream<List<Integer>> result = stream.window(maxWait, splitter);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithMaxWaitQuadPredicateAndCollectionSupplier() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        Supplier<HashSet<Integer>> supplier = HashSet::new;
-
-        Stream<Set<Integer>> result = stream.window(maxWait, splitter, supplier);
-        List<Set<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (Set<Integer> window : windows) {
-            Assertions.assertTrue(window instanceof HashSet);
-        }
-    }
-
-    @Test
-    public void testWindowWithMaxWaitQuadPredicateStartTimeAndCollectionSupplier() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> result = stream.window(maxWait, splitter, startTimeSupplier, supplier);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithMaxWaitQuadPredicateAndCollector() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-
-        Stream<Long> result = stream.window(maxWait, splitter, Collectors.counting());
-        List<Long> counts = result.toList();
-
-        Assertions.assertNotNull(counts);
-    }
-
-    @Test
-    public void testWindowWithEmptyStream() {
-        Stream<Integer> emptyStream = Stream.<Integer> empty();
-        Duration duration = Duration.ofMillis(100);
-
-        Stream<List<Integer>> result = emptyStream.window(duration);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        Assertions.assertTrue(windows.isEmpty());
-    }
-
-    @Test
-    public void testWindowWithSingleElement() {
-        Stream<Integer> singleStream = Stream.of(42);
-        Duration duration = Duration.ofMillis(100);
-
-        Stream<List<Integer>> result = singleStream.window(duration);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        Assertions.assertEquals(1, windows.size());
-        Assertions.assertEquals(1, windows.get(0).size());
-        Assertions.assertEquals(42, windows.get(0).get(0));
-    }
-
-    @Test
-    public void testWindowWithLargeDataset() {
-        List<Integer> largeData = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            largeData.add(i);
-        }
-        Stream<Integer> largeStream = Stream.of(largeData);
-        Duration duration = Duration.ofMillis(10);
-        int maxWindowSize = 100;
-
-        Stream<List<Integer>> result = largeStream.window(duration, maxWindowSize);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        int totalElements = windows.stream().mapToInt(List::size).sum();
-        Assertions.assertEquals(largeData.size(), totalElements);
-
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= maxWindowSize);
-        }
-    }
-
-    @Test
-    public void testWindowWithOverlappingWindows() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(30);
-
-        Stream<List<Integer>> result = stream.window(duration, increment);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithNonOverlappingWindows() {
-        Duration duration = Duration.ofMillis(50);
-        Duration increment = Duration.ofMillis(100);
-
-        Stream<List<Integer>> result = stream.window(duration, increment);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-    }
-
-    @Test
-    public void testWindowWithCustomCollectorAggregation() {
-        Duration duration = Duration.ofMillis(100);
-
-        Stream<Integer> sumResult = stream.window(duration, Collectors.summingInt(Integer::intValue));
-        List<Integer> sums = sumResult.toList();
-
-        Assertions.assertNotNull(sums);
-        int totalSum = sums.stream().mapToInt(Integer::intValue).sum();
-        int expectedSum = testData.stream().mapToInt(Integer::intValue).sum();
-        Assertions.assertEquals(expectedSum, totalSum);
-    }
-
-    @Test
-    public void testWindowWithComplexPredicate() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> {
-            if (current.value() != null && next.value() != null) {
-                return Math.abs(next.value() - current.value()) > 2;
-            }
-            return false;
-        };
-
-        Stream<Integer> testStream = Stream.of(1, 2, 3, 7, 8, 9, 15, 16);
-        Stream<List<Integer>> result = testStream.window(splitter);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        Assertions.assertTrue(windows.size() >= 3);
-    }
-
-    @Test
-    public void testWindowWithDynamicMaxWait() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> count * 20L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 5;
-
-        Stream<List<Integer>> result = stream.window(maxWait, splitter);
-        List<List<Integer>> windows = result.toList();
-
-        Assertions.assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            Assertions.assertTrue(window.size() <= 5);
-        }
-    }
-
-    @Test
-    public void testWindowInternalMethodsWithAsync() {
-        Duration duration = Duration.ofMillis(100);
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> resultAsync = stream.window(duration, duration, LongSuppliers.ofCurrentTimeMillis(), supplier, true);
-        List<List<Integer>> windowsAsync = resultAsync.toList();
-        Assertions.assertNotNull(windowsAsync);
-
-        stream = Stream.of(testData);
-
-        Stream<List<Integer>> resultSync = stream.window(duration, duration, LongSuppliers.ofCurrentTimeMillis(), supplier, false);
-        List<List<Integer>> windowsSync = resultSync.toList();
-        Assertions.assertNotNull(windowsSync);
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeInternalAsync() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-        Supplier<List<Integer>> supplier = ArrayList::new;
-
-        Stream<List<Integer>> resultAsync = stream.window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), supplier, true);
-        List<List<Integer>> windowsAsync = resultAsync.toList();
-        Assertions.assertNotNull(windowsAsync);
-
-        stream = Stream.of(testData);
-
-        Stream<List<Integer>> resultSync = stream.window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), supplier, false);
-        List<List<Integer>> windowsSync = resultSync.toList();
-        Assertions.assertNotNull(windowsSync);
-    }
-
-    @Test
-    public void testWindow() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<List<Integer>> windows = stream.window(Duration.ofMillis(100)).limit(3).toList();
-        assertNotNull(windows);
-        assertTrue(windows.size() > 0);
-    }
-
-    @Test
-    public void testWindowWithIncrement() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<List<Integer>> windows = stream.window(Duration.ofMillis(100), Duration.ofMillis(50)).limit(3).toList();
-
-        assertNotNull(windows);
-        assertTrue(windows.size() > 0);
-    }
-
-    @Test
-    public void testWindowWithMaxSize() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<List<Integer>> windows = stream.window(Duration.ofMillis(1000), 3).limit(4).toList();
-
-        assertNotNull(windows);
-        for (List<Integer> window : windows) {
-            assertTrue(window.size() <= 3);
-        }
-    }
-
-    @Test
-    public void testWindowWithCollector() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<Integer> sums = stream.window(Duration.ofMillis(100), Collectors.summingInt(Integer::intValue)).limit(3).toList();
-
-        assertNotNull(sums);
-        assertTrue(sums.size() > 0);
-    }
-
-    @Test
-    public void testWindowWithCustomSplitter() {
-        List<Integer> input = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
-        Stream<Integer> stream = Stream.of(input);
-
-        List<List<Integer>> windows = stream.window((first, last, next, count) -> count >= 3 || next.value() - first.value() > 3).toList();
-
-        assertNotNull(windows);
-        assertTrue(windows.size() > 0);
-    }
-
-    @Test
-    public void test_window_04() {
-        final Consumer<List<Integer>> println = N::println;
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3).forEach(println);
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        final Function<Integer, Timed<Integer>> mapper = t -> Timed.of(t, System.currentTimeMillis());
-
-        final LongSupplier sysTimeGetter = System::currentTimeMillis;
-
-        final Function<Timed<Integer>, Integer> unwrap = Timed::value;
-
-        final ToIntFunction<Timed<Integer>> toInt = Timed::value;
-
-        final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 3).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), 5, sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), 3, sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), 3, sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-        assertNotNull(println2);
-    }
-
-    @Test
-    public void test_window_05() {
-        final Consumer<List<Integer>> println = N::println;
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(9), 3).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(10)).window(Duration.ofMillis(100), 3).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(1)).window(Duration.ofMillis(100), 3).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-        assertNotNull(println);
-    }
-
-    @Test
-    public void test_window_06() {
-        final Consumer<List<Integer>> println = N::println;
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(10)).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(10)).window(Duration.ofMillis(100)).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-
-        IntStream.range(0, 12).boxed().peek(Fn.sleep(1)).window(Duration.ofMillis(100)).forEach(println);
-
-        N.println(Strings.repeat('=', 80));
-        N.sleep(200);
-        assertNotNull(println);
-    }
-
-    @Test
-    public void test_window_07() {
-        final Consumer<List<Integer>> println = N::println;
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(println);
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(println);
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        final Function<Integer, Timed<Integer>> mapper = t -> Timed.of(t, System.currentTimeMillis());
-
-        final LongSupplier sysTimeGetter = System::currentTimeMillis;
-
-        final Function<Timed<Integer>, Integer> unwrap = Timed::value;
-
-        final ToIntFunction<Timed<Integer>> toInt = Timed::value;
-
-        final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100)).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), 20, sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
-
-        IntStream.range(0, 30)
-                .boxed()
-                .peek(Fn.sleep(11))
-                .map(mapper)
-                .window(Duration.ofMillis(100), 120, sysTimeGetter, Collectors.summingInt(toInt))
-                .forEach(Fn.println());
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), ArrayList::new).forEach(Fn.println());
-        assertNotNull(println2);
-    }
-
-    @Test
-    public void test_window_08() {
-        final long now = System.currentTimeMillis();
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now + 3000, Suppliers.ofList()).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now - 3000, Suppliers.ofList()).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30)
-                .boxed()
-                .map(e -> Timed.of(e, now - 3000 - e * 10))
-                .window(Duration.ofMillis(100))
-                .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30)
-                .boxed()
-                .map(e -> Timed.of(e, now + 3000 + e * 10))
-                .window(Duration.ofMillis(100))
-                .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30)
-                .boxed()
-                .map(e -> Timed.of(e, now + 3000 + e * 10))
-                .window(Duration.ofMillis(100), 20)
-                .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-        N.println(Strings.repeat("=", 120));
-        assertNotNull(now);
-    }
-
-    @Test
-    public void test_window_late_03() {
-
-        final long startTimeMillis = System.currentTimeMillis();
-
-        final long windowInMillis = 1000;
-        final long slideInMillis = 500;
-
-        final int cacheSize = 10;
-        final Tuple2<Long, Multiset<String>>[] cache = new Tuple2[cacheSize];
-        final MutableLong prevWindowNum = MutableLong.of(-1);
-
-        Supplier<Tuple2<Long, Multiset<String>>> supplier = () -> {
-            long windowNum = (System.currentTimeMillis() - startTimeMillis) / slideInMillis;
-
-            if (windowNum <= prevWindowNum.value()) {
-                windowNum = prevWindowNum.value() + 1;
-            }
-
-            prevWindowNum.setValue(windowNum);
-
-            final Tuple2<Long, Multiset<String>> tp = Tuple.of(windowNum, N.newMultiset());
-
-            cache[(int) (tp._1 % cacheSize)] = tp;
-            return tp;
-        };
-
-        BiConsumer<Tuple2<Long, Multiset<String>>, Timed<String>> accumulator = (tp, it) -> {
-            long n = (it.timestamp() - startTimeMillis) / slideInMillis;
-
-            List<String> words = Array.asList(Strings.split(it.value(), " "));
-            Tuple2<Long, Multiset<String>> e = cache[(int) (n % cacheSize)];
-
-            if (e != null && e._1 == n) {
-                e._2.addAll(words);
-            }
-
-            e = n < 1 ? null : cache[(int) ((n - 1) % cacheSize)];
-
-            if (e != null && e._1 == n - 1) {
-                e._2.addAll(words);
-            }
-        };
-
-        BinaryOperator<Tuple2<Long, Multiset<String>>> combiner = (a, b) -> {
-            a._2.addAll(b._2);
-            return a;
-        };
-
-        Collector<Timed<String>, ?, Tuple2<Long, Multiset<String>>> collector = Collectors.create(supplier, accumulator, combiner);
-
-        List<Timed<String>> list = N.toList(Timed.of("cat dog", startTimeMillis + 200), Timed.of("dog dog", startTimeMillis + 300),
-                Timed.of("owl cat", startTimeMillis + 700), Timed.of("owl", startTimeMillis + 1300));
-
-        Stream.of(list)
-                .peek(it -> N.sleep(it.timestamp() - System.currentTimeMillis()))
-                .window(Duration.ofMillis(windowInMillis), Duration.ofMillis(slideInMillis), collector)
-                .toList()
-                .forEach(tp -> N.println("Window[" + tp._1 + "]: " + tp._2.toMapSortedByKey(Comparators.naturalOrder())));
-        assertNotNull(collector);
-    }
-
-    @Test
-    public void testWindowHandlerBuilderAndDefaults() {
-        Stream.WindowHandler<String, List<String>> handler = Stream.WindowHandler.<String, List<String>> builder()
-                .cacheSizeForLateData(10)
-                .delayForLateData(true)
-                .timeExtractor(s -> Long.parseLong(s.split(":")[1]))
-                .onLateData((el, resList) -> resList.add("LATE:" + el))
-                .build();
-
-        assertEquals(10, handler.cacheSizeForLateData());
-        assertTrue(handler.delayForLateData());
-        assertNotNull(handler.timeExtractor());
-        assertEquals(100L, handler.timeExtractor().applyAsLong("event:100"));
-        assertNotNull(handler.onLateDataAction());
-
-        List<String> testList = new ArrayList<>();
-        handler.onLateDataAction().accept(0, 0, 0, "lateEvent", testList);
-        assertEquals(Arrays.asList("LATE:lateEvent"), testList);
-
-        Stream.WindowHandler<String, Void> handler2 = Stream.WindowHandler.of(s -> Long.parseLong(s.split(":")[0]));
-        assertEquals(Stream.WindowHandler.DEFAULT_CACHE_SIZE_LATE_DATA, handler2.cacheSizeForLateData());
-        assertFalse(handler2.delayForLateData());
-        assertNotNull(handler2.timeExtractor());
-        assertNull(handler2.onLateDataAction());
-    }
-
-    @Test
-    public void testWindowHandlerBuilderSnapshotsSettings() {
-        final Stream.WindowHandler.WindowHandlerBuilder<String, List<String>> builder = Stream.WindowHandler.<String, List<String>> builder()
-                .cacheSizeForLateData(10)
-                .delayForLateData(true)
-                .timeExtractor(String::length)
-                .timeWrapper((value, timestamp) -> Timed.of("first:" + value, timestamp))
-                .onLateData((element, result) -> result.add("first:" + element));
-        final Stream.WindowHandler<String, List<String>> first = builder.build();
-
-        final Stream.WindowHandler<String, List<String>> second = builder.cacheSizeForLateData(20)
-                .delayForLateData(false)
-                .timeExtractor(value -> 99L)
-                .timeWrapper((value, timestamp) -> Timed.of("second:" + value, timestamp))
-                .onLateData((element, result) -> result.add("second:" + element))
-                .build();
-
-        assertEquals(10, first.cacheSizeForLateData());
-        assertTrue(first.delayForLateData());
-        assertEquals(3L, first.timeExtractor().applyAsLong("abc"));
-        assertEquals("first:abc", first.timeWrapper().apply("abc", 100L).value());
-        final List<String> firstLateData = new ArrayList<>();
-        first.onLateDataAction().accept(0L, 0L, 0L, "abc", firstLateData);
-        assertEquals(List.of("first:abc"), firstLateData);
-
-        assertEquals(20, second.cacheSizeForLateData());
-        assertFalse(second.delayForLateData());
-        assertEquals(99L, second.timeExtractor().applyAsLong("abc"));
-        assertEquals("second:abc", second.timeWrapper().apply("abc", 100L).value());
-        final List<String> secondLateData = new ArrayList<>();
-        second.onLateDataAction().accept(0L, 0L, 0L, "abc", secondLateData);
-        assertEquals(List.of("second:abc"), secondLateData);
-    }
-
-    @Test
-    public void testWindowHandlerRejectsNonPositiveCacheSizeAtConfigurationTime() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.WindowHandler.<String, List<String>> of(0, false, String::length, (element, result) -> result.add(element)));
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.WindowHandler.<String, List<String>> of(-1, false, String::length, (element, result) -> result.add(element)));
-        assertThrows(IllegalArgumentException.class, () -> Stream.WindowHandler.<String, List<String>> builder().cacheSizeForLateData(0));
-        assertThrows(IllegalArgumentException.class, () -> Stream.WindowHandler.<String, List<String>> builder().cacheSizeForLateData(-1));
-    }
-
-    @Test
-    public void testWindow_WithDurationSizeHandlerAndCollector_Async() {
-        Duration maxDuration = Duration.ofMillis(500);
-        int maxWindowSize = 3;
-        List<Long> result = Stream.of(1, 2, 3, 4, 5, 6).window(maxDuration, maxWindowSize, System::currentTimeMillis, null, Collectors.counting()).toList();
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-    }
-
-    @Test
-    public void testWindowWithDurationStartTimeAndCollector() {
-        Duration duration = Duration.ofMillis(50);
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-
-        Stream<Double> result = stream.window(duration, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
-        List<Double> averages = result.toList();
-
-        Assertions.assertNotNull(averages);
-        Assertions.assertTrue(averages.size() > 0);
-    }
-
-    @Test
-    public void testWindowWithMaxDurationMaxSizeStartTimeAndCollector() {
-        Duration maxDuration = Duration.ofMillis(100);
-        int maxWindowSize = 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-
-        Stream<Double> result = stream.window(maxDuration, maxWindowSize, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
-        List<Double> averages = result.toList();
-
-        Assertions.assertNotNull(averages);
-    }
-
-    @Test
-    public void testWindowWithMaxWaitQuadPredicateStartTimeAndCollector() {
-        ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-        LongSupplier startTimeSupplier = System::currentTimeMillis;
-
-        Stream<Double> result = stream.window(maxWait, splitter, startTimeSupplier, Collectors.averagingIntOrElseThrow(Integer::intValue));
-        List<Double> averages = result.toList();
-
-        Assertions.assertNotNull(averages);
-    }
-
-    @Test
-    public void testWindowWithNullDuration() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window((Duration) null);
-        });
-    }
-
-    @Test
-    public void testWindowWithNegativeDuration() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(Duration.ofMillis(-1));
-        });
-    }
-
-    @Test
-    public void testWindowWithZeroDuration() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(Duration.ZERO);
-        });
-    }
-
-    @Test
-    public void testWindowWithNullIncrement() {
-        Duration duration = Duration.ofMillis(100);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(duration, (Duration) null);
-        });
-    }
-
-    @Test
-    public void testWindowWithNegativeIncrement() {
-        Duration duration = Duration.ofMillis(100);
-        Duration increment = Duration.ofMillis(-1);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(duration, increment);
-        });
-    }
-
-    @Test
-    public void testWindowWithNullCollector() {
-        Duration duration = Duration.ofMillis(100);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(duration, (java.util.stream.Collector<Integer, ?, ?>) null);
-        });
-    }
-
-    @Test
-    public void testWindowWithNullStartTimeSupplier() {
-        final Duration duration = Duration.ofMillis(100);
-        final Duration increment = Duration.ofMillis(50);
-        final QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (
-                first, current, next, count) -> count >= 3;
-        final ToLongTriFunction<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> maxWait = (first, current, count) -> 50L;
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(duration, increment, (LongSupplier) null, Collectors.toList()).count());
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(splitter, (LongSupplier) null, Collectors.toList()).count());
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1).window(maxWait, splitter, (LongSupplier) null, Collectors.toList()).count());
-    }
-
-    @Test
-    public void testWindowWithNullQuadPredicate() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(
-                    (QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer>) null)
-                    .count();
-        });
-    }
-
-    @Test
-    public void testWindowWithNullMaxWaitFunction() {
-        QuadPredicate<NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, NoCachingNoUpdating.Timed<Integer>, Integer> splitter = (first,
-                current, next, count) -> count >= 3;
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(null, splitter).count();
-        });
-    }
-
-    @Test
-    public void testWindowWithNegativeMaxWindowSize() {
-        Duration duration = Duration.ofMillis(100);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(duration, -1);
-        });
-    }
-
-    @Test
-    public void testWindowWithZeroMaxWindowSize() {
-        Duration duration = Duration.ofMillis(100);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stream.window(duration, 0);
-        });
-    }
-
-    @Test
-    public void test_window_03() {
-        assertDoesNotThrow(() -> {
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(N::println);
-
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-            N.println(Strings.repeat("=", 120));
-
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(N::println);
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX))
-                    .forEach(Fn.println());
-
-            N.println(Strings.repeat("=", 120));
-
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(N::println);
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX))
-                    .forEach(Fn.println());
-
-            N.println(Strings.repeat("=", 120));
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100))
-                    .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100), System::currentTimeMillis, Collectors.summingInt(Timed::value))
-                    .forEach(Fn.println());
-
-            N.println(Strings.repeat("=", 120));
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100), 20)
-                    .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100), 20, System::currentTimeMillis, Collectors.summingInt(Timed::value))
-                    .forEach(Fn.println());
-
-            N.println(Strings.repeat("=", 120));
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100), 120)
-                    .forEach(s -> Stream.of(s).map(Timed::value).println());
-
-            IntStream.range(0, 30)
-                    .boxed()
-                    .peek(Fn.sleep(11))
-                    .map(e -> Timed.of(e, System.currentTimeMillis()))
-                    .window(Duration.ofMillis(100), 120, System::currentTimeMillis, Collectors.summingInt(Timed::value))
-                    .forEach(Fn.println());
-        });
-    }
-
-    @Test
-    public void test_addSubscriber() {
-        assertDoesNotThrow(() -> {
-            {
-                N.println("injectNewStream" + Strings.repeat("=", 80));
-                Stream.range(0, 10).addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println()).filter(it -> it % 2 == 0).prepend(100).limit(3).println();
-                N.sleep(100);
-                Stream.range(0, 10).addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println()).filter(it -> it % 2 == 0).prepend(100).println();
-                N.sleep(100);
-                N.println(Strings.repeat("=", 80));
-            }
-
-            {
-                N.println("filterAndInjectNewStream" + Strings.repeat("=", 80));
-                Stream.range(0, 10).filterWhileAddSubscriber(it -> it % 2 == 0, Stream::println).prepend(100).limit(3).println();
-                N.sleep(100);
-                Stream.range(0, 10).filterWhileAddSubscriber(it -> it % 2 == 0, ss -> ss.limit(2).println()).prepend(100).println();
-                N.sleep(100);
-                N.println(Strings.repeat("=", 80));
-            }
-
-            {
-                N.println("takeWhileAndInjectNewStream" + Strings.repeat("=", 80));
-                Stream.range(0, 10).takeWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
-                N.sleep(100);
-                Stream.range(0, 10).takeWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
-                N.sleep(100);
-                N.println(Strings.repeat("=", 80));
-            }
-
-            {
-                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
-                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
-                N.sleep(100);
-                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
-                N.sleep(100);
-                N.println(Strings.repeat("=", 80));
-            }
-
-            {
-                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
-                final Holder<Object> resultHolder = new Holder<>();
-                Stream.range(0, 10)
-                        .onClose(() -> N.println("closing main Stream - 1"))
-                        .dropWhileAddSubscriber(it -> it < 5, ss -> resultHolder.setValue(ss.onClose(() -> N.println("closing inject Stream")).join(", ")))
-                        .prepend(100)
-                        .limit(3)
-                        .onClose(() -> N.println("closing main Stream - 2"))
-                        .println();
-                N.sleep(100);
-                N.println(resultHolder);
-                Stream.range(0, 10)
-                        .onClose(() -> N.println("closing main Stream - 1"))
-                        .dropWhileAddSubscriber(it -> it < 5,
-                                ss -> resultHolder.setValue(ss.limit(2).mapToInt(e -> e).onClose(() -> N.println("closing inject Stream")).sum()))
-                        .prepend(100)
-                        .onClose(() -> N.println("closing main Stream - 2"))
-                        .println();
-                N.println(resultHolder);
-                N.println(Strings.repeat("=", 80));
-            }
-
-            {
-                N.println("dropWhileAndInjectNewStream" + Strings.repeat("=", 80));
-                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, Stream::println).prepend(100).limit(3).println();
-                N.sleep(100);
-                Stream.range(0, 10).dropWhileAddSubscriber(it -> it < 5, ss -> ss.limit(2).println()).prepend(100).println();
-                N.sleep(100);
-                N.println(Strings.repeat("=", 80));
-            }
-        });
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAddSubscriber_BasicFunctionality() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-            s.forEach(x -> {
-                subscriberStreamResults.add(x);
-            });
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAddSubscriber_skip_limit() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-            s.skip(2).forEach(x -> {
-                subscriberStreamResults.add(x);
-            });
-        }).skip(1).limit(2).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(2, 3), mainStreamResults);
-        assertEquals(Arrays.asList(3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    public void testAddSubscriber_timeout() throws Exception {
-        MutableBoolean mainStreamClosed = MutableBoolean.of(false);
-
-        assertThrows(IllegalStateException.class, () -> Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-            s.peek(Fn.sleep(100)).forEach(x -> {
-                subscriberStreamResults.add(x);
-            });
-        }, 2, 10, customExecutor).onClose(() -> mainStreamClosed.setTrue()).forEach(x -> {
-            mainStreamResults.add(x);
-        }));
-
-        assertTrue(mainStreamClosed.value());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAddSubscriber_EmptyStream() throws Exception {
-        Stream.<Integer> empty().addSubscriber(s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(mainStreamResults::add);
-
-        assertTrue(mainStreamResults.isEmpty());
-        assertTrue(subscriberStreamResults.isEmpty());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAddSubscriber_NullElements() throws Exception {
-
-        Stream.of(1, null, 3, null, 5).addSubscriber(s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, null, 3, null, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, null, 3, null, 5), subscriberStreamResults);
-    }
-
-    @Test
-    public void testAddSubscriber_NullConsumer() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(null).forEach(x -> {
-            });
-        });
-    }
-
-    @Test
-    public void testAddSubscriber_ClosedStream() {
-        Stream<Integer> closedStream = Stream.of(1, 2, 3);
-        closedStream.close();
-
-        assertThrows(IllegalStateException.class, () -> {
-            closedStream.addSubscriber(s -> s.forEach(x -> {
-            }));
-        });
-    }
-
-    @Test
-    @Timeout(10)
-    public void testAddSubscriberWithParameters_CustomConfiguration() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-            s.forEach(subscriberStreamResults::add);
-        }, 10, 1000, customExecutor).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    public void testAddSubscriberWithParameters_InvalidQueueSize() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(s -> {
-            }, -1, 1000, customExecutor);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(s -> {
-            }, 0, 1000, customExecutor);
-        });
-    }
-
-    @Test
-    public void testAddSubscriberWithParameters_InvalidMaxWait() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(s -> {
-            }, 10, -1, customExecutor);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(s -> {
-            }, 10, 0, customExecutor);
-        });
-    }
-
-    @Test
-    public void testAddSubscriberWithParameters_NullExecutor() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).addSubscriber(s -> {
-            }, 10, 1000, null).count();
-        });
-    }
-
-    @Test
-    public void test_addSubscriber_2() {
-        assertDoesNotThrow(() -> {
-            {
-                N.println("addSubscriber twice" + Strings.repeat("=", 80));
-                Stream.range(0, 30)
-                        .addSubscriber(ss -> ss.filter(it -> it % 2 != 0).println())
-                        .filter(it -> it % 2 == 0)
-                        .addSubscriber(ss -> ss.filter(it -> it % 3 == 0).parallel(10).peek(it -> N.sleep(it % 6 == 0 ? 100 : 0)).println())
-                        .prepend(100)
-                        .limit(3)
-                        .println();
-            }
-        });
-    }
-
-    @Test
-    public void testAddSubscriber() throws Exception {
-        Holder<List<Integer>> subscriberResult = new Holder<>();
-        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5).addSubscriber(newStream -> subscriberResult.setValue(newStream.toList())).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainResult);
-        assertNotNull(subscriberResult.value());
-        assertEquals(5, subscriberResult.value().size());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testFilterWhileAddSubscriber_BasicFunctionality() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 3, 5), mainStreamResults);
-        assertEquals(Arrays.asList(2, 4), subscriberStreamResults);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testFilterWhileAddSubscriber_AllMatch() throws Exception {
-        Stream.of(1, 3, 5, 7, 9).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 3, 5, 7, 9), mainStreamResults);
-        assertTrue(subscriberStreamResults.isEmpty());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testFilterWhileAddSubscriber_NoneMatch() throws Exception {
-        Stream.of(2, 4, 6, 8, 10).filterWhileAddSubscriber(x -> x % 2 == 1, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertTrue(mainStreamResults.isEmpty());
-        assertEquals(Arrays.asList(2, 4, 6, 8, 10), subscriberStreamResults);
-    }
-
-    @Test
-    public void testFilterWhileAddSubscriber_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).filterWhileAddSubscriber(null, s -> {
-            }).count();
-        });
-    }
-
-    @Test
-    @Timeout(10)
-    public void testFilterWhileAddSubscriberWithParameters_CustomConfiguration() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).filterWhileAddSubscriber(x -> x > 3, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }, 100, 5000, customExecutor).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2, 3), subscriberStreamResults);
-    }
-
-    @Test
-    public void testFilterWhileAddSubscriber() throws Exception {
-        Holder<List<Integer>> subscriberResult = new Holder<>();
-        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
-                .filterWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
-                .toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), mainResult);
-        assertNotNull(subscriberResult.value());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testTakeWhileAddSubscriber_BasicFunctionality() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x < 3, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2), mainStreamResults);
-        assertEquals(Arrays.asList(3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testTakeWhileAddSubscriber_TakeAll() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x <= 10, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
-        assertTrue(subscriberStreamResults.isEmpty());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testTakeWhileAddSubscriber_TakeNone() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x > 10, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertTrue(mainStreamResults.isEmpty());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    public void testTakeWhileAddSubscriber_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).takeWhileAddSubscriber(null, s -> {
-            }).count();
-        });
-    }
-
-    @Test
-    @Timeout(10)
-    public void testTakeWhileAddSubscriberWithExecutor_CustomExecutor() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).takeWhileAddSubscriber(x -> x <= 3, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }, customExecutor).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 3), mainStreamResults);
-        assertEquals(Arrays.asList(4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    public void testTakeWhileAddSubscriberWithExecutor_NullExecutor() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).takeWhileAddSubscriber(x -> x < 5, s -> {
-            }, null).count();
-        });
-    }
-
-    @Test
-    public void testTakeWhileAddSubscriber() throws Exception {
-        Holder<List<Integer>> subscriberResult = new Holder<>();
-        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
-                .takeWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
-                .toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), mainResult);
-        assertNotNull(subscriberResult.value());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testDropWhileAddSubscriber_BasicFunctionality() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x < 3, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(3, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2), subscriberStreamResults);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testDropWhileAddSubscriber_DropAll() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x <= 10, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertTrue(mainStreamResults.isEmpty());
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), subscriberStreamResults);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testDropWhileAddSubscriber_DropNone() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x > 10, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
-        assertTrue(subscriberStreamResults.isEmpty());
-    }
-
-    @Test
-    public void testDropWhileAddSubscriber_NullPredicate() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Stream.of(1, 2, 3).dropWhileAddSubscriber(null, s -> {
-            }).count();
-        });
-    }
-
-    @Test
-    @Timeout(10)
-    public void testDropWhileAddSubscriberWithParameters_CustomConfiguration() throws Exception {
-        Stream.of(1, 2, 3, 4, 5).dropWhileAddSubscriber(x -> x <= 2, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }, 100, 5000, customExecutor).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(3, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2), subscriberStreamResults);
-    }
-
-    @Test
-    public void testDropWhileAddSubscriber() throws Exception {
-        Holder<List<Integer>> subscriberResult = new Holder<>();
-        List<Integer> mainResult = Stream.of(1, 2, 3, 4, 5)
-                .dropWhileAddSubscriber(x -> x <= 3, newStream -> subscriberResult.setValue(newStream.toList()))
-                .toList();
-
-        assertEquals(Arrays.asList(4, 5), mainResult);
-        assertNotNull(subscriberResult.value());
-    }
-
-    @Test
-    public void testrunAsync() throws Exception {
-        AtomicInteger result = new AtomicInteger(0);
-        com.landawn.abacus.util.ContinuableFuture<Void> future = Stream.of(1, 2, 3).runAsync(s -> s.forEach(result::addAndGet));
-        future.get();
-        assertEquals(6, result.get());
-    }
-
-    @Test
-    public void testrunAsyncWithExecutor() throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+    public void test_exception_parallel() {
         try {
-            AtomicInteger sum = new AtomicInteger(0);
-            Stream.of(1, 2, 3).runAsync(s -> s.forEach(e -> sum.addAndGet(e)), executor).get();
-            assertEquals(6, sum.get());
-        } finally {
-            executor.shutdownNow();
+            Stream.range(0, 10).forEach(e -> {
+                throw new IOException("oooh");
+            });
+            fail("Should throw IOException");
+        } catch (IOException e) {
         }
-    }
-
-    @Test
-    public void testcallAsync() throws Exception {
-        com.landawn.abacus.util.ContinuableFuture<Integer> future = Stream.of(1, 2, 3).callAsync(s -> s.reduce(0, Integer::sum));
-        assertEquals(Integer.valueOf(6), future.get());
-    }
-
-    @Test
-    public void testcallAsync_WithExecutor() throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        try {
-            Integer result = Stream.of(1, 2, 3).callAsync(s -> s.reduce(0, Integer::sum), executor).get();
-            assertEquals(6, result);
-        } finally {
-            executor.shutdown();
-        }
-    }
-
-    @Test
-    public void testEmpty() {
-        Stream<Integer> stream = Stream.empty();
-        assertNotNull(stream);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testReversedEmpty() {
-        Stream<Integer> stream = Stream.<Integer> empty().reversed();
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testJoinEmpty() {
-        assertEquals("", Stream.empty().join(","));
-    }
-
-    @Test
-    public void testIfEmpty() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Stream.empty().ifEmpty(() -> executed.set(true)).count();
-        assertTrue(executed.get());
-    }
-
-    @Test
-    public void testEmptyStreamOperations() {
-        Stream<Integer> empty = Stream.empty();
-
-        assertEquals(0, empty.count());
-        assertFalse(Stream.<Integer> empty().first().isPresent());
-        assertFalse(Stream.<Integer> empty().last().isPresent());
-        assertEquals(0, Stream.<Integer> empty().toList().size());
-        assertEquals(0, Stream.<Integer> empty().toSet().size());
-        assertEquals("", Stream.<Integer> empty().join(","));
-    }
-
-    @Test
-    public void testAcceptIfNotEmptyWithEmpty() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.<Integer> empty().acceptIfNotEmpty(s -> s.forEach(holder::add));
-        assertTrue(holder.isEmpty());
-    }
-
-    @Test
-    public void testApplyIfNotEmptyWithEmpty() {
-        assertFalse(Stream.<Integer> empty().applyIfNotEmpty(s -> s.count()).isPresent());
-    }
-
-    @Test
-    public void testToImmutableListEmpty() {
-        List<Integer> result = Stream.<Integer> empty().toImmutableList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testToImmutableSetEmpty() {
-        Set<Integer> result = Stream.<Integer> empty().toImmutableSet();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testEmpty2() {
-        Stream<String> emptyStream = Stream.empty();
-        assertFalse(emptyStream.first().isPresent());
-    }
-
-    @Test
-    public void testThrowIfEmpty() {
-        assertThrows(NoSuchElementException.class, () -> Stream.empty().throwIfEmpty().count());
-    }
-
-    @Test
-    public void testThrowIfEmptyWithSupplier() {
-        assertThrows(IllegalStateException.class, () -> Stream.empty().throwIfEmpty(IllegalStateException::new).count());
-    }
-
-    @Test
-    public void testDefer() {
-        AtomicInteger callCount = new AtomicInteger(0);
-        Stream<Integer> deferred = Stream.defer(() -> {
-            callCount.incrementAndGet();
-            return Stream.of(1, 2, 3);
-        });
-
-        assertEquals(0, callCount.get());
-        List<Integer> result = deferred.toList();
-        assertEquals(1, callCount.get());
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testDefer2() {
-        Supplier<Stream<Integer>> supplier = () -> createStream(1, 2, 3);
-        Stream<Integer> deferredStream = Stream.defer(supplier);
-        assertEquals(Arrays.asList(1, 2, 3), deferredStream.toList());
-    }
-
-    @Test
-    public void testDeferEmpty() {
-        Stream<Integer> deferred = Stream.defer(() -> Stream.empty());
-        assertTrue(deferred.toList().isEmpty());
-    }
-
-    @Test
-    public void testDeferRejectsNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.defer(null));
-    }
-
-    @Test
-    public void testFromJdkStream() {
-        java.util.stream.Stream<Integer> jdkStream = java.util.stream.Stream.of(1, 2, 3, 4, 5);
-        List<Integer> result = Stream.from(jdkStream).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testFrom() {
-        java.util.stream.Stream<Integer> jdkStream = java.util.stream.Stream.of(1, 2, 3);
-        Stream<Integer> stream = Stream.from(jdkStream);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testFrom_JavaStream() {
-        java.util.stream.Stream<String> javaStream = java.util.stream.Stream.of("a", "b", "c");
-
-        Stream<String> stream = Stream.from(javaStream);
-
-        assertEquals(Arrays.asList("a", "b", "c"), stream.toList());
-    }
-
-    @Test
-    public void testFrom_ParallelJavaStream() {
-        java.util.stream.Stream<Integer> parallelJavaStream = java.util.stream.Stream.of(1, 2, 3, 4, 5).parallel();
-
-        Stream<Integer> stream = Stream.from(parallelJavaStream);
-
-        assertTrue(stream.isParallel());
-        assertEquals(5, stream.count());
-    }
-
-    @Test
-    public void testFrom_JavaStreamWithCount() {
-        java.util.stream.Stream<Integer> javaStream = java.util.stream.Stream.of(1, 2, 3, 4, 5);
-
-        Stream<Integer> stream = Stream.from(javaStream);
-
-        assertEquals(5, stream.count());
-    }
-
-    @Test
-    public void testFrom_JavaStreamWithAdvance() {
-        java.util.stream.Stream<Integer> javaStream = java.util.stream.Stream.of(1, 2, 3, 4, 5);
-
-        Stream<Integer> stream = Stream.from(javaStream);
-
-        List<Integer> result = stream.skip(2).toList();
-        assertEquals(Arrays.asList(3, 4, 5), result);
-    }
-
-    @Test
-    public void testFrom_JavaStreamToArray() {
-        java.util.stream.Stream<String> javaStream = java.util.stream.Stream.of("a", "b", "c");
-
-        Stream<String> stream = Stream.from(javaStream);
-
-        Object[] objArray = stream.toArray();
-        assertArrayEquals(new Object[] { "a", "b", "c" }, objArray);
-
-        java.util.stream.Stream<String> javaStream2 = java.util.stream.Stream.of("x", "y", "z");
-        Stream<String> stream2 = Stream.from(javaStream2);
-        String[] stringArray = stream2.toArray(String[]::new);
-        assertArrayEquals(new String[] { "x", "y", "z" }, stringArray);
-    }
-
-    @Test
-    public void testFromJdkStreamEmpty() {
-        java.util.stream.Stream<Integer> jdkStream = java.util.stream.Stream.empty();
-        List<Integer> result = Stream.from(jdkStream).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFromNull() {
-        Stream<Integer> stream = Stream.from((java.util.stream.Stream<Integer>) null);
-        assertTrue(stream.toList().isEmpty());
-    }
-
-    @Test
-    public void testFrom_NullJavaStream() {
-        Stream<String> stream = Stream.from((java.util.stream.Stream<String>) null);
-
-        assertTrue(stream.toList().isEmpty());
-    }
-
-    @Test
-    public void testFrom_JavaStreamOperations() {
-        java.util.stream.Stream<String> javaStream = java.util.stream.Stream.of("apple", "banana", "cherry", "date").filter(s -> s.length() > 4);
-
-        Stream<String> stream = Stream.from(javaStream);
-
-        List<String> result = stream.map(String::toUpperCase).sorted().toList();
-
-        assertEquals(Arrays.asList("APPLE", "BANANA", "CHERRY"), result);
-    }
-
-    @Test
-    public void testFrom_ClosedJavaStream() {
-        java.util.stream.Stream<String> javaStream = java.util.stream.Stream.of("a", "b", "c");
-        javaStream.close();
-
-        Stream<String> stream = Stream.from(javaStream);
 
         try {
-            stream.toList();
-            fail("Expected exception from closed java stream");
-        } catch (IllegalStateException e) {
+            Stream.range(0, 10).peek(e -> {
+                throw new UncheckedIOException(new IOException("oooh"));
+            }).forEach(Fn.println());
+            fail("Should throw UncheckedIOException");
+        } catch (UncheckedIOException e) {
         }
+
+        try {
+            Stream.range(0, 10).parallel().forEach(e -> {
+                throw new IOException("oooh");
+            });
+            fail("Should throw IOException");
+        } catch (IOException e) {
+        }
+
+        try {
+            Stream.range(0, 10).parallel().peek(e -> {
+                throw new UncheckedIOException(new IOException("oooh"));
+            }).forEach(Fn.println());
+            fail("Should throw UncheckedIOException");
+        } catch (UncheckedIOException e) {
+        }
+
     }
 
     @Test
-    public void testJust() {
-        Stream<String> stream = Stream.just("hello");
-        assertEquals("hello", stream.first().get());
+    public void testStreamCreatedAfterPeek() {
+        List<Integer> list = new ArrayList<>();
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peek(list::add).count());
+        list.clear();
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).count());
+        list.clear();
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peek(list::add).toArray());
+        list.clear();
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).toArray());
+        list.clear();
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peek(list::add).toList());
+        list.clear();
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).toList());
+        list.clear();
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).count());
+        list.clear();
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).count());
+        list.clear();
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toArray());
+        list.clear();
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toArray());
+        list.clear();
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toList());
+        list.clear();
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toList());
     }
 
     @Test
-    public void testJust2() {
-        Stream<String> stream = Stream.just("hello");
-        assertEquals(Arrays.asList("hello"), stream.toList());
+    public void testStreamCreatedAfterPeekFirst() {
+        List<Integer> firstElements = new ArrayList<>();
+        Consumer<Integer> captureFirst = firstElements::add;
+
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekFirst(captureFirst).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekFirst(captureFirst).skip(2).toList());
     }
 
     @Test
-    public void testJust_NullElement() {
-        Stream<String> stream = Stream.just(null);
+    public void testStreamCreatedAfterPeekIfWithBiPredicate() {
+        List<Integer> elements = new ArrayList<>();
+        BiPredicate<Integer, Long> isSecondElement = (e, count) -> count == 2L;
+        Consumer<Integer> capture = elements::add;
 
-        List<String> result = stream.toList();
-        assertEquals(1, result.size());
-        assertNull(result.get(0));
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isSecondElement, capture).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isSecondElement, capture).skip(2).toList());
     }
 
     @Test
-    public void testOfNullable() {
-        Stream<String> stream1 = Stream.ofNullable("hello");
-        assertEquals("hello", stream1.first().get());
+    public void testStreamCreatedAfterPeekIfWithPredicate() {
+        List<Integer> evenElements = new ArrayList<>();
+        Predicate<Integer> isEven = i -> i % 2 == 0;
+        Consumer<Integer> captureEven = evenElements::add;
 
-        Stream<String> stream2 = Stream.ofNullable(null);
-        assertEquals(0, stream2.count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekIf(isEven, captureEven).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekIf(isEven, captureEven).skip(2).toList());
     }
 
     @Test
-    public void testOfNullable2() {
-        Stream<String> stream1 = Stream.ofNullable("hello");
-        assertEquals(Arrays.asList("hello"), stream1.toList());
+    public void testStreamCreatedAfterPeekLast() {
+        List<Integer> lastElements = new ArrayList<>();
+        Consumer<Integer> captureLast = lastElements::add;
 
-        Stream<String> stream2 = Stream.ofNullable(null);
-        assertTrue(stream2.toList().isEmpty());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).peekLast(captureLast).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peekLast(captureLast).skip(2).toList());
     }
 
     @Test
@@ -8618,529 +1895,902 @@ public class StreamTest extends AbstractTest {
         Profiler.run(1, 10, 1, "Abacus parallel", () -> assertEquals(sum, Stream.of(strs).parallel().map(mapper).mapToLong(t -> t).sum())).printResult();
     }
 
+    // prepend
+
     @Test
-    public void testOfVarargs() {
-        Stream<Integer> stream = Stream.of(1, 2, 3);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterPrepend() {
+        assertEquals(5, Stream.of(3, 4, 5).prepend(1, 2).count());
+        assertEquals(4, Stream.of(3, 4, 5).prepend(1, 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).skip(1).toList());
+        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).count());
+        assertEquals(4, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(1).toList());
     }
 
     @Test
-    public void testOfArray() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-        Stream<Integer> stream = Stream.of(array);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.toList());
+    public void testStreamCreatedAfterPrependCollection() {
+        assertEquals(5, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).count());
+        assertEquals(4, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).prepend(Arrays.asList(1, 2)).skip(1).toList());
+        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).count());
+        assertEquals(4, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(Arrays.asList(1, 2)).skip(1).toList());
     }
 
     @Test
-    public void testOfArrayRange() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-        Stream<Integer> stream = Stream.of(array, 1, 4);
-        assertEquals(Arrays.asList(2, 3, 4), stream.toList());
+    public void testStreamCreatedAfterPrependVarargs() {
+        assertEquals(5, Stream.of(3, 4, 5).prepend(1, 2).count());
+        assertEquals(3, Stream.of(3, 4, 5).prepend(1, 2).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(3, 4, 5).prepend(1, 2).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(3, 4, 5).prepend(1, 2).skip(2).toList());
+        assertEquals(5, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).count());
+        assertEquals(3, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toArray());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).toList());
+        assertEquals(N.toList(3, 4, 5), Stream.of(3, 4, 5).map(e -> e).prepend(1, 2).skip(2).toList());
     }
 
     @Test
-    public void testOfCollection() {
-        List<String> list = Arrays.asList("a", "b", "c");
-        Stream<String> stream = Stream.of(list);
-        assertEquals(Arrays.asList("a", "b", "c"), stream.toList());
+    public void testPrintln() {
+        assertDoesNotThrow(() -> {
+            Stream.of(1, 2, 3).println();
+
+            Stream.range(0, 1000).println();
+
+            Stream.range(0, 1001).println();
+        });
     }
 
     @Test
-    public void testOfCollectionRange() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Stream<String> stream = Stream.of(list, 1, 4);
-        assertEquals(Arrays.asList("b", "c", "d"), stream.toList());
+    public void testStreamCreatedAfterRangeMap() {
+        assertEquals(3, Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).count());
+        assertEquals(2, Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).count());
+        assertArrayEquals(new String[] { "1-2", "5-6", "10-10" },
+                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toArray());
+        assertArrayEquals(new String[] { "5-6", "10-10" },
+                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).toArray());
+        assertEquals(N.toList("1-2", "5-6", "10-10"),
+                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toList());
+        assertEquals(N.toList("5-6", "10-10"),
+                Stream.of(1, 2, 5, 6, 10).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).skip(1).toList());
+        assertEquals(3,
+                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).count());
+        assertEquals(2,
+                Stream.of(1, 2, 5, 6, 10)
+                        .map(e -> e)
+                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
+                        .skip(1)
+                        .count());
+        assertArrayEquals(new String[] { "1-2", "5-6", "10-10" },
+                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toArray());
+        assertArrayEquals(new String[] { "5-6", "10-10" },
+                Stream.of(1, 2, 5, 6, 10)
+                        .map(e -> e)
+                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
+                        .skip(1)
+                        .toArray());
+        assertEquals(N.toList("1-2", "5-6", "10-10"),
+                Stream.of(1, 2, 5, 6, 10).map(e -> e).rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last).toList());
+        assertEquals(N.toList("5-6", "10-10"),
+                Stream.of(1, 2, 5, 6, 10)
+                        .map(e -> e)
+                        .rangeMap((first, next) -> Math.abs(first - next) <= 1, (first, last) -> first + "-" + last)
+                        .skip(1)
+                        .toList());
     }
 
     @Test
-    public void testOfMap() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        Stream<Map.Entry<String, Integer>> stream = Stream.of(map);
-        assertEquals(2, stream.count());
+    public void testEdgeCases_VeryLargeRepeat() {
+        long veryLarge = Long.MAX_VALUE / 2;
+
+        Stream<String> repeated = Stream.repeat("X", veryLarge);
+
+        List<String> first10 = repeated.limit(10).toList();
+        assertEquals(10, first10.size());
+        assertTrue(first10.stream().allMatch("X"::equals));
     }
 
     @Test
-    public void testOfIterator() {
-        Iterator<Integer> iterator = Arrays.asList(1, 2, 3).iterator();
-        Stream<Integer> stream = Stream.of(iterator);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterReversed() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reversed().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).reversed().skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reversed().toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reversed().skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reversed().toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reversed().skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reversed().skip(1).toList());
     }
 
     @Test
-    public void testOfIterable() {
-        Iterable<Integer> iterable = Arrays.asList(1, 2, 3);
-        Stream<Integer> stream = Stream.of(iterable);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterReverseSorted() {
+        assertEquals(5, Stream.of(3, 1, 4, 2, 5).reverseSorted().count());
+        assertEquals(4, Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted().toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted().toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted().skip(1).toList());
+        assertEquals(5, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().count());
+        assertEquals(4, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted().skip(1).toList());
     }
 
     @Test
-    public void testOfJdkStream() {
-        java.util.stream.Stream<Integer> jdkStream = Arrays.asList(1, 2, 3).stream();
-        Stream<Integer> stream = Stream.from(jdkStream);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterReverseSortedByComparator() {
+        assertEquals(5, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).count());
+        assertEquals(4, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).reverseSorted(Comparator.naturalOrder()).skip(1).toList());
+        assertEquals(5, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).count());
+        assertEquals(4, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 4, 3, 2, 1 }, Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(4, 3, 2, 1), Stream.of(3, 1, 4, 2, 5).map(e -> e).reverseSorted(Comparator.naturalOrder()).skip(1).toList());
     }
 
     @Test
-    public void testReversed() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).reversed();
-        assertEquals(Arrays.asList(3, 2, 1), stream.toList());
+    public void testStreamCreatedAfterReverseSortedBy() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedBy(i -> i).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedBy(i -> i).skip(2).toList());
     }
 
     @Test
-    public void testShuffled() {
-        List<Integer> original = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> shuffled = Stream.of(original).shuffled().toList();
-        assertEquals(5, shuffled.size());
-        assertTrue(shuffled.containsAll(original));
+    public void testStreamCreatedAfterReverseSortedByDouble() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByDouble(i -> i.doubleValue()).skip(2).toList());
     }
 
     @Test
-    public void testShuffledWithRandom() {
-        List<Integer> original = Arrays.asList(1, 2, 3, 4, 5);
-        Random random = new Random(12345);
-        List<Integer> shuffled1 = Stream.of(original).shuffled(new Random(12345)).toList();
-        List<Integer> shuffled2 = Stream.of(original).shuffled(new Random(12345)).toList();
-        assertEquals(shuffled1, shuffled2);
+    public void testStreamCreatedAfterReverseSortedByInt() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByInt(i -> i.intValue()).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByInt(i -> i.intValue()).skip(2).toList());
     }
 
     @Test
-    public void testIndexed() {
-        Stream<Indexed<String>> stream = Stream.of("a", "b", "c").indexed();
-        List<Indexed<String>> list = stream.toList();
-        assertEquals(0, list.get(0).index());
-        assertEquals("a", list.get(0).value());
-        assertEquals(1, list.get(1).index());
-        assertEquals("b", list.get(1).value());
-        assertEquals(2, list.get(2).index());
-        assertEquals("c", list.get(2).value());
+    public void testStreamCreatedAfterReverseSortedByLong() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).reverseSortedByLong(i -> i.longValue()).skip(2).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).count());
+        assertArrayEquals(new Integer[] { 5, 4, 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).toArray());
+        assertArrayEquals(new Integer[] { 3, 2, 1 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).toArray());
+        assertEquals(N.toList(5, 4, 3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).toList());
+        assertEquals(N.toList(3, 2, 1), Stream.of(1, 2, 3, 4, 5).map(e -> e).reverseSortedByLong(i -> i.longValue()).skip(2).toList());
     }
 
     @Test
-    public void testSkip() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).skip(2);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
+    public void testStreamCreatedAfterRotated() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).rotated(2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).rotated(2).toArray());
+        assertArrayEquals(new Integer[] { 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toArray());
+        assertEquals(N.toList(4, 5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).rotated(2).toList());
+        assertEquals(N.toList(5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).rotated(2).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toArray());
+        assertArrayEquals(new Integer[] { 5, 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toArray());
+        assertEquals(N.toList(4, 5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).toList());
+        assertEquals(N.toList(5, 1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).rotated(2).skip(1).toList());
     }
 
     @Test
-    public void testSkipGreaterThanSize() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).skip(10);
-        assertEquals(0, stream.count());
+    public void testrunAsync() throws Exception {
+        AtomicInteger result = new AtomicInteger(0);
+        com.landawn.abacus.util.ContinuableFuture<Void> future = Stream.of(1, 2, 3).runAsync(s -> s.forEach(result::addAndGet));
+        future.get();
+        assertEquals(6, result.get());
     }
 
     @Test
-    public void testSkipWithAction() {
+    public void testStreamCreatedAfterSelect() {
+        assertEquals(3, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).count());
+        assertEquals(2, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).count());
+        assertArrayEquals(new String[] { "a", "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).toArray());
+        assertArrayEquals(new String[] { "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).toArray());
+        assertEquals(N.toList("a", "b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).toList());
+        assertEquals(N.toList("b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").select(String.class).skip(1).toList());
+        assertEquals(3, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).count());
+        assertEquals(2, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).count());
+        assertArrayEquals(new String[] { "a", "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).toArray());
+        assertArrayEquals(new String[] { "b", "c" }, Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).toArray());
+        assertEquals(N.toList("a", "b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).toList());
+        assertEquals(N.toList("b", "c"), Stream.<Object> of("a", 1, "b", 2, "c").map(e -> e).select(String.class).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterShuffled() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().toArray().length);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).toArray().length);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled().toList().size());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled().skip(1).toList().size());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().toArray().length);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).toArray().length);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().toList().size());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled().skip(1).toList().size());
+    }
+
+    @Test
+    public void testStreamCreatedAfterShuffledWithRandom() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toArray().length);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).toArray().length);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).toList().size());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).shuffled(new Random(42)).skip(1).toList().size());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).count());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).toArray().length);
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).toArray().length);
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).toList().size());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).shuffled(new Random(42)).skip(1).toList().size());
+    }
+
+    @Test
+    public void testSingleElementStream() {
+        Stream<Integer> single = Stream.of(42);
+
+        assertEquals(1, single.count());
+        assertEquals(Integer.valueOf(42), Stream.of(42).first().get());
+        assertEquals(Integer.valueOf(42), Stream.of(42).last().get());
+        assertEquals(Integer.valueOf(42), Stream.of(42).onlyOne().get());
+    }
+
+    @Test
+    public void test_sjps() {
+        {
+            Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
+            List<String> result = strings.sjps(s -> s.filter(it -> it.length() <= 1)).toList();
+            assertHaveSameElements(Arrays.asList("a", "e"), result);
+        }
+        {
+            Stream<String> strings = createStream01("a", "bb", "ccc", "dd", "e");
+            List<String> result = strings.parallel().sjps(s -> s.filter(it -> it.length() <= 1)).toList();
+            assertHaveSameElements(Arrays.asList("a", "e"), result);
+        }
+    }
+
+    @Test
+    public void testStreamCreatedAfterSkip() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skip(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skip(2).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skip(2).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterSkipWithAction() {
         List<Integer> skipped = new ArrayList<>();
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add);
-        assertEquals(Arrays.asList(3, 4, 5), stream.toList());
-        assertEquals(Arrays.asList(1, 2), skipped);
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).count());
+        skipped.clear();
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).count());
+        skipped.clear();
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).toArray());
+        skipped.clear();
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).toArray());
+        skipped.clear();
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).toList());
+        skipped.clear();
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skip(2, skipped::add).skip(1).toList());
+        skipped.clear();
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).count());
+        skipped.clear();
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).count());
+        skipped.clear();
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).toArray());
+        skipped.clear();
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).toArray());
+        skipped.clear();
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).toList());
+        skipped.clear();
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skip(2, skipped::add).skip(1).toList());
     }
 
     @Test
-    public void testLimit() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).limit(3);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterSkipLast() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipLast(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).skipLast(2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).skipLast(2).toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).skipLast(2).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipLast(2).skip(1).toList());
     }
 
     @Test
-    public void testLimitGreaterThanSize() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).limit(10);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterSkipNulls() {
+        assertEquals(3, Stream.of(1, null, 2, null, 3).skipNulls().count());
+        assertEquals(2, Stream.of(1, null, 2, null, 3).skipNulls().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, null, 2, null, 3).skipNulls().toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, null, 2, null, 3).skipNulls().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, null, 2, null, 3).skipNulls().toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, null, 2, null, 3).skipNulls().skip(1).toList());
+        assertEquals(3, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().count());
+        assertEquals(2, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().toArray());
+        assertArrayEquals(new Integer[] { 2, 3 }, Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3), Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().toList());
+        assertEquals(N.toList(2, 3), Stream.of(1, null, 2, null, 3).map(e -> e).skipNulls().skip(1).toList());
     }
 
     @Test
-    public void testStep() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5, 6).step(2);
-        assertEquals(Arrays.asList(1, 3, 5), stream.toList());
+    public void testStreamCreatedAfterSkipRange() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).toArray());
+        assertEquals(N.toList(1, 4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skipRange(1, 3).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).toArray());
+        assertEquals(N.toList(1, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipRange(1, 3).skip(1).toList());
     }
 
     @Test
-    public void testStepOne() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).step(1);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamCreatedAfterSkipUntil() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).skipUntil(i -> i >= 3).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).toArray());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toArray());
+        assertEquals(N.toList(3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).toList());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).skipUntil(i -> i >= 3).skip(1).toList());
+    }
+
+    // slidingMap
+
+    @Test
+    public void testStreamCreatedAfterSlidingMap() {
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 7, 9 }, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
+        assertArrayEquals(new Integer[] { 5, 7, 9 },
+                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 7, 9), Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
+        assertEquals(N.toList(5, 7, 9), Stream.of(1, 2, 3, 4, 5).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 7, 9 },
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
+        assertArrayEquals(new Integer[] { 5, 7, 9 },
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 7, 9), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
+        assertEquals(N.toList(5, 7, 9), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
     }
 
     @Test
-    public void testSymmetricDifference() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(2, 3, 4));
-        List<Integer> result = stream.toList();
-        assertTrue(result.containsAll(Arrays.asList(1, 4)));
-        assertEquals(2, result.size());
+    public void testStreamCreatedAfterSlidingMapTri() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
+        assertArrayEquals(new Integer[] { 6, 9, 12 },
+                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
+        assertArrayEquals(new Integer[] { 9, 12 },
+                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toArray());
+        assertEquals(N.toList(6, 9, 12),
+                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
+        assertEquals(N.toList(9, 12),
+                Stream.of(1, 2, 3, 4, 5).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
+        assertEquals(2,
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
+        assertArrayEquals(new Integer[] { 6, 9, 12 },
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
+        assertArrayEquals(new Integer[] { 9, 12 },
+                Stream.of(1, 2, 3, 4, 5)
+                        .map(e -> e)
+                        .slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
+                        .skip(1)
+                        .toArray());
+        assertEquals(N.toList(6, 9, 12),
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
+        assertEquals(N.toList(9, 12),
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap((a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
     }
 
     @Test
-    public void testsliding() {
-        Stream<List<Integer>> stream = Stream.of(1, 2, 3, 4, 5).sliding(3);
-        List<List<Integer>> result = stream.toList();
-        assertEquals(Arrays.asList(1, 2, 3), result.get(0));
-        assertEquals(Arrays.asList(2, 3, 4), result.get(1));
-        assertEquals(Arrays.asList(3, 4, 5), result.get(2));
+    public void testStreamCreatedAfterSlidingMapTriWithIncrement() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
+        assertEquals(1,
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).count());
+        assertArrayEquals(new Integer[] { 6, 15 },
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
+        assertArrayEquals(new Integer[] { 15 },
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toArray());
+        assertEquals(N.toList(6, 15),
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
+        assertEquals(N.toList(15),
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).skip(1).toList());
+        assertEquals(2,
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).count());
+        assertEquals(1,
+                Stream.of(1, 2, 3, 4, 5, 6)
+                        .map(e -> e)
+                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
+                        .skip(1)
+                        .count());
+        assertArrayEquals(new Integer[] { 6, 15 },
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toArray());
+        assertArrayEquals(new Integer[] { 15 },
+                Stream.of(1, 2, 3, 4, 5, 6)
+                        .map(e -> e)
+                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
+                        .skip(1)
+                        .toArray());
+        assertEquals(N.toList(6, 15),
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c)).toList());
+        assertEquals(N.toList(15),
+                Stream.of(1, 2, 3, 4, 5, 6)
+                        .map(e -> e)
+                        .slidingMap(3, (a, b, c) -> (a == null ? 0 : a) + (b == null ? 0 : b) + (c == null ? 0 : c))
+                        .skip(1)
+                        .toList());
     }
 
     @Test
-    public void testNMatch() {
-        assertTrue(Stream.of(2, 4, 6, 8).hasMatchCountBetween(2, 3, n -> n > 5));
-        assertFalse(Stream.of(2, 4, 6, 8).hasMatchCountBetween(5, 10, n -> n > 5));
+    public void testStreamCreatedAfterSlidingMapTriWithIncrementAndIgnore() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).count());
+        assertArrayEquals(new Integer[] { 6, 15 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).toArray());
+        assertArrayEquals(new Integer[] { 15 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toArray());
+        assertEquals(N.toList(6, 15), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(15), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toList());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).count());
+        assertArrayEquals(new Integer[] { 6, 15 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).toArray());
+        assertArrayEquals(new Integer[] { 15 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toArray());
+        assertEquals(N.toList(6, 15), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).toList());
+        assertEquals(N.toList(15), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(3, true, (a, b, c) -> a + b + c).skip(1).toList());
     }
 
     @Test
-    public void testToList() {
-        List<Integer> list = Stream.of(1, 2, 3).toList();
-        assertEquals(Arrays.asList(1, 2, 3), list);
+    public void testStreamCreatedAfterSlidingMapWithIncrement() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 7, 11 }, Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
+        assertArrayEquals(new Integer[] { 7, 11 },
+                Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
+        assertEquals(N.toList(3, 7, 11), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
+        assertEquals(N.toList(7, 11), Stream.of(1, 2, 3, 4, 5, 6).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 7, 11 },
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toArray());
+        assertArrayEquals(new Integer[] { 7, 11 },
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toArray());
+        assertEquals(N.toList(3, 7, 11), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).toList());
+        assertEquals(N.toList(7, 11),
+                Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).slidingMap(2, (a, b) -> (a == null ? 0 : a) + (b == null ? 0 : b)).skip(1).toList());
     }
 
     @Test
-    public void testToSet() {
-        Set<Integer> set = Stream.of(1, 2, 2, 3).toSet();
-        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), set);
+    public void testStreamCreatedAfterSlidingMapWithIncrementAndIgnore() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 7 }, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).toArray());
+        assertArrayEquals(new Integer[] { 7 }, Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).toArray());
+        assertEquals(N.toList(3, 7), Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).toList());
+        assertEquals(N.toList(7), Stream.of(1, 2, 3, 4, 5).slidingMap(2, true, (a, b) -> a + b).skip(1).toList());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 7 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).toArray());
+        assertArrayEquals(new Integer[] { 7 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).toArray());
+        assertEquals(N.toList(3, 7), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).toList());
+        assertEquals(N.toList(7), Stream.of(1, 2, 3, 4, 5).map(e -> e).slidingMap(2, true, (a, b) -> a + b).skip(1).toList());
     }
 
     @Test
-    public void testToCollection() {
-        LinkedHashSet<Integer> set = Stream.of(1, 2, 3).toCollection(LinkedHashSet::new);
-        assertEquals(new LinkedHashSet<>(Arrays.asList(1, 2, 3)), set);
+    public void testStreamCreatedAfterSorted() {
+        assertEquals(5, Stream.of(5, 3, 1, 4, 2).sorted().count());
+        assertEquals(4, Stream.of(5, 3, 1, 4, 2).sorted().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted().toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted().skip(1).toList());
+        assertEquals(5, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().count());
+        assertEquals(4, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted().skip(1).toList());
     }
 
     @Test
-    public void testToMultiset() {
-        Multiset<Integer> multiset = Stream.of(1, 2, 2, 3, 3, 3).toMultiset();
-        assertEquals(1, multiset.count(1));
-        assertEquals(2, multiset.count(2));
-        assertEquals(3, multiset.count(3));
+    public void testStreamCreatedAfterSortedByComparator() {
+        assertEquals(5, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).count());
+        assertEquals(4, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).sorted(Comparator.naturalOrder()).skip(1).toList());
+        assertEquals(5, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).count());
+        assertEquals(4, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(5, 3, 1, 4, 2).map(e -> e).sorted(Comparator.naturalOrder()).skip(1).toList());
     }
 
     @Test
-    public void testJoin() {
-        assertEquals("1,2,3", Stream.of(1, 2, 3).join(","));
+    public void testStreamCreatedAfterSortedBy() {
+        assertEquals(3, Stream.of("bb", "a", "ccc").sortedBy(String::length).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedBy(String::length).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedBy(String::length).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedBy(String::length).skip(1).toList());
+        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedBy(String::length).skip(1).toList());
     }
 
     @Test
-    public void testJoinWithPrefixSuffix() {
-        assertEquals("[1,2,3]", Stream.of(1, 2, 3).join(",", "[", "]"));
+    public void testStreamCreatedAfterSortedByDouble() {
+        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByDouble(s -> (double) s.length()).skip(1).toList());
+        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByDouble(s -> (double) s.length()).skip(1).toList());
     }
 
     @Test
-    public void testCycled() {
-        List<Integer> result = Stream.of(1, 2, 3).cycled().limit(7).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 1, 2, 3, 1), result);
+    public void testStreamCreatedAfterSortedByInt() {
+        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByInt(String::length).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByInt(String::length).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByInt(String::length).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByInt(String::length).skip(1).toList());
+        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByInt(String::length).skip(1).toList());
     }
 
     @Test
-    public void testCycledWithRounds() {
-        List<Integer> result = Stream.of(1, 2, 3).cycled(2).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 1, 2, 3), result);
+    public void testStreamCreatedAfterSortedByLong() {
+        assertEquals(3, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").sortedByLong(s -> (long) s.length()).skip(1).toList());
+        assertEquals(3, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).count());
+        assertEquals(2, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).count());
+        assertArrayEquals(new String[] { "a", "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).toArray());
+        assertArrayEquals(new String[] { "bb", "ccc" }, Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).toArray());
+        assertEquals(N.toList("a", "bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).toList());
+        assertEquals(N.toList("bb", "ccc"), Stream.of("bb", "a", "ccc").map(e -> e).sortedByLong(s -> (long) s.length()).skip(1).toList());
     }
 
     @Test
-    public void testParallel() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).parallel();
-        assertTrue(stream.isParallel());
+    public void testStreamCreatedAfterStep() {
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).step(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).step(2).toArray());
+        assertArrayEquals(new Integer[] { 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).toArray());
+        assertEquals(N.toList(1, 3, 5), Stream.of(1, 2, 3, 4, 5, 6).step(2).toList());
+        assertEquals(N.toList(3, 5), Stream.of(1, 2, 3, 4, 5, 6).step(2).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).toArray());
+        assertArrayEquals(new Integer[] { 3, 5 }, Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).toArray());
+        assertEquals(N.toList(1, 3, 5), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).toList());
+        assertEquals(N.toList(3, 5), Stream.of(1, 2, 3, 4, 5, 6).map(e -> e).step(2).skip(1).toList());
     }
 
     @Test
-    public void testSequential() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).parallel().sequential();
-        assertFalse(stream.isParallel());
+    public void testStreamCreatedAfterFlattMap() {
+        assertEquals(6, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).count());
+        assertEquals(5, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6),
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).flattMap(l -> l.stream()).skip(1).toList());
+        assertEquals(6, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).count());
+        assertEquals(5, Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5, 6 },
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5, 6 },
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).toList());
+        assertEquals(N.toList(2, 3, 4, 5, 6),
+                Stream.of(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)).map(e -> e).flattMap(l -> l.stream()).skip(1).toList());
     }
 
     @Test
-    public void testIsParallel() {
-        assertFalse(Stream.of(1, 2, 3).isParallel());
-        assertTrue(Stream.of(1, 2, 3).parallel().isParallel());
+    public void testStreamArgJoinsWithEmptyLeftKeepRightRows() {
+        // regression: the right-side rows were only materialized inside the flatMap mapper, which
+        // never runs for an empty left stream, so full/right joins silently returned []
+        final List<Pair<Integer, Integer>> full = Stream.<Integer> empty()
+                .fullJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
+                .toList();
+        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), full);
+
+        final List<Pair<Integer, Integer>> rightJoined = Stream.<Integer> empty()
+                .rightJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
+                .toList();
+        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), rightJoined);
     }
 
     @Test
-    public void testOnClose() {
-        AtomicBoolean closed = new AtomicBoolean(false);
-        Stream<Integer> stream = Stream.of(1, 2, 3).onClose(() -> closed.set(true));
-        stream.count();
-        stream.close();
-        assertTrue(closed.get());
+    public void testStreamCreatedAfterOnEach() {
+        List<Integer> list = new ArrayList<>();
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).peek(list::add).count());
+        list.clear();
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).peek(list::add).skip(1).count());
+        list.clear();
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toArray());
+        list.clear();
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toArray());
+        list.clear();
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).toList());
+        list.clear();
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).peek(list::add).skip(1).toList());
     }
 
     @Test
-    public void testTransform() {
-        List<Integer> result = Stream.of(1, 2, 3).transform(s -> s.map(n -> n * 2)).toList();
-        assertEquals(Arrays.asList(2, 4, 6), result);
+    public void testStreamEx_AbstractClass() {
+        try {
+            Class<?> streamExClass = Stream.StreamEx.class;
+            assertTrue(java.lang.reflect.Modifier.isAbstract(streamExClass.getModifiers()));
+
+            assertEquals(Stream.class, streamExClass.getSuperclass());
+
+            assertEquals(0, streamExClass.getConstructors().length);
+        } catch (Exception e) {
+            fail("Failed to verify StreamEx class structure: " + e.getMessage());
+        }
     }
 
     @Test
-    public void testComplexStreamPipeline() {
-        List<String> result = Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).filter(n -> n % 2 == 0).map(n -> n * 2).sorted().limit(3).map(String::valueOf).toList();
-
-        assertEquals(Arrays.asList("4", "8", "12"), result);
-    }
-
-    // ==================== debounce tests ====================
-    @Test
-    public void testOfArrayWithRange() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-        Stream<Integer> stream = createStream(array, 1, 4);
-        assertEquals(Arrays.asList(2, 3, 4), stream.toList());
+    public void testStreamEx_Inheritance() {
+        assertTrue(Stream.StreamEx.class.getSuperclass().equals(Stream.class));
     }
 
     @Test
-    public void testOfCollectionWithRange() {
-        List<String> list = Arrays.asList("a", "b", "c", "d", "e");
-        Stream<String> stream = createStream(list, 1, 4);
-        assertEquals(Arrays.asList("b", "c", "d"), stream.toList());
+    @Timeout(10)
+    public void testStreamState_SortingAndComparator() throws Exception {
+        Stream.of(3, 1, 4, 1, 5).sorted().addSubscriber(s -> {
+            s.forEach(subscriberStreamResults::add);
+        }).forEach(x -> {
+            mainStreamResults.add(x);
+        });
+
+        assertEquals(Arrays.asList(1, 1, 3, 4, 5), mainStreamResults);
+        assertEquals(Arrays.asList(1, 1, 3, 4, 5), subscriberStreamResults);
     }
 
     @Test
-    public void testOfEnumeration() {
-        Vector<Integer> vector = new Vector<>(Arrays.asList(1, 2, 3));
-        Enumeration<Integer> enumeration = vector.elements();
-        Stream<Integer> stream = createStream(enumeration);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
+    public void testStreamWithNullHandling() {
+        List<String> input = Arrays.asList("a", null, "b", null, "c");
+
+        List<String> result = createStream(input).filter(Objects::nonNull).map(String::toUpperCase).toList();
+
+        assertEquals(Arrays.asList("A", "B", "C"), result);
     }
 
     @Test
-    public void testOfPrimitiveArrays() {
-        boolean[] boolArray = { true, false, true };
-        Stream<Boolean> boolStream = createStream(boolArray);
-        assertEquals(Arrays.asList(true, false, true), boolStream.toList());
-
-        char[] charArray = { 'a', 'b', 'c' };
-        Stream<Character> charStream = createStream(charArray);
-        assertEquals(Arrays.asList('a', 'b', 'c'), charStream.toList());
-
-        byte[] byteArray = { 1, 2, 3 };
-        Stream<Byte> byteStream = createStream(byteArray);
-        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), byteStream.toList());
-
-        short[] shortArray = { 1, 2, 3 };
-        Stream<Short> shortStream = createStream(shortArray);
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), shortStream.toList());
-
-        int[] intArray = { 1, 2, 3 };
-        Stream<Integer> intStream = createStream(intArray);
-        assertEquals(Arrays.asList(1, 2, 3), intStream.toList());
-
-        long[] longArray = { 1L, 2L, 3L };
-        Stream<Long> longStream = createStream(longArray);
-        assertEquals(Arrays.asList(1L, 2L, 3L), longStream.toList());
-
-        float[] floatArray = { 1.0f, 2.0f, 3.0f };
-        Stream<Float> floatStream = createStream(floatArray);
-        assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), floatStream.toList());
-
-        double[] doubleArray = { 1.0, 2.0, 3.0 };
-        Stream<Double> doubleStream = createStream(doubleArray);
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), doubleStream.toList());
+    public void testStreamCreatedAfterSymmetricDifference() {
+        assertEquals(4, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).count());
+        assertEquals(3, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 4, 5 }, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).toArray());
+        assertArrayEquals(new Integer[] { 2, 4, 5 }, Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 4, 5), Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).toList());
+        assertEquals(N.toList(2, 4, 5), Stream.of(1, 2, 3).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toList());
+        assertEquals(4, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).count());
+        assertEquals(3, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).toArray());
+        assertArrayEquals(new Integer[] { 2, 4, 5 }, Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 4, 5), Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).toList());
+        assertEquals(N.toList(2, 4, 5), Stream.of(1, 2, 3).map(e -> e).symmetricDifference(Arrays.asList(3, 4, 5)).skip(1).toList());
     }
 
     @Test
-    public void testOf_Array() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-
-        Stream<Integer> stream = createStream01(array);
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.toList());
+    public void testStreamCreatedAfterTakeLast() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).takeLast(2).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).takeLast(2).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).toArray());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).takeLast(2).toList());
+        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).takeLast(2).skip(1).toList());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).count());
+        assertArrayEquals(new Integer[] { 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).toArray());
+        assertArrayEquals(new Integer[] { 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toArray());
+        assertEquals(N.toList(4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).toList());
+        assertEquals(N.toList(5), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeLast(2).skip(1).toList());
     }
 
     @Test
-    public void testOf_ArrayWithRange() {
-        String[] array = { "a", "b", "c", "d", "e" };
-
-        Stream<String> stream = createStream(array, 1, 4);
-
-        assertEquals(Arrays.asList("b", "c", "d"), stream.toList());
+    public void testStreamCreatedAfterTakeWhile() {
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2 }, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).toArray());
+        assertArrayEquals(new Integer[] { 2 }, Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).toArray());
+        assertEquals(N.toList(1, 2), Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).toList());
+        assertEquals(N.toList(2), Stream.of(1, 2, 3, 4, 5).takeWhile(i -> i < 3).skip(1).toList());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).count());
+        assertEquals(1, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).toArray());
+        assertArrayEquals(new Integer[] { 2 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toArray());
+        assertEquals(N.toList(1, 2), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).toList());
+        assertEquals(N.toList(2), Stream.of(1, 2, 3, 4, 5).map(e -> e).takeWhile(i -> i < 3).skip(1).toList());
     }
 
     @Test
-    public void testOf_Collection() {
-        List<String> list = Arrays.asList("x", "y", "z");
+    public void testThreadSafety() throws InterruptedException {
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1000);
 
-        Stream<String> stream = createStream(list);
+        Thread producer = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                try {
+                    queue.put(i);
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        });
 
-        assertEquals(list, stream.toList());
+        producer.start();
+
+        List<Integer> consumed = Stream.observe(queue, Duration.ofMillis(500)).filter(n -> n % 2 == 0).toList();
+
+        producer.join();
+
+        assertTrue(consumed.size() > 0);
+        assertTrue(consumed.stream().allMatch(n -> n % 2 == 0));
+    }
+
+    // throwIfEmpty
+
+    @Test
+    public void testStreamCreatedAfterThrowIfEmpty() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty().toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty().skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty().skip(1).toList());
     }
 
     @Test
-    public void testOf_CollectionWithRange() {
-        List<Integer> list = Arrays.asList(10, 20, 30, 40, 50);
-
-        Stream<Integer> stream = createStream(list, 2, 4);
-
-        assertEquals(Arrays.asList(30, 40), stream.toList());
+    public void testStreamCreatedAfterThrowIfEmptyWithSupplier() {
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toList());
+        assertEquals(5, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).count());
+        assertEquals(4, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).count());
+        assertArrayEquals(new Integer[] { 1, 2, 3, 4, 5 }, Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).toArray());
+        assertArrayEquals(new Integer[] { 2, 3, 4, 5 },
+                Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toArray());
+        assertEquals(N.toList(1, 2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).toList());
+        assertEquals(N.toList(2, 3, 4, 5), Stream.of(1, 2, 3, 4, 5).map(e -> e).throwIfEmpty(() -> new RuntimeException("Empty!")).skip(1).toList());
     }
 
     @Test
-    public void testOf_Map() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-
-        List<Map.Entry<String, Integer>> entries = createStream(map).toList();
-
-        assertEquals(3, entries.size());
-        assertEquals("a", entries.get(0).getKey());
-        assertEquals(Integer.valueOf(1), entries.get(0).getValue());
+    public void testThrowIfEmpty() {
+        assertThrows(NoSuchElementException.class, () -> Stream.empty().throwIfEmpty().count());
     }
 
     @Test
-    public void testOf_Iterable() {
-        Set<String> set = new LinkedHashSet<>(Arrays.asList("one", "two", "three"));
-
-        Stream<String> stream = createStream(set);
-
-        assertEquals(3, stream.count());
+    public void testThrowIfEmptyNonEmpty() {
+        assertEquals(3, Stream.of(1, 2, 3).throwIfEmpty().count());
     }
 
     @Test
-    public void testOf_Iterator() {
-        Iterator<Double> iterator = Arrays.asList(1.1, 2.2, 3.3).iterator();
-
-        Stream<Double> stream = createStream(iterator);
-
-        assertEquals(Arrays.asList(1.1, 2.2, 3.3), stream.toList());
-    }
-
-    @Test
-    public void testOf_Enumeration() {
-        Vector<String> vector = new Vector<>(Arrays.asList("alpha", "beta", "gamma"));
-        Enumeration<String> enumeration = vector.elements();
-
-        Stream<String> stream = createStream(enumeration);
-
-        assertEquals(Arrays.asList("alpha", "beta", "gamma"), stream.toList());
-    }
-
-    @Test
-    public void testOf_BooleanArray() {
-        boolean[] array = { true, false, true, false };
-
-        Stream<Boolean> stream = createStream(array);
-
-        assertEquals(Arrays.asList(true, false, true, false), stream.toList());
-    }
-
-    @Test
-    public void testOf_CharArray() {
-        char[] array = { 'a', 'b', 'c' };
-
-        Stream<Character> stream = createStream(array);
-
-        assertEquals(Arrays.asList('a', 'b', 'c'), stream.toList());
-    }
-
-    @Test
-    public void testOf_ByteArray() {
-        byte[] array = { 1, 2, 3, 4 };
-
-        Stream<Byte> stream = createStream(array);
-
-        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3, (byte) 4), stream.toList());
-    }
-
-    @Test
-    public void testOf_ShortArray() {
-        short[] array = { 10, 20, 30 };
-
-        Stream<Short> stream = createStream(array);
-
-        assertEquals(Arrays.asList((short) 10, (short) 20, (short) 30), stream.toList());
-    }
-
-    @Test
-    public void testOf_IntArray() {
-        int[] array = { 100, 200, 300 };
-
-        Stream<Integer> stream = createStream(array);
-
-        assertEquals(Arrays.asList(100, 200, 300), stream.toList());
-    }
-
-    @Test
-    public void testOf_LongArray() {
-        long[] array = { 1000L, 2000L, 3000L };
-
-        Stream<Long> stream = createStream(array);
-
-        assertEquals(Arrays.asList(1000L, 2000L, 3000L), stream.toList());
-    }
-
-    @Test
-    public void testOf_FloatArray() {
-        float[] array = { 1.5f, 2.5f, 3.5f };
-
-        Stream<Float> stream = createStream(array);
-
-        assertEquals(Arrays.asList(1.5f, 2.5f, 3.5f), stream.toList());
-    }
-
-    @Test
-    public void testOf_DoubleArray() {
-        double[] array = { 1.1, 2.2, 3.3 };
-
-        Stream<Double> stream = createStream(array);
-
-        assertEquals(Arrays.asList(1.1, 2.2, 3.3), stream.toList());
-    }
-
-    @Test
-    public void testOf_PrimitiveArraysWithRange() {
-
-        boolean[] boolArray = { true, false, true, false, true };
-        List<Boolean> boolResult = createStream(boolArray, 1, 4).toList();
-        assertEquals(Arrays.asList(false, true, false), boolResult);
-
-        char[] charArray = { 'a', 'b', 'c', 'd', 'e' };
-        List<Character> charResult = createStream(charArray, 2, 5).toList();
-        assertEquals(Arrays.asList('c', 'd', 'e'), charResult);
-
-        byte[] byteArray = { 10, 20, 30, 40, 50 };
-        List<Byte> byteResult = createStream(byteArray, 0, 3).toList();
-        assertEquals(Arrays.asList((byte) 10, (byte) 20, (byte) 30), byteResult);
-
-        short[] shortArray = { 100, 200, 300, 400 };
-        List<Short> shortResult = createStream(shortArray, 1, 3).toList();
-        assertEquals(Arrays.asList((short) 200, (short) 300), shortResult);
-
-        int[] intArray = { 1, 2, 3, 4, 5, 6 };
-        List<Integer> intResult = createStream(intArray, 2, 5).toList();
-        assertEquals(Arrays.asList(3, 4, 5), intResult);
-
-        long[] longArray = { 10L, 20L, 30L, 40L };
-        List<Long> longResult = createStream(longArray, 1, 4).toList();
-        assertEquals(Arrays.asList(20L, 30L, 40L), longResult);
-
-        float[] floatArray = { 1.1f, 2.2f, 3.3f, 4.4f };
-        List<Float> floatResult = createStream(floatArray, 0, 2).toList();
-        assertEquals(Arrays.asList(1.1f, 2.2f), floatResult);
-
-        double[] doubleArray = { 1.5, 2.5, 3.5, 4.5, 5.5 };
-        List<Double> doubleResult = createStream(doubleArray, 2, 4).toList();
-        assertEquals(Arrays.asList(3.5, 4.5), doubleResult);
-    }
-
-    @Test
-    public void testOf_PrimitiveArrays_CountAndAdvance() {
-        int[] intArray = { 1, 2, 3, 4, 5 };
-        Stream<Integer> intStream = createStream(intArray, 1, 4);
-        assertEquals(3, intStream.count());
-
-        double[] doubleArray = { 1.0, 2.0, 3.0, 4.0, 5.0 };
-        Stream<Double> doubleStream = createStream(doubleArray);
-        assertEquals(Arrays.asList(3.0, 4.0, 5.0), doubleStream.skip(2).toList());
-    }
-
-    @Test
-    public void testOf_PrimitiveArrays_ToArray() {
-
-        boolean[] boolArray = { true, false, true };
-        Boolean[] boolResult = createStream(boolArray).toArray(Boolean[]::new);
-        assertArrayEquals(new Boolean[] { true, false, true }, boolResult);
-
-        char[] charArray = { 'x', 'y', 'z' };
-        Character[] charResult = createStream(charArray).toArray(Character[]::new);
-        assertArrayEquals(new Character[] { 'x', 'y', 'z' }, charResult);
-
-        int[] intArray = { 10, 20, 30 };
-        Integer[] intResult = createStream(intArray).toArray(Integer[]::new);
-        assertArrayEquals(new Integer[] { 10, 20, 30 }, intResult);
+    public void testThrowIfEmptyWithSupplier() {
+        assertThrows(IllegalStateException.class, () -> Stream.empty().throwIfEmpty(IllegalStateException::new).count());
     }
 
     @Test
@@ -9202,5847 +2852,6 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testOfBooleanArray() {
-        boolean[] arr = { true, false, true };
-        List<Boolean> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList(true, false, true), result);
-    }
-
-    @Test
-    public void testOfBooleanArrayRange() {
-        boolean[] arr = { true, false, true, false };
-        List<Boolean> result = Stream.of(arr, 1, 3).toList();
-        assertEquals(Arrays.asList(false, true), result);
-    }
-
-    @Test
-    public void testOfCharArray() {
-        char[] arr = { 'a', 'b', 'c' };
-        List<Character> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList('a', 'b', 'c'), result);
-    }
-
-    @Test
-    public void testOfCharArrayRange() {
-        char[] arr = { 'a', 'b', 'c', 'd' };
-        List<Character> result = Stream.of(arr, 1, 3).toList();
-        assertEquals(Arrays.asList('b', 'c'), result);
-    }
-
-    @Test
-    public void testOfByteArray() {
-        byte[] arr = { 1, 2, 3 };
-        List<Byte> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
-    }
-
-    @Test
-    public void testOfShortArray() {
-        short[] arr = { 1, 2, 3 };
-        List<Short> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), result);
-    }
-
-    @Test
-    public void testOfFloatArray() {
-        float[] arr = { 1.0f, 2.0f, 3.0f };
-        List<Float> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), result);
-    }
-
-    @Test
-    public void testOfDoubleArray() {
-        double[] arr = { 1.0, 2.0, 3.0 };
-        List<Double> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
-    }
-
-    @Test
-    public void testOfIntArray() {
-        int[] arr = { 1, 2, 3, 4, 5 };
-        List<Integer> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testOfIntArrayRange() {
-        int[] arr = { 1, 2, 3, 4, 5 };
-        List<Integer> result = Stream.of(arr, 1, 4).toList();
-        assertEquals(Arrays.asList(2, 3, 4), result);
-    }
-
-    @Test
-    public void testOfLongArray() {
-        long[] arr = { 1L, 2L, 3L };
-        List<Long> result = Stream.of(arr).toList();
-        assertEquals(Arrays.asList(1L, 2L, 3L), result);
-    }
-
-    @Test
-    public void testOfLongArrayRange() {
-        long[] arr = { 1L, 2L, 3L, 4L, 5L };
-        List<Long> result = Stream.of(arr, 1, 4).toList();
-        assertEquals(Arrays.asList(2L, 3L, 4L), result);
-    }
-
-    @Test
-    public void testOf_Optional_Present() {
-        Stream<String> s = Stream.of(u.Optional.of("hello"));
-        assertEquals(Arrays.asList("hello"), s.toList());
-    }
-
-    @Test
-    public void testOf_JavaOptional_Present() {
-        Stream<Integer> s = Stream.of(java.util.Optional.of(42));
-        assertEquals(Arrays.asList(42), s.toList());
-    }
-
-    @Test
-    public void testOf_Collection_WithRange() {
-        List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d", "e"));
-        List<String> result = Stream.of(list, 1, 4).toList();
-        assertEquals(Arrays.asList("b", "c", "d"), result);
-    }
-
-    @Test
-    public void testOf_Iterator_WithRange() {
-        Iterator<Integer> iter = Arrays.asList(0, 1, 2, 3, 4).iterator();
-        List<Integer> result = Stream.of(iter, 1, 3).toList();
-        assertEquals(Arrays.asList(1, 2), result);
-    }
-
-    @Test
-    public void testOfOptional() {
-        Stream<Integer> stream1 = Stream.of(u.Optional.of(42));
-        assertEquals(Arrays.asList(42), stream1.toList());
-
-        Stream<Integer> stream2 = Stream.of(u.Optional.<Integer> empty());
-        assertEquals(0, stream2.count());
-    }
-
-    @Test
-    public void testOfJdkOptional() {
-        Stream<Integer> stream1 = Stream.of(java.util.Optional.of(42));
-        assertEquals(Arrays.asList(42), stream1.toList());
-
-        Stream<Integer> stream2 = Stream.of(java.util.Optional.<Integer> empty());
-        assertEquals(0, stream2.count());
-    }
-
-    @Test
-    public void testReversedSingleElement() {
-        Stream<Integer> stream = Stream.of(42).reversed();
-        assertEquals(Arrays.asList(42), stream.toList());
-    }
-
-    @Test
-    public void testRotatedPositive() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).rotated(2);
-        assertEquals(Arrays.asList(4, 5, 1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testRotatedNegative() {
-        Stream<Integer> stream = Stream.of(1, 2, 3, 4, 5).rotated(-2);
-        assertEquals(Arrays.asList(3, 4, 5, 1, 2), stream.toList());
-    }
-
-    @Test
-    public void testRotatedZero() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).rotated(0);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testRotatedGreaterThanSize() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).rotated(5);
-        assertHaveSameElements(Arrays.asList(3, 1, 2), stream.toList());
-    }
-
-    @Test
-    public void testSkipZero() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).skip(0);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testLimitZero() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).limit(0);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testFirst() {
-        assertEquals(Integer.valueOf(1), Stream.of(1, 2, 3).first().get());
-        assertFalse(Stream.<Integer> empty().first().isPresent());
-    }
-
-    @Test
-    public void testElementAt() {
-        assertEquals(Integer.valueOf(2), Stream.of(1, 2, 3).elementAt(1).get());
-        assertFalse(Stream.of(1, 2, 3).elementAt(5).isPresent());
-        assertFalse(Stream.<Integer> empty().elementAt(0).isPresent());
-    }
-
-    @Test
-    public void testCount() {
-        assertEquals(5, Stream.of(1, 2, 3, 4, 5).count());
-        assertEquals(0, Stream.empty().count());
-    }
-
-    @Test
-    public void testCycledZeroRounds() {
-        List<Integer> result = Stream.of(1, 2, 3).cycled(0).toList();
-        assertEquals(0, result.size());
-    }
-
-    @Test
-    public void testParallelWithMaxThreadNum() {
-        Stream<Integer> stream = Stream.of(1, 2, 3).parallel(2);
-        assertTrue(stream.isParallel());
-    }
-
-    @Test
-    public void testOnCloseMultipleHandlers() {
-        AtomicInteger counter = new AtomicInteger(0);
-        Stream<Integer> stream = Stream.of(1, 2, 3).onClose(counter::incrementAndGet).onClose(counter::incrementAndGet);
-        stream.count();
-        stream.close();
-        assertEquals(2, counter.get());
-    }
-
-    @Test
-    public void testIfEmptyNonEmpty() {
-        AtomicBoolean executed = new AtomicBoolean(false);
-        Stream.of(1, 2, 3).ifEmpty(() -> executed.set(true)).count();
-        assertFalse(executed.get());
-    }
-
-    @Test
-    public void testHasDuplicates() {
-        assertTrue(Stream.of(1, 2, 2, 3).containsDuplicates());
-        assertFalse(Stream.of(1, 2, 3).containsDuplicates());
-        assertFalse(Stream.<Integer> empty().containsDuplicates());
-    }
-
-    @Test
-    public void testSingleElementStream() {
-        Stream<Integer> single = Stream.of(42);
-
-        assertEquals(1, single.count());
-        assertEquals(Integer.valueOf(42), Stream.of(42).first().get());
-        assertEquals(Integer.valueOf(42), Stream.of(42).last().get());
-        assertEquals(Integer.valueOf(42), Stream.of(42).onlyOne().get());
-    }
-
-    @Test
-    public void testNullHandling() {
-        List<Integer> withNulls = Arrays.asList(1, null, 2, null, 3);
-
-        List<Integer> result = Stream.of(withNulls).filter(n -> n != null).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testAcceptIfNotEmpty() {
-        List<Integer> holder = new ArrayList<>();
-        Stream.of(1, 2, 3).acceptIfNotEmpty(s -> s.forEach(holder::add));
-        assertEquals(Arrays.asList(1, 2, 3), holder);
-    }
-
-    @Test
-    public void testApplyIfNotEmpty() {
-        long result = Stream.of(1, 2, 3).applyIfNotEmpty(s -> s.count()).get();
-        assertEquals(3L, result);
-    }
-
-    @Test
-    public void testOfJavaOptional() {
-        java.util.Optional<String> optional = java.util.Optional.of("hello");
-        Stream<String> stream = createStream(optional);
-        assertEquals(Arrays.asList("hello"), stream.toList());
-
-        java.util.Optional<String> empty = java.util.Optional.empty();
-        Stream<String> emptyStream = createStream(empty);
-        assertTrue(emptyStream.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_EmptyArray() {
-        Integer[] emptyArray = {};
-
-        Stream<Integer> stream = createStream01(emptyArray);
-
-        assertTrue(stream.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_Optional() {
-        Optional<String> present = Optional.of("value");
-        Stream<String> stream1 = createStream(present);
-        assertEquals(Arrays.asList("value"), stream1.toList());
-
-        Optional<String> empty = Optional.empty();
-        Stream<String> stream2 = createStream(empty);
-        assertTrue(stream2.toList().isEmpty());
-
-        Stream<String> stream3 = createStream((Optional<String>) null);
-        assertTrue(stream3.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_JavaUtilOptional() {
-        java.util.Optional<Integer> present = java.util.Optional.of(42);
-        Stream<Integer> stream1 = createStream(present);
-        assertEquals(Arrays.asList(42), stream1.toList());
-
-        java.util.Optional<Integer> empty = java.util.Optional.empty();
-        Stream<Integer> stream2 = createStream(empty);
-        assertTrue(stream2.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_PrimitiveArrays_EmptyArrays() {
-
-        assertTrue(createStream(new boolean[0]).toList().isEmpty());
-        assertTrue(createStream(new char[0]).toList().isEmpty());
-        assertTrue(createStream(new byte[0]).toList().isEmpty());
-        assertTrue(createStream(new short[0]).toList().isEmpty());
-        assertTrue(createStream(new int[0]).toList().isEmpty());
-        assertTrue(createStream(new long[0]).toList().isEmpty());
-        assertTrue(createStream(new float[0]).toList().isEmpty());
-        assertTrue(createStream(new double[0]).toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_Optional_Empty() {
-        Stream<String> s = Stream.of(u.Optional.<String> empty());
-        assertTrue(s.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_Optional_Null() {
-        Stream<String> s = Stream.of((u.Optional<String>) null);
-        assertTrue(s.toList().isEmpty());
-    }
-
-    @Test
-    public void testOf_JavaOptional_Empty() {
-        Stream<Integer> s = Stream.of(java.util.Optional.<Integer> empty());
-        assertTrue(s.toList().isEmpty());
-    }
-
-    @Test
-    public void testOfCollection_WithRange() {
-        // Covers Stream.of(Collection, fromIndex, toIndex)
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> result = Stream.of(list, 1, 4).toList();
-        assertEquals(Arrays.asList(2, 3, 4), result);
-    }
-
-    @Test
-    public void testOfIterator_WithRange() {
-        // Covers Stream.of(Iterator, fromIndex, toIndex) internal method
-        // Uses skip + limit underneath
-        List<Integer> result = Stream.of(Arrays.asList(0, 1, 2, 3, 4).iterator(), 2, 4).toList();
-        assertEquals(Arrays.asList(2, 3), result);
-    }
-
-    @Test
-    public void test_asyncExecute() throws Exception {
-        try {
-            N.asyncExecute(() -> Stream.of(1, 2, 3).forEach(Fnn.throwIOException("oooh"))).get();
-
-            fail("Should throw ExecutionException");
-        } catch (final ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Stream.repeat("a", 100).parallel(10).forEach(Fnn.throwIOException("oooh"));
-
-            fail("Should throw IOException");
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    public void test_average() {
-        final ToDoubleFunction<String> mapper = String::hashCode;
-
-        Stream.of("a", "b", "c", "a", "d").collect(Collectors.averagingDoubleOrElseThrow(mapper));
-        assertNotNull(mapper);
-    }
-
-    @Test
-    public void testOnlyOne() {
-        assertEquals(Integer.valueOf(42), Stream.of(42).onlyOne().get());
-        assertFalse(Stream.<Integer> empty().onlyOne().isPresent());
-        assertThrows(TooManyElementsException.class, () -> Stream.of(1, 2).onlyOne());
-    }
-
-    @Test
-    public void testThrowIfEmptyNonEmpty() {
-        assertEquals(3, Stream.of(1, 2, 3).throwIfEmpty().count());
-    }
-
-    @Test
-    public void testPrintln() {
-        assertDoesNotThrow(() -> {
-            Stream.of(1, 2, 3).println();
-
-            Stream.range(0, 1000).println();
-
-            Stream.range(0, 1001).println();
-        });
-    }
-
-    @Test
-    public void testToImmutableList() {
-        List<Integer> result = Stream.of(1, 2, 3, 4, 5).toImmutableList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-
-        try {
-            result.add(6);
-        } catch (UnsupportedOperationException e) {
-        }
-    }
-
-    @Test
-    public void testToImmutableSet() {
-        Set<Integer> result = Stream.of(1, 2, 3, 2, 1).toImmutableSet();
-        assertEquals(3, result.size());
-        assertTrue(result.contains(1));
-        assertTrue(result.contains(2));
-        assertTrue(result.contains(3));
-
-        try {
-            result.add(4);
-        } catch (UnsupportedOperationException e) {
-        }
-    }
-
-    @Test
-    @Timeout(10)
-    public void testSubscriberStreams_IndependentOperations() throws Exception {
-        List<Integer> mainProcessed = new ArrayList<>();
-        List<Integer> subscriberProcessed = new ArrayList<>();
-
-        Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-            s.filter(x -> x % 2 == 0).map(x -> x * 10).forEach(subscriberProcessed::add);
-        }).filter(x -> x % 2 == 1).map(x -> x * 100).forEach(x -> {
-            mainProcessed.add(x);
-        });
-
-        assertEquals(Arrays.asList(100, 300, 500), mainProcessed);
-        assertEquals(Arrays.asList(20, 40), subscriberProcessed);
-    }
-
-    @Test
-    @Timeout(10)
-    public void testSubscriberStream_ExceptionHandling() throws Exception {
-        AtomicBoolean exceptionCaught = new AtomicBoolean(false);
-
-        try {
-            Stream.of(1, 2, 3, 4, 5).addSubscriber(s -> {
-                try {
-                    s.forEach(x -> {
-                        if (x == 3) {
-                            throw new RuntimeException("Test exception");
-                        }
-                        subscriberStreamResults.add(x);
-                    });
-                } catch (Exception e) {
-                    exceptionCaught.set(true);
-                }
-            }).forEach(mainStreamResults::add);
-        } catch (Exception e) {
-        }
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), mainStreamResults);
-        assertTrue(exceptionCaught.get());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testSubscriberStream_CloseHandling() throws Exception {
-        AtomicBoolean subscriberClosed = new AtomicBoolean(false);
-
-        Stream.of(1, 2, 3).addSubscriber(s -> {
-            s.onClose(() -> subscriberClosed.set(true)).forEach(subscriberStreamResults::add);
-        }).forEach(mainStreamResults::add);
-
-        assertEquals(Arrays.asList(1, 2, 3), mainStreamResults);
-        assertEquals(Arrays.asList(1, 2, 3), subscriberStreamResults);
-        assertTrue(subscriberClosed.get());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testLargeDataset_Performance() throws Exception {
-        int size = 10000;
-        List<Integer> data = new ArrayList<>();
-        for (int i = 1; i <= size; i++) {
-            data.add(i);
-        }
-        AtomicInteger mainCount = new AtomicInteger(0);
-        AtomicInteger subscriberCount = new AtomicInteger(0);
-
-        Stream.of(data.toArray(new Integer[0])).addSubscriber(s -> {
-            s.forEach(x -> subscriberCount.incrementAndGet());
-        }).forEach(x -> {
-            mainCount.incrementAndGet();
-            if (mainCount.get() == size) {
-            }
-        });
-        assertEquals(size, mainCount.get());
-        assertEquals(size, subscriberCount.get());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testNullElementHandling_InFilters() throws Exception {
-        Stream.of(1, null, 3, null, 5).filterWhileAddSubscriber(x -> x != null && x % 2 == 1, s -> {
-            s.forEach(subscriberStreamResults::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 3, 5), mainStreamResults);
-        assertEquals(Arrays.asList(null, null), subscriberStreamResults);
-    }
-
-    @Test
-    public void testOf_ArrayWithInvalidRange() {
-        Integer[] array = { 1, 2, 3 };
-        assertThrows(IndexOutOfBoundsException.class, () -> createStream(array, 1, 5));
-    }
-
-    @Test
-    public void testOf_Iterator_Advance() {
-        ObjIteratorEx<Integer> iter = new ObjIteratorEx<>() {
-            private int current = 0;
-
-            @Override
-            public boolean hasNext() {
-                return current < 10;
-            }
-
-            @Override
-            public Integer next() {
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                return current++;
-            }
-
-            @Override
-            public void advance(long n) {
-                if (n <= 0) {
-                    return;
-                }
-
-                current = Math.min(current + (int) n, 10);
-            }
-        };
-
-        Stream<Integer> stream = createStream(iter);
-
-        List<Integer> result = stream.skip(5).toList();
-        assertEquals(Arrays.asList(5, 6, 7, 8, 9), result);
-    }
-
-    @Test
-    public void testOf_Map_Modifications() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-
-        Stream<Map.Entry<String, Integer>> stream = createStream(map);
-
-        map.put("c", 3);
-
-        assertThrows(ConcurrentModificationException.class, () -> stream.toList());
-    }
-
-    @Test
-    public void test_lazyEvalation() throws Exception {
-        final MutableBoolean moved = MutableBoolean.of(false);
-
-        Stream<String> s = Stream.of("a", "b", "c", "d").peek(Fn.println()).peek(it -> {
-            new RuntimeException("Testing lazy evaluation").printStackTrace();
-            moved.setTrue();
-        })
-                .parallel()
-                .map(it -> it + "111")
-                .buffered()
-                .shuffled()
-                .sorted()
-                .rotated(2)
-                .filter(Fn.alwaysTrue())
-                .flatMap(Stream::of)
-                .takeWhile(Fn.alwaysTrue())
-                .dropWhile(Fn.alwaysFalse())
-                .sequential()
-                .map(it -> it + "111")
-                .buffered()
-                .shuffled()
-                .sorted()
-                .rotated(2)
-                .filter(Fn.alwaysTrue())
-                .flatMap(Stream::of)
-                .takeWhile(Fn.alwaysTrue())
-                .dropWhile(Fn.alwaysFalse());
-
-        assertFalse(moved.value());
-
-        s = s.filter(Fn.notNull());
-
-        assertFalse(moved.value());
-
-        s = s.buffered();
-
-        assertFalse(moved.value());
-
-        final ObjIterator<String> iter = s.iterator();
-
-        assertFalse(moved.value());
-
-        s.forEach(Fn.println());
-
-        assertTrue(moved.value());
-
-        assertFalse(iter.hasNext());
-
-        moved.setFalse();
-        final List<ByteStream> list = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            list.add(ByteStream.range((byte) 0, (byte) i).peek(it -> moved.setTrue()).peek(N::println));
-        }
-
-        ByteStream bs = ByteStream.merge(list, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-
-        bs = bs.filter(it -> it < 10);
-
-        assertFalse(moved.value());
-
-        final ByteIterator byteIter = bs.iterator();
-
-        bs.forEach(N::println);
-
-        assertFalse(byteIter.hasNext());
-
-        moved.setFalse();
-
-        final IntStream is = Stream.range(0, 10_000)
-                .peek(it -> moved.setTrue())
-                .parallel(128)
-                .map(it -> it - 0)
-                .map(it -> it + 0)
-                .flatMap(Stream::of)
-                .map(it -> it + 1)
-                .map(it -> it - 1)
-                .filter(it -> it >= 0)
-                .buffered(1024)
-                .peek(it -> {
-                    if (it % 37 == 0) {
-                        N.sleep(3);
-                    }
-                })
-                .map(it -> it - 0)
-                .map(it -> it + 0)
-                .flatMap(Stream::of)
-                .map(it -> it + 1)
-                .sequential()
-                .map(it -> it - 1)
-                .filter(it -> it >= 0)
-                .buffered(1024)
-                .reverseSorted()
-                .peek(it -> {
-                    if (it % 79 == 0) {
-                        N.sleep(3);
-                    }
-                })
-                .map(it -> it - 0)
-                .map(it -> it + 0)
-                .flatMap(Stream::of)
-                .map(it -> it + 1)
-                .map(it -> it - 1)
-                .filter(it -> it >= 0)
-                .buffered(1024)
-                .peek(it -> {
-                    if (it % 137 == 0) {
-                        N.sleep(3);
-                    }
-                })
-                .map(it -> it - 0)
-                .parallel(64)
-                .map(it -> it + 0)
-                .flatMap(Stream::of)
-                .map(it -> it + 1)
-                .map(it -> it - 1)
-                .filter(it -> it >= 0)
-                .buffered(137)
-                .peek(it -> {
-                    if (it % 537 == 0) {
-                        N.sleep(3);
-                    }
-                })
-                .mapToInt(ToIntFunction.UNBOX);
-
-        assertFalse(moved.value());
-
-        final IntIterator ii = is.iterator();
-
-        assertFalse(moved.value());
-
-        assertEquals(IntStream.range(0, 10_000).sum(), is.sum());
-
-        assertFalse(ii.hasNext());
-    }
-
-    @Test
-    public void testOfKeys() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        Stream<String> stream = Stream.ofKeys(map);
-        assertEquals(Arrays.asList("a", "b"), stream.toList());
-    }
-
-    @Test
-    public void testOfKeys_Map() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("key1", 10);
-        map.put("key2", 20);
-        map.put("key3", 30);
-
-        List<String> keys = Stream.ofKeys(map).toList();
-
-        assertEquals(Arrays.asList("key1", "key2", "key3"), keys);
-    }
-
-    @Test
-    public void testOfKeys_WithValueFilter() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 3);
-        map.put("d", 4);
-
-        List<String> keys = Stream.ofKeys(map, v -> v % 2 == 0).toList();
-
-        assertEquals(Arrays.asList("b", "d"), keys);
-    }
-
-    @Test
-    public void testOfKeys_WithBiPredicate() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("short", 5);
-        map.put("medium", 10);
-        map.put("long", 15);
-
-        List<String> keys = Stream.ofKeys(map, (k, v) -> k.length() > 4 && v > 5).toList();
-
-        assertEquals(Arrays.asList("medium"), keys);
-    }
-
-    @Test
-    public void testOfKeys_EmptyMap() {
-        Map<String, Integer> emptyMap = Collections.emptyMap();
-
-        assertTrue(Stream.ofKeys(emptyMap).toList().isEmpty());
-        assertTrue(Stream.ofKeys(emptyMap, v -> v > 0).toList().isEmpty());
-        assertTrue(Stream.ofKeys(emptyMap, (k, v) -> true).toList().isEmpty());
-    }
-
-    @Test
-    public void testOfValues() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        Stream<Integer> stream = Stream.ofValues(map);
-        assertEquals(Arrays.asList(1, 2), stream.toList());
-    }
-
-    @Test
-    public void testOfValues_Map() {
-        Map<Integer, String> map = new LinkedHashMap<>();
-        map.put(1, "one");
-        map.put(2, "two");
-        map.put(3, "three");
-
-        List<String> values = Stream.ofValues(map).toList();
-
-        assertEquals(Arrays.asList("one", "two", "three"), values);
-    }
-
-    @Test
-    public void testOfValues_WithKeyFilter() {
-        Map<Integer, String> map = new LinkedHashMap<>();
-        map.put(1, "odd");
-        map.put(2, "even");
-        map.put(3, "odd");
-        map.put(4, "even");
-
-        List<String> values = Stream.ofValues(map, k -> k % 2 == 0).toList();
-
-        assertEquals(Arrays.asList("even", "even"), values);
-    }
-
-    @Test
-    public void testOfValues_WithBiPredicate() {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        map.put("a", 1);
-        map.put("bb", 2);
-        map.put("ccc", 3);
-
-        List<Integer> values = Stream.ofValues(map, (k, v) -> k.length() == v).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), values);
-    }
-
-    @Test
-    public void testOfValues_EmptyMap() {
-        Map<String, Integer> emptyMap = Collections.emptyMap();
-
-        assertTrue(Stream.ofValues(emptyMap).toList().isEmpty());
-        assertTrue(Stream.ofValues(emptyMap, k -> true).toList().isEmpty());
-        assertTrue(Stream.ofValues(emptyMap, (k, v) -> true).toList().isEmpty());
-    }
-
-    @Test
-    public void testOfReversed() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-        List<Integer> result = Stream.ofReversed(array).toList();
-        assertEquals(Arrays.asList(5, 4, 3, 2, 1), result);
-    }
-
-    @Test
-    public void testOfReversedList() {
-        List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
-        List<Integer> result = Stream.ofReversed(list).toList();
-        assertEquals(Arrays.asList(5, 4, 3, 2, 1), result);
-    }
-
-    @Test
-    public void testOfReversed_Array() {
-        Integer[] array = { 1, 2, 3, 4, 5 };
-
-        List<Integer> reversed = Stream.ofReversed(array).toList();
-
-        assertEquals(Arrays.asList(5, 4, 3, 2, 1), reversed);
-    }
-
-    @Test
-    public void testOfReversed_List() {
-        List<String> list = Arrays.asList("a", "b", "c", "d");
-
-        List<String> reversed = Stream.ofReversed(list).toList();
-
-        assertEquals(Arrays.asList("d", "c", "b", "a"), reversed);
-    }
-
-    @Test
-    public void testOfReversedEmpty() {
-        Integer[] array = {};
-        List<Integer> result = Stream.ofReversed(array).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testRange() {
-        Stream<Integer> stream = Stream.range(1, 5);
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testRangeWithStep() {
-        Stream<Integer> stream = Stream.range(0, 10, 2);
-        assertEquals(Arrays.asList(0, 2, 4, 6, 8), stream.toList());
-    }
-
-    @Test
-    public void testRange_Int() {
-        List<Integer> range = Stream.range(1, 5).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4), range);
-    }
-
-    @Test
-    public void testRange_IntWithStep() {
-        List<Integer> range = Stream.range(0, 10, 2).toList();
-
-        assertEquals(Arrays.asList(0, 2, 4, 6, 8), range);
-    }
-
-    @Test
-    public void testRange_Long() {
-        List<Long> range = Stream.range(10L, 13L).toList();
-
-        assertEquals(Arrays.asList(10L, 11L, 12L), range);
-    }
-
-    @Test
-    public void testRange_LongWithStep() {
-        List<Long> range = Stream.range(0L, 15L, 5L).toList();
-
-        assertEquals(Arrays.asList(0L, 5L, 10L), range);
-    }
-
-    @Test
-    public void testComplexStreamOperations() {
-        List<String> result = Stream.range(1, 10).filter(x -> x % 2 == 0).map(x -> "Number: " + x).toList();
-
-        assertEquals(Arrays.asList("Number: 2", "Number: 4", "Number: 6", "Number: 8"), result);
-    }
-
-    @Test
-    public void testParallelStreamOperations() {
-        List<Integer> result = Stream.range(1, 1000).parallel().filter(x -> x % 7 == 0).sorted().limit(10).toList();
-
-        assertEquals(Arrays.asList(7, 14, 21, 28, 35, 42, 49, 56, 63, 70), result);
-    }
-
-    @Test
-    public void testLargeDataHandling() {
-        int size = 100000;
-
-        long sum = Stream.range(0, size).mapToLong(i -> i).sum();
-
-        long expectedSum = ((long) size * (size - 1)) / 2;
-        assertEquals(expectedSum, sum);
-    }
-
-    @Test
-    public void testPerformance_LargeConcat() {
-        List<Stream<Integer>> manyStreams = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            final int base = i * 10;
-            manyStreams.add(Stream.range(base, base + 10));
-        }
-
-        long count = Stream.concat(manyStreams).count();
-        assertEquals(1000, count);
-    }
-
-    @Test
-    public void testRangeInt() {
-        List<Integer> result = Stream.range(1, 5).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testRangeIntWithBy() {
-        List<Integer> result = Stream.range(1, 10, 3).toList();
-        assertEquals(Arrays.asList(1, 4, 7), result);
-    }
-
-    @Test
-    public void testRangeLong() {
-        List<Long> result = Stream.range(1L, 5L).toList();
-        assertEquals(Arrays.asList(1L, 2L, 3L, 4L), result);
-    }
-
-    @Test
-    public void testRangeLongWithBy() {
-        List<Long> result = Stream.range(1L, 10L, 3L).toList();
-        assertEquals(Arrays.asList(1L, 4L, 7L), result);
-    }
-
-    @Test
-    public void test_03() {
-        assertEquals(Character.MAX_VALUE, CharStream.range(Character.MIN_VALUE, Character.MAX_VALUE).count());
-        assertEquals(Character.MAX_VALUE + 1, CharStream.rangeClosed(Character.MIN_VALUE, Character.MAX_VALUE).count());
-
-        assertEquals(Byte.MAX_VALUE * 2 + 1, ByteStream.range(Byte.MIN_VALUE, Byte.MAX_VALUE).count());
-        assertEquals(Byte.MAX_VALUE * 2 + 2, ByteStream.rangeClosed(Byte.MIN_VALUE, Byte.MAX_VALUE).count());
-
-        assertEquals(Short.MAX_VALUE * 2 + 1, ShortStream.range(Short.MIN_VALUE, Short.MAX_VALUE).count());
-        assertEquals(Short.MAX_VALUE * 2 + 2, ShortStream.rangeClosed(Short.MIN_VALUE, Short.MAX_VALUE).count());
-
-        assertEquals(Character.MAX_VALUE, Array.range(Character.MIN_VALUE, Character.MAX_VALUE).length);
-        assertEquals(Character.MAX_VALUE + 1, Array.rangeClosed(Character.MIN_VALUE, Character.MAX_VALUE).length);
-
-        assertEquals(Byte.MAX_VALUE * 2 + 1, Array.range(Byte.MIN_VALUE, Byte.MAX_VALUE).length);
-        assertEquals(Byte.MAX_VALUE * 2 + 2, Array.rangeClosed(Byte.MIN_VALUE, Byte.MAX_VALUE).length);
-
-        assertEquals(Short.MAX_VALUE * 2 + 1, Array.range(Short.MIN_VALUE, Short.MAX_VALUE).length);
-        assertEquals(Short.MAX_VALUE * 2 + 2, Array.rangeClosed(Short.MIN_VALUE, Short.MAX_VALUE).length);
-    }
-
-    @Test
-    public void test_02() {
-        N.println(0 - Long.MIN_VALUE);
-        N.println(-1 - Long.MIN_VALUE);
-        N.println(Long.MAX_VALUE);
-        N.println(Long.MAX_VALUE * 1D + 10);
-        N.println(Double.MAX_VALUE - Long.MAX_VALUE);
-        assertFalse((double) Long.MAX_VALUE + 2 - Long.MAX_VALUE > 0);
-
-        assertEquals(Integer.MAX_VALUE, ((int) (Integer.MAX_VALUE + 0.9999999999999999999D)));
-        assertEquals(Long.MAX_VALUE, ((long) (Long.MAX_VALUE + 0.999999999999999D)));
-
-        N.println(Integer.MAX_VALUE - Integer.MIN_VALUE);
-        N.println(Integer.MAX_VALUE * 1L - Integer.MIN_VALUE);
-
-        double d = 100;
-        for (int i = 0; i < 100; i++) {
-            N.println(d--);
-        }
-
-        N.println(Long.MAX_VALUE - Long.MIN_VALUE);
-        N.println(Long.MAX_VALUE);
-        N.println(Long.MIN_VALUE);
-        assertEquals(Long.MAX_VALUE, (long) ((Long.MAX_VALUE * 1D - Long.MIN_VALUE) + Long.MIN_VALUE));
-        N.println(String.format("%s", Long.MAX_VALUE * 1D - Long.MIN_VALUE));
-        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.range(1, 6).toArray()));
-        assertTrue(N.equals(new int[] { 1, 2, 3, 4, 5 }, IntStream.rangeClosed(1, 5).toArray()));
-        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.range(1, 6, 2).toArray()));
-        assertTrue(N.equals(new int[] { 1, 3, 5 }, IntStream.rangeClosed(1, 5, 2).toArray()));
-        assertTrue(N.equals(new int[] { 1, 1, 1 }, IntStream.repeat(1, 3).toArray()));
-
-        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.range(0, Integer.MAX_VALUE).count()));
-        assertTrue(N.equals(Integer.MAX_VALUE + 1L, IntStream.rangeClosed(0, Integer.MAX_VALUE).count()));
-        assertTrue(N.equals(Integer.MAX_VALUE, IntStream.repeat(0, Integer.MAX_VALUE).count()));
-    }
-
-    @Test
-    public void testRange_NegativeSteps() {
-        List<Integer> intRange = Stream.range(10, 0, -2).toList();
-        assertEquals(Arrays.asList(10, 8, 6, 4, 2), intRange);
-
-        List<Long> longRange = Stream.range(20L, 10L, -3L).toList();
-        assertEquals(Arrays.asList(20L, 17L, 14L, 11L), longRange);
-    }
-
-    @Test
-    public void testComplexScenarios_NestedParallelism() {
-        List<Integer> result = Stream.range(0, 10)
-                .parallel()
-                .flatMap(i -> Stream.range(i * 10, (i + 1) * 10).parallel())
-                .filter(n -> n % 3 == 0)
-                .sorted()
-                .toList();
-
-        List<Integer> expected = new ArrayList<>();
-        for (int i = 0; i < 100; i += 3) {
-            expected.add(i);
-        }
-        assertEquals(expected, result);
-    }
-
-    @Test
-    public void test_exception_parallel() {
-        try {
-            Stream.range(0, 10).forEach(e -> {
-                throw new IOException("oooh");
-            });
-            fail("Should throw IOException");
-        } catch (IOException e) {
-        }
-
-        try {
-            Stream.range(0, 10).peek(e -> {
-                throw new UncheckedIOException(new IOException("oooh"));
-            }).forEach(Fn.println());
-            fail("Should throw UncheckedIOException");
-        } catch (UncheckedIOException e) {
-        }
-
-        try {
-            Stream.range(0, 10).parallel().forEach(e -> {
-                throw new IOException("oooh");
-            });
-            fail("Should throw IOException");
-        } catch (IOException e) {
-        }
-
-        try {
-            Stream.range(0, 10).parallel().peek(e -> {
-                throw new UncheckedIOException(new IOException("oooh"));
-            }).forEach(Fn.println());
-            fail("Should throw UncheckedIOException");
-        } catch (UncheckedIOException e) {
-        }
-
-    }
-
-    @Test
-    public void test_step() {
-        assertDoesNotThrow(() -> {
-            IntStream.range(0, 13).step(2).println();
-            IntStream.range(0, 13).step(1).println();
-            IntStream.range(0, 13).skip(2).limit(7).step(2).println();
-            IntStream.range(0, 13).skip(1).limit(7).step(1).println();
-        });
-    }
-
-    @Test
-    public void testRangeClosed() {
-        Stream<Integer> stream = Stream.rangeClosed(1, 5);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), stream.toList());
-    }
-
-    @Test
-    public void testRangeClosedWithStep() {
-        Stream<Integer> stream = Stream.rangeClosed(0, 10, 2);
-        assertEquals(Arrays.asList(0, 2, 4, 6, 8, 10), stream.toList());
-    }
-
-    @Test
-    public void testRangeClosed_Int() {
-        List<Integer> range = Stream.rangeClosed(1, 5).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), range);
-    }
-
-    @Test
-    public void testRangeClosed_IntWithStep() {
-        List<Integer> range = Stream.rangeClosed(1, 10, 3).toList();
-
-        assertEquals(Arrays.asList(1, 4, 7, 10), range);
-    }
-
-    @Test
-    public void testRangeClosed_Long() {
-        List<Long> range = Stream.rangeClosed(5L, 8L).toList();
-
-        assertEquals(Arrays.asList(5L, 6L, 7L, 8L), range);
-    }
-
-    @Test
-    public void testRangeClosed_LongWithStep() {
-        List<Long> range = Stream.rangeClosed(0L, 20L, 5L).toList();
-
-        assertEquals(Arrays.asList(0L, 5L, 10L, 15L, 20L), range);
-    }
-
-    @Test
-    public void testRangeClosedInt() {
-        List<Integer> result = Stream.rangeClosed(1, 5).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testRangeClosedIntWithBy() {
-        List<Integer> result = Stream.rangeClosed(1, 10, 3).toList();
-        assertEquals(Arrays.asList(1, 4, 7, 10), result);
-    }
-
-    @Test
-    public void testRangeClosedLong() {
-        List<Long> result = Stream.rangeClosed(1L, 5L).toList();
-        assertEquals(Arrays.asList(1L, 2L, 3L, 4L, 5L), result);
-    }
-
-    @Test
-    public void testRangeClosedLongWithBy() {
-        List<Long> result = Stream.rangeClosed(1L, 10L, 3L).toList();
-        assertEquals(Arrays.asList(1L, 4L, 7L, 10L), result);
-    }
-
-    @Test
-    public void test_04() {
-        Iterator<List<String>> iter = PermutationIterator.of(N.toList("a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.of(N.toList("a", "b"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.of(N.toList("a", "a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.of(N.toList("a", "b", "c"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.of(N.toList("a", "b", "a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.of(new ArrayList<String>());
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-
-        iter = PermutationIterator.ordered(N.toList("a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "b"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(new ArrayList<String>());
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-
-        iter = PermutationIterator.of(N.toList("1", "2", "2", "1"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "b", "c"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("1", "2", "2", "1"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        iter = PermutationIterator.ordered(N.toList("a", "b", "a"));
-        while (iter.hasNext()) {
-            N.println(iter.next());
-        }
-
-        N.println("=========================================================");
-
-        final Consumer<? super List<Character>> consumer = N::println;
-
-        CharStream.rangeClosed('a', 'e').boxed().permutations().forEach(consumer);
-        assertNotNull(consumer);
-    }
-
-    @Test
-    public void testRangeClosed_NegativeSteps() {
-        List<Integer> intRange = Stream.rangeClosed(10, 0, -2).toList();
-        assertEquals(Arrays.asList(10, 8, 6, 4, 2, 0), intRange);
-
-        List<Long> longRange = Stream.rangeClosed(15L, 5L, -5L).toList();
-        assertEquals(Arrays.asList(15L, 10L, 5L), longRange);
-    }
-
-    @Test
-    public void testSplitToLines() {
-        List<String> result = Stream.splitToLines("line1\nline2\nline3").toList();
-        assertEquals(Arrays.asList("line1", "line2", "line3"), result);
-    }
-
-    @Test
-    public void testSplitToLinesWithOptions() {
-        String multiLine = "  line1  \n\n  line2  \n\n";
-
-        List<String> result = Stream.splitToLines(multiLine, false, false).toList();
-        assertTrue(result.contains("  line1  "));
-        assertTrue(result.contains("  line2  "));
-        assertTrue(result.contains(""));
-
-        result = Stream.splitToLines(multiLine, true, false).toList();
-        assertTrue(result.contains("line1"));
-        assertTrue(result.contains("line2"));
-        assertTrue(result.contains(""));
-
-        result = Stream.splitToLines(multiLine, false, true).toList();
-        assertTrue(result.contains("  line1  "));
-        assertTrue(result.contains("  line2  "));
-        assertFalse(result.contains(""));
-
-        result = Stream.splitToLines(multiLine, true, true).toList();
-        assertEquals(Arrays.asList("line1", "line2"), result);
-    }
-
-    @Test
-    public void testSplitToLines2() {
-        String str = "line1\nline2\rline3\r\nline4";
-
-        List<String> lines = Stream.splitToLines(str).toList();
-
-        assertEquals(Arrays.asList("line1", "line2", "line3", "line4"), lines);
-    }
-
-    @Test
-    public void testSplitToLines_WithOptions() {
-        String str = "  line1  \n\n  line2  \n  \n  line3  ";
-
-        List<String> lines1 = Stream.splitToLines(str, true, true).toList();
-        assertEquals(Arrays.asList("line1", "line2", "line3"), lines1);
-
-        List<String> lines2 = Stream.splitToLines(str, true, false).toList();
-        assertEquals(Arrays.asList("line1", "", "line2", "", "line3"), lines2);
-
-        List<String> lines3 = Stream.splitToLines(str, false, true).toList();
-        assertEquals(Arrays.asList("  line1  ", "  line2  ", "  ", "  line3  "), lines3);
-
-        List<String> lines4 = Stream.splitToLines(str, false, false).toList();
-        assertEquals(Arrays.asList("  line1  ", "", "  line2  ", "  ", "  line3  "), lines4);
-    }
-
-    @Test
-    public void testSplitToLinesEmpty() {
-        List<String> result = Stream.splitToLines("").toList();
-        assertEquals(Arrays.asList(""), result);
-    }
-
-    @Test
-    public void testSplitToLinesSingleLine() {
-        List<String> result = Stream.splitToLines("single line").toList();
-        assertEquals(Arrays.asList("single line"), result);
-    }
-
-    @Test
-    public void testSplitToLines_withTrimAndOmitEmpty() {
-        List<String> result = Stream.splitToLines("  line1  \n\n  line2  ", true, true).toList();
-        assertEquals(Arrays.asList("line1", "line2"), result);
-    }
-
-    @Test
-    public void testSplitByChunkCount() {
-        List<Integer> result = Stream.splitByChunkCount(8, 3, (from, to) -> from).toList();
-        assertEquals(3, result.size());
-    }
-
-    @Test
-    public void testSplitByChunkCountWithSizeSmallerFirst() {
-        List<String> result = Stream.splitByChunkCount(7, 5, true, (from, to) -> from + "-" + to).toList();
-        assertEquals(5, result.size());
-        assertEquals("0-1", result.get(0));
-        assertEquals("1-2", result.get(1));
-        assertEquals("2-3", result.get(2));
-        assertEquals("3-5", result.get(3));
-        assertEquals("5-7", result.get(4));
-
-        result = Stream.splitByChunkCount(7, 5, false, (from, to) -> from + "-" + to).toList();
-        assertEquals(5, result.size());
-        assertEquals("0-2", result.get(0));
-        assertEquals("2-4", result.get(1));
-        assertEquals("4-5", result.get(2));
-        assertEquals("5-6", result.get(3));
-        assertEquals("6-7", result.get(4));
-    }
-
-    @Test
-    public void testSplitByChunkCount2() {
-        IntBiFunction<List<Integer>> mapper = (from, to) -> {
-            List<Integer> list = new ArrayList<>();
-            for (int i = from; i < to; i++) {
-                list.add(i);
-            }
-            return list;
-        };
-
-        Stream<List<Integer>> chunks = Stream.splitByChunkCount(10, 3, mapper);
-        List<List<Integer>> result = chunks.toList();
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList(0, 1, 2, 3), result.get(0));
-        assertEquals(Arrays.asList(4, 5, 6), result.get(1));
-        assertEquals(Arrays.asList(7, 8, 9), result.get(2));
-
-        Stream<List<Integer>> smallerFirstChunks = Stream.splitByChunkCount(10, 3, true, mapper);
-        List<List<Integer>> smallerFirstResult = smallerFirstChunks.toList();
-        assertEquals(3, smallerFirstResult.size());
-        assertEquals(Arrays.asList(0, 1, 2), smallerFirstResult.get(0));
-        assertEquals(Arrays.asList(3, 4, 5), smallerFirstResult.get(1));
-        assertEquals(Arrays.asList(6, 7, 8, 9), smallerFirstResult.get(2));
-    }
-
-    @Test
-    public void testSplitByChunkCount_SizeSmallerFirst() {
-        Integer[] array = { 1, 2, 3, 4, 5, 6, 7 };
-
-        List<List<Integer>> chunks = Stream.splitByChunkCount(7, 5, true, (from, to) -> Arrays.asList(array).subList(from, to)).toList();
-
-        assertEquals(5, chunks.size());
-        assertEquals(Arrays.asList(1), chunks.get(0));
-        assertEquals(Arrays.asList(2), chunks.get(1));
-        assertEquals(Arrays.asList(3), chunks.get(2));
-        assertEquals(Arrays.asList(4, 5), chunks.get(3));
-        assertEquals(Arrays.asList(6, 7), chunks.get(4));
-    }
-
-    @Test
-    public void testSplitByChunkCountEmpty() {
-        List<Integer> result = Stream.splitByChunkCount(0, 3, (from, to) -> from).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testSplitByChunkCountNegativeTotalSize() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.splitByChunkCount(-1, 3, (from, to) -> from + "-" + to));
-    }
-
-    @Test
-    public void testSplitByChunkCountZeroMaxChunkCount() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.splitByChunkCount(10, 0, (from, to) -> from + "-" + to));
-    }
-
-    @Test
-    public void testSplitByChunkCount_NegativeTotalSize() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.splitByChunkCount(-1, 5, (from, to) -> Collections.emptyList()));
-    }
-
-    @Test
-    public void testSplitByChunkCount_ZeroMaxChunkCount() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.splitByChunkCount(10, 0, (from, to) -> Collections.emptyList()));
-    }
-
-    @Test
-    public void testFlattenCollection() {
-        List<Integer> list1 = Arrays.asList(1, 2);
-        List<Integer> list2 = Arrays.asList(3, 4);
-        List<Integer> list3 = Arrays.asList(5, 6);
-
-        List<Integer> result = Stream.<Integer> flatten(Arrays.asList(list1, list2, list3)).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testFlattenArray() {
-        Integer[][] arr = { { 1, 2 }, { 3, 4 } };
-
-        List<Integer> result = Stream.flatten(arr).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlatten2DArrayVertically() {
-        Integer[][] array = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-
-        List<Integer> result = Stream.flatten(array, false).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
-
-        result = Stream.flatten(array, true).toList();
-        assertEquals(Arrays.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), result);
-
-        Integer[][] jagged = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
-        result = Stream.flatten(jagged, true).toList();
-        assertEquals(Arrays.asList(1, 4, 6, 2, 5, 3), result);
-    }
-
-    @Test
-    public void testFlatten2DArrayWithAlignment() {
-        Integer[][] array = { { 1, 2 }, { 3, 4, 5 }, { 6 } };
-
-        List<Integer> result = Stream.flatten(array, 0, false).toList();
-        assertEquals(Arrays.asList(1, 2, 0, 3, 4, 5, 6, 0, 0), result);
-
-        result = Stream.flatten(array, -1, true).toList();
-        assertEquals(Arrays.asList(1, 3, 6, 2, 4, -1, -1, 5, -1), result);
-    }
-
-    @Test
-    public void testFlatten_2DArray() {
-        Integer[][] array = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-
-        List<Integer> flattened = Stream.flatten(array).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), flattened);
-    }
-
-    @Test
-    public void testFlatten_2DArrayVertically() {
-        Integer[][] array = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-
-        List<Integer> flattened = Stream.flatten(array, true).toList();
-
-        assertEquals(Arrays.asList(1, 4, 7, 2, 5, 8, 3, 6, 9), flattened);
-    }
-
-    @Test
-    public void testFlatten_2DArrayWithAlignment() {
-        Integer[][] array = { { 1, 2 }, { 3, 4, 5, 6 }, { 7 } };
-
-        List<Integer> flattened = Stream.flatten(array, 0, true).toList();
-
-        assertEquals(Arrays.asList(1, 3, 7, 2, 4, 0, 0, 5, 0, 0, 6, 0), flattened);
-    }
-
-    @Test
-    public void testFlatten_3DArray() {
-        Integer[][][] array = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } }, { { 9, 10 }, { 11, 12 } } };
-
-        List<Integer> flattened = Stream.flatten(array).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), flattened);
-    }
-
-    @Test
-    public void testFlattenCollectionEmpty() {
-        List<Object> result = Stream.flatten(Arrays.asList()).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatten2DArray() {
-        Integer[][] array = { { 1, 2, 3 }, { 4, 5 }, { 6, 7, 8, 9 } };
-
-        List<Integer> result = Stream.flatten(array).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
-
-        Integer[][] empty = new Integer[0][];
-        result = Stream.flatten(empty).toList();
-        assertTrue(result.isEmpty());
-
-        Integer[][] withNulls = { { 1, 2 }, null, { 3, 4 } };
-        result = Stream.flatten(withNulls).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testFlatten3DArray() {
-        Integer[][][] array = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
-
-        List<Integer> result = Stream.flatten(array).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
-
-        Integer[][][] empty = new Integer[0][][];
-        result = Stream.flatten(empty).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFlatten() {
-        List<List<Integer>> nestedList = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
-        Stream<Integer> flattened = Stream.flatten(nestedList);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattened.toList());
-
-        Integer[][] array2D = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
-        Stream<Integer> flattenedArray = Stream.flatten(array2D);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattenedArray.toList());
-
-        Stream<Integer> flattenedVertical = Stream.flatten(array2D, true);
-        assertEquals(Arrays.asList(1, 3, 5, 2, 4, 6), flattenedVertical.toList());
-
-        Integer[][][] array3D = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
-        Stream<Integer> flattened3D = Stream.flatten(array3D);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), flattened3D.toList());
-    }
-
-    @Test
-    public void testFlatten_CollectionOfCollections() {
-        List<List<Integer>> nested = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
-
-        List<Integer> flattened = Stream.flatten(nested).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattened);
-    }
-
-    @Test
-    public void testFlatten_EmptyArrays() {
-        Integer[][] empty2D = new Integer[0][];
-        assertTrue(Stream.flatten(empty2D).toList().isEmpty());
-
-        Integer[][] withEmpty = { {}, { 1, 2 }, {}, { 3 } };
-        assertEquals(Arrays.asList(1, 2, 3), Stream.flatten(withEmpty).toList());
-
-        Integer[][][] empty3D = new Integer[0][][];
-        assertTrue(Stream.flatten(empty3D).toList().isEmpty());
-    }
-
-    @Test
-    public void testFlatten_IrregularArrays() {
-        Integer[][] irregular = { { 1 }, { 2, 3, 4 }, null, { 5, 6 } };
-
-        List<Integer> flattened = Stream.flatten(irregular).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), flattened);
-
-        List<Integer> vertical = Stream.flatten(irregular, true).toList();
-        assertEquals(Arrays.asList(1, 2, 5, 3, 6, 4), vertical);
-    }
-
-    @Test
-    public void testRepeat() {
-        Stream<String> stream = Stream.repeat("a", 3);
-        assertEquals(Arrays.asList("a", "a", "a"), stream.toList());
-    }
-
-    @Test
-    public void testRepeat_LargeCount() {
-        long largeCount = 10000L;
-
-        long actualCount = Stream.repeat("X", largeCount).count();
-
-        assertEquals(largeCount, actualCount);
-    }
-
-    @Test
-    public void testRepeatZero() {
-        Stream<String> stream = Stream.repeat("a", 0);
-        assertEquals(0, stream.count());
-    }
-
-    @Test
-    public void testRepeat2() {
-        Stream<String> repeated = Stream.repeat("hello", 3);
-        assertEquals(Arrays.asList("hello", "hello", "hello"), repeated.toList());
-
-        Stream<String> noRepeat = Stream.repeat("hello", 0);
-        assertTrue(noRepeat.toList().isEmpty());
-    }
-
-    @Test
-    public void testRepeat_Zero() {
-        List<Integer> repeated = Stream.repeat(42, 0).toList();
-
-        assertTrue(repeated.isEmpty());
-    }
-
-    @Test
-    public void testEdgeCases_VeryLargeRepeat() {
-        long veryLarge = Long.MAX_VALUE / 2;
-
-        Stream<String> repeated = Stream.repeat("X", veryLarge);
-
-        List<String> first10 = repeated.limit(10).toList();
-        assertEquals(10, first10.size());
-        assertTrue(first10.stream().allMatch("X"::equals));
-    }
-
-    @Test
-    public void testRepeatNegativeCount() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.repeat("test", -1));
-    }
-
-    @Test
-    public void testIterate() {
-        Stream<Integer> stream = Stream.iterate(1, n -> n < 5, n -> n + 1);
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testIterateWithBooleanSupplier() {
-        final int[] count = { 0 };
-        List<Integer> result = Stream.iterate(() -> count[0] < 5, () -> count[0]++).toList();
-
-        assertEquals(Arrays.asList(0, 1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testIterateWithInitAndBooleanSupplier() {
-        final int[] count = { 0 };
-        List<Integer> result = Stream.iterate(1, () -> count[0]++ < 4, n -> n * 2).toList();
-
-        assertEquals(Arrays.asList(1, 2, 4, 8), result);
-    }
-
-    @Test
-    public void testIterateWithInitAndPredicate() {
-        List<Integer> result = Stream.iterate(1, n -> n < 20, n -> n * 2).toList();
-
-        assertEquals(Arrays.asList(1, 2, 4, 8, 16), result);
-    }
-
-    @Test
-    public void testIterateInfinite() {
-        List<Integer> result = Stream.iterate(1, n -> n + 1).limit(5).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-    }
-
-    @Test
-    public void testIterate_BooleanSupplierAndSupplier() {
-        int[] counter = { 0 };
-        BooleanSupplier hasNext = () -> counter[0] < 3;
-        Supplier<Integer> next = () -> counter[0]++;
-
-        List<Integer> result = Stream.iterate(hasNext, next).toList();
-
-        assertEquals(Arrays.asList(0, 1, 2), result);
-    }
-
-    @Test
-    public void testIterate_WithInitAndBooleanSupplier() {
-        int[] counter = { 0 };
-        BooleanSupplier hasNext = () -> counter[0] < 5;
-        UnaryOperator<Integer> f = x -> {
-            counter[0]++;
-            return x * 2;
-        };
-
-        List<Integer> result = Stream.iterate(1, hasNext, f).toList();
-
-        assertEquals(Arrays.asList(1, 2, 4, 8, 16, 32), result);
-    }
-
-    @Test
-    public void testIterate_WithInitAndPredicate() {
-        Predicate<Integer> hasNext = x -> x < 100;
-        UnaryOperator<Integer> f = x -> x * 2;
-
-        List<Integer> result = Stream.iterate(1, hasNext, f).toList();
-
-        assertEquals(Arrays.asList(1, 2, 4, 8, 16, 32, 64), result);
-    }
-
-    @Test
-    public void testIterate_Infinite() {
-        UnaryOperator<Integer> f = x -> x + 1;
-
-        List<Integer> result = Stream.iterate(0, f).limit(5).toList();
-
-        assertEquals(Arrays.asList(0, 1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testIterate_StopConditions() {
-        BooleanSupplier alwaysFalse = () -> false;
-        Supplier<String> supplier = () -> "should not be called";
-
-        List<String> result1 = Stream.iterate(alwaysFalse, supplier).toList();
-        assertTrue(result1.isEmpty());
-
-        Predicate<Integer> negative = x -> x < 0;
-        List<Integer> result2 = Stream.iterate(1, negative, x -> x + 1).toList();
-        assertTrue(result2.isEmpty());
-    }
-
-    @Test
-    public void test_iterate() throws Exception {
-        final MutableInt cnt = MutableInt.of(0);
-
-        Stream.iterate(1, () -> cnt.getAndIncrement() < 3, x -> x + 3).println();
-
-        Stream.iterate(1, x -> x < 10, x -> x + 3).println();
-
-        Stream.iterate(1, x -> x + 1).limit(10).println();
-        assertNotNull(cnt);
-    }
-
-    @Test
-    public void testGenerate() {
-        AtomicInteger counter = new AtomicInteger(0);
-        Stream<Integer> stream = Stream.generate(() -> counter.incrementAndGet()).limit(3);
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testGenerate2() {
-        AtomicInteger counter = new AtomicInteger(0);
-        Stream<Integer> generated = Stream.generate(counter::getAndIncrement);
-        assertEquals(Arrays.asList(0, 1, 2, 3, 4), generated.limit(5).toList());
-    }
-
-    @Test
-    public void testGenerate_RandomNumbers() {
-        Random random = new Random(12345);
-
-        List<Integer> randomNumbers = Stream.generate(() -> random.nextInt(100)).limit(10).toList();
-
-        assertEquals(10, randomNumbers.size());
-        for (Integer num : randomNumbers) {
-            assertTrue(num >= 0 && num < 100);
-        }
-    }
-
-    @Test
-    public void testMemoryEfficientOperations() {
-        AtomicInteger generatedCount = new AtomicInteger(0);
-
-        Stream<Integer> infiniteStream = Stream.generate(() -> generatedCount.incrementAndGet());
-
-        List<Integer> result = infiniteStream.limit(5).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
-
-        assertTrue(generatedCount.get() <= 10);
-    }
-
-    @Test
-    public void testGenerate_NullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.generate(null).count());
-    }
-
-    @Test
-    public void testOfLines() throws IOException {
-        File file = tempDir.resolve("lines.txt").toFile();
-        IOUtil.write("line1\nline2\nline3", file);
-
-        List<String> result = Stream.ofLines(file).toList();
-        assertEquals(Arrays.asList("line1", "line2", "line3"), result);
-    }
-
-    @Test
-    public void testOfLinesEmpty() throws IOException {
-        File file = tempDir.resolve("empty.txt").toFile();
-        IOUtil.write("", file);
-
-        List<String> result = Stream.ofLines(file).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testOfLinesFromPathWithCharset() throws IOException {
-        Path tempPath = Files.createTempFile("test", ".txt");
-        Files.deleteIfExists(tempPath);
-
-        String content = "测试\n内容";
-        Files.write(tempPath, content.getBytes(StandardCharsets.UTF_8));
-
-        List<String> result = Stream.ofLines(tempPath, StandardCharsets.UTF_8).toList();
-        assertEquals(Arrays.asList("测试", "内容"), result);
-
-        Files.deleteIfExists(tempPath);
-    }
-
-    @Test
-    public void testOfLinesFromReaderWithCloseOption() throws IOException {
-        String content = "test1\ntest2";
-        StringReader reader = new StringReader(content);
-
-        try (Stream<String> stream = Stream.ofLines(reader, true)) {
-            List<String> result = stream.toList();
-            assertEquals(Arrays.asList("test1", "test2"), result);
-        }
-
-    }
-
-    @Test
-    public void testOfLines_File() throws IOException {
-        File testFile = Files.createTempFile(tempFolder, "test", ".txt").toFile();
-        Files.write(testFile.toPath(), Arrays.asList("line1", "line2", "line3"));
-
-        List<String> lines = Stream.ofLines(testFile).toList();
-        assertEquals(3, lines.size());
-        assertEquals("line1", lines.get(0));
-        assertEquals("line2", lines.get(1));
-        assertEquals("line3", lines.get(2));
-    }
-
-    @Test
-    public void testOfLines_FileWithCharset() throws IOException {
-        File testFile = Files.createTempFile(tempFolder, "test-charset", ".txt").toFile();
-        String content = "Hello\nWorld\n你好";
-        Files.write(testFile.toPath(), content.getBytes("UTF-8"));
-
-        List<String> lines = Stream.ofLines(testFile, Charsets.UTF_8).toList();
-        assertEquals(3, lines.size());
-        assertEquals("Hello", lines.get(0));
-        assertEquals("World", lines.get(1));
-        assertEquals("你好", lines.get(2));
-    }
-
-    @Test
-    public void testOfLines_Path() throws IOException {
-        Path testPath = Files.createTempFile(tempFolder, "test-path", ".txt").toFile().toPath();
-        Files.write(testPath, Arrays.asList("path1", "path2", "path3"));
-
-        List<String> lines = Stream.ofLines(testPath).toList();
-        assertEquals(3, lines.size());
-        assertEquals("path1", lines.get(0));
-        assertEquals("path2", lines.get(1));
-        assertEquals("path3", lines.get(2));
-    }
-
-    @Test
-    public void testOfLines_PathWithCharset() throws IOException {
-        Path testPath = Files.createTempFile(tempFolder, "test-path-charset", ".txt").toFile().toPath();
-        Files.write(testPath, Arrays.asList("line1", "line2"), Charsets.UTF_8);
-
-        List<String> lines = Stream.ofLines(testPath, Charsets.UTF_8).toList();
-        assertEquals(2, lines.size());
-        assertEquals("line1", lines.get(0));
-        assertEquals("line2", lines.get(1));
-    }
-
-    @Test
-    public void testOfLines_Reader() throws IOException {
-        String content = "line1\nline2\nline3";
-        StringReader reader = new StringReader(content);
-
-        List<String> lines = Stream.ofLines(reader).toList();
-
-        assertEquals(Arrays.asList("line1", "line2", "line3"), lines);
-    }
-
-    @Test
-    public void testOfLines_ReaderWithCloseFlag() throws IOException {
-        String content = "a\nb\nc";
-        StringReader reader = new StringReader(content);
-
-        try (Stream<String> stream = Stream.ofLines(reader, true)) {
-            assertEquals(Arrays.asList("a", "b", "c"), stream.toList());
-        }
-
-        StringReader reader2 = new StringReader(content);
-        Stream<String> stream2 = Stream.ofLines(reader2, false);
-        assertEquals(Arrays.asList("a", "b", "c"), stream2.toList());
-    }
-
-    @Test
-    public void testOfLines_NullReader() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.ofLines((Reader) null));
-    }
-
-    @Test
-    public void testOfLines_EmptyFile() throws IOException {
-        File emptyFile = Files.createTempFile(tempFolder, "empty", ".txt").toFile();
-
-        List<String> lines = Stream.ofLines(emptyFile).toList();
-
-        assertTrue(lines.isEmpty());
-    }
-
-    @Test
-    public void testOfLines_FileWithBlankLines() throws IOException {
-        File file = Files.createTempFile(tempFolder, "blank-lines", ".txt").toFile();
-        Files.write(file.toPath(), Arrays.asList("", "line1", "", "line2", ""));
-
-        List<String> lines = Stream.ofLines(file).toList();
-
-        assertEquals(5, lines.size());
-        assertEquals("", lines.get(0));
-        assertEquals("line1", lines.get(1));
-        assertEquals("", lines.get(2));
-        assertEquals("line2", lines.get(3));
-        assertEquals("", lines.get(4));
-    }
-
-    @Test
-    public void testResourceManagement() throws IOException {
-        File testFile = Files.createTempFile(tempFolder, "resource-test", ".txt").toFile();
-        Files.write(testFile.toPath(), Arrays.asList("line1", "line2", "line3"));
-
-        AtomicBoolean streamClosed = new AtomicBoolean(false);
-
-        try (Stream<String> stream = Stream.ofLines(testFile).onClose(() -> streamClosed.set(true))) {
-            assertEquals(3, stream.count());
-        }
-
-        assertTrue(streamClosed.get());
-    }
-
-    @Test
-    public void testOfLines_FileNotFound() {
-        File nonExistentFile = new File("non-existent-file.txt");
-
-        try {
-            Stream.ofLines(nonExistentFile).toList();
-            fail("Expected exception for non-existent file");
-        } catch (UncheckedIOException e) {
-            assertTrue(e.getCause() instanceof FileNotFoundException);
-        }
-    }
-
-    @Test
-    public void testOfLines_PathNotFound() {
-        Path nonExistentPath = new File("non-existent-path.txt").toPath();
-
-        try {
-            Stream.ofLines(nonExistentPath).toList();
-            fail("Expected exception for non-existent path");
-        } catch (UncheckedIOException e) {
-            assertTrue(e.getCause() instanceof IOException);
-        }
-    }
-
-    @Test
-    public void testOfLines_DifferentCharsets() throws IOException {
-        File utf8File = Files.createTempFile(tempFolder, "utf8", ".txt").toFile();
-        String content = "Hello\nWorld\n你好\n世界";
-        Files.write(utf8File.toPath(), content.getBytes("UTF-8"));
-
-        List<String> utf8Lines = Stream.ofLines(utf8File, Charsets.UTF_8).toList();
-        assertEquals(4, utf8Lines.size());
-        assertEquals("你好", utf8Lines.get(2));
-        assertEquals("世界", utf8Lines.get(3));
-
-        List<String> isoLines = Stream.ofLines(utf8File, Charset.forName("ISO-8859-1")).toList();
-        assertEquals(4, isoLines.size());
-        assertNotEquals("你好", isoLines.get(2));
-    }
-
-    @Test
-    public void testOfLines_LargeFile() throws IOException {
-        File largeFile = Files.createTempFile(tempFolder, "large", ".txt").toFile();
-        List<String> lines = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            lines.add("Line " + i);
-        }
-        Files.write(largeFile.toPath(), lines);
-
-        long count = Stream.ofLines(largeFile).count();
-        assertEquals(10000, count);
-
-        long evenCount = Stream.ofLines(largeFile)
-                .filter(line -> line.contains("0") || line.contains("2") || line.contains("4") || line.contains("6") || line.contains("8"))
-                .count();
-        assertTrue(evenCount > 0);
-    }
-
-    @Test
-    public void testOfLines_ReaderClosed() throws IOException {
-        String content = "line1\nline2\nline3";
-        StringReader reader = new StringReader(content);
-
-        List<String> lines;
-        try (Stream<String> stream = Stream.ofLines(reader, true)) {
-            lines = stream.toList();
-        }
-
-        assertEquals(3, lines.size());
-
-        try {
-            reader.read();
-            fail("Reader should be closed");
-        } catch (IOException e) {
-        }
-    }
-
-    @Test
-    public void testOfLines_BufferedReader() throws IOException {
-        String content = "line1\nline2\nline3";
-        BufferedReader bufferedReader = new BufferedReader(new StringReader(content));
-
-        List<String> lines = Stream.ofLines(bufferedReader, false).toList();
-
-        assertEquals(3, lines.size());
-
-        bufferedReader.close();
-    }
-
-    @Test
-    public void testOfLinesFromFile() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "testlines.txt");
-        try (FileWriter fw = new FileWriter(tempFile)) {
-            fw.write("hello\nworld\n");
-        }
-        try (Stream<String> lines = Stream.ofLines(tempFile)) {
-            List<String> result = lines.toList();
-            assertEquals(Arrays.asList("hello", "world"), result);
-        }
-    }
-
-    @Test
-    public void testOfLinesFromFileWithCharset() throws IOException {
-        File tempFile = new File(tempDir.toFile(), "testlines_charset.txt");
-        try (FileWriter fw = new FileWriter(tempFile)) {
-            fw.write("abc\ndef\n");
-        }
-        try (Stream<String> lines = Stream.ofLines(tempFile, StandardCharsets.UTF_8)) {
-            List<String> result = lines.toList();
-            assertEquals(Arrays.asList("abc", "def"), result);
-        }
-    }
-
-    @Test
-    public void testOfLinesFromPath() throws IOException {
-        Path tempFile = tempDir.resolve("testlines_path.txt");
-        Files.write(tempFile, Arrays.asList("one", "two", "three"));
-        try (Stream<String> lines = Stream.ofLines(tempFile)) {
-            List<String> result = lines.toList();
-            assertEquals(Arrays.asList("one", "two", "three"), result);
-        }
-    }
-
-    @Test
-    public void testOfLinesFromReader() throws IOException {
-        StringReader reader = new StringReader("first\nsecond\nthird");
-        List<String> result = Stream.ofLines(reader).toList();
-        assertEquals(Arrays.asList("first", "second", "third"), result);
-    }
-
-    @Test
-    public void testOfLinesFromReader_autoClose() throws IOException {
-        StringReader reader = new StringReader("a\nb");
-        try (Stream<String> lines = Stream.ofLines(reader, true)) {
-            List<String> result = lines.toList();
-            assertEquals(Arrays.asList("a", "b"), result);
-        }
-    }
-
-    @Test
-    public void testListFiles_NonExistentDirectory() {
-        File nonExistent = new File("non-existent-dir");
-        List<File> files = Stream.listFiles(nonExistent).toList();
-        assertTrue(files.isEmpty());
-    }
-
-    @Test
-    public void testListFiles() throws IOException {
-        File tempFile = tempDir.resolve("test.txt").toFile();
-        IOUtil.write("test content", tempFile);
-
-        List<File> result = Stream.listFiles(tempDir.toFile()).toList();
-        assertFalse(result.isEmpty());
-        assertTrue(result.stream().anyMatch(f -> f.getName().equals("test.txt")));
-    }
-
-    @Test
-    public void testListFilesRecursively() throws IOException {
-        File txtFile = tempDir.resolve("test.txt").toFile();
-        File jsonFile = tempDir.resolve("test.json").toFile();
-        IOUtil.write("txt", txtFile);
-        IOUtil.write("json", jsonFile);
-
-        List<File> result = Stream.listFiles(tempDir.toFile(), false).toList();
-        assertFalse(result.isEmpty());
-        assertTrue(result.size() >= 2);
-    }
-
-    @Test
-    public void testListFilesExcludeDirectory() throws IOException {
-        File tempDir = Files.createTempDirectory("test").toFile();
-        tempDir.deleteOnExit();
-
-        File file1 = new File(tempDir, "file1.txt");
-        File subDir = new File(tempDir, "subdir");
-        File file2 = new File(subDir, "file2.txt");
-
-        file1.createNewFile();
-        subDir.mkdir();
-        file2.createNewFile();
-
-        file1.deleteOnExit();
-        file2.deleteOnExit();
-        subDir.deleteOnExit();
-
-        List<File> files = Stream.listFiles(tempDir, true, true).toList();
-        assertEquals(2, files.size());
-        assertTrue(files.stream().allMatch(File::isFile));
-    }
-
-    @Test
-    public void testListFiles_SingleDirectory() throws IOException {
-        File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
-        File file1 = new File(parentDir, "file1.txt");
-        File file2 = new File(parentDir, "file2.txt");
-        file1.createNewFile();
-        file2.createNewFile();
-
-        List<File> files = Stream.listFiles(parentDir).toList();
-        assertEquals(2, files.size());
-        assertTrue(files.contains(file1));
-        assertTrue(files.contains(file2));
-    }
-
-    @Test
-    public void testListFiles_Recursive() throws IOException {
-        File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
-        File subDir = new File(parentDir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(parentDir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        file1.createNewFile();
-        file2.createNewFile();
-
-        List<File> files = Stream.listFiles(parentDir, true).toList();
-        assertEquals(3, files.size());
-        assertTrue(files.contains(subDir));
-        assertTrue(files.contains(file1));
-        assertTrue(files.contains(file2));
-    }
-
-    @Test
-    public void testListFiles_RecursiveExcludeDirectory() throws IOException {
-        File parentDir = Files.createTempDirectory(tempFolder, "parent").toFile();
-        File subDir = new File(parentDir, "subdir");
-        subDir.mkdir();
-        File file1 = new File(parentDir, "file1.txt");
-        File file2 = new File(subDir, "file2.txt");
-        file1.createNewFile();
-        file2.createNewFile();
-
-        List<File> files = Stream.listFiles(parentDir, true, true).toList();
-        assertEquals(2, files.size());
-        assertTrue(files.contains(file1));
-        assertTrue(files.contains(file2));
-        assertFalse(files.contains(subDir));
-    }
-
-    @Test
-    public void testListFiles_EmptyDirectory() throws IOException {
-        File emptyDir = Files.createTempDirectory(tempFolder, "empty").toFile();
-
-        List<File> files = Stream.listFiles(emptyDir).toList();
-
-        assertTrue(files.isEmpty());
-    }
-
-    @Test
-    public void testListFiles_DeepRecursion() throws IOException {
-        File root = Files.createTempDirectory(tempFolder, "deep").toFile();
-        File current = root;
-        for (int i = 0; i < 5; i++) {
-            File subDir = new File(current, "level" + i);
-            subDir.mkdir();
-            File file = new File(current, "file" + i + ".txt");
-            file.createNewFile();
-            current = subDir;
-        }
-
-        List<File> files = Stream.listFiles(root, true).toList();
-
-        assertEquals(10, files.size());
-    }
-
-    @Test
-    public void testListFiles_MixedContent() throws IOException {
-        File dir = Files.createTempDirectory(tempFolder, "mixed").toFile();
-
-        new File(dir, "test.txt").createNewFile();
-        new File(dir, "test.java").createNewFile();
-        new File(dir, "test.xml").createNewFile();
-        new File(dir, ".hidden").createNewFile();
-
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        new File(subDir, "nested.txt").createNewFile();
-
-        List<File> nonRecursive = Stream.listFiles(dir, false).toList();
-        assertEquals(5, nonRecursive.size());
-
-        List<File> recursiveFiles = Stream.listFiles(dir, true, true).toList();
-        assertEquals(5, recursiveFiles.size());
-    }
-
-    @Test
-    public void testListFiles_RecursiveDoesNotDescendIntoADirectorySymlink() throws IOException {
-        // The recursive traversal used to queue any entry for which isDirectory() was true - and isDirectory()
-        // FOLLOWS a symbolic link. That walked out of the tree through a link, and looped forever on a link
-        // pointing at one of its own ancestors. It also made IOUtil.walk(..)'s javadoc, which promises links
-        // are never descended into, false.
-        final File real = Files.createTempDirectory(tempFolder, "sym-target").toFile();
-        new File(real, "inside.txt").createNewFile();
-
-        final File root = Files.createTempDirectory(tempFolder, "sym-root").toFile();
-        new File(root, "plain.txt").createNewFile();
-
-        try {
-            Files.createSymbolicLink(new File(root, "link").toPath(), real.toPath());
-        } catch (final UnsupportedOperationException | IOException e) {
-            // Creating a symlink needs a privilege this process may not hold (Windows without Developer Mode).
-            // Abort so the run reports this as skipped rather than as a test that asserted nothing.
-            Assumptions.abort("symbolic links cannot be created here: " + e);
-        }
-
-        final List<String> names = new ArrayList<>();
-        for (final File f : Stream.listFiles(root, true).toList()) {
-            names.add(f.getName());
-        }
-        Collections.sort(names);
-
-        // The link itself is reported; what it points at is not.
-        assertEquals(N.asList("link", "plain.txt"), names);
-    }
-
-    @Test
-    public void testListFiles_RecursiveTerminatesOnACyclicSymlink() throws IOException {
-        final File root = Files.createTempDirectory(tempFolder, "sym-cycle").toFile();
-        new File(root, "f.txt").createNewFile();
-
-        try {
-            Files.createSymbolicLink(new File(root, "self").toPath(), root.toPath());
-        } catch (final UnsupportedOperationException | IOException e) {
-            Assumptions.abort("symbolic links cannot be created here: " + e); // see above
-        }
-
-        assertEquals(2, Stream.listFiles(root, true).toList().size());
-    }
-
-    /**
-     * Creates a Windows directory junction, or aborts the test if this platform has none.
-     *
-     * <p>A junction is deliberately used instead of a symbolic link: {@code Files.createSymbolicLink}
-     * needs {@code SeCreateSymbolicLinkPrivilege} and fails on a stock Windows account, which is why
-     * {@link #testListFiles_RecursiveTerminatesOnACyclicSymlink()} is skipped there - exactly the platform
-     * where junctions exist. {@code mklink /J} needs no privilege.
-     */
-    private static void createJunctionOrAbort(final File link, final File target) throws Exception {
-        if (!IOUtil.IS_OS_WINDOWS) {
-            Assumptions.abort("directory junctions are a Windows concept");
-        }
-
-        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath()).redirectErrorStream(true).start();
-
-        p.waitFor();
-
-        if (!(p.exitValue() == 0 && link.exists())) {
-            Assumptions.abort("a directory junction could not be created here");
-        }
-    }
-
-    /** Unlinks a junction without touching its target. Never use a recursive delete on one. */
-    private static void unlinkQuietly(final File link) {
-        try {
-            java.nio.file.Files.deleteIfExists(link.toPath());
-        } catch (final IOException e) {
-            // best effort: the temp folder rule cleans up the rest
-        }
-    }
-
-    /**
-     * {@code Stream.listFiles(dir, true)} must not descend into a Windows directory junction.
-     *
-     * <p>The guard used {@code !Files.isSymbolicLink(path)}, which is {@code false} for a junction (it
-     * carries the {@code MOUNT_POINT} reparse tag, not {@code SYMLINK}), so the walk descended through one.
-     * Measured before the fix on this tree: {@code IOUtil.listFiles} returned 5 entries while
-     * {@code Stream.listFiles} returned 383 (capped), 365 of them {@code loop\loop\loop\...} repetitions.
-     * The javadoc claims parity with {@link IOUtil#listFiles(File, boolean, boolean)}, so that parity is
-     * what this asserts.
-     */
-    @Test
-    public void testListFiles_DoesNotDescendIntoAWindowsJunction() throws Exception {
-        final File root = Files.createTempDirectory(tempFolder, "junction-cycle").toFile();
-        new File(root, "a.txt").createNewFile();
-        final File sub = new File(root, "sub");
-        sub.mkdir();
-        new File(sub, "b.txt").createNewFile();
-
-        final File loop = new File(root, "loop");
-        createJunctionOrAbort(loop, root);
-
-        try {
-            final List<File> viaStream = Stream.listFiles(root, true).limit(400).toList();
-            final List<File> viaIoUtil = IOUtil.listFiles(root, true, false);
-
-            assertEquals(viaIoUtil.size(), viaStream.size(), "Stream.listFiles must match IOUtil.listFiles, as its javadoc claims");
-            assertTrue(viaStream.stream().noneMatch(f -> f.getPath().contains("loop" + File.separator + "loop")),
-                    "the traversal descended into the junction: " + viaStream);
-        } finally {
-            unlinkQuietly(loop);
-        }
-    }
-
-    /**
-     * A junction needs no cycle to be dangerous: one pointing outside the tree made the traversal report
-     * files from outside its own root, contradicting "a link is therefore never followed out of the tree".
-     */
-    @Test
-    public void testListFiles_DoesNotFollowAJunctionOutOfTheTree() throws Exception {
-        final File root = Files.createTempDirectory(tempFolder, "junction-escape").toFile();
-        new File(root, "a.txt").createNewFile();
-
-        final File outside = Files.createTempDirectory(tempFolder, "junction-outside").toFile();
-        new File(outside, "SECRET.txt").createNewFile();
-
-        final File escape = new File(root, "escape");
-        createJunctionOrAbort(escape, outside);
-
-        try {
-            final List<File> viaStream = Stream.listFiles(root, true).limit(400).toList();
-
-            assertTrue(viaStream.stream().noneMatch(f -> "SECRET.txt".equals(f.getName())),
-                    "the traversal followed the junction out of the tree: " + viaStream);
-            assertEquals(IOUtil.listFiles(root, true, false).size(), viaStream.size());
-        } finally {
-            unlinkQuietly(escape);
-        }
-    }
-
-    @Test
-    public void testListFiles_SymbolicLinks() throws IOException {
-        File targetDir = Files.createTempDirectory(tempFolder, "target").toFile();
-        File targetFile = new File(targetDir, "target.txt");
-        targetFile.createNewFile();
-
-        File linkDir = Files.createTempDirectory(tempFolder, "links").toFile();
-
-        try {
-            Path link = new File(linkDir, "link.txt").toPath();
-            Files.createSymbolicLink(link, targetFile.toPath());
-
-            List<File> files = Stream.listFiles(linkDir).toList();
-            assertEquals(1, files.size());
-            assertEquals("link.txt", files.get(0).getName());
-        } catch (UnsupportedOperationException | IOException e) {
-        }
-    }
-
-    @Test
-    public void testListFiles_HiddenFiles() throws IOException {
-        File dir = Files.createTempDirectory(tempFolder, "hidden").toFile();
-
-        File regularFile = new File(dir, "regular.txt");
-        regularFile.createNewFile();
-
-        File hiddenFile = new File(dir, ".hidden");
-        hiddenFile.createNewFile();
-
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            try {
-                Files.setAttribute(hiddenFile.toPath(), "dos:hidden", true);
-            } catch (IOException e) {
-            }
-        }
-
-        List<File> allFiles = Stream.listFiles(dir).toList();
-        assertTrue(allFiles.size() >= 2);
-    }
-
-    @Test
-    public void testListFiles_PermissionDenied() throws IOException {
-        assertDoesNotThrow(() -> {
-            File dir = Files.createTempDirectory(tempFolder, "restricted").toFile();
-            File file = new File(dir, "file.txt");
-            file.createNewFile();
-
-            boolean permissionChanged = dir.setReadable(false);
-
-            if (permissionChanged) {
-                try {
-                    List<File> files = Stream.listFiles(dir).toList();
-                } catch (Exception e) {
-                } finally {
-                    dir.setReadable(true);
-                }
-            }
-        });
-    }
-
-    @Test
-    public void testListFilesRecursive() throws IOException {
-        File dir = tempDir.toFile();
-        File subDir = new File(dir, "subdir");
-        subDir.mkdir();
-        File f = new File(subDir, "nested.txt");
-        f.createNewFile();
-
-        List<File> files = Stream.listFiles(dir, true).toList();
-        assertTrue(files.stream().anyMatch(file -> file.getName().equals("nested.txt")));
-    }
-
-    @Test
-    public void testListFilesRecursiveExcludeDir() throws IOException {
-        File dir = tempDir.toFile();
-        File subDir = new File(dir, "subdir2");
-        subDir.mkdir();
-        new File(subDir, "nested2.txt").createNewFile();
-
-        List<File> files = Stream.listFiles(dir, true, true).toList();
-        assertTrue(files.stream().allMatch(File::isFile));
-    }
-
-    @Test
-    public void testInterval() {
-        AtomicInteger counter = new AtomicInteger(0);
-        List<Integer> result = Stream.interval(5, () -> counter.incrementAndGet()).limit(3).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testIntervalWithDelay() {
-        AtomicInteger counter = new AtomicInteger(0);
-        List<Integer> result = Stream.interval(1, 5, () -> counter.incrementAndGet()).limit(3).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-    }
-
-    @Test
-    public void testIntervalWithSupplier() throws InterruptedException {
-        final int[] counter = { 0 };
-        List<Integer> result = Stream.interval(10, () -> counter[0]++).limit(3).toList();
-
-        assertEquals(Arrays.asList(0, 1, 2), result);
-        assertTrue(counter[0] >= 3);
-    }
-
-    @Test
-    public void testIntervalWithDelayAndSupplier() throws InterruptedException {
-        final int[] counter = { 0 };
-        long startTime = System.currentTimeMillis();
-
-        List<Integer> result = Stream.interval(50, 10, () -> counter[0]++).limit(3).toList();
-
-        long elapsedTime = System.currentTimeMillis() - startTime;
-
-        assertEquals(Arrays.asList(0, 1, 2), result);
-        assertTrue(elapsedTime >= 50);
-    }
-
-    @Test
-    public void testIntervalWithTimeUnit() throws InterruptedException {
-        final int[] counter = { 0 };
-
-        List<Integer> result = Stream.interval(0, 10, TimeUnit.MILLISECONDS, () -> counter[0]++).limit(3).toList();
-
-        assertEquals(Arrays.asList(0, 1, 2), result);
-    }
-
-    @Test
-    public void testIntervalWithLongFunction() throws InterruptedException {
-        List<String> result = Stream.interval(10, time -> "Time: " + time).limit(2).toList();
-
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).startsWith("Time: "));
-        assertTrue(result.get(1).startsWith("Time: "));
-    }
-
-    @Test
-    public void testInterval_WithSupplier() throws InterruptedException {
-        List<Long> timestamps = new ArrayList<>();
-        long startTime = System.currentTimeMillis();
-
-        Stream.interval(50, s -> s).limit(3).forEach(timestamps::add);
-
-        assertEquals(3, timestamps.size());
-
-        for (int i = 1; i < timestamps.size(); i++) {
-            long interval = timestamps.get(i) - timestamps.get(i - 1);
-            assertTrue(interval >= 40 && interval <= 70, "Interval should be around 50ms");
-        }
-    }
-
-    @Test
-    public void testInterval_WithDelayAndSupplier() throws InterruptedException {
-        List<String> results = new ArrayList<>();
-
-        Stream.interval(100, 50, () -> "tick").limit(3).forEach(results::add);
-
-        assertEquals(Arrays.asList("tick", "tick", "tick"), results);
-    }
-
-    @Test
-    public void testInterval_WithLongFunction() throws InterruptedException {
-        List<Long> values = new ArrayList<>();
-
-        Stream.interval(50, timeMillis -> timeMillis).limit(3).forEach(values::add);
-
-        assertEquals(3, values.size());
-
-        for (Long value : values) {
-            assertTrue(value > 0);
-        }
-    }
-
-    @Test
-    public void testInterval_CancellationBehavior() throws InterruptedException {
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Stream<Integer> intervalStream = trackStream(Stream.interval(10, () -> counter.incrementAndGet()));
-
-        List<Integer> results = intervalStream.limit(3).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3), results);
-
-        Thread.sleep(50);
-        assertTrue(counter.get() <= 4);
-    }
-
-    @Test
-    public void testObserveWithDuration() throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-        queue.offer("item1");
-        queue.offer("item2");
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                Thread.sleep(50);
-                queue.offer("item3");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        List<String> result = Stream.observe(queue, Duration.ofMillis(100)).toList();
-        assertTrue(result.size() >= 2);
-        assertTrue(result.contains("item1"));
-        assertTrue(result.contains("item2"));
-    }
-
-    @Test
-    public void testObserveWithBooleanSupplier() throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-        MutableBoolean hasMore = MutableBoolean.of(true);
-
-        queue.offer("item1");
-        queue.offer("item2");
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                Thread.sleep(50);
-                queue.offer("item3");
-                Thread.sleep(50);
-                hasMore.setFalse();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        List<String> result = Stream.observe(queue, hasMore::value, 20).toList();
-        assertEquals(3, result.size());
-        assertEquals(Arrays.asList("item1", "item2", "item3"), result);
-    }
-
-    @Test
-    public void testObserve_BlockingQueueWithDuration() throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-        queue.add("item1");
-        queue.add("item2");
-
-        List<String> results = Stream.observe(queue, Duration.ofMillis(100)).toList();
-
-        assertTrue(results.contains("item1"));
-        assertTrue(results.contains("item2"));
-    }
-
-    @Test
-    public void testObserve_BlockingQueueWithHasMore() throws InterruptedException {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
-        BooleanSupplier hasMore = () -> true;
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                Thread.sleep(50);
-                queue.add(1);
-                Thread.sleep(50);
-                queue.add(2);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        List<Integer> results = Stream.observe(queue, hasMore, 30).limit(2).toList();
-
-        assertEquals(Arrays.asList(1, 2), results);
-    }
-
-    @Test
-    public void testObserve_EmptyQueue() throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-
-        List<String> results = Stream.observe(queue, Duration.ofMillis(50)).toList();
-
-        assertTrue(results.isEmpty());
-    }
-
-    @Test
-    public void testObserve_QueueWithTimeout() throws InterruptedException {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                Thread.sleep(30);
-                queue.add(1);
-                Thread.sleep(30);
-                queue.add(2);
-                Thread.sleep(100);
-                queue.add(3);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        List<Integer> results = Stream.observe(queue, Duration.ofMillis(100)).toList();
-
-        assertEquals(2, results.size());
-        assertTrue(results.contains(1));
-        assertTrue(results.contains(2));
-    }
-
-    @Test
-    public void testThreadSafety() throws InterruptedException {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1000);
-
-        Thread producer = new Thread(() -> {
-            for (int i = 0; i < 100; i++) {
-                try {
-                    queue.put(i);
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        });
-
-        producer.start();
-
-        List<Integer> consumed = Stream.observe(queue, Duration.ofMillis(500)).filter(n -> n % 2 == 0).toList();
-
-        producer.join();
-
-        assertTrue(consumed.size() > 0);
-        assertTrue(consumed.stream().allMatch(n -> n % 2 == 0));
-    }
-
-    @Test
-    public void testConcat() {
-        Stream<Integer> stream = Stream.concat(Stream.of(1, 2), Stream.of(3, 4));
-        assertEquals(Arrays.asList(1, 2, 3, 4), stream.toList());
-    }
-
-    @Test
-    public void testConcatVarargs() {
-        Stream<Integer> stream = Stream.concat(Stream.of(1), Stream.of(2), Stream.of(3));
-        assertEquals(Arrays.asList(1, 2, 3), stream.toList());
-    }
-
-    @Test
-    public void testConcatStreams() {
-        Stream<Integer> stream1 = createStream(1, 2, 3);
-        Stream<Integer> stream2 = createStream(4, 5);
-        Stream<Integer> stream3 = createStream(6, 7, 8);
-
-        List<Integer> result = Stream.concat(stream1, stream2, stream3).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
-    }
-
-    @Test
-    public void testConcat_Arrays() {
-        Integer[] arr1 = { 1, 2, 3 };
-        Integer[] arr2 = { 4, 5, 6 };
-        Integer[] arr3 = { 7, 8, 9 };
-
-        List<Integer> result = Stream.concat(arr1, arr2, arr3).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
-    }
-
-    @Test
-    public void testConcat_Iterables() {
-        List<Integer> list1 = Arrays.asList(1, 2, 3);
-        Set<Integer> set2 = new HashSet<>(Arrays.asList(4, 5, 6));
-        List<Integer> list3 = Arrays.asList(7, 8, 9);
-
-        List<Integer> result = Stream.concat(list1, set2, list3).sorted().toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
-    }
-
-    @Test
-    public void testConcat_Iterators() {
-        Iterator<String> iter1 = Arrays.asList("a", "b").iterator();
-        Iterator<String> iter2 = Arrays.asList("c", "d").iterator();
-
-        List<String> result = Stream.concat(iter1, iter2).toList();
-
-        assertEquals(Arrays.asList("a", "b", "c", "d"), result);
-    }
-
-    @Test
-    public void testConcat_Streams() {
-        Stream<Integer> stream1 = createStream(1, 2, 3);
-        Stream<Integer> stream2 = createStream(4, 5, 6);
-        Stream<Integer> stream3 = createStream(7, 8, 9);
-
-        List<Integer> result = Stream.concat(stream1, stream2, stream3).toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), result);
-    }
-
-    @Test
-    public void testConcat_CollectionOfStreams() {
-        List<Stream<String>> streams = Arrays.asList(createStream01("a", "b"), createStream01("c", "d"), createStream01("e", "f"));
-
-        List<String> result = Stream.concat(streams).toList();
-
-        assertEquals(Arrays.asList("a", "b", "c", "d", "e", "f"), result);
-    }
-
-    @Test
-    public void testConcat_MixedTypes() {
-        Integer[] arr = { 1, 2 };
-        List<Integer> list = Arrays.asList(3, 4);
-        Set<Integer> set = new HashSet<>(Arrays.asList(5, 6));
-
-        List<Integer> result = Stream.concat(createStream01(arr), createStream(list), createStream(set)).sorted().toList();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testConcat_StreamClose() {
-        AtomicBoolean stream1Closed = new AtomicBoolean(false);
-        AtomicBoolean stream2Closed = new AtomicBoolean(false);
-
-        Stream<String> stream1 = createStream01("a", "b").onClose(() -> stream1Closed.set(true));
-        Stream<String> stream2 = createStream01("c", "d").onClose(() -> stream2Closed.set(true));
-
-        try (Stream<String> concatenated = Stream.concat(stream1, stream2)) {
-            assertEquals(Arrays.asList("a", "b", "c", "d"), concatenated.toList());
-        }
-
-        assertTrue(stream1Closed.get());
-        assertTrue(stream2Closed.get());
-    }
-
-    @Test
-    public void testConcat_CollectionOfStreams_CloseHandlers() {
-        List<AtomicBoolean> closedFlags = new ArrayList<>();
-        List<Stream<Integer>> streams = new ArrayList<>();
-
-        for (int i = 0; i < 3; i++) {
-            AtomicBoolean closed = new AtomicBoolean(false);
-            closedFlags.add(closed);
-            final int base = i * 10;
-            streams.add(createStream(base, base + 1).onClose(() -> closed.set(true)));
-        }
-
-        try (Stream<Integer> concatenated = Stream.concat(streams)) {
-            List<Integer> result = concatenated.toList();
-            assertEquals(Arrays.asList(0, 1, 10, 11, 20, 21), result);
-        }
-
-        for (AtomicBoolean flag : closedFlags) {
-            assertTrue(flag.get());
-        }
-    }
-
-    @Test
-    public void testConcat_CollectionSnapshotPreservesTraversalAndClosing() {
-        final AtomicInteger closeCount = new AtomicInteger();
-        final List<Stream<Integer>> sources = new ArrayList<>();
-        sources.add(createStream(1, 2).onClose(closeCount::incrementAndGet));
-
-        final Stream<Integer> concatenated = Stream.concat(sources);
-        sources.clear();
-
-        try (concatenated) {
-            assertEquals(Arrays.asList(1, 2), concatenated.toList());
-        }
-
-        assertEquals(1, closeCount.get());
-    }
-
-    @Test
-    public void testConcat_ClosePreservesFirstErrorAndContinuesClosing() {
-        final AssertionError failure = new AssertionError("first close failure");
-        final AtomicInteger laterCloseCalls = new AtomicInteger();
-        final Stream<Integer> first = createStream(1).onClose(() -> {
-            throw failure;
-        });
-        final Stream<Integer> second = createStream(2).onClose(laterCloseCalls::incrementAndGet);
-        final Stream<Integer> concatenated = Stream.concat(first, second);
-
-        final AssertionError thrown = assertThrows(AssertionError.class, concatenated::close);
-
-        assertSame(failure, thrown);
-        assertEquals(1, laterCloseCalls.get());
-    }
-
-    @Test
-    public void testConcatArrays() {
-        Integer[] arr1 = { 1, 2, 3 };
-        Integer[] arr2 = { 4, 5 };
-        Integer[] arr3 = { 6, 7, 8 };
-
-        List<Integer> result = Stream.concat(arr1, arr2, arr3).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), result);
-
-        result = Stream.concat(new Integer[0], arr1, new Integer[0]).toList();
-        assertEquals(Arrays.asList(1, 2, 3), result);
-
-        result = Stream.concat(new Integer[0][0]).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcatStreamCollection() {
-        List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2), createStream(3, 4), createStream(5, 6));
-
-        List<Integer> result = Stream.concat(streams).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-
-        List<Stream<Integer>> emptyStreams = new ArrayList<>();
-        result = Stream.concat(emptyStreams).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcat_EmptyArrays() {
-        Integer[] arr1 = {};
-        Integer[] arr2 = {};
-
-        List<Integer> result = Stream.concat(arr1, arr2).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcat_WithNullElements() {
-        Stream<String> s1 = createStream01("a", null, "b");
-        Stream<String> s2 = createStream01(null, "c", "d");
-
-        List<String> result = Stream.concat(s1, s2).toList();
-
-        assertEquals(Arrays.asList("a", null, "b", null, "c", "d"), result);
-    }
-
-    @Test
-    public void testConcatIterables() {
-        List<Integer> list1 = Arrays.asList(1, 2);
-        List<Integer> list2 = Arrays.asList(3, 4);
-        List<Integer> list3 = Arrays.asList(5, 6);
-
-        List<Integer> result = Stream.concatIterables(Arrays.asList(list1, list2, list3)).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testConcatIterablesCollection() {
-        List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), new HashSet<>(Arrays.asList(3, 4)), Arrays.asList(5, 6));
-
-        List<Integer> result = Stream.concatIterables(iterables).toList();
-        assertEquals(6, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6)));
-    }
-
-    @Test
-    public void testConcatIterablesEmpty() {
-        List<Integer> result = Stream.concatIterables(Arrays.<List<Integer>> asList()).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcatIterables_EmptyIterables() {
-        List<List<String>> emptyLists = Arrays.asList(Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
-
-        List<String> result = Stream.concatIterables(emptyLists).toList();
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testConcatIterators() {
-        Iterator<Integer> iter1 = Arrays.asList(1, 2).iterator();
-        Iterator<Integer> iter2 = Arrays.asList(3, 4).iterator();
-
-        List<Integer> result = Stream.concatIterators(Arrays.asList(iter1, iter2)).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testConcatIteratorsCollection() {
-        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(3, 4).iterator(), Arrays.asList(5, 6).iterator());
-
-        List<Integer> result = Stream.concatIterators(iterators).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testConcatIterableAndIteratorCollectionsSnapshotMembership() {
-        final List<Iterable<Integer>> iterableSources = new ArrayList<>();
-        iterableSources.add(Arrays.asList(1, 2));
-        final Stream<Integer> iterableConcat = Stream.concatIterables(iterableSources);
-        iterableSources.clear();
-        assertEquals(Arrays.asList(1, 2), iterableConcat.toList());
-
-        final List<Iterator<Integer>> iteratorSources = new ArrayList<>();
-        iteratorSources.add(Arrays.asList(3, 4).iterator());
-        final Stream<Integer> iteratorConcat = Stream.concatIterators(iteratorSources);
-        iteratorSources.clear();
-        assertEquals(Arrays.asList(3, 4), iteratorConcat.toList());
-    }
-
-    @Test
-    public void testParallelConcat() {
-        Stream<Integer> s1 = Stream.of(1, 2, 3);
-        Stream<Integer> s2 = Stream.of(4, 5, 6);
-        List<Integer> result = Stream.parallelConcat(Arrays.asList(s1, s2), 2).toList();
-        assertEquals(6, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6)));
-    }
-
-    @Test
-    public void testParallelConcatEmpty() {
-        Stream<Integer> s1 = Stream.empty();
-        Stream<Integer> s2 = Stream.empty();
-        List<Integer> result = Stream.parallelConcat(Arrays.asList(s1, s2), 2).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testParallelConcat_StreamArray() throws Exception {
-        @SuppressWarnings("unchecked")
-        Stream<Integer>[] streams = new Stream[] { Stream.of(1, 2), Stream.of(3, 4) };
-        List<Integer> result = Stream.parallelConcat(streams).sorted().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testParallelConcat_IteratorArray() throws Exception {
-        @SuppressWarnings("unchecked")
-        Iterator<Integer>[] iters = new Iterator[] { Arrays.asList(1, 2).iterator(), Arrays.asList(3, 4).iterator() };
-        List<Integer> result = Stream.parallelConcat(iters).sorted().toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void testParallelConcatIterators() {
-        Iterator<Integer> it1 = Arrays.asList(1, 2).iterator();
-        Iterator<Integer> it2 = Arrays.asList(3, 4).iterator();
-        List<Integer> result = Stream.parallelConcatIterators(Arrays.asList(it1, it2), 2).toList();
-        assertEquals(4, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4)));
-    }
-
-    @Test
-    public void testParallelConcatIteratorsWithOnlyNullSources() {
-        final List<Iterator<Integer>> sources = Arrays.asList(null, null);
-
-        assertTrue(Stream.parallelConcatIterators(sources).toList().isEmpty());
-        assertTrue(Stream.parallelConcatIterators(sources, 1).toList().isEmpty());
-        assertTrue(Stream.parallelConcatIterators(sources, 1, 1).toList().isEmpty());
-        assertTrue(Stream.<Integer> parallelConcat((Iterator<Integer>) null, (Iterator<Integer>) null).toList().isEmpty());
-    }
-
-    @Test
-    public void testMinByAndMaxByWithOnlyNullKeys() {
-        assertEquals("a", Stream.of("a", "b").minBy(value -> (String) null).get());
-        assertEquals("a", Stream.of("a", "b").maxBy(value -> (String) null).get());
-    }
-
-    @Test
-    public void testTransformViaJdkStreamModeAndDeferral() {
-        for (final boolean deferred : new boolean[] { false, true }) {
-            final AtomicInteger transferCalls = new AtomicInteger();
-            try (final Stream<Integer> result = Stream.of(1, 2).transformViaJdkStream(jdkStream -> {
-                transferCalls.incrementAndGet();
-                assertFalse(jdkStream.isParallel());
-                return jdkStream.parallel().map(value -> value * 2);
-            }, deferred)) {
-                assertEquals(deferred ? 0 : 1, transferCalls.get());
-                assertEquals(!deferred, result.isParallel());
-                assertEquals(Arrays.asList(2, 4), result.sorted().toList());
-                assertEquals(1, transferCalls.get());
-            }
-        }
-        try (final Stream<Integer> result = Stream.of(1, 2).transformViaJdkStream(java.util.stream.Stream::parallel)) {
-            assertTrue(result.isParallel());
-        }
-    }
-
-    @Test
-    public void testParallelConcatIteratorsSkipsNullSourcesAndRetainsNullElements() {
-        for (int nullIndex = 0; nullIndex < 3; nullIndex++) {
-            for (boolean explicitBufferSize : new boolean[] { false, true }) {
-                final List<Iterator<Integer>> sources = new ArrayList<>();
-                sources.add(Arrays.asList(1, (Integer) null).iterator());
-                sources.add(Arrays.asList(2, 3).iterator());
-                sources.add(nullIndex, null);
-
-                final Stream<Integer> stream = explicitBufferSize ? Stream.parallelConcatIterators(sources, 1, 1) : Stream.parallelConcatIterators(sources, 1);
-
-                assertEquals(Arrays.asList(1, null, 2, 3), stream.toList());
-            }
-        }
-    }
-
-    @Test
-    public void testParallelConcatIteratorVarargsSkipsNullSourcesAndRetainsNullElements() {
-        for (int nullIndex = 0; nullIndex < 3; nullIndex++) {
-            final List<Iterator<Integer>> sources = new ArrayList<>();
-            sources.add(Arrays.asList(1, (Integer) null).iterator());
-            sources.add(Arrays.asList(2, 3).iterator());
-            sources.add(nullIndex, null);
-
-            final List<Integer> result = Stream.parallelConcat(sources.get(0), sources.get(1), sources.get(2)).toList();
-
-            assertEquals(4, result.size());
-            assertTrue(result.containsAll(Arrays.asList(1, null, 2, 3)));
-        }
-    }
-
-    @Test
-    public void testParallelConcatRejectsDisposableAfterRegularElement() {
-        NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
-        Stream<Object> source = Stream.of("safe", disposable);
-
-        assertThrows(IllegalStateException.class, () -> Stream.parallelConcat(Arrays.asList(source), 1, 8).count());
-    }
-
-    @Test
-    public void testParallelConcatIteratorsRejectsDisposableAfterRegularElement() {
-        NoCachingNoUpdating.DisposableArray<Integer> disposable = NoCachingNoUpdating.DisposableArray.wrap(new Integer[] { 1 });
-        Iterator<Object> source = Arrays.<Object> asList("safe", disposable).iterator();
-
-        assertThrows(IllegalStateException.class, () -> Stream.parallelConcatIterators(Arrays.asList(source), 1, 8).count());
-    }
-
-    @Test
-    public void testParallelConcatCollectionsSnapshotMembership() {
-        final List<Stream<Integer>> streamSources = new ArrayList<>();
-        streamSources.add(Stream.of(1, 2));
-        final Stream<Integer> streamConcat = Stream.parallelConcat(streamSources, 1, 8);
-        streamSources.clear();
-        assertEquals(Arrays.asList(1, 2), streamConcat.toList());
-
-        final List<Iterator<Integer>> iteratorSources = new ArrayList<>();
-        iteratorSources.add(Arrays.asList(3, 4).iterator());
-        final Stream<Integer> iteratorConcat = Stream.parallelConcatIterators(iteratorSources, 1, 8);
-        iteratorSources.clear();
-        assertEquals(Arrays.asList(3, 4), iteratorConcat.toList());
-    }
-
-    @Test
-    public void testZip() {
-        Stream<String> stream = Stream.zip(Arrays.asList(1, 2, 3), Arrays.asList("a", "b", "c"), (i, s) -> i + s);
-        assertEquals(Arrays.asList("1a", "2b", "3c"), stream.toList());
-    }
-
-    @Test
-    public void testZipCharArraysWithBiFunction() {
-        char[] a = { 'a', 'b', 'c' };
-        char[] b = { 'x', 'y', 'z' };
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("cz", result.get(2));
-    }
-
-    @Test
-    public void testZipCharArraysWithTriFunction() {
-        char[] a = { 'a', 'b', 'c' };
-        char[] b = { 'x', 'y', 'z' };
-        char[] c = { '1', '2', '3' };
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("by2", result.get(1));
-        assertEquals("cz3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharIteratorsWithBiFunction() {
-        CharIterator a = CharIterator.of('a', 'b', 'c');
-        CharIterator b = CharIterator.of('x', 'y', 'z');
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("cz", result.get(2));
-    }
-
-    @Test
-    public void testZipCharIteratorsWithTriFunction() {
-        CharIterator a = CharIterator.of('a', 'b', 'c');
-        CharIterator b = CharIterator.of('x', 'y', 'z');
-        CharIterator c = CharIterator.of('1', '2', '3');
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("by2", result.get(1));
-        assertEquals("cz3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamsWithBiFunction() {
-        CharStream a = CharStream.of('a', 'b', 'c');
-        CharStream b = CharStream.of('x', 'y', 'z');
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("cz", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamsWithTriFunction() {
-        CharStream a = CharStream.of('a', 'b', 'c');
-        CharStream b = CharStream.of('x', 'y', 'z');
-        CharStream c = CharStream.of('1', '2', '3');
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("by2", result.get(1));
-        assertEquals("cz3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamCollectionWithNFunction() {
-        Collection<CharStream> streams = Arrays.asList(CharStream.of('a', 'b', 'c'), CharStream.of('x', 'y', 'z'), CharStream.of('1', '2', '3'));
-
-        CharNFunction<String> zipFunction = chars -> {
-            StringBuilder sb = new StringBuilder();
-            for (char c : chars) {
-                sb.append(c);
-            }
-            return sb.toString();
-        };
-
-        List<String> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("by2", result.get(1));
-        assertEquals("cz3", result.get(2));
-    }
-
-    @Test
-    public void testZipByteArraysWithBiFunction() {
-        byte[] a = { 1, 2, 3 };
-        byte[] b = { 4, 5, 6 };
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipByteArraysWithTriFunction() {
-        byte[] a = { 1, 2, 3 };
-        byte[] b = { 4, 5, 6 };
-        byte[] c = { 7, 8, 9 };
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipByteIteratorsWithBiFunction() {
-        ByteIterator a = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteIterator b = ByteIterator.of((byte) 4, (byte) 5, (byte) 6);
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipByteIteratorsWithTriFunction() {
-        ByteIterator a = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
-        ByteIterator b = ByteIterator.of((byte) 4, (byte) 5, (byte) 6);
-        ByteIterator c = ByteIterator.of((byte) 7, (byte) 8, (byte) 9);
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamsWithBiFunction() {
-        ByteStream a = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
-        ByteStream b = ByteStream.of((byte) 4, (byte) 5, (byte) 6);
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamsWithTriFunction() {
-        ByteStream a = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
-        ByteStream b = ByteStream.of((byte) 4, (byte) 5, (byte) 6);
-        ByteStream c = ByteStream.of((byte) 7, (byte) 8, (byte) 9);
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamCollectionWithNFunction() {
-        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 2, (byte) 3), ByteStream.of((byte) 4, (byte) 5, (byte) 6),
-                ByteStream.of((byte) 7, (byte) 8, (byte) 9));
-
-        ByteNFunction<Integer> zipFunction = bytes -> {
-            int sum = 0;
-            for (byte b : bytes) {
-                sum += b;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipShortArraysWithBiFunction() {
-        short[] a = { 1, 2, 3 };
-        short[] b = { 4, 5, 6 };
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipShortArraysWithTriFunction() {
-        short[] a = { 1, 2, 3 };
-        short[] b = { 4, 5, 6 };
-        short[] c = { 7, 8, 9 };
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipShortIteratorsWithBiFunction() {
-        ShortIterator a = ShortIterator.of((short) 1, (short) 2, (short) 3);
-        ShortIterator b = ShortIterator.of((short) 4, (short) 5, (short) 6);
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipShortIteratorsWithTriFunction() {
-        ShortIterator a = ShortIterator.of((short) 1, (short) 2, (short) 3);
-        ShortIterator b = ShortIterator.of((short) 4, (short) 5, (short) 6);
-        ShortIterator c = ShortIterator.of((short) 7, (short) 8, (short) 9);
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamsWithBiFunction() {
-        ShortStream a = ShortStream.of((short) 1, (short) 2, (short) 3);
-        ShortStream b = ShortStream.of((short) 4, (short) 5, (short) 6);
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamsWithTriFunction() {
-        ShortStream a = ShortStream.of((short) 1, (short) 2, (short) 3);
-        ShortStream b = ShortStream.of((short) 4, (short) 5, (short) 6);
-        ShortStream c = ShortStream.of((short) 7, (short) 8, (short) 9);
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamCollectionWithNFunction() {
-        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1, (short) 2, (short) 3), ShortStream.of((short) 4, (short) 5, (short) 6),
-                ShortStream.of((short) 7, (short) 8, (short) 9));
-
-        ShortNFunction<Integer> zipFunction = shorts -> {
-            int sum = 0;
-            for (short s : shorts) {
-                sum += s;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipIntArraysWithBiFunction() {
-        int[] a = { 1, 2, 3 };
-        int[] b = { 4, 5, 6 };
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipIntArraysWithTriFunction() {
-        int[] a = { 1, 2, 3 };
-        int[] b = { 4, 5, 6 };
-        int[] c = { 7, 8, 9 };
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipIntIteratorsWithBiFunction() {
-        IntIterator a = IntIterator.of(1, 2, 3);
-        IntIterator b = IntIterator.of(4, 5, 6);
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipIntIteratorsWithTriFunction() {
-        IntIterator a = IntIterator.of(1, 2, 3);
-        IntIterator b = IntIterator.of(4, 5, 6);
-        IntIterator c = IntIterator.of(7, 8, 9);
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamsWithBiFunction() {
-        IntStream a = IntStream.of(1, 2, 3);
-        IntStream b = IntStream.of(4, 5, 6);
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(9), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamsWithTriFunction() {
-        IntStream a = IntStream.of(1, 2, 3);
-        IntStream b = IntStream.of(4, 5, 6);
-        IntStream c = IntStream.of(7, 8, 9);
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamCollectionWithNFunction() {
-        Collection<IntStream> streams = Arrays.asList(IntStream.of(1, 2, 3), IntStream.of(4, 5, 6), IntStream.of(7, 8, 9));
-
-        IntNFunction<Integer> zipFunction = ints -> {
-            int sum = 0;
-            for (int i : ints) {
-                sum += i;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(15), result.get(1));
-        assertEquals(Integer.valueOf(18), result.get(2));
-    }
-
-    @Test
-    public void testZipLongArraysWithBiFunction() {
-        long[] a = { 1L, 2L, 3L };
-        long[] b = { 4L, 5L, 6L };
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(9L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongArraysWithTriFunction() {
-        long[] a = { 1L, 2L, 3L };
-        long[] b = { 4L, 5L, 6L };
-        long[] c = { 7L, 8L, 9L };
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(15L), result.get(1));
-        assertEquals(Long.valueOf(18L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongIteratorsWithBiFunction() {
-        LongIterator a = LongIterator.of(1L, 2L, 3L);
-        LongIterator b = LongIterator.of(4L, 5L, 6L);
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(9L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongIteratorsWithTriFunction() {
-        LongIterator a = LongIterator.of(1L, 2L, 3L);
-        LongIterator b = LongIterator.of(4L, 5L, 6L);
-        LongIterator c = LongIterator.of(7L, 8L, 9L);
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(15L), result.get(1));
-        assertEquals(Long.valueOf(18L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamsWithBiFunction() {
-        LongStream a = LongStream.of(1L, 2L, 3L);
-        LongStream b = LongStream.of(4L, 5L, 6L);
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(9L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamsWithTriFunction() {
-        LongStream a = LongStream.of(1L, 2L, 3L);
-        LongStream b = LongStream.of(4L, 5L, 6L);
-        LongStream c = LongStream.of(7L, 8L, 9L);
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(15L), result.get(1));
-        assertEquals(Long.valueOf(18L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamCollectionWithNFunction() {
-        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L, 2L, 3L), LongStream.of(4L, 5L, 6L), LongStream.of(7L, 8L, 9L));
-
-        LongNFunction<Long> zipFunction = longs -> {
-            long sum = 0;
-            for (long l : longs) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Long> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(15L), result.get(1));
-        assertEquals(Long.valueOf(18L), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatArraysWithBiFunction() {
-        float[] a = { 1f, 2f, 3f };
-        float[] b = { 4f, 5f, 6f };
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(9f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatArraysWithTriFunction() {
-        float[] a = { 1f, 2f, 3f };
-        float[] b = { 4f, 5f, 6f };
-        float[] c = { 7f, 8f, 9f };
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12f), result.get(0));
-        assertEquals(Float.valueOf(15f), result.get(1));
-        assertEquals(Float.valueOf(18f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatIteratorsWithBiFunction() {
-        FloatIterator a = FloatIterator.of(1f, 2f, 3f);
-        FloatIterator b = FloatIterator.of(4f, 5f, 6f);
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(9f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatIteratorsWithTriFunction() {
-        FloatIterator a = FloatIterator.of(1, 2, 3);
-        FloatIterator b = FloatIterator.of(4, 5f, 6f);
-        FloatIterator c = FloatIterator.of(7f, 8f, 9f);
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(15f), result.get(1));
-        assertEquals(Float.valueOf(18f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamsWithBiFunction() {
-        FloatStream a = FloatStream.of(1, 2, 3);
-        FloatStream b = FloatStream.of(4, 5f, 6f);
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(9f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamsWithTriFunction() {
-        FloatStream a = FloatStream.of(1, 2, 3);
-        FloatStream b = FloatStream.of(4, 5f, 6f);
-        FloatStream c = FloatStream.of(7f, 8f, 9f);
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(15f), result.get(1));
-        assertEquals(Float.valueOf(18f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamCollectionWithNFunction() {
-        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1, 2, 3), FloatStream.of(4, 5f, 6f), FloatStream.of(7f, 8f, 9f));
-
-        FloatNFunction<Float> zipFunction = floats -> {
-            float sum = 0;
-            for (float l : floats) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Float> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(15f), result.get(1));
-        assertEquals(Float.valueOf(18f), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleArraysWithBiFunction() {
-        double[] a = { 1d, 2d, 3d };
-        double[] b = { 4d, 5d, 6d };
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(9d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleArraysWithTriFunction() {
-        double[] a = { 1d, 2d, 3d };
-        double[] b = { 4d, 5d, 6d };
-        double[] c = { 7d, 8d, 9d };
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(15d), result.get(1));
-        assertEquals(Double.valueOf(18d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleIteratorsWithBiFunction() {
-        DoubleIterator a = DoubleIterator.of(1d, 2d, 3d);
-        DoubleIterator b = DoubleIterator.of(4d, 5d, 6d);
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(9d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleIteratorsWithTriFunction() {
-        DoubleIterator a = DoubleIterator.of(1d, 2d, 3d);
-        DoubleIterator b = DoubleIterator.of(4d, 5d, 6d);
-        DoubleIterator c = DoubleIterator.of(7d, 8d, 9d);
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(15d), result.get(1));
-        assertEquals(Double.valueOf(18d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamsWithBiFunction() {
-        DoubleStream a = DoubleStream.of(1d, 2d, 3d);
-        DoubleStream b = DoubleStream.of(4d, 5d, 6d);
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(9d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamsWithTriFunction() {
-        DoubleStream a = DoubleStream.of(1d, 2d, 3d);
-        DoubleStream b = DoubleStream.of(4d, 5d, 6d);
-        DoubleStream c = DoubleStream.of(7d, 8d, 9d);
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(15d), result.get(1));
-        assertEquals(Double.valueOf(18d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamCollectionWithNFunction() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1d, 2d, 3d), DoubleStream.of(4d, 5d, 6d), DoubleStream.of(7d, 8d, 9d));
-
-        DoubleNFunction<Double> zipFunction = doubles -> {
-            double sum = 0;
-            for (double l : doubles) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Double> result = Stream.zip(streams, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(15d), result.get(1));
-        assertEquals(Double.valueOf(18d), result.get(2));
-    }
-
-    @Test
-    public void testZipCharArrays() {
-        char[] a = { 'a', 'b', 'c' };
-        char[] b = { 'x', 'y', 'z' };
-
-        List<String> result = Stream.zip(a, b, (c1, c2) -> "" + c1 + c2).toList();
-        assertEquals(Arrays.asList("ax", "by", "cz"), result);
-
-        char[] c = { '1', '2' };
-        result = Stream.zip(a, c, (c1, c2) -> "" + c1 + c2).toList();
-        assertEquals(Arrays.asList("a1", "b2"), result);
-    }
-
-    @Test
-    public void testZipThreeCharArrays() {
-        char[] a = { 'a', 'b' };
-        char[] b = { 'x', 'y' };
-        char[] c = { '1', '2' };
-
-        List<String> result = Stream.zip(a, b, c, (c1, c2, c3) -> "" + c1 + c2 + c3).toList();
-        assertEquals(Arrays.asList("ax1", "by2"), result);
-    }
-
-    @Test
-    public void testZipByteArrays() {
-        byte[] a = { 1, 2, 3 };
-        byte[] b = { 10, 20, 30 };
-
-        List<Integer> result = Stream.zip(a, b, (b1, b2) -> (int) (b1 + b2)).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipShortArrays() {
-        short[] a = { 1, 2, 3 };
-        short[] b = { 10, 20, 30 };
-
-        List<Integer> result = Stream.zip(a, b, (s1, s2) -> (int) (s1 + s2)).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipIntArrays() {
-        int[] a = { 1, 2, 3 };
-        int[] b = { 10, 20, 30 };
-
-        List<Integer> result = Stream.zip(a, b, (i1, i2) -> i1 + i2).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipLongArrays() {
-        long[] a = { 1L, 2L, 3L };
-        long[] b = { 10L, 20L, 30L };
-
-        List<Long> result = Stream.zip(a, b, (l1, l2) -> l1 + l2).toList();
-        assertEquals(Arrays.asList(11L, 22L, 33L), result);
-    }
-
-    @Test
-    public void testZipFloatArrays() {
-        float[] a = { 1.0f, 2.0f, 3.0f };
-        float[] b = { 10.0f, 20.0f, 30.0f };
-
-        List<Float> result = Stream.zip(a, b, (f1, f2) -> f1 + f2).toList();
-        assertEquals(Arrays.asList(11.0f, 22.0f, 33.0f), result);
-    }
-
-    @Test
-    public void testZipDoubleArrays() {
-        double[] a = { 1.0, 2.0, 3.0 };
-        double[] b = { 10.0, 20.0, 30.0 };
-
-        List<Double> result = Stream.zip(a, b, (d1, d2) -> d1 + d2).toList();
-        assertEquals(Arrays.asList(11.0, 22.0, 33.0), result);
-    }
-
-    @Test
-    public void testZipObjectArrays() {
-        String[] a = { "a", "b", "c" };
-        Integer[] b = { 1, 2, 3 };
-
-        List<String> result = Stream.zip(a, b, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c3"), result);
-    }
-
-    @Test
-    public void testZipThreeObjectArrays() {
-        String[] a = { "a", "b" };
-        Integer[] b = { 1, 2 };
-        Double[] c = { 0.1, 0.2 };
-
-        List<String> result = Stream.zip(a, b, c, (s, i, d) -> s + i + d).toList();
-        assertEquals(Arrays.asList("a10.1", "b20.2"), result);
-    }
-
-    @Test
-    public void testZipStreams() {
-        Stream<String> a = createStream01("a", "b", "c");
-        Stream<Integer> b = createStream(1, 2, 3);
-
-        List<String> result = Stream.zip(a, b, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c3"), result);
-    }
-
-    @Test
-    public void testZipThreeStreams() {
-        Stream<String> a = createStream01("a", "b");
-        Stream<Integer> b = createStream(1, 2);
-        Stream<Double> c = createStream(0.1, 0.2);
-
-        List<String> result = Stream.zip(a, b, c, (s, i, d) -> s + i + d).toList();
-        assertEquals(Arrays.asList("a10.1", "b20.2"), result);
-    }
-
-    @Test
-    public void testZipStreamCollection() {
-        List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2, 3), createStream(10, 20, 30), createStream(100, 200, 300));
-
-        List<Integer> result = Stream.zip(streams, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 222, 333), result);
-    }
-
-    @Test
-    public void testZipCharStreams() {
-        CharStream a = CharStream.of('a', 'b', 'c');
-        CharStream b = CharStream.of('x', 'y', 'z');
-
-        List<String> result = Stream.zip(a, b, (c1, c2) -> "" + c1 + c2).toList();
-        assertEquals(Arrays.asList("ax", "by", "cz"), result);
-    }
-
-    @Test
-    public void testZipByteStreams() {
-        ByteStream a = ByteStream.of((byte) 1, (byte) 2, (byte) 3);
-        ByteStream b = ByteStream.of((byte) 10, (byte) 20, (byte) 30);
-
-        List<Integer> result = Stream.zip(a, b, (b1, b2) -> (int) (b1 + b2)).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipIntStreams() {
-        IntStream a = IntStream.of(1, 2, 3);
-        IntStream b = IntStream.of(10, 20, 30);
-
-        List<Integer> result = Stream.zip(a, b, (i1, i2) -> i1 + i2).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipPrimitiveStreamCollection() {
-        List<IntStream> streams = Arrays.asList(IntStream.of(1, 2, 3), IntStream.of(10, 20, 30), IntStream.of(100, 200, 300));
-
-        List<Integer> result = Stream.zip(streams, arr -> Arrays.stream(arr).sum()).toList();
-        assertEquals(Arrays.asList(111, 222, 333), result);
-    }
-
-    @Test
-    public void testParallelZipIterables() {
-        List<List<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10, 20));
-
-        List<Integer> result = Stream.parallelZipIterables(iterables, values -> values.get(0) + values.get(1), 2).toList();
-        Collections.sort(result);
-
-        assertEquals(Arrays.asList(11, 22), result);
-    }
-
-    @Test
-    public void testParallelZipIterables_WithDefaults() {
-        List<List<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10));
-
-        List<Integer> result = Stream.parallelZipIterables(iterables, Arrays.asList(0, 99), values -> values.get(0) + values.get(1), 2).toList();
-        Collections.sort(result);
-
-        assertEquals(Arrays.asList(11, 101), result);
-    }
-
-    @Test
-    public void testParallelZipIterators() {
-        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10, 20).iterator());
-
-        List<Integer> result = Stream.parallelZipIterators(iterators, values -> values.get(0) + values.get(1), 2).toList();
-        Collections.sort(result);
-
-        assertEquals(Arrays.asList(11, 22), result);
-    }
-
-    @Test
-    public void testParallelZipIterators_WithDefaults() {
-        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10).iterator());
-
-        List<Integer> result = Stream.parallelZipIterators(iterators, Arrays.asList(0, 99), values -> values.get(0) + values.get(1), 2).toList();
-        Collections.sort(result);
-
-        assertEquals(Arrays.asList(11, 101), result);
-    }
-
-    @Test
-    public void testZip_ThreeIterables_WithDefaultValues() {
-        // Covers Stream.zip(Iterable, Iterable, Iterable, valueA, valueB, valueC, TriFunction)
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<String> b = Arrays.asList("a", "b");
-        List<Double> c = Arrays.asList(10.0, 20.0, 30.0, 40.0);
-        List<String> result = Stream.zip(a, b, c, 0, "x", 0.0, (i, s, d) -> i + s + d).toList();
-        assertEquals(4, result.size());
-        assertEquals("1a10.0", result.get(0));
-        assertEquals("2b20.0", result.get(1));
-        assertEquals("3x30.0", result.get(2));
-        assertEquals("0x40.0", result.get(3));
-    }
-
-    @Test
-    public void testZipCharArraysWithValueForNone() {
-        char[] a = { 'a', 'b' };
-        char[] b = { 'x', 'y', 'z' };
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, '-', '+', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("-z", result.get(2));
-    }
-
-    @Test
-    public void testZipCharArraysWithValueForNoneTriFunction() {
-        char[] a = { 'a' };
-        char[] b = { 'x', 'y' };
-        char[] c = { '1', '2', '3' };
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, '-', '+', '*', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("-y2", result.get(1));
-        assertEquals("-+3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharIteratorsWithValueForNone() {
-        CharIterator a = CharIterator.of('a', 'b');
-        CharIterator b = CharIterator.of('x', 'y', 'z');
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, '-', '+', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("-z", result.get(2));
-    }
-
-    @Test
-    public void testZipCharIteratorsWithValueForNoneTriFunction() {
-        CharIterator a = CharIterator.of('a');
-        CharIterator b = CharIterator.of('x', 'y');
-        CharIterator c = CharIterator.of('1', '2', '3');
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, '-', '+', '*', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("-y2", result.get(1));
-        assertEquals("-+3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamsWithValueForNone() {
-        CharStream a = CharStream.of('a', 'b');
-        CharStream b = CharStream.of('x', 'y', 'z');
-
-        CharBiFunction<String> zipFunction = (c1, c2) -> "" + c1 + c2;
-
-        List<String> result = Stream.zip(a, b, '-', '+', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax", result.get(0));
-        assertEquals("by", result.get(1));
-        assertEquals("-z", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamsWithValueForNoneTriFunction() {
-        CharStream a = CharStream.of('a');
-        CharStream b = CharStream.of('x', 'y');
-        CharStream c = CharStream.of('1', '2', '3');
-
-        CharTriFunction<String> zipFunction = (c1, c2, c3) -> "" + c1 + c2 + c3;
-
-        List<String> result = Stream.zip(a, b, c, '-', '+', '*', zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("-y2", result.get(1));
-        assertEquals("-+3", result.get(2));
-    }
-
-    @Test
-    public void testZipCharStreamCollectionWithValuesForNone() {
-        Collection<CharStream> streams = Arrays.asList(CharStream.of('a'), CharStream.of('x', 'y'), CharStream.of('1', '2', '3'));
-
-        char[] valuesForNone = { '-', '+', '*' };
-
-        CharNFunction<String> zipFunction = chars -> {
-            StringBuilder sb = new StringBuilder();
-            for (char c : chars) {
-                sb.append(c);
-            }
-            return sb.toString();
-        };
-
-        List<String> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals("ax1", result.get(0));
-        assertEquals("-y2", result.get(1));
-        assertEquals("-+3", result.get(2));
-    }
-
-    @Test
-    public void testZipByteArraysWithValueForNone() {
-        byte[] a = { 1, 2 };
-        byte[] b = { 4, 5, 6 };
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, (byte) 10, (byte) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipByteArraysWithValueForNoneTriFunction() {
-        byte[] a = { 1 };
-        byte[] b = { 4, 5 };
-        byte[] c = { 7, 8, 9 };
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, (byte) 10, (byte) 20, (byte) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipByteIteratorsWithValueForNone() {
-        ByteIterator a = ByteIterator.of((byte) 1, (byte) 2);
-        ByteIterator b = ByteIterator.of((byte) 4, (byte) 5, (byte) 6);
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, (byte) 10, (byte) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipByteIteratorsWithValueForNoneTriFunction() {
-        ByteIterator a = ByteIterator.of((byte) 1);
-        ByteIterator b = ByteIterator.of((byte) 4, (byte) 5);
-        ByteIterator c = ByteIterator.of((byte) 7, (byte) 8, (byte) 9);
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, (byte) 10, (byte) 20, (byte) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamsWithValueForNone() {
-        ByteStream a = ByteStream.of((byte) 1, (byte) 2);
-        ByteStream b = ByteStream.of((byte) 4, (byte) 5, (byte) 6);
-
-        ByteBiFunction<Integer> zipFunction = (b1, b2) -> b1 + b2;
-
-        List<Integer> result = Stream.zip(a, b, (byte) 10, (byte) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamsWithValueForNoneTriFunction() {
-        ByteStream a = ByteStream.of((byte) 1);
-        ByteStream b = ByteStream.of((byte) 4, (byte) 5);
-        ByteStream c = ByteStream.of((byte) 7, (byte) 8, (byte) 9);
-
-        ByteTriFunction<Integer> zipFunction = (b1, b2, b3) -> b1 + b2 + b3;
-
-        List<Integer> result = Stream.zip(a, b, c, (byte) 10, (byte) 20, (byte) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipByteStreamCollectionWithValuesForNone() {
-        Collection<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 4, (byte) 5), ByteStream.of((byte) 7, (byte) 8, (byte) 9));
-
-        byte[] valuesForNone = { 10, 20, 30 };
-
-        ByteNFunction<Integer> zipFunction = bytes -> {
-            int sum = 0;
-            for (byte b : bytes) {
-                sum += b;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipShortArraysWithValueForNone() {
-        short[] a = { 1, 2 };
-        short[] b = { 4, 5, 6 };
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, (short) 10, (short) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipShortArraysWithValueForNoneTriFunction() {
-        short[] a = { 1 };
-        short[] b = { 4, 5 };
-        short[] c = { 7, 8, 9 };
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, (short) 10, (short) 20, (short) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipShortIteratorsWithValueForNone() {
-        ShortIterator a = ShortIterator.of((short) 1, (short) 2);
-        ShortIterator b = ShortIterator.of((short) 4, (short) 5, (short) 6);
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, (short) 10, (short) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipShortIteratorsWithValueForNoneTriFunction() {
-        ShortIterator a = ShortIterator.of((short) 1);
-        ShortIterator b = ShortIterator.of((short) 4, (short) 5);
-        ShortIterator c = ShortIterator.of((short) 7, (short) 8, (short) 9);
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, (short) 10, (short) 20, (short) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamsWithValueForNone() {
-        ShortStream a = ShortStream.of((short) 1, (short) 2);
-        ShortStream b = ShortStream.of((short) 4, (short) 5, (short) 6);
-
-        ShortBiFunction<Integer> zipFunction = (s1, s2) -> s1 + s2;
-
-        List<Integer> result = Stream.zip(a, b, (short) 10, (short) 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamsWithValueForNoneTriFunction() {
-        ShortStream a = ShortStream.of((short) 1);
-        ShortStream b = ShortStream.of((short) 4, (short) 5);
-        ShortStream c = ShortStream.of((short) 7, (short) 8, (short) 9);
-
-        ShortTriFunction<Integer> zipFunction = (s1, s2, s3) -> s1 + s2 + s3;
-
-        List<Integer> result = Stream.zip(a, b, c, (short) 10, (short) 20, (short) 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipShortStreamCollectionWithValuesForNone() {
-        Collection<ShortStream> streams = Arrays.asList(ShortStream.of((short) 1), ShortStream.of((short) 4, (short) 5),
-                ShortStream.of((short) 7, (short) 8, (short) 9));
-
-        short[] valuesForNone = { 10, 20, 30 };
-
-        ShortNFunction<Integer> zipFunction = shorts -> {
-            int sum = 0;
-            for (short s : shorts) {
-                sum += s;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipIntArraysWithValueForNone() {
-        int[] a = { 1, 2 };
-        int[] b = { 4, 5, 6 };
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipIntArraysWithValueForNoneTriFunction() {
-        int[] a = { 1 };
-        int[] b = { 4, 5 };
-        int[] c = { 7, 8, 9 };
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipIntIteratorsWithValueForNone() {
-        IntIterator a = IntIterator.of(1, 2);
-        IntIterator b = IntIterator.of(4, 5, 6);
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipIntIteratorsWithValueForNoneTriFunction() {
-        IntIterator a = IntIterator.of(1);
-        IntIterator b = IntIterator.of(4, 5);
-        IntIterator c = IntIterator.of(7, 8, 9);
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamsWithValueForNone() {
-        IntStream a = IntStream.of(1, 2);
-        IntStream b = IntStream.of(4, 5, 6);
-
-        IntBiFunction<Integer> zipFunction = (i1, i2) -> i1 + i2;
-
-        List<Integer> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(5), result.get(0));
-        assertEquals(Integer.valueOf(7), result.get(1));
-        assertEquals(Integer.valueOf(16), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamsWithValueForNoneTriFunction() {
-        IntStream a = IntStream.of(1);
-        IntStream b = IntStream.of(4, 5);
-        IntStream c = IntStream.of(7, 8, 9);
-
-        IntTriFunction<Integer> zipFunction = (i1, i2, i3) -> i1 + i2 + i3;
-
-        List<Integer> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipIntStreamCollectionWithValuesForNone() {
-        Collection<IntStream> streams = Arrays.asList(IntStream.of(1), IntStream.of(4, 5), IntStream.of(7, 8, 9));
-
-        int[] valuesForNone = { 10, 20, 30 };
-
-        IntNFunction<Integer> zipFunction = ints -> {
-            int sum = 0;
-            for (int i : ints) {
-                sum += i;
-            }
-            return sum;
-        };
-
-        List<Integer> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Integer.valueOf(12), result.get(0));
-        assertEquals(Integer.valueOf(23), result.get(1));
-        assertEquals(Integer.valueOf(39), result.get(2));
-    }
-
-    @Test
-    public void testZipLongArraysWithValueForNone() {
-        long[] a = { 1L, 2L };
-        long[] b = { 4L, 5L, 6L };
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, 10L, 20L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(16L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongArraysWithValueForNoneTriFunction() {
-        long[] a = { 1L };
-        long[] b = { 4L, 5L };
-        long[] c = { 7L, 8L, 9L };
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, 10L, 20L, 30L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(23L), result.get(1));
-        assertEquals(Long.valueOf(39L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongIteratorsWithValueForNone() {
-        LongIterator a = LongIterator.of(1L, 2L);
-        LongIterator b = LongIterator.of(4L, 5L, 6L);
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, 10L, 20L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(16L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongIteratorsWithValueForNoneTriFunction() {
-        LongIterator a = LongIterator.of(1L);
-        LongIterator b = LongIterator.of(4L, 5L);
-        LongIterator c = LongIterator.of(7L, 8L, 9L);
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, 10L, 20L, 30L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(23L), result.get(1));
-        assertEquals(Long.valueOf(39L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamsWithValueForNone() {
-        LongStream a = LongStream.of(1L, 2L);
-        LongStream b = LongStream.of(4L, 5L, 6L);
-
-        LongBiFunction<Long> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Long> result = Stream.zip(a, b, 10L, 20L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(5L), result.get(0));
-        assertEquals(Long.valueOf(7L), result.get(1));
-        assertEquals(Long.valueOf(16L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamsWithValueForNoneTriFunction() {
-        LongStream a = LongStream.of(1L);
-        LongStream b = LongStream.of(4L, 5L);
-        LongStream c = LongStream.of(7L, 8L, 9L);
-
-        LongTriFunction<Long> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Long> result = Stream.zip(a, b, c, 10L, 20L, 30L, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(23L), result.get(1));
-        assertEquals(Long.valueOf(39L), result.get(2));
-    }
-
-    @Test
-    public void testZipLongStreamCollectionWithValuesForNone() {
-        Collection<LongStream> streams = Arrays.asList(LongStream.of(1L), LongStream.of(4L, 5L), LongStream.of(7L, 8L, 9L));
-
-        long[] valuesForNone = { 10L, 20L, 30L };
-
-        LongNFunction<Long> zipFunction = longs -> {
-            long sum = 0;
-            for (long l : longs) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Long> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Long.valueOf(12L), result.get(0));
-        assertEquals(Long.valueOf(23L), result.get(1));
-        assertEquals(Long.valueOf(39L), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatArraysWithValueForNone() {
-        float[] a = { 1, 2 };
-        float[] b = { 4, 5f, 6f };
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(16f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatArraysWithValueForNoneTriFunction() {
-        float[] a = { 1 };
-        float[] b = { 4, 5f };
-        float[] c = { 7f, 8f, 9f };
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(23), result.get(1));
-        assertEquals(Float.valueOf(39f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatIteratorsWithValueForNone() {
-        FloatIterator a = FloatIterator.of(1, 2);
-        FloatIterator b = FloatIterator.of(4, 5f, 6f);
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(16f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatIteratorsWithValueForNoneTriFunction() {
-        FloatIterator a = FloatIterator.of(1);
-        FloatIterator b = FloatIterator.of(4, 5f);
-        FloatIterator c = FloatIterator.of(7f, 8f, 9f);
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(23), result.get(1));
-        assertEquals(Float.valueOf(39f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamsWithValueForNone() {
-        FloatStream a = FloatStream.of(1, 2);
-        FloatStream b = FloatStream.of(4, 5f, 6f);
-
-        FloatBiFunction<Float> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Float> result = Stream.zip(a, b, 10, 20, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(5f), result.get(0));
-        assertEquals(Float.valueOf(7f), result.get(1));
-        assertEquals(Float.valueOf(16f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamsWithValueForNoneTriFunction() {
-        FloatStream a = FloatStream.of(1);
-        FloatStream b = FloatStream.of(4, 5f);
-        FloatStream c = FloatStream.of(7f, 8f, 9f);
-
-        FloatTriFunction<Float> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Float> result = Stream.zip(a, b, c, 10, 20, 30, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(23), result.get(1));
-        assertEquals(Float.valueOf(39f), result.get(2));
-    }
-
-    @Test
-    public void testZipFloatStreamCollectionWithValuesForNone() {
-        Collection<FloatStream> streams = Arrays.asList(FloatStream.of(1), FloatStream.of(4, 5f), FloatStream.of(7f, 8f, 9f));
-
-        float[] valuesForNone = { 10, 20, 30 };
-
-        FloatNFunction<Float> zipFunction = floats -> {
-            float sum = 0;
-            for (float l : floats) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Float> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Float.valueOf(12), result.get(0));
-        assertEquals(Float.valueOf(23), result.get(1));
-        assertEquals(Float.valueOf(39f), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleArraysWithValueForNone() {
-        double[] a = { 1d, 2d };
-        double[] b = { 4d, 5d, 6d };
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, 10d, 20d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(16d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleArraysWithValueForNoneTriFunction() {
-        double[] a = { 1d };
-        double[] b = { 4d, 5d };
-        double[] c = { 7d, 8d, 9d };
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, 10d, 20d, 30d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(23d), result.get(1));
-        assertEquals(Double.valueOf(39d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleIteratorsWithValueForNone() {
-        DoubleIterator a = DoubleIterator.of(1d, 2d);
-        DoubleIterator b = DoubleIterator.of(4d, 5d, 6d);
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, 10d, 20d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(16d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleIteratorsWithValueForNoneTriFunction() {
-        DoubleIterator a = DoubleIterator.of(1d);
-        DoubleIterator b = DoubleIterator.of(4d, 5d);
-        DoubleIterator c = DoubleIterator.of(7d, 8d, 9d);
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, 10d, 20d, 30d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(23d), result.get(1));
-        assertEquals(Double.valueOf(39d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamsWithValueForNone() {
-        DoubleStream a = DoubleStream.of(1d, 2d);
-        DoubleStream b = DoubleStream.of(4d, 5d, 6d);
-
-        DoubleBiFunction<Double> zipFunction = (l1, l2) -> l1 + l2;
-
-        List<Double> result = Stream.zip(a, b, 10d, 20d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(5d), result.get(0));
-        assertEquals(Double.valueOf(7d), result.get(1));
-        assertEquals(Double.valueOf(16d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamsWithValueForNoneTriFunction() {
-        DoubleStream a = DoubleStream.of(1d);
-        DoubleStream b = DoubleStream.of(4d, 5d);
-        DoubleStream c = DoubleStream.of(7d, 8d, 9d);
-
-        DoubleTriFunction<Double> zipFunction = (l1, l2, l3) -> l1 + l2 + l3;
-
-        List<Double> result = Stream.zip(a, b, c, 10d, 20d, 30d, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(23d), result.get(1));
-        assertEquals(Double.valueOf(39d), result.get(2));
-    }
-
-    @Test
-    public void testZipDoubleStreamCollectionWithValuesForNone() {
-        Collection<DoubleStream> streams = Arrays.asList(DoubleStream.of(1d), DoubleStream.of(4d, 5d), DoubleStream.of(7d, 8d, 9d));
-
-        double[] valuesForNone = { 10d, 20d, 30d };
-
-        DoubleNFunction<Double> zipFunction = doubles -> {
-            double sum = 0;
-            for (double l : doubles) {
-                sum += l;
-            }
-            return sum;
-        };
-
-        List<Double> result = Stream.zip(streams, valuesForNone, zipFunction).toList();
-
-        assertEquals(3, result.size());
-        assertEquals(Double.valueOf(12d), result.get(0));
-        assertEquals(Double.valueOf(23d), result.get(1));
-        assertEquals(Double.valueOf(39d), result.get(2));
-    }
-
-    @Test
-    public void testZipArraysWithValueForNone() {
-        String[] a = { "a", "b", "c" };
-        Integer[] b = { 1, 2 };
-
-        List<String> result = Stream.zip(a, b, "X", 99, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c99"), result);
-    }
-
-    @Test
-    public void testZipThreeArraysWithValueForNone() {
-        String[] a = { "a", "b" };
-        Integer[] b = { 1 };
-        Double[] c = { 0.1, 0.2, 0.3 };
-
-        List<String> result = Stream.zip(a, b, c, "X", 99, 0.0, (s, i, d) -> s + i + d).toList();
-        assertEquals(Arrays.asList("a10.1", "b990.2", "X990.3"), result);
-    }
-
-    @Test
-    public void testZipStreamsWithValueForNone() {
-        Stream<String> a = createStream01("a", "b", "c");
-        Stream<Integer> b = createStream(1, 2);
-
-        List<String> result = Stream.zip(a, b, "X", 99, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c99"), result);
-    }
-
-    @Test
-    public void testZipCollectionWithValuesForNone() {
-        List<Stream<Integer>> streams = Arrays.asList(createStream(1, 2), createStream(10), createStream(100, 200, 300));
-
-        List<Integer> valuesForNone = Arrays.asList(0, 0, 0);
-
-        List<Integer> result = Stream.zip(streams, valuesForNone, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 202, 300), result);
-    }
-
-    @Test
-    public void testZipPrimitiveArraysWithValueForNone() {
-        int[] a = { 1, 2, 3 };
-        int[] b = { 10, 20 };
-
-        List<Integer> result = Stream.zip(a, b, 0, 99, (i1, i2) -> i1 + i2).toList();
-        assertEquals(Arrays.asList(11, 22, 102), result);
-    }
-
-    @Test
-    public void testZipPrimitiveStreamsWithValueForNone() {
-        IntStream a = IntStream.of(1, 2, 3);
-        IntStream b = IntStream.of(10, 20);
-
-        List<Integer> result = Stream.zip(a, b, 0, 99, (i1, i2) -> i1 + i2).toList();
-        assertEquals(Arrays.asList(11, 22, 102), result);
-    }
-
-    @Test
-    public void testZipPrimitiveStreamCollectionWithValuesForNone() {
-        List<IntStream> streams = Arrays.asList(IntStream.of(1, 2), IntStream.of(10), IntStream.of(100, 200, 300));
-
-        int[] valuesForNone = { 0, 0, 0 };
-
-        List<Integer> result = Stream.zip(streams, valuesForNone, arr -> Arrays.stream(arr).sum()).toList();
-        assertEquals(Arrays.asList(111, 202, 300), result);
-    }
-
-    @Test
-    public void testZipIterables() {
-        List<Integer> list1 = Arrays.asList(1, 2, 3);
-        List<Integer> list2 = Arrays.asList(10, 20, 30);
-
-        List<Integer> result = Stream.zipIterables(Arrays.asList(list1, list2), (List<Integer> args) -> args.get(0) + args.get(1)).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    @Test
-    public void testZipIterablesWithFunction() {
-        List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(10, 20, 30), Arrays.asList(100, 200, 300));
-
-        List<Integer> result = Stream.zipIterables(iterables, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 222, 333), result);
-    }
-
-    @Test
-    public void testZipIterablesEmpty() {
-        List<Integer> result = Stream.zipIterables(Arrays.asList(), (List<Integer> args) -> 0).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testZipIterablesWithValueForNone() {
-        List<String> a = Arrays.asList("a", "b", "c");
-        List<Integer> b = Arrays.asList(1, 2);
-
-        List<String> result = Stream.zip(a, b, "X", 99, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c99"), result);
-    }
-
-    @Test
-    public void testZipIterablesCollectionWithValuesForNone() {
-        List<Iterable<Integer>> iterables = Arrays.asList(Arrays.asList(1, 2), Arrays.asList(10), Arrays.asList(100, 200, 300));
-
-        List<Integer> valuesForNone = Arrays.asList(0, 0, 0);
-
-        List<Integer> result = Stream.zipIterables(iterables, valuesForNone, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 202, 300), result);
-    }
-
-    @Test
-    public void testZipIterators() {
-        Iterator<Integer> iter1 = Arrays.asList(1, 2).iterator();
-        Iterator<Integer> iter2 = Arrays.asList(10, 20).iterator();
-
-        List<Integer> result = Stream.zipIterators(Arrays.asList(iter1, iter2), (List<Integer> args) -> args.get(0) + args.get(1)).toList();
-        assertEquals(Arrays.asList(11, 22), result);
-    }
-
-    @Test
-    public void testZipIteratorsWithFunction() {
-        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(10, 20, 30).iterator(),
-                Arrays.asList(100, 200, 300).iterator());
-
-        List<Integer> result = Stream.zipIterators(iterators, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 222, 333), result);
-    }
-
-    @Test
-    public void testZipIteratorsWithValueForNone() {
-        Iterator<String> a = Arrays.asList("a", "b", "c").iterator();
-        Iterator<Integer> b = Arrays.asList(1, 2).iterator();
-
-        List<String> result = Stream.zip(a, b, "X", 99, (s, i) -> s + i).toList();
-        assertEquals(Arrays.asList("a1", "b2", "c99"), result);
-    }
-
-    @Test
-    public void testZipIteratorsCollectionWithValuesForNone() {
-        List<Iterator<Integer>> iterators = Arrays.asList(Arrays.asList(1, 2).iterator(), Arrays.asList(10).iterator(),
-                Arrays.asList(100, 200, 300).iterator());
-
-        List<Integer> valuesForNone = Arrays.asList(0, 0, 0);
-
-        List<Integer> result = Stream.zipIterators(iterators, valuesForNone, list -> list.stream().mapToInt(Integer::intValue).sum()).toList();
-        assertEquals(Arrays.asList(111, 202, 300), result);
-    }
-
-    @Test
-    public void testParallelZip_ThreeIterables_WithDefaultValues() {
-        // Covers Stream.parallelZip(Iterable, Iterable, Iterable, valueA, valueB, valueC, TriFunction, threads)
-        List<Integer> a = Arrays.asList(1, 2, 3);
-        List<String> b = Arrays.asList("a", "b");
-        List<Double> c = Arrays.asList(0.1, 0.2, 0.3, 0.4);
-        List<String> result = Stream.parallelZip(a, b, c, 0, "z", 0.0, (i, s, d) -> i + s + d, 2).toList();
-        // parallel zip order is non-deterministic across all positions
-        assertEquals(4, result.size());
-        assertTrue(result.contains("1a0.1"));
-        assertTrue(result.contains("2b0.2"));
-        assertTrue(result.contains("3z0.3"));
-        assertTrue(result.contains("0z0.4"));
-    }
-
-    @Test
-    public void testMerge() {
-        Stream<Integer> stream = Stream.merge(Arrays.asList(1, 3, 5), Arrays.asList(2, 4, 6),
-                (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), stream.toList());
-    }
-
-    @Test
-    public void testMergeArray() {
-        Integer[] a = { 1, 3, 5 };
-        Integer[] b = { 2, 4, 6 };
-        Integer[] c = { 7, 8, 9 };
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6), Stream.merge(a, b, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.merge(a, b, c, (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    @Test
-    public void test_merge_streams() {
-        Integer[] a = { 1, 3, 5 };
-        Integer[] b = { 2, 4, 6 };
-        Integer[] c = { 7, 8, 9 };
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.merge(Stream.of(a), Stream.of(b), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.merge(N.toList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.merge(Stream.of(a), Stream.of(b), Stream.of(c), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.merge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                        .toList());
-        assertEquals(
-                N.toList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
-                        .merge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
-                                (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                        .toList());
-
-    }
-
-    @Test
-    public void testMergeIterables() {
-        List<Integer> list1 = Arrays.asList(1, 3, 5);
-        List<Integer> list2 = Arrays.asList(2, 4, 6);
-
-        List<Integer> result = Stream.mergeIterables(Arrays.asList(list1, list2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testMergeIterablesEmpty() {
-        List<Integer> result = Stream.mergeIterables(Arrays.<List<Integer>> asList(), (a, b) -> MergeResult.TAKE_FIRST).toList();
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testMergeIterators() {
-        Iterator<Integer> iter1 = Arrays.asList(1, 3).iterator();
-        Iterator<Integer> iter2 = Arrays.asList(2, 4).iterator();
-
-        List<Integer> result = Stream.mergeIterators(Arrays.asList(iter1, iter2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4), result);
-    }
-
-    @Test
-    public void test_parallelMerge_streams() {
-        Integer[] a = { 1, 3, 5 };
-        Integer[] b = { 2, 4, 6 };
-        Integer[] c = { 7, 8, 9 };
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.parallelMerge(N.toList(Stream.of(a), Stream.of(b)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream
-                .parallelMerge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c)), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                .toList());
-        assertEquals(
-                N.toList(1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9), Stream
-                        .parallelMerge(N.toList(Stream.of(a), Stream.of(b), Stream.of(c), Stream.of(a)),
-                                (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
-                        .toList());
-
-    }
-
-    @Test
-    public void testParallelMerge_Basic() {
-        List<Stream<Integer>> streams = new ArrayList<>();
-        streams.add(Stream.of(1, 4, 7));
-        streams.add(Stream.of(2, 5, 8));
-        streams.add(Stream.of(3, 6, 9));
-
-        List<Integer> result = Stream.parallelMerge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
-        assertEquals(9, result.size());
-        assertTrue(result.containsAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9)));
-    }
-
-    @Test
-    public void testParallelMerge_WithMaxThreadNum() {
-        List<Stream<Integer>> streams = new ArrayList<>();
-        streams.add(Stream.of(1, 3, 5));
-        streams.add(Stream.of(2, 4, 6));
-        streams.add(Stream.of(7, 8, 9));
-        streams.add(Stream.of(10, 11));
-
-        List<Integer> result = Stream.parallelMerge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2).toList();
-        assertEquals(11, result.size());
-    }
-
-    @Test
-    public void testParallelMerge_WithMaxThreadNum_v2() {
-        // Covers parallelMerge(Collection, BiFunction, int) - additional coverage
-        List<Stream<Integer>> streams = Arrays.asList(Stream.of(1, 4, 7, 10, 13), Stream.of(2, 5, 8, 11, 14), Stream.of(3, 6, 9, 12, 15));
-        List<Integer> result = Stream.parallelMerge(streams, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 3).toList();
-        assertEquals(15, result.size());
-    }
-
-    @Test
-    public void testParallelMergeIterators() {
-        List<Integer> a = N.toList(1, 3, 5);
-        List<Integer> b = N.toList(2, 4, 6);
-        List<Integer> c = N.toList(7, 8, 9);
-        List<Integer> d = N.toList(7, 9, 10);
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6),
-                Stream.parallelMergeIterables(N.toList(a, b), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.parallelMergeIterables(N.toList(a, b, c), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-
-        assertEquals(N.toList(1, 2, 3, 4, 5, 6, 7, 7, 8, 9, 9, 10),
-                Stream.parallelMergeIterables(N.toList(a, b, c, d), (e1, e2) -> e1 <= e2 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    @Test
-    public void testParallelMergeIterators_NewTest() {
-        List<Integer> a = Arrays.asList(1, 3, 5);
-        List<Integer> b = Arrays.asList(2, 4, 6);
-        Collection<Iterator<Integer>> iterators = Arrays.asList(a.iterator(), b.iterator());
-        List<Integer> result = Stream
-                .parallelMergeIterators(iterators,
-                        (x, y) -> x <= y ? com.landawn.abacus.util.MergeResult.TAKE_FIRST : com.landawn.abacus.util.MergeResult.TAKE_SECOND)
-                .sorted()
-                .toList();
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
-    }
-
-    @Test
-    public void testParallelMergeIterators_Basic() {
-        List<Iterator<Integer>> iterators = new ArrayList<>();
-        iterators.add(Arrays.asList(1, 4, 7).iterator());
-        iterators.add(Arrays.asList(2, 5, 8).iterator());
-        iterators.add(Arrays.asList(3, 6, 9).iterator());
-
-        List<Integer> result = Stream.parallelMergeIterators(iterators, (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList();
-        assertEquals(9, result.size());
-    }
-
-    @Test
-    public void testIntegration_AllFactoryMethods() {
-
-        assertEquals(0, Stream.empty().count());
-
-        assertEquals(1, Stream.just("test").count());
-
-        assertEquals(0, Stream.ofNullable(null).count());
-        assertEquals(1, Stream.ofNullable("test").count());
-
-        assertEquals(3, Stream.defer(() -> createStream(1, 2, 3)).count());
-
-        assertEquals(3, createStream01(new Integer[] { 1, 2, 3 }).count());
-        assertEquals(3, createStream(Arrays.asList(1, 2, 3)).count());
-        assertEquals(3, createStream(Arrays.asList(1, 2, 3).iterator()).count());
-
-        assertEquals(5, Stream.range(0, 5).count());
-        assertEquals(6, Stream.rangeClosed(0, 5).count());
-
-        assertEquals(10, Stream.repeat("X", 10).count());
-
-        assertEquals(5, Stream.generate(() -> "Y").limit(5).count());
-
-        assertEquals(5, Stream.iterate(1, x -> x + 1).limit(5).count());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testMultipleSubscribers_Chaining() throws Exception {
-        List<Integer> subscriber1Results = new ArrayList<>();
-        List<Integer> subscriber2Results = new ArrayList<>();
-
-        Stream.of(1, 2, 3, 4, 5, 6).addSubscriber(s -> {
-            s.filter(x -> x % 2 == 0).forEach(subscriber1Results::add);
-        }).filterWhileAddSubscriber(x -> x % 3 != 0, s -> {
-            s.forEach(subscriber2Results::add);
-        }).forEach(x -> {
-            mainStreamResults.add(x);
-        });
-
-        assertEquals(Arrays.asList(1, 2, 4, 5), mainStreamResults);
-        assertEquals(Arrays.asList(2, 4, 6), subscriber1Results);
-        assertEquals(Arrays.asList(3, 6), subscriber2Results);
-    }
-
-    @Test
-    public void test_ArrayDeque() {
-        assertDoesNotThrow(() -> {
-            final ArrayDeque<Integer> queue = new ArrayDeque<>(10);
-
-            for (int i = 0; i < 16; i++) {
-                if (queue.size() > 10) {
-                    queue.removeFirst();
-                }
-
-                queue.add(i);
-                N.println(queue);
-            }
-        });
-    }
-
-    @Test
-    public void testExceptionPropagation() {
-        Iterator<Integer> failingIterator = new Iterator<>() {
-            private int count = 0;
-
-            @Override
-            public boolean hasNext() {
-                if (count == 3) {
-                    throw new RuntimeException("Iterator failed");
-                }
-                return count < 5;
-            }
-
-            @Override
-            public Integer next() {
-                return count++;
-            }
-        };
-
-        Stream<Integer> stream = createStream(failingIterator);
-
-        try {
-            stream.toList();
-            fail("Expected exception");
-        } catch (RuntimeException e) {
-            assertEquals("Iterator failed", e.getMessage());
-        }
-    }
-
-    // TODO: Remaining Stream$5/Stream$6 gaps are anonymous iterator branches for async windowing/merge internals that require deterministic scheduler control beyond the current unit-test harness.
-
-    @Test
-    public void testMaxWaitRejectsZeroDuration() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ZERO, 99));
-
-        Supplier<Integer> defaultSupplier = () -> 99;
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ZERO, defaultSupplier));
-    }
-
-    @Test
-    public void testMaxWaitRejectsNegativeDuration() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ofMillis(-1), 99));
-
-        Supplier<Integer> defaultSupplier = () -> 99;
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait(Duration.ofMillis(-1), defaultSupplier));
-    }
-
-    @Test
-    public void testMaxWaitRejectsNullDuration() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait((Duration) null, 99));
-
-        Supplier<Integer> defaultSupplier = () -> 99;
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait((Duration) null, defaultSupplier));
-    }
-
-    @Test
-    public void testZipIteratorsWithNullIteratorInCollection() {
-        List<Iterator<Integer>> iterators = new ArrayList<>();
-        iterators.add(Arrays.asList(1, 2, 3).iterator());
-        iterators.add(null);
-        iterators.add(Arrays.asList(10, 20, 30).iterator());
-
-        // No-defaults zipIterators should be consistent with concatIterators: null iterators treated as empty.
-        // Since one iterator is null/empty, zip stops immediately and returns empty.
-        Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
-        List<Integer> result = Stream.zipIterators(iterators, sumFn).toList();
-        assertEquals(Collections.emptyList(), result);
-    }
-
-    @Test
-    public void testZipIteratorsAllNonNullStillWorks() {
-        List<Iterator<Integer>> iterators = new ArrayList<>();
-        iterators.add(Arrays.asList(1, 2, 3).iterator());
-        iterators.add(Arrays.asList(10, 20, 30).iterator());
-
-        Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
-        List<Integer> result = Stream.zipIterators(iterators, sumFn).toList();
-        assertEquals(Arrays.asList(11, 22, 33), result);
-    }
-
-    // ===== Additional coverage tests appended 2026-05-29 =====
-
-    // of(Iterable) where iterable is NOT a Collection -> goes through of(iterable.iterator()) branch (line 16366).
-    @Test
-    public void testOfIterable_NonCollection_uncovered() {
-        final List<Integer> backing = N.asList(1, 2, 3);
-        // anonymous Iterable that is not a Collection
-        final Iterable<Integer> iterable = backing::iterator;
-        assertEquals(N.asList(1, 2, 3), Stream.of(iterable).toList());
-    }
-
-    @Test
-    public void testOfIterable_Null_uncovered() {
-        final Iterable<Integer> iterable = null;
-        assertEquals(0, Stream.of(iterable).count());
-    }
-
-    @Test
-    public void testOfEnumeration_uncovered() {
-        final Vector<String> vector = new Vector<>(N.asList("a", "b", "c"));
-        assertEquals(N.asList("a", "b", "c"), Stream.of(vector.elements()).toList());
-    }
-
-    @Test
-    public void testOfEnumeration_Null_uncovered() {
-        final Enumeration<String> en = null;
-        assertEquals(0, Stream.of(en).count());
-    }
-
-    // of(char[], from, to): exercises count() (line 16650-16652) via terminal count().
-    @Test
-    public void testOfCharArrayRange_count_uncovered() {
-        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
-        assertEquals(3, Stream.of(a, 1, 4).count());
-    }
-
-    // of(char[], from, to): exercises advance() (line 16656-16661) via skip().
-    @Test
-    public void testOfCharArrayRange_skipThenToArray_uncovered() {
-        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
-        assertEquals(N.asList('d', 'e'), Stream.of(a, 1, 5).skip(2).toList());
-    }
-
-    // of(char[], from, to): exercises toArray() override (line 16665-16672).
-    @Test
-    public void testOfCharArrayRange_toArray_uncovered() {
-        final char[] a = { 'a', 'b', 'c', 'd', 'e' };
-        final Object[] arr = Stream.of(a, 1, 4).toArray();
-        assertArrayEquals(new Object[] { 'b', 'c', 'd' }, arr);
-    }
-
-    // of(byte[], from, to): count/advance/toArray.
-    @Test
-    public void testOfByteArrayRange_uncovered() {
-        final byte[] a = { 1, 2, 3, 4, 5 };
-        assertEquals(4, Stream.of(a, 1, 5).count());
-        assertEquals(N.asList((byte) 3, (byte) 4, (byte) 5), Stream.of(a, 1, 5).skip(1).toList());
-    }
-
-    // of(short[], from, to)
-    @Test
-    public void testOfShortArrayRange_uncovered() {
-        final short[] a = { 10, 20, 30, 40 };
-        assertEquals(2, Stream.of(a, 1, 3).count());
-        assertEquals(N.asList((short) 30, (short) 40), Stream.of(a, 1, 4).skip(1).toList());
-    }
-
-    // of(int[], from, to)
-    @Test
-    public void testOfIntArrayRange_uncovered() {
-        final int[] a = { 1, 2, 3, 4, 5, 6 };
-        assertEquals(4, Stream.of(a, 2, 6).count());
-        assertEquals(N.asList(4, 5, 6), Stream.of(a, 2, 6).skip(1).toList());
-        assertArrayEquals(new Object[] { 3, 4 }, Stream.of(a, 2, 4).toArray());
-    }
-
-    // of(long[], from, to)
-    @Test
-    public void testOfLongArrayRange_uncovered() {
-        final long[] a = { 1L, 2L, 3L, 4L };
-        assertEquals(3, Stream.of(a, 1, 4).count());
-        assertEquals(N.asList(3L, 4L), Stream.of(a, 1, 4).skip(1).toList());
-    }
-
-    // of(float[], from, to)
-    @Test
-    public void testOfFloatArrayRange_uncovered() {
-        final float[] a = { 1f, 2f, 3f, 4f };
-        assertEquals(3, Stream.of(a, 1, 4).count());
-        assertEquals(N.asList(3f, 4f), Stream.of(a, 1, 4).skip(1).toList());
-    }
-
-    // of(double[], from, to)
-    @Test
-    public void testOfDoubleArrayRange_uncovered() {
-        final double[] a = { 1d, 2d, 3d, 4d };
-        assertEquals(3, Stream.of(a, 1, 4).count());
-        assertEquals(N.asList(3d, 4d), Stream.of(a, 1, 4).skip(1).toList());
-    }
-
-    // of(boolean[], from, to)
-    @Test
-    public void testOfBooleanArrayRange_uncovered() {
-        final boolean[] a = { true, false, true, false };
-        assertEquals(3, Stream.of(a, 1, 4).count());
-        assertEquals(N.asList(true, false), Stream.of(a, 1, 4).skip(1).toList());
-    }
-
-    // of(Iterator, from, to): static factory exercising skip+limit composition (line 16419).
-    @Test
-    public void testOfIteratorRange_uncovered() {
-        final Iterator<Integer> it = N.asList(0, 1, 2, 3, 4, 5).iterator();
-        // package-private; reachable via Collection.of with subrange instead:
-        assertEquals(N.asList(1, 2, 3), Stream.of(N.asList(0, 1, 2, 3, 4, 5), 1, 4).toList());
-        assertTrue(it.hasNext());
-    }
-
-    // of(Collection, from, to) where subrange is full collection vs partial - covers line 16302/16304.
-    @Test
-    public void testOfCollectionRange_partial_uncovered() {
-        final List<String> list = N.asList("a", "b", "c", "d", "e");
-        assertEquals(N.asList("b", "c", "d"), Stream.of(list, 1, 4).toList());
-    }
-
-    @Test
-    public void testOfCollectionRange_emptyZeroZero_uncovered() {
-        final List<String> empty = new ArrayList<>();
-        assertEquals(0, Stream.of(empty, 0, 0).count());
-    }
-
-    // flatten(T[][], boolean) vertically=true (lines 18064-18111).
-    @Test
-    public void testFlatten2DVertically_uncovered() {
-        final Integer[][] a = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
-        assertEquals(N.asList(1, 3, 5, 2, 4, 6), Stream.flatten(a, true).toList());
-    }
-
-    // flatten(T[][], boolean) vertically=true with single row -> of(a[0]) (line 18059).
-    @Test
-    public void testFlatten2DVertically_singleRow_uncovered() {
-        final Integer[][] a = { { 1, 2, 3 } };
-        assertEquals(N.asList(1, 2, 3), Stream.flatten(a, true).toList());
-    }
-
-    // flatten(T[][], boolean) vertically=true with all-empty rows -> empty (line 18071).
-    @Test
-    public void testFlatten2DVertically_allEmpty_uncovered() {
-        final Integer[][] a = { {}, {} };
-        assertEquals(0, Stream.flatten(a, true).count());
-    }
-
-    // flatten(T[][], valueForAlignment, vertically=true) (lines 18135-18188).
-    @Test
-    public void testFlatten2DWithAlignment_vertical_uncovered() {
-        final Integer[][] a = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
-        // 3 rows x 3 cols, column-major with padding 0
-        assertEquals(N.asList(1, 4, 6, 2, 5, 0, 3, 0, 0), Stream.flatten(a, 0, true).toList());
-    }
-
-    // flatten(T[][], valueForAlignment, vertically=false) horizontal (lines 18189-18218).
-    @Test
-    public void testFlatten2DWithAlignment_horizontal_uncovered() {
-        final Integer[][] a = { { 1, 2, 3 }, { 4, 5 }, { 6 } };
-        assertEquals(N.asList(1, 2, 3, 4, 5, 0, 6, 0, 0), Stream.flatten(a, 0, false).toList());
-    }
-
-    // flatten(T[][], valueForAlignment, vertically) single row -> of(a[0]) (line 18139).
-    @Test
-    public void testFlatten2DWithAlignment_singleRow_uncovered() {
-        final Integer[][] a = { { 7, 8 } };
-        assertEquals(N.asList(7, 8), Stream.flatten(a, 0, false).toList());
-    }
-
-    // repeat: count() override (line 18301-18305).
-    @Test
-    public void testRepeat_count_uncovered() {
-        assertEquals(5, Stream.repeat("x", 5).count());
-    }
-
-    // repeat: advance() override via skip (line 18292-18298).
-    @Test
-    public void testRepeat_skip_uncovered() {
-        assertEquals(N.asList("x", "x"), Stream.repeat("x", 5).skip(3).toList());
-    }
-
-    // repeat: toArray() override (line 18308-18321).
-    @Test
-    public void testRepeat_toArray_uncovered() {
-        final Object[] arr = Stream.repeat("y", 3).toArray();
-        assertArrayEquals(new Object[] { "y", "y", "y" }, arr);
-    }
-
-    // iterate(BooleanSupplier, Supplier) (lines 18349-18374).
-    @Test
-    public void testIterate_BooleanSupplierSupplier_uncovered() {
-        final MutableInt counter = MutableInt.of(0);
-        final BooleanSupplier hasNext = () -> counter.value() < 4;
-        final Supplier<Integer> next = () -> counter.getAndIncrement();
-        assertEquals(N.asList(0, 1, 2, 3), Stream.iterate(hasNext, next).toList());
-    }
-
-    // iterate(init, BooleanSupplier, UnaryOperator) (lines 18398-18425).
-    @Test
-    public void testIterate_InitBooleanSupplierUnary_uncovered() {
-        final MutableInt remaining = MutableInt.of(5);
-        final BooleanSupplier hasNext = () -> remaining.getAndDecrement() > 0;
-        assertEquals(N.asList(1, 2, 4, 8, 16), Stream.iterate(1, hasNext, x -> x * 2).toList());
-    }
-
-    // iterate(init, Predicate, UnaryOperator) (lines 18448-18480).
-    @Test
-    public void testIterate_InitPredicateUnary_uncovered() {
-        assertEquals(N.asList(1, 3, 5, 7, 9), Stream.iterate(1, (Predicate<Integer>) x -> x < 10, x -> x + 2).toList());
-    }
-
-    @Test
-    public void testIterate_BooleanSupplierSupplier_NullArgs_uncovered() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.iterate((BooleanSupplier) null, () -> 1).count());
-        assertThrows(IllegalArgumentException.class, () -> Stream.iterate(() -> true, (Supplier<Integer>) null).count());
-    }
-
-    // generate(Supplier) limited (line 18539).
-    @Test
-    public void testGenerate_limited_uncovered() {
-        final MutableInt c = MutableInt.of(0);
-        final Supplier<Integer> sup = () -> c.getAndIncrement();
-        assertEquals(N.asList(0, 1, 2), Stream.generate(sup).limit(3).toList());
-    }
-
-    @Test
-    public void testGenerate_NullSupplier_uncovered() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.generate((Supplier<Integer>) null).count());
-    }
-
-    // splitByChunkCount sizeSmallerFirst=true advance() + count() (lines 17905-17941).
-    @Test
-    public void testSplitByChunkCount_sizeSmallerFirst_count_uncovered() {
-        // 7 elements into 3 chunks, smaller first
-        final long chunks = Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from).count();
-        assertEquals(3, chunks);
-    }
-
-    @Test
-    public void testSplitByChunkCount_sizeSmallerFirst_skip_uncovered() {
-        // chunk sizes smaller-first for 7/3 => [2,2,3]; skip 1 -> [2,3]
-        assertEquals(N.asList(2, 3), Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from).skip(1).toList());
-    }
-
-    @Test
-    public void testSplitByChunkCount_sizeBiggerFirst_skip_uncovered() {
-        // 7/3 bigger-first => [3,2,2]; skip 1 -> [2,2]
-        assertEquals(N.asList(2, 2), Stream.splitByChunkCount(7, 3, false, (from, to) -> to - from).skip(1).toList());
-    }
-
-    // concat(Iterable...) (lines 19227-19233).
-    @Test
-    public void testConcatIterablesVarargs_uncovered() {
-        final Iterable<Integer> i1 = N.asList(1, 2);
-        final Iterable<Integer> i2 = N.asList(3, 4);
-        assertEquals(N.asList(1, 2, 3, 4), Stream.concat(i1, i2).toList());
-    }
-
-    @Test
-    public void testConcatIterablesVarargs_empty_uncovered() {
-        @SuppressWarnings("unchecked")
-        final Iterable<Integer>[] empty = new Iterable[0];
-        assertEquals(0, Stream.concat(empty).count());
-    }
-
-    // concat(Iterator...) (lines 19259-19265).
-    @Test
-    public void testConcatIteratorsVarargs_uncovered() {
-        final Iterator<Integer> it1 = N.asList(1, 2, 3).iterator();
-        final Iterator<Integer> it2 = N.asList(4, 5).iterator();
-        assertEquals(N.asList(1, 2, 3, 4, 5), Stream.concat(it1, it2).toList());
-    }
-
-    @Test
-    public void testConcatIteratorsVarargs_empty_uncovered() {
-        @SuppressWarnings("unchecked")
-        final Iterator<Integer>[] empty = new Iterator[0];
-        assertEquals(0, Stream.concat(empty).count());
-    }
-
-    // merge(Collection<Stream>, nextSelector): size==1 (line 26370).
-    @Test
-    public void testMergeCollection_singleStream_uncovered() {
-        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 2, 3));
-        assertEquals(N.asList(1, 2, 3), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    // merge(Collection<Stream>, nextSelector): size==2 (lines 26371-26373).
-    @Test
-    public void testMergeCollection_twoStreams_uncovered() {
-        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8));
-        assertEquals(N.asList(1, 2, 4, 5, 7, 8), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    // merge(Collection<Stream>, nextSelector): size>=3 iterative path (lines 26376-26383).
-    @Test
-    public void testMergeCollection_threeStreams_uncovered() {
-        final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8), Stream.of(3, 6, 9));
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    @Test
-    public void testMergeCollection_empty_uncovered() {
-        final List<Stream<Integer>> streams = new ArrayList<>();
-        assertEquals(0, Stream.merge(streams, (x, y) -> MergeResult.TAKE_FIRST).count());
-    }
-
-    // mergeIterables(Collection<Iterable>, nextSelector) (line 26412).
-    @Test
-    public void testMergeIterables_uncovered() {
-        final List<Iterable<Integer>> iterables = N.asList((Iterable<Integer>) N.asList(1, 4, 7), N.asList(2, 5, 8), N.asList(3, 6, 9));
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9),
-                Stream.mergeIterables(iterables, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    // mergeIterators(Collection<Iterator>, nextSelector): size==1 (line 26446).
-    @Test
-    public void testMergeIterators_single_uncovered() {
-        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2, 3).iterator());
-        assertEquals(N.asList(1, 2, 3), Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    // mergeIterators(Collection<Iterator>, nextSelector): size==2 (lines 26447-26449).
-    @Test
-    public void testMergeIterators_two_uncovered() {
-        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 3, 5).iterator(), N.asList(2, 4, 6).iterator());
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6),
-                Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
-    }
-
-    // parallelZip(Iterable, Iterable, fn, 1) -> delegates to sequential zip (line 24956 -> 24993).
-    @Test
-    public void testParallelZipIterables_singleThreadFallback_uncovered() {
-        final List<Integer> a = N.asList(1, 2, 3);
-        final List<Integer> b = N.asList(10, 20, 30);
-        assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
-    }
-
-    // parallelZip(Iterator, Iterator, fn, 1) -> sequential zip (line 24993).
-    @Test
-    public void testParallelZipIterators_singleThreadFallback_uncovered() {
-        final Iterator<Integer> a = N.asList(1, 2, 3, 4).iterator();
-        final Iterator<Integer> b = N.asList(10, 20, 30).iterator();
-        assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
-    }
-
-    // parallelZip(Iterable, Iterable, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25308 -> 25348).
-    @Test
-    public void testParallelZipIterablesWithDefaults_singleThreadFallback_uncovered() {
-        final List<Integer> a = N.asList(1, 2, 3);
-        final List<Integer> b = N.asList(10, 20);
-        assertEquals(N.asList(11, 22, 3), Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 1).toList());
-    }
-
-    // parallelZip(Iterator, Iterator, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25348).
-    @Test
-    public void testParallelZipIteratorsWithDefaults_singleThreadFallback_uncovered() {
-        final Iterator<Integer> a = N.asList(1, 2).iterator();
-        final Iterator<Integer> b = N.asList(10, 20, 30).iterator();
-        assertEquals(N.asList(11, 22, 30), Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 1).toList());
-    }
-
-    @Test
-    public void testParallelZip_nonPositiveThreads_uncovered() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(N.asList(1), N.asList(2), (x, y) -> x + y, 0));
-    }
-
-    // zipIterators(Collection<Iterator>, valuesForNone, fn): size mismatch throws (line 24882).
-    @Test
-    public void testZipIteratorsWithValuesForNone_sizeMismatch_uncovered() {
-        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2).iterator(), N.asList(3, 4).iterator());
-        final List<Integer> wrongSize = N.asList(0); // size 1 != 2
-        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
-        assertThrows(IllegalArgumentException.class, () -> Stream.zipIterators(iterators, wrongSize, sumFn));
-    }
-
-    // zipIterators(Collection<Iterator>, valuesForNone, fn): empty -> empty (line 24876).
-    @Test
-    public void testZipIteratorsWithValuesForNone_empty_uncovered() {
-        final List<Iterator<Integer>> iterators = new ArrayList<>();
-        final List<Integer> none = new ArrayList<>();
-        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
-        assertEquals(0, Stream.zipIterators(iterators, none, sumFn).count());
-    }
-
-    // zipIterables(Collection<Iterable>, valuesForNone, fn) ragged padding (line 24841).
-    @Test
-    public void testZipIterablesWithValuesForNone_uncovered() {
-        final List<Iterable<Integer>> iterables = N.asList((Iterable<Integer>) N.asList(1, 2), N.asList(10, 20, 30), N.asList(100));
-        final List<Integer> defaults = N.asList(0, 0, 0);
-        final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
-        assertEquals(N.asList(111, 22, 30), Stream.zipIterables(iterables, defaults, sumFn).toList());
-    }
-
-    // ofNullable(non-null) (around line 16179).
-    @Test
-    public void testOfNullable_nonNull_uncovered() {
-        assertEquals(N.asList("x"), Stream.ofNullable("x").toList());
-    }
-
-    @Test
-    public void testOfNullable_null_uncovered() {
-        assertEquals(0, Stream.ofNullable(null).count());
-    }
-
-    @Test
-    public void testDeferCloseInvokesSupplierAndCloseHandlers() {
-        final AtomicInteger calls = new AtomicInteger();
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> stream = Stream.defer(() -> {
-            calls.incrementAndGet();
-            return Stream.of(1).onClose(closed::incrementAndGet);
-        });
-
-        stream.close();
-
-        assertEquals(1, calls.get());
-        assertEquals(1, closed.get());
-    }
-
-    @Test
-    public void testFromJdkStreamIteratorCountConsumes() {
-        try (Stream<String> stream = Stream.from(java.util.stream.Stream.of("a", "b"))) {
-            final ObjIteratorEx<String> iter = stream.iteratorEx();
-
-            assertEquals(2, iter.count());
-            assertFalse(iter.hasNext());
-            assertEquals(0, iter.count());
-            assertArrayEquals(new Object[0], iter.toArray());
-            assertThrows(NoSuchElementException.class, iter::next);
-        }
-    }
-
-    @Test
-    public void testFromJdkStreamIteratorToArrayConsumes() {
-        try (Stream<String> stream = Stream.from(java.util.stream.Stream.of("a", "b"))) {
-            final ObjIteratorEx<String> iter = stream.iteratorEx();
-
-            assertArrayEquals(new String[] { "a", "b" }, iter.toArray(new String[0]));
-            assertFalse(iter.hasNext());
-            assertEquals(0, iter.count());
-            assertThrows(NoSuchElementException.class, iter::next);
-        }
-    }
-
-    @Test
     public void testFastPathToArrayNullTerminatesOversizedArray() {
         final Boolean[] booleans = { null, null, Boolean.TRUE };
         assertSame(booleans, Stream.of(new boolean[] { true, false }).iteratorEx().toArray(booleans));
@@ -15057,7 +2866,37 @@ public class StreamTest extends AbstractTest {
         assertArrayEquals(new String[] { "x", "x", null }, repeated);
     }
 
-    // --- regression tests for 2026-06-10 deep-review fixes ---
+    @Test
+    public void testStreamCreatedAfterTop() {
+        assertEquals(3, Stream.of(5, 3, 1, 4, 2).top(3).count());
+        assertEquals(2, Stream.of(5, 3, 1, 4, 2).top(3).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3).toArray());
+        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).top(3).toList());
+        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).top(3).skip(1).toList());
+        assertEquals(3, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).count());
+        assertEquals(2, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).toArray());
+        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).toList());
+        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3).skip(1).toList());
+    }
+
+    @Test
+    public void testStreamCreatedAfterTopWithComparator() {
+        assertEquals(3, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).count());
+        assertEquals(2, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).top(3, Comparator.naturalOrder()).skip(1).toList());
+        assertEquals(3, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).count());
+        assertEquals(2, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).count());
+        assertArrayEquals(new Integer[] { 3, 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).toArray());
+        assertArrayEquals(new Integer[] { 5, 4 }, Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).toArray());
+        assertEquals(N.toList(3, 5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).toList());
+        assertEquals(N.toList(5, 4), Stream.of(5, 3, 1, 4, 2).map(e -> e).top(3, Comparator.naturalOrder()).skip(1).toList());
+    }
 
     @Test
     public void testTimeBasedSlidingWindow_noDuplicatesAcrossOverlappingWindows() {
@@ -15074,1302 +2913,46 @@ public class StreamTest extends AbstractTest {
     }
 
     @Test
-    public void testBoundedWindowCountClose_eventTimeContinuesFromLastEvent() {
-        // regression: when a window closed early on element count in event-time mode, the next window
-        // started at the wall clock instead of the last event time, silently dropping buffered events
-        final long t0 = System.currentTimeMillis();
-        final WindowHandler<Long, List<Long>> handler = WindowHandler.of(Long::longValue);
-
-        final List<List<Long>> windows = Stream.of(t0 - 100_000, t0 - 99_000, t0 - 98_000, t0 - 97_000)
-                .window(Duration.ofHours(1), 2, () -> t0 - 200_000, handler, Collectors.toList())
-                .toList();
-
-        assertEquals(N.asList(N.asList(t0 - 100_000, t0 - 99_000), N.asList(t0 - 98_000, t0 - 97_000)), windows);
-    }
-
-    @Test
-    public void testParallelConcatValidatesReadThreadNum() {
-        // regression: readThreadNum <= 0 started zero reader threads and silently produced an EMPTY stream
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(N.asList(Stream.of(1), Stream.of(2)), 0));
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcatIterators(N.asList(N.asList(1).iterator(), N.asList(2).iterator()), -1));
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(N.asList(Stream.of(1)), 1, 0));
-
-        // null collections return an empty stream, matching concat(Collection) and the 3-arg overloads
-        assertTrue(Stream.parallelConcat((Collection<Stream<Integer>>) null, 2).toList().isEmpty());
-        assertTrue(Stream.parallelConcatIterators((Collection<Iterator<Integer>>) null, 2).toList().isEmpty());
-
-        // normal behavior unchanged
-        assertEquals(N.asSet(1, 2, 3), Stream.parallelConcat(N.asList(Stream.of(1, 2), Stream.of(3)), 2).toSet());
-    }
-
-    @Test
-    public void testParallelMergeClosesInputStreamsOnCloseWithoutConsumption() {
-        // regression: the size >= 4 path returned a lazy stream without close handlers for the inputs,
-        // so closing the result without consuming it never closed the source streams
-        final AtomicInteger closedCount = new AtomicInteger();
-        final List<Stream<Integer>> sources = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            sources.add(Stream.of(1, 2, 3).onClose(closedCount::incrementAndGet));
-        }
-
-        Stream.parallelMerge(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 4).close();
-
-        assertEquals(4, closedCount.get());
-    }
-
-    @Test
-    public void testCollectionZipCloseHandlersUseSourceSnapshot() {
-        final AtomicInteger closedCount = new AtomicInteger();
-        List<Stream<Integer>> sources = new ArrayList<>(
-                Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
-        Stream<Integer> zipped = Stream.zip(sources, values -> values.get(0) + values.get(1));
-
-        sources.clear();
-        zipped.close();
-        assertEquals(2, closedCount.get());
-
-        closedCount.set(0);
-        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
-        zipped = Stream.zip(sources, Arrays.asList(0, 0), values -> values.get(0) + values.get(1));
-
-        sources.clear();
-        zipped.close();
-        assertEquals(2, closedCount.get());
-
-        closedCount.set(0);
-        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
-        zipped = Stream.parallelZip(sources, values -> values.get(0) + values.get(1), 2);
-
-        sources.clear();
-        zipped.close();
-        assertEquals(2, closedCount.get());
-
-        closedCount.set(0);
-        sources = new ArrayList<>(Arrays.asList(Stream.of(1).onClose(closedCount::incrementAndGet), Stream.of(2).onClose(closedCount::incrementAndGet)));
-        zipped = Stream.parallelZip(sources, Arrays.asList(0, 0), values -> values.get(0) + values.get(1), 2);
-
-        sources.clear();
-        zipped.close();
-        assertEquals(2, closedCount.get());
-    }
-
-    @Test
-    public void testCompositeCloseBeforeConsumptionSeesLateSourceCloseHandlers() {
-        final AtomicInteger closedCount = new AtomicInteger();
-        final Stream<Integer> source = Stream.of(1);
-        final Stream<Integer> concatenated = Stream.concat(Collections.singletonList(source));
-
-        source.onClose(closedCount::incrementAndGet);
-        concatenated.close();
-        assertEquals(1, closedCount.get());
-
-        closedCount.set(0);
-        final Stream<Integer> singleSource = Stream.of(1);
-        final Stream<Integer> zipWithCollection = singleSource.zipWith(Collections.singletonList(2), Integer::sum);
-
-        singleSource.onClose(closedCount::incrementAndGet);
-        zipWithCollection.close();
-        assertEquals(1, closedCount.get());
-
-        closedCount.set(0);
-        final Stream<Integer> left = Stream.of(1);
-        final Stream<Integer> right = Stream.of(2);
-        final Stream<Integer> zipped = Stream.zip(left, right, Integer::sum);
-
-        left.onClose(closedCount::incrementAndGet);
-        right.onClose(closedCount::incrementAndGet);
-        zipped.close();
-        assertEquals(2, closedCount.get());
-
-        closedCount.set(0);
-        final IntStream intSource = IntStream.of(1);
-        final IntStream intConcatenated = IntStream.concat(Collections.singletonList(intSource));
-
-        intSource.onClose(closedCount::incrementAndGet);
-        intConcatenated.close();
-        assertEquals(1, closedCount.get());
-    }
-
-    @Test
-    public void testPrimitiveCollectionZipCloseHandlersUseSourceSnapshots() {
-        final AtomicInteger closedCount = new AtomicInteger();
-
-        List<ByteStream> byteStreams = new ArrayList<>(Collections.singletonList(ByteStream.of((byte) 1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(byteStreams, Stream.zip(byteStreams, values -> values[0]), closedCount);
-        byteStreams = new ArrayList<>(Collections.singletonList(ByteStream.of((byte) 1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(byteStreams, Stream.zip(byteStreams, new byte[] { 0 }, values -> values[0]), closedCount);
-
-        List<ShortStream> shortStreams = new ArrayList<>(Collections.singletonList(ShortStream.of((short) 1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(shortStreams, Stream.zip(shortStreams, values -> values[0]), closedCount);
-        shortStreams = new ArrayList<>(Collections.singletonList(ShortStream.of((short) 1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(shortStreams, Stream.zip(shortStreams, new short[] { 0 }, values -> values[0]), closedCount);
-
-        List<CharStream> charStreams = new ArrayList<>(Collections.singletonList(CharStream.of('a').onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(charStreams, Stream.zip(charStreams, values -> values[0]), closedCount);
-        charStreams = new ArrayList<>(Collections.singletonList(CharStream.of('a').onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(charStreams, Stream.zip(charStreams, new char[] { 0 }, values -> values[0]), closedCount);
-
-        List<IntStream> intStreams = new ArrayList<>(Collections.singletonList(IntStream.of(1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(intStreams, Stream.zip(intStreams, values -> values[0]), closedCount);
-        intStreams = new ArrayList<>(Collections.singletonList(IntStream.of(1).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(intStreams, Stream.zip(intStreams, new int[] { 0 }, values -> values[0]), closedCount);
-
-        List<LongStream> longStreams = new ArrayList<>(Collections.singletonList(LongStream.of(1L).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(longStreams, Stream.zip(longStreams, values -> values[0]), closedCount);
-        longStreams = new ArrayList<>(Collections.singletonList(LongStream.of(1L).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(longStreams, Stream.zip(longStreams, new long[] { 0 }, values -> values[0]), closedCount);
-
-        List<FloatStream> floatStreams = new ArrayList<>(Collections.singletonList(FloatStream.of(1F).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(floatStreams, Stream.zip(floatStreams, values -> values[0]), closedCount);
-        floatStreams = new ArrayList<>(Collections.singletonList(FloatStream.of(1F).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(floatStreams, Stream.zip(floatStreams, new float[] { 0 }, values -> values[0]), closedCount);
-
-        List<DoubleStream> doubleStreams = new ArrayList<>(Collections.singletonList(DoubleStream.of(1D).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(doubleStreams, Stream.zip(doubleStreams, values -> values[0]), closedCount);
-        doubleStreams = new ArrayList<>(Collections.singletonList(DoubleStream.of(1D).onClose(closedCount::incrementAndGet)));
-        assertCollectionZipClosesSnapshottedSource(doubleStreams, Stream.zip(doubleStreams, new double[] { 0 }, values -> values[0]), closedCount);
-    }
-
-    @Test
     public void testPrimitiveCollectionZipWithDefaultsTreatsNullStreamAsEmpty() {
         assertEquals(Collections.singletonList((byte) 3),
                 Stream.zip(Arrays.asList(ByteStream.of((byte) 1), null), new byte[] { 0, 2 }, values -> (byte) (values[0] + values[1])).toList());
     }
 
-    private static void assertCollectionZipClosesSnapshottedSource(final List<?> sources, final Stream<?> zipped, final AtomicInteger closedCount) {
-        sources.clear();
-        zipped.close();
-        assertEquals(1, closedCount.getAndSet(0));
+    @Test
+    public void testStreamCreatedAfterZipWithCollection() {
+        List<String> collection = Arrays.asList("a", "b", "c");
+        BiFunction<Integer, String, String> zipFunc = (i, s) -> i + s;
+
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).count());
+        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).toArray());
+        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).toArray());
+        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).toList());
+        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(collection, zipFunc).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).count());
+        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).toArray());
+        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).toArray());
+        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).toList());
+        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(collection, zipFunc).skip(1).toList());
     }
 
     @Test
-    public void testParallelMergeSnapshotsSourceCollection() {
-        final List<Stream<Integer>> sources = new ArrayList<>(Arrays.asList(Stream.of(1, 5), Stream.of(2, 6), Stream.of(3, 7), Stream.of(4, 8)));
-        final Stream<Integer> merged = Stream.parallelMerge(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2);
-
-        sources.clear();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), merged.toList());
-    }
-
-    @Test
-    public void testParallelMergeIteratorsSnapshotsSourceCollection() {
-        final List<Iterator<Integer>> sources = new ArrayList<>(
-                Arrays.asList(Arrays.asList(1, 5).iterator(), Arrays.asList(2, 6).iterator(), Arrays.asList(3, 7).iterator(), Arrays.asList(4, 8).iterator()));
-        final Stream<Integer> merged = Stream.parallelMergeIterators(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2);
-
-        sources.clear();
-
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8), merged.toList());
-    }
-
-    @Test
-    public void testParallelMergeNullSelectorThrowsOnConsumption() {
-        final List<Stream<Integer>> sources = Arrays.asList(Stream.of(1), Stream.of(2), Stream.of(3), Stream.of(4));
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelMerge(sources, null, 2).toList());
-        assertThrows(IllegalArgumentException.class, () -> Stream.merge(Stream.of(1), Stream.of(2), (BiFunction<Integer, Integer, MergeResult>) null).toList());
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.merge(N.asList(1).iterator(), N.asList(2).iterator(), (BiFunction<Integer, Integer, MergeResult>) null).toList());
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.parallelMergeIterators(N.asList(N.asList(1).iterator(), N.asList(2).iterator()), null, 2).toList());
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelMergeIterables(N.asList(N.asList(1), N.asList(2)), null, 2).toList());
-        assertThrows(IllegalArgumentException.class, () -> Stream.mergeIterables(N.asList(N.asList(1), N.asList(2)), null).toList());
-    }
-
-    @Test
-    public void testPrimitiveMergeNullSelectorThrowsOnConsumption() {
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(new byte[] { 1 }, new byte[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> CharStream.merge(new char[] { 'a' }, new char[] { 'b' }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> ShortStream.merge(new short[] { 1 }, new short[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> IntStream.merge(new int[] { 1 }, new int[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> LongStream.merge(new long[] { 1 }, new long[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> FloatStream.merge(new float[] { 1 }, new float[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> DoubleStream.merge(new double[] { 1 }, new double[] { 2 }, null).count());
-
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteIterator.of((byte) 1), ByteIterator.of((byte) 2), null).count());
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(ByteStream.of((byte) 1), ByteStream.of((byte) 2), null).count());
-        assertThrows(IllegalArgumentException.class, () -> ByteStream.merge(N.asList(ByteStream.of((byte) 1), ByteStream.of((byte) 2)), null).count());
-    }
-
-    @Test
-    public void testMergeCollectionTreatsNullStreamAsEmpty() {
-        final List<Stream<Integer>> sources = Collections.singletonList(null);
-
-        assertTrue(Stream.merge(sources, (x, y) -> MergeResult.TAKE_FIRST).toList().isEmpty());
-        assertTrue(Stream.parallelMerge(sources, (x, y) -> MergeResult.TAKE_FIRST, 2).toList().isEmpty());
-    }
-
-    @Test
-    public void testGroupJoinParallelNoSharedStateRace() {
-        // regression: the groupJoin mappers stored the looked-up group in a shared instance field,
-        // racing across parallel worker threads and returning another element's (or no) group
-        final List<Integer> left = new ArrayList<>();
-        for (int i = 0; i < 20000; i++) {
-            left.add(i);
-        }
-        final List<Integer> right = new ArrayList<>();
-        for (int i = 0; i < 20000; i += 2) {
-            right.add(i);
-        }
-
-        final List<Pair<Integer, List<Integer>>> joined = Stream.of(left)
-                .parallel(8)
-                .groupJoin(right, Fn.identity(), Fn.identity(), (final Integer t, final List<Integer> l) -> Pair.of(t, l))
-                .toList();
-
-        assertEquals(20000, joined.size());
-
-        for (final Pair<Integer, List<Integer>> p : joined) {
-            if (p.left() % 2 == 0) {
-                assertEquals(N.asList(p.left()), p.right());
-            } else {
-                assertTrue(p.right().isEmpty());
-            }
-        }
-    }
-
-    @Test
-    public void testStreamArgJoinsWithEmptyLeftKeepRightRows() {
-        // regression: the right-side rows were only materialized inside the flatMap mapper, which
-        // never runs for an empty left stream, so full/right joins silently returned []
-        final List<Pair<Integer, Integer>> full = Stream.<Integer> empty()
-                .fullJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
-                .toList();
-        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), full);
-
-        final List<Pair<Integer, Integer>> rightJoined = Stream.<Integer> empty()
-                .rightJoin(Stream.of(10, 20), Fn.identity(), Fn.identity(), (t, u) -> Pair.of(t, u))
-                .toList();
-        assertEquals(N.asList(Pair.of((Integer) null, 10), Pair.of((Integer) null, 20)), rightJoined);
-    }
-
-    @Test
-    public void testJoinByRangeEmptyLeftRoutesUnjoinedElements() {
-        // regression: the NONE sentinel was ambiguous between "iterator exhausted" and "left stream
-        // empty", so the documented mapperForUnJoinedElements step was silently skipped
-        final List<String> result = Stream.<Integer> empty()
-                .joinByRange(N.asList(10, 20).iterator(), (t, u) -> u < t, Collectors.toList(), (t, l) -> "joined:" + t + l,
-                        rem -> Stream.of(rem).map(u -> "unjoined:" + u))
-                .toList();
-
-        assertEquals(N.asList("unjoined:10", "unjoined:20"), result);
-    }
-
-    @Test
-    public void testParallelMergeIteratorsThreeSources() {
-        // pins the size == 3 fast path, where the buffered stream's close handler is now kept reachable
-        // so the background buffering thread stops when the result stream is closed
-        final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 4, 7).iterator(), N.asList(2, 5, 8).iterator(), N.asList(3, 6, 9).iterator());
-
-        final List<Integer> merged = Stream.parallelMergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 2).toList();
-
-        assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), merged);
-    }
-
-    @Test
-    public void testSpsFilterE_ExplicitThreadCount() {
-        final List<Integer> result = Stream.of(1, 2, 3, 4, 5).spsFilterE(2, i -> i % 2 == 1).sorted().toList();
-
-        assertEquals(Arrays.asList(1, 3, 5), result);
-    }
-
-    @Test
-    public void testDebounce_emptyEmitsNothing() {
-        assertTrue(Stream.<Integer> empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
-        assertTrue(Stream.<Integer> empty().parallel().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList().isEmpty());
-    }
-
-    @Test
-    public void testDebounce_singleElementSurvives() {
-        assertEquals(Arrays.asList(42), Stream.of(42).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
-    }
-
-    @Test
-    public void testDebounce_coldStreamEmitsOnlyLastElement() {
-        // A cold in-memory stream yields all elements with ~0 inter-arrival gap, so only the last survives.
-        assertEquals(Arrays.asList(5), Stream.of(1, 2, 3, 4, 5).debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
-        assertEquals(Arrays.asList(5), Stream.of(1, 2, 3, 4, 5).parallel().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).toList());
-    }
-
-    @Test
-    public void testDebounce_slowSourceAllSurviveWhenGapAtLeastDuration() {
-        // Each element arrives >= 60ms after the previous (delay); with a 20ms quiet window all survive.
-        assertEquals(Arrays.asList(1, 2, 3),
-                Stream.of(1, 2, 3).delay(com.landawn.abacus.util.Duration.ofMillis(60)).debounce(com.landawn.abacus.util.Duration.ofMillis(20)).toList());
-    }
-
-    @Test
-    public void testDebounce_invalidDurationThrows() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce((com.landawn.abacus.util.Duration) null).toList());
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(0)).toList());
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toList());
-    }
-
-    @Test
-    public void testWindowAssignerCanBeImplementedOutsideUtilPackage() {
-        final IdentityWindowAssigner assigner = new IdentityWindowAssigner();
-
-        assertEquals(Arrays.asList(1, 2, 3), assigner.apply(ObjIterator.of(1, 2, 3)).toList());
-    }
-
-    private static final class IdentityWindowAssigner extends WindowAssigner {
-
-        @Override
-        protected <T> ObjIterator<T> process(final ObjIterator<T> iter) {
-            return iter;
-        }
-
-        <T> ObjIterator<T> apply(final ObjIterator<T> iter) {
-            return process(iter);
-        }
-    }
-
-    @Test
-    public void testBooleanSupplierIteratorsStayExhausted() {
-        final AtomicInteger conditionCalls = new AtomicInteger();
-        Iterator<Integer> iter = Stream.iterate(() -> conditionCalls.getAndIncrement() > 0, () -> 1).iterator();
-
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, iter::next);
-        assertEquals(1, conditionCalls.get());
-
-        conditionCalls.set(0);
-        iter = Stream.iterate(1, () -> conditionCalls.getAndIncrement() > 0, value -> value + 1).iterator();
-
-        assertFalse(iter.hasNext());
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, iter::next);
-        assertEquals(1, conditionCalls.get());
-    }
-
-    @Test
-    @Timeout(10)
-    public void testParallelZipDoesNotAdvanceInputsForIncompleteTuple() {
-        final AtomicInteger pairLeftNextCalls = new AtomicInteger();
-        final CountDownLatch pairRightExhausted = new CountDownLatch(1);
-        final Iterator<Integer> pairLeft = countingIterator(Arrays.asList(1, 2), pairLeftNextCalls);
-        final Iterator<Integer> pairRight = signallingIterator(Collections.singletonList(10), pairRightExhausted);
-
-        assertEquals(Collections.singletonList(11), Stream.parallelZip(pairLeft, pairRight, (a, b) -> {
-            await(pairRightExhausted);
-            return a + b;
-        }, 2).toList());
-        assertEquals(1, pairLeftNextCalls.get());
-        assertEquals(2, pairLeft.next());
-
-        final AtomicInteger triFirstNextCalls = new AtomicInteger();
-        final AtomicInteger triSecondNextCalls = new AtomicInteger();
-        final CountDownLatch triThirdExhausted = new CountDownLatch(1);
-        final Iterator<Integer> triFirst = countingIterator(Arrays.asList(1, 2), triFirstNextCalls);
-        final Iterator<Integer> triSecond = countingIterator(Arrays.asList(10, 20), triSecondNextCalls);
-        final Iterator<Integer> triThird = signallingIterator(Collections.singletonList(100), triThirdExhausted);
-
-        assertEquals(Collections.singletonList(111), Stream.parallelZip(triFirst, triSecond, triThird, (a, b, c) -> {
-            await(triThirdExhausted);
-            return a + b + c;
-        }, 2).toList());
-        assertEquals(1, triFirstNextCalls.get());
-        assertEquals(1, triSecondNextCalls.get());
-        assertEquals(2, triFirst.next());
-        assertEquals(20, triSecond.next());
-
-        final AtomicInteger collectionFirstNextCalls = new AtomicInteger();
-        final AtomicInteger collectionSecondNextCalls = new AtomicInteger();
-        final CountDownLatch collectionThirdExhausted = new CountDownLatch(1);
-        final Iterator<Integer> collectionFirst = countingIterator(Arrays.asList(1, 2), collectionFirstNextCalls);
-        final Iterator<Integer> collectionSecond = countingIterator(Arrays.asList(10, 20), collectionSecondNextCalls);
-        final Iterator<Integer> collectionThird = signallingIterator(Collections.singletonList(100), collectionThirdExhausted);
-
-        assertEquals(Collections.singletonList(111), Stream.parallelZipIterators(Arrays.asList(collectionFirst, collectionSecond, collectionThird), values -> {
-            await(collectionThirdExhausted);
-            return values.get(0) + values.get(1) + values.get(2);
-        }, 2).toList());
-        assertEquals(1, collectionFirstNextCalls.get());
-        assertEquals(1, collectionSecondNextCalls.get());
-        assertEquals(2, collectionFirst.next());
-        assertEquals(20, collectionSecond.next());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testParallelConcatNullVarargsAreEmpty() {
-        assertTrue(Stream.parallelConcat((Iterator<Integer>[]) null).toList().isEmpty());
-        assertTrue(Stream.parallelConcat((Stream<Integer>[]) null).toList().isEmpty());
-    }
-
-    @Test
-    public void testParallelConcatValidatesBufferSizeBeforeEmptyShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcat(Collections.emptyList(), 1, 0));
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelConcatIterators(Collections.emptyList(), 1, 0));
-    }
-
-    @Test
-    public void testReferenceArrayMergeNullSelectorThrowsOnConsumption() {
-        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, null).count());
-        assertThrows(IllegalArgumentException.class, () -> Stream.merge(new Integer[] { 1 }, new Integer[] { 2 }, new Integer[] { 3 }, null).count());
-    }
-
-    @Test
-    public void testAsyncTerminalWrappersAlwaysCloseStream() throws Exception {
-        final AtomicInteger closeCount = new AtomicInteger();
-        Stream<Integer> source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
-
-        source.runAsync(s -> {
-            // A terminal wrapper must close even when the callback itself does not consume the stream.
-        }).get();
-        assertEquals(1, closeCount.get());
-        assertThrows(IllegalStateException.class, source::count);
-
-        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
-        assertEquals(7, source.callAsync(s -> 7, customExecutor).get());
-        assertEquals(2, closeCount.get());
-        assertThrows(IllegalStateException.class, source::count);
-
-        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> failedRunSource = source;
-        assertThrows(ExecutionException.class, () -> failedRunSource.runAsync(s -> {
-            throw new IOException("expected");
-        }, customExecutor).get());
-        assertEquals(3, closeCount.get());
-        assertThrows(IllegalStateException.class, source::count);
-
-        source = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> failedCallSource = source;
-        assertThrows(ExecutionException.class, () -> failedCallSource.callAsync(s -> {
-            throw new IOException("expected");
-        }).get());
-        assertEquals(4, closeCount.get());
-        assertThrows(IllegalStateException.class, source::count);
-    }
-
-    @Test
-    public void testAsyncTerminalWrappersCloseStreamWhenSchedulingIsRejected() {
-        final RejectedExecutionException rejection = new RejectedExecutionException("expected");
-        final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> runSource = Stream.of(1).onClose(closeCount::incrementAndGet);
-
-        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> runSource.runAsync(s -> s.count(), command -> {
-            throw rejection;
-        })));
-        assertEquals(1, closeCount.get());
-        assertThrows(IllegalStateException.class, runSource::count);
-
-        final Stream<Integer> callSource = Stream.of(1).onClose(closeCount::incrementAndGet);
-        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> callSource.callAsync(s -> s.count(), command -> {
-            throw rejection;
-        })));
-        assertEquals(2, closeCount.get());
-        assertThrows(IllegalStateException.class, callSource::count);
-
-        final IllegalStateException closeFailure = new IllegalStateException("close failed");
-        final Stream<Integer> closeFailingSource = Stream.of(1).onClose(() -> {
-            throw closeFailure;
-        });
-        final RejectedExecutionException thrown = assertThrows(RejectedExecutionException.class, () -> closeFailingSource.runAsync(s -> s.count(), command -> {
-            throw rejection;
-        }));
-
-        assertSame(rejection, thrown);
-        assertEquals(1, thrown.getSuppressed().length);
-        assertSame(closeFailure, thrown.getSuppressed()[0]);
-        assertThrows(IllegalStateException.class, closeFailingSource::count);
-    }
-
-    @Test
-    public void testMaxWaitClosesSourceWithoutTraversal() {
-        for (final boolean suppliedDefault : new boolean[] { false, true }) {
-            for (int mode = 0; mode < 3; mode++) {
-                final AtomicInteger closeCalls = new AtomicInteger();
-                final AtomicInteger nextCalls = new AtomicInteger();
-                final Stream<Integer> source = Stream.of(countingIterator(Arrays.asList(1, 2), nextCalls)).onClose(closeCalls::incrementAndGet);
-                // This verifies closure, so allow a generous worker-startup delay before emitting a timeout value.
-                final Stream<Integer> result = suppliedDefault ? source.maxWait(Duration.ofSeconds(5), () -> 99) : source.maxWait(Duration.ofSeconds(5), 99);
-
-                if (mode == 0) {
-                    result.close();
-                } else if (mode == 1) {
-                    assertEquals(0, result.limit(0).count());
-                } else {
-                    assertEquals(Arrays.asList(1, 2), result.toList());
-                }
-
-                result.close();
-                assertEquals(1, closeCalls.get(), "source must close exactly once");
-                assertEquals(mode == 2 ? 2 : 0, nextCalls.get(), "closing must preserve lazy traversal");
-                assertThrows(IllegalStateException.class, source::count);
-            }
-        }
-    }
-
-    @Test
-    public void testBufferedClosesSourceWithoutTraversal() {
-        for (int overload = 0; overload < 3; overload++) {
-            for (int mode = 0; mode < 3; mode++) {
-                final AtomicInteger closeCalls = new AtomicInteger();
-                final AtomicInteger nextCalls = new AtomicInteger();
-                final Stream<Integer> source = Stream.of(countingIterator(Arrays.asList(1, 2), nextCalls)).onClose(closeCalls::incrementAndGet);
-                final Stream<Integer> result = overload == 0 ? source.buffered()
-                        : overload == 1 ? source.buffered(2) : source.buffered(new ArrayBlockingQueue<>(2));
-
-                if (mode == 0) {
-                    result.close();
-                } else if (mode == 1) {
-                    assertEquals(0, result.limit(0).count());
-                } else {
-                    assertEquals(Arrays.asList(1, 2), result.toList());
-                }
-
-                result.close();
-                assertEquals(1, closeCalls.get(), "source must close exactly once");
-                assertEquals(mode == 2 ? 2 : 0, nextCalls.get(), "closing must preserve lazy traversal");
-                assertThrows(IllegalStateException.class, source::count);
-            }
-        }
-    }
-
-    @Test
-    public void testTimeWindowsRejectOverflowingBoundariesAndCloseSource() {
-        final WindowHandler<Long, List<Long>> handler = WindowHandler.of((Long timestamp) -> timestamp);
-
-        for (final boolean sliding : new boolean[] { false, true }) {
-            for (final boolean initialBoundary : new boolean[] { false, true }) {
-                for (final boolean iteratorSource : new boolean[] { false, true }) {
-                    final AtomicInteger closeCalls = new AtomicInteger();
-                    final long start = initialBoundary ? 1 : sliding ? Long.MAX_VALUE - 3 : Long.MAX_VALUE - 2;
-                    final long event = initialBoundary ? 0 : sliding ? Long.MAX_VALUE - 3 : Long.MAX_VALUE - 1;
-                    final Duration duration = Duration.ofMillis(initialBoundary ? Long.MAX_VALUE : 2);
-                    final Stream<Long> source = (iteratorSource ? Stream.of(Arrays.asList(event).iterator()) : Stream.of(event))
-                            .onClose(closeCalls::incrementAndGet);
-                    final Stream<List<Long>> windows = sliding ? source.window(duration, duration, () -> start, handler, Collectors.toList())
-                            : source.window(duration, 1, () -> start, handler, Collectors.toList());
-
-                    assertThrows(ArithmeticException.class, windows::toList);
-                    windows.close();
-                    assertEquals(1, closeCalls.get(), "an unrepresentable boundary must still close the source exactly once");
-                    assertThrows(IllegalStateException.class, source::count);
-                }
-            }
-        }
-
-        final long start = Long.MAX_VALUE - 4;
-        assertEquals(Arrays.asList(Arrays.asList(start)),
-                Stream.of(start).window(Duration.ofMillis(2), Duration.ofMillis(2), () -> start, handler, Collectors.toList()).toList());
-        assertEquals(Arrays.asList(Arrays.asList(start)), Stream.of(start).window(Duration.ofMillis(2), 1, () -> start, handler, Collectors.toList()).toList());
-    }
-
-    @Test
-    public void testDefaultIfEmptyNullSupplierClosesEveryStreamType() {
-        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?>[] sources = { Stream.of(1), EntryStream.of("key", 1), ByteStream.of((byte) 1), CharStream.of('a'),
-                ShortStream.of((short) 1), IntStream.of(1), LongStream.of(1L), FloatStream.of(1F), DoubleStream.of(1D) };
-
-        for (final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> original : sources) {
-            final AtomicInteger closeCalls = new AtomicInteger();
-            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> source = original.onClose(closeCalls::incrementAndGet);
-
-            assertThrows(IllegalArgumentException.class, () -> source.defaultIfEmpty(null));
-            assertEquals(1, closeCalls.get(), "a null supplier must close the source");
-            source.close();
-            assertEquals(1, closeCalls.get());
-            assertThrows(IllegalStateException.class, () -> source.defaultIfEmpty(null));
-        }
-    }
-
-    private static <T> Iterator<T> countingIterator(final List<T> values, final AtomicInteger nextCalls) {
-        final Iterator<T> delegate = values.iterator();
-
-        return new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                return delegate.hasNext();
-            }
-
-            @Override
-            public T next() {
-                nextCalls.incrementAndGet();
-                return delegate.next();
-            }
-        };
-    }
-
-    private static <T> Iterator<T> signallingIterator(final List<T> values, final CountDownLatch exhausted) {
-        final Iterator<T> delegate = values.iterator();
-
-        return new Iterator<>() {
-            @Override
-            public boolean hasNext() {
-                final boolean hasNext = delegate.hasNext();
-
-                if (!hasNext) {
-                    exhausted.countDown();
-                }
-
-                return hasNext;
-            }
-
-            @Override
-            public T next() {
-                return delegate.next();
-            }
-        };
-    }
-
-    @Test
-    public void testAddSubscriberPreservesInterruptedOffer() {
-        assertSubscriberOfferPreservesInterrupt(0);
-    }
-
-    @Test
-    public void testFilterSubscriberPreservesInterruptedOffer() {
-        assertSubscriberOfferPreservesInterrupt(1);
-    }
-
-    @Test
-    public void testTakeWhileSubscriberPreservesInterruptedOffer() {
-        assertSubscriberOfferPreservesInterrupt(2);
-    }
-
-    @Test
-    public void testDropWhileSubscriberPreservesInterruptedOffer() {
-        assertSubscriberOfferPreservesInterrupt(3);
-    }
-
-    private static void assertSubscriberOfferPreservesInterrupt(final int operation) {
-        final AtomicReference<Runnable> subscriberTask = new AtomicReference<>();
-        final com.landawn.abacus.util.Throwables.Consumer<Stream<Integer>, RuntimeException> subscriber = attached -> assertThrows(RuntimeException.class,
-                attached::count);
-        final Stream<Integer> source = Stream.of(1, 2);
-        final Stream<Integer> main = switch (operation) {
-            case 0 -> source.addSubscriber(subscriber, 1, 1, subscriberTask::set);
-            case 1 -> source.filterWhileAddSubscriber(value -> value == 2, subscriber, 1, 1, subscriberTask::set);
-            case 2 -> source.takeWhileAddSubscriber(value -> value < 1, subscriber, subscriberTask::set);
-            case 3 -> source.dropWhileAddSubscriber(value -> value < 2, subscriber, 1, 1, subscriberTask::set);
-            default -> throw new AssertionError(operation);
-        };
-
-        try {
-            final ObjIterator<Integer> iterator = main.iterator();
-            Thread.currentThread().interrupt();
-
-            if (operation == 2) {
-                assertFalse(iterator.hasNext());
-            } else {
-                assertTrue(iterator.hasNext());
-                assertEquals(operation == 0 ? 1 : 2, iterator.next());
-            }
-
-            assertTrue(Thread.currentThread().isInterrupted(), "subscriber delivery must preserve caller interruption");
-        } finally {
-            Thread.interrupted();
-            final Runnable task = subscriberTask.get();
-            if (task != null) {
-                task.run();
-            }
-            main.close();
-        }
-    }
-
-    private static void await(final CountDownLatch latch) {
-        try {
-            assertTrue(latch.await(5, TimeUnit.SECONDS), "parallel zip did not check the exhausted source");
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new AssertionError(e);
-        }
-    }
-
-    // ------------------------------------------------------------------------------------------------------
-    // Stream review 2026-09-09 (pass B) - cartesianProduct null-array handling
-    // ------------------------------------------------------------------------------------------------------
-
-    /**
-     * {@code cartesianProduct(Collection...)} used {@code Arrays.asList(cs)}, which NPEs on a null array, while its
-     * neighbours and {@code Iterables.cartesianProduct(Collection...)} - the method its own {@code @see} points at -
-     * use the null-safe {@code Array.asList}.
-     */
-    @Test
-    public void testCartesianProduct_nullArrayIsTreatedAsNoCollections() {
-        final List<List<Integer>> expected = Stream.of(1, 2, 3).cartesianProduct().toList();
-
-        assertEquals(expected, Stream.of(1, 2, 3).cartesianProduct((Collection<Integer>[]) null).toList());
-
-        // the ordinary path is unaffected
-        assertEquals(6, Stream.of(1, 2, 3).cartesianProduct(N.asList(9, 8)).count());
-    }
-
-    @Test
-    public void testZipMismatchedValuesForNoneDoesNotOpenSources() {
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
-        // An already-closed source makes the opening step observable: whichever check runs first decides
-        // the exception. The size check must win, otherwise iterateAll() opens 'a' and strands it.
-        final Stream<Integer> alreadyClosed = Stream.of(3);
-        alreadyClosed.close();
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(a, alreadyClosed), Arrays.asList(0), list -> 0));
-        assertEquals(0, closed.get());
-        assertEquals(Arrays.asList(1, 2), a.toList());
-
-        // parallelZip guards the same way.
-        final AtomicInteger closedParallel = new AtomicInteger();
-        final Stream<Integer> pa = Stream.of(1, 2).onClose(closedParallel::incrementAndGet);
-        final Stream<Integer> pClosed = Stream.of(3);
-        pClosed.close();
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(Arrays.asList(pa, pClosed), Arrays.asList(0), list -> 0, 2));
-        assertEquals(0, closedParallel.get());
-        assertEquals(Arrays.asList(1, 2), pa.toList());
-    }
-
-    @Test
-    public void testZipClosesOpenedSourceWhenSiblingIterateFails() {
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
-        final Stream<Integer> b = Stream.of(3);
-        b.close();
-
-        assertThrows(IllegalStateException.class, () -> Stream.zip(a, b, Integer::sum).toList());
-        assertEquals(1, closed.get());
-    }
-
-    @Test
-    public void testZipDoesNotCloseUnopenedSiblingWhenFirstIterateFails() {
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2);
-        a.close();
-        final Stream<Integer> b = Stream.of(3, 4).onClose(closed::incrementAndGet);
-
-        assertThrows(IllegalStateException.class, () -> Stream.zip(a, b, Integer::sum).toList());
-        assertEquals(0, closed.get());
-        assertEquals(Arrays.asList(3, 4), b.toList());
-    }
-
-    @Test
-    public void testZipCollectionClosesOnlyOpenedPrefixWhenLaterIterateFails() {
-        final AtomicInteger closedA = new AtomicInteger();
-        final AtomicInteger closedC = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1).onClose(closedA::incrementAndGet);
-        final Stream<Integer> b = Stream.of(2);
-        b.close();
-        final Stream<Integer> c = Stream.of(3).onClose(closedC::incrementAndGet);
-
-        assertThrows(IllegalStateException.class, () -> Stream.zip(Arrays.asList(a, b, c), list -> 0).toList());
-        assertEquals(1, closedA.get());
-        assertEquals(0, closedC.get());
-        assertEquals(Arrays.asList(3), c.toList());
-    }
-
-    @Test
-    public void testIteratePredicateRetriesSeedAfterThrow() {
-        final AtomicInteger tests = new AtomicInteger();
-        final Iterator<Integer> iter = Stream.iterate(0, i -> {
-            if (tests.getAndIncrement() == 0) {
-                throw new IllegalStateException("seed test failed");
-            }
-            return i < 2;
-        }, i -> i + 1).iterator();
-
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertEquals(0, iter.next());
-        assertEquals(1, iter.next());
-        assertFalse(iter.hasNext());
-    }
-
-    @Test
-    public void testIteratePredicateRetriesFunctionResultAfterThrow() {
-        final AtomicInteger tests = new AtomicInteger();
-        final AtomicInteger fCalls = new AtomicInteger();
-        final Iterator<Integer> iter = Stream.iterate(0, i -> {
-            if (i > 0 && tests.getAndIncrement() == 0) {
-                throw new IllegalStateException("candidate test failed");
-            }
-            return i < 2;
-        }, i -> {
-            fCalls.incrementAndGet();
-            return i + 1;
-        }).iterator();
-
-        assertEquals(0, iter.next());
-        assertThrows(IllegalStateException.class, iter::hasNext);
-        assertEquals(1, fCalls.get());
-        assertEquals(1, iter.next());
-        assertEquals(1, fCalls.get());
-        assertFalse(iter.hasNext());
-        assertEquals(2, fCalls.get());
-    }
-
-    @Test
-    public void testParallelZipClosesOpenedSourceWhenSiblingIterateFails() {
-        final AtomicInteger closed = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closed::incrementAndGet);
-        final Stream<Integer> b = Stream.of(3);
-        b.close();
-
-        assertThrows(IllegalStateException.class, () -> Stream.parallelZip(a, b, Integer::sum, 2).toList());
-        assertEquals(1, closed.get());
-    }
-
-    @Test
-    public void testGroupJoinPassesStoredNullRightValueThrough() {
-        // An absent key and a key stored with a null value are the same thing to the merge-function
-        // overload: both hand 'func' null. A containsKey() probe here would only cost a second lookup.
-        final List<String> right = new ArrayList<>();
-        right.add(null);
-
-        final List<String> result = Stream.of("k", "missing")
-                .groupJoin(right, s -> s, s -> "k", (x, y) -> x, (l, r) -> l + "/" + (r == null ? "<null>" : r))
-                .toList();
-
-        assertEquals(Arrays.asList("k/<null>", "missing/<null>"), result);
-    }
-
-    /**
-     * {@code transform}/{@code sps}/{@code psp} hand the pipeline to a caller-supplied function and link this
-     * stream's {@code close()} onto the result, so that closing the result releases this one. The function was
-     * evaluated in the argument expression, so when it threw, {@code linkCloseToThis} never ran and this
-     * stream - plus any file or JDBC handle behind it - leaked. {@code linkCloseToThis} already closes this
-     * stream when the function returns {@code null} ("a function that returns null cannot be chained; still
-     * release this stream rather than leak it"); a throwing function is the same situation, and the sibling
-     * {@code Seq.transform} already closes on failure.
-     */
-    @Test
-    public void test_transformSpsPsp_closeUpstreamWhenFunctionThrows_regression_20260918() {
-        // Reference behaviour: Seq.transform has always closed the source on failure.
-        final AtomicBoolean seqClosed = new AtomicBoolean(false);
-        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2, 3).onClose(() -> seqClosed.set(true));
-        assertThrows(IllegalStateException.class, () -> seq.transform(s -> {
-            throw new IllegalStateException("boom");
-        }));
-        assertTrue(seqClosed.get());
-
-        // Before the fix each of these left the upstream stream open.
-        final AtomicBoolean transformClosed = new AtomicBoolean(false);
-        final Stream<Integer> forTransform = Stream.of(1, 2, 3).onClose(() -> transformClosed.set(true));
-        assertThrows(IllegalStateException.class, () -> forTransform.transform(s -> {
-            throw new IllegalStateException("boom");
-        }));
-        assertTrue(transformClosed.get(), "transform must close the upstream when the transfer function throws");
-
-        final AtomicBoolean spsClosed = new AtomicBoolean(false);
-        final Stream<Integer> forSps = Stream.of(1, 2, 3).onClose(() -> spsClosed.set(true));
-        assertThrows(IllegalStateException.class, () -> forSps.sps(s -> {
-            throw new IllegalStateException("boom");
-        }));
-        assertTrue(spsClosed.get(), "sps must close the upstream when the ops function throws");
-
-        final AtomicBoolean pspClosed = new AtomicBoolean(false);
-        final Stream<Integer> forPsp = Stream.of(1, 2, 3).onClose(() -> pspClosed.set(true));
-        assertThrows(IllegalStateException.class, () -> forPsp.psp(s -> {
-            throw new IllegalStateException("boom");
-        }));
-        assertTrue(pspClosed.get(), "psp must close the upstream when the ops function throws");
-
-        // A function that succeeds must still hand ownership to the result, not close early.
-        final AtomicBoolean okClosed = new AtomicBoolean(false);
-        final Stream<Integer> ok = Stream.of(1, 2, 3).onClose(() -> okClosed.set(true));
-        final Stream<Integer> mapped = ok.transform(s -> s.map(i -> i * 2));
-        assertFalse(okClosed.get(), "a successful transform must not close the upstream eagerly");
-        assertEquals(Arrays.asList(2, 4, 6), mapped.toList());
-        mapped.close();
-        assertTrue(okClosed.get(), "closing the result must release the upstream");
-    }
-
-    @Test
-    public void testOnEachSaveToLineNullOutputStreamRejectedOnFirstPull() {
-        // The null output is not validated when the operation is added; it is rejected when the first element is pulled.
-        final Stream<String> s = Stream.of("a", "b").onEachSave(e -> e, (java.io.OutputStream) null);
-        assertThrows(IllegalArgumentException.class, s::count);
-        assertEquals(0, Stream.<String> empty().onEachSave(e -> e, (java.io.OutputStream) null).count());
-    }
-
-    @Test
-    public void testOnEachSaveToLineNullWriterRejectedOnFirstPull() {
-        final Stream<String> s = Stream.of("a", "b").onEachSave(e -> e, (java.io.Writer) null);
-        assertThrows(IllegalArgumentException.class, s::count);
-        assertEquals(0, Stream.<String> empty().onEachSave(e -> e, (java.io.Writer) null).count());
-    }
-
-    @Test
-    public void testOnEachSaveWriteNullWriterRejectedOnFirstPull() {
-        final Stream<String> s = Stream.of("a", "b").onEachSave((e, w) -> w.write(e), (java.io.Writer) null);
-        assertThrows(IllegalArgumentException.class, s::count);
-        assertEquals(0, Stream.<String> empty().onEachSave((e, w) -> w.write(e), (java.io.Writer) null).count());
-    }
-
-    @Test
-    public void testSortedByPlacesNullKeysFirst() {
-        final List<String> result = Stream.of("ccc", "a", "bb").sortedBy(s -> s.length() == 1 ? null : s.length()).toList();
-
-        assertEquals(Arrays.asList("a", "bb", "ccc"), result);
-    }
-
-    @Test
-    public void testReverseSortedByPlacesNullKeysLast() {
-        final List<String> result = Stream.of("a", "bb", "ccc").reverseSortedBy(s -> s.length() == 1 ? null : s.length()).toList();
-
-        assertEquals(Arrays.asList("ccc", "bb", "a"), result);
-    }
-
-    @Test
-    public void testGroupByRejectsNullKeyOnTraversal() {
-        final Stream<Map.Entry<Integer, List<String>>> grouped = Stream.of("a", "bb").groupBy(s -> s.length() == 1 ? null : s.length());
-
-        final NullPointerException e = assertThrows(NullPointerException.class, grouped::toList);
-        assertEquals("element cannot be mapped to a null key", e.getMessage());
-    }
-
-    @Test
-    public void testCombinationsNegativeLengthThrowsIllegalArgument() {
-        // Array-backed, iterator-backed and parallel streams all reject a negative length with IllegalArgumentException.
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).combinations(-1));
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).combinations(-1));
-        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).parallel().combinations(-1));
-    }
-
-    @Test
-    public void testCombinationsLengthAboveSizeThrowsIndexOutOfBounds() {
-        assertThrows(IndexOutOfBoundsException.class, () -> Stream.of(1, 2, 3).combinations(4));
-        assertThrows(IndexOutOfBoundsException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).combinations(4));
-
-        final List<List<Integer>> all = Stream.of(1, 2, 3).combinations(3).toList();
-        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), all);
-    }
-
-    @Test
-    @Timeout(30)
-    public void testFilterWhileAddSubscriberStartsSubscriberOnlyOnFirstFilteredOutElement() throws Exception {
-        final AtomicInteger submitted = new AtomicInteger();
-        final ExecutorService pool = Executors.newSingleThreadExecutor();
-
-        try {
-            final Executor executor = command -> {
-                submitted.incrementAndGet();
-                pool.execute(command);
-            };
-
-            final List<Integer> sentToSubscriber = Collections.synchronizedList(new ArrayList<>());
-
-            try (Stream<Integer> stream = Stream.of(1, 3, 4, 5)
-                    .filterWhileAddSubscriber(x -> x % 2 == 1, s -> s.forEach(sentToSubscriber::add), 64, 30000, executor)) {
-                final Iterator<Integer> iter = stream.iterator();
-
-                assertEquals(1, iter.next());
-                assertEquals(0, submitted.get()); // elements kept by the main stream do not start the subscriber
-                assertEquals(3, iter.next());
-                assertEquals(0, submitted.get());
-                assertEquals(5, iter.next()); // 4 is filtered out and sent to the subscriber
-                assertEquals(1, submitted.get());
-            }
-
-            assertEquals(Arrays.asList(4), sentToSubscriber);
-        } finally {
-            pool.shutdownNow();
-        }
-    }
-
-    @Test
-    @Timeout(30)
-    public void testFilterWhileAddSubscriberStartsSubscriberOnCloseWhenNothingFilteredOut() throws Exception {
-        final AtomicInteger submitted = new AtomicInteger();
-        final ExecutorService pool = Executors.newSingleThreadExecutor();
-
-        try {
-            final Executor executor = command -> {
-                submitted.incrementAndGet();
-                pool.execute(command);
-            };
-
-            final AtomicInteger subscriberCount = new AtomicInteger(-1);
-            final Stream<Integer> stream = Stream.of(1, 3, 5)
-                    .filterWhileAddSubscriber(x -> x % 2 == 1, s -> subscriberCount.set((int) s.count()), 64, 30000, executor);
-            final Iterator<Integer> iter = stream.iterator();
-
-            assertEquals(1, iter.next());
-            assertEquals(3, iter.next());
-            assertEquals(5, iter.next());
-            assertFalse(iter.hasNext());
-            assertEquals(0, submitted.get());
-
-            stream.close();
-
-            assertEquals(1, submitted.get());
-            assertEquals(0, subscriberCount.get());
-        } finally {
-            pool.shutdownNow();
-        }
-    }
-
-    @Test
-    public void testParallelZipTwoStreamsNonPositiveThreadCountLeavesSourcesOpen() {
-        final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> b = Stream.of(10, 20).onClose(closeCount::incrementAndGet);
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, (x, y) -> x + y, 0));
-        assertEquals(0, closeCount.get());
-
-        assertEquals(Arrays.asList(11, 22), Stream.zip(a, b, (x, y) -> x + y).toList());
-        assertEquals(2, closeCount.get());
-    }
-
-    @Test
-    public void testParallelZipThreeStreamsNonPositiveThreadCountLeavesSourcesOpen() {
-        final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> b = Stream.of(10, 20).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> c = Stream.of(100, 200).onClose(closeCount::incrementAndGet);
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, c, (x, y, z) -> x + y + z, -1));
-        assertEquals(0, closeCount.get());
-
-        assertEquals(Arrays.asList(111, 222), Stream.zip(a, b, c, (x, y, z) -> x + y + z).toList());
-        assertEquals(3, closeCount.get());
-    }
-
-    @Test
-    public void testParallelZipTwoStreamsWithDefaultsNonPositiveThreadCountLeavesSourcesOpen() {
-        final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> b = Stream.of(10).onClose(closeCount::incrementAndGet);
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 0));
-        assertEquals(0, closeCount.get());
-
-        assertEquals(Arrays.asList(11, 2), Stream.zip(a, b, 0, 0, (x, y) -> x + y).toList());
-        assertEquals(2, closeCount.get());
-    }
-
-    @Test
-    public void testParallelZipThreeStreamsWithDefaultsNonPositiveThreadCountLeavesSourcesOpen() {
-        final AtomicInteger closeCount = new AtomicInteger();
-        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> b = Stream.of(10).onClose(closeCount::incrementAndGet);
-        final Stream<Integer> c = Stream.of(100, 200, 300).onClose(closeCount::incrementAndGet);
-
-        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z, 0));
-        assertEquals(0, closeCount.get());
-
-        assertEquals(Arrays.asList(111, 202, 300), Stream.zip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z).toList());
-        assertEquals(3, closeCount.get());
-    }
-
-    // ---- perf review 2026-09-26 G108 begin ----
-    // G108-01: pins the column-major order of flatten(T[][], true) for jagged input with null/empty/short rows and null elements
-    @Test
-    public void testFlattenVertically_jaggedNullRowsAndElementsMatchColumnMajorReference() {
-        final Random rnd = new Random(20260926L);
-
-        for (int round = 0; round < 300; round++) {
-            final int rows = 2 + rnd.nextInt(12);
-            final Integer[][] a = new Integer[rows][];
-            int maxLen = 0;
-
-            for (int r = 0; r < rows; r++) {
-                final int kind = rnd.nextInt(6);
-
-                if (kind == 0) {
-                    a[r] = null;
-                } else {
-                    final int len = kind == 1 ? 0 : rnd.nextInt(kind == 5 ? 40 : 6);
-                    a[r] = new Integer[len];
-
-                    for (int c = 0; c < len; c++) {
-                        a[r][c] = rnd.nextInt(7) == 0 ? null : r * 1000 + c;
-                    }
-
-                    maxLen = Math.max(maxLen, len);
-                }
-            }
-
-            final List<Integer> expected = new ArrayList<>();
-
-            for (int c = 0; c < maxLen; c++) {
-                for (int r = 0; r < rows; r++) {
-                    if (a[r] != null && c < a[r].length) {
-                        expected.add(a[r][c]);
-                    }
-                }
-            }
-
-            assertEquals(expected, Stream.flatten(a, true).toList(), "round " + round);
-            assertEquals(expected.size(), Stream.flatten(a, true).count(), "round " + round);
-            assertEquals(expected.isEmpty() ? expected : expected.subList(1, expected.size()), Stream.flatten(a, true).skip(1).toList(), "round " + round);
-        }
-    }
-
-    // G108-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
-    @Test
-    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
-        final String[][] a = { null, { "a" }, {}, { "b", null, "d" }, null, { "e", "f" } };
-        final Iterator<String> iter = Stream.flatten(a, true).iterator();
-        final List<String> result = new ArrayList<>();
-
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        assertEquals(Arrays.asList("a", "b", "e", null, "f", "d"), result);
-        assertFalse(iter.hasNext());
-        assertThrows(NoSuchElementException.class, iter::next);
-        assertFalse(iter.hasNext());
-
-        final Integer[][] jagged = new Integer[201][];
-
-        for (int i = 0; i < 200; i++) {
-            jagged[i] = i % 3 == 0 ? null : new Integer[] { i };
-        }
-
-        jagged[200] = new Integer[5000];
-
-        for (int i = 0; i < 5000; i++) {
-            jagged[200][i] = 100000 + i;
-        }
-
-        final List<Integer> expected = new ArrayList<>();
-
-        for (int i = 0; i < 200; i++) {
-            if (jagged[i] != null) {
-                expected.add(jagged[i][0]);
-            }
-        }
-
-        for (int i = 0; i < 5000; i++) {
-            expected.add(jagged[200][i]);
-        }
-
-        assertEquals(expected, Stream.flatten(jagged, true).toList());
-        assertEquals(0, Stream.flatten(new Integer[][] { null, {}, null }, true).count());
-    }
-    // ---- perf review 2026-09-26 G108 end ----
-
-    // ---- bug review 2026-09-30 G123 begin ----
-    // G123: Stream/EntryStream/primitive-stream defer reject a supplier that returns the deferred stream itself
-    // (IllegalStateException instead of StackOverflowError).
-    @Test
-    public void testDefer_supplierReturningTheDeferredStreamItselfFailsFast() {
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s = new Stream[1];
-        s[0] = Stream.defer(() -> s[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> s[0].count());
-
-        @SuppressWarnings("unchecked")
-        final EntryStream<Object, Object>[] es = new EntryStream[1];
-        es[0] = EntryStream.defer(() -> es[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> es[0].count());
-
-        final ByteStream[] b = new ByteStream[1];
-        b[0] = ByteStream.defer(() -> b[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> b[0].count());
-
-        final CharStream[] c = new CharStream[1];
-        c[0] = CharStream.defer(() -> c[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> c[0].count());
-
-        final ShortStream[] sh = new ShortStream[1];
-        sh[0] = ShortStream.defer(() -> sh[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> sh[0].count());
-
-        final IntStream[] i = new IntStream[1];
-        i[0] = IntStream.defer(() -> i[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> i[0].count());
-
-        final LongStream[] l = new LongStream[1];
-        l[0] = LongStream.defer(() -> l[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> l[0].count());
-
-        final FloatStream[] f = new FloatStream[1];
-        f[0] = FloatStream.defer(() -> f[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> f[0].count());
-
-        final DoubleStream[] d = new DoubleStream[1];
-        d[0] = DoubleStream.defer(() -> d[0]);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> d[0].count());
-
-        // unchanged: a normal supplier, and a null result (empty)
-        org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of(1, 2), Stream.defer(() -> Stream.of(1, 2)).toList());
-        org.junit.jupiter.api.Assertions.assertEquals(0, Stream.defer(() -> null).count());
-        org.junit.jupiter.api.Assertions.assertEquals(3, LongStream.defer(() -> LongStream.of(1, 2, 3)).count());
-        org.junit.jupiter.api.Assertions.assertEquals(1, EntryStream.defer(() -> EntryStream.of("a", 1)).count());
-    }
-    // ---- bug review 2026-09-30 G123 end ----
-
-    // ---- bug review 2026-09-30 verify2 G129 begin ----
-    // Self-returning deferred stream fails fast on the iterator, skip/limit and parallel paths too, and the failure is cached.
-    @Test
-    public void testDefer_selfReturningStreamFailsOnIteratorSkipAndParallelPaths() {
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s1 = new Stream[1];
-        s1[0] = Stream.defer(() -> s1[0]);
-        final Iterator<Object> iter = s1[0].iterator();
-        final IllegalStateException first = assertThrows(IllegalStateException.class, iter::hasNext);
-        assertEquals("Stream supplier returned the deferred stream itself", first.getMessage());
-        assertSame(first, assertThrows(IllegalStateException.class, iter::next));
-        s1[0].close();
-
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s2 = new Stream[1];
-        s2[0] = Stream.defer(() -> s2[0]);
-        assertThrows(IllegalStateException.class, () -> s2[0].skip(1).limit(2).toList());
-
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s3 = new Stream[1];
-        s3[0] = Stream.defer(() -> s3[0]);
-        assertThrows(IllegalStateException.class, () -> s3[0].parallel(4).map(x -> x).count());
-
-        final IntStream[] i1 = new IntStream[1];
-        i1[0] = IntStream.defer(() -> i1[0]);
-        assertThrows(IllegalStateException.class, () -> i1[0].iterator().hasNext());
-        i1[0].close();
-
-        final IntStream[] i2 = new IntStream[1];
-        i2[0] = IntStream.defer(() -> i2[0]);
-        assertThrows(IllegalStateException.class, () -> i2[0].parallel(4).boxed().toList());
-    }
-
-    // Closing a self-returning deferred stream, before or after a failed traversal, runs the supplier once, does not
-    // recurse, and runs the stream's own close handlers once.
-    @Test
-    public void testDefer_selfReturningStreamCloseIsSafe() {
-        final AtomicInteger calls = new AtomicInteger();
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s1 = new Stream[1];
-        s1[0] = Stream.defer(() -> {
-            calls.incrementAndGet();
-            return s1[0];
-        });
-        assertDoesNotThrow(() -> s1[0].close());
-        assertEquals(1, calls.get());
-
-        calls.set(0);
-        final AtomicInteger closes = new AtomicInteger();
-        @SuppressWarnings("unchecked")
-        final Stream<Object>[] s2 = new Stream[1];
-        s2[0] = Stream.defer(() -> {
-            calls.incrementAndGet();
-            return s2[0];
-        });
-        final Stream<Object> withHandler = s2[0].onClose(closes::incrementAndGet);
-        assertThrows(IllegalStateException.class, withHandler::count);
-        assertDoesNotThrow(() -> withHandler.close());
-        assertEquals(1, calls.get());
-        assertEquals(1, closes.get());
-    }
-
-    // Neighbours unchanged: a deferred stream that returns ANOTHER deferred stream, and the supplied stream is closed once.
-    @Test
-    public void testDefer_otherDeferredStreamAndInnerCloseUnchanged() {
-        final Stream<Integer> other = Stream.defer(() -> Stream.of(5, 6));
-        assertEquals(Arrays.asList(5, 6), Stream.defer(() -> other).toList());
-
-        final AtomicInteger innerCloses = new AtomicInteger();
-        assertEquals(Arrays.asList(1, 2, 3), Stream.defer(() -> Stream.of(1, 2, 3).onClose(innerCloses::incrementAndGet)).toList());
-        assertEquals(1, innerCloses.get());
-
-        assertEquals(6, IntStream.defer(() -> IntStream.of(1, 2, 3)).parallel(2).sum());
-        assertEquals(0, IntStream.defer(() -> null).count());
+    public void testStreamCreatedAfterZipWithStream() {
+        BiFunction<Integer, String, String> zipFunc = (i, s) -> i + s;
+
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).count());
+        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).toArray());
+        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toArray());
+        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).toList());
+        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
+        assertEquals(3, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).count());
+        assertEquals(2, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).count());
+        assertArrayEquals(new String[] { "1a", "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).toArray());
+        assertArrayEquals(new String[] { "2b", "3c" }, Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toArray());
+        assertEquals(N.toList("1a", "2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).toList());
+        assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
     }
-    // ---- bug review 2026-09-30 verify2 G129 end ----
 
 }

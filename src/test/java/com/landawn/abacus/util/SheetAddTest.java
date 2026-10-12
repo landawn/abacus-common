@@ -13,10 +13,201 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 public class SheetAddTest extends SheetTestSupport {
+
+    // addColumn
+
     @Test
-    public void testAddExistingRow() {
+    public void testAddColumn() {
+        sheet.addColumn("col4", Arrays.asList(10, 11, 12));
+        assertEquals(4, sheet.columnCount());
+        assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
+        assertEquals(Integer.valueOf(11), sheet.get("row2", "col4"));
+        assertEquals(Integer.valueOf(12), sheet.get("row3", "col4"));
+    }
+
+    @Test
+    public void testAddColumn_atIndex() {
+        List<Object> newColData = Arrays.asList("NR1New", "NR2New", "NR3New");
+        objectSheet.addColumn(1, "CNew", newColData);
+
+        assertEquals(4, objectSheet.columnCount());
+        assertTrue(objectSheet.containsColumn("CNew"));
+        assertEquals(Arrays.asList("C1", "CNew", "C2", "C3"), new ArrayList<>(objectSheet.columnKeySet()));
+        assertEquals(newColData, new ArrayList<>(objectSheet.columnValues("CNew")));
+        assertEquals("V11", objectSheet.get("R1", "C1"));
+        assertEquals("V12", objectSheet.get("R1", "C2"));
+    }
+
+    @Test
+    public void testAddColumn_atIndex_end() {
+        List<Object> newColData = Arrays.asList("V14", "V24", "V34");
+        objectSheet.addColumn(3, "C4", newColData);
+        assertEquals(Arrays.asList("C1", "C2", "C3", "C4"), new ArrayList<>(objectSheet.columnKeySet()));
+        assertEquals(newColData, new ArrayList<>(objectSheet.columnValues("C4")));
+    }
+
+    @Test
+    public void testAddColumn_atIndex_outOfBounds() {
+        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addColumn(4, "C5", Arrays.asList("a", "b", "c")));
+        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addColumn(-1, "C0", Arrays.asList("a", "b", "c")));
+    }
+
+    @Test
+    public void testAddColumn_DuplicateKeyAtIndex() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(0, "col1", Arrays.asList(1, 2, 3)));
+    }
+
+    @Test
+    public void testAddColumn_emptyData() {
+        objectSheet.addColumn("C4", Collections.emptyList());
+        assertTrue(objectSheet.containsColumn("C4"));
+        assertEquals(4, objectSheet.columnCount());
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(objectSheet.columnValues("C4")));
+    }
+
+    @Test
+    public void testAddColumn_frozen() {
+        objectSheet.freeze();
+        assertThrows(IllegalStateException.class, () -> objectSheet.addColumn("C4", Arrays.asList("a", "b", "c")));
+    }
+
+
+
+    // G070-01: an all-null new column (null or empty argument) is presized; pin contents, order and later growth.
+    @Test
+    public void testAddColumn_nullOrEmptyColumnAtEveryPosition() {
+        final Sheet<String, String, Integer> initialized = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2"),
+                new Integer[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } });
+        initialized.addColumn(1, "mid", null);
+        initialized.addColumn(0, "first", Collections.emptyList());
+        initialized.addColumn("last", null);
+        initialized.addColumn(initialized.columnCount(), "appended", Collections.emptyList());
+        assertEquals(Arrays.asList("first", "c1", "mid", "c2", "last", "appended"), new ArrayList<>(initialized.columnKeySet()));
+        assertEquals(Arrays.asList(null, 1, null, 2, null, null), new ArrayList<>(initialized.rowValues("r1")));
+        assertEquals(Arrays.asList(null, 5, null, 6, null, null), new ArrayList<>(initialized.rowValues("r3")));
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(initialized.columnValues("mid")));
+
+        // the new columns keep growing correctly afterwards
+        initialized.addRow("r4", Arrays.asList(7, 8, 9, 10, 11, 12));
+        initialized.addRow(0, "r0", null);
+        assertEquals(Arrays.asList(null, null, null, null, 12), new ArrayList<>(initialized.columnValues("appended")));
+        assertEquals(Arrays.asList(null, null, null, null, 9), new ArrayList<>(initialized.columnValues("mid")));
+        assertEquals(Arrays.asList(null, 1, 3, 5, 8), new ArrayList<>(initialized.columnValues("c1")));
+
+        // uninitialized sheet: addColumn initializes it with all-null columns
+        final Sheet<String, String, Integer> uninitialized = new Sheet<>(Arrays.asList("r1", "r2"), Arrays.asList("c1"));
+        uninitialized.addColumn(0, "x", null);
+        uninitialized.addColumn("y", Collections.emptyList());
+        assertEquals(Arrays.asList("x", "c1", "y"), new ArrayList<>(uninitialized.columnKeySet()));
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(uninitialized.rowValues("r2")));
+        uninitialized.set("r2", "y", 42);
+        assertEquals(Integer.valueOf(42), uninitialized.get("r2", "y"));
+        assertNull(uninitialized.get("r1", "y"));
+
+        // zero rows: the new columns are empty and still accept rows
+        final Sheet<String, String, Integer> noRows = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
+        noRows.addColumn(1, "mid", null);
+        noRows.addColumn("end", Collections.emptyList());
+        assertEquals(0, noRows.rowCount());
+        assertEquals(0, noRows.columnValues("mid").size());
+        for (int i = 0; i < 20; i++) {
+            noRows.addRow("r" + i, Arrays.asList(i, i + 1, i + 2, i + 3));
+        }
+        assertEquals(20, noRows.rowCount());
+        assertEquals(Integer.valueOf(19 + 1), noRows.get("r19", "mid"));
+        assertEquals(Integer.valueOf(19 + 3), noRows.get("r19", "end"));
+    }
+
+    @Test
+    public void testAddColumn_OnFrozenSheetAtIndex() {
+        sheet.freeze();
+        assertThrows(IllegalStateException.class, () -> sheet.addColumn(0, "newCol", Arrays.asList(1, 2, 3)));
+    }
+
+    @Test
+    public void testAddColumn_SizeMismatchAtIndex() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(0, "newCol", Arrays.asList(1, 2)));
+    }
+
+    @Test
+    public void testAddColumnAfterMoveColumn_indexMapResetRegression() {
+        // moveColumn() sets _columnKeyIndexMap = null while the sheet stays initialized.
+        // Before the fix, addColumn() threw NullPointerException for the same reason.
+        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2"), new Integer[][] { { 10, 20 } });
+
+        s.moveColumn("c1", 1);
+        assertEquals(Arrays.asList("c2", "c1"), new ArrayList<>(s.columnKeySet()));
+
+        s.addColumn("c3", Arrays.asList(30));
+
+        assertEquals(Arrays.asList("c2", "c1", "c3"), new ArrayList<>(s.columnKeySet()));
+        assertEquals(Integer.valueOf(20), s.get("r1", "c2"));
+        assertEquals(Integer.valueOf(10), s.get("r1", "c1"));
+        assertEquals(Integer.valueOf(30), s.get("r1", "c3"));
+        assertEquals(Integer.valueOf(30), s.getAt(0, 2));
+    }
+
+    @Test
+    public void testAddColumnAtEnd() {
         Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
-        assertThrows(IllegalArgumentException.class, () -> uninitSheet.addRow("R1", Arrays.asList(1, 2, 3)));
+        uninitSheet.set("R1", "C1", 1);
+
+        uninitSheet.addColumn(uninitSheet.columnCount(), "C4", Arrays.asList(4, 5, 6));
+
+        assertEquals(4, uninitSheet.columnCount());
+        assertEquals(Integer.valueOf(4), uninitSheet.get("R1", "C4"));
+    }
+
+    @Test
+    public void testAddColumnAtIndex() {
+        sheet.addColumn(1, "col1.5", Arrays.asList(10, 11, 12));
+        assertEquals(4, sheet.columnCount());
+
+        assertEquals(Integer.valueOf(10), sheet.get("row1", "col1.5"));
+
+        List<String> expectedOrder = Arrays.asList("col1", "col1.5", "col2", "col3");
+        List<String> actualOrder = new ArrayList<>(sheet.columnKeySet());
+        assertEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
+    public void testAddColumnAtIndexAtEnd() {
+        sheet.addColumn(3, "col4", Arrays.asList(10, 11, 12));
+        assertEquals(4, sheet.columnCount());
+        assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
+    }
+
+    @Test
+    public void testAddColumnAtIndexInvalid() {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            sheet.addColumn(-1, "col0", Arrays.asList(10, 11, 12));
+        });
+        assertThrows(IndexOutOfBoundsException.class, () -> {
+            sheet.addColumn(10, "col10", Arrays.asList(10, 11, 12));
+        });
+    }
+
+    @Test
+    public void testAddColumnDuplicateKey() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.addColumn("col1", Arrays.asList(10, 11, 12));
+        });
+    }
+
+    @Test
+    public void testAddColumnEmptyCollection() {
+        sheet.addColumn("col4", Arrays.asList());
+        assertEquals(4, sheet.columnCount());
+        assertNull(sheet.get("row1", "col4"));
+        assertNull(sheet.get("row2", "col4"));
+        assertNull(sheet.get("row3", "col4"));
+    }
+
+    @Test
+    public void testAddColumnSizeMismatch() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.addColumn("col4", Arrays.asList(10, 11));
+        });
     }
 
     @Test
@@ -26,31 +217,20 @@ public class SheetAddTest extends SheetTestSupport {
     }
 
     @Test
+    public void testAddExistingRow() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
+        assertThrows(IllegalArgumentException.class, () -> uninitSheet.addRow("R1", Arrays.asList(1, 2, 3)));
+    }
+
+    // addRow
+
+    @Test
     public void testAddRow() {
         sheet.addRow("row4", Arrays.asList(10, 11, 12));
         assertEquals(4, sheet.rowCount());
         assertEquals(Integer.valueOf(10), sheet.get("row4", "col1"));
         assertEquals(Integer.valueOf(11), sheet.get("row4", "col2"));
         assertEquals(Integer.valueOf(12), sheet.get("row4", "col3"));
-    }
-
-    @Test
-    public void testAddRowAtIndex() {
-        sheet.addRow(1, "row1.5", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.rowCount());
-
-        assertEquals(Integer.valueOf(10), sheet.get("row1.5", "col1"));
-
-        List<String> expectedOrder = Arrays.asList("row1", "row1.5", "row2", "row3");
-        List<String> actualOrder = new ArrayList<>(sheet.rowKeySet());
-        assertEquals(expectedOrder, actualOrder);
-    }
-
-    @Test
-    public void testAddRowAtIndexAtEnd() {
-        sheet.addRow(3, "row4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.rowCount());
-        assertEquals(Integer.valueOf(10), sheet.get("row4", "col1"));
     }
 
     @Test
@@ -75,26 +255,14 @@ public class SheetAddTest extends SheetTestSupport {
     }
 
     @Test
-    public void testAddRowAtBeginning() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
-        uninitSheet.set("R1", "C1", 1);
-        uninitSheet.set("R2", "C1", 2);
-
-        uninitSheet.addRow(0, "R0", Arrays.asList(0, 0, 0));
-
-        assertEquals(4, uninitSheet.rowCount());
-        assertEquals(Integer.valueOf(0), uninitSheet.get("R0", "C1"));
-        assertEquals(Integer.valueOf(0), uninitSheet.getAt(0, 0));
-        assertEquals(Integer.valueOf(1), uninitSheet.getAt(1, 0));
+    public void testAddRow_atIndex_outOfBounds() {
+        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addRow(4, "R5", Arrays.asList("a", "b", "c")));
+        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addRow(-1, "R0", Arrays.asList("a", "b", "c")));
     }
 
     @Test
-    public void testAddRowEmptyCollection() {
-        sheet.addRow("row4", Arrays.asList());
-        assertEquals(4, sheet.rowCount());
-        assertNull(sheet.get("row4", "col1"));
-        assertNull(sheet.get("row4", "col2"));
-        assertNull(sheet.get("row4", "col3"));
+    public void testAddRow_DuplicateKeyAtIndex() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.addRow(0, "row1", Arrays.asList(1, 2, 3)));
     }
 
     @Test
@@ -106,50 +274,15 @@ public class SheetAddTest extends SheetTestSupport {
     }
 
     @Test
-    public void testAddRowDuplicateKey() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.addRow("row1", Arrays.asList(10, 11, 12));
-        });
-    }
-
-    @Test
-    public void testAddRowSizeMismatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.addRow("row4", Arrays.asList(10, 11));
-        });
-    }
-
-    @Test
-    public void testAddRowAtIndexInvalid() {
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.addRow(-1, "row0", Arrays.asList(10, 11, 12));
-        });
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.addRow(10, "row10", Arrays.asList(10, 11, 12));
-        });
-    }
-
-    @Test
     public void testAddRow_frozen() {
         objectSheet.freeze();
         assertThrows(IllegalStateException.class, () -> objectSheet.addRow("R4", Arrays.asList("a", "b", "c")));
     }
 
     @Test
-    public void testAddRow_atIndex_outOfBounds() {
-        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addRow(4, "R5", Arrays.asList("a", "b", "c")));
-        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addRow(-1, "R0", Arrays.asList("a", "b", "c")));
-    }
-
-    @Test
     public void testAddRow_OnFrozenSheetAtIndex() {
         sheet.freeze();
         assertThrows(IllegalStateException.class, () -> sheet.addRow(0, "newRow", Arrays.asList(1, 2, 3)));
-    }
-
-    @Test
-    public void testAddRow_DuplicateKeyAtIndex() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.addRow(0, "row1", Arrays.asList(1, 2, 3)));
     }
 
     @Test
@@ -177,6 +310,32 @@ public class SheetAddTest extends SheetTestSupport {
     }
 
     @Test
+    public void testAddRowAtBeginning() {
+        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
+        uninitSheet.set("R1", "C1", 1);
+        uninitSheet.set("R2", "C1", 2);
+
+        uninitSheet.addRow(0, "R0", Arrays.asList(0, 0, 0));
+
+        assertEquals(4, uninitSheet.rowCount());
+        assertEquals(Integer.valueOf(0), uninitSheet.get("R0", "C1"));
+        assertEquals(Integer.valueOf(0), uninitSheet.getAt(0, 0));
+        assertEquals(Integer.valueOf(1), uninitSheet.getAt(1, 0));
+    }
+
+    @Test
+    public void testAddRowAtIndex() {
+        sheet.addRow(1, "row1.5", Arrays.asList(10, 11, 12));
+        assertEquals(4, sheet.rowCount());
+
+        assertEquals(Integer.valueOf(10), sheet.get("row1.5", "col1"));
+
+        List<String> expectedOrder = Arrays.asList("row1", "row1.5", "row2", "row3");
+        List<String> actualOrder = new ArrayList<>(sheet.rowKeySet());
+        assertEquals(expectedOrder, actualOrder);
+    }
+
+    @Test
     public void testAddRowAtIndexAfterMoveRow_indexMapResetRegression() {
         Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1"), new Integer[][] { { 1 }, { 2 }, { 3 } });
 
@@ -192,150 +351,43 @@ public class SheetAddTest extends SheetTestSupport {
     }
 
     @Test
-    public void testAddColumn() {
-        sheet.addColumn("col4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnCount());
-        assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
-        assertEquals(Integer.valueOf(11), sheet.get("row2", "col4"));
-        assertEquals(Integer.valueOf(12), sheet.get("row3", "col4"));
+    public void testAddRowAtIndexAtEnd() {
+        sheet.addRow(3, "row4", Arrays.asList(10, 11, 12));
+        assertEquals(4, sheet.rowCount());
+        assertEquals(Integer.valueOf(10), sheet.get("row4", "col1"));
     }
 
     @Test
-    public void testAddColumnAtIndex() {
-        sheet.addColumn(1, "col1.5", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnCount());
-
-        assertEquals(Integer.valueOf(10), sheet.get("row1", "col1.5"));
-
-        List<String> expectedOrder = Arrays.asList("col1", "col1.5", "col2", "col3");
-        List<String> actualOrder = new ArrayList<>(sheet.columnKeySet());
-        assertEquals(expectedOrder, actualOrder);
-    }
-
-    @Test
-    public void testAddColumnAtIndexAtEnd() {
-        sheet.addColumn(3, "col4", Arrays.asList(10, 11, 12));
-        assertEquals(4, sheet.columnCount());
-        assertEquals(Integer.valueOf(10), sheet.get("row1", "col4"));
-    }
-
-    @Test
-    public void testAddColumn_atIndex() {
-        List<Object> newColData = Arrays.asList("NR1New", "NR2New", "NR3New");
-        objectSheet.addColumn(1, "CNew", newColData);
-
-        assertEquals(4, objectSheet.columnCount());
-        assertTrue(objectSheet.containsColumn("CNew"));
-        assertEquals(Arrays.asList("C1", "CNew", "C2", "C3"), new ArrayList<>(objectSheet.columnKeySet()));
-        assertEquals(newColData, new ArrayList<>(objectSheet.columnValues("CNew")));
-        assertEquals("V11", objectSheet.get("R1", "C1"));
-        assertEquals("V12", objectSheet.get("R1", "C2"));
-    }
-
-    @Test
-    public void testAddColumn_atIndex_end() {
-        List<Object> newColData = Arrays.asList("V14", "V24", "V34");
-        objectSheet.addColumn(3, "C4", newColData);
-        assertEquals(Arrays.asList("C1", "C2", "C3", "C4"), new ArrayList<>(objectSheet.columnKeySet()));
-        assertEquals(newColData, new ArrayList<>(objectSheet.columnValues("C4")));
-    }
-
-    @Test
-    public void testAddColumnAtEnd() {
-        Sheet<String, String, Integer> uninitSheet = new Sheet<>(upperRowKeys, colKeys);
-        uninitSheet.set("R1", "C1", 1);
-
-        uninitSheet.addColumn(uninitSheet.columnCount(), "C4", Arrays.asList(4, 5, 6));
-
-        assertEquals(4, uninitSheet.columnCount());
-        assertEquals(Integer.valueOf(4), uninitSheet.get("R1", "C4"));
-    }
-
-    @Test
-    public void testAddColumnEmptyCollection() {
-        sheet.addColumn("col4", Arrays.asList());
-        assertEquals(4, sheet.columnCount());
-        assertNull(sheet.get("row1", "col4"));
-        assertNull(sheet.get("row2", "col4"));
-        assertNull(sheet.get("row3", "col4"));
-    }
-
-    @Test
-    public void testAddColumn_emptyData() {
-        objectSheet.addColumn("C4", Collections.emptyList());
-        assertTrue(objectSheet.containsColumn("C4"));
-        assertEquals(4, objectSheet.columnCount());
-        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(objectSheet.columnValues("C4")));
-    }
-
-    @Test
-    public void testAddColumnDuplicateKey() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.addColumn("col1", Arrays.asList(10, 11, 12));
-        });
-    }
-
-    @Test
-    public void testAddColumnSizeMismatch() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            sheet.addColumn("col4", Arrays.asList(10, 11));
-        });
-    }
-
-    @Test
-    public void testAddColumnAtIndexInvalid() {
+    public void testAddRowAtIndexInvalid() {
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.addColumn(-1, "col0", Arrays.asList(10, 11, 12));
+            sheet.addRow(-1, "row0", Arrays.asList(10, 11, 12));
         });
         assertThrows(IndexOutOfBoundsException.class, () -> {
-            sheet.addColumn(10, "col10", Arrays.asList(10, 11, 12));
+            sheet.addRow(10, "row10", Arrays.asList(10, 11, 12));
         });
     }
 
     @Test
-    public void testAddColumn_frozen() {
-        objectSheet.freeze();
-        assertThrows(IllegalStateException.class, () -> objectSheet.addColumn("C4", Arrays.asList("a", "b", "c")));
+    public void testAddRowDuplicateKey() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.addRow("row1", Arrays.asList(10, 11, 12));
+        });
     }
 
     @Test
-    public void testAddColumn_atIndex_outOfBounds() {
-        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addColumn(4, "C5", Arrays.asList("a", "b", "c")));
-        assertThrows(IndexOutOfBoundsException.class, () -> objectSheet.addColumn(-1, "C0", Arrays.asList("a", "b", "c")));
+    public void testAddRowEmptyCollection() {
+        sheet.addRow("row4", Arrays.asList());
+        assertEquals(4, sheet.rowCount());
+        assertNull(sheet.get("row4", "col1"));
+        assertNull(sheet.get("row4", "col2"));
+        assertNull(sheet.get("row4", "col3"));
     }
 
     @Test
-    public void testAddColumn_OnFrozenSheetAtIndex() {
-        sheet.freeze();
-        assertThrows(IllegalStateException.class, () -> sheet.addColumn(0, "newCol", Arrays.asList(1, 2, 3)));
-    }
-
-    @Test
-    public void testAddColumn_DuplicateKeyAtIndex() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(0, "col1", Arrays.asList(1, 2, 3)));
-    }
-
-    @Test
-    public void testAddColumn_SizeMismatchAtIndex() {
-        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(0, "newCol", Arrays.asList(1, 2)));
-    }
-
-    @Test
-    public void testAddColumnAfterMoveColumn_indexMapResetRegression() {
-        // moveColumn() sets _columnKeyIndexMap = null while the sheet stays initialized.
-        // Before the fix, addColumn() threw NullPointerException for the same reason.
-        Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1"), Arrays.asList("c1", "c2"), new Integer[][] { { 10, 20 } });
-
-        s.moveColumn("c1", 1);
-        assertEquals(Arrays.asList("c2", "c1"), new ArrayList<>(s.columnKeySet()));
-
-        s.addColumn("c3", Arrays.asList(30));
-
-        assertEquals(Arrays.asList("c2", "c1", "c3"), new ArrayList<>(s.columnKeySet()));
-        assertEquals(Integer.valueOf(20), s.get("r1", "c2"));
-        assertEquals(Integer.valueOf(10), s.get("r1", "c1"));
-        assertEquals(Integer.valueOf(30), s.get("r1", "c3"));
-        assertEquals(Integer.valueOf(30), s.getAt(0, 2));
+    public void testAddRowSizeMismatch() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            sheet.addRow("row4", Arrays.asList(10, 11));
+        });
     }
 
     @Test
@@ -395,50 +447,5 @@ public class SheetAddTest extends SheetTestSupport {
                 assertThrows(IllegalArgumentException.class, () -> sheet.putAll(foreignPlain)).getMessage());
     }
 
-    // ---- perf review 2026-09-26 G070 begin ----
-    // G070-01: an all-null new column (null or empty argument) is presized; pin contents, order and later growth.
-    @Test
-    public void testAddColumn_nullOrEmptyColumnAtEveryPosition() {
-        final Sheet<String, String, Integer> initialized = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2"),
-                new Integer[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } });
-        initialized.addColumn(1, "mid", null);
-        initialized.addColumn(0, "first", Collections.emptyList());
-        initialized.addColumn("last", null);
-        initialized.addColumn(initialized.columnCount(), "appended", Collections.emptyList());
-        assertEquals(Arrays.asList("first", "c1", "mid", "c2", "last", "appended"), new ArrayList<>(initialized.columnKeySet()));
-        assertEquals(Arrays.asList(null, 1, null, 2, null, null), new ArrayList<>(initialized.rowValues("r1")));
-        assertEquals(Arrays.asList(null, 5, null, 6, null, null), new ArrayList<>(initialized.rowValues("r3")));
-        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(initialized.columnValues("mid")));
-
-        // the new columns keep growing correctly afterwards
-        initialized.addRow("r4", Arrays.asList(7, 8, 9, 10, 11, 12));
-        initialized.addRow(0, "r0", null);
-        assertEquals(Arrays.asList(null, null, null, null, 12), new ArrayList<>(initialized.columnValues("appended")));
-        assertEquals(Arrays.asList(null, null, null, null, 9), new ArrayList<>(initialized.columnValues("mid")));
-        assertEquals(Arrays.asList(null, 1, 3, 5, 8), new ArrayList<>(initialized.columnValues("c1")));
-
-        // uninitialized sheet: addColumn initializes it with all-null columns
-        final Sheet<String, String, Integer> uninitialized = new Sheet<>(Arrays.asList("r1", "r2"), Arrays.asList("c1"));
-        uninitialized.addColumn(0, "x", null);
-        uninitialized.addColumn("y", Collections.emptyList());
-        assertEquals(Arrays.asList("x", "c1", "y"), new ArrayList<>(uninitialized.columnKeySet()));
-        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(uninitialized.rowValues("r2")));
-        uninitialized.set("r2", "y", 42);
-        assertEquals(Integer.valueOf(42), uninitialized.get("r2", "y"));
-        assertNull(uninitialized.get("r1", "y"));
-
-        // zero rows: the new columns are empty and still accept rows
-        final Sheet<String, String, Integer> noRows = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
-        noRows.addColumn(1, "mid", null);
-        noRows.addColumn("end", Collections.emptyList());
-        assertEquals(0, noRows.rowCount());
-        assertEquals(0, noRows.columnValues("mid").size());
-        for (int i = 0; i < 20; i++) {
-            noRows.addRow("r" + i, Arrays.asList(i, i + 1, i + 2, i + 3));
-        }
-        assertEquals(20, noRows.rowCount());
-        assertEquals(Integer.valueOf(19 + 1), noRows.get("r19", "mid"));
-        assertEquals(Integer.valueOf(19 + 3), noRows.get("r19", "end"));
-    }
     // ---- perf review 2026-09-26 G070 end ----
 }

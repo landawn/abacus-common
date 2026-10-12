@@ -22,6 +22,16 @@ import com.landawn.abacus.util.u.OptionalInt;
 public class IndexOfTest extends IndexTestSupport {
 
     @Test
+    public void testOf_Iterator() {
+        final List<String> list = Arrays.asList("a", "b", "c", "a", "b");
+        assertEquals(OptionalInt.of(0), Index.of(list.iterator(), "a"));
+        assertEquals(OptionalInt.of(3), Index.of(list.iterator(), "a", 3));
+        assertEquals(OptionalInt.empty(), Index.of(list.iterator(), "d"));
+        assertEquals(OptionalInt.empty(), Index.of((Iterator<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyIterator(), "a"));
+    }
+
+    @Test
     public void testOf_BooleanArray() {
         final boolean[] array = { true, false, true, false };
         assertEquals(OptionalInt.of(0), Index.of(array, true));
@@ -30,6 +40,14 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(OptionalInt.empty(), Index.of(array, true, 3));
         assertEquals(OptionalInt.empty(), Index.of((boolean[]) null, true));
         assertEquals(OptionalInt.empty(), Index.of(new boolean[0], true));
+    }
+
+    @Test
+    public void testOf_ByteArray() {
+        final byte[] array = { 1, 2, 3, 1 };
+        assertEquals(OptionalInt.of(0), Index.of(array, (byte) 1));
+        assertEquals(OptionalInt.of(3), Index.of(array, (byte) 1, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, (byte) 4));
     }
 
     @Test
@@ -44,19 +62,78 @@ public class IndexOfTest extends IndexTestSupport {
     }
 
     @Test
-    public void testOf_ByteArray() {
-        final byte[] array = { 1, 2, 3, 1 };
-        assertEquals(OptionalInt.of(0), Index.of(array, (byte) 1));
-        assertEquals(OptionalInt.of(3), Index.of(array, (byte) 1, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, (byte) 4));
+    public void testOf_Collection() {
+        final String[] data = { "a", "b", "c", "b", "d" };
+        final List<String> list = Arrays.asList(data);
+        assertEquals(OptionalInt.of(0), Index.of(list, "a"));
+        assertEquals(OptionalInt.of(3), Index.of(list, "b", 2));
+        assertEquals(OptionalInt.empty(), Index.of(list, "z"));
+        assertEquals(OptionalInt.empty(), Index.of((List<String>) null, "a"));
+        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyList(), "a"));
+
+        final Vector<String> vector = new Vector<>(list);
+        assertEquals(OptionalInt.of(1), Index.of(vector, "b"));
+        final Stack<String> stack = new Stack<>();
+        Collections.addAll(stack, data);
+        assertEquals(OptionalInt.of(1), Index.of(stack, "b"));
+        assertEquals(OptionalInt.of(1), Index.of(Collections.unmodifiableList(list), "b"));
     }
 
     @Test
-    public void testOf_ShortArray() {
-        final short[] array = { 10, 20, 30, 20 };
-        assertEquals(OptionalInt.of(1), Index.of(array, (short) 20));
-        assertEquals(OptionalInt.of(3), Index.of(array, (short) 20, 2));
-        assertEquals(OptionalInt.empty(), Index.of(array, (short) 50));
+    public void testOf_DoubleArray() {
+        final double[] array = { 1.0, 2.0, 3.0, 1.05 };
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0));
+        assertEquals(OptionalInt.of(1), Index.of(array, 2.0, 1));
+        assertEquals(OptionalInt.empty(), Index.of(array, 4.0));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.1));
+        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1, 0.1));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.01));
+    }
+
+    @Test
+    public void testOf_DoubleArray_SignedZeroAndExtremes() {
+        final double[] zeros = { -0.0d, 0.0d };
+        assertEquals(OptionalInt.of(0), Index.of(zeros, -0.0d));
+        assertEquals(OptionalInt.of(1), Index.of(zeros, 0.0d));
+
+        final double[] arr = { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE };
+        assertEquals(OptionalInt.of(0), Index.of(arr, Double.MIN_VALUE));
+        assertEquals(OptionalInt.of(1), Index.of(arr, Double.MAX_VALUE));
+        assertEquals(OptionalInt.of(2), Index.of(arr, -Double.MIN_VALUE));
+        assertEquals(OptionalInt.of(3), Index.of(arr, -Double.MAX_VALUE));
+    }
+
+    @Test
+    public void testOf_DoubleArray_Tolerance() {
+        final double[] array = { 1.0, 1.05, 1.1, 1.15, 1.2 };
+        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0, 0.0));
+        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 1, 0.051));
+        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.04999));
+        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0, 0.05));
+        assertThrows(IllegalArgumentException.class, () -> Index.of(array, 1.25, 0, -0.05));
+    }
+
+    @Test
+    public void testOf_FloatArray() {
+        final float[] array = { 1.1f, 2.2f, 3.3f, 2.2f };
+        assertEquals(OptionalInt.of(1), Index.of(array, 2.2f));
+        assertEquals(OptionalInt.of(3), Index.of(array, 2.2f, 2));
+        assertEquals(OptionalInt.empty(), Index.of(array, 5.5f));
+    }
+
+    @Test
+    public void testOf_FloatArray_NaNAndSignedZero() {
+        final float[] arr = { 1.0f, -0.0f, 0.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN };
+        assertEquals(OptionalInt.of(1), Index.of(arr, -0.0f));
+        assertEquals(OptionalInt.of(2), Index.of(arr, 0.0f));
+        assertEquals(OptionalInt.of(3), Index.of(arr, Float.NaN));
+        assertEquals(OptionalInt.of(6), Index.of(arr, Float.NaN, 4));
+        assertEquals(OptionalInt.of(4), Index.of(arr, Float.POSITIVE_INFINITY));
+        assertEquals(OptionalInt.of(5), Index.of(arr, Float.NEGATIVE_INFINITY));
+
+        final BitSet all = Index.allOf(new float[] { 1.0f, Float.NaN, 2.0f }, Float.NaN);
+        assertEquals(1, all.cardinality());
+        assertTrue(all.get(1));
     }
 
     @Test
@@ -79,63 +156,6 @@ public class IndexOfTest extends IndexTestSupport {
     }
 
     @Test
-    public void testOf_FloatArray() {
-        final float[] array = { 1.1f, 2.2f, 3.3f, 2.2f };
-        assertEquals(OptionalInt.of(1), Index.of(array, 2.2f));
-        assertEquals(OptionalInt.of(3), Index.of(array, 2.2f, 2));
-        assertEquals(OptionalInt.empty(), Index.of(array, 5.5f));
-    }
-
-    @Test
-    public void testOf_DoubleArray() {
-        final double[] array = { 1.0, 2.0, 3.0, 1.05 };
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0));
-        assertEquals(OptionalInt.of(1), Index.of(array, 2.0, 1));
-        assertEquals(OptionalInt.empty(), Index.of(array, 4.0));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.1));
-        assertEquals(OptionalInt.of(3), Index.of(array, 1.0, 1, 0.1));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.01));
-    }
-
-    @Test
-    public void testOf_DoubleArray_Tolerance() {
-        final double[] array = { 1.0, 1.05, 1.1, 1.15, 1.2 };
-        assertEquals(OptionalInt.of(2), Index.of(array, 1.1, 0, 0.0));
-        assertEquals(OptionalInt.of(1), Index.of(array, 1.0, 1, 0.051));
-        assertEquals(OptionalInt.of(0), Index.of(array, 1.0, 0, 0.04999));
-        assertEquals(OptionalInt.empty(), Index.of(array, 0.9, 0, 0.05));
-        assertThrows(IllegalArgumentException.class, () -> Index.of(array, 1.25, 0, -0.05));
-    }
-
-    @Test
-    public void testOf_FloatArray_NaNAndSignedZero() {
-        final float[] arr = { 1.0f, -0.0f, 0.0f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN };
-        assertEquals(OptionalInt.of(1), Index.of(arr, -0.0f));
-        assertEquals(OptionalInt.of(2), Index.of(arr, 0.0f));
-        assertEquals(OptionalInt.of(3), Index.of(arr, Float.NaN));
-        assertEquals(OptionalInt.of(6), Index.of(arr, Float.NaN, 4));
-        assertEquals(OptionalInt.of(4), Index.of(arr, Float.POSITIVE_INFINITY));
-        assertEquals(OptionalInt.of(5), Index.of(arr, Float.NEGATIVE_INFINITY));
-
-        final BitSet all = Index.allOf(new float[] { 1.0f, Float.NaN, 2.0f }, Float.NaN);
-        assertEquals(1, all.cardinality());
-        assertTrue(all.get(1));
-    }
-
-    @Test
-    public void testOf_DoubleArray_SignedZeroAndExtremes() {
-        final double[] zeros = { -0.0d, 0.0d };
-        assertEquals(OptionalInt.of(0), Index.of(zeros, -0.0d));
-        assertEquals(OptionalInt.of(1), Index.of(zeros, 0.0d));
-
-        final double[] arr = { Double.MIN_VALUE, Double.MAX_VALUE, -Double.MIN_VALUE, -Double.MAX_VALUE };
-        assertEquals(OptionalInt.of(0), Index.of(arr, Double.MIN_VALUE));
-        assertEquals(OptionalInt.of(1), Index.of(arr, Double.MAX_VALUE));
-        assertEquals(OptionalInt.of(2), Index.of(arr, -Double.MIN_VALUE));
-        assertEquals(OptionalInt.of(3), Index.of(arr, -Double.MAX_VALUE));
-    }
-
-    @Test
     public void testOf_ObjectArray() {
         final String[] array = { "a", "b", "c", "a" };
         assertEquals(OptionalInt.of(0), Index.of(array, "a"));
@@ -146,31 +166,11 @@ public class IndexOfTest extends IndexTestSupport {
     }
 
     @Test
-    public void testOf_Collection() {
-        final String[] data = { "a", "b", "c", "b", "d" };
-        final List<String> list = Arrays.asList(data);
-        assertEquals(OptionalInt.of(0), Index.of(list, "a"));
-        assertEquals(OptionalInt.of(3), Index.of(list, "b", 2));
-        assertEquals(OptionalInt.empty(), Index.of(list, "z"));
-        assertEquals(OptionalInt.empty(), Index.of((List<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyList(), "a"));
-
-        final Vector<String> vector = new Vector<>(list);
-        assertEquals(OptionalInt.of(1), Index.of(vector, "b"));
-        final Stack<String> stack = new Stack<>();
-        Collections.addAll(stack, data);
-        assertEquals(OptionalInt.of(1), Index.of(stack, "b"));
-        assertEquals(OptionalInt.of(1), Index.of(Collections.unmodifiableList(list), "b"));
-    }
-
-    @Test
-    public void testOf_Iterator() {
-        final List<String> list = Arrays.asList("a", "b", "c", "a", "b");
-        assertEquals(OptionalInt.of(0), Index.of(list.iterator(), "a"));
-        assertEquals(OptionalInt.of(3), Index.of(list.iterator(), "a", 3));
-        assertEquals(OptionalInt.empty(), Index.of(list.iterator(), "d"));
-        assertEquals(OptionalInt.empty(), Index.of((Iterator<String>) null, "a"));
-        assertEquals(OptionalInt.empty(), Index.of(Collections.emptyIterator(), "a"));
+    public void testOf_ShortArray() {
+        final short[] array = { 10, 20, 30, 20 };
+        assertEquals(OptionalInt.of(1), Index.of(array, (short) 20));
+        assertEquals(OptionalInt.of(3), Index.of(array, (short) 20, 2));
+        assertEquals(OptionalInt.empty(), Index.of(array, (short) 50));
     }
 
     @Test
@@ -238,6 +238,36 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(1), Index.ofIgnoreCase("aBcAbC", "bc", -1));
     }
 
+
+
+    /**
+     * G31-003 contract pin: the ignore-case substring searches are a same-length UTF-16 compare via
+     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding - a length-changing
+     * mapping such as {@code "ß"}/{@code "SS"} does not match, while same-length non-ASCII mappings do.
+     */
+    @Test
+    public void testOfIgnoreCase_SameLengthUtf16CompareNotCaseFolding() {
+        final String source = "straße";
+
+        // length-changing mappings do NOT match, on any of the four String overloads
+        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "STRASSE"));
+        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "SS"));
+        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "SS", 0));
+        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS"));
+        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS", source.length()));
+        assertEquals("STRASSE", source.toUpperCase(Locale.ROOT)); // a case-folding search WOULD match here
+
+        // same-length non-ASCII mappings DO match, so the contract is "same-length", not "ASCII only"
+        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("cafÉ", "café"));
+        assertEquals(OptionalInt.of(3), Index.ofIgnoreCase("le CAFÉ", "café"));
+        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("ÄÖÜ", "äöü", 0));
+        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase("ÄÖÜ", "äöü"));
+        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase("ÄÖÜ", "äöü", 2));
+        assertEquals(OptionalInt.of(4), Index.ofIgnoreCase(source, "ß"));
+    }
+
+    // ofSubArray
+
     @Test
     public void testOfSubArray() {
         assertEquals(OptionalInt.of(2), Index.ofSubArray(new boolean[] { true, false, true, true, false }, new boolean[] { true, true }));
@@ -254,33 +284,6 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(0), Index.ofSubArray(new int[] { 1, 2, 3 }, new int[0]));
         assertEquals(OptionalInt.empty(), Index.ofSubArray((int[]) null, new int[] { 1 }));
         assertEquals(OptionalInt.empty(), Index.ofSubArray(new int[] { 1 }, (int[]) null));
-    }
-
-    @Test
-    public void testOfSubArray_Range() {
-        final boolean[] bools = { true, false, true, false, true };
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(bools, 0, new boolean[] { false, true, false, true }, 1, 2));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(bools, 0, new boolean[] { false, true, false, true }, 0, 3));
-        assertEquals(OptionalInt.of(0), Index.ofSubArray(bools, 0, bools, 0, 0));
-        assertEquals(OptionalInt.of(5), Index.ofSubArray(bools, 10, bools, 0, 0));
-
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new long[] { 9L, 4L, 5L, 6L }, 0, new long[] { 0L, 4L, 5L, 7L }, 1, 2));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new float[] { 9f, 4f, 5f, 6f }, 0, new float[] { 0f, 4f, 5f, 7f }, 1, 2));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(new double[] { 3d, 7d, 8d, 9d }, 0, new double[] { 0d, 7d, 8d, 1d }, 1, 2));
-        assertEquals(OptionalInt.of(2), Index.ofSubArray(new String[] { "x", "y", "b", "c", "d" }, 1, new String[] { "a", "b", "c", "z" }, 1, 2));
-
-        final long[] source = { 1L, 2L, 3L, 4L, 5L };
-        final long[] sub = { 2L, 3L, 4L };
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new long[] { 2L, 9L }, 0, 2));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 4, sub, 0, 3));
-        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
-        assertEquals(OptionalInt.empty(), Index.ofSubArray((long[]) null, 0, sub, 0, 0));
-        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, -1, sub, 0, 3));
-        assertEquals(OptionalInt.of(3), Index.ofSubArray(new long[] { 1L, 2L, 3L }, 10, new long[0], 0, 0));
-        assertFalse(Index.ofSubArray((char[]) null, 0, new char[0], 0, 0).isPresent());
-        assertFalse(Index.ofSubArray(new char[] { 'a' }, 0, (char[]) null, 0, 0).isPresent());
     }
 
     @Test
@@ -311,6 +314,33 @@ public class IndexOfTest extends IndexTestSupport {
         final double[] dzSource = { -0.0d, 1.0d };
         assertEquals(OptionalInt.of(0), Index.lastOfSubArray(dzSource, new double[] { -0.0d }));
         assertFalse(Index.lastOfSubArray(dzSource, new double[] { 0.0d }).isPresent());
+    }
+
+    @Test
+    public void testOfSubArray_Range() {
+        final boolean[] bools = { true, false, true, false, true };
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(bools, 0, new boolean[] { false, true, false, true }, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(bools, 0, new boolean[] { false, true, false, true }, 0, 3));
+        assertEquals(OptionalInt.of(0), Index.ofSubArray(bools, 0, bools, 0, 0));
+        assertEquals(OptionalInt.of(5), Index.ofSubArray(bools, 10, bools, 0, 0));
+
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new long[] { 9L, 4L, 5L, 6L }, 0, new long[] { 0L, 4L, 5L, 7L }, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new float[] { 9f, 4f, 5f, 6f }, 0, new float[] { 0f, 4f, 5f, 7f }, 1, 2));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(new double[] { 3d, 7d, 8d, 9d }, 0, new double[] { 0d, 7d, 8d, 1d }, 1, 2));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(new String[] { "x", "y", "b", "c", "d" }, 1, new String[] { "a", "b", "c", "z" }, 1, 2));
+
+        final long[] source = { 1L, 2L, 3L, 4L, 5L };
+        final long[] sub = { 2L, 3L, 4L };
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, 0, sub, 0, 3));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 0, new long[] { 2L, 9L }, 0, 2));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 10, sub, 0, 3));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray(source, 4, sub, 0, 3));
+        assertEquals(OptionalInt.of(2), Index.ofSubArray(source, 2, sub, 0, 0));
+        assertEquals(OptionalInt.empty(), Index.ofSubArray((long[]) null, 0, sub, 0, 0));
+        assertEquals(OptionalInt.of(1), Index.ofSubArray(source, -1, sub, 0, 3));
+        assertEquals(OptionalInt.of(3), Index.ofSubArray(new long[] { 1L, 2L, 3L }, 10, new long[0], 0, 0));
+        assertFalse(Index.ofSubArray((char[]) null, 0, new char[0], 0, 0).isPresent());
+        assertFalse(Index.ofSubArray(new char[] { 'a' }, 0, (char[]) null, 0, 0).isPresent());
     }
 
     @Test
@@ -353,6 +383,8 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(Index.lastOfSubList(raSource, 2, raSub), Index.lastOfSubList(raSource, 2, llSub));
     }
 
+
+
     /**
      * G31-002 contract pin: a negative {@code sizeToMatch} comes back from {@code N.checkFromIndexSize} as an
      * {@link IllegalArgumentException}, not as the {@link IndexOutOfBoundsException} every other invalid slice
@@ -394,29 +426,4 @@ public class IndexOfTest extends IndexTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> Index.lastOfSubList(list, 2, subList, 0, 5));
     }
 
-    /**
-     * G31-003 contract pin: the ignore-case substring searches are a same-length UTF-16 compare via
-     * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding - a length-changing
-     * mapping such as {@code "ß"}/{@code "SS"} does not match, while same-length non-ASCII mappings do.
-     */
-    @Test
-    public void testOfIgnoreCase_SameLengthUtf16CompareNotCaseFolding() {
-        final String source = "straße";
-
-        // length-changing mappings do NOT match, on any of the four String overloads
-        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "STRASSE"));
-        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "SS"));
-        assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "SS", 0));
-        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS"));
-        assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS", source.length()));
-        assertEquals("STRASSE", source.toUpperCase(Locale.ROOT)); // a case-folding search WOULD match here
-
-        // same-length non-ASCII mappings DO match, so the contract is "same-length", not "ASCII only"
-        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("cafÉ", "café"));
-        assertEquals(OptionalInt.of(3), Index.ofIgnoreCase("le CAFÉ", "café"));
-        assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("ÄÖÜ", "äöü", 0));
-        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase("ÄÖÜ", "äöü"));
-        assertEquals(OptionalInt.of(0), Index.lastOfIgnoreCase("ÄÖÜ", "äöü", 2));
-        assertEquals(OptionalInt.of(4), Index.ofIgnoreCase(source, "ß"));
-    }
 }

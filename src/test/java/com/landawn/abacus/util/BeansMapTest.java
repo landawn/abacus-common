@@ -19,143 +19,7 @@ import org.junit.jupiter.api.Test;
 
 public class BeansMapTest extends BeansTestSupport {
 
-    @Test
-    public void testMapToBean() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "Jane");
-        map.put("age", 30);
-        map.put("active", false);
-
-        SimpleBean bean = Beans.mapToBean(map, SimpleBean.class);
-        assertEquals("Jane", bean.getName());
-        assertEquals(30, bean.getAge());
-        assertEquals(false, bean.getActive());
-
-        assertNull(Beans.mapToBean((Map<String, Object>) null, SimpleBean.class));
-
-        bean = Beans.mapToBean(new HashMap<>(), SimpleBean.class);
-        assertNotNull(bean);
-        assertNull(bean.getName());
-        assertEquals(0, bean.getAge());
-    }
-
-    @Test
-    public void testMapToBean_IgnoreUnmatched() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "Jane");
-        map.put("age", null);
-        map.put("unknownField", "value");
-
-        SimpleBean bean = Beans.mapToBean(map, true, SimpleBean.class);
-        assertEquals("Jane", bean.getName());
-        assertNull(bean.getActive());
-
-        map.put("age", 25);
-        bean = Beans.mapToBean(map, true, SimpleBean.class);
-        assertEquals("Jane", bean.getName());
-        assertEquals(25, bean.getAge());
-    }
-
-    @Test
-    public void testMapToBean_SelectPropNames() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", "Nora");
-        map.put("age", 31);
-        map.put("active", true);
-
-        SimpleBean bean = Beans.mapToBean(map, Arrays.asList("name"), SimpleBean.class);
-        assertEquals("Nora", bean.getName());
-        assertEquals(0, bean.getAge());
-
-        bean = Beans.mapToBean(map, Arrays.asList("name", "age"), SimpleBean.class);
-        assertEquals("Nora", bean.getName());
-        assertEquals(31, bean.getAge());
-        assertNull(bean.getActive());
-
-        bean = Beans.mapToBean(map, (Collection<String>) null, SimpleBean.class);
-        assertEquals("Nora", bean.getName());
-        assertEquals(31, bean.getAge());
-        assertEquals(true, bean.getActive());
-
-        bean = Beans.mapToBean(map, Collections.emptyList(), SimpleBean.class);
-        assertNull(bean.getName());
-        assertEquals(0, bean.getAge());
-        assertNull(bean.getActive());
-
-        assertNull(Beans.mapToBean((Map<String, Object>) null, Arrays.asList("name"), SimpleBean.class));
-    }
-
-    @Test
-    public void testMapToBean_NestedMap() {
-        Map<String, Object> addressMap = new HashMap<>();
-        addressMap.put("city", "Boston");
-        addressMap.put("street", "Elm St");
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", "456");
-        map.put("address", addressMap);
-
-        NestedBean bean = Beans.mapToBean(map, Arrays.asList("id", "address"), NestedBean.class);
-        assertEquals("456", bean.getId());
-        assertNotNull(bean.getAddress());
-        assertEquals("Boston", bean.getAddress().getCity());
-    }
-
-    @Test
-    public void testMapToBean_DottedKeys() {
-        Map<String, Object> flat = new LinkedHashMap<>();
-        flat.put("id", "789");
-        flat.put("address.city", "Boston");
-        flat.put("address.zipCode", "02101");
-        flat.put("simpleBean.name", "Ann");
-        flat.put("simpleBean.age", 40);
-
-        NestedBean bean = Beans.mapToBean(flat, NestedBean.class);
-        assertEquals("789", bean.getId());
-        assertEquals("Boston", bean.getAddress().getCity());
-        assertEquals("02101", bean.getAddress().getZipCode());
-        assertEquals("Ann", bean.getSimpleBean().getName());
-        assertEquals(40, bean.getSimpleBean().getAge());
-    }
-
-    @Test
-    public void testMapToBean_RoundTripFromFlatMap() {
-        Map<String, Object> flat = Beans.beanToFlatMap(nestedBean);
-        assertEquals("New York", flat.get("address.city"));
-        assertEquals("John", flat.get("simpleBean.name"));
-        assertTrue(!(flat.get("address") instanceof Map));
-
-        NestedBean restored = Beans.mapToBean(flat, NestedBean.class);
-        assertEquals("123", restored.getId());
-        assertEquals("John", restored.getSimpleBean().getName());
-        assertEquals(25, restored.getSimpleBean().getAge());
-        assertEquals("New York", restored.getAddress().getCity());
-        assertEquals("5th Avenue", restored.getAddress().getStreet());
-    }
-
-    @Test
-    public void testMapToBean_SelectionIsStrictOnlyAtTopLevel() {
-        Map<String, Object> nested = new LinkedHashMap<>();
-        nested.put("city", "NYC");
-        nested.put("bogus", 1);
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("address", nested);
-
-        BeansUserFixture user = Beans.mapToBean(map, CommonUtil.asList("address"), BeansUserFixture.class);
-        assertNotNull(user.getAddress());
-        assertEquals("NYC", user.getAddress().getCity());
-
-        Map<String, Object> topLevel = new LinkedHashMap<>();
-        topLevel.put("bogus", 1);
-        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(topLevel, CommonUtil.asList("bogus"), BeansUserFixture.class));
-
-        Map<String, Object> dotted = new LinkedHashMap<>();
-        dotted.put("address.bogus", 1);
-        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(dotted, CommonUtil.asList("address.bogus"), BeansUserFixture.class));
-
-        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(map, false, BeansUserFixture.class));
-        assertEquals("NYC", Beans.mapToBean(map, true, BeansUserFixture.class).getAddress().getCity());
-    }
+    // mapsToBeans
 
     @Test
     public void testMapsToBeans() {
@@ -227,6 +91,8 @@ public class BeansMapTest extends BeansTestSupport {
         assertNull(beans.get(0).getActive());
     }
 
+
+
     /**
      * {@code mapToBean(Map, Collection, Class)} validates every selected name whether or not the map carries
      * it, so a name the target bean has no setter for is rejected with {@code IllegalArgumentException}. The
@@ -257,4 +123,145 @@ public class BeansMapTest extends BeansTestSupport {
         // An empty selection has nothing to validate either.
         assertTrue(Beans.mapsToBeans(Collections.emptyList(), Collections.emptyList(), SimpleBean.class).isEmpty());
     }
+
+    // mapToBean
+
+    @Test
+    public void testMapToBean() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Jane");
+        map.put("age", 30);
+        map.put("active", false);
+
+        SimpleBean bean = Beans.mapToBean(map, SimpleBean.class);
+        assertEquals("Jane", bean.getName());
+        assertEquals(30, bean.getAge());
+        assertEquals(false, bean.getActive());
+
+        assertNull(Beans.mapToBean((Map<String, Object>) null, SimpleBean.class));
+
+        bean = Beans.mapToBean(new HashMap<>(), SimpleBean.class);
+        assertNotNull(bean);
+        assertNull(bean.getName());
+        assertEquals(0, bean.getAge());
+    }
+
+    @Test
+    public void testMapToBean_DottedKeys() {
+        Map<String, Object> flat = new LinkedHashMap<>();
+        flat.put("id", "789");
+        flat.put("address.city", "Boston");
+        flat.put("address.zipCode", "02101");
+        flat.put("simpleBean.name", "Ann");
+        flat.put("simpleBean.age", 40);
+
+        NestedBean bean = Beans.mapToBean(flat, NestedBean.class);
+        assertEquals("789", bean.getId());
+        assertEquals("Boston", bean.getAddress().getCity());
+        assertEquals("02101", bean.getAddress().getZipCode());
+        assertEquals("Ann", bean.getSimpleBean().getName());
+        assertEquals(40, bean.getSimpleBean().getAge());
+    }
+
+    @Test
+    public void testMapToBean_IgnoreUnmatched() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Jane");
+        map.put("age", null);
+        map.put("unknownField", "value");
+
+        SimpleBean bean = Beans.mapToBean(map, true, SimpleBean.class);
+        assertEquals("Jane", bean.getName());
+        assertNull(bean.getActive());
+
+        map.put("age", 25);
+        bean = Beans.mapToBean(map, true, SimpleBean.class);
+        assertEquals("Jane", bean.getName());
+        assertEquals(25, bean.getAge());
+    }
+
+    @Test
+    public void testMapToBean_NestedMap() {
+        Map<String, Object> addressMap = new HashMap<>();
+        addressMap.put("city", "Boston");
+        addressMap.put("street", "Elm St");
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", "456");
+        map.put("address", addressMap);
+
+        NestedBean bean = Beans.mapToBean(map, Arrays.asList("id", "address"), NestedBean.class);
+        assertEquals("456", bean.getId());
+        assertNotNull(bean.getAddress());
+        assertEquals("Boston", bean.getAddress().getCity());
+    }
+
+    @Test
+    public void testMapToBean_RoundTripFromFlatMap() {
+        Map<String, Object> flat = Beans.beanToFlatMap(nestedBean);
+        assertEquals("New York", flat.get("address.city"));
+        assertEquals("John", flat.get("simpleBean.name"));
+        assertTrue(!(flat.get("address") instanceof Map));
+
+        NestedBean restored = Beans.mapToBean(flat, NestedBean.class);
+        assertEquals("123", restored.getId());
+        assertEquals("John", restored.getSimpleBean().getName());
+        assertEquals(25, restored.getSimpleBean().getAge());
+        assertEquals("New York", restored.getAddress().getCity());
+        assertEquals("5th Avenue", restored.getAddress().getStreet());
+    }
+
+    @Test
+    public void testMapToBean_SelectionIsStrictOnlyAtTopLevel() {
+        Map<String, Object> nested = new LinkedHashMap<>();
+        nested.put("city", "NYC");
+        nested.put("bogus", 1);
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("address", nested);
+
+        BeansUserFixture user = Beans.mapToBean(map, CommonUtil.asList("address"), BeansUserFixture.class);
+        assertNotNull(user.getAddress());
+        assertEquals("NYC", user.getAddress().getCity());
+
+        Map<String, Object> topLevel = new LinkedHashMap<>();
+        topLevel.put("bogus", 1);
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(topLevel, CommonUtil.asList("bogus"), BeansUserFixture.class));
+
+        Map<String, Object> dotted = new LinkedHashMap<>();
+        dotted.put("address.bogus", 1);
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(dotted, CommonUtil.asList("address.bogus"), BeansUserFixture.class));
+
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapToBean(map, false, BeansUserFixture.class));
+        assertEquals("NYC", Beans.mapToBean(map, true, BeansUserFixture.class).getAddress().getCity());
+    }
+
+    @Test
+    public void testMapToBean_SelectPropNames() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", "Nora");
+        map.put("age", 31);
+        map.put("active", true);
+
+        SimpleBean bean = Beans.mapToBean(map, Arrays.asList("name"), SimpleBean.class);
+        assertEquals("Nora", bean.getName());
+        assertEquals(0, bean.getAge());
+
+        bean = Beans.mapToBean(map, Arrays.asList("name", "age"), SimpleBean.class);
+        assertEquals("Nora", bean.getName());
+        assertEquals(31, bean.getAge());
+        assertNull(bean.getActive());
+
+        bean = Beans.mapToBean(map, (Collection<String>) null, SimpleBean.class);
+        assertEquals("Nora", bean.getName());
+        assertEquals(31, bean.getAge());
+        assertEquals(true, bean.getActive());
+
+        bean = Beans.mapToBean(map, Collections.emptyList(), SimpleBean.class);
+        assertNull(bean.getName());
+        assertEquals(0, bean.getAge());
+        assertNull(bean.getActive());
+
+        assertNull(Beans.mapToBean((Map<String, Object>) null, Arrays.asList("name"), SimpleBean.class));
+    }
+
 }

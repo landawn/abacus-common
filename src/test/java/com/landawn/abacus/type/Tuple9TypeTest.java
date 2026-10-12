@@ -14,10 +14,10 @@
 
 package com.landawn.abacus.type;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -32,8 +32,8 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Objectory;
-import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple9;
+import com.landawn.abacus.util.Tuple;
 
 public class Tuple9TypeTest extends TestBase {
 

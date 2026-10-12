@@ -58,67 +58,7 @@ public class ShortListRemoveTest extends ShortListTestSupport {
         }
     }
 
-    @Test
-    public void testRemoveIf() {
-        {
-            list = new ShortList();
-            for (short i = -100; i <= 100; i++) {
-                list.add(i);
-            }
-
-            assertTrue(list.removeIf(s -> s % 3 == 0 || s % 5 == 0));
-
-            for (int i = 0; i < list.size(); i++) {
-                short value = list.get(i);
-                assertTrue(value % 3 != 0 && value % 5 != 0);
-            }
-
-            assertTrue(list.removeIf(s -> s < 0));
-            for (int i = 0; i < list.size(); i++) {
-                assertTrue(list.get(i) >= 0);
-            }
-        }
-        {
-            list = new ShortList();
-            ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-            boolean result = list.removeIf(new ShortPredicate() {
-                @Override
-                public boolean test(short value) {
-                    return value % 2 == 0;
-                }
-            });
-            assertTrue(result);
-            assertEquals(3, list.size());
-            assertEquals((short) 1, list.get(0));
-            assertEquals((short) 3, list.get(1));
-            assertEquals((short) 5, list.get(2));
-        }
-    }
-
-    @Test
-    public void testRemoveDuplicates() {
-        ShortList list = ShortList.of((short) 1, (short) 5, (short) 1, (short) 2, (short) 5);
-        assertTrue(list.removeDuplicates());
-        assertArrayEquals(new short[] { 1, 5, 2 }, list.toArray());
-
-        ShortList list2 = ShortList.of((short) 1, (short) 5, (short) 1, (short) 2, (short) 5);
-        assertTrue(list2.removeAllOccurrences((short) 1));
-        assertArrayEquals(new short[] { 5, 2, 5 }, list2.toArray());
-    }
-
-    @Test
-    public void testRemoveDuplicates_Empty() {
-        assertFalse(ShortList.of().removeDuplicates());
-    }
-
-    @Test
-    public void testRemoveAllOccurrences() {
-        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 2, (short) 3, (short) 2);
-        boolean changed = sl.removeAllOccurrences((short) 2);
-        assertTrue(changed);
-        assertEquals(2, sl.size());
-        assertFalse(sl.contains((short) 2));
-    }
+    // removeAll
 
     @Test
     public void testRemoveAll() {
@@ -207,6 +147,15 @@ public class ShortListRemoveTest extends ShortListTestSupport {
     }
 
     @Test
+    public void testRemoveAllOccurrences() {
+        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 2, (short) 3, (short) 2);
+        boolean changed = sl.removeAllOccurrences((short) 2);
+        assertTrue(changed);
+        assertEquals(2, sl.size());
+        assertFalse(sl.contains((short) 2));
+    }
+
+    @Test
     public void testRemoveAt_Empty() {
         ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3);
         sl.removeAllAt();
@@ -214,20 +163,19 @@ public class ShortListRemoveTest extends ShortListTestSupport {
     }
 
     @Test
-    public void testRemoveRange() {
-        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
-        sl.removeRange(1, 3);
-        assertEquals(3, sl.size());
-        assertEquals((short) 1, sl.get(0));
-        assertEquals((short) 4, sl.get(1));
-        assertEquals((short) 5, sl.get(2));
+    public void testRemoveDuplicates() {
+        ShortList list = ShortList.of((short) 1, (short) 5, (short) 1, (short) 2, (short) 5);
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new short[] { 1, 5, 2 }, list.toArray());
+
+        ShortList list2 = ShortList.of((short) 1, (short) 5, (short) 1, (short) 2, (short) 5);
+        assertTrue(list2.removeAllOccurrences((short) 1));
+        assertArrayEquals(new short[] { 5, 2, 5 }, list2.toArray());
     }
 
     @Test
-    public void testRemoveRange_Empty() {
-        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3);
-        sl.removeRange(1, 1);
-        assertEquals(3, sl.size());
+    public void testRemoveDuplicates_Empty() {
+        assertFalse(ShortList.of().removeDuplicates());
     }
 
     @Test
@@ -268,6 +216,43 @@ public class ShortListRemoveTest extends ShortListTestSupport {
     }
 
     @Test
+    public void testRemoveIf() {
+        {
+            list = new ShortList();
+            for (short i = -100; i <= 100; i++) {
+                list.add(i);
+            }
+
+            assertTrue(list.removeIf(s -> s % 3 == 0 || s % 5 == 0));
+
+            for (int i = 0; i < list.size(); i++) {
+                short value = list.get(i);
+                assertTrue(value % 3 != 0 && value % 5 != 0);
+            }
+
+            assertTrue(list.removeIf(s -> s < 0));
+            for (int i = 0; i < list.size(); i++) {
+                assertTrue(list.get(i) >= 0);
+            }
+        }
+        {
+            list = new ShortList();
+            ShortList list = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
+            boolean result = list.removeIf(new ShortPredicate() {
+                @Override
+                public boolean test(short value) {
+                    return value % 2 == 0;
+                }
+            });
+            assertTrue(result);
+            assertEquals(3, list.size());
+            assertEquals((short) 1, list.get(0));
+            assertEquals((short) 3, list.get(1));
+            assertEquals((short) 5, list.get(2));
+        }
+    }
+
+    @Test
     public void testRemoveLast() {
         ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
         short removed = list.removeLast();
@@ -282,4 +267,22 @@ public class ShortListRemoveTest extends ShortListTestSupport {
         ShortList list = new ShortList();
         assertThrows(NoSuchElementException.class, () -> list.removeLast());
     }
+
+    @Test
+    public void testRemoveRange() {
+        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
+        sl.removeRange(1, 3);
+        assertEquals(3, sl.size());
+        assertEquals((short) 1, sl.get(0));
+        assertEquals((short) 4, sl.get(1));
+        assertEquals((short) 5, sl.get(2));
+    }
+
+    @Test
+    public void testRemoveRange_Empty() {
+        ShortList sl = ShortList.of((short) 1, (short) 2, (short) 3);
+        sl.removeRange(1, 1);
+        assertEquals(3, sl.size());
+    }
+
 }

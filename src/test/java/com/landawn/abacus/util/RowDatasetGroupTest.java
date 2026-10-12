@@ -20,19 +20,8 @@ import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.function.Function;
 
 public class RowDatasetGroupTest extends RowDatasetTestSupport {
-    @Test
-    public void testGroupByWithKeyExtractor() {
-        final RowDataset dataset = createFourRowCityDataset();
-        String keyColumn = "age";
-        Function<Integer, String> keyExtractor = age -> age < 30 ? "Young" : "Adult";
-        Collection<String> aggregateColumns = Arrays.asList("name", "city");
-        String aggregateResultColumn = "people";
 
-        Dataset grouped = dataset.groupBy(keyColumn, keyExtractor, aggregateColumns, aggregateResultColumn, Map.class);
-
-        Assertions.assertEquals(2, grouped.columnCount());
-        Assertions.assertEquals(2, grouped.size());
-    }
+    // groupBy
 
     @Test
     public void testGroupBy() {
@@ -54,176 +43,6 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
         Assertions.assertEquals(2, grouped.size());
         Assertions.assertTrue(grouped.containsColumn("department"));
         Assertions.assertTrue(grouped.containsColumn("employees"));
-    }
-
-    @Test
-    public void testGroupByWithSingleKeyAndCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Collector<Object, ?, List<Object>> listCollector = Collectors.toList();
-        Dataset grouped = dataset.groupBy("city", "name", "names", listCollector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("names"));
-    }
-
-    @Test
-    public void testGroupByWithSingleKeyAndRowType() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "people", Object[].class);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("people"));
-    }
-
-    @Test
-    public void testGroupByWithSingleKeyAndArrayCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Collector<Object[], ?, List<Object[]>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "data", collector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("data"));
-    }
-
-    @Test
-    public void testGroupByWithSingleKeyAndRowMapper() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0) + "-" + arr.get(1);
-        Collector<String, ?, List<String>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "info", rowMapper, collector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("info"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeys() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"));
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysAndCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Collector<Object, ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), "name", "count", countCollector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("count"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysAndRowType() {
-        List<String> columnNames = CommonUtil.toList("id", "name");
-        List<List<Object>> columnValues = new ArrayList<>();
-        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
-        columnValues.add(CommonUtil.toList("A", "B", "A", "B"));
-
-        RowDataset ds = new RowDataset(columnNames, columnValues);
-        Dataset grouped = ds.groupBy(CommonUtil.toList("name"), CommonUtil.toList("id"), "ids", List.class);
-
-        assertNotNull(grouped);
-        assertEquals(2, grouped.size());
-        assertTrue(grouped.containsColumn("name"));
-        assertTrue(grouped.containsColumn("ids"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysAndArrayCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("name", "age"), "count", countCollector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("count"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysAndRowMapper() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0);
-        Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("age"), "totalAge", rowMapper, sumCollector);
-
-        assertNotNull(grouped);
-        assertEquals(3, grouped.size());
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("totalAge"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysAndKeyExtractor() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor);
-
-        assertNotNull(grouped);
-        assertTrue(grouped.containsColumn("city"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysKeyExtractorAndCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Collector<Object, ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, "name", "count", countCollector);
-
-        assertNotNull(grouped);
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("count"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysKeyExtractorAndRowType() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", List.class);
-
-        assertNotNull(grouped);
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("names"));
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysKeyExtractorAndArrayCollector() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Collector<Object[], ?, Long> countCollector = Collectors.counting();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "count", countCollector);
-
-        assertNotNull(grouped);
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("count"));
-        assertEquals(3, grouped.size());
-    }
-
-    @Test
-    public void testGroupByWithMultipleKeysKeyExtractorAndRowMapper() {
-        final RowDataset dataset = createFiveRowCityDataset();
-        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
-        Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
-        Collector<String, ?, List<String>> collector = Collectors.toList();
-        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", rowMapper, collector);
-
-        assertNotNull(grouped);
-        assertTrue(grouped.containsColumn("city"));
-        assertTrue(grouped.containsColumn("names"));
     }
 
     @Test
@@ -249,8 +68,6 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
         assertEquals(2, result.size());
     }
 
-    // ===== groupBy with Collection keyColumnNames and rowType =====
-
     @Test
     public void testGroupBy_MultiColumnKeys_WithKeyExtractorAndRowType() {
         RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("dept", "role", "name", "salary")),
@@ -265,16 +82,6 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
 
         assertNotNull(result);
         assertTrue(result.size() > 0);
-    }
-
-    // ========== groupBy - empty dataset / duplicate prop ==========
-
-    @Test
-    public void testGroupBy_WithCollector_EmptyDataset_ReturnsEmpty() {
-        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "val")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
-        Dataset result = ds.groupBy("id", "val", "sum", Collectors.summingInt(o -> (Integer) o));
-        assertNotNull(result);
-        assertEquals(0, result.size());
     }
 
     @Test
@@ -296,12 +103,25 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
     }
 
     @Test
-    public void testGroupByWithEmptyAggregateColumns() {
-        String keyColumn = "city";
-        Collection<String> aggregateColumns = new ArrayList<>();
-        String aggregateResultColumn = "data";
+    public void testGroupBy_WithCollector_DuplicatePropertyName_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("id", "val", "id", Collectors.counting()));
+    }
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class));
+    @Test
+    public void testGroupBy_WithCollector_EmptyDataset_ReturnsEmpty() {
+        RowDataset ds = new RowDataset(new ArrayList<>(Arrays.asList("id", "val")), new ArrayList<>(Arrays.asList(new ArrayList<>(), new ArrayList<>())));
+        Dataset result = ds.groupBy("id", "val", "sum", Collectors.summingInt(o -> (Integer) o));
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testGroupBy_WithNullCollector_ThrowsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(Arrays.asList("name", "id"), "age", "totalAge", (Collector<?, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> dataset.groupBy(Arrays.asList("name", "id"), Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
     }
 
     @Test
@@ -315,17 +135,197 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
     }
 
     @Test
-    public void testGroupBy_WithCollector_DuplicatePropertyName_ThrowsIllegalArgument() {
-        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("id", "val", "id", Collectors.counting()));
+    public void testGroupByWithEmptyAggregateColumns() {
+        String keyColumn = "city";
+        Collection<String> aggregateColumns = new ArrayList<>();
+        String aggregateResultColumn = "data";
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(keyColumn, null, aggregateColumns, aggregateResultColumn, List.class));
     }
 
     @Test
-    public void testGroupBy_WithNullCollector_ThrowsIllegalArgument() {
-        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", "age", "totalAge", (Collector<?, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy("name", Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class, () -> dataset.groupBy(Arrays.asList("name", "id"), "age", "totalAge", (Collector<?, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> dataset.groupBy(Arrays.asList("name", "id"), Fn.identity(), "age", "totalAge", (Collector<?, ?, ?>) null));
+    public void testGroupByWithKeyExtractor() {
+        final RowDataset dataset = createFourRowCityDataset();
+        String keyColumn = "age";
+        Function<Integer, String> keyExtractor = age -> age < 30 ? "Young" : "Adult";
+        Collection<String> aggregateColumns = Arrays.asList("name", "city");
+        String aggregateResultColumn = "people";
+
+        Dataset grouped = dataset.groupBy(keyColumn, keyExtractor, aggregateColumns, aggregateResultColumn, Map.class);
+
+        Assertions.assertEquals(2, grouped.columnCount());
+        Assertions.assertEquals(2, grouped.size());
     }
+
+    @Test
+    public void testGroupByWithMultipleKeys() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"));
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysAndArrayCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Collector<Object[], ?, Long> countCollector = Collectors.counting();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("name", "age"), "count", countCollector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("count"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysAndCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Collector<Object, ?, Long> countCollector = Collectors.counting();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), "name", "count", countCollector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("count"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysAndKeyExtractor() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor);
+
+        assertNotNull(grouped);
+        assertTrue(grouped.containsColumn("city"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysAndRowMapper() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, Integer> rowMapper = arr -> (Integer) arr.get(0);
+        Collector<Integer, ?, Integer> sumCollector = Collectors.summingInt(Integer::intValue);
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), CommonUtil.toList("age"), "totalAge", rowMapper, sumCollector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("totalAge"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysAndRowType() {
+        List<String> columnNames = CommonUtil.toList("id", "name");
+        List<List<Object>> columnValues = new ArrayList<>();
+        columnValues.add(CommonUtil.toList(1, 2, 3, 4));
+        columnValues.add(CommonUtil.toList("A", "B", "A", "B"));
+
+        RowDataset ds = new RowDataset(columnNames, columnValues);
+        Dataset grouped = ds.groupBy(CommonUtil.toList("name"), CommonUtil.toList("id"), "ids", List.class);
+
+        assertNotNull(grouped);
+        assertEquals(2, grouped.size());
+        assertTrue(grouped.containsColumn("name"));
+        assertTrue(grouped.containsColumn("ids"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysKeyExtractorAndArrayCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
+        Collector<Object[], ?, Long> countCollector = Collectors.counting();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "count", countCollector);
+
+        assertNotNull(grouped);
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("count"));
+        assertEquals(3, grouped.size());
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysKeyExtractorAndCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
+        Collector<Object, ?, Long> countCollector = Collectors.counting();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, "name", "count", countCollector);
+
+        assertNotNull(grouped);
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("count"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysKeyExtractorAndRowMapper() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
+        Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0).toString();
+        Collector<String, ?, List<String>> collector = Collectors.toList();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", rowMapper, collector);
+
+        assertNotNull(grouped);
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("names"));
+    }
+
+    @Test
+    public void testGroupByWithMultipleKeysKeyExtractorAndRowType() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> keyExtractor = arr -> arr.get(0).toString();
+        Dataset grouped = dataset.groupBy(CommonUtil.toList("city"), keyExtractor, CommonUtil.toList("name"), "names", List.class);
+
+        assertNotNull(grouped);
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("names"));
+    }
+
+    @Test
+    public void testGroupByWithSingleKeyAndArrayCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Collector<Object[], ?, List<Object[]>> collector = Collectors.toList();
+        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "data", collector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("data"));
+    }
+
+    @Test
+    public void testGroupByWithSingleKeyAndCollector() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Collector<Object, ?, List<Object>> listCollector = Collectors.toList();
+        Dataset grouped = dataset.groupBy("city", "name", "names", listCollector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("names"));
+    }
+
+    @Test
+    public void testGroupByWithSingleKeyAndRowMapper() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Function<DisposableObjArray, String> rowMapper = arr -> arr.get(0) + "-" + arr.get(1);
+        Collector<String, ?, List<String>> collector = Collectors.toList();
+        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "info", rowMapper, collector);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("info"));
+    }
+
+    @Test
+    public void testGroupByWithSingleKeyAndRowType() {
+        final RowDataset dataset = createFiveRowCityDataset();
+        Dataset grouped = dataset.groupBy("city", CommonUtil.toList("name", "age"), "people", Object[].class);
+
+        assertNotNull(grouped);
+        assertEquals(3, grouped.size());
+        assertTrue(grouped.containsColumn("city"));
+        assertTrue(grouped.containsColumn("people"));
+    }
+
 
 }

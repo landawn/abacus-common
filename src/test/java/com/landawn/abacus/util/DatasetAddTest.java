@@ -29,55 +29,54 @@ import com.landawn.abacus.util.function.TriFunction;
 import testfixtures.entity.extendDirty.basic.Account;
 
 public class DatasetAddTest extends DatasetTestSupport {
-    @Test
-    public void testAddColumn_WithCollection() {
-        Dataset ds = dataset.copy();
-        List<String> emails = Arrays.asList("john@test.com", "jane@test.com", "bob@test.com", "alice@test.com", "charlie@test.com");
-        ds.addColumn("email", emails);
 
-        assertEquals(5, ds.columnCount());
-        assertEquals("email", ds.getColumnName(4));
-        assertEquals("john@test.com", ds.get(0, 4));
+    @Test
+    @DisplayName("Should add large number of columns")
+    public void testAddManyColumns() {
+        List<String> newColumnNames = new ArrayList<>();
+        List<Collection<Object>> newColumns = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            newColumnNames.add("col" + i);
+            List<Object> column = new ArrayList<>();
+            for (int j = 0; j < dataset.size(); j++) {
+                column.add("R" + j + "C" + i);
+            }
+            newColumns.add(column);
+        }
+
+        int originalColumnCount = dataset.columnCount();
+        dataset.addColumns(newColumnNames, newColumns);
+
+        assertEquals(originalColumnCount + 10, dataset.columnCount());
+
+        assertEquals("R0C0", dataset.get(0, dataset.getColumnIndex("col0")));
+        assertEquals("R4C9", dataset.get(4, dataset.getColumnIndex("col9")));
+    }
+
+    // addColumn
+
+    @Test
+    public void testAddColumn() {
+        List<Object> newColumn = Arrays.asList("A", "B", "C", "D", "E");
+        dataset.addColumn("grade", newColumn);
+
+        assertEquals(5, dataset.columnCount());
+        assertTrue(dataset.containsColumn("grade"));
+        assertEquals("A", dataset.get(0, 4));
     }
 
     @Test
-    public void testAddColumn_WithPosition() {
-        Dataset ds = dataset.copy();
-        List<String> emails = Arrays.asList("john@test.com", "jane@test.com", "bob@test.com", "alice@test.com", "charlie@test.com");
-        ds.addColumn(1, "email", emails);
+    public void test_addColumn() throws Exception {
+        final Account account = createAccount(Account.class);
+        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account, account));
 
-        assertEquals(5, ds.columnCount());
-        assertEquals("email", ds.getColumnName(1));
-        assertEquals("name", ds.getColumnName(2));
-    }
+        ds1.addColumn("firstName2", "firstName", (Function<String, String>) t -> "**********" + t);
 
-    @Test
-    public void testAddColumn_WithFunction() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("ageDouble", "age", (Integer age) -> age * 2);
+        ds1.addColumn(0, "firstName3", CommonUtil.toList("firstName", "lastName"),
+                (Function<DisposableObjArray, String>) a -> a.get(0) + "**********" + a.get(1));
 
-        assertEquals(5, ds.columnCount());
-        assertEquals(Integer.valueOf(50), ds.get(0, 4));
-        assertEquals(Integer.valueOf(60), ds.get(1, 4));
-    }
-
-    @Test
-    public void testAddColumn_WithBiFunction() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("fullInfo", Tuple.of("name", "age"), (String name, Integer age) -> name + " (" + age + ")");
-
-        assertEquals(5, ds.columnCount());
-        assertEquals("John (25)", ds.get(0, 4));
-        assertEquals("Jane (30)", ds.get(1, 4));
-    }
-
-    @Test
-    public void testAddColumn_WithTriFunction() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("info", Tuple.of("id", "name", "age"), (Integer id, String name, Integer age) -> id + ":" + name + ":" + age);
-
-        assertEquals(5, ds.columnCount());
-        assertEquals("1:John:25", ds.get(0, 4));
+        assertNotNull(ds1);
     }
 
     @Test
@@ -86,6 +85,14 @@ public class DatasetAddTest extends DatasetTestSupport {
         assertEquals(4, sampleDataset.columnCount());
         assertTrue(sampleDataset.columnNames().contains("AgePlus5"));
         assertEquals(Arrays.asList(35, 29, 40), sampleDataset.getColumn("AgePlus5"));
+    }
+
+    @Test
+    public void addColumn_fromMultipleColumns_withFunction() {
+        sampleDataset.addColumn("ID_Name", Arrays.asList("ID", "Name"), (DisposableObjArray row) -> row.get(0) + "_" + row.get(1));
+        assertEquals(4, sampleDataset.columnCount());
+        assertTrue(sampleDataset.columnNames().contains("ID_Name"));
+        assertEquals(Arrays.asList("1_Alice", "2_Bob", "3_Charlie"), sampleDataset.getColumn("ID_Name"));
     }
 
     @Test
@@ -109,132 +116,6 @@ public class DatasetAddTest extends DatasetTestSupport {
         t3ds.addColumn("Combined", Tuple.of("C1", "C2", "C3"), (Integer c1, String c2, Boolean c3) -> c1 + "_" + c2 + "_" + c3);
         assertEquals(5, t3ds.columnCount());
         assertEquals(Arrays.asList("1_A_true", "2_B_false"), t3ds.getColumn("Combined"));
-    }
-
-    @Test
-    public void testAddColumnWithCollection() {
-        Dataset ds = dataset.copy();
-        List<String> newColumn = Arrays.asList("Engineering", "Sales", "Marketing", "HR", "Finance");
-        ds.addColumn("department", newColumn);
-        assertEquals(5, ds.columnCount());
-        assertEquals("department", ds.getColumnName(4));
-        assertEquals("Engineering", ds.get(0, 4));
-    }
-
-    @Test
-    public void testAddColumnWithPosition() {
-        Dataset ds = dataset.copy();
-        List<String> newColumn = Arrays.asList("A", "B", "C", "D", "E");
-        ds.addColumn(1, "grade", newColumn);
-        assertEquals(5, ds.columnCount());
-        assertEquals("grade", ds.getColumnName(1));
-        assertEquals("A", ds.get(0, 1));
-    }
-
-    @Test
-    public void testAddColumnWithFunction() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("nameLength", "name", (String name) -> name.length());
-        assertEquals(5, ds.columnCount());
-        assertEquals("nameLength", ds.getColumnName(4));
-        assertEquals((Integer) 4, ds.get(0, 4));
-    }
-
-    @Test
-    public void testAddColumnWithTuple2() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("nameAge", Tuple.of("name", "age"), (String name, Integer age) -> name + "(" + age + ")");
-        assertEquals(5, ds.columnCount());
-        assertEquals("John(25)", ds.get(0, 4));
-    }
-
-    @Test
-    public void testAddColumnWithTuple3() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("summary", Tuple.of("name", "age", "salary"), (String name, Integer age, Double salary) -> name + "," + age + "," + salary);
-        assertEquals(5, ds.columnCount());
-        assertEquals("John,25,50000.0", ds.get(0, 4));
-    }
-
-    @Test
-    public void testAddColumnAtPosition() {
-        Dataset dataset = testDataset.copy();
-        List<String> departments = Arrays.asList("IT", "HR", "Finance", "Marketing");
-        dataset.addColumn(1, "department", departments);
-
-        assertEquals("department", dataset.getColumnName(1));
-        assertEquals("name", dataset.getColumnName(2));
-    }
-
-    @Test
-    public void testAddColumnWithBiFunction() {
-        Dataset dataset = testDataset.copy();
-        Tuple2<String, String> fromColumns = Tuple.of("name", "age");
-        BiFunction<String, Integer, String> func = (name, age) -> name + "_" + age;
-        dataset.addColumn("name_age", fromColumns, func);
-
-        assertTrue(dataset.containsColumn("name_age"));
-        dataset.moveToRow(0);
-        assertEquals("Alice_30", dataset.get("name_age"));
-    }
-
-    @Test
-    public void testAddColumnWithTriFunction() {
-        Dataset dataset = testDataset.copy();
-        Tuple3<String, String, String> fromColumns = Tuple.of("id", "name", "age");
-        TriFunction<Integer, String, Integer, String> func = (id, name, age) -> id + ":" + name + ":" + age;
-        dataset.addColumn("combined", fromColumns, func);
-
-        assertTrue(dataset.containsColumn("combined"));
-        dataset.moveToRow(0);
-        assertEquals("1:Alice:30", dataset.get("combined"));
-    }
-
-    @Test
-    public void testAddColumn() {
-        List<Object> newColumn = Arrays.asList("A", "B", "C", "D", "E");
-        dataset.addColumn("grade", newColumn);
-
-        assertEquals(5, dataset.columnCount());
-        assertTrue(dataset.containsColumn("grade"));
-        assertEquals("A", dataset.get(0, 4));
-    }
-
-    @Test
-    public void testAddColumnWithDisposableObjArray() {
-        dataset.addColumn("combined", Arrays.asList("id", "name"), (DisposableObjArray arr) -> arr.get(0) + ":" + arr.get(1));
-
-        assertTrue(dataset.containsColumn("combined"));
-        assertEquals("1:John", dataset.get(0, 4));
-    }
-
-    @Test
-    public void addColumn_fromMultipleColumns_withFunction() {
-        sampleDataset.addColumn("ID_Name", Arrays.asList("ID", "Name"), (DisposableObjArray row) -> row.get(0) + "_" + row.get(1));
-        assertEquals(4, sampleDataset.columnCount());
-        assertTrue(sampleDataset.columnNames().contains("ID_Name"));
-        assertEquals(Arrays.asList("1_Alice", "2_Bob", "3_Charlie"), sampleDataset.getColumn("ID_Name"));
-    }
-
-    @Test
-    public void testAddColumnWithMultipleColumns() {
-        Dataset ds = dataset.copy();
-        ds.addColumn("fullInfo", Arrays.asList("name", "age"), arr -> arr.get(0) + ":" + arr.get(1));
-        assertEquals(5, ds.columnCount());
-        assertEquals("John:25", ds.get(0, 4));
-    }
-
-    @Test
-    public void test_addColumn() throws Exception {
-        final Account account = createAccount(Account.class);
-        final Dataset ds1 = CommonUtil.newDataset(CommonUtil.toList(account, account));
-
-        ds1.addColumn("firstName2", "firstName", (Function<String, String>) t -> "**********" + t);
-
-        ds1.addColumn(0, "firstName3", CommonUtil.toList("firstName", "lastName"),
-                (Function<DisposableObjArray, String>) a -> a.get(0) + "**********" + a.get(1));
-
-        assertNotNull(ds1);
     }
 
     @Test
@@ -265,6 +146,154 @@ public class DatasetAddTest extends DatasetTestSupport {
 
         assertThrows(IllegalArgumentException.class, () -> sampleDataset.addColumn(0, "ID", scores));
     }
+
+    @Test
+    public void testAddColumn_WithBiFunction() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("fullInfo", Tuple.of("name", "age"), (String name, Integer age) -> name + " (" + age + ")");
+
+        assertEquals(5, ds.columnCount());
+        assertEquals("John (25)", ds.get(0, 4));
+        assertEquals("Jane (30)", ds.get(1, 4));
+    }
+
+    @Test
+    public void testAddColumn_WithCollection() {
+        Dataset ds = dataset.copy();
+        List<String> emails = Arrays.asList("john@test.com", "jane@test.com", "bob@test.com", "alice@test.com", "charlie@test.com");
+        ds.addColumn("email", emails);
+
+        assertEquals(5, ds.columnCount());
+        assertEquals("email", ds.getColumnName(4));
+        assertEquals("john@test.com", ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumn_WithFunction() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("ageDouble", "age", (Integer age) -> age * 2);
+
+        assertEquals(5, ds.columnCount());
+        assertEquals(Integer.valueOf(50), ds.get(0, 4));
+        assertEquals(Integer.valueOf(60), ds.get(1, 4));
+    }
+
+    @Test
+    public void testAddColumn_WithPosition() {
+        Dataset ds = dataset.copy();
+        List<String> emails = Arrays.asList("john@test.com", "jane@test.com", "bob@test.com", "alice@test.com", "charlie@test.com");
+        ds.addColumn(1, "email", emails);
+
+        assertEquals(5, ds.columnCount());
+        assertEquals("email", ds.getColumnName(1));
+        assertEquals("name", ds.getColumnName(2));
+    }
+
+    @Test
+    public void testAddColumn_WithTriFunction() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("info", Tuple.of("id", "name", "age"), (Integer id, String name, Integer age) -> id + ":" + name + ":" + age);
+
+        assertEquals(5, ds.columnCount());
+        assertEquals("1:John:25", ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnAtPosition() {
+        Dataset dataset = testDataset.copy();
+        List<String> departments = Arrays.asList("IT", "HR", "Finance", "Marketing");
+        dataset.addColumn(1, "department", departments);
+
+        assertEquals("department", dataset.getColumnName(1));
+        assertEquals("name", dataset.getColumnName(2));
+    }
+
+    @Test
+    public void testAddColumnWithBiFunction() {
+        Dataset dataset = testDataset.copy();
+        Tuple2<String, String> fromColumns = Tuple.of("name", "age");
+        BiFunction<String, Integer, String> func = (name, age) -> name + "_" + age;
+        dataset.addColumn("name_age", fromColumns, func);
+
+        assertTrue(dataset.containsColumn("name_age"));
+        dataset.moveToRow(0);
+        assertEquals("Alice_30", dataset.get("name_age"));
+    }
+
+    @Test
+    public void testAddColumnWithCollection() {
+        Dataset ds = dataset.copy();
+        List<String> newColumn = Arrays.asList("Engineering", "Sales", "Marketing", "HR", "Finance");
+        ds.addColumn("department", newColumn);
+        assertEquals(5, ds.columnCount());
+        assertEquals("department", ds.getColumnName(4));
+        assertEquals("Engineering", ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnWithDisposableObjArray() {
+        dataset.addColumn("combined", Arrays.asList("id", "name"), (DisposableObjArray arr) -> arr.get(0) + ":" + arr.get(1));
+
+        assertTrue(dataset.containsColumn("combined"));
+        assertEquals("1:John", dataset.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnWithFunction() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("nameLength", "name", (String name) -> name.length());
+        assertEquals(5, ds.columnCount());
+        assertEquals("nameLength", ds.getColumnName(4));
+        assertEquals((Integer) 4, ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnWithMultipleColumns() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("fullInfo", Arrays.asList("name", "age"), arr -> arr.get(0) + ":" + arr.get(1));
+        assertEquals(5, ds.columnCount());
+        assertEquals("John:25", ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnWithPosition() {
+        Dataset ds = dataset.copy();
+        List<String> newColumn = Arrays.asList("A", "B", "C", "D", "E");
+        ds.addColumn(1, "grade", newColumn);
+        assertEquals(5, ds.columnCount());
+        assertEquals("grade", ds.getColumnName(1));
+        assertEquals("A", ds.get(0, 1));
+    }
+
+    @Test
+    public void testAddColumnWithTriFunction() {
+        Dataset dataset = testDataset.copy();
+        Tuple3<String, String, String> fromColumns = Tuple.of("id", "name", "age");
+        TriFunction<Integer, String, Integer, String> func = (id, name, age) -> id + ":" + name + ":" + age;
+        dataset.addColumn("combined", fromColumns, func);
+
+        assertTrue(dataset.containsColumn("combined"));
+        dataset.moveToRow(0);
+        assertEquals("1:Alice:30", dataset.get("combined"));
+    }
+
+    @Test
+    public void testAddColumnWithTuple2() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("nameAge", Tuple.of("name", "age"), (String name, Integer age) -> name + "(" + age + ")");
+        assertEquals(5, ds.columnCount());
+        assertEquals("John(25)", ds.get(0, 4));
+    }
+
+    @Test
+    public void testAddColumnWithTuple3() {
+        Dataset ds = dataset.copy();
+        ds.addColumn("summary", Tuple.of("name", "age", "salary"), (String name, Integer age, Double salary) -> name + "," + age + "," + salary);
+        assertEquals(5, ds.columnCount());
+        assertEquals("John,25,50000.0", ds.get(0, 4));
+    }
+
+    // addColumns
 
     @Test
     public void testAddColumns() {
@@ -299,6 +328,49 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
+    @DisplayName("Should add multiple columns at specific position")
+    public void testAddColumnsAtPosition() {
+        List<String> newColumnNames = Arrays.asList("grade", "status");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("A", "B", "C", "B", "A"),
+                Arrays.asList("Active", "Active", "Inactive", "Active", "Active"));
+
+        dataset.addColumns(2, newColumnNames, newColumns);
+
+        assertEquals(6, dataset.columnCount());
+        assertEquals("grade", dataset.getColumnName(2));
+        assertEquals("status", dataset.getColumnName(3));
+        assertEquals("age", dataset.getColumnName(4));
+        assertEquals("A", dataset.get(0, 2));
+        assertEquals("Active", dataset.get(0, 3));
+    }
+
+    @Test
+    @DisplayName("Should handle mixed empty and non-empty columns")
+    public void testAddColumnsMixedEmptyAndNonEmpty() {
+        List<String> newColumnNames = Arrays.asList("data", "empty", "moreData");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("D1", "D2", "D3", "D4", "D5"), Collections.emptyList(),
+                Arrays.asList(100, 200, 300, 400, 500));
+
+        dataset.addColumns(newColumnNames, newColumns);
+
+        assertEquals(7, dataset.columnCount());
+        assertEquals("D1", dataset.get(0, dataset.getColumnIndex("data")));
+        assertNull(dataset.get(0, dataset.getColumnIndex("empty")));
+        assertEquals(100, (Integer) dataset.get(0, dataset.getColumnIndex("moreData")));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when adding to frozen dataset")
+    public void testAddColumnsOnFrozenDataset() {
+        dataset.freeze();
+
+        List<String> newColumnNames = Arrays.asList("col1");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5));
+
+        assertThrows(IllegalStateException.class, () -> dataset.addColumns(newColumnNames, newColumns));
+    }
+
+    @Test
     @DisplayName("Should preserve original data when adding columns")
     public void testAddColumnsPreservesOriginalData() {
         Object[][] originalData = new Object[dataset.size()][dataset.columnCount()];
@@ -320,80 +392,6 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    @DisplayName("Should add multiple columns at specific position")
-    public void testAddColumnsAtPosition() {
-        List<String> newColumnNames = Arrays.asList("grade", "status");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("A", "B", "C", "B", "A"),
-                Arrays.asList("Active", "Active", "Inactive", "Active", "Active"));
-
-        dataset.addColumns(2, newColumnNames, newColumns);
-
-        assertEquals(6, dataset.columnCount());
-        assertEquals("grade", dataset.getColumnName(2));
-        assertEquals("status", dataset.getColumnName(3));
-        assertEquals("age", dataset.getColumnName(4));
-        assertEquals("A", dataset.get(0, 2));
-        assertEquals("Active", dataset.get(0, 3));
-    }
-
-    @Test
-    @DisplayName("Should handle empty columns by filling with nulls")
-    public void testAddColumnsWithEmptyColumns() {
-        List<String> newColumnNames = Arrays.asList("empty1", "empty2");
-        List<Collection<Object>> newColumns = Arrays.asList(Collections.emptyList(), Collections.emptyList());
-
-        dataset.addColumns(newColumnNames, newColumns);
-
-        assertEquals(6, dataset.columnCount());
-        for (int i = 0; i < dataset.size(); i++) {
-            assertNull(dataset.get(i, dataset.getColumnIndex("empty1")));
-            assertNull(dataset.get(i, dataset.getColumnIndex("empty2")));
-        }
-    }
-
-    @Test
-    @DisplayName("Should handle mixed empty and non-empty columns")
-    public void testAddColumnsMixedEmptyAndNonEmpty() {
-        List<String> newColumnNames = Arrays.asList("data", "empty", "moreData");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("D1", "D2", "D3", "D4", "D5"), Collections.emptyList(),
-                Arrays.asList(100, 200, 300, 400, 500));
-
-        dataset.addColumns(newColumnNames, newColumns);
-
-        assertEquals(7, dataset.columnCount());
-        assertEquals("D1", dataset.get(0, dataset.getColumnIndex("data")));
-        assertNull(dataset.get(0, dataset.getColumnIndex("empty")));
-        assertEquals(100, (Integer) dataset.get(0, dataset.getColumnIndex("moreData")));
-    }
-
-    @Test
-    @DisplayName("Should handle columns with null values")
-    public void testAddColumnsWithNullValues() {
-        List<String> newColumnNames = Arrays.asList("nullable1", "nullable2");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("A", null, "C", null, "E"), Arrays.asList(null, 2, null, 4, null));
-
-        dataset.addColumns(newColumnNames, newColumns);
-
-        assertEquals(6, dataset.columnCount());
-        assertEquals("A", dataset.get(0, dataset.getColumnIndex("nullable1")));
-        assertNull(dataset.get(1, dataset.getColumnIndex("nullable1")));
-        assertNull(dataset.get(0, dataset.getColumnIndex("nullable2")));
-        assertEquals(2, (Integer) dataset.get(1, dataset.getColumnIndex("nullable2")));
-    }
-
-    @Test
-    @DisplayName("Should handle empty column names list")
-    public void testAddColumnsWithEmptyNamesList() {
-        List<String> newColumnNames = Collections.emptyList();
-        List<Collection<Object>> newColumns = Collections.emptyList();
-
-        int originalColumnCount = dataset.columnCount();
-        dataset.addColumns(newColumnNames, newColumns);
-
-        assertEquals(originalColumnCount, dataset.columnCount());
-    }
-
-    @Test
     @DisplayName("Should add multiple columns with different collection types")
     public void testAddColumnsWithDifferentCollectionTypes() {
         List<String> newColumnNames = Arrays.asList("list", "set", "arrayList");
@@ -406,24 +404,6 @@ public class DatasetAddTest extends DatasetTestSupport {
         assertTrue(dataset.containsColumn("list"));
         assertTrue(dataset.containsColumn("set"));
         assertTrue(dataset.containsColumn("arrayList"));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when column names and columns size mismatch")
-    public void testAddColumnsWithSizeMismatch() {
-        List<String> newColumnNames = Arrays.asList("col1", "col2", "col3");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5), Arrays.asList(6, 7, 8, 9, 10));
-
-        assertThrows(IllegalArgumentException.class, () -> dataset.addColumns(newColumnNames, newColumns));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when column size doesn't match dataset size")
-    public void testAddColumnsWithIncorrectColumnSize() {
-        List<String> newColumnNames = Arrays.asList("col1", "col2");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6, 7, 8, 9));
-
-        assertThrows(IllegalArgumentException.class, () -> dataset.addColumns(newColumnNames, newColumns));
     }
 
     @Test
@@ -445,14 +425,39 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    @DisplayName("Should throw exception when adding to frozen dataset")
-    public void testAddColumnsOnFrozenDataset() {
-        dataset.freeze();
+    @DisplayName("Should handle empty columns by filling with nulls")
+    public void testAddColumnsWithEmptyColumns() {
+        List<String> newColumnNames = Arrays.asList("empty1", "empty2");
+        List<Collection<Object>> newColumns = Arrays.asList(Collections.emptyList(), Collections.emptyList());
 
-        List<String> newColumnNames = Arrays.asList("col1");
-        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5));
+        dataset.addColumns(newColumnNames, newColumns);
 
-        assertThrows(IllegalStateException.class, () -> dataset.addColumns(newColumnNames, newColumns));
+        assertEquals(6, dataset.columnCount());
+        for (int i = 0; i < dataset.size(); i++) {
+            assertNull(dataset.get(i, dataset.getColumnIndex("empty1")));
+            assertNull(dataset.get(i, dataset.getColumnIndex("empty2")));
+        }
+    }
+
+    @Test
+    @DisplayName("Should handle empty column names list")
+    public void testAddColumnsWithEmptyNamesList() {
+        List<String> newColumnNames = Collections.emptyList();
+        List<Collection<Object>> newColumns = Collections.emptyList();
+
+        int originalColumnCount = dataset.columnCount();
+        dataset.addColumns(newColumnNames, newColumns);
+
+        assertEquals(originalColumnCount, dataset.columnCount());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when column size doesn't match dataset size")
+    public void testAddColumnsWithIncorrectColumnSize() {
+        List<String> newColumnNames = Arrays.asList("col1", "col2");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6, 7, 8, 9));
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.addColumns(newColumnNames, newColumns));
     }
 
     @Test
@@ -465,6 +470,43 @@ public class DatasetAddTest extends DatasetTestSupport {
 
         assertThrows(IndexOutOfBoundsException.class, () -> dataset.addColumns(-1, newColumnNames, newColumns));
     }
+
+    @Test
+    @DisplayName("Should handle columns with null values")
+    public void testAddColumnsWithNullValues() {
+        List<String> newColumnNames = Arrays.asList("nullable1", "nullable2");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList("A", null, "C", null, "E"), Arrays.asList(null, 2, null, 4, null));
+
+        dataset.addColumns(newColumnNames, newColumns);
+
+        assertEquals(6, dataset.columnCount());
+        assertEquals("A", dataset.get(0, dataset.getColumnIndex("nullable1")));
+        assertNull(dataset.get(1, dataset.getColumnIndex("nullable1")));
+        assertNull(dataset.get(0, dataset.getColumnIndex("nullable2")));
+        assertEquals(2, (Integer) dataset.get(1, dataset.getColumnIndex("nullable2")));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when column names and columns size mismatch")
+    public void testAddColumnsWithSizeMismatch() {
+        List<String> newColumnNames = Arrays.asList("col1", "col2", "col3");
+        List<Collection<Object>> newColumns = Arrays.asList(Arrays.asList(1, 2, 3, 4, 5), Arrays.asList(6, 7, 8, 9, 10));
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.addColumns(newColumnNames, newColumns));
+    }
+
+    @Test
+    public void testAddMultipleColumns() {
+        Dataset ds = dataset.copy();
+        List<String> newColumnNames = Arrays.asList("col1", "col2");
+        List<List<Object>> newColumns = Arrays.asList(Arrays.asList("A", "B", "C", "D", "E"), Arrays.asList(1, 2, 3, 4, 5));
+        ds.addColumns(newColumnNames, newColumns);
+        assertEquals(6, ds.columnCount());
+        assertEquals("col1", ds.getColumnName(4));
+        assertEquals("col2", ds.getColumnName(5));
+    }
+
+    // addRow
 
     @Test
     public void testAddRow() {
@@ -487,17 +529,18 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
+    public void addRow_atPosition() {
+        sampleDataset.addRow(1, new Object[] { 0, "Zero", 0 });
+        assertEquals(4, sampleDataset.size());
+        assertEquals("Zero", sampleDataset.moveToRow(1).get("Name"));
+        assertEquals("Bob", sampleDataset.moveToRow(2).get("Name"));
+    }
+
+    @Test
     public void addRow_fromArray() {
         sampleDataset.addRow(new Object[] { 4, "David", 28 });
         assertEquals(4, sampleDataset.size());
         assertEquals("David", sampleDataset.moveToRow(3).get("Name"));
-    }
-
-    @Test
-    public void addRow_fromList() {
-        sampleDataset.addRow(Arrays.asList(4, "Eve", 40));
-        assertEquals(4, sampleDataset.size());
-        assertEquals((Integer) 40, sampleDataset.moveToRow(3).get("Age"));
     }
 
     @Test
@@ -512,11 +555,24 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testAddRowWithPosition() {
-        Dataset ds = dataset.copy();
-        ds.addRow(1, new Object[] { 5, "Eve", 32, 58000.0 });
-        assertEquals(6, ds.size());
-        assertEquals("Eve", ds.get(1, 1));
+    public void addRow_fromList() {
+        sampleDataset.addRow(Arrays.asList(4, "Eve", 40));
+        assertEquals(4, sampleDataset.size());
+        assertEquals((Integer) 40, sampleDataset.moveToRow(3).get("Age"));
+    }
+
+    @Test
+    public void addRow_fromMap() {
+        Map<String, Object> newRowMap = new LinkedHashMap<>();
+        newRowMap.put("ID", 4);
+        newRowMap.put("Name", "Frank");
+        newRowMap.put("Age", 33);
+        sampleDataset.addRow(newRowMap);
+        assertEquals(4, sampleDataset.size());
+        assertEquals("Frank", sampleDataset.moveToRow(3).get("Name"));
+
+        Map<String, Object> incompleteMap = Map.of("ID", 5, "Name", "Grace");
+        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addRow(incompleteMap));
     }
 
     @Test
@@ -529,6 +585,25 @@ public class DatasetAddTest extends DatasetTestSupport {
         dataset.moveToRow(1);
         assertEquals(5, dataset.getInt("id"));
         assertEquals("Eve", dataset.get("name"));
+    }
+
+    @Test
+    @DisplayName("addRow(null) must throw IllegalArgumentException, not NullPointerException")
+    public void testAddRowNullThrowsIAE() {
+        Dataset ds = new RowDataset(new ArrayList<>(Arrays.asList("a", "b")),
+                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList(2)))));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRow(null));
+        assertThrows(IllegalArgumentException.class, () -> ds.addRow(0, null));
+    }
+
+    @Test
+    public void testAddRowWithBean() {
+        Person person = new Person(6, "Frank", 45, 90000.0);
+        dataset.addRow(person);
+
+        assertEquals(6, dataset.size());
+        assertEquals((Integer) 6, dataset.get(5, 0));
+        assertEquals("Frank", dataset.get(5, 1));
     }
 
     @Test
@@ -557,50 +632,22 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testAddRowWithBean() {
-        Person person = new Person(6, "Frank", 45, 90000.0);
-        dataset.addRow(person);
-
-        assertEquals(6, dataset.size());
-        assertEquals((Integer) 6, dataset.get(5, 0));
-        assertEquals("Frank", dataset.get(5, 1));
-    }
-
-    @Test
-    public void addRow_atPosition() {
-        sampleDataset.addRow(1, new Object[] { 0, "Zero", 0 });
-        assertEquals(4, sampleDataset.size());
-        assertEquals("Zero", sampleDataset.moveToRow(1).get("Name"));
-        assertEquals("Bob", sampleDataset.moveToRow(2).get("Name"));
-    }
-
-    @Test
-    public void addRow_fromMap() {
-        Map<String, Object> newRowMap = new LinkedHashMap<>();
-        newRowMap.put("ID", 4);
-        newRowMap.put("Name", "Frank");
-        newRowMap.put("Age", 33);
-        sampleDataset.addRow(newRowMap);
-        assertEquals(4, sampleDataset.size());
-        assertEquals("Frank", sampleDataset.moveToRow(3).get("Name"));
-
-        Map<String, Object> incompleteMap = Map.of("ID", 5, "Name", "Grace");
-        assertThrows(IllegalArgumentException.class, () -> sampleDataset.addRow(incompleteMap));
-    }
-
-    @Test
-    public void testAddRows_Collection() {
+    public void testAddRowWithPosition() {
         Dataset ds = dataset.copy();
-        List<Object[]> newRows = new ArrayList<>();
-        newRows.add(new Object[] { 5, "Eve", 27, 52000.0 });
-        newRows.add(new Object[] { 6, "Frank", 32, 58000.0 });
+        ds.addRow(1, new Object[] { 5, "Eve", 32, 58000.0 });
+        assertEquals(6, ds.size());
+        assertEquals("Eve", ds.get(1, 1));
+    }
 
+    // addRows
+
+    @Test
+    public void testAddRows() {
+        Dataset ds = dataset.copy();
+        List<Object[]> newRows = Arrays.asList(new Object[] { 5, "Eve", 32, 58000.0 }, new Object[] { 6, "Frank", 29, 52000.0 });
         ds.addRows(newRows);
-
         assertEquals(7, ds.size());
-        assertEquals(Integer.valueOf(5), ds.get(5, 0));
         assertEquals("Eve", ds.get(5, 1));
-        assertEquals(Integer.valueOf(6), ds.get(6, 0));
         assertEquals("Frank", ds.get(6, 1));
     }
 
@@ -622,26 +669,19 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testAddRows() {
+    public void testAddRows_Collection() {
         Dataset ds = dataset.copy();
-        List<Object[]> newRows = Arrays.asList(new Object[] { 5, "Eve", 32, 58000.0 }, new Object[] { 6, "Frank", 29, 52000.0 });
+        List<Object[]> newRows = new ArrayList<>();
+        newRows.add(new Object[] { 5, "Eve", 27, 52000.0 });
+        newRows.add(new Object[] { 6, "Frank", 32, 58000.0 });
+
         ds.addRows(newRows);
+
         assertEquals(7, ds.size());
+        assertEquals(Integer.valueOf(5), ds.get(5, 0));
         assertEquals("Eve", ds.get(5, 1));
+        assertEquals(Integer.valueOf(6), ds.get(6, 0));
         assertEquals("Frank", ds.get(6, 1));
-    }
-
-    @Test
-    public void testAddRowsAtPosition() {
-        Dataset dataset = testDataset.copy();
-        List<Object[]> newRows = Arrays.asList(new Object[] { 5, "Eve", 32, 58000.0 }, new Object[] { 6, "Frank", 29, 52000.0 });
-        dataset.addRows(1, newRows);
-
-        assertEquals(6, dataset.size());
-        dataset.moveToRow(1);
-        assertEquals(5, dataset.getInt("id"));
-        dataset.moveToRow(2);
-        assertEquals(6, dataset.getInt("id"));
     }
 
     @Test
@@ -676,32 +716,16 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    public void testAddRowsModCountIncrement() {
-        Object[] row = { 4, "David", 40, 100.0 };
-        Collection<Object[]> rows = Collections.singletonList(row);
+    public void testAddRowsAtPosition() {
+        Dataset dataset = testDataset.copy();
+        List<Object[]> newRows = Arrays.asList(new Object[] { 5, "Eve", 32, 58000.0 }, new Object[] { 6, "Frank", 29, 52000.0 });
+        dataset.addRows(1, newRows);
 
-        int sizeBefore = dataset.size();
-        dataset.addRows(rows);
-
-        assertEquals(sizeBefore + 1, dataset.size());
-    }
-
-    @Test
-    @DisplayName("Should add multiple rows with Object arrays")
-    public void testAddRowsWithObjectArrays() {
-        Collection<Object[]> rows = Arrays.asList(new Object[] { 6, "Frank", 45, 90000.0 }, new Object[] { 7, "Grace", 32, 75000.0 },
-                new Object[] { 8, "Henry", 28, 65000.0 });
-
-        int originalSize = dataset.size();
-        dataset.addRows(rows);
-
-        assertEquals(originalSize + 3, dataset.size());
-        assertEquals((Integer) 6, dataset.get(5, 0));
-        assertEquals("Frank", dataset.get(5, 1));
-        assertEquals((Integer) 7, dataset.get(6, 0));
-        assertEquals("Grace", dataset.get(6, 1));
-        assertEquals((Integer) 8, dataset.get(7, 0));
-        assertEquals("Henry", dataset.get(7, 1));
+        assertEquals(6, dataset.size());
+        dataset.moveToRow(1);
+        assertEquals(5, dataset.getInt("id"));
+        dataset.moveToRow(2);
+        assertEquals(6, dataset.getInt("id"));
     }
 
     @Test
@@ -718,6 +742,92 @@ public class DatasetAddTest extends DatasetTestSupport {
         assertEquals("Insert1", dataset.get(2, 1));
         assertEquals((Integer) 11, dataset.get(3, 0));
         assertEquals("Insert2", dataset.get(3, 1));
+    }
+
+    @Test
+    public void testAddRowsModCountIncrement() {
+        Object[] row = { 4, "David", 40, 100.0 };
+        Collection<Object[]> rows = Collections.singletonList(row);
+
+        int sizeBefore = dataset.size();
+        dataset.addRows(rows);
+
+        assertEquals(sizeBefore + 1, dataset.size());
+    }
+
+    @Test
+    public void testAddRowsOnFrozenDataset() {
+        dataset.freeze();
+
+        Object[] row = { 4, "David", 40 };
+        Collection<Object[]> rows = Collections.singletonList(row);
+
+        assertThrows(IllegalStateException.class, () -> dataset.addRows(rows));
+    }
+
+    @Test
+    @DisplayName("Should preserve row order when adding multiple rows")
+    public void testAddRowsPreservesOrder() {
+        Collection<Object[]> rows = new ArrayList<>();
+        for (int i = 10; i <= 15; i++) {
+            rows.add(new Object[] { i, "Person" + i, 20 + i, 50000.0 + i * 1000 });
+        }
+
+        int originalSize = dataset.size();
+        dataset.addRows(rows);
+
+        assertEquals(originalSize + 6, dataset.size());
+
+        for (int i = 0; i < 6; i++) {
+            assertEquals((Integer) (10 + i), dataset.get(originalSize + i, 0));
+            assertEquals("Person" + (10 + i), dataset.get(originalSize + i, 1));
+        }
+    }
+
+    @Test
+    @DisplayName("Should add multiple rows with Bean objects")
+    public void testAddRowsWithBeans() {
+        Collection<Person> rows = Arrays.asList(new Person(6, "Frank", 45, 90000.0), new Person(7, "Grace", 32, 75000.0), new Person(8, "Henry", 28, 65000.0));
+
+        int originalSize = dataset.size();
+        dataset.addRows(rows);
+
+        assertEquals(originalSize + 3, dataset.size());
+        assertEquals((Integer) 6, dataset.get(5, 0));
+        assertEquals("Frank", dataset.get(5, 1));
+        assertEquals((Integer) 45, dataset.get(5, 2));
+        assertEquals((Double) 90000.0, dataset.get(5, 3));
+    }
+
+    @Test
+    @DisplayName("Should handle empty collection in addRows")
+    public void testAddRowsWithEmptyCollection() {
+        Collection<Object[]> rows = Collections.emptyList();
+
+        int originalSize = dataset.size();
+        dataset.addRows(rows);
+
+        assertEquals(originalSize, dataset.size());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when row has fewer columns than dataset")
+    public void testAddRowsWithInsufficientColumns() {
+        Collection<Object[]> rows = new ArrayList<>();
+        rows.add(new Object[] { 6, "Frank" });
+
+        assertThrows(IllegalArgumentException.class, () -> dataset.addRows(rows));
+    }
+
+    @Test
+    @DisplayName("Should throw exception for invalid position in addRows")
+    public void testAddRowsWithInvalidPosition() {
+        Collection<Object[]> rows = new ArrayList<>();
+        rows.add(new Object[] { 6, "Test", 45, 90000.0 });
+
+        assertThrows(IndexOutOfBoundsException.class, () -> dataset.addRows(100, rows));
+
+        assertThrows(IndexOutOfBoundsException.class, () -> dataset.addRows(-1, rows));
     }
 
     @Test
@@ -764,29 +874,16 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    @DisplayName("Should add multiple rows with Bean objects")
-    public void testAddRowsWithBeans() {
-        Collection<Person> rows = Arrays.asList(new Person(6, "Frank", 45, 90000.0), new Person(7, "Grace", 32, 75000.0), new Person(8, "Henry", 28, 65000.0));
+    @DisplayName("Should add rows with mixed supported representations")
+    public void testAddRowsWithMixedTypes() {
+        Collection<Object> mixedRows = Arrays.asList(new Object[] { 6, "Array", 45, 90000.0 }, Arrays.asList(7, "List", 32, 75000.0));
 
-        int originalSize = dataset.size();
-        dataset.addRows(rows);
+        final int originalSize = dataset.size();
+        dataset.addRows(mixedRows);
 
-        assertEquals(originalSize + 3, dataset.size());
-        assertEquals((Integer) 6, dataset.get(5, 0));
-        assertEquals("Frank", dataset.get(5, 1));
-        assertEquals((Integer) 45, dataset.get(5, 2));
-        assertEquals((Double) 90000.0, dataset.get(5, 3));
-    }
-
-    @Test
-    @DisplayName("Should handle empty collection in addRows")
-    public void testAddRowsWithEmptyCollection() {
-        Collection<Object[]> rows = Collections.emptyList();
-
-        int originalSize = dataset.size();
-        dataset.addRows(rows);
-
-        assertEquals(originalSize, dataset.size());
+        assertEquals(originalSize + 2, dataset.size());
+        assertEquals("Array", dataset.get(originalSize, 1));
+        assertEquals("List", dataset.get(originalSize + 1, 1));
     }
 
     @Test
@@ -805,6 +902,24 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
+    @DisplayName("Should add multiple rows with Object arrays")
+    public void testAddRowsWithObjectArrays() {
+        Collection<Object[]> rows = Arrays.asList(new Object[] { 6, "Frank", 45, 90000.0 }, new Object[] { 7, "Grace", 32, 75000.0 },
+                new Object[] { 8, "Henry", 28, 65000.0 });
+
+        int originalSize = dataset.size();
+        dataset.addRows(rows);
+
+        assertEquals(originalSize + 3, dataset.size());
+        assertEquals((Integer) 6, dataset.get(5, 0));
+        assertEquals("Frank", dataset.get(5, 1));
+        assertEquals((Integer) 7, dataset.get(6, 0));
+        assertEquals("Grace", dataset.get(6, 1));
+        assertEquals((Integer) 8, dataset.get(7, 0));
+        assertEquals("Henry", dataset.get(7, 1));
+    }
+
+    @Test
     @DisplayName("Should add single row using addRows")
     public void testAddRowsWithSingleRow() {
         Collection<Object[]> rows = Collections.singletonList(new Object[] { 6, "Single", 45, 90000.0 });
@@ -818,68 +933,6 @@ public class DatasetAddTest extends DatasetTestSupport {
     }
 
     @Test
-    @DisplayName("Should preserve row order when adding multiple rows")
-    public void testAddRowsPreservesOrder() {
-        Collection<Object[]> rows = new ArrayList<>();
-        for (int i = 10; i <= 15; i++) {
-            rows.add(new Object[] { i, "Person" + i, 20 + i, 50000.0 + i * 1000 });
-        }
-
-        int originalSize = dataset.size();
-        dataset.addRows(rows);
-
-        assertEquals(originalSize + 6, dataset.size());
-
-        for (int i = 0; i < 6; i++) {
-            assertEquals((Integer) (10 + i), dataset.get(originalSize + i, 0));
-            assertEquals("Person" + (10 + i), dataset.get(originalSize + i, 1));
-        }
-    }
-
-    @Test
-    public void testAddRowsOnFrozenDataset() {
-        dataset.freeze();
-
-        Object[] row = { 4, "David", 40 };
-        Collection<Object[]> rows = Collections.singletonList(row);
-
-        assertThrows(IllegalStateException.class, () -> dataset.addRows(rows));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when row has fewer columns than dataset")
-    public void testAddRowsWithInsufficientColumns() {
-        Collection<Object[]> rows = new ArrayList<>();
-        rows.add(new Object[] { 6, "Frank" });
-
-        assertThrows(IllegalArgumentException.class, () -> dataset.addRows(rows));
-    }
-
-    @Test
-    @DisplayName("Should throw exception for invalid position in addRows")
-    public void testAddRowsWithInvalidPosition() {
-        Collection<Object[]> rows = new ArrayList<>();
-        rows.add(new Object[] { 6, "Test", 45, 90000.0 });
-
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.addRows(100, rows));
-
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.addRows(-1, rows));
-    }
-
-    @Test
-    @DisplayName("Should add rows with mixed supported representations")
-    public void testAddRowsWithMixedTypes() {
-        Collection<Object> mixedRows = Arrays.asList(new Object[] { 6, "Array", 45, 90000.0 }, Arrays.asList(7, "List", 32, 75000.0));
-
-        final int originalSize = dataset.size();
-        dataset.addRows(mixedRows);
-
-        assertEquals(originalSize + 2, dataset.size());
-        assertEquals("Array", dataset.get(originalSize, 1));
-        assertEquals("List", dataset.get(originalSize + 1, 1));
-    }
-
-    @Test
     @DisplayName("Should throw exception for unsupported row type")
     public void testAddRowsWithUnsupportedType() {
         Collection<String> rows = Arrays.asList("row1", "row2");
@@ -887,48 +940,5 @@ public class DatasetAddTest extends DatasetTestSupport {
         assertThrows(IllegalArgumentException.class, () -> dataset.addRows(rows));
     }
 
-    @Test
-    public void testAddMultipleColumns() {
-        Dataset ds = dataset.copy();
-        List<String> newColumnNames = Arrays.asList("col1", "col2");
-        List<List<Object>> newColumns = Arrays.asList(Arrays.asList("A", "B", "C", "D", "E"), Arrays.asList(1, 2, 3, 4, 5));
-        ds.addColumns(newColumnNames, newColumns);
-        assertEquals(6, ds.columnCount());
-        assertEquals("col1", ds.getColumnName(4));
-        assertEquals("col2", ds.getColumnName(5));
-    }
-
-    @Test
-    @DisplayName("Should add large number of columns")
-    public void testAddManyColumns() {
-        List<String> newColumnNames = new ArrayList<>();
-        List<Collection<Object>> newColumns = new ArrayList<>();
-
-        for (int i = 0; i < 10; i++) {
-            newColumnNames.add("col" + i);
-            List<Object> column = new ArrayList<>();
-            for (int j = 0; j < dataset.size(); j++) {
-                column.add("R" + j + "C" + i);
-            }
-            newColumns.add(column);
-        }
-
-        int originalColumnCount = dataset.columnCount();
-        dataset.addColumns(newColumnNames, newColumns);
-
-        assertEquals(originalColumnCount + 10, dataset.columnCount());
-
-        assertEquals("R0C0", dataset.get(0, dataset.getColumnIndex("col0")));
-        assertEquals("R4C9", dataset.get(4, dataset.getColumnIndex("col9")));
-    }
-
-    @Test
-    @DisplayName("addRow(null) must throw IllegalArgumentException, not NullPointerException")
-    public void testAddRowNullThrowsIAE() {
-        Dataset ds = new RowDataset(new ArrayList<>(Arrays.asList("a", "b")),
-                new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)), new ArrayList<>(Arrays.asList(2)))));
-        assertThrows(IllegalArgumentException.class, () -> ds.addRow(null));
-        assertThrows(IllegalArgumentException.class, () -> ds.addRow(0, null));
-    }
 
 }

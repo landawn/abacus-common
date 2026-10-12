@@ -50,12 +50,21 @@ public class ArrayGetTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testGetShort() {
-        assertEquals((short) 2, Array.getShort(new short[] { 1, 2, 3 }, 1));
-        assertEquals((short) 2, Array.getShort(new byte[] { 1, 2, 3 }, 1));
-        assertThrows(NullPointerException.class, () -> Array.getShort(null, 0));
-        assertThrows(IllegalArgumentException.class, () -> Array.getShort(new Short[] { 1 }, 0));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getShort(new short[] { 1 }, 1));
+    public void testGetDouble() {
+        assertEquals(2.2, Array.getDouble(new double[] { 1.1, 2.2, 3.3 }, 1));
+        assertEquals(2.0, Array.getDouble(new int[] { 1, 2, 3 }, 1));
+        assertThrows(NullPointerException.class, () -> Array.getDouble(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> Array.getDouble(new Double[] { 1d }, 0));
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getDouble(new double[] { 1d }, 1));
+    }
+
+    @Test
+    public void testGetFloat() {
+        assertEquals(2.2f, Array.getFloat(new float[] { 1.1f, 2.2f, 3.3f }, 1));
+        assertEquals(2f, Array.getFloat(new int[] { 1, 2, 3 }, 1));
+        assertThrows(NullPointerException.class, () -> Array.getFloat(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> Array.getFloat(new Float[] { 1f }, 0));
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getFloat(new float[] { 1f }, 1));
     }
 
     @Test
@@ -77,20 +86,12 @@ public class ArrayGetTest extends ArrayTestSupport {
     }
 
     @Test
-    public void testGetFloat() {
-        assertEquals(2.2f, Array.getFloat(new float[] { 1.1f, 2.2f, 3.3f }, 1));
-        assertEquals(2f, Array.getFloat(new int[] { 1, 2, 3 }, 1));
-        assertThrows(NullPointerException.class, () -> Array.getFloat(null, 0));
-        assertThrows(IllegalArgumentException.class, () -> Array.getFloat(new Float[] { 1f }, 0));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getFloat(new float[] { 1f }, 1));
+    public void testGetShort() {
+        assertEquals((short) 2, Array.getShort(new short[] { 1, 2, 3 }, 1));
+        assertEquals((short) 2, Array.getShort(new byte[] { 1, 2, 3 }, 1));
+        assertThrows(NullPointerException.class, () -> Array.getShort(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> Array.getShort(new Short[] { 1 }, 0));
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getShort(new short[] { 1 }, 1));
     }
 
-    @Test
-    public void testGetDouble() {
-        assertEquals(2.2, Array.getDouble(new double[] { 1.1, 2.2, 3.3 }, 1));
-        assertEquals(2.0, Array.getDouble(new int[] { 1, 2, 3 }, 1));
-        assertThrows(NullPointerException.class, () -> Array.getDouble(null, 0));
-        assertThrows(IllegalArgumentException.class, () -> Array.getDouble(new Double[] { 1d }, 0));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> Array.getDouble(new double[] { 1d }, 1));
-    }
 }

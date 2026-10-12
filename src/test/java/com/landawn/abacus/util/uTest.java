@@ -30,37 +30,18 @@ import com.landawn.abacus.util.u.OptionalShort;
 public class uTest extends uTestSupport {
 
     @Test
-    public void testOptionalOfAndGet() {
-        Optional<String> empty = Optional.empty();
-        Optional<String> present = Optional.of("test");
-        assertFalse(empty.isPresent());
-        assertTrue(empty.isEmpty());
-        assertTrue(present.isPresent());
-        assertEquals("test", present.get());
-        assertThrows(NullPointerException.class, () -> Optional.of(null));
-        assertTrue(Optional.ofNullable("test").isPresent());
-        assertFalse(Optional.ofNullable(null).isPresent());
-        assertEquals("jdk", Optional.from(java.util.Optional.of("jdk")).get());
-        assertFalse(Optional.from(java.util.Optional.empty()).isPresent());
-        assertSame(Optional.empty(), Optional.empty());
-        assertSame(Optional.TRUE, Optional.of(Boolean.TRUE));
-        assertSame(Optional.FALSE, Optional.ofNullable(Boolean.FALSE));
-        assertSame(Optional.of(""), Optional.ofNullable(""));
-        assertTrue(Optional.TRUE.get());
-        assertFalse(Optional.FALSE.get());
+    public void reviewFixes20260906_containsComparesArraysByIdentity() {
+        final int[] arr = { 1, 2 };
+        assertFalse(Optional.of(arr).contains(new int[] { 1, 2 }));
+        assertTrue(Optional.of(arr).contains(arr));
+        assertFalse(Nullable.of(arr).contains(new int[] { 1, 2 }));
+        assertTrue(Nullable.of(arr).contains(arr));
 
-        assertEquals("test", present.orElse("other"));
-        assertEquals("other", empty.orElse("other"));
-        assertEquals("test", present.orElseGet(() -> "other"));
-        assertEquals("other", empty.orElseGet(() -> "other"));
-        assertEquals("test", present.orElseNull());
-        assertNull(empty.orElseNull());
-        assertEquals("test", present.orElseThrow());
-        assertThrows(NoSuchElementException.class, empty::get);
-        assertThrows(NoSuchElementException.class, empty::orElseThrow);
-        assertTrue(present.contains("test"));
-        assertFalse(present.contains("other"));
-        assertFalse(empty.contains("test"));
+        assertTrue(Optional.of("test").contains("test"));
+        assertFalse(Optional.of("test").contains("hello"));
+        assertFalse(Optional.<String> empty().contains("test"));
+        assertTrue(Nullable.of((String) null).contains(null));
+        assertFalse(Nullable.<String> empty().contains(null));
     }
 
     @Test
@@ -127,6 +108,54 @@ public class uTest extends uTestSupport {
     }
 
     @Test
+    public void testOptionalOfAndGet() {
+        Optional<String> empty = Optional.empty();
+        Optional<String> present = Optional.of("test");
+        assertFalse(empty.isPresent());
+        assertTrue(empty.isEmpty());
+        assertTrue(present.isPresent());
+        assertEquals("test", present.get());
+        assertThrows(NullPointerException.class, () -> Optional.of(null));
+        assertTrue(Optional.ofNullable("test").isPresent());
+        assertFalse(Optional.ofNullable(null).isPresent());
+        assertEquals("jdk", Optional.from(java.util.Optional.of("jdk")).get());
+        assertFalse(Optional.from(java.util.Optional.empty()).isPresent());
+        assertSame(Optional.empty(), Optional.empty());
+        assertSame(Optional.TRUE, Optional.of(Boolean.TRUE));
+        assertSame(Optional.FALSE, Optional.ofNullable(Boolean.FALSE));
+        assertSame(Optional.of(""), Optional.ofNullable(""));
+        assertTrue(Optional.TRUE.get());
+        assertFalse(Optional.FALSE.get());
+
+        assertEquals("test", present.orElse("other"));
+        assertEquals("other", empty.orElse("other"));
+        assertEquals("test", present.orElseGet(() -> "other"));
+        assertEquals("other", empty.orElseGet(() -> "other"));
+        assertEquals("test", present.orElseNull());
+        assertNull(empty.orElseNull());
+        assertEquals("test", present.orElseThrow());
+        assertThrows(NoSuchElementException.class, empty::get);
+        assertThrows(NoSuchElementException.class, empty::orElseThrow);
+        assertTrue(present.contains("test"));
+        assertFalse(present.contains("other"));
+        assertFalse(empty.contains("test"));
+    }
+
+    @Test
+    public void reviewFixes20260906_mapIfNotNullKeepsANullMapperResultPresent() {
+        final Nullable<String> nullResult = Nullable.of("x").mapIfNotNull(v -> null);
+        assertTrue(nullResult.isPresent());
+        assertTrue(nullResult.isNull());
+        assertNull(nullResult.orElse("d"));
+        assertEquals("Nullable[null]", nullResult.toString());
+
+        assertTrue(Nullable.of("x").map(v -> null).isPresent());
+        assertFalse(Nullable.of((String) null).mapIfNotNull(v -> v).isPresent());
+        assertFalse(Nullable.<String> empty().mapIfNotNull(v -> v).isPresent());
+        assertEquals("X", Nullable.of("x").mapIfNotNull(String::toUpperCase).get());
+    }
+
+    @Test
     public void testNullable() throws Exception {
         Nullable<String> empty = Nullable.empty();
         Nullable<String> present = Nullable.of("test");
@@ -187,6 +216,30 @@ public class uTest extends uTestSupport {
     }
 
     @Test
+    public void reviewFixes20260906_nullablePresentNullIsReturnedByEveryOrElseThrowOverload() {
+        final Nullable<String> pn = Nullable.of((String) null);
+        assertNull(pn.orElseThrow());
+        assertNull(pn.orElseThrow("boom"));
+        assertNull(pn.orElseThrow("boom {}", "a"));
+        assertNull(pn.orElseThrow("boom {} {}", "a", "b"));
+        assertNull(pn.orElseThrow("boom {} {} {}", "a", "b", "c"));
+        assertNull(pn.orElseThrow("boom {} {} {} {}", "a", "b", "c", "d"));
+        assertNull(pn.orElseThrow(IllegalStateException::new));
+        assertThrows(NoSuchElementException.class, pn::orElseThrowIfNull);
+        assertThrows(IllegalStateException.class, () -> pn.orElseThrowIfNull(IllegalStateException::new));
+        assertEquals("fallback", pn.orElseGetIfNull(() -> "fallback"));
+
+        final Nullable<String> absent = Nullable.empty();
+        assertThrows(NoSuchElementException.class, absent::orElseThrow);
+        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom"));
+        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {}", "a"));
+        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {}", "a", "b"));
+        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {} {}", "a", "b", "c"));
+        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {} {} {}", "a", "b", "c", "d"));
+        assertThrows(IllegalStateException.class, () -> absent.orElseThrow(IllegalStateException::new));
+    }
+
+    @Test
     public void testPrimitiveFactoriesAndCache() {
         assertSame(OptionalBoolean.empty(), OptionalBoolean.empty());
         assertSame(OptionalChar.empty(), OptionalChar.empty());
@@ -229,6 +282,56 @@ public class uTest extends uTestSupport {
         assertSame(OptionalByte.of((byte) 127), OptionalByte.of((byte) 127));
         assertSame(OptionalFloat.of(0.0f), OptionalFloat.of(0.0f));
         assertSame(OptionalDouble.of(0.0d), OptionalDouble.of(0.0d));
+    }
+
+    @Test
+    public void reviewFixes20260906_mapToXxxJavadocExamplesRenderAsDocumented() {
+        assertEquals("OptionalLong[1]", Optional.of("test").mapToLong(val -> 1L).toString());
+        assertEquals("OptionalFloat[1.0]", Optional.of("test").mapToFloat(val -> 1.0f).toString());
+        assertEquals("OptionalDouble[1.0]", Optional.of("test").mapToDouble(val -> 1).toString());
+        assertEquals("OptionalLong[1]", Nullable.of("test").mapToLong(val -> 1L).toString());
+        assertEquals("OptionalFloat[1.0]", Nullable.of("test").mapToFloat(val -> 1.0f).toString());
+        assertEquals("OptionalDouble[1.0]", Nullable.of("test").mapToDouble(val -> 1).toString());
+        assertEquals("OptionalChar[A]", Nullable.of("test").mapToCharIfNotNull(val -> 'A').toString());
+        assertEquals("OptionalByte[1]", Optional.of("test").mapToByte(val -> 1).toString());
+        assertEquals("OptionalShort[1]", Optional.of("test").mapToShort(val -> 1).toString());
+        assertEquals("OptionalInt[1]", Optional.of("test").mapToInt(val -> 1).toString());
+        assertEquals("OptionalChar[A]", Optional.of("test").mapToChar(val -> 'A').toString());
+    }
+
+    @Test
+    public void reviewFixes20260906_primitiveMapToXxxAcceptsASupertypeMapper() {
+        final Throwables.ToIntFunction<Number, RuntimeException> toInt = Number::intValue;
+        final Throwables.ToLongFunction<Number, RuntimeException> toLong = Number::longValue;
+        final Throwables.ToDoubleFunction<Number, RuntimeException> toDouble = Number::doubleValue;
+
+        assertEquals(OptionalInt.of(42), Optional.of(42L).mapToInt(toInt));
+        assertEquals(OptionalInt.of(42), Nullable.of(42L).mapToInt(toInt));
+        assertEquals(OptionalInt.of(42), OptionalLong.of(42L).mapToInt(toInt));
+        assertEquals(OptionalInt.of(1), OptionalByte.of((byte) 1).mapToInt(toInt));
+        assertEquals(OptionalInt.of(1), OptionalShort.of((short) 1).mapToInt(toInt));
+        assertEquals(OptionalInt.of(2), OptionalFloat.of(2.7f).mapToInt(toInt));
+        assertEquals(OptionalInt.of(3), OptionalDouble.of(3.9d).mapToInt(toInt));
+        assertEquals(OptionalLong.of(42L), OptionalInt.of(42).mapToLong(toLong));
+        assertEquals(OptionalDouble.of(1.5d), OptionalFloat.of(1.5f).mapToDouble(toDouble));
+
+        assertEquals(OptionalInt.of(8), OptionalLong.of(7L).mapToInt(v -> (int) (v + 1)));
+        assertEquals(OptionalInt.of(1), OptionalBoolean.of(true).mapToInt(v -> v ? 1 : 0));
+        assertEquals(OptionalInt.empty(), OptionalLong.empty().mapToInt(toInt));
+        assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).mapToInt(null));
+    }
+
+    @Test
+    public void reviewFixes20260906_stringOverloadWinsForEveryStringArgument() {
+        final Optional<Object> a = Optional.of((Object) "abc");
+        final Optional<CharSequence> b = Optional.ofNullable((CharSequence) "abc");
+        final Nullable<Object> c = Nullable.of((Object) "abc");
+        assertEquals("abc", a.get());
+        assertEquals("abc", b.get());
+        assertEquals("abc", c.get());
+        final Optional<String> plain = Optional.of("abc");
+        assertEquals("abc", plain.get());
+        assertSame(Nullable.of((String) null), Nullable.of((String) null));
     }
 
     @Test
@@ -289,106 +392,4 @@ public class uTest extends uTestSupport {
         assertThrows(NoSuchElementException.class, () -> OptionalDouble.empty().getAsDouble());
     }
 
-    @Test
-    public void reviewFixes20260906_primitiveMapToXxxAcceptsASupertypeMapper() {
-        final Throwables.ToIntFunction<Number, RuntimeException> toInt = Number::intValue;
-        final Throwables.ToLongFunction<Number, RuntimeException> toLong = Number::longValue;
-        final Throwables.ToDoubleFunction<Number, RuntimeException> toDouble = Number::doubleValue;
-
-        assertEquals(OptionalInt.of(42), Optional.of(42L).mapToInt(toInt));
-        assertEquals(OptionalInt.of(42), Nullable.of(42L).mapToInt(toInt));
-        assertEquals(OptionalInt.of(42), OptionalLong.of(42L).mapToInt(toInt));
-        assertEquals(OptionalInt.of(1), OptionalByte.of((byte) 1).mapToInt(toInt));
-        assertEquals(OptionalInt.of(1), OptionalShort.of((short) 1).mapToInt(toInt));
-        assertEquals(OptionalInt.of(2), OptionalFloat.of(2.7f).mapToInt(toInt));
-        assertEquals(OptionalInt.of(3), OptionalDouble.of(3.9d).mapToInt(toInt));
-        assertEquals(OptionalLong.of(42L), OptionalInt.of(42).mapToLong(toLong));
-        assertEquals(OptionalDouble.of(1.5d), OptionalFloat.of(1.5f).mapToDouble(toDouble));
-
-        assertEquals(OptionalInt.of(8), OptionalLong.of(7L).mapToInt(v -> (int) (v + 1)));
-        assertEquals(OptionalInt.of(1), OptionalBoolean.of(true).mapToInt(v -> v ? 1 : 0));
-        assertEquals(OptionalInt.empty(), OptionalLong.empty().mapToInt(toInt));
-        assertThrows(IllegalArgumentException.class, () -> OptionalLong.of(1L).mapToInt(null));
-    }
-
-    @Test
-    public void reviewFixes20260906_mapIfNotNullKeepsANullMapperResultPresent() {
-        final Nullable<String> nullResult = Nullable.of("x").mapIfNotNull(v -> null);
-        assertTrue(nullResult.isPresent());
-        assertTrue(nullResult.isNull());
-        assertNull(nullResult.orElse("d"));
-        assertEquals("Nullable[null]", nullResult.toString());
-
-        assertTrue(Nullable.of("x").map(v -> null).isPresent());
-        assertFalse(Nullable.of((String) null).mapIfNotNull(v -> v).isPresent());
-        assertFalse(Nullable.<String> empty().mapIfNotNull(v -> v).isPresent());
-        assertEquals("X", Nullable.of("x").mapIfNotNull(String::toUpperCase).get());
-    }
-
-    @Test
-    public void reviewFixes20260906_containsComparesArraysByIdentity() {
-        final int[] arr = { 1, 2 };
-        assertFalse(Optional.of(arr).contains(new int[] { 1, 2 }));
-        assertTrue(Optional.of(arr).contains(arr));
-        assertFalse(Nullable.of(arr).contains(new int[] { 1, 2 }));
-        assertTrue(Nullable.of(arr).contains(arr));
-
-        assertTrue(Optional.of("test").contains("test"));
-        assertFalse(Optional.of("test").contains("hello"));
-        assertFalse(Optional.<String> empty().contains("test"));
-        assertTrue(Nullable.of((String) null).contains(null));
-        assertFalse(Nullable.<String> empty().contains(null));
-    }
-
-    @Test
-    public void reviewFixes20260906_nullablePresentNullIsReturnedByEveryOrElseThrowOverload() {
-        final Nullable<String> pn = Nullable.of((String) null);
-        assertNull(pn.orElseThrow());
-        assertNull(pn.orElseThrow("boom"));
-        assertNull(pn.orElseThrow("boom {}", "a"));
-        assertNull(pn.orElseThrow("boom {} {}", "a", "b"));
-        assertNull(pn.orElseThrow("boom {} {} {}", "a", "b", "c"));
-        assertNull(pn.orElseThrow("boom {} {} {} {}", "a", "b", "c", "d"));
-        assertNull(pn.orElseThrow(IllegalStateException::new));
-        assertThrows(NoSuchElementException.class, pn::orElseThrowIfNull);
-        assertThrows(IllegalStateException.class, () -> pn.orElseThrowIfNull(IllegalStateException::new));
-        assertEquals("fallback", pn.orElseGetIfNull(() -> "fallback"));
-
-        final Nullable<String> absent = Nullable.empty();
-        assertThrows(NoSuchElementException.class, absent::orElseThrow);
-        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom"));
-        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {}", "a"));
-        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {}", "a", "b"));
-        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {} {}", "a", "b", "c"));
-        assertThrows(NoSuchElementException.class, () -> absent.orElseThrow("boom {} {} {} {}", "a", "b", "c", "d"));
-        assertThrows(IllegalStateException.class, () -> absent.orElseThrow(IllegalStateException::new));
-    }
-
-    @Test
-    public void reviewFixes20260906_mapToXxxJavadocExamplesRenderAsDocumented() {
-        assertEquals("OptionalLong[1]", Optional.of("test").mapToLong(val -> 1L).toString());
-        assertEquals("OptionalFloat[1.0]", Optional.of("test").mapToFloat(val -> 1.0f).toString());
-        assertEquals("OptionalDouble[1.0]", Optional.of("test").mapToDouble(val -> 1).toString());
-        assertEquals("OptionalLong[1]", Nullable.of("test").mapToLong(val -> 1L).toString());
-        assertEquals("OptionalFloat[1.0]", Nullable.of("test").mapToFloat(val -> 1.0f).toString());
-        assertEquals("OptionalDouble[1.0]", Nullable.of("test").mapToDouble(val -> 1).toString());
-        assertEquals("OptionalChar[A]", Nullable.of("test").mapToCharIfNotNull(val -> 'A').toString());
-        assertEquals("OptionalByte[1]", Optional.of("test").mapToByte(val -> 1).toString());
-        assertEquals("OptionalShort[1]", Optional.of("test").mapToShort(val -> 1).toString());
-        assertEquals("OptionalInt[1]", Optional.of("test").mapToInt(val -> 1).toString());
-        assertEquals("OptionalChar[A]", Optional.of("test").mapToChar(val -> 'A').toString());
-    }
-
-    @Test
-    public void reviewFixes20260906_stringOverloadWinsForEveryStringArgument() {
-        final Optional<Object> a = Optional.of((Object) "abc");
-        final Optional<CharSequence> b = Optional.ofNullable((CharSequence) "abc");
-        final Nullable<Object> c = Nullable.of((Object) "abc");
-        assertEquals("abc", a.get());
-        assertEquals("abc", b.get());
-        assertEquals("abc", c.get());
-        final Optional<String> plain = Optional.of("abc");
-        assertEquals("abc", plain.get());
-        assertSame(Nullable.of((String) null), Nullable.of((String) null));
-    }
 }

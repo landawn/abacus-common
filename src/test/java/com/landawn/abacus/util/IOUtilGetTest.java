@@ -13,6 +13,41 @@ import org.junit.jupiter.api.Test;
 
 public class IOUtilGetTest extends IOUtilTestSupport {
 
+    // getFileExtension
+
+    @Test
+    public void testGetFileExtension() {
+        assertEquals("txt", IOUtil.getFileExtension(new File("test.txt")));
+        assertEquals("pdf", IOUtil.getFileExtension("document.pdf"));
+        assertEquals("java", IOUtil.getFileExtension("/path/to/file.java"));
+        assertEquals("gz", IOUtil.getFileExtension("archive.tar.gz"));
+        assertEquals("gitignore", IOUtil.getFileExtension(".gitignore"));
+        assertEquals("", IOUtil.getFileExtension("README"));
+        assertEquals("", IOUtil.getFileExtension("file."));
+    }
+
+    @Test
+    public void testGetFileExtension_Empty() {
+        assertEquals("", IOUtil.getFileExtension(""));
+    }
+
+    @Test
+    public void testGetFileExtension_Null() {
+        assertNull(IOUtil.getFileExtension((File) null));
+        assertNull(IOUtil.getFileExtension((String) null));
+    }
+
+    @Test
+    public void testGetFileExtensionAndNameWithoutExtension_NulByteInTheName() {
+        final String nameWithNul = new String(new char[] { 'a', (char) 0, 'b', '.', 't', 'x', 't' });
+        final File fileWithNul = new File(nameWithNul);
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.getFileExtension(nameWithNul));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.getFileExtension(fileWithNul));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.getNameWithoutExtension(nameWithNul));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.getNameWithoutExtension(fileWithNul));
+    }
+
     @Test
     public void testGetHostName() {
         String hostName = IOUtil.getHostName();
@@ -37,27 +72,7 @@ public class IOUtilGetTest extends IOUtilTestSupport {
         }
     }
 
-    @Test
-    public void testGetFileExtension() {
-        assertEquals("txt", IOUtil.getFileExtension(new File("test.txt")));
-        assertEquals("pdf", IOUtil.getFileExtension("document.pdf"));
-        assertEquals("java", IOUtil.getFileExtension("/path/to/file.java"));
-        assertEquals("gz", IOUtil.getFileExtension("archive.tar.gz"));
-        assertEquals("gitignore", IOUtil.getFileExtension(".gitignore"));
-        assertEquals("", IOUtil.getFileExtension("README"));
-        assertEquals("", IOUtil.getFileExtension("file."));
-    }
-
-    @Test
-    public void testGetFileExtension_Null() {
-        assertNull(IOUtil.getFileExtension((File) null));
-        assertNull(IOUtil.getFileExtension((String) null));
-    }
-
-    @Test
-    public void testGetFileExtension_Empty() {
-        assertEquals("", IOUtil.getFileExtension(""));
-    }
+    // getNameWithoutExtension
 
     @Test
     public void testGetNameWithoutExtension() {
@@ -72,24 +87,14 @@ public class IOUtilGetTest extends IOUtilTestSupport {
     }
 
     @Test
-    public void testGetNameWithoutExtension_Null() {
-        assertNull(IOUtil.getNameWithoutExtension((File) null));
-        assertNull(IOUtil.getNameWithoutExtension((String) null));
-    }
-
-    @Test
     public void testGetNameWithoutExtension_Empty() {
         assertEquals("", IOUtil.getNameWithoutExtension(""));
     }
 
     @Test
-    public void testGetFileExtensionAndNameWithoutExtension_NulByteInTheName() {
-        final String nameWithNul = new String(new char[] { 'a', (char) 0, 'b', '.', 't', 'x', 't' });
-        final File fileWithNul = new File(nameWithNul);
-
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.getFileExtension(nameWithNul));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.getFileExtension(fileWithNul));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.getNameWithoutExtension(nameWithNul));
-        assertThrows(IllegalArgumentException.class, () -> IOUtil.getNameWithoutExtension(fileWithNul));
+    public void testGetNameWithoutExtension_Null() {
+        assertNull(IOUtil.getNameWithoutExtension((File) null));
+        assertNull(IOUtil.getNameWithoutExtension((String) null));
     }
+
 }
