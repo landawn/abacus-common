@@ -16674,7 +16674,7 @@ public final class Strings {
      * @return the longest common substring; an empty string if no common substring exists; or {@code null} if either {@code a} or {@code b} is {@code null}.
      * @throws IllegalArgumentException if the combined length of the inputs exceeds the maximum array size, so that the
      *         suffix-array path cannot be used and the dynamic-programming fallback would be impractically expensive
-     *         (unreachable for two {@code String} inputs)
+     *         (a combined length above about 2<sup>31</sup> code units; possible for two {@code String} inputs only with a very large heap)
      * @see #commonPrefix(CharSequence, CharSequence)
      * @see #commonSuffix(CharSequence, CharSequence)
      */

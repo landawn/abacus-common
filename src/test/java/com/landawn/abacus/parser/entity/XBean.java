@@ -264,7 +264,8 @@ public class XBean extends TestBase {
             return false;
         }
 
-        if (!Objects.equals(typeSqlDate, other.typeSqlDate) || !Objects.equals(typeSqlTimestamp, other.typeSqlTimestamp) || !Objects.equals(typeString, other.typeString) || (weekDay != other.weekDay)) {
+        if (!Objects.equals(typeSqlDate, other.typeSqlDate) || !Objects.equals(typeSqlTimestamp, other.typeSqlTimestamp)
+                || !Objects.equals(typeString, other.typeString) || (weekDay != other.weekDay)) {
             return false;
         }
 

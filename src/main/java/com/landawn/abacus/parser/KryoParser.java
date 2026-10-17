@@ -908,7 +908,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 // trailing bytes and malformed payloads, without closing the caller's stream.
                 if (input.readFailure == null) {
                     try {
-                        while (IOUtil.read(source, input.ownedBuffer) != IOUtil.EOF) {
+                        // IOUtil retries an initial zero once; a second zero means no progress and must end the drain.
+                        while (IOUtil.read(source, input.ownedBuffer) > 0) {
                             // Drain using the same owned buffer after decoding has finished.
                         }
                     } catch (final IOException e) {
@@ -1214,6 +1215,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Registers a class with a specific ID for this parser instance.
      * Using fixed IDs ensures compatibility across different JVM instances.
      * Any earlier registration of the same class through another overload is replaced.
+     * The default serializer is used even when the class has a global custom serializer.
      *
      * <p>An ID that Kryo assigns to one of its built-in types may be reused; the built-in type then falls
      * back to a name-based registration. If the ID is one of the primitive slots (0 for {@code int} and
@@ -1686,7 +1688,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
                 if (N.notEmpty(kryoClassIdMap)) {
                     for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
-                        registerKryo(kryo, entry.getKey(), entry.getValue());
+                        // A local ID-only registration requests the default serializer, just like register(Class).
+                        // The current primitive registration may already carry a global custom serializer, so use
+                        // the original captured before global registrations rather than preserving that override.
+                        final Serializer<?> primitiveSerializer = primitiveSerializers.get(entry.getKey());
+                        registerKryo(kryo, entry.getKey(), primitiveSerializer == null ? kryo.getDefaultSerializer(entry.getKey()) : primitiveSerializer,
+                                entry.getValue());
                     }
                 }
 

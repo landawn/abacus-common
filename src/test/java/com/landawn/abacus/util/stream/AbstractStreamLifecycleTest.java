@@ -33,8 +33,6 @@ import com.landawn.abacus.util.Pair;
 /** AbstractStream lifecycle contracts. */
 public class AbstractStreamLifecycleTest extends AbstractStreamTestSupport {
 
-
-
     /**
      * The class javadoc (Stream.java:329-336) promises that a null {@code collector} is "rejected with
      * {@code IllegalArgumentException} naming the parameter" and that "the stream is closed before the
@@ -197,8 +195,6 @@ public class AbstractStreamLifecycleTest extends AbstractStreamTestSupport {
         beanStream.close();
         assertThrows(IllegalStateException.class, () -> beanStream.persistToCsv(writer));
     }
-
-
 
     /**
      * Sibling of {@code EntryStreamTest.testSelectByKeyValue_nullClassIsRejectedAndTheStreamIsClosed}:

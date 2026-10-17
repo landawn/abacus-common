@@ -24,6 +24,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.ShortIterator;
@@ -266,6 +267,8 @@ final class ParallelPrimitiveBuffer {
      * Integral values and floating-point raw bits share storage without wrapper objects. The worker futures and any
      * temporary executor are released when the ring runs out of values, when it reports a worker failure, when starting
      * the workers fails, or when its stream is closed, whichever comes first.
+     * Closing preserves values already published for the consumer. Observing an empty queue after publication stops
+     * releases its backing array; a value cached by {@code hasNext()} remains available to {@code nextLong()}.
      */
     private static final class PrimitiveRing extends LongIteratorEx {
         private final List<LongIterator> iterators;
@@ -396,6 +399,11 @@ final class ParallelPrimitiveBuffer {
                     size--;
                     ready = true;
                     notFull.signal();
+                } else {
+                    // The wait ended with no possible publication. Release the backing storage even when an
+                    // earlier close left published values available for the consumer to drain.
+                    values = N.EMPTY_LONG_ARRAY;
+                    head = 0;
                 }
             } finally {
                 queueLock.unlock();
@@ -439,6 +447,12 @@ final class ParallelPrimitiveBuffer {
             onGoing.setFalse();
             queueLock.lock();
             try {
+                if (size == 0) {
+                    // Preserve buffered values after close, but keep no allocation when the queue is empty.
+                    // Workers can still reach their locked stop check, so use an empty array instead of null.
+                    values = N.EMPTY_LONG_ARRAY;
+                    head = 0;
+                }
                 notEmpty.signalAll();
                 notFull.signalAll();
             } finally {

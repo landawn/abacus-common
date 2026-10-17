@@ -1815,15 +1815,16 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Renders a template argument with {@code N.toString(Object)} while containing failures from the argument's own
-     * {@code toString()}: any exception, and the {@link StackOverflowError} that
-     * {@code N.toString} raises for a self-referential collection or array, is replaced by a marker naming
-     * the argument's class, its identity hash and the failure type. Every other {@link VirtualMachineError}
-     * propagates.
+     * Renders a template argument with {@code N.toString(Object)}. Rendering failures, including
+     * {@link AssertionError} and the {@link StackOverflowError} raised for a self-referential collection
+     * or array, are replaced by a marker naming the argument's class, its identity hash and the failure type.
+     * The exceptions to this rule are {@link ThreadDeath} and {@link VirtualMachineError}s other than
+     * {@code StackOverflowError}, which propagate unchanged.
      *
      * @param arg the argument to render, may be {@code null}
      * @return the rendered argument, or a {@code [FAILED toString() of <class>@<hash>: <error>]} marker
      */
+    @SuppressWarnings("removal")
     private static String toStringSafe(final Object arg) {
         try {
             return N.toString(arg);
@@ -1832,6 +1833,11 @@ public abstract class AbstractLogger implements Logger {
             // the stack has already unwound by the time it is caught here; OutOfMemoryError & co. are not recoverable.
             if (e instanceof VirtualMachineError && !(e instanceof StackOverflowError)) {
                 throw (VirtualMachineError) e;
+            }
+
+            // Thread termination must survive best-effort argument formatting just as it does logger initialization.
+            if (e instanceof ThreadDeath threadDeath) {
+                throw threadDeath;
             }
 
             // Never call arg.toString() again: the class name and identity hash cannot fail.
@@ -1849,8 +1855,10 @@ public abstract class AbstractLogger implements Logger {
      * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
      * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
      * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
-     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
-     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
+     * than placeholders) are left in the output verbatim. Argument rendering failures, including
+     * {@link AssertionError} and {@link StackOverflowError}, produce a {@code [FAILED toString() of ...]}
+     * marker. The exceptions to this rule are {@link ThreadDeath} and {@link VirtualMachineError}s other
+     * than {@code StackOverflowError}, which propagate unchanged.
      * If no placeholder is found, the argument is appended in square brackets.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1862,8 +1870,9 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg the argument to substitute; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg the argument to substitute, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
      * @return the formatted message
      */
     static String format(String template, final Object arg) {
@@ -1907,8 +1916,10 @@ public abstract class AbstractLogger implements Logger {
      * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
      * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
      * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
-     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
-     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
+     * than placeholders) are left in the output verbatim. Argument rendering failures, including
+     * {@link AssertionError} and {@link StackOverflowError}, produce a {@code [FAILED toString() of ...]}
+     * marker. The exceptions to this rule are {@link ThreadDeath} and {@link VirtualMachineError}s other
+     * than {@code StackOverflowError}, which propagate unchanged.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1920,10 +1931,12 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg1 the first argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
-     * @param arg2 the second argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg1 the first argument, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
+     * @param arg2 the second argument, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2) {
@@ -1989,8 +2002,10 @@ public abstract class AbstractLogger implements Logger {
      * conversions ({@code %d}, {@code %n}, {@code %5s}, ...) are not placeholders, and there is no escape
      * sequence ({@code \{}} and {@code %%} are not special); to emit a literal placeholder pass it as an
      * argument, because substituted arguments are never re-scanned. Unmatched placeholders (fewer arguments
-     * than placeholders) are left in the output verbatim; an argument whose {@code toString()} throws is
-     * rendered as a {@code [FAILED toString() of ...]} marker instead of aborting the call.
+     * than placeholders) are left in the output verbatim. Argument rendering failures, including
+     * {@link AssertionError} and {@link StackOverflowError}, produce a {@code [FAILED toString() of ...]}
+     * marker. The exceptions to this rule are {@link ThreadDeath} and {@link VirtualMachineError}s other
+     * than {@code StackOverflowError}, which propagate unchanged.
      * Extra arguments are appended in square brackets if there are fewer placeholders than arguments.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2003,12 +2018,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template, may be {@code null} (converted to {@code "null"})
-     * @param arg1 the first argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
-     * @param arg2 the second argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
-     * @param arg3 the third argument; converted with {@code N.toString(Object)} (a {@code toString()} that throws is rendered as a
-     *     {@code [FAILED toString() of ...]} marker), may be {@code null}
+     * @param arg1 the first argument, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
+     * @param arg2 the second argument, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
+     * @param arg3 the third argument, may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
      * @return the formatted message
      */
     static String format(String template, final Object arg1, final Object arg2, final Object arg3) {
@@ -2093,6 +2111,10 @@ public abstract class AbstractLogger implements Logger {
      * are plain text), there is no escape sequence, and substituted arguments are never re-scanned for
      * placeholders. An empty or {@code null} {@code arguments} array leaves the template unchanged.</p>
      *
+     * <p>Argument rendering failures, including {@link AssertionError} and {@link StackOverflowError},
+     * produce a {@code [FAILED toString() of ...]} marker. The exceptions to this rule are {@link ThreadDeath}
+     * and {@link VirtualMachineError}s other than {@code StackOverflowError}, which propagate unchanged.</p>
+     *
      * <p><b>Note:</b> calls with one, two or three individual arguments bind to the fixed-arity
      * {@code format} overloads. This overload accepts zero or four or more individual arguments,
      * or an explicit {@code Object[]} of any length.</p>
@@ -2106,9 +2128,9 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template containing 0 or more {@code {}} or {@code %s} placeholders, may be {@code null} (converted to "null")
-     * @param arguments the arguments to be substituted into the message template. Arguments
-     *     are converted to strings using {@code N.toString(Object)}; an argument whose {@code toString()} throws is
-     *     rendered as a {@code [FAILED toString() of ...]} marker. Arguments can be {@code null}.
+     * @param arguments the arguments to substitute, which may be {@code null}; rendered with {@code N.toString(Object)}.
+     *     Rendering failures produce a {@code [FAILED toString() of ...]} marker except {@link ThreadDeath}
+     *     and {@link VirtualMachineError}s other than {@link StackOverflowError}, which propagate unchanged
      * @return the formatted message
      */
     static String format(String template, final Object... arguments) {

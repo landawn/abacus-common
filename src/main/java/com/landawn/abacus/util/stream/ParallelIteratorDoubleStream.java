@@ -721,11 +721,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                 private double next;
                 private boolean exhausted;
                 private Iterator<? extends Double> cur = null;
-                private Collection<? extends Double> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextDouble();
@@ -736,11 +736,17 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends Double> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1210,11 +1216,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                 private double next;
                 private boolean exhausted;
                 private Iterator<? extends T> cur = null;
-                private Collection<? extends T> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextDouble();
@@ -1225,11 +1231,17 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends T> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override

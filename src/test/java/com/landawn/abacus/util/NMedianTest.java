@@ -49,8 +49,6 @@ public class NMedianTest extends NTestSupport {
 
     // median
 
-
-
     // G057-01: double/float overloads - bitwise identical to the sorted-copy answer for NaN (any payload), -0.0/0.0, infinities, overflow
     @Test
     public void testMedian_doubleAndFloatLargeArraysMatchSortedCopy() {
@@ -109,8 +107,6 @@ public class NMedianTest extends NTestSupport {
         }
     }
 
-
-
     // G057-01: median/lowerMedian/kthLargest(int[]) select instead of sorting a copy - results must equal the sorted-copy answer
     @Test
     public void testMedian_intLargeArraysMatchSortedCopy() {
@@ -153,8 +149,6 @@ public class NMedianTest extends NTestSupport {
             assertEquals(sortedAll[all.length - k], N.kthLargest(all, k));
         }
     }
-
-
 
     // G057-01: long overloads - exactLongMean of the two middle values, extremes included
     @Test
@@ -706,8 +700,6 @@ public class NMedianTest extends NTestSupport {
         assertEquals(Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(actual));
     }
 
-
-
     // A median of two NaNs is computed by arithmetic, whose NaN bit pattern the JIT may pick from either operand: only NaN-ness is stable.
     private static void g057AssertMedian(final double expected, final double actual) {
         if (Double.isNaN(expected)) {
@@ -716,8 +708,6 @@ public class NMedianTest extends NTestSupport {
             g057AssertSameBits(expected, actual);
         }
     }
-
-
 
     // The sort path (min(k, len - k + 1) > 64) must return the very NaN a sort puts there; the heap path (unchanged) only an equal value.
     private static void g057AssertKth(final double expected, final double actual, final int k, final int len) {
@@ -735,7 +725,6 @@ public class NMedianTest extends NTestSupport {
             assertEquals(0, Float.compare(expected, actual));
         }
     }
-
 
     // ---- perf review 2026-09-26 G057 end ----
 }

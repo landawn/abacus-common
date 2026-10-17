@@ -602,5 +602,4 @@ public class DatasetGetTest extends DatasetTestSupport {
         assertEquals((short) 100, ds.getShort("num"));
     }
 
-
 }

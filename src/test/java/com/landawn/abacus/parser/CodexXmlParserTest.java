@@ -450,8 +450,7 @@ public class CodexXmlParserTest extends TestBase {
             assertDoesNotThrow(() -> map.put("extra", null), xml);
             map.remove("extra");
         } else {
-            final Collection<Object> collection = kind == KeyKind.SET ? assertInstanceOf(Set.class, value, xml)
-                    : assertInstanceOf(List.class, value, xml);
+            final Collection<Object> collection = kind == KeyKind.SET ? assertInstanceOf(Set.class, value, xml) : assertInstanceOf(List.class, value, xml);
             final Object marker = new Object();
             assertDoesNotThrow(() -> collection.add(marker), xml);
             collection.remove(marker);

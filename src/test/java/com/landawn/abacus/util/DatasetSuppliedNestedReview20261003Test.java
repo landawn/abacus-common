@@ -33,11 +33,13 @@ class DatasetSuppliedNestedReview20261003Test extends TestBase {
                 case MAP_RANGE_FACTORY -> data.<Integer, T, Map<Integer, T>> toMap(0, data.size(), "id", columns, rows, n -> new LinkedHashMap<>()).get(1);
                 case MULTI -> data.<Integer, T> toMultimap("id", columns, rows).get(1).get(0);
                 case MULTI_RANGE -> data.<Integer, T> toMultimap(0, data.size(), "id", columns, rows).get(1).get(0);
-                case MULTI_FACTORY -> data.<Integer, T, List<T>, ListMultimap<Integer, T>> toMultimap("id", columns, rows, n -> CommonUtil.newLinkedListMultimap())
+                case MULTI_FACTORY -> data
+                        .<Integer, T, List<T>, ListMultimap<Integer, T>> toMultimap("id", columns, rows, n -> CommonUtil.newLinkedListMultimap())
                         .get(1)
                         .get(0);
                 case MULTI_RANGE_FACTORY -> data
-                        .<Integer, T, List<T>, ListMultimap<Integer, T>> toMultimap(0, data.size(), "id", columns, rows, n -> CommonUtil.newLinkedListMultimap())
+                        .<Integer, T, List<T>, ListMultimap<Integer, T>> toMultimap(0, data.size(), "id", columns, rows,
+                                n -> CommonUtil.newLinkedListMultimap())
                         .get(1)
                         .get(0);
             };

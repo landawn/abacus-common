@@ -26,8 +26,6 @@ public class StringsSplitTest extends StringsTestSupport {
         assertEquals("'delimiter' cannot be null or empty", e.getMessage());
     }
 
-
-
     /** Validate the delimiter before max, including when the source would otherwise return early. */
     @Test
     public void testDelimiterIsValidatedBeforeMax() {
@@ -88,8 +86,6 @@ public class StringsSplitTest extends StringsTestSupport {
             }
         }
     }
-
-
 
     // C-017: the simplified post-loop of the multi-char splitWorker keeps its results
     @Test
@@ -438,8 +434,6 @@ public class StringsSplitTest extends StringsTestSupport {
         assertArrayEquals(new String[] { "a", "b" }, Strings.split("a::b::", "::"));
     }
 
-
-
     // C-018: the char/max overloads of splitPreserveAllTokens behave exactly like the one-char String overloads
     @Test
     public void testC018_splitPreserveAllTokensCharMaxMatchesStringForm() {
@@ -483,8 +477,6 @@ public class StringsSplitTest extends StringsTestSupport {
     }
 
     // splitToLines
-
-
 
     // C-019 / C-020: the documented trailing-terminator and trailing-delimiter rules
     @Test
@@ -555,8 +547,6 @@ public class StringsSplitTest extends StringsTestSupport {
         // mixed terminators
         assertArrayEquals(new String[] { "a", "b", "c", "d" }, Strings.splitToLines("a\u0085b\u2028c\u000Cd"));
     }
-
-
 
     /** A valid max still short-circuits on a null/empty input exactly as documented. */
     @Test

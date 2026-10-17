@@ -634,8 +634,6 @@ public class StreamReductionTest extends StreamTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).maxWait((Duration) null, defaultSupplier));
     }
 
-
-
     // TODO: Remaining Stream$5/Stream$6 gaps are anonymous iterator branches for async windowing/merge internals that require deterministic scheduler control beyond the current unit-test harness.
     @Test
     public void testMaxWaitRejectsZeroDuration() {

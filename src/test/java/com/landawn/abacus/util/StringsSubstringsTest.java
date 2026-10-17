@@ -24,8 +24,6 @@ import com.landawn.abacus.util.Strings.DelimiterMatchMode;
 /** Strings substrings contracts, including regression cases. */
 public class StringsSubstringsTest extends StringsTestSupport {
 
-
-
     /**
      * Verbatim copy of the r9620 nested engine of
      * {@link Strings#substringIndicesBetween(String, int, int, String, String, DelimiterMatchMode, int)} (before C-431),
@@ -180,8 +178,6 @@ public class StringsSubstringsTest extends StringsTestSupport {
         }
     }
 
-
-
     // J-1 : DelimiterMatchMode.OUTERMOST_ONLY on unbalanced input
     @Test
     public void testOutermostOnly_unclosedBeginDelimiterSuppressesNothing() {
@@ -267,8 +263,6 @@ public class StringsSubstringsTest extends StringsTestSupport {
 
         assertTrue(checks > 0);
     }
-
-
 
     // C-431: the nested-mode engine no longer rescans the tail after every end delimiter; results are unchanged
     @Test

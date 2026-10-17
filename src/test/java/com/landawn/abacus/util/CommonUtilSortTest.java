@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 
 public class CommonUtilSortTest extends CommonUtilTestSupport {
 
-
-
     /**
      * {@code parallelSort} of a {@code CopyOnWriteArrayList} must not depend on its size.
      *
@@ -35,8 +33,6 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
             assertEquals(ascending(1, n), new ArrayList<>(cow));
         }
     }
-
-
 
     /**
      * A partial-range {@code parallelSort} always reaches the array write-back, whatever the core count.
@@ -187,8 +183,6 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         assertEquals(Arrays.asList("a", "pie", "apple"), byDouble);
     }
 
-
-
     /**
      * A partial-range sort of a {@code CopyOnWriteArrayList} must not throw.
      *
@@ -207,8 +201,6 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         CommonUtil.sort(partial, 1, 4, Comparator.<Integer> naturalOrder());
         assertEquals(Arrays.asList(5, 2, 3, 4, 1), new ArrayList<>(partial));
     }
-
-
 
     /** The non-{@code RandomAccess} write-back branch must still sort a partial range correctly. */
     @Test
@@ -264,8 +256,6 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
         CommonUtil.sort(byLength, 1, 4, Comparator.comparing(String::length));
         assertArrayEquals(new String[] { "e", "b", "cc", "aaa", "d" }, byLength);
     }
-
-
 
     /**
      * The two overloads that delegate to {@code sort(List, int, int, Comparator)} inherit the fix.

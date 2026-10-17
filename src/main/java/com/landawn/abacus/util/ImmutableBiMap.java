@@ -81,8 +81,11 @@ import com.landawn.abacus.annotation.Internal;
 @SuppressWarnings("java:S2160")
 public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
 
-    @SuppressWarnings("rawtypes")
-    private static final ImmutableBiMap EMPTY = new ImmutableBiMap(new BiMap<>(), true);
+    // Backed by the same insertion-ordered BiMap as of(...)/builder(): a default (HashMap-backed) BiMap makes the
+    // keySet()/values()/entrySet() spliterators drop ORDERED, so Stream.concat with an of(...) view becomes
+    // unordered. Same fix as ImmutableList.EMPTY, ImmutableSet.EMPTY and ImmutableMap.EMPTY.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static final ImmutableBiMap EMPTY = new ImmutableBiMap(orderedBiMap(0), true);
 
     /**
      * The backing {@link BiMap}, kept unwrapped so that the reverse lookups ({@link #getByValue(Object)},

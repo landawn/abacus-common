@@ -357,6 +357,14 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * and rethrown on each subsequent traversal attempt; a recursive-access failure is kept even if the
      * supplier catches it. These failures do not occur when this factory creates the deferred iterator.</p>
      *
+     * <p>If the supplier catches a recursive-access failure and returns a different iterator, that rejected iterator is
+     * released and closed once if it implements {@link IteratorEx} or {@link AutoCloseable}. The cached failure is published
+     * before cleanup, and cleanup runs outside the initialization lock, so cleanup callbacks can access the failed deferred
+     * iterator. Other callers may observe the cached failure while cleanup is still running. A cleanup failure is suppressed
+     * on the cached initialization failure, except that {@link ThreadDeath} and {@link VirtualMachineError} propagate from
+     * the initializing call with the initialization failure suppressed on them. Subsequent traversal attempts still throw
+     * the original cached initialization failure.</p>
+     *
      * @param <T> the type of elements
      * @param iteratorSupplier the supplier that provides the iterator
      * @return a deferred ObjIteratorEx
@@ -441,9 +449,13 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
              * @throws IllegalStateException if the iterator supplier returned {@code null} or this iterator, or accessed this
              *         iterator during initialization
              * @throws RuntimeException if the supplier throws during initialization; the cached failure is rethrown
-             * @throws Error if the supplier throws an error during initialization; the cached failure is rethrown
+             * @throws Error if initialization cached an error, or closing a rejected iterator throws {@link ThreadDeath}
+             *         or {@link VirtualMachineError}
              */
+            @SuppressWarnings("removal")
             private void init() throws IllegalStateException, RuntimeException, Error {
+                Iterator<? extends T> rejected = null;
+
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
@@ -477,9 +489,40 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                                 }
                             } finally {
                                 supplierHolder.setValue(null);
+
+                                if (initializationFailure != null) {
+                                    // Detach ownership before publishing failure. Only this initializing call closes
+                                    // the rejected resource; reentrant or concurrent calls must not close it again.
+                                    rejected = iter;
+                                    iter = null;
+                                    iterEx = null;
+                                }
+
                                 isInitializing = false;
                                 isInitialized = true;
                             }
+                        }
+                    }
+                }
+
+                if (rejected != null && rejected != this) {
+                    // A close callback may wait for another thread to access this iterator. Publish the failed state
+                    // and release the initialization lock first, so that access can finish without waiting for cleanup.
+                    try {
+                        ObjIteratorEx.closeResource(rejected);
+                    } catch (final ThreadDeath | VirtualMachineError closeFailure) {
+                        // A rejected iterator exists only after the recursive-access IllegalStateException,
+                        // so this fatal error is never the cached failure itself.
+                        try {
+                            closeFailure.addSuppressed(initializationFailure);
+                        } catch (final Throwable ignored) { //NOSONAR
+                            // Recording context must not replace the fatal error, even if it runs out of memory.
+                        }
+
+                        throw closeFailure;
+                    } catch (final Throwable closeFailure) {
+                        if (closeFailure != initializationFailure) {
+                            initializationFailure.addSuppressed(closeFailure);
                         }
                     }
                 }

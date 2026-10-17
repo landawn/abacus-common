@@ -313,7 +313,7 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * @param typeClass the ImmutableSet class
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "ImmutableSet&lt;String&gt;" or "com.landawn.abacus.util.ImmutableSet&lt;java.lang.String&gt;")
+     * @return the formatted type name (e.g., "ImmutableSet&lt;String&gt;" or "com.landawn.abacus.util.ImmutableSet&lt;String&gt;")
      * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)

@@ -55,8 +55,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals("123", result);
     }
 
-
-
     // G124-01 neighbours (unchanged): ordinary array targets.
     @Test
     public void testConvert_arrayTargetsWithElementType_unchanged() {
@@ -100,8 +98,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals(Integer.valueOf(65), CommonUtil.convert('A', Integer.class));
     }
 
-
-
     // G124-01: Bytes as the element/value type of a container (each element went through the null element-type check)
     @Test
     public void testConvert_bytesHandlerAsContainerElementType() {
@@ -115,8 +111,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         final Map<String, byte[]> map = CommonUtil.convert(Map.of("k", "AQID"), TypeFactory.<Map<String, byte[]>> getType("Map<String, Bytes>"));
         assertArrayEquals(new byte[] { 1, 2, 3 }, map.get("k"));
     }
-
-
 
     // G124-01: a container source is converted element by element to the array's component class, the same as for byte[].
     @Test
@@ -132,8 +126,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
             }
         }
     }
-
-
 
     // G124-01: handlers with a byte[] javaType but no element type (Bytes, Base64Encoded) threw NullPointerException from the
     // container-constraint check: a byte[] is returned as is and text is Base64-decoded.
@@ -175,8 +167,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         }
     }
 
-
-
     /** Same contract for a {@code char}/{@code Character} target, which also drains the source. */
     @Test
     public void testConvert_ClosesReaderForCharacterTarget() {
@@ -188,8 +178,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals(Character.valueOf('x'), CommonUtil.convert(stream, Character.class));
         assertTrue(stream.closed);
     }
-
-
 
     /**
      * A stream source drained by a numeric conversion must be closed, exactly as for a {@code String} target.
@@ -209,8 +197,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
             assertTrue(reader.closed, "source drained by a " + target.getSimpleName() + " conversion must be closed");
         }
     }
-
-
 
     /**
      * A conversion failure must still close a drained source, and must surface as the conversion error rather
@@ -286,8 +272,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertArrayEquals(new String[] { "x", "y" }, array);
     }
 
-
-
     // integral values at the exact edges of the long range take the char range check; just outside it the textual path
     @Test
     public void testConvert_integralNumberAtLongRangeEdgesToChar() {
@@ -314,8 +298,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals('\uffff', (char) CommonUtil.convert(65535.0, char.class));
     }
 
-
-
     // G027-01: an integral value that fits a long is range-checked (IAE), not parsed as text (NumberFormatException)
     @Test
     public void testConvert_integralNumberFittingLongOutOfCharRange() {
@@ -329,8 +311,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertThrows(NumberFormatException.class, () -> CommonUtil.convert(new BigDecimal(Long.MIN_VALUE).subtract(BigDecimal.ONE), char.class));
         assertEquals('A', (char) CommonUtil.convert(new BigDecimal("65"), char.class));
     }
-
-
 
     // JSON<T[]>/XML<T[]> with a PARAMETERIZED component convert each element with T's own parameters, exactly like the plain T[]
     // type: the erased component class (List) kept "1" as a String, which failed with ClassCastException when read as Integer.
@@ -361,8 +341,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertSame(rawLists, CommonUtil.convert(rawLists, TypeFactory.<Object[]> getType("JSON<List[]>")));
     }
 
-
-
     // G124-01: JSON<T[]>/XML<T[]> also have an array javaType and no element type: an instance is returned as is, a container
     // source is converted element by element and text goes through the handler (each threw NullPointerException).
     @Test
@@ -378,8 +356,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertArrayEquals(new String[] { "1", "b" }, CommonUtil.convert(new Object[] { 1, "b" }, TypeFactory.<String[]> getType("JSON<String[]>")));
         assertArrayEquals(new String[] { "1", "2" }, CommonUtil.convert(List.of(1, 2), TypeFactory.<String[]> getType("XML<String[]>")));
     }
-
-
 
     // G116-01: the Immutable* stand-in path wraps the Long too (the reason an earlier version of this fix was rolled back)
     @Test
@@ -401,8 +377,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
 
     }
 
-
-
     // G116-01: pins - Long targets the fall-through does not wrap keep their previous results
     @Test
     public void testConvert_longToNonWrapTargetsUnchanged() {
@@ -420,8 +394,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> CommonUtil.convert(5L, Map.class));
     }
 
-
-
     // G116-01: a Long converted to an Object[]/Number[] target is wrapped as is
     @Test
     public void testConvert_longToObjectArrayWrapsLongElement() {
@@ -433,8 +405,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals(Number[].class, numbers.getClass());
         assertEquals(Long.valueOf(0L), numbers[0]);
     }
-
-
 
     // G116-01: a Long converted to a raw List/Collection is wrapped as is (it was re-parsed from "5" into an Integer element)
     @Test
@@ -453,8 +423,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals(Arrays.asList(5L), CommonUtil.convert(5L, Type.<List<Number>> of("List<Number>")));
     }
 
-
-
     // G116-01: a target of exactly Set is a LinkedHashSet holding the Long itself (it was a HashSet with an Integer element)
     @Test
     public void testConvert_longToRawSetWrapsLongInLinkedHashSet() {
@@ -468,8 +436,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertEquals(LinkedHashSet.class, objectSet.getClass());
         assertTrue(objectSet.contains(Long.MAX_VALUE));
     }
-
-
 
     // G123-02: a Long reaches the same single-value wrap as an Integer - including a raw ArrayBlockingQueue, which the Long branch
     // used to reject ("No default constructor") - and only the element type differs
@@ -511,8 +477,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertTrue(result instanceof TreeMap);
     }
 
-
-
     /**
      * A {@code Boolean} target READS a text source and then closes it, like the {@code String} and number targets.
      *
@@ -544,8 +508,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         String result = CommonUtil.convert(sb, String.class);
         assertEquals("hello", result);
     }
-
-
 
     // G124-01: text follows the target handler - Bytes Base64-decodes it (it threw NullPointerException), while a byte[] target
     // still parses an array literal (so Base64 text fails there, and "[1, 2]" is not valid Base64 for Bytes)
@@ -1312,8 +1274,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertThrows(SQLException.class, clobForString::length);
     }
 
-
-
     // Fix pass 2026-09-08 (G01)
 
     // G01-24: convert applied its own documented rule only when the SOURCE TYPE was classified as a number. A Number
@@ -1343,8 +1303,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> boxedBoolean.valueOf(Double.valueOf(0.5)));
     }
 
-
-
     /** A {@code Reader} that records whether it was closed, and can report whether anything is left to read. */
     private static final class ClosingProbeReader extends StringReader {
         private boolean closed = false;
@@ -1365,8 +1323,6 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
         }
     }
 
-
-
     /** An {@code InputStream} that records whether it was closed. */
     private static final class ClosingProbeStream extends ByteArrayInputStream {
         private boolean closed = false;
@@ -1383,4 +1339,441 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
     }
 
     // ---- bug review 2026-10-02 external review #3 end ----
+
+    // ---- deep review 2026-10-16 G129 begin ----
+
+    /** Bean fixture whose declared property order differs from both alphabetical and HashMap order. */
+    public static class G129Bean {
+        private String zeta;
+        private int id;
+        private String name;
+        private Date when;
+        private String alpha;
+
+        public String getZeta() {
+            return zeta;
+        }
+
+        public void setZeta(final String zeta) {
+            this.zeta = zeta;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public Date getWhen() {
+            return when;
+        }
+
+        public void setWhen(final Date when) {
+            this.when = when;
+        }
+
+        public String getAlpha() {
+            return alpha;
+        }
+
+        public void setAlpha(final String alpha) {
+            this.alpha = alpha;
+        }
+    }
+
+    /** Bean fixture with no non-null property values. */
+    public static class G129EmptyBean {
+        private String only;
+
+        public String getOnly() {
+            return only;
+        }
+
+        public void setOnly(final String only) {
+            this.only = only;
+        }
+    }
+
+    /** A named user map class, created by its default factory (reflective construction). */
+    public static class G129NamedMap<K, V> extends LinkedHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    private static G129Bean g129Bean() {
+        final G129Bean bean = new G129Bean();
+        bean.setZeta("z");
+        bean.setId(7);
+        bean.setName("n");
+        bean.setWhen(new Date(1000L));
+        bean.setAlpha("a");
+        return bean;
+    }
+
+    private static final List<String> G129_PROPERTY_ORDER = List.of("zeta", "id", "name", "when", "alpha");
+
+    // G129-01: an Immutable* map target used to throw IAE "Container factory must create a fresh empty ImmutableMap..."
+    @Test
+    public void testConvert_beanToImmutableMap_usesStandIn() {
+        final G129Bean bean = g129Bean();
+
+        final ImmutableMap<String, Object> byClass = CommonUtil.convert(bean, ImmutableMap.class);
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(byClass.keySet()));
+        assertSame(bean.getWhen(), byClass.get("when"));
+        assertEquals(7, byClass.get("id"));
+
+        final ImmutableMap<String, Object> byType = CommonUtil.convert(bean, new TypeReference<ImmutableMap<String, Object>>() {
+        }.type());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(byType.keySet()));
+        assertSame(bean.getWhen(), byType.get("when"));
+        assertThrows(UnsupportedOperationException.class, () -> byType.put("x", 1));
+
+        final ImmutableSortedMap<String, Object> sorted = CommonUtil.convert(bean, new TypeReference<ImmutableSortedMap<String, Object>>() {
+        }.type());
+        assertEquals(List.of("alpha", "id", "name", "when", "zeta"), new ArrayList<>(sorted.keySet()));
+        assertNull(sorted.comparator());
+
+        final ImmutableNavigableMap<String, Object> navigable = CommonUtil.convert(bean, ImmutableNavigableMap.class);
+        assertEquals(List.of("alpha", "id", "name", "when", "zeta"), new ArrayList<>(navigable.keySet()));
+
+        // nested in a container conversion, and through Maps.getAs
+        final List<ImmutableMap<String, Object>> list = CommonUtil.convert(List.of(bean), new TypeReference<List<ImmutableMap<String, Object>>>() {
+        }.type());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(list.get(0).keySet()));
+        assertEquals(byType, Maps.getAs(Map.of("k", (Object) bean), "k", new TypeReference<ImmutableMap<String, Object>>() {
+        }.type()).orElseThrow());
+
+        assertTrue(CommonUtil.convert(new G129EmptyBean(), ImmutableMap.class).isEmpty());
+    }
+
+    // G129-01: an exact Map target is a LinkedHashMap in the bean's property order (was a HashMap / HashMap order).
+    @Test
+    public void testConvert_beanToExactMap_keepsPropertyOrder() {
+        final G129Bean bean = g129Bean();
+
+        final Map<String, Object> byClass = CommonUtil.convert(bean, Map.class);
+        assertEquals(LinkedHashMap.class, byClass.getClass());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(byClass.keySet()));
+        assertSame(bean.getWhen(), byClass.get("when"));
+
+        final Map<String, Object> byType = CommonUtil.convert(bean, new TypeReference<Map<String, Object>>() {
+        }.type());
+        assertEquals(LinkedHashMap.class, byType.getClass());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(byType.keySet()));
+
+        final Map<Object, Object> objectKeys = CommonUtil.convert(bean, new TypeReference<Map<Object, Object>>() {
+        }.type());
+        assertEquals(LinkedHashMap.class, objectKeys.getClass());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(objectKeys.keySet()));
+    }
+
+    // G129-01: ImmutableBiMap used to be built by the type-handler text fallback, which changed the value types
+    // (Date -> Integer) and failed for a bean without non-null properties; it now wraps a BiMap like a Map source does.
+    @Test
+    public void testConvert_beanToImmutableBiMap_keepsValues() {
+        final G129Bean bean = g129Bean();
+
+        final ImmutableBiMap<String, Object> biMap = CommonUtil.convert(bean, ImmutableBiMap.class);
+        assertSame(bean.getWhen(), biMap.get("when"));
+        assertEquals(Integer.valueOf(7), biMap.get("id"));
+        assertEquals("zeta", biMap.getByValue("z"));
+        assertTrue(CommonUtil.convert(new G129EmptyBean(), new TypeReference<ImmutableBiMap<String, Object>>() {
+        }.type()).isEmpty());
+
+        // duplicate values are still rejected, as for a BiMap target
+        final G129Bean duplicate = new G129Bean();
+        duplicate.setZeta("same");
+        duplicate.setAlpha("same");
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(duplicate, ImmutableBiMap.class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(duplicate, BiMap.class));
+    }
+
+    // G129-01: a raw EnumMap target reports the missing enum key type (as a Map source does), not a factory problem.
+    @Test
+    public void testConvert_beanToRawEnumMap_reportsMissingKeyType() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(g129Bean(), java.util.EnumMap.class));
+        assertTrue(e.getMessage().startsWith("EnumMap requires an enum key type"), e.getMessage());
+    }
+
+    // G129-01 neighbours (unchanged): factory-created and sorted map targets of a bean source.
+    @Test
+    public void testConvert_beanToOtherMapTargets_unchanged() {
+        final G129Bean bean = g129Bean();
+
+        assertEquals(HashMap.class, CommonUtil.convert(bean, HashMap.class).getClass());
+        assertEquals(HashMap.class, CommonUtil.convert(bean, new TypeReference<HashMap<String, Object>>() {
+        }.type()).getClass());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(CommonUtil.convert(bean, LinkedHashMap.class).keySet()));
+
+        final Map<String, Object> tree = CommonUtil.convert(bean, TreeMap.class);
+        assertEquals(TreeMap.class, tree.getClass());
+        assertEquals(List.of("alpha", "id", "name", "when", "zeta"), new ArrayList<>(tree.keySet()));
+        assertEquals(TreeMap.class, CommonUtil.convert(bean, java.util.SortedMap.class).getClass());
+        assertEquals(java.util.concurrent.ConcurrentHashMap.class, CommonUtil.convert(bean, java.util.concurrent.ConcurrentHashMap.class).getClass());
+
+        final BiMap<String, Object> biMap = CommonUtil.convert(bean, BiMap.class);
+        assertSame(bean.getWhen(), biMap.get("when"));
+
+        // a named user map class still uses its factory (registered factories: ScalarContainerFactoryReview20261003Test)
+        final G129NamedMap<String, Object> named = CommonUtil.convert(bean, G129NamedMap.class);
+        assertEquals(G129NamedMap.class, named.getClass());
+        assertEquals(G129_PROPERTY_ORDER, new ArrayList<>(named.keySet()));
+
+        // a non-Object value type still goes through the type handler
+        final Map<String, String> strings = CommonUtil.convert(bean, new TypeReference<Map<String, String>>() {
+        }.type());
+        assertEquals("7", strings.get("id"));
+        assertEquals("1000", strings.get("when"));
+
+        // anonymous container classes stay rejected
+        final Class<?> anonymous = new HashMap<String, Object>() {
+            private static final long serialVersionUID = 1L;
+        }.getClass();
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(bean, anonymous));
+    }
+
+    // ---- deep review 2026-10-16 G129 end ----
+
+    // ---- deep review 2026-10-16 verify G134 begin ----
+
+    /** Record fixture: its component order is the property order. */
+    public static record G134Record(String zeta, int id, String alpha) {
+    }
+
+    /** Fixture whose properties are read through the getters. */
+    @com.landawn.abacus.annotation.AccessFieldByMethod
+    public static class G134ByMethodBean {
+        private String name;
+        private int count;
+
+        public String getName() {
+            return name == null ? null : "get:" + name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(final int count) {
+            this.count = count;
+        }
+    }
+
+    /** Superclass fixture: its property comes before the subclass's. */
+    public static class G134ParentBean {
+        private String zp;
+
+        public String getZp() {
+            return zp;
+        }
+
+        public void setZp(final String zp) {
+            this.zp = zp;
+        }
+    }
+
+    /** Subclass fixture. */
+    public static class G134ChildBean extends G134ParentBean {
+        private String ac;
+
+        public String getAc() {
+            return ac;
+        }
+
+        public void setAc(final String ac) {
+            this.ac = ac;
+        }
+    }
+
+    private static G134ChildBean g134Child() {
+        final G134ChildBean bean = new G134ChildBean();
+        bean.setZp("p");
+        bean.setAc("c");
+        return bean;
+    }
+
+    // G129-01: records, getter-accessed and inherited properties keep the bean's property order in a Map/ImmutableMap target.
+    @Test
+    public void testConvert_otherBeanKindsToMap_keepPropertyOrder() {
+        final Map<String, Object> record = CommonUtil.convert(new G134Record("z", 7, "a"), Map.class);
+        assertEquals(LinkedHashMap.class, record.getClass());
+        assertEquals(List.of("zeta", "id", "alpha"), new ArrayList<>(record.keySet()));
+        assertEquals(7, record.get("id"));
+        final ImmutableMap<String, Object> immutableRecord = CommonUtil.convert(new G134Record("z", 7, "a"), ImmutableMap.class);
+        assertEquals(List.of("zeta", "id", "alpha"), new ArrayList<>(immutableRecord.keySet()));
+
+        final G134ByMethodBean byMethod = new G134ByMethodBean();
+        byMethod.setName("n");
+        byMethod.setCount(2);
+        final ImmutableMap<String, Object> viaGetters = CommonUtil.convert(byMethod, ImmutableMap.class);
+        assertEquals(List.of("name", "count"), new ArrayList<>(viaGetters.keySet()));
+        assertEquals("get:n", viaGetters.get("name"));
+
+        final Map<String, Object> inherited = CommonUtil.convert(g134Child(), new TypeReference<Map<String, Object>>() {
+        }.type());
+        assertEquals(LinkedHashMap.class, inherited.getClass());
+        assertEquals(List.of("zp", "ac"), new ArrayList<>(inherited.keySet()));
+    }
+
+    // G129-01: beans nested in a container conversion get the same Map/ImmutableMap destinations as a root bean.
+    @Test
+    public void testConvert_beansInsideContainers_useMapStandIns() {
+        final Map<String, ImmutableMap<String, Object>> byKey = CommonUtil.convert(Map.of("k", g134Child()),
+                new TypeReference<Map<String, ImmutableMap<String, Object>>>() {
+                }.type());
+        assertTrue(byKey.get("k") instanceof ImmutableMap);
+        assertEquals(List.of("zp", "ac"), new ArrayList<>(byKey.get("k").keySet()));
+
+        @SuppressWarnings("rawtypes")
+        final List<Map> rawMaps = CommonUtil.convert(List.of(g134Child()), new TypeReference<List<Map>>() {
+        }.type());
+        assertEquals(LinkedHashMap.class, rawMaps.get(0).getClass());
+        assertEquals(List.of("zp", "ac"), new ArrayList<>(rawMaps.get(0).keySet()));
+
+        final Map<?, ?>[] array = CommonUtil.convert(List.of(g134Child()), Map[].class);
+        assertEquals(LinkedHashMap.class, array[0].getClass());
+        assertEquals(List.of("zp", "ac"), new ArrayList<>(array[0].keySet()));
+    }
+
+    // G129-01: when reading the bean into the stand-in fails, the existing parser fallback still applies (as for a factory map).
+    @Test
+    public void testConvert_beanToImmutableMap_failedReadUsesParserFallback() {
+        final testfixtures.ScalarContainerFactoryReview20261003Fixtures.RetryBean bean = new testfixtures.ScalarContainerFactoryReview20261003Fixtures.RetryBean();
+        final ImmutableMap<String, Object> result = CommonUtil.convert(bean, ImmutableMap.class);
+        assertEquals(Map.of("value", 1), result);
+        assertEquals(2, bean.calls());
+
+        final testfixtures.ScalarContainerFactoryReview20261003Fixtures.RetryBean biBean = new testfixtures.ScalarContainerFactoryReview20261003Fixtures.RetryBean();
+        assertEquals(Map.of("value", 1), CommonUtil.convert(biBean, ImmutableBiMap.class));
+        assertEquals(2, biBean.calls());
+    }
+
+    // ---- deep review 2026-10-16 verify G134 end ----
+
+    // ---- deep review 2026-10-16 G154 begin ----
+
+    /** Fixture with a java transient field, an @Transient field and a property left null. */
+    public static class G154TransientBean {
+        private String zeta;
+        private transient String temp;
+        @com.landawn.abacus.annotation.Transient
+        private String marked;
+        private String unset;
+        private String alpha;
+
+        public String getZeta() {
+            return zeta;
+        }
+
+        public void setZeta(final String zeta) {
+            this.zeta = zeta;
+        }
+
+        public String getTemp() {
+            return temp;
+        }
+
+        public void setTemp(final String temp) {
+            this.temp = temp;
+        }
+
+        public String getMarked() {
+            return marked;
+        }
+
+        public void setMarked(final String marked) {
+            this.marked = marked;
+        }
+
+        public String getUnset() {
+            return unset;
+        }
+
+        public void setUnset(final String unset) {
+            this.unset = unset;
+        }
+
+        public String getAlpha() {
+            return alpha;
+        }
+
+        public void setAlpha(final String alpha) {
+            this.alpha = alpha;
+        }
+    }
+
+    private static G154TransientBean g154TransientBean() {
+        final G154TransientBean bean = new G154TransientBean();
+        bean.setZeta("z");
+        bean.setTemp("t");
+        bean.setMarked("m");
+        bean.setAlpha("a");
+        return bean;
+    }
+
+    // G154 (verifies G129-01): the stand-in destinations hold exactly the entries Beans.beanToMap(bean) produces (null
+    // properties left out, transient ones kept), in property order for Map/ImmutableMap; r89 threw for ImmutableMap and
+    // dropped the transient properties for ImmutableBiMap (type-handler text fallback).
+    @Test
+    public void testConvert_beanWithTransientAndNullPropertiesToStandInMaps() {
+        final G154TransientBean bean = g154TransientBean();
+        final List<Map.Entry<String, Object>> expected = new ArrayList<>(Beans.beanToMap(bean).entrySet());
+        assertEquals(List.of("zeta", "temp", "marked", "alpha"), expected.stream().map(Map.Entry::getKey).toList());
+
+        final Map<String, Object> exactMap = CommonUtil.convert(bean, Map.class);
+        assertEquals(expected, new ArrayList<>(exactMap.entrySet()));
+        final ImmutableMap<String, Object> immutableMap = CommonUtil.convert(bean, ImmutableMap.class);
+        assertEquals(expected, new ArrayList<>(immutableMap.entrySet()));
+        final ImmutableSortedMap<String, Object> sortedMap = CommonUtil.convert(bean, ImmutableSortedMap.class);
+        assertEquals(List.of("alpha", "marked", "temp", "zeta"), new ArrayList<>(sortedMap.keySet()));
+
+        final ImmutableBiMap<String, Object> biMap = CommonUtil.convert(bean, ImmutableBiMap.class);
+        assertEquals(Beans.beanToMap(bean), biMap);
+        assertEquals("temp", biMap.getByValue("t"));
+
+        // an all-null bean gives an empty sorted map too
+        final ImmutableSortedMap<String, Object> emptySorted = CommonUtil.convert(new G154TransientBean(), ImmutableSortedMap.class);
+        assertTrue(emptySorted.isEmpty());
+    }
+
+    // G154 neighbours (unchanged): the other sorted/concurrent JDK map targets still use their registered factories.
+    @Test
+    public void testConvert_beanToSortedAndConcurrentMapTargets_unchanged() {
+        final G154TransientBean bean = g154TransientBean();
+        final Map<String, Object> expected = Beans.beanToMap(bean);
+
+        final Map<String, Object> navigable = CommonUtil.convert(bean, java.util.NavigableMap.class);
+        assertEquals(TreeMap.class, navigable.getClass());
+        assertEquals(List.of("alpha", "marked", "temp", "zeta"), new ArrayList<>(navigable.keySet()));
+
+        final Map<String, Object> concurrent = CommonUtil.convert(bean, java.util.concurrent.ConcurrentMap.class);
+        assertEquals(java.util.concurrent.ConcurrentHashMap.class, concurrent.getClass());
+        assertEquals(expected, concurrent);
+
+        final Map<String, Object> skipList = CommonUtil.convert(bean, java.util.concurrent.ConcurrentNavigableMap.class);
+        assertEquals(java.util.concurrent.ConcurrentSkipListMap.class, skipList.getClass());
+        assertEquals(List.of("alpha", "marked", "temp", "zeta"), new ArrayList<>(skipList.keySet()));
+
+        final Map<String, Object> sortedByType = CommonUtil.convert(bean, new TypeReference<java.util.SortedMap<String, Object>>() {
+        }.type());
+        assertEquals(TreeMap.class, sortedByType.getClass());
+        assertEquals(expected, sortedByType);
+
+        assertNull(CommonUtil.convert(null, ImmutableMap.class));
+    }
+
+    // ---- deep review 2026-10-16 G154 end ----
 }

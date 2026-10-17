@@ -194,5 +194,4 @@ public class SheetCopyTest extends SheetTestSupport {
         assertFalse(copy.containsColumn("C3"));
     }
 
-
 }

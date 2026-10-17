@@ -745,8 +745,9 @@ public class AbstractFloatStreamTest extends TestBase {
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final FloatIteratorEx byNext = (source == 0 ? FloatStream.of(backing, from, from + len)
-                                : FloatStream.of(FloatIterator.of(copy))).rotated(distance).iteratorEx();
+                        final FloatIteratorEx byNext = (source == 0 ? FloatStream.of(backing, from, from + len) : FloatStream.of(FloatIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextFloat(), msg + ", k=" + k + ", j=" + j);
@@ -755,8 +756,9 @@ public class AbstractFloatStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final FloatIteratorEx byAdvance = (source == 0 ? FloatStream.of(backing, from, from + len)
-                                : FloatStream.of(FloatIterator.of(copy))).rotated(distance).iteratorEx();
+                        final FloatIteratorEx byAdvance = (source == 0 ? FloatStream.of(backing, from, from + len) : FloatStream.of(FloatIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);
                     }

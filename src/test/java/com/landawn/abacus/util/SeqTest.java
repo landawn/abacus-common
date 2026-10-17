@@ -376,8 +376,6 @@ public class SeqTest extends SeqTestSupport {
 
     // defer
 
-
-
     // G143: a self-returning supplier fails with IllegalStateException instead of recursing; a null supplier result is still an
     // empty sequence. G149: the failure is final - iterating on after it does not invoke the supplier again (a second terminal
     // operation only fails because the first one closed the sequence).
@@ -411,8 +409,6 @@ public class SeqTest extends SeqTestSupport {
 
         org.junit.jupiter.api.Assertions.assertEquals(0, Seq.<Object, RuntimeException> defer(() -> null).count());
     }
-
-
 
     // G142: Seq.defer fails with IllegalStateException when the supplier returns the deferred sequence itself (it flat-mapped
     // into itself until StackOverflowError), as Stream.defer does; an ordinary supplier is unaffected.
@@ -642,8 +638,6 @@ public class SeqTest extends SeqTestSupport {
 
     // groupTo
 
-
-
     // G071-01: groupTo(.., downstream, mapFactory) finished the groups with entry.setValue, which a map with
     // immutable entry views (ConcurrentSkipListMap) rejects; Stream.groupTo accepts the same map.
     @Test
@@ -661,8 +655,6 @@ public class SeqTest extends SeqTestSupport {
                 .groupTo(String::length, Collectors.counting(), () -> ImmutableMap.<Integer, Long> empty());
         assertTrue(empty.isEmpty());
     }
-
-
 
     // groupTo(.., downstream, mapFactory): a failing finisher still propagates its own exception through the replaceAll
     // pass (HashMap and ConcurrentSkipListMap), and a null finisher result is kept by a HashMap.
@@ -682,8 +674,6 @@ public class SeqTest extends SeqTestSupport {
         assertEquals(2, nulls.size());
         assertTrue(nulls.containsKey(1) && nulls.get(1) == null && nulls.containsKey(2) && nulls.get(2) == null);
     }
-
-
 
     // G069-03: groupTo(keyMapper, valueMapper, mapFactory) does a single get() for a known key - pins the map protocol.
     @Test
@@ -928,8 +918,6 @@ public class SeqTest extends SeqTestSupport {
             assertFalse(iterator.hasNext());
         }
     }
-
-
 
     // G112-04: mapMulti buffers the emitted elements in an ArrayList read through a cursor - pins nulls, laziness, order, a consumer
     // used after the mapper returned, and a mapper that fails after emitting
@@ -1176,8 +1164,6 @@ public class SeqTest extends SeqTestSupport {
         }
     }
 
-
-
     // G069-01: skipLast buffers in an ArrayDeque with a null sentinel - pins nulls, buffer growth past 16 and manual iteration.
     @Test
     public void testSkipLast_nullsGrowthAndManualIteration() throws Exception {
@@ -1205,8 +1191,6 @@ public class SeqTest extends SeqTestSupport {
         assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of(null, null, null).skipLast(1).toList());
         assertEquals(2, Seq.<String, Exception> of(null, "x", null, "y").skipLast(2).count());
     }
-
-
 
     // G112-03: sliding(..) keeps its overlap in an ArrayDeque with a null sentinel - pins window contents with nulls, gaps, skip and count
     @Test
@@ -1324,8 +1308,6 @@ public class SeqTest extends SeqTestSupport {
         assertTrue(Seq.of(1, 2).takeLast(0).toList().isEmpty());
         assertEquals(Arrays.asList(1, 2), Seq.of(1, 2).takeLast(3).toList());
     }
-
-
 
     // G069-02: takeLast keeps a ring buffer and rotates it into order - pins wrap-around at every offset, growth, nulls, count/skip.
     @Test
@@ -1465,8 +1447,6 @@ public class SeqTest extends SeqTestSupport {
 
         return list;
     }
-
-
 
     // Reference windows for sliding(windowSize, increment): window i covers [i * increment, i * increment + windowSize) clipped to the
     // source; it is emitted only if it contains at least one element the previous window did not contain.

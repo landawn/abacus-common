@@ -1179,8 +1179,6 @@ public class IntListTest extends IntListTestSupport {
         }
     }
 
-
-
     // G115-01: every PrimitiveList random(..) factory (now ThreadLocalRandom-backed) called from several threads at once.
     @Test
     public void testRandom_primitiveListFactoriesConcurrentCallers() throws Exception {
@@ -1252,8 +1250,6 @@ public class IntListTest extends IntListTestSupport {
 
         assertTrue(errors.isEmpty(), errors::toString);
     }
-
-
 
     // G115-01: validation is unchanged - bad arguments still fail before any value is drawn.
     @Test

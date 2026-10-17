@@ -171,8 +171,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, stream.toArray());
     }
 
-
-
     // G097-05: bulk paths after partial consumption (skip inside a segment, at a segment end, beyond the end)
     @Test
     public void testConcatListOfArrays_bulkOpsAfterSkip() {
@@ -194,8 +192,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 2, 3, 4, 5, 6 }, iter.toArray());
         assertFalse(iter.hasNext());
     }
-
-
 
     // G097-05: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
     @Test
@@ -229,8 +225,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertFalse(result2 == b);
         assertEquals(100, IntStream.concat(b, a).toArray()[0]);
     }
-
-
 
     // G097-05: concat(List<int[]>) bulk toArray()/toIntList()/count(); pins null/empty segments and fresh results.
     @Test
@@ -289,8 +283,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         int[] result = IntStream.concatIterators(iters).toArray();
         assertArrayEquals(new int[] { 10, 20, 30 }, result);
     }
-
-
 
     // concatIterators(Collection) - collection of IntIterators
     @Test
@@ -568,8 +560,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 5, 7, 9 }, zipped.toArray());
     }
 
-
-
     // zip(int[], int[], int[], int, int, int, IntTernaryOperator) - array ternary with defaults
     @Test
     public void testZip_ThreeArrays_WithDefaults() {
@@ -589,8 +579,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 12, 15, 18 }, result);
     }
 
-
-
     // zip(IntIterator, IntIterator, IntIterator, int, int, int, IntTernaryOperator) - iterator ternary with defaults
     @Test
     public void testZip_ThreeIterators_WithDefaults() {
@@ -607,16 +595,12 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[0], result);
     }
 
-
-
     // zip(IntStream, IntStream, IntStream, IntTernaryOperator) - three-stream zip
     @Test
     public void testZip_ThreeStreams_TernaryOp() {
         int[] result = IntStream.zip(IntStream.of(1, 2, 3), IntStream.of(10, 20, 30), IntStream.of(100, 200, 300), (a, b, c) -> a + b + c).toArray();
         assertArrayEquals(new int[] { 111, 222, 333 }, result);
     }
-
-
 
     // zip(IntStream, IntStream, IntStream, int, int, int, IntTernaryOperator) - three-stream with defaults
     @Test
@@ -631,8 +615,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 9, 12 }, result);
     }
 
-
-
     // zip(IntIterator, IntIterator, int, int, IntBinaryOperator) - iterator binary with defaults
     @Test
     public void testZip_TwoIterators_WithDefaults() {
@@ -641,8 +623,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         int[] result = IntStream.zip(a, b, 0, 99, (x, y) -> x + y).toArray();
         assertArrayEquals(new int[] { 11, 22, 102 }, result);
     }
-
-
 
     // zip(IntStream, IntStream, IntBinaryOperator) - stream-based binary zip
     @Test
@@ -662,8 +642,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         int[] result = IntStream.zip(IntStream.of(1, 2, 3), IntStream.of(10), 0, 99, (a, b) -> a + b).toArray();
         assertArrayEquals(new int[] { 11, 101, 102 }, result);
     }
-
-
 
     // zip(IntStream, IntStream, int, int, IntBinaryOperator) - binary zip with defaults
     @Test
@@ -800,8 +778,6 @@ public class IntStreamCombinationTest extends IntStreamTestSupport {
         });
         assertEquals(2, stream.count());
     }
-
-
 
     // Additional coverage tests for 2025
     @Test

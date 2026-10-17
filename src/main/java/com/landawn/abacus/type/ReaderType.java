@@ -670,16 +670,28 @@ public class ReaderType extends AbstractType<Reader> {
             final char[] buf = Objectory.createCharArrayBuffer();
 
             try {
-                int count = 0;
+                int carried = 0;
 
-                while (IOUtil.EOF != (count = IOUtil.read(x, buf, 0, buf.length))) {
+                while (true) {
+                    final int count = IOUtil.read(x, buf, carried, buf.length - carried);
+
                     // IOUtil.read reports 0 when a read and its retry both make no progress; stop, as
                     // readAllToString and appendTo do, instead of looping forever on such a Reader.
-                    if (count == 0) {
+                    if (count <= 0) {
+                        if (carried > 0) {
+                            Utils.writeStringContent(writer, buf, 0, carried, config == null ? 0 : config.getStringQuotation());
+                        }
                         break;
                     }
 
-                    Utils.writeStringContent(writer, buf, 0, count, config == null ? 0 : config.getStringQuotation());
+                    final int available = carried + count;
+                    // A pair crossing the buffer boundary must reach the writer together; otherwise each half is escaped.
+                    carried = Character.isHighSurrogate(buf[available - 1]) ? 1 : 0;
+                    Utils.writeStringContent(writer, buf, 0, available - carried, config == null ? 0 : config.getStringQuotation());
+
+                    if (carried > 0) {
+                        buf[0] = buf[available - 1];
+                    }
                 }
             } finally {
                 Objectory.recycle(buf);

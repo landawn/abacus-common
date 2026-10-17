@@ -14076,9 +14076,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fnn.<T, E> pp(Fn.equal(a[0])));
             } else {
-                // The former two-element shortcut tested membership with N.equals but counted the matches with
-                // distinct(); the two disagree for array elements (see containsAll(Collection)), so it is gone.
-                return containsAll(N.toSet(a));
+                final Set<T> set = N.toSet(a);
+                return anyMatch(value -> set.remove(value) && set.isEmpty());
             }
         } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
             closeAfterFailure(t);
@@ -14122,19 +14121,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
                 return anyMatch(Fnn.<T, E> pp(Fn.equal(val)));
             } else {
-                // Membership and "have I seen them all yet" must use ONE equality rule. Filtering with the
-                // membership set's equals/hashCode and then counting with distinct() - which normalises an ARRAY
-                // element through Wrapper, i.e. by content - disagreed for array elements, so a sequence that did
-                // contain every requested element answered false. Consuming a private copy of the membership set
-                // applies that set's own equality on both sides, matches containsAny(Collection), and
-                // short-circuits as soon as nothing is left to find.
-                final Set<T> remaining = N.newHashSet(c);
-
-                return anyMatch(t -> {
-                    remaining.remove(t);
-
-                    return remaining.isEmpty();
-                });
+                final Set<T> set = N.newHashSet(c);
+                return anyMatch(value -> set.remove(value) && set.isEmpty());
             }
         } catch (final Throwable t) { // NOSONAR: precise rethrow; close now so that a failing close handler is suppressed into t
             closeAfterFailure(t);

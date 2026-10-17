@@ -250,8 +250,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         assertTrue(newDir.exists());
     }
 
-
-
     /**
      * C-031: {@code close(AutoCloseable, Consumer)} was the only member of the close family that let an
      * {@code InterruptedException} pass to the handler without restoring the thread's interrupt status.
@@ -315,8 +313,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         assertEquals("hello", IOUtil.readAllToString(gzip));
     }
 
-
-
     // G044-01: the bulk comparison must answer, and read both streams, exactly as the per-position loop did.
     @Test
     public void testContentEqualsInputStream_matchesPerPositionReferenceIncludingReadPattern() throws IOException {
@@ -345,8 +341,6 @@ public class IOUtilTest extends IOUtilTestSupport {
             }
         }
     }
-
-
 
     // G044-02: the Reader twin of the test above.
     @Test
@@ -388,8 +382,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         }
     }
 
-
-
     /**
      * C-002: {@code File.listFiles()} answers {@code null} on an I/O error, which is not an empty directory.
      * {@code copyDirectory} used to route the listing through {@code listFiles(File)}, whose walk semantics fold
@@ -421,8 +413,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         IOUtil.copyDirectory(realSource.toFile(), destination2);
         assertEquals("payload", IOUtil.readAllToString(new File(destination2, "a.txt")));
     }
-
-
 
     /**
      * C-003: when neither move can replace the destination (the documented Windows case - a reader holds it
@@ -1415,8 +1405,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         assertTrue(dir.exists());
     }
 
-
-
     /**
      * C-001: the deprecated {@code move(File, File, CopyOption...)} javadoc claimed {@code IllegalArgumentException}
      * for a missing source; the code has always thrown {@code FileNotFoundException}, like its two-argument twin
@@ -1486,8 +1474,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         assertThrows(IOException.class, () -> IOUtil.split(missing, 2, tempFolder.toFile()));
         assertThrows(IOException.class, () -> IOUtil.splitBySize(missing, 2, tempFolder.toFile()));
     }
-
-
 
     /**
      * C-033: the {@code String}-taking and size-taking {@code newXxx} factories reject a directory with
@@ -1688,8 +1674,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         reader.close();
     }
 
-
-
     /**
      * C-005: a {@code null} {@code InputStream} used to reach {@code newInputStreamReader}, which reports the
      * internal parameter name {@code 'is'}, and only after the offset/count checks - while the byte readers and
@@ -1774,8 +1758,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         assertTrue(renamedFile.exists());
         assertTrue(!srcFile.exists());
     }
-
-
 
     /**
      * C-004: {@code appendLine}/{@code appendLines} accept a {@code null} charset and resolve it to UTF-8, which
@@ -2431,8 +2413,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         writer.close();
     }
 
-
-
     /**
      * Array writes and appends validate their slice before the destination argument.
      */
@@ -2784,9 +2764,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         }
     }
 
-
-
-
     /**
      * A stream that hands out its bytes in pseudo-random chunk sizes (sometimes 0, sometimes more than one
      * buffer's worth requested) and records how many read calls it served and how many bytes it gave away.
@@ -2824,8 +2801,6 @@ public class IOUtilTest extends IOUtilTestSupport {
             return chunk;
         }
     }
-
-
 
     /**
      * The Reader twin of {@link G044ChunkedInputStream}.
@@ -2867,8 +2842,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         public void close() {
         }
     }
-
-
 
     /**
      * The per-position algorithm contentEquals(InputStream, InputStream) used before G044-01, kept as the oracle.
@@ -2928,8 +2901,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         }
     }
 
-
-
     /**
      * The Reader twin of {@link #g044ReferenceContentEquals(InputStream, InputStream, int)}.
      */
@@ -2988,8 +2959,6 @@ public class IOUtilTest extends IOUtilTestSupport {
         }
     }
 
-
-
     /**
      * The data pairs of the differential tests: lengths around the pooled buffer size, with a difference at the
      * start, the middle, the end, either side of the buffer boundary, a length difference, or none at all.
@@ -3025,6 +2994,259 @@ public class IOUtilTest extends IOUtilTestSupport {
         return pairs;
     }
 
-
     // ---- perf review 2026-09-26 G044 end ----
+
+    // ---- deep review 2026-10-16 G048 begin ----
+
+    private File newCaseSensitiveDirectoryOrSkip(final String name) throws Exception {
+        assumeTrue(IOUtil.IS_OS_WINDOWS, "Files.isSameFile's case-insensitive shortcut is Windows-only");
+        final File directory = tempFolder.resolve(name).toFile();
+        assertTrue(directory.mkdirs());
+        final Process process;
+        try {
+            process = new ProcessBuilder("fsutil", "file", "setCaseSensitiveInfo", directory.getAbsolutePath(), "enable").redirectErrorStream(true).start();
+        } catch (final IOException e) {
+            assumeTrue(false, "fsutil cannot be started: " + e.getMessage());
+            throw e;
+        }
+        process.getInputStream().readAllBytes();
+        assumeTrue(process.waitFor() == 0, "fsutil setCaseSensitiveInfo is not available");
+        return directory;
+    }
+
+    private static java.util.List<String> zipEntryNames(final File zip) throws IOException {
+        final java.util.List<String> names = new java.util.ArrayList<>();
+        try (java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(zip)) {
+            zipFile.stream().forEach(entry -> names.add(entry.getName()));
+        }
+        return names;
+    }
+
+    // G048-01: requireCanonicalPathsNotEquals took two case-sensitive siblings for a hard-link alias (Files.isSameFile shortcut)
+    @Test
+    public void testCopyFileAndMerge_caseSensitiveSiblingsAreDistinctFiles() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g048-copy");
+        final File upper = new File(directory, "Case.txt");
+        final File lower = new File(directory, "case.txt");
+        Files.write(upper.toPath(), "UPPER".getBytes(StandardCharsets.UTF_8));
+        Files.write(lower.toPath(), "lower".getBytes(StandardCharsets.UTF_8));
+        assumeTrue(directory.list().length == 2, "the directory is not case-sensitive");
+
+        IOUtil.copyFile(upper, lower);
+        assertEquals("UPPER", new String(Files.readAllBytes(lower.toPath()), StandardCharsets.UTF_8));
+
+        Files.write(lower.toPath(), "lower".getBytes(StandardCharsets.UTF_8));
+        assertEquals(5, IOUtil.merge(Arrays.asList(upper), lower));
+        assertEquals("UPPER", new String(Files.readAllBytes(lower.toPath()), StandardCharsets.UTF_8));
+        assertEquals("UPPER", new String(Files.readAllBytes(upper.toPath()), StandardCharsets.UTF_8));
+
+        // a real hard link whose name differs only in case is still refused
+        final File link = new File(directory, "CASE.txt");
+        try {
+            Files.createLink(link.toPath(), upper.toPath());
+        } catch (final IOException | UnsupportedOperationException e) {
+            return;
+        }
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(upper, link));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.merge(Arrays.asList(upper), link));
+        assertEquals("UPPER", new String(Files.readAllBytes(upper.toPath()), StandardCharsets.UTF_8));
+    }
+
+    // G048-02: unzip refused an entry whose name differs from the source archive's only in case, in a case-sensitive directory
+    @Test
+    public void testUnzip_entryDifferingOnlyInCaseFromTheSourceArchiveIsExtracted() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g048-unzip");
+        final File source = new File(directory, "a.zip");
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(source))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("A.zip"));
+            zos.write("payload".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+
+        IOUtil.unzip(source, directory);
+
+        assertEquals("payload", new String(Files.readAllBytes(new File(directory, "A.zip").toPath()), StandardCharsets.UTF_8));
+        assertEquals(2, directory.list().length);
+
+        // the source archive's own name is still refused
+        final File selfNamed = new File(directory, "self.zip");
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(selfNamed))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("self.zip"));
+            zos.write("x".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+        assertThrows(IOException.class, () -> IOUtil.unzip(selfNamed, directory));
+    }
+
+    // G048-03: zip left a source file or directory out of the archive when its name matched the archive (or the
+    // directory created for it) ignoring case, in a case-sensitive directory
+    @Test
+    public void testZip_caseSensitiveSiblingsOfTheArchiveAreArchived() throws Exception {
+        final File source = newCaseSensitiveDirectoryOrSkip("g048-zip");
+        Files.write(new File(source, "Out.zip").toPath(), "real source file".getBytes(StandardCharsets.UTF_8));
+        assertTrue(new File(source, "sub").mkdir());
+        Files.write(new File(source, "sub/b.txt").toPath(), "b".getBytes(StandardCharsets.UTF_8));
+
+        final File target = new File(source, "out.zip");
+        IOUtil.zip(source, target);
+        final java.util.List<String> names = zipEntryNames(target);
+        assertTrue(names.contains("g048-zip/Out.zip"), names.toString());
+        assertTrue(names.contains("g048-zip/sub/b.txt"), names.toString());
+        assertFalse(names.contains("g048-zip/out.zip"), names.toString());
+
+        final File target2 = new File(source, "Sub/out2.zip");
+        IOUtil.zip(source, target2);
+        final java.util.List<String> names2 = zipEntryNames(target2);
+        assertTrue(names2.contains("g048-zip/sub/b.txt"), names2.toString());
+        assertFalse(names2.contains("g048-zip/Sub/"), names2.toString());
+    }
+
+    // ---- deep review 2026-10-16 G048 end ----
+
+    // ---- deep review 2026-10-16 verify G120 begin ----
+
+    // G120: two case-sensitive sibling DIRECTORIES (Sub, sub) holding f.txt each are distinct; a hard link spelled through "y/.." is still refused
+    @Test
+    public void testCopyFile_caseSensitiveParentDirectoriesAreDistinct() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g120-parents");
+        final File upperDir = new File(directory, "Sub");
+        final File lowerDir = new File(directory, "sub");
+        assertTrue(upperDir.mkdir());
+        assertTrue(lowerDir.mkdir());
+        assumeTrue(directory.list().length == 2, "the directory is not case-sensitive");
+        final File upper = new File(upperDir, "f.txt");
+        final File lower = new File(lowerDir, "f.txt");
+        Files.write(upper.toPath(), "UPPER".getBytes(StandardCharsets.UTF_8));
+        Files.write(lower.toPath(), "lower".getBytes(StandardCharsets.UTF_8));
+
+        IOUtil.copyFile(upper, lower);
+        assertEquals("UPPER", new String(Files.readAllBytes(lower.toPath()), StandardCharsets.UTF_8));
+
+        final File link = new File(upperDir, "F.txt");
+        try {
+            Files.createLink(link.toPath(), upper.toPath());
+        } catch (final IOException | UnsupportedOperationException e) {
+            return;
+        }
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(upper, new File(upperDir, "y/../F.txt")));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(link, upper));
+        assertEquals("UPPER", new String(Files.readAllBytes(upper.toPath()), StandardCharsets.UTF_8));
+    }
+
+    // G120: in a case-sensitive directory an entry "A.zip" that is a hard link to the source archive "a.zip" is still refused
+    @Test
+    public void testUnzip_caseSensitiveHardLinkToTheSourceArchiveIsRefused() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g120-unzip");
+        final File source = new File(directory, "a.zip");
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(source))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("A.zip"));
+            zos.write("payload".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+        try {
+            Files.createLink(new File(directory, "A.zip").toPath(), source.toPath());
+        } catch (final IOException | UnsupportedOperationException e) {
+            return;
+        }
+        final long length = source.length();
+
+        assertThrows(IOException.class, () -> IOUtil.unzip(source, directory));
+        assertEquals(length, source.length());
+        assertEquals(java.util.Arrays.asList("A.zip"), zipEntryNames(source));
+    }
+
+    // G120: in an ordinary (case-insensitive) directory, a source spelled in another case than the target still leaves
+    // the archive, and the directory created for it, out of the archive (now decided by file identity, not Path.equals)
+    @Test
+    public void testZip_sourceSpelledInAnotherCaseStillExcludesTheArchive() throws Exception {
+        assumeTrue(IOUtil.IS_OS_WINDOWS, "only Windows paths are equal ignoring case");
+        final File source = tempFolder.resolve("g120-ZipSrc").toFile();
+        assertTrue(source.mkdirs());
+        Files.write(new File(source, "f.txt").toPath(), "f".getBytes(StandardCharsets.UTF_8));
+        final File upper = tempFolder.resolve("G120-ZIPSRC").toFile();
+        final File lower = tempFolder.resolve("g120-zipsrc").toFile();
+        assumeTrue(upper.isDirectory() && lower.isDirectory(), "the temp directory is case-sensitive");
+
+        IOUtil.zip(upper, new File(lower, "out.zip"));
+        assertEquals(java.util.Arrays.asList("G120-ZIPSRC/", "G120-ZIPSRC/f.txt"), zipEntryNames(new File(source, "out.zip")));
+
+        // again, now that the archive exists, and spelled "OUT.zip"
+        IOUtil.zip(upper, new File(lower, "OUT.zip"));
+        assertEquals(java.util.Arrays.asList("G120-ZIPSRC/", "G120-ZIPSRC/f.txt"), zipEntryNames(new File(source, "out.zip")));
+
+        IOUtil.zip(upper, new File(lower, "New/o2.zip"));
+        final java.util.List<String> names = zipEntryNames(new File(source, "new/o2.zip"));
+        assertTrue(names.contains("G120-ZIPSRC/out.zip"), names.toString());
+        assertFalse(names.stream().anyMatch(name -> name.toLowerCase().startsWith("g120-zipsrc/new")), names.toString());
+    }
+
+    // ---- deep review 2026-10-16 verify G120 end ----
+
+    // ---- deep review 2026-10-16 G155 begin ----
+
+    // G155-T1: in a case-sensitive directory an existing, DISTINCT file "A.zip" beside the source "a.zip" is an ordinary
+    // extraction target (overwritten by the entry), not the source archive
+    @Test
+    public void testUnzip_existingCaseSensitiveSiblingOfTheSourceArchiveIsOverwritten() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g155-unzip");
+        final File source = new File(directory, "a.zip");
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(source))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("A.zip"));
+            zos.write("payload".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+        final File sibling = new File(directory, "A.zip");
+        Files.write(sibling.toPath(), "old".getBytes(StandardCharsets.UTF_8));
+        assumeTrue(directory.list().length == 2, "the directory is not case-sensitive");
+        final long length = source.length();
+
+        IOUtil.unzip(source, directory);
+
+        assertEquals("payload", new String(Files.readAllBytes(sibling.toPath()), StandardCharsets.UTF_8));
+        assertEquals(length, source.length());
+        assertEquals(java.util.Arrays.asList("A.zip"), zipEntryNames(source));
+    }
+
+    // G155-T2: a case-sensitive sibling "Out.zip" of the archive "out.zip" that shares the archive's creation time passes
+    // the creation-time pre-filter, so the file-identity test decides - and it is a different file: archived
+    @Test
+    public void testZip_caseSensitiveSiblingWithTheArchivesCreationTimeIsArchived() throws Exception {
+        final File source = newCaseSensitiveDirectoryOrSkip("g155-zip");
+        final File sibling = new File(source, "Out.zip");
+        final File target = new File(source, "out.zip");
+        Files.write(sibling.toPath(), "real source file".getBytes(StandardCharsets.UTF_8));
+        Files.write(target.toPath(), "old archive".getBytes(StandardCharsets.UTF_8));
+        assumeTrue(source.list().length == 2, "the directory is not case-sensitive");
+        final java.nio.file.attribute.FileTime creationTime = java.nio.file.attribute.FileTime.fromMillis(1_600_000_000_000L);
+        Files.setAttribute(sibling.toPath(), "basic:creationTime", creationTime);
+        Files.setAttribute(target.toPath(), "basic:creationTime", creationTime);
+
+        IOUtil.zip(source, target);
+
+        final java.nio.file.attribute.BasicFileAttributes targetAttrs = Files.readAttributes(target.toPath(),
+                java.nio.file.attribute.BasicFileAttributes.class);
+        assumeTrue(creationTime.equals(targetAttrs.creationTime()), "writing the archive changed its creation time");
+        assertEquals(java.util.Arrays.asList("g155-zip/", "g155-zip/Out.zip"), zipEntryNames(target));
+    }
+
+    // G155-T3: a hard link "T.zip" to the archive "t.zip" in a case-sensitive directory is still the archive: left out
+    @Test
+    public void testZip_caseSensitiveHardLinkOfTheArchiveIsExcluded() throws Exception {
+        final File source = newCaseSensitiveDirectoryOrSkip("g155-zip-link");
+        final File target = new File(source, "t.zip");
+        Files.write(new File(source, "f.txt").toPath(), "f".getBytes(StandardCharsets.UTF_8));
+        Files.write(target.toPath(), "old archive".getBytes(StandardCharsets.UTF_8));
+        try {
+            Files.createLink(new File(source, "T.zip").toPath(), target.toPath());
+        } catch (final IOException | UnsupportedOperationException e) {
+            return;
+        }
+        assumeTrue(source.list().length == 3, "the directory is not case-sensitive");
+
+        IOUtil.zip(source, target);
+
+        assertEquals(java.util.Arrays.asList("g155-zip-link/", "g155-zip-link/f.txt"), zipEntryNames(target));
+    }
+
+    // ---- deep review 2026-10-16 G155 end ----
 }

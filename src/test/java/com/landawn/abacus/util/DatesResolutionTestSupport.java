@@ -57,7 +57,7 @@ public abstract class DatesResolutionTestSupport extends TestBase {
 
     protected static final long OVERLAP_STANDARD = 1699165800000L;
 
- // 2023-11-05T01:30-05:00[America/New_York]
+    // 2023-11-05T01:30-05:00[America/New_York]
     protected static final long OVERLAP_DAYLIGHT = 1699162200000L;
 
     protected static void assertAmbiguous(final org.junit.jupiter.api.function.Executable call) {

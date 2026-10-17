@@ -141,8 +141,6 @@ public class DifferenceOfTest extends DifferenceTestSupport {
         assertFalse(objects.areEqual());
     }
 
-
-
     // G032-01: boolean occurrence counting without a Multiset - same partition as the Collection overload
     @Test
     public void testOfBooleanList_countingMatchesCollectionOverload() {
@@ -174,8 +172,6 @@ public class DifferenceOfTest extends DifferenceTestSupport {
             assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
         }
     }
-
-
 
     // G032-01: byte occurrence counting indexed by the unsigned value - negative bytes and extremes included
     @Test
@@ -209,8 +205,6 @@ public class DifferenceOfTest extends DifferenceTestSupport {
             assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
         }
     }
-
-
 
     // G032-01: char counting-array path (dense range; left values below/above the right-hand range) and Multiset fallback (sparse range)
     @Test
@@ -298,8 +292,6 @@ public class DifferenceOfTest extends DifferenceTestSupport {
         Difference<DoubleList, DoubleList> doubles = Difference.of(DoubleList.of(1.0, 2.0, 3.0, 2.0), DoubleList.of(2.0, 3.0, 4.0, 3.0));
         assertEquals(DoubleList.of(2.0, 3.0), doubles.common());
     }
-
-
 
     // G032-01: short counting-array path (negative values, extremes, size-widened threshold) and Multiset fallback (sparse range)
     @Test

@@ -1098,7 +1098,8 @@ public final class HttpRequest {
 
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
-     * The bean properties will be encoded as form fields using getter methods.
+     * The bean properties will be encoded as form fields. Property values are read from their fields
+     * (through the getter only for an {@code @AccessFieldByMethod} property or one without a usable field), and {@code null} properties are omitted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2496,7 +2497,9 @@ public final class HttpRequest {
      * {@link CompletableFuture} (normally {@link java.util.concurrent.ForkJoinPool#commonPool()}), so a slow response keeps one
      * of that pool's threads reading for the length of its transfer. The JDK's response stream waits through managed blocking,
      * which lets the common pool add compensating workers instead of starving other tasks. {@code String}, {@code byte[]} and
-     * results without a structured content format are received completely before they are converted.</p>
+     * results without a structured content format are received completely before they are converted.
+     * Note for XML: parsing from the arriving stream stops at the end of the root element and does not reject content after it
+     * (a second root element or trailing text), so such a malformed body is read as its first root element.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2886,6 +2889,8 @@ public final class HttpRequest {
                         responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null));
                 // Parsers can consume a bounded-buffer Reader directly. Explicit text/byte results and
                 // conversions without a known structured format still need the complete value.
+                // XML is streamed too (lower memory) although its Reader parse, unlike the String parse, does not reject
+                // content after the root element (a second root, trailing text): the first root is read.
                 subscriber = !String.class.equals(resultClass) && !byte[].class.equals(resultClass) && format != null && format != ContentFormat.NONE
                         && format != ContentFormat.FORM_URL_ENCODED ? BodySubscribers.mapping(BodySubscribers.ofInputStream(), ParsedBodyInputStream::new)
                                 : BodySubscribers.ofByteArray();
@@ -2990,6 +2995,8 @@ public final class HttpRequest {
                 if (firstByte < 0) {
                     // Empty String and empty Reader parsing differ for XML. Peek after decoding so a
                     // compressed empty body also retains the original String-parser default values.
+                    // (A non-empty XML body is parsed from the stream below, which reads its first root element and does
+                    // not reject content after it.)
                     return convertDecodedBody(N.EMPTY_BYTE_ARRAY, responseContentFormat, responseCharset, resultClass);
                 }
                 input.unread(firstByte);

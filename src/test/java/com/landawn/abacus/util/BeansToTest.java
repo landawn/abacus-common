@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test;
 
 public class BeansToTest extends BeansTestSupport {
 
-
-
     /**
      * Pins the "Key Naming" paragraph of the {@link Beans} class javadoc: the key comes from the matched
      * property's own name with the {@link NamingPolicy} applied, never from the spelling that was passed, and
@@ -178,8 +176,6 @@ public class BeansToTest extends BeansTestSupport {
         assertEquals("", Beans.toSnakeCase(""));
         assertNull(Beans.toSnakeCase((String) null));
     }
-
-
 
     /** Single-property bean for the key-derivation examples in the {@link Beans} class javadoc. */
     public static class KeyNamingBean {

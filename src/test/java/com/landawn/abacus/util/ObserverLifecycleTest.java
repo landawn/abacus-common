@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -33,6 +34,97 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class ObserverLifecycleTest extends TestBase {
+    @Test
+    void countCompletedWindowsStopMappingAtDownstreamLimit() throws Exception {
+        PollQueue<Integer> queue = new PollQueue<>();
+        AtomicInteger mappedWindows = new AtomicInteger();
+        Observer<List<Integer>> observer = Observer.of(queue).buffer(2, 1, TimeUnit.DAYS, 1).map(window -> {
+            if (mappedWindows.incrementAndGet() > 1) {
+                throw new IllegalStateException("Mapped a full window after the downstream limit was reached");
+            }
+            return window;
+        }).limit(1);
+        Signals<List<Integer>> signals = new Signals<>();
+        signals.subscribe(observer);
+
+        try {
+            await(queue.waiting);
+            fire(observer, "startWindow");
+            queue.add(10);
+            signals.normal(observer, List.of(List.of(10)));
+            await(queue.exited);
+            assertEquals(1, mappedWindows.get());
+        } finally {
+            finish(observer);
+        }
+    }
+
+    @Test
+    void completedOverlappingWindowsCanBeMutatedWithoutChangingOtherWindows() throws Exception {
+        PollQueue<Integer> queue = new PollQueue<>();
+        CountDownLatch fullWindows = new CountDownLatch(2);
+        Observer<List<Integer>> observer = Observer.of(queue).buffer(2, 1, TimeUnit.DAYS, 2).map(window -> {
+            window.add(99);
+            fullWindows.countDown();
+            return window;
+        });
+        Signals<List<Integer>> signals = new Signals<>();
+        signals.subscribe(observer);
+
+        try {
+            await(queue.waiting);
+            fire(observer, "startWindow");
+            queue.add(10);
+            queue.add(20);
+            await(fullWindows);
+            fire(observer, "startWindow");
+            queue.add(30);
+            Observer.complete(queue);
+            signals.normal(observer, List.of(List.of(10, 20, 99), List.of(10, 20, 99), List.of(30, 99)));
+        } finally {
+            finish(observer);
+        }
+    }
+
+    @Test
+    void expiredWindowCanBeMutatedWhileAnotherWindowRemainsActive() throws Exception {
+        PollQueue<Integer> queue = new PollQueue<>();
+        CountDownLatch firstItem = new CountDownLatch(1);
+        Observer<List<Integer>> observer = Observer.of(queue).map(value -> {
+            firstItem.countDown();
+            return value;
+        }).buffer(2, 1, TimeUnit.DAYS, 10).map(window -> {
+            window.add(99);
+            return window;
+        });
+        Signals<List<Integer>> signals = new Signals<>();
+        signals.subscribe(observer);
+
+        try {
+            await(queue.waiting);
+            fire(observer, "startWindow");
+            queue.add(10);
+            await(firstItem);
+            final Object buffer = operator(observer, "emitWindow");
+            final Object expired;
+            final List<?> windowTasks;
+            synchronized (observerField(observer, "eventGate")) {
+                expired = ((List<?>) field(buffer, "windows")).get(0);
+                windowTasks = new ArrayList<>(((Map<?, ?>) field(buffer, "windowFutures")).values());
+            }
+            fire(observer, "emitWindow", expired);
+            assertEquals(List.of(List.of(10, 99)), signals.values);
+            // A callback already queued when its future was cancelled must not emit the same window twice.
+            fire(observer, "emitWindow", expired);
+            queue.add(20);
+            Observer.complete(queue);
+            signals.normal(observer, List.of(List.of(10, 99), List.of(10, 20, 99)));
+            assertTrue(windowTasks.stream().allMatch(task -> ((Future<?>) task).isCancelled()));
+        } finally {
+            finish(observer);
+        }
+    }
+
     @Test
     void timedLimitWakesEmptyQueueAndPreservesLaterItems() throws Exception {
         PollQueue<Integer> queue = new PollQueue<>();
@@ -469,7 +561,7 @@ public class ObserverLifecycleTest extends TestBase {
     }
 
     // Fire the scheduled body through the production event gate; no sleeps or scheduler replacement.
-    private static void fire(Observer<?> observer, String methodName) throws Exception {
+    private static void fire(Observer<?> observer, String methodName, Object... arguments) throws Exception {
         Object node = operator(observer, methodName);
         Method callback = java.util.Arrays.stream(node.getClass().getDeclaredMethods()).filter(m -> m.getName().equals(methodName)).findFirst().orElseThrow();
         callback.setAccessible(true);
@@ -484,7 +576,14 @@ public class ObserverLifecycleTest extends TestBase {
                 if (callback.getParameterCount() == 0) {
                     callback.invoke(node);
                 } else {
-                    callback.invoke(node, field(node, "generation"));
+                    final Object argument = arguments.length == 0 ? field(node, "generation") : arguments[0];
+                    if (methodName.equals("emitWindow")) {
+                        final Future<?> future = (Future<?>) ((Map<?, ?>) field(node, "windowFutures")).get(argument);
+                        if (future != null) {
+                            future.cancel(false);
+                        }
+                    }
+                    callback.invoke(node, argument);
                 }
             } catch (InvocationTargetException error) {
                 if (error.getCause() instanceof Error fatal) {

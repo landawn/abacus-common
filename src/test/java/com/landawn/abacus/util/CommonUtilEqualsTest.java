@@ -147,8 +147,6 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertTrue(CommonUtil.equals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
     }
 
-
-
     // G026-01: the primitive range overloads delegate to Arrays.equals(range); pin them against the element-wise
     // Float.compare / Double.compare / == loop on random offsets/lengths, incl. -0.0, NaN payloads and vector tails.
     @Test
@@ -249,8 +247,6 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
             assertEquals(expectedD, CommonUtil.equals(da, fromIndexA, db, fromIndexB, length), ctx);
         }
     }
-
-
 
     // G026-01: one mismatch at any position of a long run is found; 0.0 vs -0.0 differ, NaN payloads compare equal.
     @Test

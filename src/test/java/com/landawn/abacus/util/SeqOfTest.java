@@ -323,8 +323,6 @@ public class SeqOfTest extends SeqTestSupport {
         assertEquals(CommonUtil.asList("b"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).skip(1).limit(1).toList());
     }
 
-
-
     // C-128 (2026-09-24 review, cycle 3): the list iterator is created by the factory, so a structural change made
     // afterwards is handled by that iterator - fail-fast, like Seq.of(list) - instead of being silently dropped.
     @Test
@@ -345,8 +343,6 @@ public class SeqOfTest extends SeqTestSupport {
         cow.add("d");
         assertEquals(CommonUtil.asList("c", "b", "a"), fromCow.toList());
     }
-
-
 
     // G068-01: ofReversed(T[]) walks the array directly; pins traversal, skip/limit/step/count, nulls, lazy element reads and exhaustion.
     @Test

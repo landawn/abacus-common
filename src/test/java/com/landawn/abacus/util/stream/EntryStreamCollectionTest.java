@@ -55,8 +55,6 @@ public class EntryStreamCollectionTest extends EntryStreamTestSupport {
         assertEquals(5, result.size());
     }
 
-
-
     /**
      * {@code EntryStream}'s class javadoc (239-243) promises {@code IllegalArgumentException} naming the
      * parameter, and a closed stream, for a null argument - {@code collect} used to throw a raw NPE.
@@ -246,8 +244,6 @@ public class EntryStreamCollectionTest extends EntryStreamTestSupport {
         assertEquals(Arrays.asList(1, 2), result.get("a"));
         assertEquals(Arrays.asList(3), result.get("b"));
     }
-
-
 
     // Tests for uncovered paths
     @Test

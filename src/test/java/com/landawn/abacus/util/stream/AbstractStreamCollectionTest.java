@@ -83,8 +83,6 @@ public class AbstractStreamCollectionTest extends AbstractStreamTestSupport {
 
     // groupBy
 
-
-
     //
     //
     //
@@ -135,8 +133,6 @@ public class AbstractStreamCollectionTest extends AbstractStreamTestSupport {
         Map<Integer, List<String>> result = Stream.of(1, 2, 3, 4, 5).groupByToEntry(i -> i % 2, String::valueOf).toMap();
         assertEquals(Map.of(0, Arrays.asList("2", "4"), 1, Arrays.asList("1", "3", "5")), result);
     }
-
-
 
     //
     @Test
@@ -414,8 +410,6 @@ public class AbstractStreamCollectionTest extends AbstractStreamTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), lists.get(3));
     }
 
-
-
     // Stream review 2026-09-09 (pass B) - rollup / forEachUntil / splitAt
 
     /**
@@ -441,8 +435,6 @@ public class AbstractStreamCollectionTest extends AbstractStreamTestSupport {
         assertEquals(N.asList("a", "b"), out.get(2));
         assertEquals(N.asList("a", "b", "c"), out.get(3));
     }
-
-
 
     /**
      * The iterator-backed path never touched the caller's array, but every emitted list was still a view over

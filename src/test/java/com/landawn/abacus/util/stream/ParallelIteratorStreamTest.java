@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.landawn.abacus.TestBase;
@@ -435,6 +437,54 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertEquals("First: 1", result.get(0));
         assertEquals("Other: 2", result.get(1));
         assertEquals("Other: 10", result.get(9));
+    }
+
+    @ParameterizedTest(name = "fail in hasNext={0}, fail on close={1}")
+    @CsvSource({ "true, false", "false, false", "true, true", "false, true" })
+    public void testMapFirstOrElseEagerReadFailureClosesSource(final boolean failInHasNext, final boolean failOnClose) {
+        final IllegalStateException failure = new IllegalStateException("source read failed");
+        final IllegalArgumentException closeFailure = new IllegalArgumentException("source close failed");
+        final AtomicInteger hasNextCalls = new AtomicInteger();
+        final AtomicInteger nextCalls = new AtomicInteger();
+        final AtomicInteger closes = new AtomicInteger();
+        final Iterator<Integer> iterator = new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                hasNextCalls.incrementAndGet();
+                if (failInHasNext) {
+                    throw failure;
+                }
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                nextCalls.incrementAndGet();
+                throw failure;
+            }
+        };
+        final Stream<Integer> source = Stream.of(iterator).onClose(() -> {
+            closes.incrementAndGet();
+            if (failOnClose) {
+                throw closeFailure;
+            }
+        });
+        // Force the eager parallel branch even on a single-processor test runner; no worker needs to start.
+        final Stream<Integer> parallel = source.parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(2).build());
+        assertEquals(ParallelIteratorStream.class, parallel.getClass());
+        assertTrue(parallel.isParallel());
+
+        assertSame(failure, assertThrows(IllegalStateException.class, () -> parallel.mapFirstOrElse(value -> value, value -> value)));
+        assertEquals(1, closes.get(), "The eager failure must close the source before any terminal operation or explicit close");
+        assertArrayEquals(failOnClose ? new Throwable[] { closeFailure } : new Throwable[0], failure.getSuppressed());
+        assertThrows(IllegalStateException.class, source::count);
+        assertThrows(IllegalStateException.class, parallel::count);
+        assertEquals(1, hasNextCalls.get());
+        assertEquals(failInHasNext ? 0 : 1, nextCalls.get());
+
+        parallel.close();
+        source.close();
+        assertEquals(1, closes.get(), "Closing the failed stream again must not rerun the close handler");
     }
 
     @Test

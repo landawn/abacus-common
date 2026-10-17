@@ -8177,7 +8177,8 @@ sealed class CommonUtil permits N {
             return Strings.STR_FOR_EMPTY_ARRAY;
         }
 
-        final StringBuilder sb = Objectory.createStringBuilder(calculateBufferSize(toIndex - fromIndex, 32));
+        // Element count cannot predict nested output size. Bound the initial estimate and grow with the rendered text.
+        final StringBuilder sb = Objectory.createStringBuilder(Strings.calculateBufferSize(toIndex - fromIndex, 32, 0, 1, 1));
         // Not pre-sized: this set only ever holds the arrays on the current recursion path (the nesting depth),
         // never one entry per element. Sizing it by the array length made a one-element range over a large array
         // allocate - and zero-fill - a table proportional to the whole array.
@@ -8190,19 +8191,6 @@ sealed class CommonUtil permits N {
         } finally {
             Objectory.recycle(sb);
         }
-    }
-
-    /**
-     * Estimates the initial buffer size needed to render {@code length} elements, each of which is expected to
-     * occupy {@code elementPlusDelimiterLen} characters including its delimiter. The result is clamped to
-     * {@link Integer#MAX_VALUE} instead of overflowing.
-     *
-     * @param length the number of elements to be rendered
-     * @param elementPlusDelimiterLen the expected number of characters per element, including its delimiter; must not be 0
-     * @return the estimated buffer size, or {@link Integer#MAX_VALUE} if the product would overflow
-     */
-    static int calculateBufferSize(final int length, final int elementPlusDelimiterLen) {
-        return length > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : length * elementPlusDelimiterLen;
     }
 
     /**
@@ -11875,15 +11863,18 @@ sealed class CommonUtil permits N {
      *   <li>a target of exactly {@code Map}/{@code Set} is a {@code LinkedHashMap}/{@code LinkedHashSet}, so the source order is kept;</li>
      *   <li>a {@code TreeMap}/{@code SortedMap}/{@code NavigableMap} (or {@code TreeSet}/{@code SortedSet}/{@code NavigableSet}) target,
      *       and likewise an {@code ImmutableSortedMap}/{@code ImmutableNavigableMap} (or {@code ImmutableSortedSet}/{@code ImmutableNavigableSet})
-     *       target, keeps a sorted source's comparator when every key/element already has the target type, and uses natural order
-     *       otherwise.</li>
+     *       target, keeps a sorted source's comparator when every non-null key/element already has the target type and any
+     *       null key/element remains null (the target key/element type's {@link Type#defaultValue() default value} is {@code null}).
+     *       Otherwise, natural order is used.</li>
      * </ul>
      * <p>An {@code AbstractQueue} target is not supported. Converted map-key collisions are rejected according to the target
      * map's equality rules, and an entry the target map rejects (such as a {@code null} key for a {@code TreeMap}) is an
      * {@code IllegalArgumentException}; sets retain their usual duplicate elimination. Source containers are not modified
      * by this traversal, although user converters/factories and resource-backed leaf conversions may have side effects.</p>
      * <p>The fresh, empty destination requirement also applies when wrapping a scalar in a collection or copying a bean
-     * into a map. A factory destination is checked before adding any elements or properties.</p>
+     * into a map, and so do the library-chosen destinations above: a bean converted to {@code Map} or {@code Map<String, Object>}
+     * is a {@code LinkedHashMap} in the bean's property order, and one converted to {@code ImmutableMap<String, Object>} is an
+     * {@code ImmutableMap} of the same entries. A factory destination is checked before adding any elements or properties.</p>
      *
      * <p>A registered converter is invoked once for its root value - unless that value is already an instance of the target
      * class (for a {@code Class} token) or of an unparameterized descriptor's class: an assignable value bypasses registered
@@ -12033,8 +12024,9 @@ sealed class CommonUtil permits N {
      *   <li>a target of exactly {@code Map}/{@code Set} is a {@code LinkedHashMap}/{@code LinkedHashSet}, so the source order is kept;</li>
      *   <li>a {@code TreeMap}/{@code SortedMap}/{@code NavigableMap} (or {@code TreeSet}/{@code SortedSet}/{@code NavigableSet}) target,
      *       and likewise an {@code ImmutableSortedMap}/{@code ImmutableNavigableMap} (or {@code ImmutableSortedSet}/{@code ImmutableNavigableSet})
-     *       target, keeps a sorted source's comparator when every key/element already has the target type, and uses natural order
-     *       otherwise.</li>
+     *       target, keeps a sorted source's comparator when every non-null key/element already has the target type and any
+     *       null key/element remains null (the target key/element type's {@link Type#defaultValue() default value} is {@code null}).
+     *       Otherwise, natural order is used.</li>
      * </ul>
      * <p>An {@code AbstractQueue} target is not supported. Converted map-key collisions are rejected according to the target
      * map's equality rules, and an entry the target map rejects (such as a {@code null} key for a {@code TreeMap}) is an
@@ -12042,7 +12034,9 @@ sealed class CommonUtil permits N {
      * by this traversal, although user converters/factories and resource-backed leaf conversions may have side effects.</p>
      *
      * <p>The fresh, empty destination requirement also applies when wrapping a scalar in a collection or copying a bean
-     * into a map. A factory destination is checked before adding any elements or properties.</p>
+     * into a map, and so do the library-chosen destinations above: a bean converted to {@code Map} or {@code Map<String, Object>}
+     * is a {@code LinkedHashMap} in the bean's property order, and one converted to {@code ImmutableMap<String, Object>} is an
+     * {@code ImmutableMap} of the same entries. A factory destination is checked before adding any elements or properties.</p>
      *
      * <p>A registered converter is invoked once for its root value - unless that value is already an instance of the target
      * class (for a {@code Class} token) or of an unparameterized descriptor's class: an assignable value bypasses registered
@@ -12404,8 +12398,9 @@ sealed class CommonUtil permits N {
      *   <li>Order: a target of exactly {@code Map}/{@code Set} gets a {@code LinkedHashMap}/{@code LinkedHashSet} so the source
      *       order survives; a {@code TreeMap}/{@code SortedMap}/{@code NavigableMap} (or set) target - and the {@code TreeMap}/{@code TreeSet}
      *       stand-in of an {@code ImmutableSortedMap}/{@code ImmutableNavigableMap}/{@code ImmutableSortedSet}/{@code ImmutableNavigableSet}
-     *       target - keeps a sorted source's comparator when every key/element already has the target type - a converted key
-     *       could not be compared by it.</li>
+     *       target - keeps a sorted source's comparator when every non-null key/element already has the target type and any
+     *       null key/element remains null (the target key/element type's {@link Type#defaultValue() default value} is {@code null}).
+     *       Otherwise, natural order is used because converted keys/elements may not be comparable by the source comparator.</li>
      * </ul>
      *
      * @throws IllegalArgumentException if an {@code EnumSet}/{@code EnumMap} target has no enum type argument
@@ -12469,8 +12464,9 @@ sealed class CommonUtil permits N {
     }
 
     /**
-     * The comparator of a sorted source map/set, if every key/element is already an instance of the target key/element class;
-     * otherwise {@code null} (natural order).
+     * The comparator of a sorted source map/set, if every non-null key/element is already an instance of the target
+     * key/element class and any null key/element remains null (the target type's {@link Type#defaultValue() default value}
+     * is {@code null}); otherwise {@code null} (natural order).
      */
     private static Comparator<?> conformingComparator(final Object source, final Type<?> keyType) {
         final Comparator<?> cmp = source instanceof SortedMap<?, ?> sortedMap ? sortedMap.comparator()
@@ -12483,7 +12479,9 @@ sealed class CommonUtil permits N {
         final Class<?> keyClass = keyType.javaType();
 
         for (final Object key : source instanceof SortedMap<?, ?> sortedMap ? sortedMap.keySet() : (SortedSet<?>) source) {
-            if (!keyClass.isInstance(key)) {
+            // A null-aware comparator stays valid when null remains null. Primitive and wrapper defaults
+            // such as Optional.empty() change that value, so those conversions still need natural ordering.
+            if (key == null ? keyType.defaultValue() != null : !keyClass.isInstance(key)) {
                 return null;
             }
         }
@@ -12704,28 +12702,46 @@ sealed class CommonUtil permits N {
         } else if (targetType.isMap()) {
             if (srcType.isBean() && targetType.parameterTypes().get(0).javaType().isAssignableFrom(String.class)
                     && Object.class.equals(targetType.parameterTypes().get(1).javaType())) {
-                Map<String, Object> result = null;
-                try {
-                    result = newMap((Class<Map>) targetType.javaType());
-                } catch (final Exception e) {
-                    // CommonUtil must not create a logger in its own static initializer: {@code LoggerFactory}
-                    // references {@link N}, and {@code N} extends this class, so touching {@code LoggerFactory} from
-                    // {@code CommonUtil.<clinit>} would re-enter this class's initialization and expose half-built statics.
-                    // Nesting the field defers that work to the first actual log call, which only happens on rare failure paths. 
-                    // logger.debug(e, "Failed to convert bean {} to map type {}; falling through to Type.valueOf", ClassUtil.getCanonicalClassName(srcClass), targetType.name());
-                    // ignore.
+                // Same destinations as the container conversions in convertStructure: an Immutable*/EnumMap target (which no
+                // registered factory creates as itself) and an exact Map target (a LinkedHashMap, so the bean's property order is
+                // kept) get the library-chosen stand-in; every other target (null stand-in) still uses its registered factory.
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> standIn = (Map<String, Object>) newConversionStandIn(targetType, srcObj, Beans.getPropNameList(sourceClass).size());
+                Map<String, Object> result = standIn;
+
+                if (standIn == null) {
+                    try {
+                        result = newMap((Class<Map>) targetType.javaType());
+                    } catch (final Exception e) {
+                        // CommonUtil must not create a logger in its own static initializer: {@code LoggerFactory}
+                        // references {@link N}, and {@code N} extends this class, so touching {@code LoggerFactory} from
+                        // {@code CommonUtil.<clinit>} would re-enter this class's initialization and expose half-built statics.
+                        // Nesting the field defers that work to the first actual log call, which only happens on rare failure paths.
+                        // logger.debug(e, "Failed to convert bean {} to map type {}; falling through to Type.valueOf", ClassUtil.getCanonicalClassName(srcClass), targetType.name());
+                        // ignore.
+                    }
                 }
 
                 if (result != null) {
-                    // Invalid destinations must fail before mutation, outside the compatibility fallback catch.
-                    requireFreshConversionContainer(result, targetType, checkedGraphs);
+                    if (standIn != null) {
+                        checkedGraphs.put(result, Boolean.TRUE); // library-created and fresh: only record it
+                    } else {
+                        // Invalid destinations must fail before mutation, outside the compatibility fallback catch.
+                        requireFreshConversionContainer(result, targetType, checkedGraphs);
+                    }
+
                     try {
                         Beans.beanToMap(srcObj, result);
-                        // Keep the destination identity reserved, but validate its newly copied property graph during normalization.
-                        checkedGraphs.put(result, null);
-                        return (T) result;
                     } catch (final Exception e) {
                         // Preserve the existing type-handler fallback when reading bean properties fails.
+                        result = null;
+                    }
+
+                    if (result != null) {
+                        // Keep the destination identity reserved, but validate its newly copied property graph during normalization.
+                        checkedGraphs.put(result, null);
+                        // The stand-in never escapes: an Immutable* target wraps it, as in convertStructure.
+                        return (T) (standIn != null ? finishConversionStandIn(result, targetType) : result);
                     }
                 }
             }

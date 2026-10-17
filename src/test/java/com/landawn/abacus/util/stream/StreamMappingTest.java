@@ -33,8 +33,6 @@ import com.landawn.abacus.util.u;
 /** Stream mapping contracts. */
 public class StreamMappingTest extends StreamTestSupport {
 
-
-
     // flatMap
 
     @Test

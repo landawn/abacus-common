@@ -35,6 +35,8 @@ import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonParser;
 import com.landawn.abacus.parser.ParserFactory;
 import com.landawn.abacus.type.EnumType;
+import com.landawn.abacus.type.GuavaMultimapType;
+import com.landawn.abacus.type.GuavaMultisetType;
 import com.landawn.abacus.type.ImmutableMapEntryType;
 import com.landawn.abacus.type.IndexedType;
 import com.landawn.abacus.type.MapEntryType;
@@ -78,6 +80,11 @@ import com.landawn.abacus.util.u.Optional;
  * objects retain their type handler's structured representation and conversion rules. Their nested
  * configuration behavior is the same as direct Abacus parser use. Custom value accessors should be
  * side-effect-free: detecting a custom structured representation can invoke an accessor twice.</p>
+ *
+ * <p>Root Abacus and Guava multimaps use JSON objects whose values are arrays; multisets use
+ * JSON objects whose values are occurrence counts. These representations also apply inside root
+ * Optional/Nullable/Holder wrappers. Reading upper-bounded wildcards retains the bound's declared
+ * generic arguments. Guava remains optional when converting other types.</p>
  *
  * <p><b>Usage Examples in Spring Configuration:</b></p>
  * <pre>{@code
@@ -407,6 +414,12 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @throws ParsingException if the request does not contain exactly one JSON value compatible with the target type
      */
     private Object readJson(final com.landawn.abacus.type.Type<?> targetType, final Reader reader) throws UncheckedIOException, ParsingException {
+        // Upper-bounded handlers delegate conversion but hide the concrete handler class used to select JSON shape.
+        // Read through the bound while retaining all of its declared element types (including inside Optional).
+        if (targetType.name().startsWith("? extends ")) {
+            return readJson(TypeFactory.getType(targetType.name().substring(10)), reader);
+        }
+
         try {
             final PushbackReader input = new PushbackReader(reader);
             int first;
@@ -492,7 +505,9 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
                 // took the scalar path and emitted the container's JSON as a quoted, escaped *string*
                 // ("{\"x\": 2}" instead of {"x": 2}), while the reader rejected a well-formed object body
                 // with "Expected one JSON scalar value". Multimap covers ListMultimap/SetMultimap.
-                || Multiset.class.isAssignableFrom(type.javaType()) || Multimap.class.isAssignableFrom(type.javaType());
+                || Multiset.class.isAssignableFrom(type.javaType()) || Multimap.class.isAssignableFrom(type.javaType())
+                // Guava handlers use the same object-shaped representation without advertising isMap/isCollection.
+                || type instanceof GuavaMultimapType<?, ?, ?> || type instanceof GuavaMultisetType<?, ?>;
     }
 
     private static boolean isCustomValueType(final com.landawn.abacus.type.Type<?> type) {

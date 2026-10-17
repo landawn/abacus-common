@@ -27,8 +27,6 @@ public class IntStreamLifecycleTest extends IntStreamTestSupport {
         assertThrows(IllegalStateException.class, () -> stream.count());
     }
 
-
-
     // G097-05: the list is still read at terminal-operation time; close handlers run once
     @Test
     public void testConcatListOfArrays_lazyReadAndCloseHandler() {
@@ -132,8 +130,6 @@ public class IntStreamLifecycleTest extends IntStreamTestSupport {
     public void testRangeClosed_EmptyWhenStartGreaterThanEnd() {
         assertEquals(0, IntStream.rangeClosed(5, 3).count());
     }
-
-
 
     // rangeClosed(int, int) with multiple elements uses IteratorIntStream path
     @Test

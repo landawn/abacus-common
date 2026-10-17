@@ -19,8 +19,6 @@ import com.landawn.abacus.util.function.TriPredicate;
 
 public class SheetUpdateTest extends SheetTestSupport {
 
-
-
     /**
      * A frozen Sheet cannot honour any mutator, whatever its arguments are, so {@code checkFrozen()} runs
      * before argument validation in every one of them. This is the order the whole class had before the
@@ -286,6 +284,5 @@ public class SheetUpdateTest extends SheetTestSupport {
             sheet.updateRow("row1", v -> v);
         });
     }
-
 
 }

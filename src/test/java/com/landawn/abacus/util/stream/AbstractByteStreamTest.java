@@ -2035,8 +2035,9 @@ public class AbstractByteStreamTest extends TestBase {
 
                     // next() for every element, then partial consumption followed by toArray() / advance() followed by toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final ByteIteratorEx byNext = (source == 0 ? ByteStream.of(backing, from, from + len)
-                                : ByteStream.of(ByteIterator.of(copy))).rotated(distance).iteratorEx();
+                        final ByteIteratorEx byNext = (source == 0 ? ByteStream.of(backing, from, from + len) : ByteStream.of(ByteIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextByte(), msg + ", k=" + k + ", j=" + j);
@@ -2045,8 +2046,9 @@ public class AbstractByteStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         org.junit.jupiter.api.Assertions.assertFalse(byNext.hasNext(), msg);
 
-                        final ByteIteratorEx byAdvance = (source == 0 ? ByteStream.of(backing, from, from + len)
-                                : ByteStream.of(ByteIterator.of(copy))).rotated(distance).iteratorEx();
+                        final ByteIteratorEx byAdvance = (source == 0 ? ByteStream.of(backing, from, from + len) : ByteStream.of(ByteIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);
                     }

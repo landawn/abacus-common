@@ -80,6 +80,17 @@ import com.landawn.abacus.util.stream.Stream;
  * ({@link #copy()}, {@link #toMap()}, {@link #toMap(IntFunction)}) also reject a non-empty result or one
  * already in use, with {@link IllegalArgumentException}, because filling it would corrupt either the copy or this Multimap.</p>
  *
+ * <p><b>WARNING - value collections must not be shared:</b> every key must map to its own value collection.
+ * Two keys must never map to the same collection instance, nor to views of one collection (for example
+ * {@code subList}, {@code Collections.unmodifiableList(list)} or {@code Arrays.asList} over the same array).
+ * This class does not detect or support such sharing, which can only arise through a {@code wrap} factory
+ * ({@link ListMultimap#wrap(Map)}, {@link SetMultimap#wrap(Map)} and their {@code Supplier} overloads, including
+ * later changes to the wrapped map) or through a value supplier that breaks the contract above, for example
+ * {@code () -> sharedList}. With shared collections, a change made through one key is visible under every key
+ * sharing the collection; when a removal empties it, only the key being processed is removed, so the other keys
+ * stay mapped to an empty collection; and a bulk removal may throw {@link UnsupportedOperationException} when it
+ * reaches an unmodifiable view of a collection that another key already emptied.</p>
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Flexible Value Storage:</b> Supports any Collection type for storing values</li>

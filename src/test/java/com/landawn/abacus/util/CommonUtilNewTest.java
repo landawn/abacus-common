@@ -171,8 +171,6 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
         assertEquals(2, fromCollRows.size());
     }
 
-
-
     // G027-02: the same-class fast path still reports an unsupported row that follows bean rows
     @Test
     public void testNewDataset_beanRowsThenUnsupportedRowStillThrows() {
@@ -223,8 +221,6 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
         assertNull(padded.get(2, padded.getColumnIndex("City")));
         assertEquals("Charlie", padded.get(2, padded.getColumnIndex("Name")));
     }
-
-
 
     // G027-02: bean metadata is resolved once per run of same-class rows; mixed classes, maps, nulls and missing columns keep their values
     @Test
@@ -511,8 +507,6 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
         assertEquals(0, CommonUtil.newHashMap(0).size());
         assertEquals(0, CommonUtil.newLinkedHashMap(0).size());
     }
-
-
 
     // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
     // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).

@@ -162,8 +162,6 @@ public class BuilderOfTest extends BuilderTestSupport {
         assertEquals(val, builder.val());
     }
 
-
-
     // PrimitiveList is not a java.util.List, so the instanceof chain in of(Object) has no branch for
     // these - only the creatorMap entries make this work.
     @Test

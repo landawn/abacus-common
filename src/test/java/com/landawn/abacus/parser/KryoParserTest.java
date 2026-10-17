@@ -618,6 +618,62 @@ public class KryoParserTest extends TestBase {
         assertEquals(0, thrown.getSuppressed().length);
     }
 
+    @Test
+    public void testDeserializeStopsDrainingWhenSourceMakesNoProgress() {
+        final byte[] encoded = Strings.base64Decode(parser.serialize("decoded"));
+        final StalledAfterPayloadInput source = new StalledAfterPayloadInput(encoded);
+
+        assertEquals("decoded", parser.deserialize(source, String.class));
+        assertEquals(2, source.zeroReads);
+        assertFalse(source.closed);
+    }
+
+    @Test
+    public void testDeserializePreservesDecodeFailureWhenDrainMakesNoProgress() {
+        final KryoException failure = new KryoException("decode failed");
+        parser.register(TestObject.class, new Serializer<TestObject>() {
+            @Override
+            public void write(final Kryo kryo, final Output output, final TestObject value) {
+                output.writeByte(1);
+            }
+
+            @Override
+            public TestObject read(final Kryo kryo, final Input input, final Class<? extends TestObject> type) {
+                input.readByte();
+                throw failure;
+            }
+        });
+        final StalledAfterPayloadInput source = new StalledAfterPayloadInput(Strings.base64Decode(parser.serialize(new TestObject())));
+
+        assertSame(failure, assertThrows(KryoException.class, () -> parser.deserialize(source, TestObject.class)));
+        assertEquals(2, source.zeroReads);
+        assertFalse(source.closed);
+    }
+
+    private static final class StalledAfterPayloadInput extends ByteArrayInputStream {
+        int zeroReads;
+        boolean closed;
+
+        StalledAfterPayloadInput(final byte[] payload) {
+            super(payload);
+        }
+
+        @Override
+        public synchronized int read(final byte[] bytes, final int offset, final int length) {
+            if (length > 0 && available() == 0) {
+                // Fail deterministically if the parser retries after IOUtil's two-read no-progress signal.
+                assertTrue(++zeroReads <= 2, "Drain continued after two consecutive zero-length reads");
+                return 0;
+            }
+            return super.read(bytes, offset, length);
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+    }
+
     private static void unregisterKryoForTest(final Class<?> type) {
         synchronized (ParserFactory._kryoRegistrationLock) {
             ParserFactory._kryoClassSet.remove(type);

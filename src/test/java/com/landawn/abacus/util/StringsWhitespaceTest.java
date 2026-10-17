@@ -26,49 +26,31 @@ public class StringsWhitespaceTest extends StringsTestSupport {
 
     private static final String CTRL = String.valueOf((char) 0x0001);
 
-
-
- // START OF HEADING (not Java whitespace)
+    // START OF HEADING (not Java whitespace)
     private static final String NEL = String.valueOf((char) 0x0085);
 
-
-
- // NEXT LINE (not Java whitespace)
+    // NEXT LINE (not Java whitespace)
     private static final String NBSP = String.valueOf((char) 0x00A0);
 
-
-
- // NO-BREAK SPACE (isSpaceChar only)
+    // NO-BREAK SPACE (isSpaceChar only)
     private static final String OGHAM = String.valueOf((char) 0x1680);
 
-
-
- // OGHAM SPACE MARK (Java whitespace)
+    // OGHAM SPACE MARK (Java whitespace)
     private static final String EN_QUAD = String.valueOf((char) 0x2000);
 
-
-
- // EN QUAD (Java whitespace)
+    // EN QUAD (Java whitespace)
     private static final String FIGURE_SP = String.valueOf((char) 0x2007);
 
-
-
- // FIGURE SPACE (isSpaceChar only)
+    // FIGURE SPACE (isSpaceChar only)
     private static final String NNBSP = String.valueOf((char) 0x202F);
 
-
-
- // NARROW NO-BREAK SPACE (isSpaceChar only)
+    // NARROW NO-BREAK SPACE (isSpaceChar only)
     private static final String IDEO_SP = String.valueOf((char) 0x3000);
-
-
 
     // U+1F300 CYCLONE and U+1F700 ALCHEMICAL SYMBOL FOR QUINTESSENCE share the low surrogate U+DF00
     private static final String CYCLONE = "\uD83C\uDF00";
 
     private static final String QUINTESSENCE = "\uD83D\uDF00";
-
-
 
     /** Documented semantics: code-unit matching for a surrogate-free stripChars, whole-code-point matching otherwise. */
     private static String referenceStrip(final String str, final String stripChars, final boolean fromStart, final boolean fromEnd) {
@@ -424,8 +406,6 @@ public class StringsWhitespaceTest extends StringsTestSupport {
         assertTrue(Strings.containsWhitespace("abc "));
         assertTrue(Strings.containsWhitespace("a b c"));
     }
-
-
 
     /**
      * The class-level whitespace-predicate index lists {@code containsWhitespace} in the code-unit half and the
@@ -1641,8 +1621,6 @@ public class StringsWhitespaceTest extends StringsTestSupport {
         assertEquals("abc", Strings.trim("  abc  "));
         assertEquals("abc", Strings.trim("abc"));
     }
-
-
 
     /**
      * Regression: {@link Strings#trim(String)} previously short-circuited via

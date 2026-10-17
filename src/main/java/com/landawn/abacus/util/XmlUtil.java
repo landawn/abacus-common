@@ -1686,7 +1686,7 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Element element = doc.getElementById("myElement");
+     * Element element = doc.getDocumentElement();
      * String id = XmlUtil.getAttribute(element, "id");
      * String className = XmlUtil.getAttribute(element, "class");
      * }</pre>
@@ -1718,7 +1718,7 @@ public final class XmlUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Element element = doc.getElementById("myElement");
+     * Element element = doc.getDocumentElement();
      * Map<String, String> attrs = XmlUtil.readAttributes(element);
      * for (Map.Entry<String, String> entry : attrs.entrySet()) {
      *     System.out.println(entry.getKey() + "=" + entry.getValue());
@@ -1966,7 +1966,10 @@ public final class XmlUtil {
             final StringBuilder sb = Objectory.createStringBuilder();
 
             try {
-                for (final char c : textContent.toCharArray()) {
+                // Scan the existing string to avoid copying the entire input when normalization collapses it.
+                for (int i = 0, len = textContent.length(); i < len; i++) {
+                    final char c = textContent.charAt(i);
+
                     switch (c) {
                         case '\t':
                         case '\b':

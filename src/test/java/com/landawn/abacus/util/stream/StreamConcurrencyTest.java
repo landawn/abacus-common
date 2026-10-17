@@ -683,8 +683,6 @@ public class StreamConcurrencyTest extends StreamTestSupport {
         assertEquals(20, collectionSecond.next());
     }
 
-
-
     // parallelZip(Iterable, Iterable, fn, 1) -> delegates to sequential zip (line 24956 -> 24993).
     @Test
     public void testParallelZipIterables_singleThreadFallback_uncovered() {
@@ -692,8 +690,6 @@ public class StreamConcurrencyTest extends StreamTestSupport {
         final List<Integer> b = N.asList(10, 20, 30);
         assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
     }
-
-
 
     // parallelZip(Iterable, Iterable, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25308 -> 25348).
     @Test
@@ -703,8 +699,6 @@ public class StreamConcurrencyTest extends StreamTestSupport {
         assertEquals(N.asList(11, 22, 3), Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 1).toList());
     }
 
-
-
     // parallelZip(Iterator, Iterator, fn, 1) -> sequential zip (line 24993).
     @Test
     public void testParallelZipIterators_singleThreadFallback_uncovered() {
@@ -712,8 +706,6 @@ public class StreamConcurrencyTest extends StreamTestSupport {
         final Iterator<Integer> b = N.asList(10, 20, 30).iterator();
         assertEquals(N.asList(11, 22, 33), Stream.parallelZip(a, b, (x, y) -> x + y, 1).toList());
     }
-
-
 
     // parallelZip(Iterator, Iterator, valueForNoneA, valueForNoneB, fn, 1) -> sequential zip (line 25348).
     @Test

@@ -670,8 +670,6 @@ public class CollectorsTest extends CollectorsTestSupport {
         assertEquals("5:31:Optional[apple]", result);
     }
 
-
-
     // Parallel tests to cover combiner lambdas in MoreCollectors.combine and averaging methods
     @Test
     public void testMoreCollectors_Combine_CollectionWithFinisher_Parallel() {

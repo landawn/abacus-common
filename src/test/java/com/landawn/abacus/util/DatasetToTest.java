@@ -634,5 +634,4 @@ public class DatasetToTest extends DatasetTestSupport {
         assertTrue(xml.contains("<person>"));
     }
 
-
 }

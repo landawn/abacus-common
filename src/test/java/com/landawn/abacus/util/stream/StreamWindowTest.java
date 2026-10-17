@@ -708,8 +708,6 @@ public class StreamWindowTest extends StreamTestSupport {
         assertEquals(Arrays.asList(6, 7), chunks.get(4));
     }
 
-
-
     // splitByChunkCount sizeSmallerFirst=true advance() + count() (lines 17905-17941).
     @Test
     public void testSplitByChunkCount_sizeSmallerFirst_count_uncovered() {

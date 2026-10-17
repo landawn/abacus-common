@@ -98,8 +98,6 @@ public class BeansTest extends BeansTestSupport {
         assertFalse(Beans.getPropValueIfPresent(ordinary, "computed").isPresent());
     }
 
-
-
     // G020-03: the per-call cycle guard starts with a small table; pins deep nesting (past the initial capacity),
     // shared non-cyclic references, cycle detection, and that the guard is reset after a failure.
     @SuppressWarnings("unchecked")
@@ -188,8 +186,6 @@ public class BeansTest extends BeansTestSupport {
         assertFalse(Beans.isRecordClass(int.class));
         assertFalse(Beans.isRecordClass(null));
     }
-
-
 
     // G020-02: isRecordClass's mapping function no longer captures its argument; pins the answers and their caching.
     @Test
@@ -301,8 +297,6 @@ public class BeansTest extends BeansTestSupport {
         assertNull(filled.getName());
     }
 
-
-
     // G020-01: an enum property whose enum declares a getter/setter pair (so isBeanClass accepts it) aborted the
     // random fill with UnsupportedOperationException after earlier properties were written; documented: default value
     @Test
@@ -320,8 +314,6 @@ public class BeansTest extends BeansTestSupport {
         assertNull(existing.getColor());
     }
 
-
-
     // a Number type that can be created from a String but only in a narrow range (MutableByte, MutableShort, a byte-sized
     // user Number) gets a random value - it neither aborts the fill nor is left null - on every run
     @Test
@@ -335,8 +327,6 @@ public class BeansTest extends BeansTestSupport {
             assertNotNull(bean.getBigInteger());
         }
     }
-
-
 
     // G020-01: a nested bean property whose type cannot be instantiated gets its default (like an abstract bean type) instead of
     // aborting newRandomBean/randomize with UnsupportedOperationException after the earlier properties were written.
@@ -366,8 +356,6 @@ public class BeansTest extends BeansTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> Beans.newRandomBean(G020UnbuildableMoney.class));
     }
 
-
-
     // G120 verify of G020-01: next to an uninstantiable nested type (left null), instantiable nested types - a record, a mutable
     // bean with its own nested bean, and a builder-based bean - are still created and filled in the same pass.
     @Test
@@ -382,8 +370,6 @@ public class BeansTest extends BeansTestSupport {
         assertNotNull(holder.getBuiltCity());
         assertNotNull(holder.getBuiltCity().getName());
     }
-
-
 
     // G020-01: a concrete Number without a String factory (LongAdder, a user-defined Number) is an unsupported type and
     // must get its default value, not abort the whole random fill with UnsupportedOperationException.
@@ -507,8 +493,6 @@ public class BeansTest extends BeansTestSupport {
         assertEquals(0, bean.getAge());
     }
 
-
-
     /**
      * Pins the shape {@code randomize(Object)} documents for an e-mail-named property: the local part is the
      * first 12 characters of a canonical (hyphenated) UUID, so it is 8 hex digits, a hyphen and 3 hex digits -
@@ -529,8 +513,6 @@ public class BeansTest extends BeansTestSupport {
             assertTrue(local.matches("[0-9a-f]{8}-[0-9a-f]{3}"), local);
         }
     }
-
-
 
     // G020-01: an enum that isBeanClass accepts through a public mutable field, next to a plain enum; both get the default value.
     @Test
@@ -568,8 +550,6 @@ public class BeansTest extends BeansTestSupport {
         assertNotNull(Beans.getBeanInfo(EntityBean.class));
     }
 
-
-
     // Nested property writes traverse the first collection element and create missing intermediate beans.
     @SuppressWarnings("deprecation")
     @Test
@@ -586,8 +566,6 @@ public class BeansTest extends BeansTestSupport {
         Beans.setPropValue(empty, "addresses.city.name", "Rome");
         assertEquals("Rome", empty.getAddresses().get(0).getCity().getName());
     }
-
-
 
     // G020-01: setPropValue(Object, Method, Object) no longer clones the parameter-type array; pins every branch that read it.
     @Test
@@ -667,8 +645,6 @@ public class BeansTest extends BeansTestSupport {
         assertThrowablePropertyModelExcluded(ExceptionWithProperties.class);
         assertThrowablePropertyModelExcluded(RegisteredException.class);
     }
-
-
 
     // Throwable subclasses stay outside the bean model, even with properties or bean annotations.
     @Test
@@ -1083,8 +1059,6 @@ public class BeansTest extends BeansTestSupport {
     public record NestedAddressRecord(String name, NestedAddress address) {
     }
 
-
-
     // A concrete bean type with a getter/setter pair but no accessible no-arg constructor, builder or all-arguments constructor.
     public static class G020UnbuildableMoney {
         private long cents;
@@ -1201,5 +1175,397 @@ public class BeansTest extends BeansTestSupport {
     }
 
     // ---- bug review 2026-10-02 verify G120 end ----
+
+    // ---- deep review 2026-10-16 G023 begin ----
+
+    /** A static String constant named like a property whose getter/setter work on a differently named field. */
+    public static class G023StaticNamedBean {
+        public static final String NAME = "NAME";
+        private String fullName;
+
+        public String getName() {
+            return fullName;
+        }
+
+        public void setName(final String name) {
+            this.fullName = name;
+        }
+    }
+
+    // G023-01: a static field must never become a property's backing field
+    @Test
+    public void testGetPropNameList_staticFieldDoesNotBackProperty() {
+        assertEquals(List.of("name"), Beans.getPropNameList(G023StaticNamedBean.class));
+        assertTrue(Beans.getPropFields(G023StaticNamedBean.class).isEmpty());
+
+        final G023StaticNamedBean bean = new G023StaticNamedBean();
+        bean.setName("John");
+
+        assertEquals(Map.of("name", "John"), Beans.beanToMap(bean));
+        assertEquals("John", Beans.getPropValue(bean, "name"));
+
+        final G023StaticNamedBean copy = Beans.mapToBean(Map.of("name", "Jane"), G023StaticNamedBean.class);
+        assertEquals("Jane", copy.getName());
+        assertEquals("NAME", G023StaticNamedBean.NAME);
+    }
+
+    /** An XML-binding bean whose no-arg constructor is not accessible to Beans (private, no nestmate access). */
+    public static class G023PrivateCtorXmlBean {
+        private final java.util.List<String> items = new java.util.ArrayList<>();
+        private String name;
+
+        private G023PrivateCtorXmlBean() {
+        }
+
+        public java.util.List<String> getItems() {
+            return items;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    // G023-02: the JAXB getter probe must construct the bean the way BeanInfo does (accessible constructor),
+    // not demote the registration and drop the getter-only collection
+    @Test
+    public void testRegisterXmlBindingClass_inaccessibleConstructorKeepsGetterOnlyCollection() {
+        Beans.registerXmlBindingClass(G023PrivateCtorXmlBean.class);
+
+        assertEquals(List.of("items", "name"), Beans.getPropNameList(G023PrivateCtorXmlBean.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G023PrivateCtorXmlBean.class));
+
+        final Map<String, Object> map = new HashMap<>();
+        map.put("items", List.of("a", "b"));
+        map.put("name", "n");
+
+        final G023PrivateCtorXmlBean bean = Beans.mapToBean(map, false, G023PrivateCtorXmlBean.class);
+        assertEquals(List.of("a", "b"), bean.getItems());
+        assertEquals("n", bean.getName());
+    }
+
+    // ---- deep review 2026-10-16 G023 end ----
+
+    // ---- deep review 2026-10-16 verify G119 begin ----
+
+    /** The static field is the only field matching the accessors: the getter and setter work on it. */
+    public static class G119StaticOnlyCandidateBean {
+        private static String region = "init";
+        private int id;
+
+        public String getRegion() {
+            return region;
+        }
+
+        public void setRegion(final String region) {
+            G119StaticOnlyCandidateBean.region = region;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+    }
+
+    // G023-01: a static field that is the only candidate for a getter/setter pair does not back the property;
+    // the property is read and written through its accessors (it used to crash every read)
+    @Test
+    public void testGetPropNameList_staticFieldOnlyCandidateIsAccessorProperty() {
+        final String saved = G119StaticOnlyCandidateBean.region;
+
+        try {
+            assertEquals(List.of("id", "region"), Beans.getPropNameList(G119StaticOnlyCandidateBean.class));
+            assertEquals(List.of("id"), List.copyOf(Beans.getPropFields(G119StaticOnlyCandidateBean.class).keySet()));
+            assertNull(Beans.getPropField(G119StaticOnlyCandidateBean.class, "region"));
+
+            final G119StaticOnlyCandidateBean bean = new G119StaticOnlyCandidateBean();
+            bean.setId(3);
+            G119StaticOnlyCandidateBean.region = "eu";
+
+            assertEquals("eu", Beans.getPropValue(bean, "region"));
+            assertEquals(Map.of("id", 3, "region", "eu"), Beans.beanToMap(bean));
+
+            Beans.setPropValue(bean, "region", "us");
+            assertEquals("us", G119StaticOnlyCandidateBean.region);
+        } finally {
+            G119StaticOnlyCandidateBean.region = saved;
+        }
+    }
+
+    /** A static constant collides by name with a getter of an @AccessFieldByMethod bean. */
+    @com.landawn.abacus.annotation.AccessFieldByMethod
+    public static class G119AccessorModeStaticCollisionBean {
+        public static final String CODE = "c";
+        private String internalCode;
+        private String name;
+
+        public String getCode() {
+            return internalCode;
+        }
+
+        public void setCode(final String code) {
+            this.internalCode = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    // G023-01: in accessor mode too, the property is named after its getter, not after the colliding static constant
+    @Test
+    public void testGetPropNameList_staticConstantCollidingWithAccessorModeGetter() {
+        assertEquals(List.of("name", "code"), Beans.getPropNameList(G119AccessorModeStaticCollisionBean.class));
+        assertEquals(List.of("name"), List.copyOf(Beans.getPropFields(G119AccessorModeStaticCollisionBean.class).keySet()));
+
+        final G119AccessorModeStaticCollisionBean bean = new G119AccessorModeStaticCollisionBean();
+        bean.setCode("x");
+        bean.setName("n");
+
+        assertEquals(Map.of("name", "n", "code", "x"), Beans.beanToMap(bean));
+        assertEquals("c", G119AccessorModeStaticCollisionBean.CODE);
+    }
+
+    /** Immutable bean (no no-arg constructor) with a static constant matching a getter by name. */
+    public static class G119ImmutableStaticCollisionBean {
+        public static final String TYPE = "T";
+        private final int amount;
+
+        public G119ImmutableStaticCollisionBean(final int amount) {
+            this.amount = amount;
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+
+        public String getType() {
+            return TYPE;
+        }
+    }
+
+    // G023-01: the static field no longer enters the immutable-constructor signature, so the class is an immutable bean
+    @Test
+    public void testIsBeanClass_immutableBeanWithStaticConstantCollidingWithGetter() {
+        assertTrue(Beans.isBeanClass(G119ImmutableStaticCollisionBean.class));
+        assertEquals(List.of("amount"), Beans.getPropNameList(G119ImmutableStaticCollisionBean.class));
+        assertEquals(Map.of("amount", 4), Beans.beanToMap(new G119ImmutableStaticCollisionBean(4)));
+    }
+
+    /** A static field names the getter exactly; the instance field matches it only case-insensitively. */
+    public static class G119StaticExactOwnerBean {
+        private static String userName = "STATIC";
+        private String username;
+
+        public String getUserName() {
+            return username;
+        }
+
+        public void setUserName(final String userName) {
+            this.username = userName;
+        }
+    }
+
+    // G023-01: a static field does not claim a getter in the exact-owner pass, so the instance field keeps it
+    @Test
+    public void testGetPropNameList_staticFieldDoesNotOwnGetterExactly() {
+        assertEquals(List.of("username"), Beans.getPropNameList(G119StaticExactOwnerBean.class));
+        assertEquals(List.of("username"), List.copyOf(Beans.getPropFields(G119StaticExactOwnerBean.class).keySet()));
+
+        final G119StaticExactOwnerBean bean = new G119StaticExactOwnerBean();
+        bean.setUserName("bob");
+        assertEquals(Map.of("username", "bob"), Beans.beanToMap(bean));
+
+        final G119StaticExactOwnerBean copy = Beans.mapToBean(Map.of("username", "al"), G119StaticExactOwnerBean.class);
+        assertEquals("al", copy.getUserName());
+        assertEquals("STATIC", G119StaticExactOwnerBean.userName);
+    }
+
+    /** Static members that never collided with an accessor: logger-style constants, a same-name-ignoring-case static. */
+    public static class G119UnrelatedStaticsBean implements java.io.Serializable {
+        private static final long serialVersionUID = 1L;
+        private static final Object LOG = new Object();
+        public static final String FIRST_NAME = "firstName";
+        public static String shared = "s";
+        private static String URL = "u";
+        private String firstName;
+        private String url;
+        public String plain;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(final String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(final String url) {
+            this.url = url;
+        }
+    }
+
+    // G023-01 neighbour: beans whose static fields never matched a getter keep the same field-backed properties
+    @Test
+    public void testGetPropNameList_unrelatedStaticFieldsUnchanged() {
+        assertEquals(List.of("firstName", "url", "plain"), Beans.getPropNameList(G119UnrelatedStaticsBean.class));
+        assertEquals(List.of("firstName", "url", "plain"), List.copyOf(Beans.getPropFields(G119UnrelatedStaticsBean.class).keySet()));
+        assertNull(Beans.getPropField(G119UnrelatedStaticsBean.class, "shared"));
+        assertNotNull(G119UnrelatedStaticsBean.LOG);
+
+        final G119UnrelatedStaticsBean bean = Beans.mapToBean(Map.of("firstName", "f", "url", "h", "plain", "p", "shared", "z"),
+                G119UnrelatedStaticsBean.class);
+        assertEquals("f", bean.getFirstName());
+        assertEquals("h", bean.getUrl());
+        assertEquals("p", bean.plain);
+        assertEquals("s", G119UnrelatedStaticsBean.shared);
+        assertEquals("u", G119UnrelatedStaticsBean.URL);
+    }
+
+    // G023-02: a registered XML-binding class that is not public, in another package (public no-arg constructor,
+    // public getter-only collection): both the construction and the getter probe need setAccessible
+    @Test
+    public void testRegisterXmlBindingClass_nonPublicClassInOtherPackageKeepsGetterOnlyCollection(
+            @org.junit.jupiter.api.io.TempDir final java.nio.file.Path tempDir) throws Exception {
+        final java.nio.file.Path source = tempDir.resolve("HiddenXmlBean.java");
+        java.nio.file.Files.writeString(source, String.join("\n", //
+                "package g119hidden;", //
+                "class HiddenXmlBean {", //
+                "    private final java.util.List<String> items = new java.util.ArrayList<>();", //
+                "    private String name;", //
+                "    public HiddenXmlBean() {}", //
+                "    public java.util.List<String> getItems() { return items; }", //
+                "    public String getName() { return name; }", //
+                "    public void setName(String name) { this.name = name; }", //
+                "}", ""), java.nio.charset.StandardCharsets.UTF_8);
+        assertEquals(0, javax.tools.ToolProvider.getSystemJavaCompiler().run(null, null, null, "-d", tempDir.toString(), source.toString()));
+
+        try (java.net.URLClassLoader loader = new java.net.URLClassLoader(new java.net.URL[] { tempDir.toUri().toURL() }, BeansTest.class.getClassLoader())) {
+            final Class<?> cls = Class.forName("g119hidden.HiddenXmlBean", false, loader);
+            Beans.registerXmlBindingClass(cls);
+
+            assertEquals(List.of("items", "name"), Beans.getPropNameList(cls));
+            assertTrue(Beans.isRegisteredXmlBindingClass(cls));
+
+            final Map<String, Object> map = new HashMap<>();
+            map.put("items", List.of("a"));
+            map.put("name", "n");
+
+            final Object bean = Beans.mapToBean(map, false, cls);
+            assertEquals(List.of("a"), Beans.getPropValue(bean, "items"));
+            assertEquals("n", Beans.getPropValue(bean, "name"));
+        }
+    }
+
+    /** Not registered, no XML annotations: its getter-only list must not trigger the construction probe. */
+    public static class G119PlainPrivateCtorBean {
+        static int constructed = 0;
+        private final java.util.List<String> items = new java.util.ArrayList<>();
+        private String name;
+
+        private G119PlainPrivateCtorBean() {
+            constructed++;
+        }
+
+        public java.util.List<String> getItems() {
+            return items;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    // G023-02 neighbour: the now-accessible probe constructor runs only for XML-binding candidates
+    @Test
+    public void testGetPropNameList_privateCtorNonXmlBeanIsNotConstructed() {
+        assertEquals(List.of("name"), Beans.getPropNameList(G119PlainPrivateCtorBean.class));
+        assertEquals(0, G119PlainPrivateCtorBean.constructed);
+        assertFalse(Beans.isRegisteredXmlBindingClass(G119PlainPrivateCtorBean.class));
+    }
+
+    // ---- deep review 2026-10-16 verify G119 end ----
+
+    // ---- deep review 2026-10-16 G154 begin ----
+
+    /** Superclass fixture: an ordinary field-backed property. */
+    public static class G154CodeBase {
+        private String code;
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(final String code) {
+            this.code = code;
+        }
+    }
+
+    /** Subclass fixture: its own static constant matches the INHERITED getCode() case-insensitively. */
+    public static class G154StaticOverInheritedBean extends G154CodeBase {
+        public static final String CODE = "STATIC";
+        private int size;
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(final int size) {
+            this.size = size;
+        }
+    }
+
+    /** Record fixture with a static constant named like its component. */
+    public record G154StaticRecord(String name, int size) {
+        public static final String NAME = "STATIC";
+    }
+
+    // G154 (verifies G023-01): a subclass's static constant no longer pairs with an inherited getter - on r89 it became a
+    // second, static-field-backed property "CODE" beside the inherited "code" (beanToMap then failed reading it).
+    @Test
+    public void testGetPropNameList_subclassStaticDoesNotDuplicateInheritedProperty() {
+        assertEquals(List.of("code", "size"), Beans.getPropNameList(G154StaticOverInheritedBean.class));
+        assertEquals(List.of("code", "size"), List.copyOf(Beans.getPropFields(G154StaticOverInheritedBean.class).keySet()));
+
+        final G154StaticOverInheritedBean bean = new G154StaticOverInheritedBean();
+        bean.setCode("c");
+        bean.setSize(2);
+        assertEquals(Map.of("code", "c", "size", 2), Beans.beanToMap(bean));
+
+        final G154StaticOverInheritedBean copy = Beans.mapToBean(Map.of("code", "x", "size", 3), G154StaticOverInheritedBean.class);
+        assertEquals("x", copy.getCode());
+        assertEquals(3, copy.getSize());
+        assertEquals("STATIC", G154StaticOverInheritedBean.CODE);
+    }
+
+    // G154 neighbour (unchanged): a record's static constant never competes with its components.
+    @Test
+    public void testGetPropNameList_recordStaticConstantUnchanged() {
+        assertEquals(List.of("name", "size"), Beans.getPropNameList(G154StaticRecord.class));
+        assertEquals(Map.of("name", "n", "size", 1), Beans.beanToMap(new G154StaticRecord("n", 1)));
+        assertEquals(new G154StaticRecord("m", 2), Beans.mapToBean(Map.of("name", "m", "size", 2), G154StaticRecord.class));
+        assertEquals("STATIC", G154StaticRecord.NAME);
+    }
+
+    // ---- deep review 2026-10-16 G154 end ----
 
 }

@@ -652,8 +652,10 @@ public final class HARUtil {
      *         cannot be combined without changing their semantics; if the entry carries a non-empty body ({@code postData.text} or
      *         {@code postData.params}) but its method is none of {@code POST}, {@code PUT}, {@code DELETE},
      *         {@code OPTIONS}, {@code PATCH}; if curl logging is enabled for the current thread with a quote character that is
-     *         neither a single nor a double quote; or if its {@code url} is missing, empty, relative or malformed
-     *         (see {@link HttpRequest#url(String)}).
+     *         neither a single nor a double quote; if its {@code url} is missing, empty, relative or malformed
+     *         (see {@link HttpRequest#url(String)}); or if a body is replayed and the captured {@code Content-Encoding} header differs
+     *         from the compression the body's content format applies (for example {@code deflate}, a stacked list such as
+     *         {@code gzip, identity}, or {@code gzip} on a form body; see {@link HttpRequest#execute(HttpMethod, Class)}).
      * @throws ClassCastException if the entry's {@code url} field is present but is not a {@code String}
      * @throws UnsupportedOperationException if the entry's method is {@code PATCH} or {@code CONNECT}, which the underlying
      *         {@code java.net.HttpURLConnection} cannot issue (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT}).

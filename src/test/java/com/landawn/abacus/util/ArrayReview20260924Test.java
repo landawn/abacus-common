@@ -80,7 +80,8 @@ public class ArrayReview20260924Test extends TestBase {
     public void testC306_newInstanceVoidHasMessage() {
         for (final org.junit.jupiter.api.function.Executable call : List.<org.junit.jupiter.api.function.Executable> of(() -> Array.newInstance(void.class, 0),
                 () -> Array.newInstance(void.class, 5), () -> Array.newInstance(void.class, new int[] { 1 }),
-                () -> Array.newInstance(void.class, new int[] { 1, 2 }), () -> Array.newInstance(void.class, new int[0]), () -> CommonUtil.newArray(void.class, 3))) {
+                () -> Array.newInstance(void.class, new int[] { 1, 2 }), () -> Array.newInstance(void.class, new int[0]),
+                () -> CommonUtil.newArray(void.class, 3))) {
             final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
             assertEquals("'componentType' cannot be void", e.getMessage());
         }

@@ -711,11 +711,11 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                 private float next;
                 private boolean exhausted;
                 private Iterator<? extends Float> cur = null;
-                private Collection<? extends Float> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextFloat();
@@ -726,11 +726,17 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends Float> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1200,11 +1206,11 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                 private float next;
                 private boolean exhausted;
                 private Iterator<? extends T> cur = null;
-                private Collection<? extends T> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextFloat();
@@ -1215,11 +1221,17 @@ final class ParallelIteratorFloatStream extends IteratorFloatStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends T> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override

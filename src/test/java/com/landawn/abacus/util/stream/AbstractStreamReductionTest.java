@@ -499,8 +499,6 @@ public class AbstractStreamReductionTest extends AbstractStreamTestSupport {
         assertEquals(N.asList(1, 2), pulled); // used to be [1, 2, 3]
     }
 
-
-
     /**
      * {@code forEachUntil} was implemented as {@code takeWhile(v -> flag.isFalse()).forEach(action)}, and
      * {@code takeWhile.hasNext()} has to pull an element before it can test the predicate - so it consumed one
@@ -524,8 +522,6 @@ public class AbstractStreamReductionTest extends AbstractStreamTestSupport {
         assertEquals(N.asList(1, 2), delivered);
         assertEquals(N.asList(1, 2), pulled); // used to be [1, 2, 3]
     }
-
-
 
     /**
      * {@code Stream.forEachUntil}'s javadoc: "If the flagToBreak is set to {@code true} at the beginning, no
@@ -565,8 +561,6 @@ public class AbstractStreamReductionTest extends AbstractStreamTestSupport {
         });
         assertEquals(Arrays.asList(1, 2, 3), list);
     }
-
-
 
     /**
      * The sequential path consumes exactly what it delivers; the parallel path cannot, because its workers

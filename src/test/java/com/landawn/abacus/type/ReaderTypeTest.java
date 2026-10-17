@@ -32,10 +32,13 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Objectory;
 
 public class ReaderTypeTest extends TestBase {
 
@@ -272,6 +275,42 @@ public class ReaderTypeTest extends TestBase {
     }
 
     @Test
+    public void testSerializeToPreservesSurrogatesAcrossReadChunks() throws IOException {
+        final char[] buffer = Objectory.createCharArrayBuffer();
+        final int chunkSize = buffer.length;
+        Objectory.recycle(buffer);
+
+        // Place a surrogate at the last slot of the real read buffer; short Reader reads alone are
+        // insufficient because IOUtil.read fills the requested range before returning.
+        final String prefix = "x".repeat(chunkSize - 1);
+        final String[] contents = { prefix + "\uD83D\uDE00y", prefix + "\uD83D", prefix + "\uD83Dx", prefix + "\uDE00", prefix + "\uD83D\uD83D\uDE00",
+                "a" + "\uD83D\uDE00".repeat(chunkSize) };
+        final JsonSerConfig[] configs = { JsonSerConfig.create(), JsonSerConfig.create().setStringQuotation('\''), null };
+
+        for (final JsonSerConfig config : configs) {
+            for (int i = 0; i < contents.length; i++) {
+                final BufferedJsonWriter expected = Objectory.createBufferedJsonWriter();
+                final BufferedJsonWriter actual = Objectory.createBufferedJsonWriter();
+                final G142CloseTrackingReader source = new G142CloseTrackingReader(contents[i]);
+
+                try {
+                    // Whole-string serialization is the oracle for valid pairs and isolated surrogate code units.
+                    Type.of(String.class).serializeTo(expected, contents[i], config);
+                    readerType.serializeTo(actual, source, config);
+
+                    assertEquals(expected.toString(), actual.toString(), "Content case " + i + ", config=" + config);
+                    assertFalse(source.closed);
+                    assertEquals(-1, source.read());
+                } finally {
+                    source.close();
+                    Objectory.recycle(expected);
+                    Objectory.recycle(actual);
+                }
+            }
+        }
+    }
+
+    @Test
     public void testSerializeToPropagatesReaderIOException() {
         final IOException failure = new IOException("read failure");
         final Reader reader = new Reader() {
@@ -397,8 +436,7 @@ public class ReaderTypeTest extends TestBase {
         final java.io.ByteArrayInputStream stream = new java.io.ByteArrayInputStream(new byte[] { 'q' });
         org.junit.jupiter.api.Assertions.assertThrows(UnsupportedOperationException.class, () -> Type.of(FileReader.class).valueOf(stream));
         org.junit.jupiter.api.Assertions.assertEquals(1, stream.available());
-        org.junit.jupiter.api.Assertions.assertEquals("q",
-                com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
+        org.junit.jupiter.api.Assertions.assertEquals("q", com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
     }
     // ---- bug review 2026-09-30 G142 end ----
 
@@ -407,8 +445,7 @@ public class ReaderTypeTest extends TestBase {
     @Test
     public void testValueOfObject_inputStreamDecodedAsUtf8() throws IOException {
         final java.io.ByteArrayInputStream stream = new java.io.ByteArrayInputStream("h\u00e9".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        org.junit.jupiter.api.Assertions.assertEquals("h\u00e9",
-                com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
+        org.junit.jupiter.api.Assertions.assertEquals("h\u00e9", com.landawn.abacus.util.IOUtil.readAllToString(Type.of(StringReader.class).valueOf(stream)));
     }
 
     // G144: a Clob is returned as the handled reader class (it was always the internal owning wrapper): wrapped for a

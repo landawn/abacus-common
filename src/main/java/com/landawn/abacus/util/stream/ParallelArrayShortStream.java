@@ -689,11 +689,11 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 private short next;
                 private boolean exhausted;
                 private Iterator<? extends Short> cur = null;
-                private Collection<? extends Short> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextShort();
@@ -704,11 +704,17 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends Short> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1044,11 +1050,11 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 private short next;
                 private boolean exhausted;
                 private Iterator<? extends T> cur = null;
-                private Collection<? extends T> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextShort();
@@ -1059,11 +1065,17 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends T> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1083,8 +1095,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
 
     /**
      * Returns a parallel stream that applies the given action to each element as elements are
-     * consumed. The action may be invoked concurrently from multiple worker threads before
-     * the result is mapped back to shorts. This method is primarily used for debugging.
+     * consumed. The action may be invoked concurrently from multiple worker threads.
+     * This method is primarily used for debugging.
      *
      * <p>If the stream can be processed sequentially, delegates to the sequential implementation.
      *
@@ -1149,8 +1161,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
@@ -1328,8 +1340,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     short result = identity;
 
@@ -1425,8 +1437,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     if (cursor >= to) {
                         return null;
@@ -1542,8 +1554,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     // A null container is recorded like any other worker failure: execute(..) runs this worker under
                     // callWithErrorCapture, so it stops the other workers and is rethrown as the NullPointerException
@@ -1631,8 +1643,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isFalse() && eHolder.value() == null) {
@@ -1715,8 +1727,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isTrue() && eHolder.value() == null) {
@@ -1799,8 +1811,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isTrue() && eHolder.value() == null) {
@@ -1886,8 +1898,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
                     int candidateIndex = 0;
                     short candidate = 0;
@@ -1991,8 +2003,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     short next = 0;
 
                     try {
@@ -2091,8 +2103,8 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final int from = fromIndex + sliceIndex * sliceSize;
-                    int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
+                    final int from = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
                     int candidateIndex = 0;
                     short candidate = 0;

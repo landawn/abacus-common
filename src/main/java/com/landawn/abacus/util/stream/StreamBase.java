@@ -3966,6 +3966,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
                 CORE_THREAD_POOL_SIZE, activeCount);
     }
 
+    static int arraySliceBoundary(final int fromIndex, final int toIndex, final int sliceIndex, final int sliceSize) {
+        // Rounded-up slice sizes can place extra workers past the array end. Widen before
+        // multiplying, then clamp the offset so those workers get an empty, valid slice.
+        return fromIndex + (int) Math.min((long) sliceIndex * sliceSize, toIndex - fromIndex);
+    }
+
     static boolean canBeSequential(final int maxThreadNum) {
         return maxThreadNum <= 1;
     }

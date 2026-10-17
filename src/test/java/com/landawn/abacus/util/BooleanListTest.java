@@ -1438,8 +1438,6 @@ public class BooleanListTest extends BooleanListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> list.set(2, true));
     }
 
-
-
     // G022-01 / G022-02: the argument is the list itself or another list wrapping the same array
     @Test
     public void testSetOperations_aliasedArgumentMatchesBoxedReference() {
@@ -1477,9 +1475,6 @@ public class BooleanListTest extends BooleanListTestSupport {
             assertArrayEquals(expectedB, list.toArray());
         }
     }
-
-
-
 
     // G022-01 / G022-02: set operations checked against a boxed reference over every list of length 0..5 plus larger lists
     @Test
@@ -1802,10 +1797,6 @@ public class BooleanListTest extends BooleanListTestSupport {
         }
     }
 
-
-
-
-
     // G111-04: toMultiset() with the capped (2-entry) multiset supplier still counts every occurrence, for the full list,
     // a sub-range, an empty range and a single-valued list.
     @Test
@@ -1988,7 +1979,6 @@ public class BooleanListTest extends BooleanListTestSupport {
 
         return result;
     }
-
 
     // ---- perf review 2026-09-26 G111 end ----
 }

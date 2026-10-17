@@ -518,5 +518,4 @@ public class SheetSortTest extends SheetTestSupport {
         assertEquals(Arrays.asList(10, 20, 30, 40), new ArrayList<>(s.columnValues("other")));
     }
 
-
 }

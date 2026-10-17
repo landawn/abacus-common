@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 /** Strings encoding contracts, including regression cases. */
 public class StringsEncodingTest extends StringsTestSupport {
 
-
-
     // D-2: isBase64Alphabet(byte) derived from the per-dialect predicate
 
     /** The private lookup table that used to back {@code isBase64Alphabet(byte)}, transcribed verbatim. */
@@ -108,8 +106,6 @@ public class StringsEncodingTest extends StringsTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Strings.base64DecodeToString("!", null));
     }
 
-
-
     // G072-02: malformed UTF-8 still fails with the same exception, message and cause type
     @Test
     public void testBase64DecodeToStringStrict_utf8Malformed() {
@@ -128,8 +124,6 @@ public class StringsEncodingTest extends StringsTestSupport {
 
         assertThrows(NullPointerException.class, () -> Strings.base64DecodeToStringStrict("YQ==", null));
     }
-
-
 
     // G072-02: UTF-8 strict decoding equals the reporting CharsetDecoder for well-formed input (incl. a genuine U+FFFD)
     @Test
@@ -363,8 +357,6 @@ public class StringsEncodingTest extends StringsTestSupport {
         assertEquals("", Strings.encodeUrlQuery(null));
     }
 
-
-
     // C-435: finding is linear on long runs without '@'
     @Test
     public void testC435_emailFindingIsLinear() throws Exception {
@@ -499,8 +491,6 @@ public class StringsEncodingTest extends StringsTestSupport {
             assertEquals(expected, Strings.isBase64Alphabet(octet), "isBase64Alphabet((byte) " + v + ")");
         }
     }
-
-
 
     /**
      * C2-S1: {@code isBase64Mime} documents, in three places, that everything it accepts is decodable by

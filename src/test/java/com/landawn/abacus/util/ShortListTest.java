@@ -205,8 +205,6 @@ public class ShortListTest extends ShortListTestSupport {
         assertTrue(boxed.isEmpty());
     }
 
-
-
     // G071-02: removeAll/retainAll (hash set or bit set of the argument), containsAll/disjoint/containsAny (hash set or bit set
     // of this list) and the linear path must all agree with a boxed-set reference, for both overloads and around every threshold.
     @Test
@@ -257,8 +255,6 @@ public class ShortListTest extends ShortListTestSupport {
             }
         }
     }
-
-
 
     // G071-02: self-aliased and shared-backing-array arguments must still see the argument's original membership.
     @Test
@@ -1450,8 +1446,6 @@ public class ShortListTest extends ShortListTestSupport {
         assertNotNull(multiset);
     }
 
-
-
     // G071-03: intersection/difference/symmetricDifference (boxed Multiset up to 1024 elements of b, int[65536] count table above)
     // must match a boxed counting reference, incl. the order of b's surviving occurrences in symmetricDifference.
     @Test
@@ -1672,8 +1666,6 @@ public class ShortListTest extends ShortListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
         assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
-
-
 
     // G071-01: the unsorted removeDuplicates path (hash set up to 64 elements, 8 KB bit set above) must keep the first
     // occurrence of every value in order and zero the vacated tail, exactly like the boxed LinkedHashSet reference.
@@ -2406,8 +2398,6 @@ public class ShortListTest extends ShortListTestSupport {
         }
     }
 
-
-
     // G071-04: toMultiset() with the capped multiset supplier still counts every occurrence of a large list.
     @Test
     public void testToMultiset_largeListCountsEveryOccurrence() {
@@ -2523,7 +2513,6 @@ public class ShortListTest extends ShortListTestSupport {
 
         return new short[][] { intersection.toArray(), difference.toArray(), symmetricDifference.toArray() };
     }
-
 
     // ---- perf review 2026-09-26 G071 end ----
 }

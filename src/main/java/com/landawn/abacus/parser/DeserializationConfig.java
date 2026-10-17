@@ -51,14 +51,15 @@ import com.landawn.abacus.util.cs;
  * <p>Type lookups during deserialization use the immediate property or map-key name at each
  * nesting level. Register the local name (e.g. {@code "city"}) to affect any property or key
  * with that name, at any depth. For example:</p>
- * <p>For JSON bean properties, a configured JSON name takes precedence over the resolved Java property name;
- * the Java name is used as a fallback when the JSON spelling has no configured type.</p>
  * <pre>{@code
  * config.setValueType("city", String.class);   // applies to a property/key named "city" at any level
  * config.setValueType("model", String.class);  // applies to a property/key named "model" at any level
  * config.setValueType("items", List.class);    // applies to a property/key named "items"
  * config.setValueType("settings", Map.class);  // applies to a property/key named "settings"
  * }</pre>
+ *
+ * <p>For JSON bean properties, a configured JSON name takes precedence over the resolved Java property name;
+ * the Java name is used as a fallback when the JSON spelling has no configured type.</p>
  *
  * <p>Dotted keys such as {@code "address.city"} are matched only as literal key strings by
  * {@link #getValueType(String)}; they are not resolved as paths. They can match an actual property

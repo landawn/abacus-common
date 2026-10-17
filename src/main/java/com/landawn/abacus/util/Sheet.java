@@ -1875,16 +1875,17 @@ public final class Sheet<R, C, V> implements Cloneable {
             throw new IllegalArgumentException("Row '" + keyToString(rowKey) + "' already exists");
         }
 
+        if (rowIndex == rowLength) {
+            // The append overload takes the defensive snapshot; avoid copying the row twice.
+            addRow(rowKey, row);
+            return;
+        }
+
         // The input may be one of our live views; read it before changing cells or key indexes.
         row = row == null ? null : new ArrayList<>(row);
 
         if (N.notEmpty(row) && row.size() != columnLength) {
             throw new IllegalArgumentException("The size of specified row: " + row.size() + " does not match the size of column key set: " + columnLength);
-        }
-
-        if (rowIndex == rowLength) {
-            addRow(rowKey, row);
-            return;
         }
 
         init();

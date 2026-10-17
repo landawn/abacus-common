@@ -47,8 +47,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertEquals(0, deferred.count());
     }
 
-
-
     // defer(Supplier) - lazy stream creation
     @Test
     public void testDefer_LazyEvaluation() {
@@ -165,8 +163,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 1, 2, 3, 4 }, result);
     }
 
-
-
     // flatten(int[][], boolean) - with vertically=true
     @Test
     public void testFlatten_2D_Vertically() {
@@ -186,8 +182,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         int[] result = IntStream.flatten(arr, -1, false).toArray();
         assertArrayEquals(new int[] { 1, 2, -1, 3, 4, 5 }, result);
     }
-
-
 
     // flatten(int[][], int, boolean) - with padding value
     @Test
@@ -247,8 +241,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         IntStream stream = IntStream.flatten(arrays, true);
         assertArrayEquals(new int[] { 1, 4, 7, 2, 5, 8, 3, 6, 9 }, stream.toArray());
     }
-
-
 
     // G097-03: flatten(int[][], true) uses a compacted row walk for sparse jagged input; pins column-major order on both walks.
     @Test
@@ -479,8 +471,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertEquals(10, stream.limit(10).mapToLong(e -> e).sum());
     }
 
-
-
     // iterate(BooleanSupplier, IntSupplier) - BooleanSupplier-gated stream
     @Test
     public void testIterate_BooleanSupplierAndIntSupplier() {
@@ -501,8 +491,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 10, 8, 6, 4, 2 }, result);
     }
 
-
-
     // iterate(int, IntUnaryOperator) - infinite stream
     @Test
     public void testIterate_InfiniteWithLimit() {
@@ -521,8 +509,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         stream = IntStream.iterate(() -> counter.get() < 5, () -> counter.incrementAndGet());
         assertArrayEquals(new int[] { 1, 2, 3, 4, 5 }, stream.toArray());
     }
-
-
 
     // iterate(int, BooleanSupplier, IntUnaryOperator) - finite stream with BooleanSupplier
     @Test
@@ -550,8 +536,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         int[] result = IntStream.iterate(100, x -> x < 10, x -> x + 1).toArray();
         assertArrayEquals(new int[0], result);
     }
-
-
 
     // iterate(int, IntPredicate, IntUnaryOperator) - finite stream with predicate
     @Test
@@ -650,8 +634,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 1, 2, 3 }, result);
     }
 
-
-
     // of(int[], int, int) - array range factory
     @Test
     public void testOf_ArrayWithFromTo_HappyPath() {
@@ -670,8 +652,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertEquals(0, IntStream.of((java.util.OptionalInt) null).count());
     }
 
-
-
     // of(java.util.OptionalInt) - JDK OptionalInt
     @Test
     public void testOf_JdkOptionalInt_Present() {
@@ -683,8 +663,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
     public void testOf_LandawnOptionalInt_Null() {
         assertEquals(0, IntStream.of((OptionalInt) null).count());
     }
-
-
 
     // of(u.OptionalInt) - Landawn's OptionalInt
     @Test
@@ -749,8 +727,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 42 }, stream.toArray());
     }
 
-
-
     //
     @Test
     public void testOf_WithOptionalInt() {
@@ -804,8 +780,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 0, 1, 2, 3 }, result);
     }
 
-
-
     // ofIndices(int, int) - range-based with step > 1
     @Test
     public void testOfIndices_RangeWithStep_StepTwo() {
@@ -823,8 +797,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         int[] result = IntStream.ofIndices((int[]) null, 0, 1, (arr, fromIdx) -> fromIdx < 3 ? fromIdx : -1).toArray();
         assertArrayEquals(new int[0], result);
     }
-
-
 
     // ofIndices(Object, int, int, ObjIntFunction) - source with fromIndex and increment
     @Test
@@ -933,8 +905,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 42 }, stream.toArray());
     }
 
-
-
     // ofNullable(Integer) - both null and non-null paths
     @Test
     public void testOfNullable_NonNull() {
@@ -982,8 +952,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
             assertTrue(v >= 5 && v < 100);
         }
     }
-
-
 
     // G115-01: random() streams are lazy and look up ThreadLocalRandom.current() per draw, so a stream created on one
     // thread can be consumed on another (and several such streams concurrently).
@@ -1094,8 +1062,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 10, 8, 6, 4, 2 }, stream.toArray());
     }
 
-
-
     // range(int, int) with advance() exercised via skip/limit
     @Test
     public void testRange_WithSkip() {
@@ -1192,8 +1158,6 @@ public class IntStreamCreationTest extends IntStreamTestSupport {
             assertEquals(3, v);
         }
     }
-
-
 
     // Tests targeting uncovered code paths identified by coverage report
 

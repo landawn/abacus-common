@@ -398,8 +398,7 @@ public class InputStreamTypeTest extends TestBase {
                 .assertThrows(UnsupportedOperationException.class, () -> Type.of(FileInputStream.class).valueOf(new byte[] { 1 }))
                 .getMessage();
         final String fromStream = org.junit.jupiter.api.Assertions
-                .assertThrows(UnsupportedOperationException.class,
-                        () -> Type.of(FileInputStream.class).valueOf(new ByteArrayInputStream(new byte[] { 1 })))
+                .assertThrows(UnsupportedOperationException.class, () -> Type.of(FileInputStream.class).valueOf(new ByteArrayInputStream(new byte[] { 1 })))
                 .getMessage();
         final String fromText = org.junit.jupiter.api.Assertions
                 .assertThrows(UnsupportedOperationException.class, () -> Type.of(FileInputStream.class).valueOf("x"))

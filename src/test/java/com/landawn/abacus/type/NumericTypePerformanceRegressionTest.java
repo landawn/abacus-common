@@ -134,22 +134,16 @@ class NumericTypePerformanceRegressionTest extends TestBase {
     }
 
     @Test
-    void arrayFallbackRetainsPrimitiveAndBoxedQuoteDifferences() {
+    void arrayFallbackReadsQuotedElementsAlikeForPrimitiveAndBoxedArrays() {
+        // Since G151 (owner: consistency) the boxed Byte/Short/Integer/Float/Double arrays read a quoted element like
+        // Long[] and the primitive arrays do: quotes removed, JSON escapes decoded once.
         for (final Class<?> component : COMPONENTS) {
             final Type<?> type = arrayType(component);
+            final Object result = type.valueOf("[\"1\",'2',\"\\u0033\"]");
 
-            if (component.isPrimitive()) {
-                final Object result = type.valueOf("[\"1\",'2',\"\\u0033\"]");
-                assertEquals(3, Array.getLength(result));
-                assertEquals(3.0, ((Number) Array.get(result, 2)).doubleValue());
-                assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
-            } else if (component == Long.class) {
-                assertArrayEquals(new Long[] { 1L, 2L }, (Long[]) type.valueOf("[\"1\",'2']"));
-                assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\u0033\"]"));
-            } else {
-                assertThrows(NumberFormatException.class, () -> type.valueOf("[\"1\"]"));
-            }
-
+            assertEquals(3, Array.getLength(result));
+            assertEquals(3.0, ((Number) Array.get(result, 2)).doubleValue());
+            assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
             assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
         }
     }
@@ -251,14 +245,18 @@ class NumericTypePerformanceRegressionTest extends TestBase {
         final Type<int[]> ints = Type.of(int[].class);
         final Type<Integer[]> boxed = Type.of(Integer[].class);
 
-        for (final String text : List.of("[1, 2, null]", "[1, 2, \"3\"]", "[1, 2, 3L]", "[1, 2, 3 4]", "[1,2,]", "[1, 2,  ]", "[1, 2, 3x]", "[null]",
-                "[1, 2, [3]]", "[1, 2, 3e1]")) {
+        for (final String text : List.of("[1, 2, 3L]", "[1, 2, 3 4]", "[1,2,]", "[1, 2,  ]", "[1, 2, 3x]", "[1, 2, [3]]", "[1, 2, 3e1]",
+                "[1, 2, nullx]")) {
             assertNull(AbstractArrayType.parseNumericArray(text, Type.of(int.class), int.class), text);
         }
 
         assertArrayEquals(new int[] { 1, 2, 3 }, (int[]) AbstractArrayType.parseNumericArray("[1, 2 , 3 ]", Type.of(int.class), int.class));
+        assertArrayEquals(new int[] { 1, 2, 3 }, (int[]) AbstractArrayType.parseNumericArray("[1, 2, \"3\"]", Type.of(int.class), int.class));
         assertArrayEquals(new int[] { 7 }, (int[]) AbstractArrayType.parseNumericArray("[ 7 ]", Type.of(int.class), int.class));
         assertArrayEquals(new double[] { 1, 2, 30 }, (double[]) AbstractArrayType.parseNumericArray("[1, 2, 3e1]", Type.of(double.class), double.class));
+        // The bare null token stays on the fast path (G162), read as the original parser reads it.
+        assertArrayEquals(new int[] { 1, 2, 0 }, (int[]) AbstractArrayType.parseNumericArray("[1, 2, null]", Type.of(int.class), int.class));
+        assertArrayEquals(new Integer[] { null }, (Integer[]) AbstractArrayType.parseNumericArray("[null]", Type.of(Integer.class), Integer.class));
 
         assertArrayEquals(new int[] { 1, 2, 0 }, ints.valueOf("[1, 2, null]"));
         assertArrayEquals(new Integer[] { 1, 2, null }, boxed.valueOf("[1, 2, null]"));
@@ -266,7 +264,25 @@ class NumericTypePerformanceRegressionTest extends TestBase {
         assertArrayEquals(new int[] { 1, 2, 3 }, ints.valueOf("[1, 2, 3L]"));
         assertEquals("Missing array element at index 2", assertThrows(IllegalArgumentException.class, () -> ints.valueOf("[1,2,]")).getMessage());
         assertThrows(NumberFormatException.class, () -> ints.valueOf("[1, 2, 3 4]"));
-        assertThrows(NumberFormatException.class, () -> boxed.valueOf("[1, 2, \"3\"]"));
+        assertArrayEquals(new Integer[] { 1, 2, 3 }, boxed.valueOf("[1, 2, \"3\"]"));
+    }
+
+    @Test
+    void unsupportedQuotedFirstElementIsRejectedBeforeAllocatingTheResult() {
+        final String text = "[\"\\u0031\"," + "1,".repeat(50_000) + "1]";
+        final Type<?> element = Type.of(long.class);
+        final com.sun.management.ThreadMXBean threads = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();
+
+        for (int i = 0; i < 100; i++) {
+            assertNull(AbstractArrayType.parseNumericArray(text, element, long.class));
+        }
+
+        final long before = threads.getCurrentThreadAllocatedBytes();
+        final Object result = AbstractArrayType.parseNumericArray(text, element, long.class);
+        final long allocated = threads.getCurrentThreadAllocatedBytes() - before;
+
+        assertNull(result);
+        assertTrue(allocated < 100_000, "unsupported first element allocated " + allocated + " bytes");
     }
 
     @Test

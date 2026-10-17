@@ -62,8 +62,6 @@ public class NoCachingNoUpdatingDisposableArrayTest extends NoCachingNoUpdatingT
 
     // create
 
-
-
     /**
      * A primitive component type must be rejected with a documented {@code IllegalArgumentException} rather than
      * failing with a {@code ClassCastException} from inside the constructor.

@@ -130,8 +130,6 @@ public class StringsTransformationTest extends StringsTestSupport {
         assertNull(Strings.reverseDelimited(null, ','));
     }
 
-
-
     /**
      * reverseDelimited(String, String) validates its required delimiter before short-circuiting on a
      * null/empty/single-character input, like split/splitPreserveAllTokens/mapWords/capitalizeWords.

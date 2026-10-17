@@ -100,8 +100,6 @@ public class FnApplyTest extends FnTestSupport {
         assertEquals(2, rows.size());
     }
 
-
-
     // FINDING G20-008 (doc-only contract pin): the applyKeyVal javadoc example now builds its source map through
     // a TreeMap, so the element order it prints is reproducible (Map.of alone randomizes it per JVM run).
     @Test

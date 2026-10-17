@@ -16,7 +16,8 @@
  * Spreadsheet utilities built on Apache POI.
  *
  * <p>{@link ExcelUtil} reads and writes XLS (Excel 97–2003) and XLSX (Excel 2007+) workbooks and
- * converts them to and from Abacus {@link com.landawn.abacus.util.Dataset} values and CSV.</p>
+ * converts them to and from Abacus {@link com.landawn.abacus.util.Dataset} values; sheets can also be exported to
+ * CSV (there is no CSV-to-workbook import).</p>
  *
  * <p>Primary operations:</p>
  * <ul>

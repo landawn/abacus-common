@@ -219,8 +219,6 @@ public class IndexLastTest extends IndexTestSupport {
         assertFalse(Index.lastOfSubArray(new char[] { 'a' }, -1, new char[0], 0, 0).isPresent());
     }
 
-
-
     /**
      * G31-001 contract pin: for the indexed {@code lastOfSubArray} forms an empty pattern is a zero-width match at
      * {@code min(startIndexFromBack, length)} only when {@code startIndexFromBack >= 0}; a negative

@@ -99,4 +99,43 @@ public class SeqContainsTest extends SeqTestSupport {
         // null counts as a value of its own rather than raising.
         assertEquals(Arrays.asList("a", null, "b"), Seq.of("a", null, "b", null).distinct().toList());
     }
+
+    // ---- deep review 2026-10-16 G139 begin ----
+    // G139-02: containsAll(T...) builds its membership set once; duplicates (also collapsing to one value) and nulls.
+    @Test
+    public void testContainsAll_varargsDuplicatesAndNulls() throws Exception {
+        assertTrue(Seq.of("a", null, "b").containsAll("a", "a", "a"));
+        assertTrue(Seq.of("a", null, "b").containsAll((String) null, null, null));
+        assertTrue(Seq.of("a", null, "b").containsAll("a", null, "b", "a"));
+        assertTrue(Seq.of("b", "a", "b", null).containsAll("b", "a", "b"));
+        assertFalse(Seq.of("a", "b").containsAll("a", "a", null));
+        assertFalse(Seq.of("a", null, "b").containsAll("a", "c", "a"));
+        assertFalse(Seq.of("b").containsAll("a", "a", "a"));
+        assertFalse(Seq.<String, Exception> empty().containsAll("a", "a", "a"));
+        assertTrue(Seq.of("a", "b", "c", "d", "e").containsAll("e", "d", "c", "b", "a"));
+
+        // arrays are matched by identity, also when duplicates collapse the request to one element
+        final int[] first = { 1 };
+        final int[] sameContent = { 1 };
+        assertTrue(Seq.of(Arrays.asList(first, sameContent)).containsAll(first, first, first));
+        assertFalse(Seq.of(Collections.singletonList(sameContent)).containsAll(first, first, first));
+        assertFalse(Seq.of(Arrays.asList(sameContent, new int[] { 2 })).containsAll(first, first, sameContent));
+    }
+
+    // G139-02: containsAll(Collection) consumes a private copy, so a caller's HashSet is never modified; null probes
+    // against a null-hostile argument set are safe.
+    @Test
+    public void testContainsAll_callerSetNotModifiedAndNullElements() throws Exception {
+        final HashSet<String> wanted = new HashSet<>(Arrays.asList("b", null, "q"));
+
+        assertTrue(Seq.of("q", null, "b", "z").containsAll(wanted));
+        assertFalse(Seq.of("q", "b").containsAll(wanted));
+        assertTrue(Seq.of("x", null, "a").containsAny(wanted));
+        assertFalse(Seq.of("x", "a").containsAny(wanted));
+        assertTrue(Seq.of("x", null, "a").containsAny(java.util.Set.of("a", "b")));
+        assertTrue(Seq.of("x", null, "a", "b").containsAll(java.util.Set.of("a", "b")));
+        assertTrue(Seq.of("x", null, "a", "b").containsAll(new java.util.TreeSet<>(Arrays.asList("b", "a"))));
+        assertEquals(new HashSet<>(Arrays.asList("b", null, "q")), wanted);
+    }
+    // ---- deep review 2026-10-16 G139 end ----
 }

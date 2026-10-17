@@ -327,5 +327,4 @@ public class RowDatasetGroupTest extends RowDatasetTestSupport {
         assertTrue(grouped.containsColumn("people"));
     }
 
-
 }

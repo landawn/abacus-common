@@ -38,8 +38,6 @@ import com.landawn.abacus.util.u.Optional;
 /** Strings general contracts, including regression cases. */
 public class StringsTest extends StringsTestSupport {
 
-
-
     // B2 : decode-only charsets
 
     /** A charset with no encoder, or {@code null} if this JDK ships none. JDK 25 ships ISO-2022-CN and x-JISAutoDetect. */
@@ -601,9 +599,7 @@ public class StringsTest extends StringsTestSupport {
         assertFalse(Strings.equalsAny("abc"));
     }
 
-
-
- // IDEOGRAPHIC SPACE (Java whitespace)
+    // IDEOGRAPHIC SPACE (Java whitespace)
 
     /**
      * The three non-breaking Unicode space separators are exactly the code points where
@@ -808,8 +804,6 @@ public class StringsTest extends StringsTestSupport {
         assertNull(Strings.getBytesUtf8(null));
     }
 
-
-
     // G072-01: malformed UTF-16 still fails with the same exception, message and cause type
     @Test
     public void testGetBytesUtf8Strict_loneSurrogates() {
@@ -825,8 +819,6 @@ public class StringsTest extends StringsTestSupport {
 
         assertThrows(NullPointerException.class, () -> Strings.getBytesStrict("a", null));
     }
-
-
 
     // G072-01: UTF-8 strict encoding equals the reporting CharsetEncoder for well-formed input (incl. surrogate pairs)
     @Test
@@ -1189,8 +1181,6 @@ public class StringsTest extends StringsTestSupport {
 
     // truncate
 
-
-
     // C-021: documented surrogate / overlap rules that had no test
     @Test
     public void testC021_documentedSurrogateAndOverlapRules() {
@@ -1340,8 +1330,6 @@ public class StringsTest extends StringsTestSupport {
     }
 
     // wrapIfMissing
-
-
 
     /**
      * Contract pin for the {@code @return} text of {@code appendIfMissing}, {@code appendIfMissingIgnoreCase},

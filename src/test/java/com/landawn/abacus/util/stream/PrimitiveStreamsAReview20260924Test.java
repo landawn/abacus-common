@@ -104,8 +104,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
 
         for (final Supplier<IntStream> src : sources) {
             final AtomicInteger closed = new AtomicInteger();
-            NullPointerException ex = assertThrows(NullPointerException.class,
-                    () -> src.get().onClose(closed::incrementAndGet).toCollection(() -> null));
+            NullPointerException ex = assertThrows(NullPointerException.class, () -> src.get().onClose(closed::incrementAndGet).toCollection(() -> null));
             assertTrue(ex.getMessage().contains("supplier returned null"), ex.getMessage());
             ex = assertThrows(NullPointerException.class, () -> src.get().onClose(closed::incrementAndGet).toMultiset(() -> null));
             assertTrue(ex.getMessage().contains("supplier returned null"), ex.getMessage());
@@ -119,8 +118,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
             NullPointerException ex = assertThrows(NullPointerException.class,
                     () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, () -> null));
             assertTrue(ex.getMessage().contains("mapFactory returned null"), ex.getMessage());
-            assertThrows(NullPointerException.class,
-                    () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, Integer::sum, () -> null));
+            assertThrows(NullPointerException.class, () -> src.get().onClose(closed::incrementAndGet).toMap(i -> i, i -> i, Integer::sum, () -> null));
             assertThrows(NullPointerException.class,
                     () -> src.get().onClose(closed::incrementAndGet).groupTo(i -> i, java.util.stream.Collectors.counting(), () -> null));
             assertEquals(3, closed.get());
@@ -160,20 +158,13 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
 
         final AtomicInteger closed = new AtomicInteger();
         assertThrows(NullPointerException.class, () -> LongStream.of(1L).onClose(closed::incrementAndGet).toMap(x -> x, x -> x, () -> null));
+        assertThrows(NullPointerException.class, () -> LongStream.empty().onClose(closed::incrementAndGet).toMap(x -> x, x -> x, Long::sum, () -> null));
         assertThrows(NullPointerException.class,
-                () -> LongStream.empty().onClose(closed::incrementAndGet).toMap(x -> x, x -> x, Long::sum, () -> null));
+                () -> CharStream.of(CharIterator.of('a')).onClose(closed::incrementAndGet).groupTo(c -> c, java.util.stream.Collectors.counting(), () -> null));
+        assertThrows(NullPointerException.class, () -> CharStream.of('a').onClose(closed::incrementAndGet).toMap(c -> c, c -> c, () -> null));
+        assertThrows(NullPointerException.class, () -> ByteStream.of((byte) 1).onClose(closed::incrementAndGet).toMap(b -> b, b -> b, () -> null));
         assertThrows(NullPointerException.class,
-                () -> CharStream.of(CharIterator.of('a'))
-                        .onClose(closed::incrementAndGet)
-                        .groupTo(c -> c, java.util.stream.Collectors.counting(), () -> null));
-        assertThrows(NullPointerException.class,
-                () -> CharStream.of('a').onClose(closed::incrementAndGet).toMap(c -> c, c -> c, () -> null));
-        assertThrows(NullPointerException.class,
-                () -> ByteStream.of((byte) 1).onClose(closed::incrementAndGet).toMap(b -> b, b -> b, () -> null));
-        assertThrows(NullPointerException.class,
-                () -> ByteStream.empty()
-                        .onClose(closed::incrementAndGet)
-                        .groupTo(b -> b, java.util.stream.Collectors.counting(), () -> null));
+                () -> ByteStream.empty().onClose(closed::incrementAndGet).groupTo(b -> b, java.util.stream.Collectors.counting(), () -> null));
         assertEquals(6, closed.get());
     }
 

@@ -362,8 +362,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertEquals(Arrays.asList("HEADER", "data1", "data2", "TAIL"), lines);
     }
 
-
-
     // G089-01: a pooled writer whose final flush failed is never handed out again with its unwritten characters: the
     // next persist to a non-buffered target writes exactly its own line
     @Test
@@ -376,8 +374,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertEquals(1, Stream.of("fresh").persist(Fn.identity(), target));
         assertEquals("fresh\n", target.toString());
     }
-
-
 
     // G089-01: persist(toLine, Writer) - the final flush is the first write to the target; its IOException must surface
     // (documented "@throws IOException if ... flushing the output fails") instead of being replaced by the
@@ -400,8 +396,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
                 () -> Stream.of("a").persist("H", "T", (s, w) -> w.write(s), g089FailingWriter(false, flushFailures)));
         assertEquals("flush failed #1", e2.getMessage());
     }
-
-
 
     // G089-01: a failure of the write loop (the toLine mapper here) stays the primary failure when the target fails too;
     // the flush and recycle failures are added to it as suppressed, as before
@@ -482,8 +476,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertTrue(writer.toString().contains("name"));
         assertTrue(writer.toString().contains("John"));
     }
-
-
 
     // Covers AbstractStream.persistToCsv(Writer) - no-headers path (canCsvHeadersBeEmpty=true)
     @Test
@@ -694,8 +686,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertTrue(json.contains("Jane"));
     }
 
-
-
     /** Characters are scalars too, and a null element must be written as JSON {@code null}, not as nothing. */
     @Test
     public void testPersistToJson_charactersAndNulls() throws IOException {
@@ -705,8 +695,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertEquals("[\"a\",null,\"b\"]", writer.toString().replaceAll("\\s", ""));
         assertEquals(Arrays.asList("a", null, "b"), N.fromJson(writer.toString(), List.class));
     }
-
-
 
     /**
      * {@code persistToJson} must write each element as a JSON <i>value</i>, quoted and escaped.
@@ -725,8 +713,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertEquals("[\"A\",\"B\",\"C\"]", writer.toString().replaceAll("\\s", ""));
     }
 
-
-
     /**
      * A quote, a comma, a bracket or a {@code null} element must survive a round trip. Before the fix a null
      * element vanished entirely and any of the others made the document unparseable.
@@ -742,8 +728,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         assertEquals(elements, readBack);
     }
 
-
-
     /** Numbers, Maps and beans were already correct and must stay byte-identical. */
     @Test
     public void testPersistToJson_structuredElementsUnchanged() throws IOException {
@@ -755,8 +739,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         Stream.of(Map.of("key", "val1")).persistToJson(maps);
         assertEquals("[{\"key\":\"val1\"}]", maps.toString().replaceAll("\\s", ""));
     }
-
-
 
     // G089-01: persistToJson/persistToCsv(.., OutputStream) end in the Writer terminal's final flush too, so a failing flush
     // of the target is the documented IOException (it was the UncheckedIOException of the recycle's retry); the toLine
@@ -776,8 +758,6 @@ public class AbstractStreamConcurrencyTest extends AbstractStreamTestSupport {
         final IOException lineFailure = assertThrows(IOException.class, () -> Stream.of("a").persist(Fn.identity(), g122FlushFailingStream(lineFailures)));
         assertEquals("flush failed #1", lineFailure.getMessage());
     }
-
-
 
     // G089-01: same for persistToJson(Writer) and persistToCsv(.., Writer), which share the final flush/recycle step.
     @Test

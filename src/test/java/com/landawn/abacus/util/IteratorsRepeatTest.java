@@ -310,8 +310,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertEquals(2, result.size());
     }
 
-
-
     /**
      * Pins the "Live view" paragraph (C-322, 2026-09-24): if {@code c} has been emptied before the first
      * {@code next()}, it is treated like a shrunk source - {@code hasNext()} reports {@code false} and
@@ -327,8 +325,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, iter::next);
     }
-
-
 
     /**
      * The requested total must hold even if the source collection grows between the factory call and the first
@@ -359,8 +355,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertThrows(NoSuchElementException.class, iter::next);
     }
 
-
-
     /**
      * Pins the other half of the corrected "Live view" paragraph: a structural modification made <i>after</i> the
      * first {@code next()} is governed by the source collection's own iterator contract, so a fail-fast source
@@ -382,8 +376,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertEquals("a", iter.next());
         assertThrows(java.util.ConcurrentModificationException.class, iter::next);
     }
-
-
 
     /**
      * A source that shrinks behaves exactly as it did before the total-count guard was added.
@@ -419,8 +411,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertEquals(2, list.size());
     }
 
-
-
     /** An unmutated source is unaffected by the total-count guard. */
     @Test
     public void testRepeatElementsToSize_UnmutatedSourceIsUnchanged() {
@@ -451,8 +441,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertFalse(result.hasNext());
     }
 
-
-
     /**
      * The inherited terminal helpers are bounded by the same guard, because they all drive
      * {@code hasNext()}/{@code next()}.
@@ -463,8 +451,6 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
         assertEquals(4, grownAfterCreation(4).toArray().length);
         assertEquals(Arrays.asList("a", "a", "b", "b"), grownAfterCreation(4).toList());
     }
-
-
 
     /** A {@code repeatElementsToSize} iterator whose source gained three elements before it was first read. */
     private static ObjIterator<String> grownAfterCreation(final long size) {

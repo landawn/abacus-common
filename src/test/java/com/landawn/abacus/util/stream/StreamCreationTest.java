@@ -71,8 +71,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(3.0, 4.0, 5.0), doubleStream.skip(2).toList());
     }
 
-
-
     // of(char[], from, to): exercises count() (line 16650-16652) via terminal count().
     @Test
     public void testOfCharArrayRange_count_uncovered() {
@@ -102,9 +100,6 @@ public class StreamCreationTest extends StreamTestSupport {
         Stream<Integer> deferredStream = Stream.defer(supplier);
         assertEquals(Arrays.asList(1, 2, 3), deferredStream.toList());
     }
-
-
-
 
     // Self-returning deferred stream fails fast on the iterator, skip/limit and parallel paths too, and the failure is cached.
     @Test
@@ -137,9 +132,6 @@ public class StreamCreationTest extends StreamTestSupport {
         i2[0] = IntStream.defer(() -> i2[0]);
         assertThrows(IllegalStateException.class, () -> i2[0].parallel(4).boxed().toList());
     }
-
-
-
 
     // G123: Stream/EntryStream/primitive-stream defer reject a supplier that returns the deferred stream itself
     // (IllegalStateException instead of StackOverflowError).
@@ -327,16 +319,12 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(1, 3, 6, 2, 4, -1, -1, 5, -1), result);
     }
 
-
-
     // flatten(T[][], boolean) vertically=true with all-empty rows -> empty (line 18071).
     @Test
     public void testFlatten2DVertically_allEmpty_uncovered() {
         final Integer[][] a = { {}, {} };
         assertEquals(0, Stream.flatten(a, true).count());
     }
-
-
 
     // flatten(T[][], boolean) vertically=true with single row -> of(a[0]) (line 18059).
     @Test
@@ -345,16 +333,12 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(N.asList(1, 2, 3), Stream.flatten(a, true).toList());
     }
 
-
-
     // flatten(T[][], boolean) vertically=true (lines 18064-18111).
     @Test
     public void testFlatten2DVertically_uncovered() {
         final Integer[][] a = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
         assertEquals(N.asList(1, 3, 5, 2, 4, 6), Stream.flatten(a, true).toList());
     }
-
-
 
     // flatten(T[][], valueForAlignment, vertically=false) horizontal (lines 18189-18218).
     @Test
@@ -363,16 +347,12 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(N.asList(1, 2, 3, 4, 5, 0, 6, 0, 0), Stream.flatten(a, 0, false).toList());
     }
 
-
-
     // flatten(T[][], valueForAlignment, vertically) single row -> of(a[0]) (line 18139).
     @Test
     public void testFlatten2DWithAlignment_singleRow_uncovered() {
         final Integer[][] a = { { 7, 8 } };
         assertEquals(N.asList(7, 8), Stream.flatten(a, 0, false).toList());
     }
-
-
 
     // flatten(T[][], valueForAlignment, vertically=true) (lines 18135-18188).
     @Test
@@ -476,8 +456,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertTrue(result.isEmpty());
     }
 
-
-
     // G108-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -521,8 +499,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(expected, Stream.flatten(jagged, true).toList());
         assertEquals(0, Stream.flatten(new Integer[][] { null, {}, null }, true).count());
     }
-
-
 
     // G108-01: pins the column-major order of flatten(T[][], true) for jagged input with null/empty/short rows and null elements
     @Test
@@ -830,8 +806,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), generated.limit(5).toList());
     }
 
-
-
     // generate(Supplier) limited (line 18539).
     @Test
     public void testGenerate_limited_uncovered() {
@@ -899,8 +873,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Stream.iterate(() -> true, (Supplier<Integer>) null).count());
     }
 
-
-
     // iterate(BooleanSupplier, Supplier) (lines 18349-18374).
     @Test
     public void testIterate_BooleanSupplierSupplier_uncovered() {
@@ -919,8 +891,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(0, 1, 2, 3, 4), result);
     }
 
-
-
     // iterate(init, BooleanSupplier, UnaryOperator) (lines 18398-18425).
     @Test
     public void testIterate_InitBooleanSupplierUnary_uncovered() {
@@ -928,8 +898,6 @@ public class StreamCreationTest extends StreamTestSupport {
         final BooleanSupplier hasNext = () -> remaining.getAndDecrement() > 0;
         assertEquals(N.asList(1, 2, 4, 8, 16), Stream.iterate(1, hasNext, x -> x * 2).toList());
     }
-
-
 
     // iterate(init, Predicate, UnaryOperator) (lines 18448-18480).
     @Test
@@ -1076,8 +1044,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(2, 3), result);
     }
 
-
-
     // of(Iterator, from, to): static factory exercising skip+limit composition (line 16419).
     @Test
     public void testOfIteratorRange_uncovered() {
@@ -1116,8 +1082,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(10, files.size());
     }
 
-
-
     /**
      * {@code Stream.listFiles(dir, true)} must not descend into a Windows directory junction.
      *
@@ -1150,8 +1114,6 @@ public class StreamCreationTest extends StreamTestSupport {
             unlinkQuietly(loop);
         }
     }
-
-
 
     /**
      * A junction needs no cycle to be dangerous: one pointing outside the tree made the traversal report
@@ -1773,8 +1735,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(false, true), result);
     }
 
-
-
     // of(boolean[], from, to)
     @Test
     public void testOfBooleanArrayRange_uncovered() {
@@ -1789,8 +1749,6 @@ public class StreamCreationTest extends StreamTestSupport {
         List<Byte> result = Stream.of(arr).toList();
         assertEquals(Arrays.asList((byte) 1, (byte) 2, (byte) 3), result);
     }
-
-
 
     // of(byte[], from, to): count/advance/toArray.
     @Test
@@ -1842,8 +1800,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(0, Stream.of(empty, 0, 0).count());
     }
 
-
-
     // of(Collection, from, to) where subrange is full collection vs partial - covers line 16302/16304.
     @Test
     public void testOfCollectionRange_partial_uncovered() {
@@ -1864,8 +1820,6 @@ public class StreamCreationTest extends StreamTestSupport {
         List<Double> result = Stream.of(arr).toList();
         assertEquals(Arrays.asList(1.0, 2.0, 3.0), result);
     }
-
-
 
     // of(double[], from, to)
     @Test
@@ -1902,8 +1856,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(1.0f, 2.0f, 3.0f), result);
     }
 
-
-
     // of(float[], from, to)
     @Test
     public void testOfFloatArrayRange_uncovered() {
@@ -1926,8 +1878,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(2, 3, 4), result);
     }
 
-
-
     // of(int[], from, to)
     @Test
     public void testOfIntArrayRange_uncovered() {
@@ -1943,9 +1893,6 @@ public class StreamCreationTest extends StreamTestSupport {
         Stream<Integer> stream = Stream.of(iterable);
         assertEquals(Arrays.asList(1, 2, 3), stream.toList());
     }
-
-
-
 
     // of(Iterable) where iterable is NOT a Collection -> goes through of(iterable.iterator()) branch (line 16366).
     @Test
@@ -2285,8 +2232,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(2L, 3L, 4L), result);
     }
 
-
-
     // of(long[], from, to)
     @Test
     public void testOfLongArrayRange_uncovered() {
@@ -2323,8 +2268,6 @@ public class StreamCreationTest extends StreamTestSupport {
         Stream<String> stream2 = Stream.ofNullable(null);
         assertTrue(stream2.toList().isEmpty());
     }
-
-
 
     // ofNullable(non-null) (around line 16179).
     @Test
@@ -2428,8 +2371,6 @@ public class StreamCreationTest extends StreamTestSupport {
         List<Short> result = Stream.of(arr).toList();
         assertEquals(Arrays.asList((short) 1, (short) 2, (short) 3), result);
     }
-
-
 
     // of(short[], from, to)
     @Test
@@ -2615,8 +2556,6 @@ public class StreamCreationTest extends StreamTestSupport {
         assertTrue(noRepeat.toList().isEmpty());
     }
 
-
-
     // repeat: count() override (line 18301-18305).
     @Test
     public void testRepeat_count_uncovered() {
@@ -2632,15 +2571,11 @@ public class StreamCreationTest extends StreamTestSupport {
         assertEquals(largeCount, actualCount);
     }
 
-
-
     // repeat: advance() override via skip (line 18292-18298).
     @Test
     public void testRepeat_skip_uncovered() {
         assertEquals(N.asList("x", "x"), Stream.repeat("x", 5).skip(3).toList());
     }
-
-
 
     // repeat: toArray() override (line 18308-18321).
     @Test
@@ -2666,8 +2601,6 @@ public class StreamCreationTest extends StreamTestSupport {
         Stream<String> stream = Stream.repeat("a", 0);
         assertEquals(0, stream.count());
     }
-
-
 
     // of(char[], from, to): exercises advance() (line 16656-16661) via skip().
     @Test
@@ -2698,8 +2631,6 @@ public class StreamCreationTest extends StreamTestSupport {
         Integer[] intResult = createStream(intArray).toArray(Integer[]::new);
         assertArrayEquals(new Integer[] { 10, 20, 30 }, intResult);
     }
-
-
 
     // of(char[], from, to): exercises toArray() override (line 16665-16672).
     @Test

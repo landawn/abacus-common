@@ -87,14 +87,22 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Returns {@code null} for a {@code null}, empty, or blank input string.
      * Returns an empty array for the string {@code "[]"}.
      *
+     * <p>A non-{@code null} element may also be enclosed in a matching pair of double or single quotes (for example
+     * {@code ["1", 2]}), as {@code Long[]}, the primitive array types and the JSON parser accept; the quotes are
+     * removed and the JSON escapes in the content are decoded once before the element is parsed. An empty quoted
+     * element is rejected as a malformed number rather than read as {@code null}. A quoted {@code "null"} is not a
+     * {@code null} element.</p>
+     *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse; may be {@code null}, empty, or blank
      * @return the parsed {@code Byte[]}, or {@code null} if {@code str} is {@code null}, empty, or blank
-     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if a non-{@code null} element is not a valid integer literal
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a quoted element
+     *         contains a malformed Unicode escape
+     * @throws NumberFormatException if a quoted element is empty, or a non-{@code null} element (after removing
+     *         enclosing quotes and decoding escapes once, if quoted) is not a valid integer literal
      * @throws ArithmeticException if an element is outside the {@code byte} range
      * @see #valueOf(Object)
      * @see #stringOf(Byte[])
@@ -123,7 +131,10 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
                 if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
                     array[i] = null;
                 } else {
-                    array[i] = elementType.valueOf(elements[i]);
+                    // A quoted element (["1", 2]) is read like an unquoted one, as Long[], the primitive arrays and
+                    // N.fromJson do; it can contain JSON escapes. The helper leaves empty quoted tokens intact so they
+                    // still fail instead of becoming null.
+                    array[i] = elementType.valueOf(jsonElementContent(elements[i]));
                 }
             }
         }

@@ -245,5 +245,4 @@ public class SheetPutTest extends SheetTestSupport {
         assertEquals(Integer.valueOf(100), sheet.get(point));
     }
 
-
 }

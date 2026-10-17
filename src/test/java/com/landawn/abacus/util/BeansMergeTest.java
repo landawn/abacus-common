@@ -124,8 +124,6 @@ public class BeansMergeTest extends BeansTestSupport {
         assertEquals("NYC", unmatched.getCity());
     }
 
-
-
     /**
      * A {@code null} source is a no-op for every {@code mergeInto}/{@code mergeIntoIf} overload: the target is
      * returned unchanged and its class is not inspected, so a non-bean target is not rejected either.

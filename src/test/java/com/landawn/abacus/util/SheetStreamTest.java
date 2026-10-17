@@ -148,8 +148,6 @@ public class SheetStreamTest extends SheetTestSupport {
         assertEquals(expectedRowMajor(s, 0, 4).subList(2, 9), s.rowMajorStream().skip(2).limit(7).toList());
     }
 
-
-
     // rowMajorStream/columnMajorStream step a (row, column) pair along with the cursor and re-derive it only after
     // advance(..), count() or values returned while the Sheet had no storage. These pin every path of that bookkeeping.
     @Test

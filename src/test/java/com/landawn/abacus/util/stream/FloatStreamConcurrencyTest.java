@@ -91,8 +91,6 @@ public class FloatStreamConcurrencyTest extends FloatStreamTestSupport {
         }
     }
 
-
-
     // Parallel operations
     @Test
     @DisplayName("parallel stream operations additional")

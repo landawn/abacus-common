@@ -714,11 +714,11 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                 private short next;
                 private boolean exhausted;
                 private Iterator<? extends Short> cur = null;
-                private Collection<? extends Short> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextShort();
@@ -729,11 +729,17 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends Short> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1069,11 +1075,11 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                 private short next;
                 private boolean exhausted;
                 private Iterator<? extends T> cur = null;
-                private Collection<? extends T> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && !exhausted) {
+                        cur = null;
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextShort();
@@ -1084,11 +1090,17 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends T> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override
@@ -1109,9 +1121,8 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
     /**
      * Returns a stream consisting of the elements of this stream, additionally performing the
      * provided action on each element as elements are consumed from the resulting stream. The
-     * action may be invoked concurrently from multiple worker threads before the result is
-     * mapped back to shorts. Falls back to sequential execution if the thread count is
-     * insufficient to justify parallel overhead.
+     * action may be invoked concurrently from multiple worker threads. Falls back to
+     * sequential execution if the thread count is insufficient to justify parallel overhead.
      *
      * <p>This is an intermediate operation primarily intended for debugging and logging purposes.
      *

@@ -31,8 +31,6 @@ import com.landawn.abacus.util.u.OptionalShort;
 
 public class uOptionalApiTest extends uTestSupport {
 
-
-
     /**
      * Pins the "Checked exceptions" row of the JDK-comparison tables in the {@code OptionalInt},
      * {@code OptionalLong} and {@code OptionalDouble} class javadocs, and the matching bullet in
@@ -91,8 +89,6 @@ public class uOptionalApiTest extends uTestSupport {
         assertThrows(IOException.class, () -> OptionalLong.empty().orElseThrow(() -> new IOException("boom")));
         assertThrows(IOException.class, () -> OptionalDouble.empty().orElseThrow(() -> new IOException("boom")));
     }
-
-
 
     /**
      * Completes the coverage of the "Checked exceptions" doc row: {@link #testCheckedExceptionDocContract()}
@@ -496,8 +492,6 @@ public class uOptionalApiTest extends uTestSupport {
         assertEquals("OptionalShort[100]", present.toString());
         assertEquals("OptionalShort.empty", OptionalShort.empty().toString());
     }
-
-
 
     /** The one-argument declared overloads of {@code name} on {@code cls}, by parameter type, name-sorted. */
     private static List<Class<?>> oneArgParamTypes(final Class<?> cls, final String name) {

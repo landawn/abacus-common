@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -99,13 +100,19 @@ import com.landawn.abacus.util.cs;
  * names are converted to Avro enum symbols for {@code enum} fields; an undefined symbol fails with
  * {@code IllegalArgumentException}. A {@code byte[]} value is written to a {@code bytes} field, or to a {@code fixed}
  * field when its length is exactly the fixed size (otherwise {@code IllegalArgumentException}); a {@code bytes} or
- * {@code fixed} datum is read back into a {@code byte[]} property, element or map value. Bean properties and map keys that are not fields of the record schema are
+ * {@code fixed} datum is read back into a {@code byte[]} property, element or map value. Java object and primitive arrays
+ * such as {@code String[]} or {@code int[]} (and {@code byte[]} for an {@code array} schema) are written to an {@code array}
+ * field like a collection of their elements, and an {@code array} datum is read into an array-typed property, element or map
+ * value as an array of its component type, converting each item like a collection element (a null item leaves the default,
+ * such as {@code 0}, in a primitive array; an Avro {@code bytes} item read into a primitive numeric
+ * or wrapper component such as {@code int[]} or {@code Long[]} fails with {@code NumberFormatException}).
+ * Bean properties and map keys that are not fields of the record schema are
  * rejected by default, including null-valued properties and keys; {@link AvroSerConfig#setIgnoreUnknownFields(boolean) setIgnoreUnknownFields(true)}
  * explicitly enables projection that discards those fields, including in nested records.</p>
  *
  * <p>For serialization with a supplied schema, a collection under a record schema writes zero or
  * more record datums; an array schema writes exactly one array datum, including for an empty collection.
- * Nested beans/maps/collections are converted using their field, value and element schemas. Nullable
+ * Nested beans/maps/collections/arrays are converted using their field, value and element schemas. Nullable
  * unions with one non-null branch use that branch; other unions use Avro's datum-based resolution.
  * An explicit array schema is honored for SpecificRecord collections; otherwise their record schema
  * is inferred as before. Without an explicit array schema, inferred SpecificRecord collections must
@@ -398,7 +405,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     private static final Type<Long> LONG_TYPE = Type.of(long.class);
 
     /**
-     * Converts nested Java containers according to their datum schema, range-checks {@code Number} values for
+     * Converts nested Java containers (including Java arrays for an {@code array} schema) according to their datum schema, range-checks {@code Number} values for
      * {@code int}/{@code long} schemas with the same {@link Type} conversion the read side uses, and converts
      * enum values to Avro symbols and {@code byte[]} values to the {@code ByteBuffer}/{@code GenericFixed} a {@code bytes}/{@code fixed}
      * schema requires.
@@ -458,6 +465,16 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                     final Collection<Object> result = new ArrayList<>(collection.size());
                     for (final Object element : collection) {
                         result.add(toAvroDatum(element, schema.getElementType(), ignoreUnknownFields));
+                    }
+                    return result;
+                }
+                if (value.getClass().isArray()) {
+                    // GenericDatumWriter requires a Collection for an array schema, so a String[]/int[] (any object or
+                    // primitive array, byte[] included) bean property or map value failed the write with a ClassCastException.
+                    final int length = Array.getLength(value);
+                    final Collection<Object> result = new ArrayList<>(length);
+                    for (int i = 0; i < length; i++) {
+                        result.add(toAvroDatum(Array.get(value, i), schema.getElementType(), ignoreUnknownFields));
                     }
                     return result;
                 }
@@ -1135,6 +1152,10 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             }
             return result;
         }
+        // Type.isArray(), not javaType().isArray(): scalar types over byte[] (Bytes, Base64Encoded) have no element type.
+        if (value instanceof Collection<?> collection && targetType.isArray()) {
+            return convertAvroArray(collection, targetType, ignoreUnmatchedProperty);
+        }
         if (value instanceof ByteBuffer buffer && targetType.javaType() == byte[].class) {
             // An Avro bytes datum: Type.valueOf(Object) goes through the buffer's toString() and silently answered null.
             final byte[] bytes = new byte[buffer.remaining()];
@@ -1146,6 +1167,52 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             return fixed.bytes().clone();
         }
         return targetType.javaType().isInstance(value) ? value : targetType.valueOf(value);
+    }
+
+    /**
+     * Converts an Avro array datum to a Java array of the component type of {@code targetType}, converting each
+     * item like a collection element.
+     *
+     * @throws IllegalArgumentException if an item cannot be converted to the component type
+     * @throws NumberFormatException if an Avro {@code bytes} item is read into a {@code byte}/{@code short}/{@code int}/{@code long}/
+     *         {@code float}/{@code double} (or wrapper) component
+     * @throws ParsingException if an item record contains an unmatched property and {@code ignoreUnmatchedProperty} is false
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric component type
+     */
+    private Object convertAvroArray(final Collection<?> source, final Type<?> targetType, final boolean ignoreUnmatchedProperty)
+            throws IllegalArgumentException, ParsingException, ArithmeticException {
+        // Type.valueOf(Object) went through the datum's string form, which only worked for numeric/boolean items
+        // (Utf8, record, enum and bytes items failed or were lost), so convert item by item instead.
+        // Deliberately stricter than that string round trip: each item follows the same rules as a List element or a
+        // single field (a long 1/0 is not a boolean, 1.5 is not a BigInteger) instead of being re-parsed as text.
+        final Type<?> elementType = targetType.elementType();
+        final Object result = Array.newInstance(targetType.javaType().getComponentType(), source.size());
+        int index = 0;
+
+        for (final Object element : source) {
+            // Type.valueOf(ByteBuffer) answers null for a numeric type, which would silently store 0/null here; the
+            // string-based conversion this replaced threw NumberFormatException for such items, so keep failing.
+            if (element instanceof ByteBuffer && isPrimitiveNumberClass(elementType.javaType())) {
+                throw new NumberFormatException("An Avro bytes item cannot be converted to " + elementType.name());
+            }
+
+            final Object converted = convertAvroValue(element, elementType, ignoreUnmatchedProperty);
+
+            // A null item keeps the primitive default (0, false, '\0') of a primitive array, as the
+            // string-based conversion did and as a null primitive bean property does.
+            if (converted != null) {
+                Array.set(result, index, converted);
+            }
+
+            index++;
+        }
+
+        return result;
+    }
+
+    private static boolean isPrimitiveNumberClass(final Class<?> cls) {
+        return cls == int.class || cls == Integer.class || cls == long.class || cls == Long.class || cls == double.class || cls == Double.class
+                || cls == byte.class || cls == Byte.class || cls == short.class || cls == Short.class || cls == float.class || cls == Float.class;
     }
 
     /**

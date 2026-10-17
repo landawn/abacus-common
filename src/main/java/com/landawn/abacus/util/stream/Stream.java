@@ -24805,6 +24805,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The iterables are processed sequentially, maintaining the order of elements within each iterable
      * and the order of iterables as provided in the collection. If the collection is empty, an empty stream is returned.
      * The collection's membership and encounter order are snapshotted when this method is called.
+     * Each iterable's iterator is acquired lazily when traversal reaches that source; the supplied collection is not modified.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -24831,17 +24832,25 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final List<? extends Iterable<? extends T>> sources = new ArrayList<>(iterables);
 
         return of(new ObjIteratorEx<>() {
-            private final Iterator<? extends Iterable<? extends T>> iterators = sources.iterator();
-            private Iterable<? extends T> coll;
+            private final ListIterator<? extends Iterable<? extends T>> iterators = sources.listIterator();
             private Iterator<? extends T> cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iterators.hasNext()) {
-                    cur = (coll = iterators.next()) == null ? null : coll.iterator();
+                while (cur == null || !cur.hasNext()) {
+                    cur = null;
+
+                    if (!iterators.hasNext()) {
+                        return false;
+                    }
+
+                    final Iterable<? extends T> coll = iterators.next();
+                    // This snapshot slot is consumed even if obtaining the source iterator fails or reenters us.
+                    iterators.set(null);
+                    cur = coll == null ? null : coll.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                return true;
             }
 
             @Override
@@ -24862,6 +24871,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The iterators are processed sequentially, maintaining the order of elements within each iterator
      * and the order of iterators as provided in the collection. If the collection is empty, an empty stream is returned.
      * The collection's membership and encounter order are snapshotted when this method is called.
+     * Snapshotting does not traverse the supplied iterators or modify the supplied collection.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -24888,16 +24898,24 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final List<? extends Iterator<? extends T>> sources = new ArrayList<>(c);
 
         return of(new ObjIteratorEx<>() {
-            private final Iterator<? extends Iterator<? extends T>> iterators = sources.iterator();
+            private final ListIterator<? extends Iterator<? extends T>> iterators = sources.listIterator();
             private Iterator<? extends T> cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iterators.hasNext()) {
+                while (cur == null || !cur.hasNext()) {
+                    cur = null;
+
+                    if (!iterators.hasNext()) {
+                        return false;
+                    }
+
                     cur = iterators.next();
+                    // Only the current iterator must stay reachable; this snapshot is owned by the stream.
+                    iterators.set(null);
                 }
 
-                return cur != null && cur.hasNext();
+                return true;
             }
 
             @Override

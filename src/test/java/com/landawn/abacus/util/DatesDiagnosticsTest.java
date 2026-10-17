@@ -27,8 +27,6 @@ import com.landawn.abacus.util.Dates.DTF;
 /** Date resolution and diagnostic regression contracts. */
 public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
 
-
-
     // C-014: every auto-detected failure says "the auto-detected format" exactly once
     @Test
     public void c014_autoDetectedFailuresNameTheAutoDetectedFormatExactlyOnce() {
@@ -61,8 +59,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         }
     }
 
-
-
     // C-074 / C-075 (cycle 2): every auto-detected failure names "the auto-detected format", never a pattern
     @Test
     public void c074_c075_autoDetectedFailuresNeverNameAPatternTheCallerDidNotWrite() {
@@ -89,8 +85,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertTrue(explicit.getMessage().contains("with format 'yyyy-MM-dd'T'HH:mm:ss'Z''"), explicit.getMessage());
     }
 
-
-
     // C-047: the Calendar default names no pattern in its year-range error
     @Test
     public void c047_calendarDefaultYearRangeErrorUsesTheIso8601Wording() {
@@ -109,8 +103,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals("0001-01-01T00:00:00Z[UTC]", Dates.format(Dates.createCalendar(-62135596800000L, UTC)));
         assertEquals("9999-12-31T23:59:59.999Z[UTC]", Dates.format(Dates.createCalendar(253402300799999L, UTC)));
     }
-
-
 
     // C-119 revised 2026-10-04: distinguish unverifiable custom rules from supported but different rules.
     @Test
@@ -148,8 +140,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertTrue(Dates.isSameYear(registered, Dates.createCalendar(1736937045000L, NEW_YORK)));
     }
 
-
-
     // C-052: the DTF failure prints the error index once
     @Test
     public void c052_dtfParseFailurePrintsTheErrorIndexOnce() {
@@ -180,8 +170,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(0, count(zone, "at index"), zone);
     }
 
-
-
     // C-078: the DTF-routed branch of parse() names no fallback zone for text that carries its own
     @Test
     public void c078_dtfRoutedBranchNamesNoFallbackZoneForTextThatCarriesItsOwn() {
@@ -210,8 +198,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
                 Dates.parseToJUDate("2025-01-15T10:30:45+05:30[Asia/Kolkata]", Dates.ISO_ZONED_DATE_TIME_FORMAT, NEW_YORK).getTime());
         assertEquals(Instant.parse("2025-01-15T05:00:45.5Z").toEpochMilli(), Dates.parseToJUDate("2025-01-15T10:30:45.5+05:30", null, NEW_YORK).getTime());
     }
-
-
 
     // C-079: the explicit-zone Date/SQL and XMLGregorianCalendar defaults name no pattern in their
     // year-range error, exactly as the Calendar default (C-047) and the UTC default do
@@ -243,8 +229,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals("9999-12-31T23:59:59.999Z", Dates.format(new Timestamp(253402300799999L), null, UTC));
         assertEquals("-0001-12-31T23:59:59.999Z", Dates.format(xml));
     }
-
-
 
     // C-123 (cycle 3): a fixed-zone conflict on the java.time entry points names the caller's constant
     @Test
@@ -283,8 +267,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(expected, Dates.parseToInstant("Wed, 15 Jan 2025 10:30:45 GMT", Dates.HTTP_DATE_FORMAT, UTC));
     }
 
-
-
     // C-080: the fractional-offset auto branch reports "the auto-detected format" like every other
     @Test
     public void c080_fractionalOffsetAutoBranchReportsTheAutoDetectedFormatLikeEveryOther() {
@@ -304,8 +286,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(500_000_000, Dates.parseToTimestamp("2025-01-15T10:30:45.5+05:30").getNanos());
         assertEquals(1736917245500L, Dates.parseToXMLGregorianCalendar("2025-01-15T10:30:45.5+05:30").toGregorianCalendar().getTimeInMillis());
     }
-
-
 
     // C-133: parseISO8601 names the fallback zone only for zone-less text
     @Test
@@ -344,8 +324,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(1736955000000L, Dates.parseToJUDate("2025-01-15T10:30", null, NEW_YORK).getTime());
     }
 
-
-
     // C-139: the java.time targets report a malformed auto-detected ISO offset like the legacy ones
     @Test
     public void c139_javaTimeTargetsReportAMalformedAutoDetectedOffsetInTheLegacyFamily() {
@@ -376,8 +354,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(OffsetDateTime.of(2025, 1, 15, 10, 30, 45, 0, ZoneOffset.ofHoursMinutes(5, 30)), Dates.parseToOffsetDateTime("2025-01-15T10:30:45+05:30"));
         assertTrue(messageOf(() -> Dates.parseToInstant("2025-01-15T10:30:45.123+5:30")).startsWith("Cannot detect a date/time format"));
     }
-
-
 
     // C-122 (cycle 3): one diagnostic per malformed auto-detected text on every legacy target
     @Test
@@ -430,8 +406,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertTrue(gap.getMessage().contains("Nonexistent"), gap.getMessage());
     }
 
-
-
     // C-016: one DST gap/overlap wording whichever resolver reports it
     @Test
     public void c016_overlapAndGapAreTaggedOnEveryAutoDetectedPath() {
@@ -467,8 +441,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
             TimeZone.setDefault(saved);
         }
     }
-
-
 
     // C-135: one ArithmeticException shape across the add*/roll family
     @Test
@@ -518,8 +490,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertEquals(Long.MIN_VALUE, Dates.addMilliseconds(min, 0L).getTime());
     }
 
-
-
     // C-073 (cycle 2): a set* whose target leaves the epoch-millisecond range is an ArithmeticException
     @Test
     public void c073_setterTargetBeyondTheEpochRangeIsAnArithmeticException() {
@@ -560,8 +530,6 @@ public class DatesDiagnosticsTest extends DatesResolutionTestSupport {
         assertThrows(ArithmeticException.class, () -> Dates.setDays(max, 18));
         assertThrows(ArithmeticException.class, () -> Dates.setMonths(min, 0));
     }
-
-
 
     // C-045: year 0000 reports the year-range diagnostic on every entry point
     @Test

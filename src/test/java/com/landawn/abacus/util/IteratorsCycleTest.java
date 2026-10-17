@@ -79,8 +79,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertFalse(iter.hasNext());
     }
 
-
-
     /** B4: a Collection is cycled in place, so later changes to it are visible. */
     @Test
     public void testCycleIterable_collectionIsALiveViewNotASnapshot() {
@@ -108,8 +106,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertThrows(java.util.ConcurrentModificationException.class, failFastIter::next);
     }
 
-
-
     /**
      * The Iterator contract: {@code while (it.hasNext()) it.next()} must terminate rather than throw. The infinite
      * {@code cycle(Collection)} used to hard-code {@code hasNext() == true}, so a drained source reported an element
@@ -134,8 +130,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList("a", "b"), seen);
         assertFalse(infinite.hasNext());
     }
-
-
 
     /** B4: a non-Collection Iterable cannot be assumed re-iterable, so it is still snapshotted after round one. */
     @Test
@@ -166,8 +160,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         }
     }
 
-
-
     /** B4: emptying the source stops the cycle cleanly instead of spinning or throwing a message-less exception. */
     @Test
     public void testCycleIterable_sourceEmptiedAfterCreation() {
@@ -187,8 +179,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertFalse(rounds.hasNext(), "an emptied source must end the iteration rather than spin through the remaining rounds");
     }
 
-
-
     /** B4: a Collection cycled for a fixed number of rounds is a live view too, and still stops after {@code rounds}. */
     @Test
     public void testCycleIterableRounds_collectionIsALiveView() {
@@ -200,8 +190,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList("a", "MUT", "a", "MUT"), drainToList(iter));
         assertFalse(iter.hasNext());
     }
-
-
 
     /**
      * The javadoc of {@code cycle(Iterable, long)} promises that an emptied source "ends the iteration early
@@ -225,8 +213,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertFalse(iter.hasNext(), "the iteration has already ended; a later refill must not resurrect it");
         assertThrows(NoSuchElementException.class, iter::next);
     }
-
-
 
     /** The untouched path is unchanged: repeated queries neither skip nor duplicate a round. */
     @Test
@@ -322,8 +308,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), iter.toList());
     }
 
-
-
     /**
      * {@code hasNext()} is a query: how often it is called must not change what the iterator yields. The
      * {@code round} counter used to be incremented by {@code hasNext()} itself, so every call made while the
@@ -406,8 +390,6 @@ public class IteratorsCycleTest extends IteratorsTestSupport {
         ObjIterator<Integer> result = Iterators.cycleToSize(Arrays.asList(1, 2, 3), 0);
         assertFalse(result.hasNext());
     }
-
-
 
     /**
      * Drains {@code cycle(source, 5)} over a one-element source that is emptied after the first element and

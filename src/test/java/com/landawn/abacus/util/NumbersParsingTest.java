@@ -108,7 +108,6 @@ public class NumbersParsingTest extends NumbersTestSupport {
         assertEquals(expected, Numbers.tryCreateNumber(token).get(), token);
     }
 
-
     /**
      * Independent spelling of the sign + radix-prefix grammar: an optional sign, then {@code 0x}/{@code 0X}/{@code #}
      * for radix 16, a leading zero followed by another character for radix 8 when {@code octal} is set, ASCII

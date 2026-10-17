@@ -448,7 +448,6 @@ public class HBaseColumnTest extends TestBase {
         set.add(HBaseColumn.valueOf("a", 1L));
         set.add(HBaseColumn.valueOf("z", 9L));
 
-        Assertions.assertEquals(List.of(HBaseColumn.valueOf("z", 9L), HBaseColumn.valueOf("a", 1L), HBaseColumn.valueOf("v", 1L)),
-                new ArrayList<>(set));
+        Assertions.assertEquals(List.of(HBaseColumn.valueOf("z", 9L), HBaseColumn.valueOf("a", 1L), HBaseColumn.valueOf("v", 1L)), new ArrayList<>(set));
     }
 }

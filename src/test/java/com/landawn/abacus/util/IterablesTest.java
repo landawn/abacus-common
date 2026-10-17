@@ -84,8 +84,6 @@ public class IterablesTest extends IterablesTestSupport {
         assertEquals(Integer.valueOf(1), reversed.get(2));
     }
 
-
-
     /**
      * Pins the documented exception to "random-access in, random-access out": the reversed <i>view</i> of an
      * {@link ImmutableList} deliberately drops the {@link RandomAccess} marker, while a zero-/one-element
@@ -355,8 +353,6 @@ public class IterablesTest extends IterablesTestSupport {
         assertTrue(e.getMessage().contains("3") && e.getMessage().contains("1"), "message should name both sizes, was: " + e.getMessage());
     }
 
-
-
     // G048-01: a forward-overlapping self-copy took the snapshot path, which wrote through ListIterator.set; a
     // CopyOnWriteArrayList supports set(int, E) but not ListIterator.set, so only that overlap direction threw.
     @Test
@@ -400,8 +396,6 @@ public class IterablesTest extends IterablesTestSupport {
         Iterables.copyInto(backward, 3, backward, 1, 3); // destPos < srcPos: a forward copy is already safe
         assertEquals(Arrays.asList(0, 3, 4, 5, 4, 5), backward);
     }
-
-
 
     // G048-01: whether the copy into a RandomAccess destination succeeded depended on the SOURCE's type - a
     // non-RandomAccess source sent the writes through the destination's ListIterator.set.

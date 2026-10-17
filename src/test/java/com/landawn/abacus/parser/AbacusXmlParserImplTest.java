@@ -136,10 +136,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         return doc.getFirstChild();
     }
 
-
-
-
-
     // R4-01: an adopted type attribute naming a class whose codec cannot read text at all (Number) is a document error, reported as
     // ParsingException naming the attribute, the same on every backend and at every site (bean property, map value, map key, list
     // item under a typed root; a map value under an untyped root, where values adopt scalar attributes) instead of the codec's
@@ -186,8 +182,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals("5", r2bSameOnAllBackends(holderTag + "<open type=\"CharSequence\">5</open>" + holderEnd, null, holderType).getOpen());
     }
 
-
-
     // P4-06: SAX and DOM close the source; StAX leaves it open.
     @Test
     public void reviewFixes20260906_saxAndDomCloseTheSourceStaxDoesNot() {
@@ -218,8 +212,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(expectClosed, closed[1], type + " Reader closed");
         }
     }
-
-
 
     // R5-02: a value type configured for a bean property types its text on every backend, as on the DOM reader (and the standard
     // readers): the configuration wins over a scalar attribute, with and without type information; an Object configuration keeps
@@ -253,8 +245,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         final java.util.Date when = r2bSameOnAllBackends(root + "<when type=\"JUDate\">2024-01-02</when>" + end, longWhen, type).getWhen();
         assertEquals("2024-01-02", new java.text.SimpleDateFormat("yyyy-MM-dd").format(when));
     }
-
-
 
     // R5-05: a nested element in a String key or value slot is read with the slot's container metadata on every backend, as in an
     // open slot (the StAX reader read String items, the DOM reader typed a list but not a map); bean metadata does not open the
@@ -297,8 +287,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R5-04: container metadata on a nested map key or value is the container on every backend: under an explicit Object override
     // (the StAX reader read the nested element through an open slot) and on an open key with an uninstantiable container (the DOM
     // reader read it through the open Object key), a nested element that is no item of the container is rejected as without the
@@ -334,8 +322,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     stringMapType, ParsingException.class, notAnItem);
         }
     }
-
-
 
     // R5-01: a type attribute naming the declared class of a property whose codec cannot read text at all (Number) is the
     // ParsingException naming the attribute on every backend; it was that ParsingException on the DOM reader and the codec's
@@ -420,8 +406,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(81, restored.getAge());
     }
 
-
-
     // G144: DOM reads a bean with a type attribute in an untyped ARRAY item (the branch G143 changed for lists), and a list of an
     // INTERFACE element type reads its nested items as Object slots on every backend: DOM passed the interface, so it took the
     // node-name class instead of a misfitting type attribute and could not read a bean outside com.landawn.abacus.
@@ -446,8 +430,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G141: a bean held in an Object property is read through its type attribute on every backend; StAX already used it, DOM and
     // SAX only tried node-name discovery, which searches the com.landawn.abacus packages: "No bean class found for node name:
@@ -482,9 +464,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
-
     // G143: DOM reads a bean with a type attribute directly inside an untyped list item or map value (<e>, <value> without a
     // type attribute), as StAX and SAX do: it read such a slot as String, which no bean fits, and failed with "No bean class
     // found for node name". Root lists and maps as well.
@@ -513,8 +492,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01 neighbour: a bean in an Object property that is of the same class as the preceding list's element type (which SAX used
     // to get right only through the stale element type) is still read back on every backend, now by node-name discovery.
     @Test
@@ -542,8 +519,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(box, parser.deserialize(parser.serialize(box), G006Box.class), parserType.name());
         }
     }
-
-
 
     // G121 neighbours: below the root the configured bean element type still types the items of a list/array root, and SAX still
     // discovers a bean nested in an Object property of such an item through the configured element type.
@@ -574,8 +549,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(List.of(box), saxParser.deserialize(saxParser.serialize(List.of(box)), XmlDeserConfig.create().setElementType(G006Box.class), List.class));
     }
 
-
-
     // DOM (and StAX/SAX): a configured Map<String, Integer> value keeps its type arguments, while an unconfigured key of the
     // same map still reads with the default value type.
     @Test
@@ -592,8 +565,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals("3", result.get("y"), parserType.toString());
         }
     }
-
-
 
     // G006-02: the type attribute of a <key>/<value> wrapper holding a nested element is approved on DOM also when it is not used (a
     // configured value type, or a bean read without type information), as on StAX and SAX; DOM silently accepted an unapproved name.
@@ -621,8 +592,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01: the DOM reader dropped the type arguments of a configured map value type (List<Integer> read as List<String>).
     @Test
     public void testDeserialize_domMapValueKeepsConfiguredType() {
@@ -636,8 +605,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Arrays.asList(1, 2), result.get("x"), parserType.toString());
         }
     }
-
-
 
     // G121: at the root a configured bean element type no longer turns a bean root into that bean for a List/Map/Object
     // target - DOM (List/Map/Object) and SAX (List/Map) returned a G006Alpha where a List was requested; StAX rejected it.
@@ -660,8 +627,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-02: DOM started the root with the configured element type as the declared type, so a List<Integer> element type
     // was applied one level too deep: [[1, 2]] read back as [[[1], [2]]] (StAX and SAX read [[1, 2]]).
     @Test
@@ -679,8 +644,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(List.of(1, 2), array[0], parserType.name());
         }
     }
-
-
 
     // G006-02 completed for a map root: DOM took the key/value types of a configured Map<K, V> element type for the root map itself,
     // overriding even an explicitly typed target (key "7" read as a String, or NumberFormatException on key "a").
@@ -704,8 +667,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Map.of("a", 1), parser.deserialize(flat, Type.of("Map<String, Integer>")), parserType.name());
         }
     }
-
-
 
     // G144: an entry whose key is ignored (setIgnoredPropNames(Map.class, ..)) must still hold exactly one <value>: StAX and SAX
     // skipped the rest of it unchecked, where DOM reports it as malformed. Null values read the same on every backend.
@@ -737,8 +698,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-06: an ignored property was still bound when its element/name attribute used a case or snake-case variant that
     // BeanInfo.getPropInfo resolves to the same property (<firstname>, <first_name>).
     @Test
@@ -769,8 +728,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals("y", byAttribute.getLastName(), parserType + " name attribute");
         }
     }
-
-
 
     // G145: every backend gives the StAX result for an item whose declared type is an interface - an array component type or the
     // item's own <e type=..> - and for a value wrapper's type attribute under a root map without one (DOM took a misfitting type
@@ -814,8 +771,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertTrue(ex.getCause() instanceof IOException);
     }
 
-
-
     // G143: SAX rejects an <entry> that does not hold exactly one <key> and one <value> - a bean directly inside it was built and
     // dropped (the entry silently lost), and an empty entry was ignored - as StAX and DOM do.
     @Test
@@ -840,8 +795,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01 neighbours: a primitive type name fits its wrapper and is kept; one that does not fit the declared type is dropped on
     // every backend (StAX took <value type="long"> as a Long in a Map<String, Integer> and <key type="int"> as an Integer key).
     @Test
@@ -859,8 +812,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01: a map key/value type attribute that does not fit the declared key/value type is dropped on every backend, as the DOM
     // and SAX readers already drop it; StAX took it as is and returned a String key and a Long value in a Map<Integer, Integer>.
     @Test
@@ -877,8 +828,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Map.of("a", 5L), parser.deserialize(fitting, Type.<Map<String, Number>> of("Map<String, Number>")), parserType.name());
         }
     }
-
-
 
     // G145: an item wrapper <e> belongs directly in an array or collection; SAX added a nested one to the enclosing collection and
     // failed with NullPointerException. A pooled SAX handler is reused correctly after a failure inside an ignored entry.
@@ -901,8 +850,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                 sax.deserialize(holderStart + "<entry><key>k</key><value>v</value></entry>" + holderEnd, ignoring, G141Holder.class).getValues());
     }
 
-
-
     // G144: <entry> belongs directly in a map and <key>/<value> directly in an <entry>; SAX used the enclosing entry's state for
     // such elements nested in an item or value and failed with NullPointerException. Every backend rejects them.
     @Test
@@ -920,8 +867,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G115-03: an Optional map value nested two levels deep (Optional<Map<String, Optional<Bean>>>) is re-wrapped at both levels on every
     // backend, and a malformed wrapper (two child elements) fails without leaving per-frame state behind: the next document read by the
@@ -948,8 +893,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G143: the root check also applies through the nodeTypes overloads (the root element's mapped type).
     @Test
     public void testDeserialize_nodeTypesRootOfAnotherKindRejected() {
@@ -963,8 +906,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     parserType.name());
         }
     }
-
-
 
     // G134-01/02: Optional/Nullable items, keys and explicitly parameterized values: a List<Optional<Object>> root lost its wrappers (DOM,
     // SAX: root erasure) and its items' types (all readers: <e type="Integer">5</e> became Optional["5"]); an Optional key ignored its type
@@ -1006,8 +947,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G115-03: writeMap/writeCollection write a present Optional/Nullable key, value or item as the value it holds, so a bean, map,
     // list or array arrives as a nested element. All three readers read it with the wrapper type itself: the slot got a bare bean or
     // an ArrayList instead of Optional[...] (Map<String, Optional<List<String>>> gave [a, b]). Same defect as G010-01 in XmlParserImpl.
@@ -1044,8 +983,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(typed, parser.deserialize(typedXml, G115JdkOptionalValueHolder.class), parserType + " " + typedXml);
         }
     }
-
-
 
     // G134 neighbours (unchanged): without type information every wrapper keeps its value's shape (Strings, as for an unwrapped Object
     // value); an empty wrapper (the isNull marker) reads as null (the open G010-03 decision); a configured value type takes precedence over
@@ -1096,7 +1033,23 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
+    @Test
+    public void testDeserializeIgnoredJsonKeyDoesNotBecomeCompactMapContent() {
+        final String ignoredKey = "{\"x\":1}";
+        final XmlDeserConfig config = XmlDeserConfig.create().setIgnoredPropNames(Map.class, Set.of(ignoredKey));
+        final String entry = "<entry><key>" + ignoredKey + "</key><value>discard</value></entry>";
 
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+            for (final String separator : new String[] { "", "\n  " }) {
+                final String ignoredMap = "<map>" + separator + entry + separator + "</map>";
+                assertEquals(Map.of(), parser.deserialize(ignoredMap, config, Map.class), type.toString());
+                assertEquals(Map.of("outer", Map.of()),
+                        parser.deserialize("<map><entry><key>outer</key><value>" + ignoredMap + "</value></entry></map>", config, Map.class), type.toString());
+            }
+            assertEquals(Map.of("x", 1), parser.deserialize("<map>" + ignoredKey + "</map>", config, Map.class), type.toString());
+        }
+    }
 
     // G149: a pretty-printed entry whose key is ignored (whitespace between </key>, <value> and </entry>) is skipped on every
     // backend, and is still validated: exactly one <value>.
@@ -1125,8 +1078,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G121 for array targets: a bean root with a configured bean element type was returned as that bean for an Object[] or
     // G006Alpha[] target (DOM and SAX); every backend now rejects it, as StAX did.
     @Test
@@ -1142,8 +1093,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertThrows(ParsingException.class, () -> parser.deserialize(xml, config, G006Alpha[].class), parserType.name());
         }
     }
-
-
 
     // G142: the root check also covers InputStream and Node sources (separate SAX/DOM entry points), and a bean root read with a
     // configured bean element type for an Object target is never that bean (a bean outside com.landawn.abacus, so that node-name
@@ -1176,8 +1125,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals("m", assertInstanceOf(Map.class, contactValue, parserType.name()).get("mobile"), parserType.name());
         }
     }
-
-
 
     // G141: the kind of the root element no longer overrides the requested type: an <array>, <list> or <map> root was returned as
     // an array, list or map for a bean (or String) target - deserialize(xml, G141Omega.class) returned a G141Omega[] and failed
@@ -1213,8 +1160,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G134-01: a root whose type attribute names a subclass with another parameter layout (G134StringKeyMap<V> extends HashMap<String, V>,
     // written as type="...G134StringKeyMap<Object, Object>"): the declared Map<String, X> is the schema and the subclass is only
     // instantiated; no type argument is transplanted onto it.
@@ -1240,8 +1185,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertTrue(wrapped instanceof G134StringKeyMap, parserType + " " + wrapped.getClass().getName());
         }
     }
-
-
 
     // G134-01: all three readers let the root element's type attribute - the RAW runtime class, type="LinkedHashMap<Object, Object>" -
     // replace the declared root type, so with type information a declared Map<String, Optional<Object>> lost every wrapper. The declared
@@ -1270,8 +1213,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G134-01: the same root erasure dropped every other declared type argument below the root on all three readers (Map<String, Set<Integer>>
     // read lists, HashMap<String, List<Long>> Integers on StAX, a configured value type was not applied on DOM because the keys became Object),
@@ -1314,8 +1255,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01: the same leak inside a list item: the bean in an Object property of a List<G006Carrier> item was read as a G006Carrier.
     @Test
     public void testDeserialize_saxBeanInObjectPropertyOfListItemReadsItsOwnBean() {
@@ -1331,8 +1270,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(box, parser.deserialize(parser.serialize(box), G006Box.class), parserType.name());
         }
     }
-
-
 
     // G006-01: after a closed List<Set<G006Alpha>> / List<G006Alpha[]> property, SAX typed the list/array held by the following Object
     // property with that element type (anyList read as a Set of G006Alpha, anyArray as a G006Alpha[]).
@@ -1359,8 +1296,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01: a map nested in an Object value of a List<Map<Integer, Object>> item was typed as Map<Integer, Object> by SAX
     // and failed with NumberFormatException on its String key.
     @Test
@@ -1375,8 +1310,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(list, parser.deserialize(parser.serialize(list), Type.of("List<Map<Integer, Object>>")), parserType.name());
         }
     }
-
-
 
     // G006-02: the SAX reader did not ignore a null map key under the name it is written as ("null").
     @Test
@@ -1394,8 +1327,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Map.of("a", "2"), result, parserType.toString());
         }
     }
-
-
 
     // SAX: an ignored null key also skips a structured value, and a null key is kept when "null" is not an ignored name.
     @Test
@@ -1420,8 +1351,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-01: SAX kept the element type of a closed List<G006Alpha> property, so the bean held by the following Object
     // property was read as a G006Alpha (fields silently dropped, or "Unknown property" in strict mode).
     @Test
@@ -1441,8 +1370,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G149: SAX checks a bean's type attribute in an Object slot once (it was resolved twice); the approval policy still applies.
     @Test
     public void testDeserialize_saxObjectSlotTypeAttributeStillApproved() {
@@ -1459,8 +1386,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertThrows(ParsingException.class, () -> strict.deserialize(doc, List.class), parserType.name());
         }
     }
-
-
 
     // G006-02: SAX classified a non-<e> child of <list>/<array> by its name, so it dropped, misread or crashed on items
     // that the StAX and DOM readers read as item wrappers.
@@ -1487,8 +1412,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G145: sibling items of a root container each decide whether type attributes are used, as on StAX/DOM: SAX kept the first
     // item's decision for the document, so a later item's type attribute was ignored.
     @Test
@@ -1508,8 +1431,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(List.of(omega, contact), parser.deserialize(xml, config, List.class), parserType.name());
         }
     }
-
-
 
     // G146: items of a root container written in the name-attribute format (<bean name=..><property name=..>) next to items in the
     // tag format each decide their own format, as on StAX/DOM: SAX kept the first item's decision ("Missing 'name' attribute").
@@ -1535,8 +1456,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G142: DOM and SAX use a bean's type attribute only in an Object (or untyped) slot, as StAX does. For a typed slot whose
     // attribute names a class that does not fit (G142Other in a G142Shape property, a bean inside a Map property) they took the
@@ -1567,8 +1486,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G119-01: with writeTypeInfo a java.time.Duration property or map value is written with its handler's name (type="JdkDuration"),
     // which every backend rejected - the same defect as the JdkOptional names of G115-02.
     @Test
@@ -1591,8 +1508,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G115-02: with writeTypeInfo the property type attribute names the java.util optional handlers (type="Map<String,
     // JdkOptional<String>>"), which every backend rejected; those names of already approved classes are accepted now.
@@ -1743,8 +1658,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R5-03: an explicit Object value-type override keeps the text of a map value on every backend when the value's type attribute
     // names a bean class (the SAX reader converted the text with the bean class: "Can't parse", a bean read from JSON text, null for
     // empty text); a nested element carrying the bean class is still read as that bean.
@@ -1766,8 +1679,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     root + "<entry><key>k</key><value type=\"" + childClass + "\">" + childElement + "</value></entry></map>", override, stringMapType), root);
         }
     }
-
-
 
     // G01-02: writeBean rejected a bean with no serializable property whatever failOnEmptyBean said, while the
     // JSON writer already honoured the flag - and serialize's own javadoc promised this one did too.
@@ -1797,8 +1708,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertThrows(ParsingException.class, () -> parser.serialize(bean, XmlSerConfig.create().setFailOnEmptyBean(true)), type.toString());
         }
     }
-
-
 
     // G01-08: a wrapper in map-KEY position was the one place left unwrapped, so an empty wrapper key wrote the
     // JSON literal "null" and, under writeTypeInfo, a type attribute the readers reject.
@@ -1830,8 +1739,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertNotNull(parser.deserialize(plain, Map.class), plain);
         }
     }
-
-
 
     // G04-104: the DOM branches of read(..) look the target type up under the element's LOCAL name (or its
     // `name` attribute) but reported node.getNodeName() when nothing matched, naming a key they never searched
@@ -1870,8 +1777,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(2, result.get(1).getAge());
         }
     }
-
-
 
     // G006-03: without circular-reference support no identity set is consulted; with it, cycles and shared references keep their output.
     @Test
@@ -1922,8 +1827,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R5-06: an Object[] property item holding a nested array, read under a String element configuration, keeps the nested
     // Object[] on every backend (the StAX and DOM readers built a String[], or failed with "Unsupported class type" on the StAX
     // reader under the attribute name style).
@@ -1944,8 +1847,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Object[].class, arr[1].getClass(), xml);
         }
     }
-
-
 
     /**
      * The ignored-name filter tested a null map key by passing the bare {@code null} to
@@ -1984,8 +1885,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R5-07: a bean property element without content is read as empty text on the StAX reader too, with the same type selection
     // as text (it read the attribute's type even where text ignores it, ignored the property's format and the Optional payload
     // refinement): an Object property keeps "" under a primitive or an ignored scalar attribute, an Optional<Object> property
@@ -2016,8 +1915,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         holder.setAmount(1234);
         assertEquals(1234, r2bSameOnAllBackends(parserOf(XmlParserType.StAX).serialize(holder), null, type).getAmount());
     }
-
-
 
     // G11-01: the empty element of a property-less class is pinned on every backend for the first write (the name tags
     // are built) and the later ones (the tags are cached per class): root, list, map value and bean property, both tag
@@ -2083,8 +1980,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R3-03: a bean-shaped element in an open slot that holds a bean-shaped element of its own reads as nested maps on every
     // backend, in a list item, an Object property and a map value (the SAX handler took the inner element for a map node when it
     // closed: it popped the enclosing map's key/value types, or failed on an empty queue inside a list item or an Object property).
@@ -2125,8 +2020,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(expected, holder.getOpen());
         assertEquals(expectedDeeper, r2bSameOnAllBackends(holderTag + "<open>" + deeper + "</open>" + holderEnd, null, Type.of(R2BHolder.class)).getOpen());
     }
-
-
 
     // G05-01: bean properties whose element carries a type attribute on the DOM backend (the approval result now feeds getConcreteClass
     // instead of a second read and resolution of the same attribute): the declared class, a subclass, an incompatible class, a
@@ -2193,8 +2086,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G05-01: list/array items and the open map key/value fallback with type attributes on the DOM backend (resolveItemType(Node, Type)
     // now reads and approves the attribute once): compatible metadata is adopted, incompatible metadata and a blank attribute keep the
     // declared type, a primitive name fits its wrapper, an open item adopts scalars and containers (an uninstantiable container as an
@@ -2251,8 +2142,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     parserType.name());
         }
     }
-
-
 
     // R2B-02: the Abacus DOM reader reads and approves a node's type attribute once (bean property, list / array item, map key and
     // value) and hands the result to the text and nested value readers, which used to resolve it again. Pins the values and the
@@ -2535,8 +2424,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(31, ((Person) result).getAge());
     }
 
-
-
     // R2B-01: the Abacus StAX reader skips refineSlot for a scalar, bean or Object property (refineSlot hands such a schema back
     // unchanged, see AbstractXmlParser.isRefinableSlot) and still refines container, array and wrapper slots. Pins every slot kind
     // of the bean-property path (JSON-text and child-element form, null markers, empty text, the writer's output with and without
@@ -2675,8 +2562,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R3-02: an explicit Object value-type override is an open slot of its own on every backend: a scalar attribute does not type
     // its text (the SAX reader adopted it), container metadata is adopted, and a nested element carrying an approved bean class
     // is read as that bean (the DOM reader read it as a map of its properties); without the override the scalar attribute types
@@ -2714,9 +2599,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     r2bSameOnAllBackends(root + "<entry><key>k</key><value type=\"Integer\">2</value></entry></map>", longValue, stringMapType), root);
         }
     }
-
-
-
 
     // R3-01: a nested map KEY whose type attribute names a bean class is read as that bean on every backend, under a typed and an
     // untyped root (the DOM reader handed its nested reader the declared Object key type and read the bean as a map of its
@@ -2756,8 +2638,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     root + "<entry><key>k</key><value type=\"" + childClass + "\">" + beanChild + "</value></entry></map>", null, openMapType), root);
         }
     }
-
-
 
     // R2A-03: an attribute class that is not approved still fails on every backend, with and without type information; a property
     // declared as a concrete scalar (int, String) keeps its own codec whatever scalar the attribute names; an interface-declared
@@ -2803,8 +2683,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R2A-01: with type information honoured, an approved scalar type attribute on an Object property names the value's type on every
     // backend (RED on base for StAX and SAX, which read the declared Object's text); text the adopted type cannot read fails on every
     // backend as it failed on the DOM reader; the properties beside the adopted one keep their own codecs.
@@ -2839,8 +2717,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R2A-02: the shapes the DOM reader does not adopt stay the declared Object's text on every backend: a primitive name, the Object
     // name, no or a blank attribute, and any scalar attribute while type information is ignored (root without a type attribute); a
     // null marker wins over the attribute and any text; container metadata is still adopted as before.
@@ -2864,8 +2740,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         r2aAssertOpen("true", untyped.replace(R2A_OPEN_UNTYPED, "<open type=\"Boolean\">true</open>"));
         r2aAssertOpen(null, untyped.replace(R2A_OPEN_UNTYPED, "<open type=\"Long\" isNull=\"true\"></open>"));
     }
-
-
 
     // G006-02: a StAX item/key/value wrapper keeps a single text fragment without copying it; joined fragments stay the same.
     @Test
@@ -2903,8 +2777,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P4-05: the JSON text form of a collection is read by SAX and DOM as it is by StAX.
     @Test
     public void reviewFixes20260906_collectionJsonTextForm() {
@@ -2920,8 +2792,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(List.of("x", "y"), back.getTags(), type.toString());
         }
     }
-
-
 
     // P4-12: Dataset is documented as unsupported.
     @Test
@@ -2948,8 +2818,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P4-10: isNull="true" wins over text on every reader.
     @Test
     public void reviewFixes20260906_isNullAttributeWinsOverText() {
@@ -2970,8 +2838,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Arrays.asList(null, "y"), l, type.toString());
         }
     }
-
-
 
     // P4-07: malformed map entries / stray elements are ParsingExceptions everywhere; mixed text is skipped everywhere.
     @Test
@@ -3001,8 +2867,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P4-08: namespace-prefixed documents match on the local name in all three readers.
     @Test
     public void reviewFixes20260906_namespacePrefixedDocument() {
@@ -3019,8 +2883,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals("a", viaNodeTypes.getName(), type.toString());
         }
     }
-
-
 
     // P4-09: nodeTypes lookup falls back to the tag name when the name attribute is present but empty.
     @Test
@@ -3064,8 +2926,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(Character.valueOf('y'), back.getBoxed());
         }
     }
-
-
 
     // T6-02: empty optionals are written as the null form, present ones as their element, tuple-likes as JSON text.
     @Test
@@ -3152,8 +3012,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P4-02: pretty-printed EMPTY array (non-serializable element type) on SAX and DOM.
     @Test
     public void reviewFixes20260906_prettyPrintedEmptyArrayReadsBackEmpty() {
@@ -3205,8 +3063,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P5-06: raw JSON payloads are XML-escaped for & < > only and decode back verbatim.
     @Test
     public void reviewFixes20260906_rawJsonValueIsXmlEscaped() {
@@ -3231,8 +3087,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertThrows(ParsingException.class, () -> parserOf(XmlParserType.StAX).serialize(control));
     }
 
-
-
     // P4-04: a root element marked isNull="true" is null on every reader.
     @Test
     public void reviewFixes20260906_rootIsNullYieldsNull() {
@@ -3250,8 +3104,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // P4-11: root scalar contract pinned (documented, not changed).
     @Test
     public void reviewFixes20260906_rootScalarContractPinned() {
@@ -3264,8 +3116,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertArrayEquals(new int[] { 1, 2 }, parserOf(type).deserialize("<array><e>1</e><e>2</e></array>", int[].class), type.toString());
         }
     }
-
-
 
     // R-P04 / P5-12: content after the root element is rejected for bounded sources; open sources are not drained.
     @Test
@@ -3295,8 +3145,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals("a", parserOf(XmlParserType.StAX).deserialize(twoDocs, Person.class).getName());
         assertTrue(twoDocs.ready(), "the reader is left open");
     }
-
-
 
     // P4-03: an unwrapped nested bean is rejected instead of silently read as an empty bean.
     @Test
@@ -3348,8 +3196,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     type.toString());
         }
     }
-
-
 
     // R-P01 / P5-15 for this parser: the default configuration tracks no object identity, so a cyclic graph used
     // to unwind in StackOverflowError here while JsonParserImpl and XmlParserImpl already raised ParsingException.
@@ -3409,8 +3255,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals("<selfRef><name>a</name></selfRef>", parser.serialize(plain));
     }
 
-
-
     // writeUnwrappedValue routes a present wrapper through the same XML-1.0 guard as a plain property.
     @Test
     public void reviewFixes20260907_illegalCharactersInsideAWrapperAreRejected() {
@@ -3435,8 +3279,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // X-01, container half: a tuple-like map key/value, collection element or array element is written as its
     // JSON text, so it must NOT also carry a type attribute naming the tuple - the readers reject that name and
@@ -3507,8 +3349,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R02-3 (2026-09-08): the G04-85 fix added toElementNode to XmlParserImpl so that an org.w3c.dom.Document -
     // what DocumentBuilder.parse returns, and what most callers hand to deserialize(Node, ..) - is read as its
     // document element. AbacusXmlParserImpl, the sibling DOM reader with the identical overloads, was not
@@ -3542,8 +3382,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertNull(domParser.deserialize(noRoot, null, Person.class));
     }
 
-
-
     // R03-11 (2026-09-08): when the anchor class is a JDK class (a Map/List target), node-name discovery guesses
     // the package to scan from the call stack. Under the SAX backend the frames below the parser belong to the XML
     // implementation itself, so a caller inside com.landawn.abacus.parser resolves com.sun.org and
@@ -3575,8 +3413,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     type.toString());
         }
     }
-
-
 
     // G02-49: the child elements of a map entry are matched by name, not by position, in every reader. Read
     // positionally, StAX and DOM turned <key>a</key><key>b</key> into {a=b} and <value>1</value><key>k</key>
@@ -3614,8 +3450,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R03 review of G04-104: the StAX branches look the target type up under the root's `name` attribute,
     // falling back to its local name, but reported getLocalName() - naming a key they never searched for
     // whenever a name attribute is present. The same defect the DOM branches were corrected for.
@@ -3643,8 +3477,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                 () -> staxParser.deserialize(new StringReader("<ns:order xmlns:ns=\"urn:x\"><id>1</id></ns:order>"), null, nodeTypes));
         assertEquals("No target type is specified for xml node: order", prefixedStax.getMessage());
     }
-
-
 
     // X03/R03-8: the r9506 escaping fix covered only the <property name=".."> (attribute) style, and the
     // follow-up element-name check landed in XmlParserImpl only. This writer still interpolated the annotation
@@ -3715,8 +3547,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                     new AbacusXmlParserImpl(parserType, null, null, approvedTypes()).deserialize(xml, null, targetType));
         }
     }
-
-
 
     // G149: reset() clears the per-parse SAX state a failure can leave behind - the ignored-entry, entry and type-info flags -
     // so a pooled handler starts clean. (A reuse through the parser cannot observe it: the cleared ignored-element count alone
@@ -3822,8 +3652,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(staxParser.deserialize(xml, xdc, RecordWrapper.class).getRec(), fromSax.getRec());
         assertEquals(domParser.deserialize(xml, xdc, RecordWrapper.class).getRec(), fromSax.getRec());
     }
-
-
 
     // G06-01: the SAX reader resolves an element's type attribute once per element (concrete class, item type and the
     // final approval check share it). Pins the values read and the rejections, which must match the StAX and DOM readers.
@@ -3979,8 +3807,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(101, restored.getAge());
     }
 
-
-
     // P4-01 / P5-07 (a): XML-1.0-illegal code units throw at serialize time, on every scalar path.
     @Test
     public void reviewFixes20260906_illegalXmlCharactersThrowAtSerializeTime() {
@@ -4028,8 +3854,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G115-01: a Map.Entry value was written with unquoted String slots ({"a,b":c,d}) and its own output did not read back on any
     // backend; with writeTypeInfo its handler name became a rejected type attribute. It is now written as JSON text like Pair/Tuple.
     @Test
@@ -4057,8 +3881,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G006-03, map-key site: a repeated object used as a map KEY is written as an empty <key></key> in pretty format too, and every
     // backend reads the pretty form back like the compact form.
     @Test
@@ -4082,8 +3904,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals(1, fromPretty.getAttrs().size(), parserType.name());
         }
     }
-
-
 
     // G006-03: with circularReferenceSupported a repeated object is written as an empty element, but pretty format put the
     // closing line break + indentation into it, so an Object-typed value read back as that whitespace (compact reads "").
@@ -4122,10 +3942,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
-
-
     // pretty format: an Object property reads back on every backend exactly as the compact form does, for scalars
     // (including surrounding blanks and the empty String) and for structured values alike.
     @Test
@@ -4149,9 +3965,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
-
 
     // G114-03: with prettyFormat an Object-declared property holding a scalar got the closing line break and
     // indentation inside its element (<any>abc\n    </any>), so it read back as "abc\n    ".
@@ -4333,8 +4146,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G04-01: writeArray indexes an Object[] directly instead of calling the reflective Array.get per element; the output of
     // every array shape (nulls, wrappers, tuple-likes, nested arrays, beans, primitive arrays, cycles) is pinned on base and fix.
     @Test
@@ -4444,8 +4255,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals("<array><e><array><e>s</e></array></e><e><array><e>s</e></array></e></array>", parser.serialize(new Object[] { shared, shared }));
     }
 
-
-
     // G11-01: two property-less classes written alternately each keep their own element name
     @Test
     public void testWriteEmptyObject_distinctClassesKeepTheirOwnTags() {
@@ -4462,8 +4271,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G11-01: an anonymous class has an empty simple name: the element-name check fails on every write (a cached tag
     // never suppresses the failure), while the attribute style still writes the empty name as before
@@ -4486,8 +4293,6 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G006-01: the property description is built only on failure; the messages stay exactly the same.
     @Test
@@ -4532,8 +4337,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         legal.setAny(u.Optional.of("z"));
         assertEquals("<strBean><name>x&amp;&lt;y&gt;</name><any>z</any></strBean>", parser.serialize(legal));
     }
-
-
 
     // G04-03: writeProperties builds the indentation of nested structured properties lazily (never for a bean of scalars) and
     // G04-04: it reuses the BeanInfo writeBean looked up; pretty output of scalar-only, nested, custom-indentation, typed,
@@ -4628,8 +4431,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                         "            </beanMap>", "        </outerBean>", "    </e>", "    <e></e>", "</list>"),
                 parser.serialize(cyclic, new XmlSerConfig().setPrettyFormat(true).setCircularReferenceSupported(true)));
     }
-
-
 
     // Review fixes 2026-09-06 (P4-01..P4-12, P8-02, R-P04, P5-06, T6-02). Every case runs on StAX, DOM and SAX.
     private static final XmlParserType[] ALL_TYPES = { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX };
@@ -4917,8 +4718,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // Self-review 2026-09-07 (R3): the two halves of the 2026-09-06 fixes that stopped short.
     public static class SelfRef {
         private String name;
@@ -4971,8 +4770,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // Fix pass 2026-09-08 (G01)
 
     /** A recognized bean (getter + setter) whose only property is excluded from serialization. */
@@ -4989,23 +4786,17 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /** A bean whose custom property name is escapable in attribute position but not writable as an element name. */
     public static class MarkupXmlPropNameBean {
         @JsonXmlField(name = "a&b")
         public String value;
     }
 
-
-
     /** A custom property name that attribute escaping turns into a character reference XML 1.0 forbids. */
     public static class ControlCharXmlPropNameBean {
         @JsonXmlField(name = "a" + (char) 1 + "b")
         public String value;
     }
-
-
 
     /** A custom property name that needs no escaping and is a valid element name. */
     public static class PlainCustomXmlPropNameBean {
@@ -5070,8 +4861,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         private List<G006Alpha[]> arrays;
         private Object anyArray;
     }
-
-
 
     // Plain bean (identity equals/hashCode) so it can be a key of its own map.
     public static class G115KeyLoop {
@@ -5192,16 +4981,12 @@ public class AbacusXmlParserImplTest extends TestBase {
         private Map<String, java.util.Optional<Map<String, java.util.Optional<G006Alpha>>>> deep;
     }
 
-
-
     // A map subclass with another parameter layout than Map<K, V>: its key type is fixed, its only parameter is the value type.
     public static class G134StringKeyMap<V> extends HashMap<String, V> {
         private static final long serialVersionUID = 1L;
     }
 
     private static final String[] G134_WRAPPERS = { "java.util.Optional", "com.landawn.abacus.util.u.Optional", "com.landawn.abacus.util.u.Nullable" };
-
-
 
     // Wraps a value in the wrapper named by its type name (one of G134_WRAPPERS).
     private static Object g134Wrap(final String wrapper, final Object value) {
@@ -5217,8 +5002,6 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         return map;
     }
-
-
 
     // mutable values: an immutable JDK container is written with its own class name, which no reader can instantiate
     private static List<Object> g134Values() {
@@ -5253,8 +5036,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         return prefix + text.replace("\n", "\n" + prefix);
     }
 
-
-
     // Beans for the DOM type-attribute pins (G05-01): a property whose declared type is a bean, a container or Object reaches
     // getConcreteClass in the DOM bean reader; list and array items and the open map key/value fallbacks reach
     // resolveItemType(Node, Type). Both used to read and resolve the element's type attribute twice.
@@ -5276,8 +5057,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         private Map<String, Integer> counts;
         private Object open;
     }
-
-
 
     // Reads the document on the three backends: the DOM result must stay what the StAX and SAX backends read (value and class).
     private static <T> T g05SameOnAllBackends(final String xml, final Type<T> type) {
@@ -5322,26 +5101,18 @@ public class AbacusXmlParserImplTest extends TestBase {
         return child;
     }
 
-
-
     /** G11-01: a property-less class (an ObjectType, not a bean) written by AbstractXmlParser.writeEmptyObject. */
     public static class PerfReviewMarker {
     }
-
-
 
     /** G11-01: a property-less class whose annotation selects the naming policy of its element name. */
     @com.landawn.abacus.annotation.JsonXmlConfig(namingPolicy = com.landawn.abacus.util.NamingPolicy.SNAKE_CASE)
     public static class PerfReviewAnnotatedMarker {
     }
 
-
-
     /** G11-01: a second property-less class, interleaved with the first one. */
     public static class PerfReviewOtherMarker {
     }
-
-
 
     /** G11-01: a bean holding property-less values. */
     public static class PerfReviewMarkerHolder {
@@ -5374,8 +5145,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // R2A (owner ruling on G05-02): a scalar type attribute on an Object bean property is adopted by the Abacus StAX and SAX readers
     // the way the DOM reader adopts it. The beans: an Object property beside concrete scalars, and an interface-declared property
     // (read by the Object handler, so the same rule applies to it).
@@ -5395,16 +5164,12 @@ public class AbacusXmlParserImplTest extends TestBase {
 
     private static final String R2A_OPEN_UNTYPED = "<open>5</open>";
 
-
-
     // The interface the writer names on the interface-declared property must be approved to read the typed document back.
     private static XmlParser r2aParserOf(final XmlParserType type) {
         final java.util.Set<Class<?>> approved = new java.util.HashSet<>(approvedTypes());
         approved.add(java.io.Serializable.class);
         return new AbacusXmlParserImpl(type, null, null, approved);
     }
-
-
 
     // The documents the writer produces for the holder: with type information (the DECLARED Object type on the property) and without.
     private static String r2aDocument(final boolean withTypeInfo) {
@@ -5418,8 +5183,6 @@ public class AbacusXmlParserImplTest extends TestBase {
                 : xml.contains(R2A_OPEN_UNTYPED) && xml.contains("<count>1</count>") && !xml.contains("type="), xml);
         return xml;
     }
-
-
 
     // Asserts the value AND the class of the open property on the three backends.
     private static void r2aAssertOpen(final Object expected, final String xml) {
@@ -5522,8 +5285,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // Reads the document on the three backends and through the DOM Node overload: all four results must be equal.
     private static <T> T r2bSameOnAllBackends(final String xml, final XmlDeserConfig config, final Type<T> type) {
         final T expected = parserOf(XmlParserType.StAX).deserialize(xml, config, type);
@@ -5535,8 +5296,6 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         return expected;
     }
-
-
 
     // Every backend and the DOM Node overload reject the document with the message of the disallowed attribute.
     private static void r2bRejectedOnAllBackends(final String xml, final XmlDeserConfig config, final Type<?> type) {
@@ -5564,9 +5323,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertEquals(expectedMessage, e.getMessage(), "Node " + xml);
     }
 
-
-
-
     // Backend agreement of the Abacus readers after the recheck of rounds 3 and 4: every document below was read differently by
     // one of the three readers (or by the StAX reader for an element without content); each test pins the agreed result on the
     // StAX, DOM and SAX readers and through the DOM Node overload.
@@ -5577,8 +5333,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         private Number n;
         private String tag;
     }
-
-
 
     /** R5-07: the property kinds whose element without content the StAX reader read with its own fallback. */
     @Data
@@ -5594,8 +5348,6 @@ public class AbacusXmlParserImplTest extends TestBase {
         private Object open;
     }
 
-
-
     // The typed root element of a bean as the writer opens it, e.g. <r5NumberHolder type="...R5NumberHolder">.
     private static String r5TypedRoot(final Object bean) {
         final String xml = parserOf(XmlParserType.StAX).serialize(bean, XmlSerConfig.create().setWriteTypeInfo(true));
@@ -5609,8 +5361,6 @@ public class AbacusXmlParserImplTest extends TestBase {
     private static String r5UntypedRoot(final String typedRoot) {
         return typedRoot.substring(0, typedRoot.indexOf(' ')) + ">";
     }
-
-
 
     // Every backend and the DOM Node overload fail with the same exception class and a message with the same start.
     private static void r5SameFailureOnAllBackends(final String xml, final XmlDeserConfig config, final Type<?> type, final Class<? extends Throwable> expected,
@@ -5626,4 +5376,315 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     // ---- review 2026-10-07 recheck R5 end ----
+
+    // ---- deep review 2026-10-16 G007 begin ----
+
+    // G007-01: an untyped <array> (no declared array type) whose <e> items the configured element type types used to keep the
+    // String[] placeholder as its destination on StAX and DOM, so the configured items failed with "cannot be stored in String[]";
+    // SAX built an array of the configured class. All three now agree, at the root, in an Object map value and in a List<Object> item.
+    @Test
+    public void testDeserialize_untypedArrayChildrenUnderConfiguredElementTypeOnAllBackends() {
+        final XmlDeserConfig integers = XmlDeserConfig.create().setElementType(Integer.class);
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+
+            final Object root = parser.deserialize("<array><e>1</e><e>2</e></array>", integers, Object.class);
+            assertArrayEquals(new Integer[] { 1, 2 }, assertInstanceOf(Integer[].class, root), parserType.name());
+
+            final Map<String, Object> map = parser.deserialize("<map><entry><key>a</key><value><array><e>3</e></array></value></entry></map>", integers,
+                    Type.<Map<String, Object>> of("Map<String, Object>"));
+            assertArrayEquals(new Integer[] { 3 }, assertInstanceOf(Integer[].class, map.get("a")), parserType.name());
+
+            final List<Object> list = parser.deserialize("<list><e><array><e>4</e><e isNull=\"true\"/></array></e></list>", integers,
+                    Type.<List<Object>> of("List<Object>"));
+            assertArrayEquals(new Integer[] { 4, null }, assertInstanceOf(Integer[].class, list.get(0)), parserType.name());
+
+            // Unchanged: without configuration the untyped array keeps its String items.
+            assertArrayEquals(new String[] { "1", "2" }, assertInstanceOf(String[].class, parser.deserialize("<array><e>1</e><e>2</e></array>", Object.class)),
+                    parserType.name());
+        }
+    }
+
+    // ---- deep review 2026-10-16 G007 end ----
+
+    // ---- deep review 2026-10-16 verify G118 begin ----
+
+    // G118-01: a configured untyped <array> is an array of the CONFIGURED class on all three backends (SAX's rule), not of the
+    // items' runtime class (ArrayList[] / HashMap[] / Object[] for mixed items).
+    @Test
+    public void testDeserialize_configuredUntypedArrayUsesTheConfiguredClassOnAllBackends() {
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+
+            final Object lists = parser.deserialize("<array><e>1</e><e>2</e></array>", XmlDeserConfig.create().setElementType("List<Long>"), Object.class);
+            assertEquals(List[].class, lists.getClass(), parserType.name());
+            assertEquals(Arrays.asList(1L), ((List<?>[]) lists)[0], parserType.name());
+
+            final Object numbers = parser.deserialize("<array><e type=\"Long\">1</e><e type=\"Integer\">2</e></array>",
+                    XmlDeserConfig.create().setElementType(Number.class), Object.class);
+            assertArrayEquals(new Number[] { 1L, 2 }, assertInstanceOf(Number[].class, numbers), parserType.name());
+            assertEquals(Number[].class, numbers.getClass(), parserType.name());
+
+            final List<Object> maps = parser.deserialize("<list><e><array><e><map><entry><key>k</key><value>1</value></entry></map></e></array></e></list>",
+                    XmlDeserConfig.create().setElementType("Map<String, Integer>"), Type.<List<Object>> of("List<Object>"));
+            assertEquals(Map[].class, maps.get(0).getClass(), parserType.name());
+            assertEquals(1, ((Map<?, ?>[]) maps.get(0))[0].get("k"), parserType.name());
+        }
+    }
+
+    // G118-01: an item the configured class cannot hold (a nested <array> under a scalar configuration) is a parse error on all
+    // three backends.
+    @Test
+    public void testDeserialize_configuredUntypedArrayRejectsMismatchedItemsOnAllBackends() {
+        final XmlDeserConfig integers = XmlDeserConfig.create().setElementType(Integer.class);
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+
+            assertThrows(ParsingException.class, () -> parser.deserialize("<array><e><array><e>1</e></array></e></array>", integers, Object.class),
+                    parserType.name());
+        }
+    }
+
+    // G007-01 neighbours that must not change: text form, declared array types, type attribute, String configuration, and the
+    // StAX/DOM String[] results for an empty or all-null configured untyped array.
+    @Test
+    public void testDeserialize_configuredUntypedArrayNeighboursAreUnchanged() {
+        final XmlDeserConfig integers = XmlDeserConfig.create().setElementType(Integer.class);
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+            final String name = parserType.name();
+
+            assertArrayEquals(new String[] { "1", "2" }, assertInstanceOf(String[].class, parser.deserialize("<array>[1, 2]</array>", integers, Object.class)),
+                    name);
+            assertArrayEquals(new Integer[] { 1, 2 }, parser.deserialize("<array><e>1</e><e>2</e></array>", integers, Integer[].class), name);
+            assertEquals(Object[].class, parser.deserialize("<array><e>1</e><e>2</e></array>", integers, Object[].class).getClass(), name);
+            final Object typed = parser.deserialize("<array type=\"Object[]\"><e>1</e><e>2</e></array>", integers, Object.class);
+            assertEquals(Object[].class, typed.getClass(), name);
+            assertArrayEquals(new Object[] { 1, 2 }, (Object[]) typed, name);
+            final Object strings = parser.deserialize("<array><e>1</e><e>2</e></array>", XmlDeserConfig.create().setElementType(String.class), Object.class);
+            assertEquals(String[].class, strings.getClass(), name);
+            assertArrayEquals(new String[] { "1", "2" }, (String[]) strings, name);
+
+            if (parserType != XmlParserType.SAX) {
+                // SAX answers Integer[0] / Integer[]{null} here (its placeholder); StAX and DOM keep their String[] results.
+                assertEquals(String[].class, parser.deserialize("<array></array>", integers, Object.class).getClass(), name);
+                final Object nulls = parser.deserialize("<array><e isNull=\"true\"/></array>", integers, Object.class);
+                assertEquals(String[].class, nulls.getClass(), name);
+                assertArrayEquals(new String[] { null }, (String[]) nulls, name);
+            }
+        }
+    }
+
+    // ---- deep review 2026-10-16 verify G118 end ----
+
+    // ---- deep review 2026-10-16 G145 begin ----
+
+    // G145 (G118-02): an explicit null element in a primitive array reads as the primitive default (as the JSON parser reads
+    // [1, null, 3] into int[]), on all three backends, instead of escaping as a raw NullPointerException.
+    @Test
+    public void testDeserialize_nullElementInPrimitiveArrayReadsAsDefault() {
+        final String xml = "<array><e>1</e><e isNull=\"true\"/><e>3</e></array>";
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+            final String name = parserType.name();
+
+            assertArrayEquals(new int[] { 1, 0, 3 }, parser.deserialize(xml, null, int[].class), name);
+            assertArrayEquals(new long[] { 1L, 0L, 3L }, parser.deserialize(xml, null, long[].class), name);
+            assertArrayEquals(new double[] { 1d, 0d, 3d }, parser.deserialize(xml, null, double[].class), name);
+            assertArrayEquals(new boolean[] { true, false }, parser.deserialize("<array><e>true</e><e isNull=\"true\"/></array>", null, boolean[].class), name);
+
+            final Object configured = parser.deserialize(xml, XmlDeserConfig.create().setElementType(int.class), Object.class);
+            assertArrayEquals(new int[] { 1, 0, 3 }, assertInstanceOf(int[].class, configured), name);
+        }
+    }
+
+    // G145 neighbours (unchanged): all-non-null primitive arrays, and a null element in a wrapper array stays null.
+    @Test
+    public void testDeserialize_primitiveArrayWithoutNullAndWrapperArrayNullUnchanged() {
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+            final String name = parserType.name();
+
+            assertArrayEquals(new int[] { 1, 2 }, parser.deserialize("<array><e>1</e><e>2</e></array>", null, int[].class), name);
+            assertArrayEquals(new Integer[] { 1, null, 3 }, parser.deserialize("<array><e>1</e><e isNull=\"true\"/><e>3</e></array>", null, Integer[].class),
+                    name);
+        }
+    }
+
+    // ---- deep review 2026-10-16 G145 end ----
+
+    // ---- deep review 2026-10-16 G153 begin ----
+
+    // G153-01 (G145 coverage): the shared collectionToArray maps a null element to the primitive default for every primitive array type
+    // (leading, inner and all-null), and leaves null-free, empty, nested (int[][]) and wrapper arrays as before; a NullPointerException
+    // that does not come from a null element is rethrown unchanged, and a mistyped non-null element fails with ParsingException.
+    @Test
+    public void testCollectionToArray_nullElementReadsAsPrimitiveDefaultForEveryPrimitiveType() {
+        assertArrayEquals(new boolean[] { false, true, false },
+                (boolean[]) AbstractParser.collectionToArray(Arrays.asList(null, true, null), Type.of(boolean[].class)));
+        assertArrayEquals(new char[] { 'a', (char) 0 }, (char[]) AbstractParser.collectionToArray(Arrays.asList('a', null), Type.of(char[].class)));
+        assertArrayEquals(new byte[] { 1, 0, 3 }, (byte[]) AbstractParser.collectionToArray(Arrays.asList((byte) 1, null, (byte) 3), Type.of(byte[].class)));
+        assertArrayEquals(new short[] { 0, 2 }, (short[]) AbstractParser.collectionToArray(Arrays.asList(null, (short) 2), Type.of(short[].class)));
+        assertArrayEquals(new int[] { 1, 0, 3 }, (int[]) AbstractParser.collectionToArray(Arrays.asList(1, null, 3), Type.of(int[].class)));
+        assertArrayEquals(new long[] { 1L, 0L }, (long[]) AbstractParser.collectionToArray(Arrays.asList(1L, null), Type.of(long[].class)));
+        assertArrayEquals(new float[] { 0f, 1.5f }, (float[]) AbstractParser.collectionToArray(Arrays.asList(null, 1.5f), Type.of(float[].class)));
+        assertArrayEquals(new double[] { 1.5d, 0d }, (double[]) AbstractParser.collectionToArray(Arrays.asList(1.5d, null), Type.of(double[].class)));
+        assertArrayEquals(new int[] { 0, 0 }, (int[]) AbstractParser.collectionToArray(Arrays.asList(null, null), Type.of(int[].class)));
+
+        // Unchanged neighbours.
+        assertArrayEquals(new int[] { 1, 2 }, (int[]) AbstractParser.collectionToArray(Arrays.asList(1, 2), Type.of(int[].class)));
+        assertEquals(0, ((char[]) AbstractParser.collectionToArray(new java.util.ArrayList<>(), Type.of(char[].class))).length);
+        final int[][] nested = AbstractParser.collectionToArray(Arrays.asList(new int[] { 1 }, null), Type.of(int[][].class));
+        assertArrayEquals(new int[] { 1 }, nested[0]);
+        assertNull(nested[1]);
+        assertArrayEquals(new Integer[] { 1, null }, (Integer[]) AbstractParser.collectionToArray(Arrays.asList(1, null), Type.of(Integer[].class)));
+        // A mistyped non-null element is a ParsingException (G157), see testCollectionToArray_mistypedElementOfPrimitiveArrayIsParsingException.
+        assertThrows(ParsingException.class, () -> AbstractParser.collectionToArray(Arrays.asList(1L), Type.of(int[].class)));
+
+        final NullPointerException failure = new NullPointerException("iterator failure");
+        final java.util.Collection<Object> failing = new java.util.AbstractCollection<>() {
+            @Override
+            public java.util.Iterator<Object> iterator() {
+                return new java.util.Iterator<>() {
+                    private int count;
+
+                    @Override
+                    public boolean hasNext() {
+                        return count < 2;
+                    }
+
+                    @Override
+                    public Object next() {
+                        if (count++ == 1) {
+                            throw failure;
+                        }
+
+                        return 1;
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return 2;
+            }
+        };
+
+        org.junit.jupiter.api.Assertions.assertSame(failure,
+                assertThrows(NullPointerException.class, () -> AbstractParser.collectionToArray(failing, Type.of(int[].class))));
+    }
+
+    // G153-02 (G145 coverage): null markers in primitive arrays on all three backends beyond int[]/long[]/double[]/boolean[]: char[], an all-null
+    // array, a nested int[][] (a null inner element reads 0, a null row stays null), a bean's int[] property, a type="int[]" attribute and a
+    // configured char component; an empty primitive array stays empty.
+    @Test
+    public void testDeserialize_nullMarkerInPrimitiveArrayShapesOnAllBackends() {
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+            final String name = parserType.name();
+
+            assertArrayEquals(new char[] { 'a', (char) 0 }, parser.deserialize("<array><e>a</e><e isNull=\"true\"/></array>", null, char[].class), name);
+            assertArrayEquals(new int[] { 0, 0 }, parser.deserialize("<array><e isNull=\"true\"/><e isNull=\"true\"/></array>", null, int[].class), name);
+            assertEquals(0, parser.deserialize("<array></array>", null, int[].class).length, name);
+
+            final int[][] nested = parser.deserialize("<array><e><array><e>1</e><e isNull=\"true\"/></array></e><e isNull=\"true\"/></array>", null,
+                    int[][].class);
+            assertEquals(2, nested.length, name);
+            assertArrayEquals(new int[] { 1, 0 }, nested[0], name);
+            assertNull(nested[1], name);
+
+            final Family family = parser.deserialize("<family><nums><array><e>7</e><e isNull=\"true\"/></array></nums></family>", null, Family.class);
+            assertArrayEquals(new int[] { 7, 0 }, family.getNums(), name);
+
+            assertArrayEquals(new int[] { 1, 0 },
+                    assertInstanceOf(int[].class, parser.deserialize("<array type=\"int[]\"><e>1</e><e isNull=\"true\"/></array>", null, Object.class)), name);
+
+            final Object chars = parser.deserialize("<array><e>x</e><e isNull=\"true\"/></array>", XmlDeserConfig.create().setElementType(char.class),
+                    Object.class);
+            assertArrayEquals(new char[] { 'x', (char) 0 }, assertInstanceOf(char[].class, chars), name);
+        }
+    }
+
+    // ---- deep review 2026-10-16 G153 end ----
+
+    // ---- deep review 2026-10-16 G157 begin ----
+
+    // G157 (G153-05): a non-null element that a primitive array cannot hold (a nested array/map/list item, a wrong wrapper type) is
+    // a ParsingException naming the element, like the object-array check, not a raw ClassCastException from the unboxing cast.
+    @Test
+    public void testCollectionToArray_mistypedElementOfPrimitiveArrayIsParsingException() {
+        ParsingException e = assertThrows(ParsingException.class,
+                () -> AbstractParser.collectionToArray(Arrays.asList(1, new int[] { 2 }), Type.of(int[].class)));
+        assertTrue(e.getMessage().contains("index 1"), e.getMessage());
+        assertTrue(e.getMessage().contains("int[]"), e.getMessage());
+        assertInstanceOf(ClassCastException.class, e.getCause());
+
+        // A null before the mistyped element takes the null-to-default path first and still ends as a ParsingException.
+        e = assertThrows(ParsingException.class, () -> AbstractParser.collectionToArray(Arrays.asList(null, "x"), Type.of(long[].class)));
+        assertTrue(e.getMessage().contains("index 1"), e.getMessage());
+        assertThrows(ParsingException.class, () -> AbstractParser.collectionToArray(Arrays.asList(1), Type.of(char[].class)));
+        assertThrows(ParsingException.class, () -> AbstractParser.collectionToArray(Arrays.asList(true, java.util.Map.of()), Type.of(boolean[].class)));
+
+        // Unchanged neighbours: correctly typed elements, nulls only, and a ClassCastException that no element explains (rethrown as is).
+        assertArrayEquals(new long[] { 1L, 0L }, (long[]) AbstractParser.collectionToArray(Arrays.asList(1L, null), Type.of(long[].class)));
+        final ClassCastException failure = new ClassCastException("iterator failure");
+        final java.util.Collection<Object> failing = new java.util.AbstractCollection<>() {
+            @Override
+            public java.util.Iterator<Object> iterator() {
+                return new java.util.Iterator<>() {
+                    private int count;
+
+                    @Override
+                    public boolean hasNext() {
+                        return count < 2;
+                    }
+
+                    @Override
+                    public Object next() {
+                        if (count++ == 1) {
+                            throw failure;
+                        }
+
+                        return 1;
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return 2;
+            }
+        };
+
+        org.junit.jupiter.api.Assertions.assertSame(failure,
+                assertThrows(ClassCastException.class, () -> AbstractParser.collectionToArray(failing, Type.of(int[].class))));
+    }
+
+    // G157 (G153-05): with a primitive configured element type, a nested <array>, <map> or <list> item is a ParsingException on every
+    // backend (r89: ParsingException on StAX/DOM, ClassCastException on SAX); a declared int[] target with such an item too (r89:
+    // ClassCastException on all backends). Well-formed arrays are unchanged.
+    @Test
+    public void testDeserialize_nestedItemIntoPrimitiveArrayIsParsingExceptionOnAllBackends() {
+        final XmlDeserConfig intElements = XmlDeserConfig.create().setElementType(int.class);
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
+            final String name = parserType.name();
+
+            assertThrows(ParsingException.class, () -> parser.deserialize("<array><e><array><e>1</e></array></e></array>", intElements, Object.class), name);
+            assertThrows(ParsingException.class, () -> parser.deserialize("<array><e><map><a>1</a></map></e></array>", intElements, Object.class), name);
+            assertThrows(ParsingException.class, () -> parser.deserialize("<array><e><list><e>1</e></list></e></array>", intElements, Object.class), name);
+            assertThrows(ParsingException.class, () -> parser.deserialize("<array><e><array><e>1</e></array></e></array>", null, int[].class), name);
+
+            assertArrayEquals(new int[] { 1, 2 },
+                    assertInstanceOf(int[].class, parser.deserialize("<array><e>1</e><e>2</e></array>", intElements, Object.class)), name);
+            assertArrayEquals(new int[] { 1, 2 }, parser.deserialize("<array><e>1</e><e>2</e></array>", null, int[].class), name);
+        }
+    }
+
+    // ---- deep review 2026-10-16 G157 end ----
 }

@@ -71,8 +71,6 @@ public class SheetAddTest extends SheetTestSupport {
         assertThrows(IllegalStateException.class, () -> objectSheet.addColumn("C4", Arrays.asList("a", "b", "c")));
     }
 
-
-
     // G070-01: an all-null new column (null or empty argument) is presized; pin contents, order and later growth.
     @Test
     public void testAddColumn_nullOrEmptyColumnAtEveryPosition() {

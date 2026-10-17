@@ -303,8 +303,6 @@ public class IOUtilContentTest extends IOUtilTestSupport {
         assertTrue(IOUtil.contentEqualsIgnoreEOL(tempFile, tempFile, "UTF-8"));
     }
 
-
-
     /** Delivers at most one byte per bulk read, which is what makes the equal-prefix branch reachable. */
     private static InputStream dripInputStream(final byte[] bytes) {
         return new InputStream() {

@@ -185,8 +185,6 @@ public class EntryStreamReductionTest extends EntryStreamTestSupport {
         assertFalse(result.isPresent());
     }
 
-
-
     // SUSPECT #2: findAny() must work in both sequential and parallel modes.
     @Test
     public void testFindAny_sequential_nonEmpty() {

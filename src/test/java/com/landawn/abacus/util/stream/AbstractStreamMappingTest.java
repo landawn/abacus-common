@@ -283,8 +283,6 @@ public class AbstractStreamMappingTest extends AbstractStreamTestSupport {
         assertArrayEquals(new short[] { 1, 10, 2, 20 }, result.toArray());
     }
 
-
-
     // G086-01: mapMulti iterator protocol - repeated hasNext(), next() without hasNext(), null elements, NoSuchElementException at the end
     @Test
     public void testMapMulti_iteratorProtocol() {
@@ -337,8 +335,6 @@ public class AbstractStreamMappingTest extends AbstractStreamTestSupport {
         assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), result.toList());
     }
 
-
-
     // G086-01, revised 2026-10-07: elements a mapper emitted before it failed are discarded with that call, as the
     // primitive mapMulti operations do; iteration continues with the next source element.
     @Test
@@ -373,8 +369,6 @@ public class AbstractStreamMappingTest extends AbstractStreamTestSupport {
         assertEquals(Arrays.asList(null, "v1", null, "v2"), result);
     }
 
-
-
     // G086-01: mapMulti stays lazy - the source is read only until the buffer holds an element
     @Test
     public void testMapMulti_lazySourceConsumption() {
@@ -388,8 +382,6 @@ public class AbstractStreamMappingTest extends AbstractStreamTestSupport {
         assertEquals(Arrays.asList(2, 2, 3), result);
         assertEquals(Arrays.asList(0, 0, 2, 0, 3), pulled);
     }
-
-
 
     // G086-01: mapMulti (sequential buffer) - variable fan-out (0, 1, many), order kept, buffer drained and reused across bursts
     @Test

@@ -627,8 +627,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         }
     }
 
-
-
     // G043-01: bounded readBytes whose buffer grows and is capped at maxLength (exactly-full grown array returned as is)
     @Test
     public void testReadBytes_grownBufferCappedAtMaxLength() throws IOException {
@@ -652,8 +650,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         }
     }
 
-
-
     // G043-01: a grown array that is returned is exclusively the caller's
     @Test
     public void testReadBytes_grownResultIsExclusive() throws IOException {
@@ -676,8 +672,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         assertNotNull(bytes);
         assertEquals(50, bytes.length);
     }
-
-
 
     // G043-01: the pooled buffer is never handed out - a result filling it exactly must survive later reads
     @Test
@@ -777,8 +771,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         }
     }
 
-
-
     // G043-01: bounded readChars whose buffer grows and is capped at maxLength
     @Test
     public void testReadChars_grownBufferCappedAtMaxLength() throws IOException {
@@ -808,8 +800,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         assertNotNull(chars);
         assertEquals(50, chars.length);
     }
-
-
 
     // G043-01: the pooled char buffer is never handed out, and a grown result is exclusively the caller's
     @Test
@@ -940,8 +930,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
 
     // readLine
 
-
-
     // G043-01: readLine over a caller's BufferedReader asked the source again after end of input and returned a line read past it
     @Test
     public void testReadLine_bufferedSourceEndOfInputIsSticky() {
@@ -1021,8 +1009,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
     }
 
     // readLines
-
-
 
     // G043-01: readLines with an offset past end of input over a caller's BufferedReader returned a line read past that end
     @Test
@@ -1247,8 +1233,6 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         assertNotNull(content);
         assertEquals(50, content.length());
     }
-
-
 
     /**
      * A reader that reports end of input once and then serves more text, as a console does after Ctrl-D.

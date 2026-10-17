@@ -2122,5 +2122,4 @@ public class DatasetFilterTest extends DatasetTestSupport {
         assertEquals(5, union.size());
     }
 
-
 }

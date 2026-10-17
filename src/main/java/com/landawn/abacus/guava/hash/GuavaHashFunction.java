@@ -269,8 +269,9 @@ final class GuavaHashFunction implements HashFunction {
      * Returns the wrapped function's own description, for example {@code "Hashing.murmur3_128(42)"}. Without
      * this the wrapper printed {@code GuavaHashFunction@1b6d3586}, naming neither the algorithm nor the seed.
      * Functions whose Guava implementation does not override {@code toString} (notably the result of
-     * {@code concatenating(...)}) still print in Guava's identity form, e.g.
-     * {@code com.google.common.hash.Hashing$ConcatenatedHashFunction@88ade00b}.
+     * {@code concatenating(...)}) still print in {@link Object#toString()}'s {@code class@hex} form, e.g.
+     * {@code com.google.common.hash.Hashing$ConcatenatedHashFunction@88ade00b}, where the hex digits are that
+     * function's value-based {@code hashCode()} (equal functions print the same text), not an identity hash.
      *
      * @return the wrapped Guava hash function's string representation
      */

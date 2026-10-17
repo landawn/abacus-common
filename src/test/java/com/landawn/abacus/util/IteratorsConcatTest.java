@@ -77,8 +77,6 @@ public class IteratorsConcatTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), r.toList());
     }
 
-
-
     /** D6: concat copies its varargs array, so a later write to it cannot change what the iterator yields. */
     @Test
     public void testConcat_varargsArrayIsCopied() {
@@ -770,8 +768,6 @@ public class IteratorsConcatTest extends IteratorsTestSupport {
         assertFalse(result.hasNext());
     }
 
-
-
     /**
      * D3: {@code concat(Map...)} grabbed every {@code entrySet().iterator()} up front, so modifying any of the maps
      * afterwards threw {@code ConcurrentModificationException} on the first {@code next()} - even for a map whose
@@ -917,8 +913,6 @@ public class IteratorsConcatTest extends IteratorsTestSupport {
         assertEquals(4.44, doubleIter.nextDouble(), 0.001);
         assertFalse(doubleIter.hasNext());
     }
-
-
 
     /**
      * J1: the javadoc claimed "The array is copied, so writing to it afterwards does not change what the returned

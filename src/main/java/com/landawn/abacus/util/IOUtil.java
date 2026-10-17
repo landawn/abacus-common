@@ -11223,7 +11223,7 @@ public final class IOUtil {
         // Distinct canonical paths can still point to the same underlying file through a hard link
         // (same inode, different directory entry). Files.isSameFile compares file keys and detects that,
         // but requires both files to exist, so guard the call.
-        if (file1.exists() && file2.exists() && Files.isSameFile(file1.toPath(), file2.toPath())) {
+        if (file1.exists() && file2.exists() && isSameFileCaseSensitive(file1.toPath(), file2.toPath())) {
             throw new IllegalArgumentException(
                     String.format("Files denote the same on-disk file (hard-link alias): file1='%s', file2='%s'", describe(file1), describe(file2)));
         }
@@ -14547,15 +14547,43 @@ public final class IOUtil {
     }
 
     /**
-     * {@link Files#isSameFile(Path, Path)}, answering {@code false} instead of failing when either path cannot be
+     * {@link #isSameFileCaseSensitive(Path, Path)}, answering {@code false} instead of failing when either path cannot be
      * resolved.
      */
     private static boolean isSameFileQuietly(final Path a, final Path b) {
         try {
-            return Files.isSameFile(a, b);
+            return isSameFileCaseSensitive(a, b);
         } catch (final IOException | SecurityException e) {
             return false;
         }
+    }
+
+    /**
+     * {@link Files#isSameFile(Path, Path)} without its Windows shortcut. There it answers {@code true} WITHOUT opening
+     * anything when the two paths are equal ignoring case, but in a case-sensitive directory
+     * ({@code fsutil file setCaseSensitiveInfo <dir> enable}) {@code Case.txt} and {@code case.txt} are two distinct
+     * files (see {@link #isSameDirectory(File, File)}, C-693). Such a pair is asked about with the second path spelled
+     * through a {@code "."} element: the paths are then no longer equal, so the provider opens both and compares their
+     * file identity - a hard link between two such names is still recognised. Elsewhere {@link Path#equals(Object)}
+     * is case-sensitive and this is exactly {@code Files.isSameFile}.
+     *
+     * @param a a path.
+     * @param b another path.
+     * @return {@code true} if both locate the same file.
+     * @throws IOException if an I/O error occurs while comparing the two files.
+     */
+    private static boolean isSameFileCaseSensitive(final Path a, final Path b) throws IOException {
+        if (a.equals(b) && !a.toString().equals(b.toString())) {
+            final Path absolute = b.toAbsolutePath();
+            final Path parent = absolute.getParent();
+            final Path name = absolute.getFileName();
+
+            if (parent != null && name != null) {
+                return Files.isSameFile(a, parent.resolve(".").resolve(name));
+            }
+        }
+
+        return Files.isSameFile(a, b);
     }
 
     /**
@@ -15088,7 +15116,13 @@ public final class IOUtil {
      */
     private static boolean isArchiveTarget(final Path file, final BasicFileAttributes attrs, final Path normalizedTargetPath,
             final BasicFileAttributes targetAttrs) throws IOException {
-        if (normalizedTargetPath.equals(file.toAbsolutePath().normalize())) {
+        // Compared as spelled: Path.equals folds case on Windows, which left a source file "Out.zip" out of an archive
+        // "out.zip" written beside it in a case-sensitive directory. Another spelling of the target is still caught below.
+        // Path.equals is kept too: on Unix it compares the raw name bytes, which toString() can decode to equal strings.
+        // It is tested first: it rejects nearly every visited file without the String a Unix path decodes on toString().
+        final Path normalizedFile = file.toAbsolutePath().normalize();
+
+        if (normalizedTargetPath.equals(normalizedFile) && normalizedTargetPath.toString().equals(normalizedFile.toString())) {
             return true;
         }
 
@@ -15103,7 +15137,7 @@ public final class IOUtil {
             return false;
         }
 
-        return Files.isSameFile(file, normalizedTargetPath);
+        return isSameFileCaseSensitive(file, normalizedTargetPath);
     }
 
     /**
@@ -15431,7 +15465,10 @@ public final class IOUtil {
                     // "j/evil.txt"); the deepest existing ancestor is resolved for real to close that.
                     requireInsideTarget(newPath, targetRealPath, entryName);
 
-                    if (newFile.equals(canonicalSourceZip) || (newFile.exists() && Files.isSameFile(newPath, sourceZipFile.toPath()))) {
+                    // Not File.equals / Files.isSameFile: both fold case on Windows, so an entry "A.zip" beside the source
+                    // "a.zip" in a case-sensitive directory was refused. The source's own name, in any case, is still caught.
+                    if (newFile.getPath().equals(canonicalSourceZip.getPath())
+                            || (newFile.exists() && isSameFileCaseSensitive(newPath, sourceZipFile.toPath()))) {
                         throw new IOException("Zip entry would overwrite the source archive: " + entryName);
                     }
 

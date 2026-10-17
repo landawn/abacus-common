@@ -37,9 +37,6 @@ public class StringsJoinTest extends StringsTestSupport {
         return map;
     }
 
-
-
-
     /** A Collection whose {@code size()} disagrees with its iterator: the size is only a capacity hint. */
     private static final class LyingSizeCollection extends AbstractCollection<String> {
         private final List<String> elements;
@@ -60,8 +57,6 @@ public class StringsJoinTest extends StringsTestSupport {
             return reportedSize;
         }
     }
-
-
 
     /** A plain {@code Iterable} that is not a {@code Collection}, so no size is available. */
     private static Iterable<String> iterableOf(final List<String> elements) {
@@ -713,8 +708,6 @@ public class StringsJoinTest extends StringsTestSupport {
         assertEquals("[x, (this Collection)]", self.toString());
     }
 
-
-
     // G074-01: pins join(char[], ..., empty/null delimiter, ...) after the bulk-append change
     @Test
     public void testJoinCharArray_emptyOrNullDelimiterRanges() {
@@ -877,8 +870,6 @@ public class StringsJoinTest extends StringsTestSupport {
         assertEquals("", Strings.joinEntries(noEntries, ", ", "=", key, value));
         assertEquals("a1b2", Strings.joinEntries(entries, null, "", key, value));
     }
-
-
 
     // C-030: joinEntries sizing change keeps the output
     @Test

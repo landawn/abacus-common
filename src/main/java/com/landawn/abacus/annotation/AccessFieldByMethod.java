@@ -88,6 +88,13 @@ import java.lang.annotation.Target;
  *     @AccessFieldByMethod
  *     private BigDecimal total;
  *
+ *     // A property of a plain (non-@Entity) bean needs both accessors: without this getter "total"
+ *     // is not a property at all, and deserialization never calls the setter: it silently skips "total",
+ *     // or, when no other property is left (as here, where "id" has no accessors), rejects Order itself.
+ *     public BigDecimal getTotal() {
+ *         return total;
+ *     }
+ *
  *     public void setTotal(BigDecimal total) {
  *         // Validation that must run on every deserialized / programmatic write.
  *         if (total != null && total.signum() < 0) {

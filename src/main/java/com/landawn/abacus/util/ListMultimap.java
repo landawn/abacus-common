@@ -901,6 +901,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * mutable - and {@link #copy()} reproduces such a key faithfully. The check exists to catch a malformed
      * map up front, not to guarantee the state can never occur.</p>
      *
+     * <p><b>WARNING:</b> each key of {@code map} must map to its own list - never the same list instance as
+     * another key, nor a view of another key's list (for example {@code subList} or {@code Collections.unmodifiableList(list)}).
+     * Sharing is not detected and is not supported, also when it is introduced later through the wrapped
+     * map; see the {@link Multimap} class javadoc.</p>
+     *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the list
      * @param map The map to be wrapped into a ListMultimap, must not be {@code null}
@@ -952,6 +957,12 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *     ListMultimap.wrap(new HashMap<String, List<Integer>>(), ArrayList::new);
      * mm2.isEmpty();        // returns true
      * }</pre>
+     *
+     * <p><b>WARNING:</b> each key of {@code map} must map to its own list - never the same list instance as
+     * another key, nor a view of another key's list (for example {@code subList} or {@code Collections.unmodifiableList(list)}).
+     * Sharing is not detected and is not supported, also when it is introduced later through the wrapped
+     * map; see the {@link Multimap} class javadoc. {@code valueSupplier} must likewise return a new, empty list
+     * on every call.</p>
      *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the list
@@ -1066,7 +1077,8 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * because its key handling (a comparator, reference equivalence, thread safety, weak keys) applies to the
      * original keys, not to the inverted ones: a sorted multimap does <i>not</i> invert into a sorted one, and a
      * {@link java.util.concurrent.ConcurrentHashMap}-backed one does <i>not</i> invert into a concurrent one -
-     * unlike {@link #copy()}, which does reuse this multimap's map supplier. Nor is a {@link BiMap}, whose
+     * unlike {@link #copy()}, which reuses this multimap's map supplier, or the kind of its backing map when it
+     * has no map supplier. Nor is a {@link BiMap}, whose
      * value-uniqueness would reject two inverted keys with equal value lists.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1116,8 +1128,11 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      *
      * <p>This method creates a copy of the ListMultimap, including all keys and their associated values.
      * The value lists are newly created, but the value elements themselves are shared by reference (shallow copy).
-     * The new ListMultimap uses the same map supplier and value supplier as the original, ensuring it has
-     * the same structural and hash characteristics.
+     * The new ListMultimap uses the same value supplier as the original, and the same map supplier when this
+     * multimap was created with one. A multimap built over an existing map (by {@link #wrap(Map)},
+     * {@link #fromMap(Map)} or {@code of(..)}, for example) has no map supplier; its copy gets a compatible
+     * empty map of the same kind, with the same fallbacks as {@link #fromMap(Map)} for a runtime map type that
+     * cannot be instantiated.
      *
      * <p>Every key of this ListMultimap appears in the copy, including a key whose value list is empty
      * (which normal mutators never leave behind, but a caller can create by emptying a list obtained from

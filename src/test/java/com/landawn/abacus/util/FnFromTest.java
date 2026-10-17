@@ -48,8 +48,6 @@ public class FnFromTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.f2c((Function<String, String>) null));
     }
 
-
-
     // FINDING G20-003 (doc-only contract pin): the class-javadoc conversion table now names the DECLARED source
     // type of each shorthand. c2f/f2c/r2c declare the JDK interfaces (so the table's "leading j marks the JDK
     // source" rule does not apply to them); c2r is the one shorthand whose source really is the abacus type.

@@ -164,8 +164,6 @@ public class FloatStreamCreationTest extends FloatStreamTestSupport {
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f }, result.toArray(), DELTA);
     }
 
-
-
     // Edge cases
     @Test
     @DisplayName("flatten() with alignment horizontally additional")
@@ -186,8 +184,6 @@ public class FloatStreamCreationTest extends FloatStreamTestSupport {
         FloatStream stream = FloatStream.flatten(array);
         assertEquals(0, stream.count());
     }
-
-
 
     // G114-01: flatten(float[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
@@ -259,8 +255,6 @@ public class FloatStreamCreationTest extends FloatStreamTestSupport {
         assertEquals(0, FloatStream.flatten(new float[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G096-01: iterator of flatten(a, true) throws NoSuchElementException once exhausted
     @Test
     public void testFlattenVertically_iteratorExhaustion() {
@@ -273,8 +267,6 @@ public class FloatStreamCreationTest extends FloatStreamTestSupport {
         assertThrows(NoSuchElementException.class, iter::nextFloat);
         assertThrows(NoSuchElementException.class, iter::nextFloat);
     }
-
-
 
     // G096-01: flatten(a, true) on jagged arrays with null/empty rows keeps the column-major order
     @Test
@@ -299,8 +291,6 @@ public class FloatStreamCreationTest extends FloatStreamTestSupport {
         assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(special[1]));
         assertEquals(1f, special[2]);
     }
-
-
 
     // G096-01: flatten(a, true) matches a naive column-major reference on random jagged arrays
     @Test

@@ -40,7 +40,8 @@ import com.landawn.abacus.util.cs;
  *   <li>a public static factory method on the type class (such as {@code valueOf(String)}) that
  *       returns an instance of the type;</li>
  *   <li>a public static method returning the type whose parameter matches the inferred numeric field type
- *       (with primitive/wrapper equivalence);</li>
+ *       (with primitive/wrapper equivalence) - only when the class itself declares a non-static numeric field of a
+ *       concrete type (not {@code Number});</li>
  *   <li>a public single-argument constructor accepting a {@code String}, then a numeric value;</li>
  *   <li>a unique public static numeric factory using a different representation, only when no earlier creator exists.
  *       Multiple such factories are ambiguous and are not selected.</li>
@@ -51,8 +52,8 @@ import com.landawn.abacus.util.cs;
  * {@link UnsupportedOperationException} when called with a non-empty input.
  * The selected creator's parameter type parses the text; numeric arguments are not obtained by narrowing a
  * value parsed using the backing field type.
- * The unique numeric-factory fallback excludes a parameter of {@link Number} itself because its default
- * type handler cannot construct a value from text; such a factory must not hide a usable constructor.
+ * A factory or constructor whose parameter is {@link Number} itself is never selected, at any of these steps,
+ * because its default type handler cannot construct a value from text; such a creator must not hide a usable one.
  *
  * @param <T> the specific {@code Number} subclass this type handler manages
  */
@@ -129,15 +130,23 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
             }
         }
 
-        if (factoryMethod == null) {
+        // Step 2 needs a concrete numeric field type to match. Without one (no numeric instance field declared on the class,
+        // or one declared as Number) valueType is Number and every numeric factory would match - including one in different
+        // units (ofCents(long)) - ahead of the constructors and order-dependently; such factories are left to the
+        // unique-factory last resort below instead.
+        if (factoryMethod == null && valueType != Number.class) {
             try {
                 final Method[] methods = typeClass.getDeclaredMethods();
 
+                // A Number parameter can never be parsed from text (its handler throws UnsupportedOperationException),
+                // so it is excluded here and below: otherwise it can hide a usable creator (below in the any-numeric
+                // constructor fallback).
                 factoryMethod = N.findFirst(methods, it -> Modifier.isPublic(it.getModifiers()) //
                         && Modifier.isStatic(it.getModifiers()) //
                         && typeClass.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 1 //
                         && it.getParameterTypes()[0] != typeClass //
+                        && it.getParameterTypes()[0] != Number.class //
                         && ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0]))).orElse(null);
 
             } catch (final Exception e) {
@@ -164,10 +173,12 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                     constructor = N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                             && it.getParameterCount() == 1 //
                             && it.getParameterTypes()[0] != typeClass //
+                            && it.getParameterTypes()[0] != Number.class //
                             && (valueType.isAssignableFrom(it.getParameterTypes()[0])))
                             .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                                     && it.getParameterCount() == 1 //
                                     && it.getParameterTypes()[0] != typeClass //
+                                    && it.getParameterTypes()[0] != Number.class //
                                     && (Number.class.isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0])))))
                             .orElse(null);
                 } catch (final Exception e) {

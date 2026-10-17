@@ -152,8 +152,6 @@ public class SeqReviewTest extends SeqTestSupport {
 
     // close
 
-
-
     // G03-78: merge(Seq, Seq, Seq, BiFunction) was the one factory that rejected the selector before building a
     // close handler, so a null selector - or an already-closed operand - stranded the inputs the failure never
     // reached. Its five siblings (the four zip shapes and the two-input merge) all close every operand.
@@ -339,8 +337,6 @@ public class SeqReviewTest extends SeqTestSupport {
         assertTrue(called.get());
     }
 
-
-
     // G03-78 control: the successful path is unchanged - the merge still produces the merged order and closes
     // each of the three inputs exactly once when the returned sequence is consumed.
     @Test
@@ -394,8 +390,6 @@ public class SeqReviewTest extends SeqTestSupport {
         assertEquals(Arrays.asList("a", "c"), result.get(null));
         assertEquals(Arrays.asList("bb", "dd"), result.get(2));
     }
-
-
 
     // Seq.join(delimiter, prefix, suffix) builds a reuse-mode Joiner, which borrows a StringBuilder from
     // Objectory and only returns it on close(). A throwing traversal skipped that close, so every failed
@@ -788,6 +782,5 @@ public class SeqReviewTest extends SeqTestSupport {
             stream.close();
         }
     }
-
 
 }

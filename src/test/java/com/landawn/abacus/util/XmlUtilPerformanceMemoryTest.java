@@ -13,12 +13,67 @@ import java.util.Random;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
 
 /** Performance and memory regression contracts for XmlUtil. */
 @Tag("slow-test")
 public class XmlUtilPerformanceMemoryTest extends TestBase {
+
+    @ParameterizedTest
+    @ValueSource(strings = { "value", "\u4E2D\uD83D\uDE03" })
+    public void testGetTextContent_normalizationDoesNotCopyInputToCharArray(final String expected) throws Exception {
+        final java.lang.management.ThreadMXBean managementBean = java.lang.management.ManagementFactory.getThreadMXBean();
+        org.junit.jupiter.api.Assumptions.assumeTrue(managementBean instanceof com.sun.management.ThreadMXBean,
+                "This JVM does not expose per-thread allocation accounting");
+        final com.sun.management.ThreadMXBean allocationBean = (com.sun.management.ThreadMXBean) managementBean;
+        org.junit.jupiter.api.Assumptions.assumeTrue(allocationBean.isThreadAllocatedMemorySupported() && allocationBean.isThreadAllocatedMemoryEnabled(),
+                "Per-thread allocation accounting must be supported and enabled");
+        org.junit.jupiter.api.Assumptions.assumeTrue(allocationBean.getCurrentThreadAllocatedBytes() >= 0,
+                "Allocation accounting is unavailable for the current thread");
+
+        final int smallPrefixLength = 64;
+        final int largePrefixLength = 262_144;
+        final org.w3c.dom.Document document = XmlUtil.createDOMParser().newDocument();
+        final org.w3c.dom.Text smallText = document.createTextNode("\n".repeat(smallPrefixLength) + expected);
+        final org.w3c.dom.Text largeText = document.createTextNode("\n".repeat(largePrefixLength) + expected);
+
+        // Warm the exact DOM/result paths, the builder pool, and the allocation counter before comparing equal outputs.
+        normalizationAllocatedBytes(allocationBean, smallText, expected, 2_000);
+        normalizationAllocatedBytes(allocationBean, largeText, expected, 16);
+
+        final int calls = 8;
+        long smallAllocation = Long.MAX_VALUE;
+        long largeAllocation = Long.MAX_VALUE;
+        for (int sample = 0; sample < 5; sample++) {
+            smallAllocation = Math.min(smallAllocation, normalizationAllocatedBytes(allocationBean, smallText, expected, calls));
+            largeAllocation = Math.min(largeAllocation, normalizationAllocatedBytes(allocationBean, largeText, expected, calls));
+        }
+
+        // Both outputs are tiny and identical. One copied char[] adds two bytes per extra input code unit per call;
+        // allow half that growth to absorb fixed VM/pool overhead without depending on object headers or exact counts.
+        final long copiedInputGrowth = (long) (largePrefixLength - smallPrefixLength) * Character.BYTES * calls;
+        assertTrue(largeAllocation - smallAllocation < copiedInputGrowth / 2,
+                "Allocation grew by " + (largeAllocation - smallAllocation) + " bytes; a redundant input char[] would add " + copiedInputGrowth + " bytes");
+    }
+
+    private static long normalizationAllocatedBytes(final com.sun.management.ThreadMXBean allocationBean, final org.w3c.dom.Node text, final String expected,
+            final int calls) {
+        final String[] results = new String[calls];
+        final long before = allocationBean.getCurrentThreadAllocatedBytes();
+        for (int i = 0; i < calls; i++) {
+            results[i] = XmlUtil.getTextContent(text, true);
+        }
+        final long after = allocationBean.getCurrentThreadAllocatedBytes();
+
+        org.junit.jupiter.api.Assumptions.assumeTrue(before >= 0 && after >= before, "Per-thread allocation accounting became unavailable");
+        for (final String result : results) {
+            assertEquals(expected, result);
+        }
+        return after - before;
+    }
 
     // ---- perf review 2026-10-08 G075 end ----
     // ---- perf review 2026-10-08 G076 begin ----

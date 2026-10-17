@@ -69,8 +69,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-
-
     // BeanInfo.getPropInfoChain(String)
     @Test
     public void testBeanInfoGetPropInfoQueue() {
@@ -98,8 +96,6 @@ public class ParserUtilTest extends AbstractTest {
         assertJsonRoundTrip(new RecordB(111, "fn", "ln"), RecordB.class);
     }
 
-
-
     // A FIELD-level dateFormat on long/String still wins under a class-level config; the plain long takes the class-level numberFormat.
     @Test
     public void testClassLevelDateFormat_fieldLevelDateFormatOnLongAndStringStillApplied() {
@@ -123,8 +119,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(11L, copy.getEpoch());
         assertEquals("zz", copy.getText());
     }
-
-
 
     // G009-01: a class-level @JsonXmlConfig(dateFormat) was offered to long/Long/String properties (they have
     // propFuncMap entries for a field-level dateFormat): every long was written as a JSON string and the
@@ -154,8 +148,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals("x", copy.getName());
         assertEquals(new Date(0), copy.getCreatedOn());
     }
-
-
 
     // XML: the class-level numberFormat now reaches long/Long properties and the value round-trips.
     @Test
@@ -218,8 +210,6 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(result instanceof TestBean);
     }
 
-
-
     // G07-01: an exception thrown by the no-args constructor reaches the caller exactly as N.newInstance(clazz) delivered it:
     // a RuntimeException as the same instance, a checked exception wrapped by ExceptionUtil.toRuntimeException.
     @Test
@@ -250,8 +240,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertSame(G07PlainBean.class, beanInfo.createBeanResult().getClass());
     }
-
-
 
     // G07-01: classes N.newInstance(clazz) does not create through a plain no-args constructor keep their previous path and
     // result: a non-static member class and an anonymous class are created through an enclosing instance; a class
@@ -289,8 +277,6 @@ public class ParserUtilTest extends AbstractTest {
         final G07NoDefaultConstructorBean finished = noDefault.finishBeanResult(args);
         assertNull(finished.getName());
     }
-
-
 
     // G07-01: createBeanResult() for a plain mutable bean (top-level, static nested, local class in a static context, private
     // no-args constructor) invokes the no-args constructor exactly once per call and returns a fresh instance of the class.
@@ -336,8 +322,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // equals
 
-
-
     // BeanInfo.equals
     @Test
     public void testBeanInfoEquals() {
@@ -382,8 +366,6 @@ public class ParserUtilTest extends AbstractTest {
         assertFalse(p1.equals(p2));
     }
 
-
-
     // BeanInfo.createBeanResult / finishBeanResult
     @Test
     public void testBeanInfoCreateAndFinishBeanResult() {
@@ -414,8 +396,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals("First", record.firstName());
         assertEquals("Last", record.lastName());
     }
-
-
 
     /**
      * Verifies that {@code @JsonXmlField(numberFormat=...)} produces locale-independent output.
@@ -495,8 +475,6 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(aliases == null || aliases.length == 0);
     }
 
-
-
     // getAliases(Field)
     @Test
     public void testGetAliases_nullField() {
@@ -512,8 +490,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // getAnnotation
-
-
 
     // BeanInfo.getAnnotation
     @Test
@@ -534,8 +510,6 @@ public class ParserUtilTest extends AbstractTest {
         Table tableAnnotation = beanInfo.getAnnotation(Table.class);
         assertNull(tableAnnotation);
     }
-
-
 
     // PropInfo.getAnnotation
     @Test
@@ -569,8 +543,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // getBeanInfo
-
-
 
     // getBeanInfo(java.lang.reflect.Type)
     @Test
@@ -613,8 +585,6 @@ public class ParserUtilTest extends AbstractTest {
         assertNotNull(beanInfo.canonicalClassName);
         assertTrue(beanInfo.canonicalClassName.contains("TestBean"));
     }
-
-
 
     // getBeanInfo(Class)
     @Test
@@ -681,8 +651,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(String.class, value.type.javaType());
     }
 
-
-
     // G009-01 guard: a pattern invalid in the property's own syntax, and a java.time-only rejection on a java.time
     // property, are still rejected when the BeanInfo is built.
     @Test
@@ -716,8 +684,6 @@ public class ParserUtilTest extends AbstractTest {
         assertNotNull(beanInfo.javaType);
         assertEquals(TestBean.class, beanInfo.javaType);
     }
-
-
 
     // G009-01: a legacy date/time property uses SimpleDateFormat pattern syntax (JsonXmlField.dateFormat), but the
     // BeanInfo build rejected SimpleDateFormat patterns java.time does not accept ("Too many pattern letters").
@@ -758,8 +724,6 @@ public class ParserUtilTest extends AbstractTest {
         Date d = (Date) propInfo.readPropValue("1700000000000");
         assertEquals(1700000000000L, d.getTime());
     }
-
-
 
     // G120 verify of G009-01 guard: a pattern valid in both syntaxes still builds the java.time formatter and formats as before.
     @Test
@@ -917,8 +881,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(Object.class, rawInfo.getPropInfo("second").type.javaType());
     }
 
-
-
     // G120 verify of G009-01: java.sql.Date/Time read their pattern with java.time syntax (Dates.parseToLocalDate/LocalTime),
     // so a pattern java.time rejects can never be read back; such a property is still rejected when the BeanInfo is built,
     // and so is a type outside the exact legacy/Joda list (GregorianCalendar).
@@ -960,8 +922,6 @@ public class ParserUtilTest extends AbstractTest {
         assertNotNull(beanInfo.type);
     }
 
-
-
     // getBeanInfo(Type, boolean) - internal/deprecated
     @Test
     public void testGetBeanInfo_withAsmFlag() {
@@ -997,8 +957,6 @@ public class ParserUtilTest extends AbstractTest {
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((Class<?>) null));
         assertEquals("'beanClass' cannot be null", e.getMessage());
     }
-
-
 
     // Both public metadata lookups and the internal ASM/reflective test entry point reject non-beans.
     @SuppressWarnings("deprecation")
@@ -1046,8 +1004,6 @@ public class ParserUtilTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> beanInfo.getPropInfo((String) null));
     }
 
-
-
     // G009-01: the same for a Joda-Time property, whose pattern syntax is Joda's DateTimeFormat.
     @Test
     public void testGetBeanInfo_jodaDatePropertyAcceptsJodaOnlyPattern() {
@@ -1081,8 +1037,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals("yyyy/MM/dd", ParserUtil.getDateFormat(field, config));
     }
 
-
-
     // getDateFormat(Field, JsonXmlConfig)
     @Test
     public void testGetDateFormat_nullField() {
@@ -1114,8 +1068,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(com.landawn.abacus.util.EnumType.NAME, ParserUtil.getEnumerated(nameField, null));
     }
 
-
-
     // getEnumerated(Field, JsonXmlConfig)
     @Test
     public void testGetEnumerated_nullField() {
@@ -1132,8 +1084,6 @@ public class ParserUtilTest extends AbstractTest {
         // SNAKE_CASE should produce "first_name"
         assertArrayEquals("first_name".toCharArray(), tags[NamingPolicy.SNAKE_CASE.ordinal()].name);
     }
-
-
 
     // getJsonNameTags(String)
     @Test
@@ -1164,8 +1114,6 @@ public class ParserUtilTest extends AbstractTest {
             assertArrayEquals("customAge".toCharArray(), tag.name);
         }
     }
-
-
 
     // getJsonNameTags(String, Field)
     @Test
@@ -1211,8 +1159,6 @@ public class ParserUtilTest extends AbstractTest {
         assertNull(ParserUtil.getNumberFormat(nameField, null));
     }
 
-
-
     // getNumberFormat(Field, JsonXmlConfig)
     @Test
     public void testGetNumberFormat_nullField() {
@@ -1220,8 +1166,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // getPropInfo
-
-
 
     // BeanInfo.getPropInfo(String)
     @Test
@@ -1276,8 +1220,6 @@ public class ParserUtilTest extends AbstractTest {
         PropInfo p2 = beanInfo.getPropInfo("name");
         assertSame(p1, p2);
     }
-
-
 
     // BeanInfo.getPropInfo(PropInfo)
     @Test
@@ -1347,8 +1289,6 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(chain.isEmpty());
     }
 
-
-
     // G009-02: refreshing the inner bean's metadata left the outer bean's memoized "inner.city" chain in place.
     @Test
     public void testGetPropInfoChain_droppedAfterNestedBeanRefresh() {
@@ -1372,8 +1312,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // getPropValue
-
-
 
     // BeanInfo.getPropValue(Object, String)
     @Test
@@ -1415,8 +1353,6 @@ public class ParserUtilTest extends AbstractTest {
         Date date = beanInfo.getPropValue(bean, "createdDate");
         assertNull(date);
     }
-
-
 
     // PropInfo.getPropValue(Object)
     @Test
@@ -1492,8 +1428,6 @@ public class ParserUtilTest extends AbstractTest {
         assertNull(ParserUtil.getTimeZone(nameField, null));
     }
 
-
-
     // getTimeZone(Field, JsonXmlConfig)
     @Test
     public void testGetTimeZone_nullField() {
@@ -1501,8 +1435,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // getXmlNameTags
-
-
 
     // getXmlNameTags(String, String, boolean)
     @Test
@@ -1529,8 +1461,6 @@ public class ParserUtilTest extends AbstractTest {
             assertNotNull(tag);
         }
     }
-
-
 
     // getXmlNameTags(String, Field, String, boolean)
     @Test
@@ -1562,8 +1492,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // hashCode
 
-
-
     // BeanInfo.hashCode
     @Test
     public void testBeanInfoHashCode() {
@@ -1588,8 +1516,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertNotEquals(beanInfo1.hashCode(), beanInfo2.hashCode());
     }
-
-
 
     // hashCode(char[])
     @Test
@@ -1618,8 +1544,6 @@ public class ParserUtilTest extends AbstractTest {
         int hash = ParserUtil.hashCode("a".toCharArray());
         assertEquals(31 + 'a', hash);
     }
-
-
 
     // hashCode(char[], int, int)
     @Test
@@ -1661,8 +1585,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals(h1, h2);
     }
 
-
-
     // PropInfo.hashCode / equals / toString
     @Test
     public void testPropInfoHashCodeAndEquals() {
@@ -1693,8 +1615,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // isAnnotationPresent
 
-
-
     // BeanInfo.isAnnotationPresent
     @Test
     public void testBeanInfoIsAnnotationPresent() {
@@ -1709,8 +1629,6 @@ public class ParserUtilTest extends AbstractTest {
         BeanInfo beanInfo = ParserUtil.getBeanInfo(RecordA.class);
         assertFalse(beanInfo.isAnnotationPresent(Table.class));
     }
-
-
 
     // PropInfo.isAnnotationPresent
     @Test
@@ -1759,8 +1677,6 @@ public class ParserUtilTest extends AbstractTest {
         assertFalse(ParserUtil.isJsonRawValue(nameField));
     }
 
-
-
     // isJsonRawValue(Field)
     @Test
     public void testIsJsonRawValue_nullField() {
@@ -1787,8 +1703,6 @@ public class ParserUtilTest extends AbstractTest {
         Field ageField = TestBean.class.getDeclaredField("age");
         assertTrue(ParserUtil.isJsonXmlSerializable(ageField, null));
     }
-
-
 
     // isJsonXmlSerializable(Field, JsonXmlConfig)
     @Test
@@ -1843,8 +1757,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-
-
     // G120 verify of G009-01: java.sql.Timestamp (SimpleDateFormat syntax) and Joda MutableDateTime (Joda syntax) accept a
     // pattern java.time rejects and round-trip through JSON and XML.
     @Test
@@ -1866,8 +1778,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // newInstance
-
-
 
     // BeanInfo.newInstance
     @Test
@@ -1914,8 +1824,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertThrows(RuntimeException.class, () -> propInfo.readPropValue("12oops"));
     }
-
-
 
     // PropInfo public fields
     @Test
@@ -2078,8 +1986,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // readPropInfo
 
-
-
     // BeanInfo.readPropInfo(char[], int, int)
     @Test
     public void testBeanInfoReadPropInfo() {
@@ -2132,8 +2038,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // readPropValue
-
-
 
     // PropInfo.readPropValue(String)
     @Test
@@ -2192,8 +2096,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // refreshBeanPropInfo
 
-
-
     // refreshBeanPropInfo
     @Test
     public void testRefreshBeanPropInfo() {
@@ -2206,8 +2108,6 @@ public class ParserUtilTest extends AbstractTest {
         Assertions.assertNotSame(beanInfo1, beanInfo2);
     }
 
-
-
     // G009-02: refreshBeanPropInfo(Class) left the BeanInfo cached for a parameterized use of the class (Box<String>) stale.
     @Test
     public void testRefreshBeanPropInfo_evictsParameterizedTypeBeanInfo() throws Exception {
@@ -2219,8 +2119,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertNotSame(before, ParserUtil.getBeanInfo(parameterized));
     }
-
-
 
     // G009-02 neighbours: refreshing a class still evicts its raw-class BeanInfo, but keeps the BeanInfos of other classes' parameterized types.
     @Test
@@ -2429,8 +2327,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // setPropValue
 
-
-
     // BeanInfo.setPropValue(Object, String, Object)
     @Test
     public void testBeanInfoSetPropValue() {
@@ -2500,8 +2396,6 @@ public class ParserUtilTest extends AbstractTest {
         });
     }
 
-
-
     // BeanInfo.setPropValue(Object, PropInfo, Object)
     @Test
     public void testBeanInfoSetPropValueByPropInfo() {
@@ -2546,8 +2440,6 @@ public class ParserUtilTest extends AbstractTest {
         });
     }
 
-
-
     // BeanInfo.setPropValue(Object, PropInfo, Object, boolean)
     @Test
     public void testBeanInfoSetPropValueByPropInfo_withIgnoreUnmatchedProperty() {
@@ -2560,8 +2452,6 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(result);
         assertEquals("CrossBeanValue", bean2.getName());
     }
-
-
 
     // BeanInfo.setPropValue(Object, String, Object, boolean)
     @Test
@@ -2576,8 +2466,6 @@ public class ParserUtilTest extends AbstractTest {
             beanInfo.setPropValue(bean, "nonExistent", "value", false);
         });
     }
-
-
 
     // PropInfo.setPropValue(Object, Object)
     @Test
@@ -2614,8 +2502,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertNull(bean.getName());
     }
-
-
 
     // G009-01: the ASM PropInfo retried a setter that threw its own exception, so a rejecting setter ran twice.
     @Test
@@ -2657,8 +2543,6 @@ public class ParserUtilTest extends AbstractTest {
 
         assertEquals(42, bean.getAge());
     }
-
-
 
     // Existing integration/feature tests
     @Test
@@ -2703,8 +2587,6 @@ public class ParserUtilTest extends AbstractTest {
     }
 
     // toString
-
-
 
     // BeanInfo.toString
     @Test
@@ -2806,8 +2688,6 @@ public class ParserUtilTest extends AbstractTest {
 
     // writePropValue
 
-
-
     // PropInfo.writePropValue(CharacterWriter, Object, JsonXmlSerConfig)
     @Test
     public void testPropInfoWritePropValue() throws Exception {
@@ -2864,8 +2744,6 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals("null", output);
         com.landawn.abacus.util.Objectory.recycle(writer);
     }
-
-
 
     // G009-01: a numberFormat affix holding XML markup characters was written raw, producing XML no reader accepts.
     @Test
@@ -3033,8 +2911,6 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(json.contains("ln"));
         assertEquals(bean, N.fromJson(json, type));
     }
-
-
 
     // TODO: Remaining ParserUtil.ASMPropInfo gaps are ReflectASM-specific generated access paths that are not meaningfully isolated beyond public ParserUtil/PropInfo coverage.
     public static class NumberFormatBean {
@@ -3321,8 +3197,6 @@ public class ParserUtilTest extends AbstractTest {
         @JsonXmlField(name = "user_id")
         public String value;
     }
-
-
 
     // Accessor-based on purpose: this fixture observes getter/setter calls, and properties are read and written
     // through their fields unless @AccessFieldByMethod says otherwise (in both the reflective and the ASM mode).
@@ -3637,8 +3511,6 @@ public class ParserUtilTest extends AbstractTest {
         }
     }
 
-
-
     /** A non-static member class: N.newInstance creates it through an enclosing instance of the test class. */
     public class G07InnerBean {
         private int count;
@@ -3669,7 +3541,6 @@ public class ParserUtilTest extends AbstractTest {
 
         return G07LocalBean.class;
     }
-
 
     // ---- perf review 2026-10-07 G07 end ----
 

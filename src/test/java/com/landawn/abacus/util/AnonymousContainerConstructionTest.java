@@ -212,7 +212,8 @@ public class AnonymousContainerConstructionTest extends com.landawn.abacus.TestB
             assertEquals(failure.getMessage(), assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(listType)).getMessage());
             for (final int capacity : new int[] { -1, 0, 1, 100 }) {
                 assertEquals(failure.getMessage(), assertThrows(IllegalArgumentException.class, () -> creator.apply(capacity)).getMessage());
-                assertEquals(failure.getMessage(), assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(listType, capacity)).getMessage());
+                assertEquals(failure.getMessage(),
+                        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newCollection(listType, capacity)).getMessage());
             }
         }
         assertEquals(outerCalls, OUTER_CALLS.get());

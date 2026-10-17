@@ -2108,6 +2108,9 @@ public abstract class Observer<T> {
      * gapped windows based on the timespan and timeskip parameters. Normal completion
      * emits each active non-empty partial window; an error discards active windows.
      *
+     * <p>Each emitted list is independent and is no longer modified by this operator. Overlapping lists
+     * can contain the same element objects; the elements themselves are not copied.</p>
+     *
      * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
      * never suppressed. Only the active partial windows delivered on normal completion are suppressed when
      * they are empty.</p>
@@ -2149,6 +2152,10 @@ public abstract class Observer<T> {
      * Creates overlapping or gapped windows that emit when either the window duration
      * expires or the count is reached. Normal completion emits each active non-empty partial
      * window; an error discards active windows.
+     *
+     * <p>Each emitted list is independent and is no longer modified by this operator. Overlapping lists
+     * can contain the same element objects; the elements themselves are not copied. A downstream limit
+     * can stop delivery partway through several windows completed by the same input item.</p>
      *
      * <p>A window that expires with no items buffered still emits an empty list; the periodic emission is
      * never suppressed. Only the active partial windows delivered on normal completion are suppressed when
@@ -2248,13 +2255,18 @@ public abstract class Observer<T> {
                                 fullWindows = new ArrayList<>();
                             }
 
-                            fullWindows.add(new ArrayList<>(window));
+                            // Removed windows are no longer mutated by the source, so ownership can pass downstream.
+                            fullWindows.add(window);
                         }
                     }
 
                     if (fullWindows != null && downDispatcher != null) {
                         // Serialize count-triggered delivery with scheduled and terminal signals.
                         for (final List<T> window : fullWindows) {
+                            // One input may complete several windows; a limit can be reached by the first one.
+                            if (isLimitReached()) {
+                                break;
+                            }
                             downDispatcher.onNext(window);
                         }
                     }
@@ -2333,7 +2345,7 @@ public abstract class Observer<T> {
                     if (downDispatcher != null) {
                         try {
                             // Serialize scheduled delivery with source and terminal signals.
-                            downDispatcher.onNext(new ArrayList<>(window));
+                            downDispatcher.onNext(window);
                         } catch (final Exception e) {
                             hasMore = false;
                             terminateLocked();
@@ -2358,7 +2370,7 @@ public abstract class Observer<T> {
                     if (takePending) {
                         for (final List<T> window : windows) {
                             if (N.notEmpty(window)) {
-                                pending.add(new ArrayList<>(window));
+                                pending.add(window);
                             }
                         }
                     }

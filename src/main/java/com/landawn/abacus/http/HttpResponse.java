@@ -333,6 +333,9 @@ public class HttpResponse {
             } else if (bodyFormat == ContentFormat.FORM_URL_ENCODED) {
                 return URLEncodedUtil.decode(new String(body, respCharset), respCharset, resultClass);
             } else if (body.length > 0 && bodyFormat != null && bodyFormat != ContentFormat.NONE) {
+                // Every known format, XML included, is parsed from a Reader over the body. Note for XML: unlike
+                // deserialize(String), the Reader parse stops at the end of the root element and does not reject content
+                // after it (a second root element or trailing text), so such a malformed body is read as its first root.
                 return HttpUtil.getParser(bodyFormat).deserialize(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultClass);
             } else {
                 // For NONE / unrecognized content formats, the configured parser falls back to
@@ -404,6 +407,9 @@ public class HttpResponse {
                 return body.length == 0 ? N.fromJson("", resultType)
                         : N.fromJson(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);
             } else if (bodyFormat != null && bodyFormat.name().contains("XML")) {
+                // Parsed from a Reader, like JSON above. Note: unlike N.fromXml(String, ...), the Reader parse stops at the end
+                // of the root element and does not reject content after it (a second root element or trailing text), so such a
+                // malformed body is read as its first root.
                 return body.length == 0 ? N.fromXml("", resultType) : N.fromXml(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);
             } else if (body.length > 0 && bodyFormat != null && bodyFormat != ContentFormat.NONE) {
                 return HttpUtil.getParser(bodyFormat).deserialize(new InputStreamReader(new ByteArrayInputStream(body), respCharset), resultType);

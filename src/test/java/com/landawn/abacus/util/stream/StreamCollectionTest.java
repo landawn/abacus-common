@@ -53,8 +53,6 @@ public class StreamCollectionTest extends StreamTestSupport {
         assertEquals(Set.of(1, 2, 3), parallelResult);
     }
 
-
-
     //
     //
     @Test
@@ -302,8 +300,6 @@ public class StreamCollectionTest extends StreamTestSupport {
     }
 
     // groupTo
-
-
 
     //
     //

@@ -1716,7 +1716,6 @@ public class NumbersConversionTest extends NumbersTestSupport {
         assertThrows(NumberFormatException.class, () -> Numbers.toDouble("abc"));
     }
 
-
     // G060-01: the integral-float fast path of the Float -> double decimal widening must equal the string round trip bit for bit.
     @Test
     public void testToDouble_floatIntegralFastPathMatchesDecimalRoundTrip() {

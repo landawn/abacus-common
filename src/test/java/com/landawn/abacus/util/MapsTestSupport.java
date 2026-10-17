@@ -298,7 +298,6 @@ public abstract class MapsTestSupport extends AbstractTest {
 
     // zip with empty keys/values and mapSupplier returns empty map
 
-
     // getAsCharOrDefaultIfAbsent: value is not Character -> converted from its string form
 
     // getAsByteOrDefaultIfAbsent: value is not Number -> calls Numbers.toByte(N.toString(val))
@@ -341,8 +340,6 @@ public abstract class MapsTestSupport extends AbstractTest {
             return super.containsKey(key instanceof String ? ((String) key).toLowerCase(java.util.Locale.ROOT) : key);
         }
     }
-
-
 
     // 3.2 removeEntry(Map, Map.Entry) tolerates a null entry (matches containsEntry)
 

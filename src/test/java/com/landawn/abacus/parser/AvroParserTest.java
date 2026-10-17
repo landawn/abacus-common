@@ -954,4 +954,898 @@ public class AvroParserTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 5, 6 }, bean.getData());
     }
     // ---- deep review 2026-09-25 G006 end ----
+
+    // ---- deep review 2026-10-16 G128 begin ----
+    public static class G128ArrayBean {
+        private String name;
+        private String[] tags;
+        private int[] nums;
+        private String[][] grid;
+        private List<int[]> rows;
+        private G128Item[] items;
+        private Map<String, long[]> byKey;
+        private List<String> plain;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String[] getTags() {
+            return tags;
+        }
+
+        public void setTags(String[] tags) {
+            this.tags = tags;
+        }
+
+        public int[] getNums() {
+            return nums;
+        }
+
+        public void setNums(int[] nums) {
+            this.nums = nums;
+        }
+
+        public String[][] getGrid() {
+            return grid;
+        }
+
+        public void setGrid(String[][] grid) {
+            this.grid = grid;
+        }
+
+        public List<int[]> getRows() {
+            return rows;
+        }
+
+        public void setRows(List<int[]> rows) {
+            this.rows = rows;
+        }
+
+        public G128Item[] getItems() {
+            return items;
+        }
+
+        public void setItems(G128Item[] items) {
+            this.items = items;
+        }
+
+        public Map<String, long[]> getByKey() {
+            return byKey;
+        }
+
+        public void setByKey(Map<String, long[]> byKey) {
+            this.byKey = byKey;
+        }
+
+        public List<String> getPlain() {
+            return plain;
+        }
+
+        public void setPlain(List<String> plain) {
+            this.plain = plain;
+        }
+    }
+
+    public static class G128Item {
+        private int x;
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+    }
+
+    private static Schema g128ArraySchema() {
+        return new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G128Arrays\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},"
+                + "{\"name\":\"tags\",\"type\":[\"null\",{\"type\":\"array\",\"items\":\"string\"}]},"
+                + "{\"name\":\"nums\",\"type\":[\"null\",{\"type\":\"array\",\"items\":\"int\"}]},"
+                + "{\"name\":\"grid\",\"type\":[\"null\",{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":\"string\"}}]},"
+                + "{\"name\":\"rows\",\"type\":[\"null\",{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":\"int\"}}]},"
+                + "{\"name\":\"items\",\"type\":[\"null\",{\"type\":\"array\",\"items\":{\"type\":\"record\",\"name\":\"G128Item\","
+                + "\"fields\":[{\"name\":\"x\",\"type\":\"int\"}]}}]},"
+                + "{\"name\":\"byKey\",\"type\":[\"null\",{\"type\":\"map\",\"values\":{\"type\":\"array\",\"items\":\"long\"}}]},"
+                + "{\"name\":\"plain\",\"type\":[\"null\",{\"type\":\"array\",\"items\":\"string\"}]}]}");
+    }
+
+    private static Schema g128ValueSchema(final String fieldSchema) {
+        return new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G128Value\",\"fields\":[{\"name\":\"v\",\"type\":" + fieldSchema + "}]}");
+    }
+
+    private static G128ArrayBean g128FilledBean() {
+        final G128Item item = new G128Item();
+        item.setX(7);
+        final Map<String, long[]> byKey = new java.util.LinkedHashMap<>();
+        byKey.put("k", new long[] { 8L, 5000000000L });
+
+        final G128ArrayBean bean = new G128ArrayBean();
+        bean.setName("n");
+        bean.setTags(new String[] { "a", "b" });
+        bean.setNums(new int[] { 1, 2 });
+        bean.setGrid(new String[][] { { "g" }, {} });
+        bean.setRows(List.of(new int[] { 3 }, new int[] { 4, 5 }));
+        bean.setItems(new G128Item[] { item });
+        bean.setByKey(byKey);
+        bean.setPlain(List.of("p"));
+        return bean;
+    }
+
+    // G128 (G008-02): object/primitive array bean properties failed the write with DataFileWriter$AppendWriteException (ClassCastException).
+    @Test
+    public void testSerialize_arrayBeanPropertiesToArrayFields() {
+        final Schema schema = g128ArraySchema();
+        final String encoded = parser.serialize(g128FilledBean(), new AvroSerConfig().setSchema(schema));
+
+        final GenericRecord read = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), GenericRecord.class);
+        assertEquals("[a, b]", read.get("tags").toString());
+        assertEquals("[1, 2]", read.get("nums").toString());
+        assertEquals("[[g], []]", read.get("grid").toString());
+        assertEquals("[[3], [4, 5]]", read.get("rows").toString());
+        assertEquals("[{\"x\": 7}]", read.get("items").toString());
+        assertEquals("{k=[8, 5000000000]}", read.get("byKey").toString());
+        assertEquals("[p]", read.get("plain").toString());
+    }
+
+    // G128 (G008-02): an array<string> datum read into a String[] property failed with ParsingException "Unsupported class: Utf8".
+    @Test
+    public void testDeserialize_arrayFieldsIntoArrayBeanProperties() {
+        final Schema schema = g128ArraySchema();
+        final Map<String, Object> source = new HashMap<>();
+        source.put("name", "n");
+        source.put("tags", List.of("a", "b"));
+        source.put("nums", List.of(1, 2));
+        source.put("grid", List.of(List.of("g"), List.of()));
+        source.put("rows", List.of(List.of(3), List.of(4, 5)));
+        source.put("items", List.of(Map.of("x", 7)));
+        source.put("byKey", Map.of("k", List.of(8L)));
+        source.put("plain", List.of("p"));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        final G128ArrayBean bean = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), G128ArrayBean.class);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "a", "b" }, bean.getTags());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 1, 2 }, bean.getNums());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[][] { { "g" }, {} }, bean.getGrid());
+        assertEquals(2, bean.getRows().size());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 3 }, bean.getRows().get(0));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 4, 5 }, bean.getRows().get(1));
+        assertEquals(1, bean.getItems().length);
+        assertEquals(7, bean.getItems()[0].getX());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 8L }, bean.getByKey().get("k"));
+        assertEquals(List.of("p"), bean.getPlain());
+    }
+
+    // G128 (G008-02): a bean with array properties now round-trips.
+    @Test
+    public void testSerialize_arrayBeanRoundTrip() {
+        final Schema schema = g128ArraySchema();
+        final String encoded = parser.serialize(g128FilledBean(), new AvroSerConfig().setSchema(schema));
+        final G128ArrayBean bean = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), G128ArrayBean.class);
+
+        assertEquals("n", bean.getName());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "a", "b" }, bean.getTags());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 1, 2 }, bean.getNums());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[][] { { "g" }, {} }, bean.getGrid());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 4, 5 }, bean.getRows().get(1));
+        assertEquals(7, bean.getItems()[0].getX());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 8L, 5000000000L }, bean.getByKey().get("k"));
+    }
+
+    // G128 (G008-02): array map values (object, primitive and byte[] for an array<int> schema) were passed to Avro unconverted.
+    @Test
+    public void testSerialize_arrayMapValuesToArrayFields() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"int\"}");
+
+        for (final Object value : new Object[] { new int[] { 1, 2 }, new Integer[] { 1, 2 }, new long[] { 1L, 2L }, new short[] { 1, 2 },
+                new byte[] { 1, 2 } }) {
+            final Map<String, Object> source = new HashMap<>();
+            source.put("v", value);
+            final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+            final GenericRecord read = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), GenericRecord.class);
+            assertEquals("[1, 2]", read.get("v").toString(), value.getClass().getSimpleName());
+        }
+
+        final Map<String, Object> enums = new HashMap<>();
+        enums.put("v", new String[] { "GREEN" });
+        final Schema enumSchema = g128ValueSchema("{\"type\":\"array\",\"items\":{\"type\":\"enum\",\"name\":\"G128Color\",\"symbols\":[\"RED\",\"GREEN\"]}}");
+        final GenericRecord read = parser.deserialize(parser.serialize(enums, new AvroSerConfig().setSchema(enumSchema)),
+                AvroDeserConfig.create().setSchema(enumSchema), GenericRecord.class);
+        assertEquals("[GREEN]", read.get("v").toString());
+    }
+
+    // G128 (G008-02): array items get the same range checks as collection items instead of a ClassCastException from Avro.
+    @Test
+    public void testSerialize_arrayItemOverflowThrowsArithmeticException() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"int\"}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", new long[] { 5000000000L });
+
+        assertThrows(ArithmeticException.class, () -> parser.serialize(source, new AvroSerConfig().setSchema(schema)));
+
+        source.put("v", List.of(5000000000L));
+        assertThrows(ArithmeticException.class, () -> parser.serialize(source, new AvroSerConfig().setSchema(schema)));
+    }
+
+    // G128 (G008-02): Map targets with array value types and collection targets with array element types read item by item.
+    @Test
+    public void testDeserialize_arrayDatumIntoArrayMapValueAndCollectionElement() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":\"string\"}}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", List.of(List.of("a"), List.of("b", "c")));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        final Map<String, String[][]> map = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, String[][].class));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[][] { { "a" }, { "b", "c" } }, map.get("v"));
+
+        final Map<String, List<String[]>> listMap = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema),
+                Type.of("Map<String, List<String[]>>"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "b", "c" }, listMap.get("v").get(1));
+
+        final Schema arraySchemaOfArrays = new Schema.Parser().parse("{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":\"string\"}}");
+        final String top = parser.serialize(List.of(List.of("x", "y")), new AvroSerConfig().setSchema(arraySchemaOfArrays));
+        final List<String[]> list = parser.deserialize(top, AvroDeserConfig.create().setSchema(arraySchemaOfArrays).setElementType(String[].class), List.class);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "x", "y" }, list.get(0));
+    }
+
+    // G128 (G008-02): an array<bytes> datum read into byte[][] silently produced null items.
+    @Test
+    public void testDeserialize_bytesArrayIntoByteArrayArray() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"bytes\"}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", new byte[][] { { 1 }, { 2, 3 } });
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        final Map<String, byte[][]> map = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, byte[][].class));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[][] { { 1 }, { 2, 3 } }, map.get("v"));
+    }
+
+    // G128 neighbour: numeric array datums were already readable into primitive arrays; a null item keeps the primitive default
+    // and integral overflow still fails - unchanged.
+    @Test
+    public void testDeserialize_numericArrayIntoPrimitiveArrayUnchanged() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":[\"null\",\"long\"]}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", Arrays.asList(1L, null, 3L));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 1, 0, 3 },
+                parser.<Map<String, int[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, int[].class)).get("v"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Long[] { 1L, null, 3L },
+                parser.<Map<String, Long[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, Long[].class)).get("v"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 1.0, 0.0, 3.0 },
+                parser.<Map<String, double[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, double[].class))
+                        .get("v"));
+
+        source.put("v", List.of(5000000000L));
+        final String big = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+        assertThrows(ArithmeticException.class,
+                () -> parser.deserialize(big, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, int[].class)));
+    }
+
+    // G128 neighbour: collections, untyped values, byte[] for a bytes field and the root-level array rejection are unchanged.
+    @Test
+    public void testArrayNeighboursUnchanged() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"string\"}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", List.of("a", "b"));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        assertEquals(List.of("a", "b"),
+                parser.<Map<String, List<String>>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.of("Map<String, List<String>>"))
+                        .get("v"));
+        final Object untyped = parser.<Map<String, Object>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.of("Map<String, Object>"))
+                .get("v");
+        assertTrue(untyped instanceof GenericData.Array);
+
+        final G006BytesBean bytesBean = new G006BytesBean();
+        bytesBean.setName("n");
+        bytesBean.setData(new byte[] { 1, 2 });
+        final GenericRecord bytesRead = parser.deserialize(parser.serialize(bytesBean, new AvroSerConfig().setSchema(g006BytesSchema())),
+                AvroDeserConfig.create().setSchema(g006BytesSchema()), GenericRecord.class);
+        assertTrue(bytesRead.get("data") instanceof java.nio.ByteBuffer);
+
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(new String[] { "a" }, new AvroSerConfig().setSchema(arraySchema)));
+        final String top = parser.serialize(List.of("a"), new AvroSerConfig().setSchema(arraySchema));
+        assertThrows(IllegalArgumentException.class, () -> parser.deserialize(top, AvroDeserConfig.create().setSchema(arraySchema), String[].class));
+    }
+    // ---- deep review 2026-10-16 G128 end ----
+
+    // ---- deep review 2026-10-16 verify G133 begin ----
+    public enum G133Color {
+        RED, GREEN
+    }
+
+    public static class G133ArrayKinds {
+        private long[] longs;
+        private double[] doubles;
+        private boolean[] flags;
+        private Integer[] boxed;
+        private Object[] objects;
+        private G133Color[] colors;
+        private G128Item[] items;
+        private byte[][] blobs;
+        private float[] floats;
+        private char[] chars;
+
+        public long[] getLongs() {
+            return longs;
+        }
+
+        public void setLongs(long[] longs) {
+            this.longs = longs;
+        }
+
+        public double[] getDoubles() {
+            return doubles;
+        }
+
+        public void setDoubles(double[] doubles) {
+            this.doubles = doubles;
+        }
+
+        public boolean[] getFlags() {
+            return flags;
+        }
+
+        public void setFlags(boolean[] flags) {
+            this.flags = flags;
+        }
+
+        public Integer[] getBoxed() {
+            return boxed;
+        }
+
+        public void setBoxed(Integer[] boxed) {
+            this.boxed = boxed;
+        }
+
+        public Object[] getObjects() {
+            return objects;
+        }
+
+        public void setObjects(Object[] objects) {
+            this.objects = objects;
+        }
+
+        public G133Color[] getColors() {
+            return colors;
+        }
+
+        public void setColors(G133Color[] colors) {
+            this.colors = colors;
+        }
+
+        public G128Item[] getItems() {
+            return items;
+        }
+
+        public void setItems(G128Item[] items) {
+            this.items = items;
+        }
+
+        public byte[][] getBlobs() {
+            return blobs;
+        }
+
+        public void setBlobs(byte[][] blobs) {
+            this.blobs = blobs;
+        }
+
+        public float[] getFloats() {
+            return floats;
+        }
+
+        public void setFloats(float[] floats) {
+            this.floats = floats;
+        }
+
+        public char[] getChars() {
+            return chars;
+        }
+
+        public void setChars(char[] chars) {
+            this.chars = chars;
+        }
+    }
+
+    public static class G133RoundTripBean {
+        private String[] strings;
+        private int[] ints;
+        private long[] longs;
+        private double[] doubles;
+        private boolean[] flags;
+        private Integer[] boxed;
+        private String[][] grid;
+
+        public String[] getStrings() {
+            return strings;
+        }
+
+        public void setStrings(String[] strings) {
+            this.strings = strings;
+        }
+
+        public int[] getInts() {
+            return ints;
+        }
+
+        public void setInts(int[] ints) {
+            this.ints = ints;
+        }
+
+        public long[] getLongs() {
+            return longs;
+        }
+
+        public void setLongs(long[] longs) {
+            this.longs = longs;
+        }
+
+        public double[] getDoubles() {
+            return doubles;
+        }
+
+        public void setDoubles(double[] doubles) {
+            this.doubles = doubles;
+        }
+
+        public boolean[] getFlags() {
+            return flags;
+        }
+
+        public void setFlags(boolean[] flags) {
+            this.flags = flags;
+        }
+
+        public Integer[] getBoxed() {
+            return boxed;
+        }
+
+        public void setBoxed(Integer[] boxed) {
+            this.boxed = boxed;
+        }
+
+        public String[][] getGrid() {
+            return grid;
+        }
+
+        public void setGrid(String[][] grid) {
+            this.grid = grid;
+        }
+    }
+
+    private static String g133NullableArray(final String items) {
+        return "[\"null\",{\"type\":\"array\",\"items\":" + items + "}]";
+    }
+
+    private static Schema g133ArrayKindsSchema() {
+        return new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G133ArrayKinds\",\"fields\":[" + "{\"name\":\"longs\",\"type\":"
+                + g133NullableArray("\"long\"") + "}," + "{\"name\":\"doubles\",\"type\":" + g133NullableArray("\"double\"") + "},"
+                + "{\"name\":\"flags\",\"type\":" + g133NullableArray("\"boolean\"") + "}," + "{\"name\":\"boxed\",\"type\":"
+                + g133NullableArray("[\"null\",\"int\"]") + "}," + "{\"name\":\"objects\",\"type\":" + g133NullableArray("\"string\"") + "},"
+                + "{\"name\":\"colors\",\"type\":" + g133NullableArray("{\"type\":\"enum\",\"name\":\"G133Color\",\"symbols\":[\"RED\",\"GREEN\"]}") + "},"
+                + "{\"name\":\"items\",\"type\":"
+                + g133NullableArray("{\"type\":\"record\",\"name\":\"G133Item\",\"fields\":[{\"name\":\"x\",\"type\":\"int\"}]}") + "},"
+                + "{\"name\":\"blobs\",\"type\":" + g133NullableArray("\"bytes\"") + "}," + "{\"name\":\"floats\",\"type\":" + g133NullableArray("\"float\"")
+                + "}," + "{\"name\":\"chars\",\"type\":" + g133NullableArray("\"string\"") + "}]}");
+    }
+
+    private static Schema g133RoundTripSchema() {
+        return new Schema.Parser().parse(
+                "{\"type\":\"record\",\"name\":\"G133RoundTrip\",\"fields\":[" + "{\"name\":\"strings\",\"type\":" + g133NullableArray("\"string\"") + "},"
+                        + "{\"name\":\"ints\",\"type\":" + g133NullableArray("\"int\"") + "}," + "{\"name\":\"longs\",\"type\":" + g133NullableArray("\"long\"")
+                        + "}," + "{\"name\":\"doubles\",\"type\":" + g133NullableArray("\"double\"") + "}," + "{\"name\":\"flags\",\"type\":"
+                        + g133NullableArray("\"boolean\"") + "}," + "{\"name\":\"boxed\",\"type\":" + g133NullableArray("[\"null\",\"int\"]") + "},"
+                        + "{\"name\":\"grid\",\"type\":" + g133NullableArray("{\"type\":\"array\",\"items\":\"string\"}") + "}]}");
+    }
+
+    private static byte[] g133WriteGeneric(final Schema schema, final GenericRecord record) throws IOException {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new org.apache.avro.generic.GenericDatumWriter<GenericRecord>(schema))) {
+            writer.create(schema, os);
+            writer.append(record);
+        }
+        return os.toByteArray();
+    }
+
+    // G133 (G128 read side): Avro-written array datums are read into every kind of array bean property.
+    @Test
+    public void testDeserialize_genericArrayDatumsIntoAllArrayPropertyKinds() throws IOException {
+        final Schema schema = g133ArrayKindsSchema();
+        final GenericRecord record = new GenericData.Record(schema);
+        record.put("longs", Arrays.asList(5000000000L, -1L));
+        record.put("doubles", Arrays.asList(1.5, -0.25));
+        record.put("flags", Arrays.asList(true, false));
+        record.put("boxed", Arrays.asList(1, null));
+        record.put("objects", Arrays.asList("p", "q"));
+        final Schema colorSchema = schema.getField("colors").schema().getTypes().get(1).getElementType();
+        record.put("colors", Arrays.asList(new GenericData.EnumSymbol(colorSchema, "GREEN"), new GenericData.EnumSymbol(colorSchema, "RED")));
+        final GenericRecord item = new GenericData.Record(schema.getField("items").schema().getTypes().get(1).getElementType());
+        item.put("x", 9);
+        record.put("items", Arrays.asList(item));
+        record.put("blobs", Arrays.asList(java.nio.ByteBuffer.wrap(new byte[] { 1, 2 }), java.nio.ByteBuffer.wrap(new byte[0])));
+        record.put("floats", Arrays.asList(1.25f));
+        record.put("chars", Arrays.asList("x", "y"));
+
+        final G133ArrayKinds bean = parser.deserialize(new ByteArrayInputStream(g133WriteGeneric(schema, record)), AvroDeserConfig.create().setSchema(schema),
+                G133ArrayKinds.class);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 5000000000L, -1L }, bean.getLongs());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 1.5, -0.25 }, bean.getDoubles());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new boolean[] { true, false }, bean.getFlags());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Integer[] { 1, null }, bean.getBoxed());
+        // An Object component keeps the Avro item representation (Utf8), exactly like a List<Object> element.
+        assertEquals(2, bean.getObjects().length);
+        assertTrue(bean.getObjects()[0] instanceof CharSequence);
+        assertEquals("p", bean.getObjects()[0].toString());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new G133Color[] { G133Color.GREEN, G133Color.RED }, bean.getColors());
+        assertEquals(1, bean.getItems().length);
+        assertEquals(9, bean.getItems()[0].getX());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[][] { { 1, 2 }, {} }, bean.getBlobs());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1.25f }, bean.getFloats());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { 'x', 'y' }, bean.getChars());
+    }
+
+    // G133 (G128 read side): reader-schema array defaults (schema evolution) are read into array properties and array map values.
+    @Test
+    public void testDeserialize_arrayFieldDefaultsFromSchemaEvolution() throws IOException {
+        final Schema writerSchema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"G133Evol\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+        final Schema readerSchema = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G133Evol\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},"
+                + "{\"name\":\"tags\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":[\"x\",\"y\"]},"
+                + "{\"name\":\"nums\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"default\":[3,4]}]}");
+        final GenericRecord record = new GenericData.Record(writerSchema);
+        record.put("name", "n");
+        final byte[] bytes = g133WriteGeneric(writerSchema, record);
+
+        final G128ArrayBean bean = parser.deserialize(new ByteArrayInputStream(bytes), AvroDeserConfig.create().setSchema(readerSchema), G128ArrayBean.class);
+        assertEquals("n", bean.getName());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "x", "y" }, bean.getTags());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 3, 4 }, bean.getNums());
+
+        final Map<String, String[]> map = parser.deserialize(new ByteArrayInputStream(bytes), AvroDeserConfig.create().setSchema(readerSchema),
+                Type.of("Map<String, String[]>"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "x", "y" }, map.get("tags"));
+    }
+
+    // G133 (G128 write side): null arrays under a nullable union stay null and empty arrays of every kind round-trip as empty.
+    @Test
+    public void testSerialize_nullAndEmptyArrayProperties() {
+        final Schema schema = g133RoundTripSchema();
+        final G133RoundTripBean nulls = parser.deserialize(parser.serialize(new G133RoundTripBean(), new AvroSerConfig().setSchema(schema)),
+                AvroDeserConfig.create().setSchema(schema), G133RoundTripBean.class);
+        assertEquals(null, nulls.getStrings());
+        assertEquals(null, nulls.getInts());
+        assertEquals(null, nulls.getGrid());
+
+        final G133RoundTripBean empty = new G133RoundTripBean();
+        empty.setStrings(new String[0]);
+        empty.setInts(new int[0]);
+        empty.setLongs(new long[0]);
+        empty.setDoubles(new double[0]);
+        empty.setFlags(new boolean[0]);
+        empty.setBoxed(new Integer[0]);
+        empty.setGrid(new String[][] { {} });
+        final G133RoundTripBean read = parser.deserialize(parser.serialize(empty, new AvroSerConfig().setSchema(schema)),
+                AvroDeserConfig.create().setSchema(schema), G133RoundTripBean.class);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[0], read.getStrings());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[0], read.getInts());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[0], read.getLongs());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[0], read.getDoubles());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new boolean[0], read.getFlags());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Integer[0], read.getBoxed());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[][] { {} }, read.getGrid());
+    }
+
+    // G133 (G128): property test - random arrays (incl. empty, null items, extreme values) written from a bean read back equal.
+    @Test
+    public void testSerialize_randomArrayBeanRoundTripProperty() {
+        final Schema schema = g133RoundTripSchema();
+        final java.util.Random random = new java.util.Random(133L);
+
+        for (int round = 0; round < 200; round++) {
+            final int length = random.nextInt(6);
+            final G133RoundTripBean bean = new G133RoundTripBean();
+            final String[] strings = new String[length];
+            final int[] ints = new int[length];
+            final long[] longs = new long[length];
+            final double[] doubles = new double[length];
+            final boolean[] flags = new boolean[length];
+            final Integer[] boxed = new Integer[length];
+            final String[][] grid = new String[length][];
+
+            for (int i = 0; i < length; i++) {
+                strings[i] = Integer.toString(random.nextInt(), 36);
+                ints[i] = random.nextBoolean() ? random.nextInt() : (random.nextBoolean() ? Integer.MIN_VALUE : Integer.MAX_VALUE);
+                longs[i] = random.nextBoolean() ? random.nextLong() : Long.MIN_VALUE;
+                doubles[i] = random.nextBoolean() ? random.nextGaussian() * 1e300 : -0.0;
+                flags[i] = random.nextBoolean();
+                boxed[i] = random.nextInt(3) == 0 ? null : random.nextInt();
+                grid[i] = new String[random.nextInt(3)];
+                for (int j = 0; j < grid[i].length; j++) {
+                    grid[i][j] = "g" + random.nextInt(100);
+                }
+            }
+
+            bean.setStrings(strings);
+            bean.setInts(ints);
+            bean.setLongs(longs);
+            bean.setDoubles(doubles);
+            bean.setFlags(flags);
+            bean.setBoxed(boxed);
+            bean.setGrid(grid);
+
+            final G133RoundTripBean read = parser.deserialize(parser.serialize(bean, new AvroSerConfig().setSchema(schema)),
+                    AvroDeserConfig.create().setSchema(schema), G133RoundTripBean.class);
+            final String message = "round " + round;
+            org.junit.jupiter.api.Assertions.assertArrayEquals(strings, read.getStrings(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(ints, read.getInts(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(longs, read.getLongs(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(doubles, read.getDoubles(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(flags, read.getFlags(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(boxed, read.getBoxed(), message);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(grid, read.getGrid(), message);
+        }
+    }
+
+    // G133 (G128 write side): wrong array element types fail exactly like the equivalent List (Avro's ClassCastException in the append).
+    @Test
+    public void testSerialize_arrayWrongElementTypeFailsLikeList() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"int\"}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", new String[] { "x" });
+        final RuntimeException fromArray = assertThrows(RuntimeException.class, () -> parser.serialize(source, new AvroSerConfig().setSchema(schema)));
+
+        source.put("v", List.of("x"));
+        final RuntimeException fromList = assertThrows(RuntimeException.class, () -> parser.serialize(source, new AvroSerConfig().setSchema(schema)));
+
+        assertEquals(fromList.getClass(), fromArray.getClass());
+        assertTrue(fromList.getCause() instanceof ClassCastException);
+        assertTrue(fromArray.getCause() instanceof ClassCastException);
+        // The array is now unpacked, so Avro reports the offending ITEM, as it does for the List.
+        assertTrue(fromArray.getCause().getMessage().contains("java.lang.String"), fromArray.getCause().getMessage());
+        assertFalse(fromArray.getCause().getMessage().contains("[Ljava.lang.String;"), fromArray.getCause().getMessage());
+    }
+
+    // G133-01: a byte[]-typed SCALAR target (Bytes/Base64Encoded) keeps the pre-existing Base64 conversion of an array datum
+    // instead of failing inside the element-wise array conversion ("argument type mismatch").
+    @Test
+    public void testDeserialize_arrayDatumIntoBase64ScalarTypeUnchanged() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":\"int\"}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", List.of(1, 2));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        for (final String typeName : new String[] { "Map<String, Base64Encoded>", "Map<String, Bytes>" }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                    () -> parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.of(typeName)), typeName);
+            assertTrue(String.valueOf(e.getMessage()).toLowerCase().contains("base64"), typeName + ": " + e.getMessage());
+        }
+
+        // byte[] itself is an array type: element-wise, as for a List<Byte>.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 2 },
+                parser.<Map<String, byte[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, byte[].class)).get("v"));
+    }
+
+    // G133-02: an Avro bytes item read into a numeric array component fails (as before the array conversion existed) instead of
+    // silently becoming 0/null; byte[][], ByteBuffer[], Object[] and List targets keep their results.
+    @Test
+    public void testDeserialize_bytesItemsIntoNumericArrayComponentThrow() {
+        final Schema schema = g128ValueSchema("{\"type\":\"array\",\"items\":[\"null\",\"bytes\"]}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", Arrays.asList(new byte[] { 1, 2 }, null));
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+
+        for (final Class<?> arrayClass : new Class<?>[] { byte[].class, Byte[].class, short[].class, int[].class, Integer[].class, long[].class, Long[].class,
+                float[].class, double[].class, Double[].class }) {
+            assertThrows(NumberFormatException.class,
+                    () -> parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, arrayClass)),
+                    arrayClass.getSimpleName());
+        }
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[][] { { 1, 2 }, null },
+                parser.<Map<String, byte[][]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, byte[][].class))
+                        .get("v"));
+        final java.nio.ByteBuffer[] buffers = parser.<Map<String, java.nio.ByteBuffer[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema),
+                Type.ofMap(String.class, java.nio.ByteBuffer[].class)).get("v");
+        assertEquals(java.nio.ByteBuffer.wrap(new byte[] { 1, 2 }), buffers[0]);
+        assertEquals(null, buffers[1]);
+        final Object[] objects = parser
+                .<Map<String, Object[]>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.ofMap(String.class, Object[].class))
+                .get("v");
+        assertEquals(java.nio.ByteBuffer.wrap(new byte[] { 1, 2 }), objects[0]);
+        final List<byte[]> byteList = parser
+                .<Map<String, List<byte[]>>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.of("Map<String, List<byte[]>>"))
+                .get("v");
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 2 }, byteList.get(0));
+        // List targets are out of scope and unchanged: a bytes item still converts to null there.
+        assertEquals(Arrays.asList(null, null),
+                parser.<Map<String, List<Integer>>> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), Type.of("Map<String, List<Integer>>"))
+                        .get("v"));
+    }
+    // ---- deep review 2026-10-16 verify G133 end ----
+
+    // ---- deep review 2026-10-16 G152 begin ----
+    private Object g152RoundTripValue(final String fieldSchema, final Object value, final String targetTypeName) {
+        final Schema schema = g128ValueSchema(fieldSchema);
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", value);
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+        final Map<String, Object> read = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema),
+                Type.of("Map<String, " + targetTypeName + ">"));
+        return read.get("v");
+    }
+
+    private String g152WrittenDatum(final String fieldSchema, final Object value) {
+        final Schema schema = g128ValueSchema(fieldSchema);
+        final Map<String, Object> source = new HashMap<>();
+        source.put("v", value);
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+        return String.valueOf(parser.<GenericRecord> deserialize(encoded, AvroDeserConfig.create().setSchema(schema), GenericRecord.class).get("v"));
+    }
+
+    // G152 (G128 coverage): a byte[][] for an array<fixed> field writes each item as a fixed datum (with the size check)
+    // and reads back as byte[][]; an Object[] component keeps the Avro fixed datum like a List<Object> element.
+    @Test
+    public void testSerialize_fixedItemArrayRoundTrip() {
+        final String fixedItems = "{\"type\":\"array\",\"items\":{\"type\":\"fixed\",\"name\":\"G152Fixed\",\"size\":2}}";
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[][] { { 1, 2 }, { 3, 4 } },
+                (byte[][]) g152RoundTripValue(fixedItems, new byte[][] { { 1, 2 }, { 3, 4 } }, "byte[][]"));
+        final Object[] objects = (Object[]) g152RoundTripValue(fixedItems, new byte[][] { { 1, 2 } }, "Object[]");
+        assertTrue(objects[0] instanceof org.apache.avro.generic.GenericFixed);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 2 }, ((org.apache.avro.generic.GenericFixed) objects[0]).bytes());
+        assertThrows(IllegalArgumentException.class, () -> g152WrittenDatum(fixedItems, new byte[][] { { 1 } }));
+    }
+
+    // G152 (G128 coverage): a Map[] for an array<map> field is written item by item and read into a typed Map[] component,
+    // converting the map values to the component's value type.
+    @Test
+    public void testSerialize_mapItemArrayRoundTrip() {
+        final String mapItems = "{\"type\":\"array\",\"items\":{\"type\":\"map\",\"values\":\"int\"}}";
+        final Map<String, Integer> item = new java.util.LinkedHashMap<>();
+        item.put("a", 1);
+
+        assertEquals("[{a=1}]", g152WrittenDatum(mapItems, new Map[] { item }));
+        final Map<?, ?>[] read = (Map<?, ?>[]) g152RoundTripValue(mapItems, new Map[] { item }, "Map<String, Long>[]");
+        assertEquals(1, read.length);
+        assertEquals(Long.valueOf(1L), read[0].get("a"));
+    }
+
+    // G152 (G128 coverage): a Java enum array for an array<enum> field is written as symbols and read back into the enum
+    // array or a String[]; an undefined symbol still fails with IllegalArgumentException.
+    @Test
+    public void testSerialize_javaEnumArrayToEnumItems() {
+        final String enumItems = "{\"type\":\"array\",\"items\":{\"type\":\"enum\",\"name\":\"G152Color\",\"symbols\":[\"RED\",\"GREEN\"]}}";
+
+        assertEquals("[GREEN, RED]", g152WrittenDatum(enumItems, new G133Color[] { G133Color.GREEN, G133Color.RED }));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new G133Color[] { G133Color.GREEN },
+                (G133Color[]) g152RoundTripValue(enumItems, new G133Color[] { G133Color.GREEN }, G133Color.class.getName() + "[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "GREEN" },
+                (String[]) g152RoundTripValue(enumItems, new G133Color[] { G133Color.GREEN }, "String[]"));
+        assertThrows(IllegalArgumentException.class, () -> g152WrittenDatum(enumItems, new String[] { "BLUE" }));
+    }
+
+    // G152 (G128 coverage): null items of an object array are written for nullable items and read back as null; a null item
+    // for non-nullable items fails exactly like the equivalent List (Avro's NullPointerException inside the append).
+    @Test
+    public void testSerialize_objectArrayWithNullItems() {
+        final String nullableItems = "{\"type\":\"array\",\"items\":[\"null\",\"string\"]}";
+
+        assertEquals("[a, null]", g152WrittenDatum(nullableItems, new String[] { "a", null }));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new String[] { "a", null },
+                (String[]) g152RoundTripValue(nullableItems, new String[] { "a", null }, "String[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { 'a', '\0' },
+                (char[]) g152RoundTripValue(nullableItems, new String[] { "a", null }, "char[]"));
+
+        final String strictItems = "{\"type\":\"array\",\"items\":\"string\"}";
+        final RuntimeException fromArray = assertThrows(RuntimeException.class, () -> g152WrittenDatum(strictItems, new String[] { "a", null }));
+        final RuntimeException fromList = assertThrows(RuntimeException.class, () -> g152WrittenDatum(strictItems, Arrays.asList("a", null)));
+        assertEquals(fromList.getClass(), fromArray.getClass());
+        assertTrue(fromArray.getCause() instanceof NullPointerException, String.valueOf(fromArray.getCause()));
+    }
+
+    // G152 (G128 coverage): primitive arrays of the remaining primitive types round-trip (NaN / -0.0 / MIN kept); a char[]
+    // fails for a string schema exactly like a List<Character>; integral overflow on read still throws ArithmeticException.
+    @Test
+    public void testSerialize_primitiveArraysOfEveryTypeRoundTrip() {
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { 1, -2, Short.MIN_VALUE },
+                (short[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"int\"}", new short[] { 1, -2, Short.MIN_VALUE }, "short[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, -2, Byte.MAX_VALUE },
+                (byte[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"int\"}", new byte[] { 1, -2, Byte.MAX_VALUE }, "byte[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { Long.MIN_VALUE, Long.MAX_VALUE },
+                (long[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"long\"}", new long[] { Long.MIN_VALUE, Long.MAX_VALUE }, "long[]"));
+        final float[] floats = (float[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"float\"}", new float[] { Float.NaN, -0.0f, 1.5f }, "float[]");
+        assertTrue(Float.isNaN(floats[0]));
+        assertEquals(Float.floatToIntBits(-0.0f), Float.floatToIntBits(floats[1]));
+        assertEquals(1.5f, floats[2]);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 1.5 },
+                (double[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"float\"}", new float[] { 1.5f }, "double[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new boolean[] { true, false },
+                (boolean[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"boolean\"}", new boolean[] { true, false }, "boolean[]"));
+
+        final RuntimeException fromChars = assertThrows(RuntimeException.class,
+                () -> g152WrittenDatum("{\"type\":\"array\",\"items\":\"string\"}", new char[] { 'a' }));
+        final RuntimeException fromList = assertThrows(RuntimeException.class,
+                () -> g152WrittenDatum("{\"type\":\"array\",\"items\":\"string\"}", List.of('a')));
+        assertEquals(fromList.getClass(), fromChars.getClass());
+
+        assertThrows(ArithmeticException.class, () -> g152RoundTripValue("{\"type\":\"array\",\"items\":\"int\"}", new int[] { 70000 }, "short[]"));
+        assertThrows(ArithmeticException.class, () -> g152RoundTripValue("{\"type\":\"array\",\"items\":\"int\"}", new int[] { 300 }, "byte[]"));
+    }
+
+    // G152 (G128 coverage): nested primitive arrays with a null inner array under nullable items round-trip as int[][]
+    // (the null inner array stays null) and as List<int[]>.
+    @Test
+    public void testSerialize_nestedPrimitiveArrayWithNullInnerArray() {
+        final String nestedItems = "{\"type\":\"array\",\"items\":[\"null\",{\"type\":\"array\",\"items\":\"int\"}]}";
+
+        assertEquals("[[1, 2], null]", g152WrittenDatum(nestedItems, new int[][] { { 1, 2 }, null }));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[][] { { 1, 2 }, null },
+                (int[][]) g152RoundTripValue(nestedItems, new int[][] { { 1, 2 }, null }, "int[][]"));
+        final List<?> list = (List<?>) g152RoundTripValue(nestedItems, new int[][] { { 1, 2 }, null }, "List<int[]>");
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 1, 2 }, (int[]) list.get(0));
+        assertEquals(null, list.get(1));
+    }
+
+    // G152 (owner decision): a null item read into a primitive array of every primitive type keeps the primitive default,
+    // and a wrapper array keeps the null. The numeric/boolean rows read the same before the array conversion existed;
+    // the char[] row from string items failed before (ParsingException "Unsupported class: Utf8").
+    @Test
+    public void testDeserialize_nullItemsIntoEveryPrimitiveArrayKeepDefault() {
+        final String nullableInts = "{\"type\":\"array\",\"items\":[\"null\",\"int\"]}";
+        final List<Integer> withNull = Arrays.asList(1, null, 3);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 0, 3 }, (byte[]) g152RoundTripValue(nullableInts, withNull, "byte[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { 1, 0, 3 }, (short[]) g152RoundTripValue(nullableInts, withNull, "short[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 1, 0, 3 }, (long[]) g152RoundTripValue(nullableInts, withNull, "long[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1, 0, 3 }, (float[]) g152RoundTripValue(nullableInts, withNull, "float[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Short[] { 1, null, 3 }, (Short[]) g152RoundTripValue(nullableInts, withNull, "Short[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Float[] { 1f, null, 3f }, (Float[]) g152RoundTripValue(nullableInts, withNull, "Float[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new boolean[] { true, false },
+                (boolean[]) g152RoundTripValue("{\"type\":\"array\",\"items\":[\"null\",\"boolean\"]}", Arrays.asList(true, null), "boolean[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Boolean[] { true, null },
+                (Boolean[]) g152RoundTripValue("{\"type\":\"array\",\"items\":[\"null\",\"boolean\"]}", Arrays.asList(true, null), "Boolean[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { 'x', '\0' },
+                (char[]) g152RoundTripValue("{\"type\":\"array\",\"items\":[\"null\",\"string\"]}", Arrays.asList("x", null), "char[]"));
+    }
+    // ---- deep review 2026-10-16 G152 end ----
+
+    // ---- deep review 2026-10-16 G159 begin ----
+
+    // G159 (owner: keep the stricter behaviour): an Avro array item is converted like a List element or a single field, not
+    // re-parsed from the array's text form as before the array conversion existed. r89 read array<long> [1, 0] into boolean[]
+    // as [true, false] and array<double> [1.5] into BigInteger[] as [1]; both now fail exactly like the List and scalar targets.
+    @Test
+    public void testDeserialize_arrayItemCoercionMatchesListElementAndScalarField() {
+        final String longs = "{\"type\":\"array\",\"items\":\"long\"}";
+        final String doubles = "{\"type\":\"array\",\"items\":\"double\"}";
+        final String floats = "{\"type\":\"array\",\"items\":\"float\"}";
+
+        assertThrows(IllegalArgumentException.class, () -> g152RoundTripValue(longs, List.of(1L, 0L), "boolean[]"));
+        assertThrows(IllegalArgumentException.class, () -> g152RoundTripValue(longs, List.of(1L, 0L), "Boolean[]"));
+        assertThrows(IllegalArgumentException.class, () -> g152RoundTripValue(longs, List.of(1L, 0L), "List<Boolean>"));
+        assertThrows(IllegalArgumentException.class, () -> g152RoundTripValue("\"long\"", 1L, "Boolean"));
+
+        assertThrows(NumberFormatException.class, () -> g152RoundTripValue(doubles, List.of(1.5d), "BigInteger[]"));
+        assertThrows(NumberFormatException.class, () -> g152RoundTripValue(floats, List.of(1.5f), "BigInteger[]"));
+        assertThrows(NumberFormatException.class, () -> g152RoundTripValue(doubles, List.of(1.5d), "List<BigInteger>"));
+        assertThrows(NumberFormatException.class, () -> g152RoundTripValue("\"double\"", 1.5d, "BigInteger"));
+
+        // Neighbours that convert the same way item by item and as text: int 1/0 is a boolean, integral doubles and longs are BigIntegers.
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new boolean[] { true, false },
+                (boolean[]) g152RoundTripValue("{\"type\":\"array\",\"items\":\"int\"}", List.of(1, 0), "boolean[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new BigInteger[] { BigInteger.ONE, BigInteger.valueOf(-3) },
+                (BigInteger[]) g152RoundTripValue(longs, List.of(1L, -3L), "BigInteger[]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new long[] { 1L, 0L }, (long[]) g152RoundTripValue(longs, List.of(1L, 0L), "long[]"));
+    }
+
+    // ---- deep review 2026-10-16 G159 end ----
 }

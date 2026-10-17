@@ -354,8 +354,6 @@ public class SheetTest extends SheetTestSupport {
         assertEquals(Integer.valueOf(1), sheet.get("row1", "col1"));
     }
 
-
-
     // Kryo is on the test classpath, but KryoParser's built-in registrations need reflective access to java.io; a JVM
     // started without --add-opens java.base/java.io therefore has the jar yet no usable parser. That state cannot be
     // produced inside this JVM (the parser is a static final initialized once), so the scenario runs in a child JVM.
@@ -1355,8 +1353,6 @@ public class SheetTest extends SheetTestSupport {
         s2.removeRow("r1");
         assertThrows(IndexOutOfBoundsException.class, () -> v2.get(5));
     }
-
-
 
     /**
      * Property test for the keyed-view contract: after any sequence of structural mutations, a view obtained
@@ -2998,8 +2994,6 @@ public class SheetTest extends SheetTestSupport {
         assertEquals(Arrays.asList("A", "B", "C"), sortedColumns);
     }
 
-
-
     /**
      * Entry point of the child JVM used by {@link #testCloneWhenKryoIsPresentButFailsToInitializeReportsUnavailableNotMissingJar()}.
      */
@@ -3025,6 +3019,5 @@ public class SheetTest extends SheetTestSupport {
             }
         }
     }
-
 
 }

@@ -450,4 +450,52 @@ public class HttpResponseTest extends TestBase {
     }
 
     // ---- deep review 2026-09-25 G003 end ----
+
+    // ---- deep review 2026-10-16 G127 begin ----
+
+    // Pins the current (owner-accepted) behaviour: body(Class) and body(Type) parse an XML response from a Reader, which stops at
+    // the end of the root element, so a second root element or trailing text after it is not rejected - the first root is read.
+    // (deserialize(String) / N.fromXml(String) would reject such a body.)
+    @Test
+    public void testBody_xmlTrailingContentAfterRootIsReadAsFirstRoot() {
+        final Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
+        for (final String body : new String[] { "<map><a>1</a></map><map><b>2</b></map>", "<map><a>1</a></map>junk" }) {
+            for (final ContentFormat format : new ContentFormat[] { ContentFormat.XML, ContentFormat.XML_GZIP, ContentFormat.XML_LZ4, ContentFormat.XML_SNAPPY,
+                    ContentFormat.XML_BR }) {
+                final HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(),
+                        body.getBytes(StandardCharsets.UTF_8), format, StandardCharsets.UTF_8);
+                assertEquals(Map.of("a", "1"), response.body(Map.class), body + " " + format);
+                assertEquals(Map.of("a", "1"), response.body(mapType), body + " " + format);
+                assertEquals(body, response.body(String.class));
+            }
+        }
+    }
+
+    // Neighbours: legal XML epilogs and a non-UTF-8 charset parse; JSON trailing content is rejected; empty XML bodies keep
+    // their String-parser defaults.
+    @Test
+    public void testBody_xmlLegalEpilogAndJsonTrailingContentUnchanged() {
+        final Type<Map<String, Object>> mapType = Type.of("Map<String, Object>");
+        for (final String body : new String[] { "<map><a>1</a></map>", " <map><a>1</a></map> \n", "<map><a>1</a></map><!-- c -->",
+                "<map><a>1</a></map><?pi x?>" }) {
+            for (final java.nio.charset.Charset charset : new java.nio.charset.Charset[] { StandardCharsets.UTF_8, StandardCharsets.UTF_16LE }) {
+                final HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), body.getBytes(charset),
+                        ContentFormat.XML, charset);
+                assertEquals(Map.of("a", "1"), response.body(Map.class), body);
+                assertEquals(Map.of("a", "1"), response.body(mapType), body);
+            }
+        }
+
+        final HttpResponse json = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(),
+                "{\"a\":1}{\"b\":2}".getBytes(StandardCharsets.UTF_8), ContentFormat.JSON, StandardCharsets.UTF_8);
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> json.body(Map.class));
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> json.body(mapType));
+
+        final HttpResponse empty = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(), new byte[0], ContentFormat.XML,
+                StandardCharsets.UTF_8);
+        assertNull(empty.body(Map.class));
+        assertEquals(com.landawn.abacus.util.N.fromXml("", mapType), empty.body(mapType));
+    }
+
+    // ---- deep review 2026-10-16 G127 end ----
 }

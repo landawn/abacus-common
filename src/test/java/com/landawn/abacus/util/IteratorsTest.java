@@ -373,8 +373,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), iter.toList());
     }
 
-
-
     /**
      * The Memory note now carried by {@code distinct(Iterable)} and {@code distinctBy(Iterable, Function)}: every
      * distinct element - or key - seen so far is retained for the lifetime of the returned iterator, so a
@@ -691,8 +689,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertTrue(Iterators.equalsInOrder(Arrays.asList(null, "a").iterator(), Arrays.asList(null, "a").iterator()));
         assertFalse(Iterators.equalsInOrder(Arrays.asList(null, "a").iterator(), Arrays.asList(null, "b").iterator()));
     }
-
-
 
     /** O3: an exhausted adapter must not keep the last element (or the last mapped array) alive. */
     @Test
@@ -1110,8 +1106,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         }
     }
 
-
-
     /**
      * The parallel path used to wrap a checked exception in a {@code RuntimeException}, which made
      * {@code catch (IOException e)} - still demanded by the compiler, since E is inferred from the consumer -
@@ -1166,8 +1160,6 @@ public class IteratorsTest extends IteratorsTestSupport {
     public void testFrequency_AllMatch() {
         assertEquals(3, Iterators.frequency(Arrays.asList("a", "a", "a").iterator(), "a"));
     }
-
-
 
     /**
      * {@code frequency}'s "Comparison" note: elements are compared with
@@ -1521,8 +1513,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), result);
     }
 
-
-
     /** D2/D3: negative settings are rejected by build(), and the message names the public property. */
     @Test
     public void testIterateOptions_builderRejectsNegativeValuesWithThePublicPropertyName() {
@@ -1549,8 +1539,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Iterators.forEach(empty, Iterators.IterateOptions.builder().queueSize(-1).build(), value -> {
         }));
     }
-
-
 
     /** D4: the shared default instance must equal a freshly-built one, and be what a {@code null} options means. */
     @Test
@@ -1594,8 +1582,6 @@ public class IteratorsTest extends IteratorsTestSupport {
 
         Assertions.assertEquals(Arrays.asList(1, 2), result);
     }
-
-
 
     /** B1: removing the guard must not change what a non-exhausted iterator yields, including {@code null}. */
     @Test
@@ -1836,8 +1822,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), result.toList());
     }
 
-
-
     /** B3: {@code map} used to let the source's own (message-less) NoSuchElementException escape. */
     @Test
     public void testMap_nextPastEndThrowsNoSuchElement() {
@@ -1920,8 +1904,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         });
     }
 
-
-
     /** D7: the slicing and forEach paths must report a negative offset/count the same way. */
     @Test
     public void testNegativeOffsetCountMessageIsConsistent() {
@@ -1931,9 +1913,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertEquals(fromSlice, fromForEach);
         assertTrue(fromSlice.contains("'offset'"), fromSlice);
     }
-
-
-
 
     /**
      * B1: seven "nothing to do" fast paths hand back a bare {@code ObjIterator.of(iter)}, and that wrapper
@@ -2032,8 +2011,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         });
     }
 
-
-
     /**
      * J2: these three compare with {@code Objects.equals}, so array elements match by identity, not content.
      * Undocumented until now, and easy to get wrong after {@code N.equals(Object, Object)} was narrowed.
@@ -2103,8 +2080,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         ObjIterator<Integer> result = Iterators.takeWhile(Arrays.asList(1, 2, 3).iterator(), n -> n < 10);
         assertEquals(Arrays.asList(1, 2, 3), result.toList());
     }
-
-
 
     /** J4: {@code takeWhile} pulls the stopping element in order to test it, and then discards it. */
     @Test
@@ -2249,8 +2224,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertFalse(r.hasNext());
     }
 
-
-
     /** The two *ToSize methods read their source lazily; shrinking it must fail with the standard message. */
     @Test
     public void testToSizeIterators_sourceEmptiedAfterCreation() {
@@ -2325,8 +2298,6 @@ public class IteratorsTest extends IteratorsTestSupport {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> Iterators.unzip(Arrays.asList("a").iterator(), (com.landawn.abacus.util.function.BiConsumer<String, Pair<String, Integer>>) null));
     }
-
-
 
     /**
      * All four {@code unzip}/{@code unzip3} overloads - and {@code cycle(Iterable)} - are null-tolerant and return

@@ -19,6 +19,10 @@ package com.landawn.abacus.util;
  * {@code EventBus}. The mode controls whether subscriber
  * methods are invoked on the posting thread or dispatched through the configured executor.
  *
+ * <p>This library only defines the constants. The {@code EventBus} and the {@code @Subscribe} annotation used in the
+ * example below are not part of it: they live in the separate {@code abacus-event-bus} library
+ * (package {@code com.landawn.abacus.eventbus}), which must be on the classpath for the example to compile.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * class SynchronousSubscriber {

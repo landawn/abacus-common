@@ -139,9 +139,13 @@ import com.landawn.abacus.util.u;
  *       array or collection (a declared element type that is a bean, map or map entity is honoured). An
  *       {@code <e>} wrapper applies the same type-attribute approval policy as other elements; unapproved
  *       nonblank type names are rejected with a {@link ParsingException} on both backends.</li>
- *   <li>With {@link XmlParserType#StAX} an element with no text ({@code <s/>}, {@code <s></s>}) yields the
- *       property's default value ({@code null} for a String); with {@link XmlParserType#DOM} it yields an
- *       empty String. Scalar {@code <e>} wrappers inside arrays and collections are converted from
+ *   <li>An element with no text ({@code <s/>}, {@code <s></s>}) yields the empty String for a {@code String} or
+ *       open {@code Object} property or map value on both backends (a {@code null} is written with the
+ *       {@code isNull="true"} marker); for most other types it yields the type's default value ({@code null} for an
+ *       {@code Integer}, {@code 0} for an {@code int}). The backends still differ for a property with a number
+ *       format and for an {@code Optional<Object>} property (L16 in the package documentation), and for an
+ *       {@code Object} property whose element carries a scalar {@code type} attribute while the root has none (L11).
+ *       Scalar {@code <e>} wrappers inside arrays and collections are converted from
  *       the empty string on both backends, so an empty String element remains empty. Enum properties and map values
  *       also pass an empty token to their codec, allowing annotated enum values of {@code ""} to round-trip.
  *       An annotated enum whose codec rejects {@code ""} fails on an empty element; empty name-based enum

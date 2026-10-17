@@ -2934,5 +2934,4 @@ public class DatasetTest extends DatasetTestSupport {
         assertEquals(List.of("id", "name"), dataset.columnNames());
     }
 
-
 }

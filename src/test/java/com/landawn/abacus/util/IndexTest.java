@@ -383,9 +383,6 @@ public class IndexTest extends IndexTestSupport {
         }
     }
 
-
-
-
     // G046-01: RandomAccess source + sequential pattern (and the reverse) must agree with the all-RandomAccess path.
     @Test
     public void testOfSubList_mixedRandomAccessAgreesWithRandomAccess() {
@@ -426,8 +423,6 @@ public class IndexTest extends IndexTestSupport {
             assertEquals(Collections.lastIndexOfSubList(source, pattern), Index.lastOfSubList(source, llPattern).orElse(-1), msg);
         }
     }
-
-
 
     // G046-01: the sequence of element equals(...) calls (receiver and argument) is the same for every list kind.
     @Test
@@ -482,8 +477,6 @@ public class IndexTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(6), Index.lastOfSubList(source, 8, llPattern, 1, 2));
     }
 
-
-
     // G046-01: argument validation of the pattern slice is unchanged when the pattern is sequential.
     @Test
     public void testOfSubList_mixedRandomAccessValidation() {
@@ -523,7 +516,6 @@ public class IndexTest extends IndexTestSupport {
         assertEquals(Index.ofSubList(raSource, 2, raSub), Index.ofSubList(llSource, 2, llSub));
         assertEquals(Index.lastOfSubList(raSource, 2, raSub), Index.lastOfSubList(llSource, 2, llSub));
     }
-
 
     // ---- perf review 2026-09-26 G046 end ----
 }

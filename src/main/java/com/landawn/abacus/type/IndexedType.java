@@ -285,7 +285,7 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      *
      * @param valueTypeName the name of the value type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
-     * @return the formatted type name (e.g., "Indexed&lt;String&gt;" or "com.landawn.abacus.util.Indexed&lt;java.lang.String&gt;")
+     * @return the formatted type name (e.g., "Indexed&lt;String&gt;" or "com.landawn.abacus.util.Indexed&lt;String&gt;")
      * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final String valueTypeName, final boolean isDeclaringName) throws IllegalArgumentException {

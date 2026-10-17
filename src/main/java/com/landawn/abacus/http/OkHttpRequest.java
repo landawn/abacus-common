@@ -1126,7 +1126,8 @@ public final class OkHttpRequest {
 
     /**
      * Sets the request body as form data with Content-Type: application/x-www-form-urlencoded.
-     * The bean properties will be encoded as form fields using getter methods. Properties with
+     * The bean properties will be encoded as form fields. Property values are read from their fields
+     * (through the getter only for an {@code @AccessFieldByMethod} property or one without a usable field). Properties with
      * {@code null} values are skipped, consistently with {@link #formBody(Map)}.
      *
      * <p><b>Usage Examples:</b></p>

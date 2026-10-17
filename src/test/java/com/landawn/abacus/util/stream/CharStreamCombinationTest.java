@@ -208,8 +208,6 @@ public class CharStreamCombinationTest extends CharStreamTestSupport {
         assertEquals(0, stream.count());
     }
 
-
-
     // G112-01: bulk count()/toCharList()/toArray() of concat(List<char[]>) / concat(char[]...) - null/empty arrays, skip into/at/after a
     // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
     @Test
@@ -811,8 +809,6 @@ public class CharStreamCombinationTest extends CharStreamTestSupport {
         List<Character> result = CharStream.zip(stream1, stream2, (c1, c2) -> (char) (c1 + c2)).boxed().toList();
         assertEquals(Arrays.asList((char) ('P' + 'R'), (char) ('Q' + 'S')), result);
     }
-
-
 
     // Additional coverage improvement tests - Collection-based factory methods
     @Test

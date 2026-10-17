@@ -428,6 +428,53 @@ public class ThrowablesIteratorTest extends ThrowablesTestSupport {
         }
     }
 
+    // A fatal failure while closing the abandoned iterator propagates instead of being suppressed, as in ObjIteratorEx.defer.
+    @Test
+    @SuppressWarnings("removal")
+    public void testDeferFatalAbandonedCloseFailurePropagatesWithRecursiveFailure() {
+        // Construct sentinels directly; never exhaust heap/stack space or stop a real thread.
+        for (final Error closeFailure : new Error[] { new ThreadDeath(), new OutOfMemoryError("close failed"), new StackOverflowError("close failed") }) {
+            final AtomicInteger attempts = new AtomicInteger();
+            final AtomicInteger closed = new AtomicInteger();
+            final java.util.concurrent.atomic.AtomicReference<Iterator<String, RuntimeException>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final java.util.concurrent.atomic.AtomicReference<IllegalStateException> recursiveFailure = new java.util.concurrent.atomic.AtomicReference<>();
+            final Iterator<String, RuntimeException> deferred = Iterator.defer(() -> {
+                if (attempts.incrementAndGet() > 1) {
+                    return Iterator.just("recovered");
+                }
+                recursiveFailure.set(assertThrows(IllegalStateException.class, reference.get()::hasNext));
+                return new Iterator<String, RuntimeException>() {
+                    @Override
+                    public boolean hasNext() {
+                        return false;
+                    }
+
+                    @Override
+                    public String next() {
+                        throw new NoSuchElementException();
+                    }
+
+                    @Override
+                    protected void closeResourceInternal() {
+                        closed.incrementAndGet();
+                        throw closeFailure;
+                    }
+                };
+            });
+            reference.set(deferred);
+
+            assertSame(closeFailure, assertThrows(Error.class, deferred::hasNext));
+            assertArrayEquals(new Throwable[] { recursiveFailure.get() }, closeFailure.getSuppressed());
+            assertEquals(0, recursiveFailure.get().getSuppressed().length);
+            assertEquals(1, closed.get());
+            // Creation stays retryable after a fatal close failure, exactly as after an ordinary one.
+            assertEquals("recovered", deferred.next());
+            assertEquals(2, attempts.get());
+            deferred.closeResource();
+            assertEquals(1, closed.get());
+        }
+    }
+
     @Test
     public void testDeferRejectsSelfReturnAndCanRetry() {
         for (int operation = 0; operation < 5; operation++) {

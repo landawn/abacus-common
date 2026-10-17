@@ -307,8 +307,6 @@ public class AbstractStreamWindowTest extends AbstractStreamTestSupport {
         assertEquals(N.asList(4, 5, 6), halves.get(1).toList());
     }
 
-
-
     /**
      * {@code splitAt(Predicate)} built its tail with a hard-coded {@code new IteratorStream<>(...)}, so the tail
      * came back sequential and lost maxThreadNum, the split strategy and the executor - while the sibling

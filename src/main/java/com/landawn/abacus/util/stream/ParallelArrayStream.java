@@ -167,8 +167,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ObjIteratorEx<>() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private T next = null;
                     private boolean hasNext = false;
 
@@ -450,8 +450,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ObjIteratorEx<>() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -754,8 +754,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new CharIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -841,8 +841,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ByteIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -928,8 +928,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ShortIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -1015,8 +1015,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new IntIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -1102,8 +1102,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new LongIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -1189,8 +1189,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new FloatIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -1276,8 +1276,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new DoubleIterator() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -1369,8 +1369,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ObjIteratorEx<>() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private Iterator<? extends R> cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -1549,19 +1549,25 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ObjIteratorEx<>() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private Iterator<? extends R> cur = null;
-                    private Collection<? extends R> c = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && cursor < to) {
-                            c = mapper.apply(elements[cursor++]);
+                            cur = null;
+                            final Collection<? extends R> c = mapper.apply(elements[cursor++]);
                             cur = N.isEmpty(c) ? null : c.iterator();
                         }
 
-                        return cur != null && cur.hasNext();
+                        if (cur != null && cur.hasNext()) {
+                            return true;
+                        }
+
+                        // An exhausted iterator can retain the entire mapped collection.
+                        cur = null;
+                        return false;
                     }
 
                     @Override
@@ -1581,11 +1587,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 iters.add(new ObjIteratorEx<>() {
                     private T next = null;
                     private Iterator<? extends R> cur = null;
-                    private Collection<? extends R> c = null;
 
                     @Override
                     public boolean hasNext() {
                         while ((cur == null || !cur.hasNext()) && next != NONE) {
+                            cur = null;
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
                                     next = elements[cursor.getAndIncrement()];
@@ -1596,11 +1602,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            c = mapper.apply(next);
+                            final Collection<? extends R> c = mapper.apply(next);
                             cur = N.isEmpty(c) ? null : c.iterator();
                         }
 
-                        return cur != null && cur.hasNext();
+                        if (cur != null && cur.hasNext()) {
+                            return true;
+                        }
+
+                        // An exhausted iterator can retain the entire mapped collection.
+                        cur = null;
+                        return false;
                     }
 
                     @Override
@@ -1675,8 +1687,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new CharIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private CharIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -1858,8 +1870,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ByteIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private ByteIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2041,8 +2053,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ShortIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private ShortIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2224,8 +2236,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new IntIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private IntIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2407,8 +2419,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new LongIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private LongIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2590,8 +2602,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new FloatIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private FloatIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2773,8 +2785,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new DoubleIteratorEx() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     private DoubleIterator cur = null;
                     private final MappedStreamHolder mappedStream = new MappedStreamHolder();
 
@@ -2950,8 +2962,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 final int sliceIndex = i;
                 iters.add(new ObjIteratorEx<>() {
-                    private int cursor = fromIndex + sliceIndex * sliceSize;
-                    private final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @Override
                     public boolean hasNext() {
@@ -3051,8 +3063,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
@@ -3166,8 +3178,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     Iterable<? extends U> c = null;
 
@@ -3280,8 +3292,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     Iterable<T2> c2 = null;
                     Iterable<T3> c3 = null;
@@ -3550,8 +3562,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
@@ -3696,8 +3708,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @SuppressWarnings("rawtypes")
                     final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
@@ -3879,8 +3891,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     @SuppressWarnings("rawtypes")
                     final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
@@ -4060,8 +4072,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
@@ -4163,8 +4175,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     if (cursor >= to) {
                         return (T) NONE;
@@ -4281,8 +4293,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     U result = identity;
 
@@ -4386,8 +4398,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     R container = null;
 
@@ -4511,8 +4523,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     final Object container = isConcurrentCollector ? singleContainer : supplier.get();
 
@@ -4699,8 +4711,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isFalse() && eHolder.value() == null) {
@@ -4785,8 +4797,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isTrue() && eHolder.value() == null) {
@@ -4871,8 +4883,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && result.isTrue() && eHolder.value() == null) {
@@ -4963,8 +4975,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
 
                     try {
                         while (cursor < to && cnt.get() <= atMost && eHolder.value() == null) {
@@ -5049,8 +5061,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
                     int candidateIndex = 0;
                     T candidate = null;
@@ -5157,8 +5169,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    int cursor = fromIndex + sliceIndex * sliceSize;
-                    final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     T next = null;
 
                     try {
@@ -5258,8 +5270,8 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 final int sliceIndex = i;
 
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final int from = fromIndex + sliceIndex * sliceSize;
-                    int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
+                    final int from = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
                     // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
                     int candidateIndex = 0;
                     T candidate = null;

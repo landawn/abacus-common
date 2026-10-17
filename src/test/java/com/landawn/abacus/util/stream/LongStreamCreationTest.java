@@ -243,8 +243,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertEquals(Arrays.asList(4L, 6L, 2L, 5L, 3L), LongStream.flatten(arr, true).map(e -> e).skip(1).toList());
     }
 
-
-
     // G114-01: flatten(long[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
     @Test
@@ -315,8 +313,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertEquals(0, LongStream.flatten(new long[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G100-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -361,8 +357,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new long[0], LongStream.flatten(new long[][] { null, {}, null }, true).toArray());
     }
-
-
 
     // G100-01: pins the column-major order of flatten(long[][], true) for jagged input with null/empty/short rows
     @Test
@@ -493,8 +487,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertEquals(Arrays.asList(11L, 21L, 2L, 12L, 22L, 3L, 13L, 23L),
                 LongStream.of(1, 2, 3).map(e -> e).flattMap(e -> java.util.stream.LongStream.of(e, e + 10, e + 20)).skip(1).toList());
     }
-
-
 
     // Covers flattmap (throws UnsupportedOperationException)
     @Test
@@ -910,8 +902,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertEquals(Arrays.asList(30L, 40L), LongStream.of(arr, 1, 4).map(e -> e).skip(1).toList());
     }
 
-
-
     //
     @Test
     public void testOfLongBuffer() {
@@ -1028,8 +1018,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertArrayEquals(new long[] {}, LongStream.range(5L, 0L).toArray());
     }
 
-
-
     // Covers count() in range(long, long) inner LongIteratorEx
     @Test
     public void testRange_Count() {
@@ -1042,8 +1030,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         assertEquals(0L, LongStream.range(5L, 5L).count());
         assertEquals(0L, LongStream.range(6L, 5L).count());
     }
-
-
 
     // Covers advance() in range(long, long) inner LongIteratorEx
     @Test
@@ -1082,8 +1068,6 @@ public class LongStreamCreationTest extends LongStreamTestSupport {
         long[] result = LongStream.range(10L, 0L, -2L).toArray();
         assertArrayEquals(new long[] { 10L, 8L, 6L, 4L, 2L }, result);
     }
-
-
 
     // Covers advance() in range(long, long, long) inner LongIteratorEx
     @Test

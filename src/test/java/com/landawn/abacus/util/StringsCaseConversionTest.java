@@ -53,8 +53,6 @@ import com.landawn.abacus.util.u.Optional;
 /** Strings caseconversion contracts, including regression cases. */
 public class StringsCaseConversionTest extends StringsTestSupport {
 
-
-
     /** Verbatim transcription of the pre-change {@code capitalizeWords(String, String)} implementation. */
     private static String refCapitalizeWords(final String str, final String delimiter) {
         if (str == null || str.isEmpty()) {
@@ -69,8 +67,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
 
         return Strings.join(words, delimiter);
     }
-
-
 
     /** Verbatim transcription of the pre-change {@code capitalizeWordsFully(String, String, Collection)}. */
     private static String refCapitalizeWordsFully(final String str, final String delimiter, final Collection<String> excludedWords) {
@@ -107,32 +103,20 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, r::run);
     }
 
-
-
     // B1 : camel case capitalizes the first letter OR cased code point
     private static final String CIRCLED_A_LOWER = "ⓐ";
 
-
-
- // ⓐ CIRCLED LATIN SMALL LETTER A (So, Other_Lowercase)
+    // ⓐ CIRCLED LATIN SMALL LETTER A (So, Other_Lowercase)
     private static final String CIRCLED_A_UPPER = "Ⓐ";
 
-
-
- // Ⓐ CIRCLED LATIN CAPITAL LETTER A (So, Other_Uppercase)
+    // Ⓐ CIRCLED LATIN CAPITAL LETTER A (So, Other_Uppercase)
     private static final String ROMAN_EIGHT_LOWER = "ⅷ";
 
-
-
- // ⅷ SMALL ROMAN NUMERAL EIGHT (Nl, Other_Lowercase)
+    // ⅷ SMALL ROMAN NUMERAL EIGHT (Nl, Other_Lowercase)
     private static final String ROMAN_EIGHT_UPPER = "Ⅷ";
 
-
-
- // Ⅷ ROMAN NUMERAL EIGHT (Nl, Other_Uppercase)
+    // Ⅷ ROMAN NUMERAL EIGHT (Nl, Other_Uppercase)
     private static final String SQUARED_A = new String(Character.toChars(0x1F130));
-
-
 
     // Greek: capital omicron, capital sigma, small alpha, small final sigma, small omicron
     private static final String OMICRON_SIGMA = "\u039F\u03A3";
@@ -535,8 +519,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("", Strings.capitalizeWords(""));
     }
 
-
-
     // D-1: capitalizeWords / capitalizeWordsFully delimiter fast path
     @Test
     public void testD1_capitalizeWords_delimiter_basics() {
@@ -548,8 +530,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("Hello World", Strings.capitalizeWordsFully("HELLO WORLD", " "));
         assertEquals("Hello World", Strings.capitalizeWordsFully("hELLo WoRLD", " "));
     }
-
-
 
     /**
      * The word-splitting parameter of capitalizeWords/capitalizeWordsFully is named {@code delimiter} (was
@@ -565,8 +545,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> Strings.capitalizeWordsFully("x", "", Set.of("a"))).getMessage());
         assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> Strings.mapWords("x", "", Fn.identity())).getMessage());
     }
-
-
 
     /**
      * The {@code String...} overloads of capitalizeWords/capitalizeWordsFully were removed because they were
@@ -1004,8 +982,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertCaseFormatConvertersRejectSurrogate('\uD83D');
         assertCaseFormatConvertersRejectSurrogate('\uDE00');
     }
-
-
 
     /**
      * Characterization tests for Unicode case mapping and exclusion matching.
@@ -1578,8 +1554,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
 
     // indexOfIgnoreCase
 
-
-
     // C-023 / C-033: a surrogate in the haystack no longer disables the folded search, and results are unchanged
     @Test
     public void testC023_ignoreCaseSearchWithSurrogatesInHaystack() {
@@ -2054,8 +2028,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("A-b", Strings.mapWords("a-b", "-", List.of("b"), w -> "b".equals(w) ? null : w.toUpperCase()));
         assertEquals("A-B", Strings.mapWords("a-b", "-", Strings::toUpperCase));
     }
-
-
 
     // C-012: a mapper returning null is rejected instead of writing the text "null"
     @Test
@@ -2631,8 +2603,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
 
     // substringBetweenIgnoreCase
 
-
-
     /**
      * C-019: an empty delimiter matches twice at index zero, so {@code substringBetweenIgnoreCase} answers
      * {@code ""} for every non-{@code null} string - the one input for which it never returns {@code null}.
@@ -2692,8 +2662,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("\u03BF" + SMALL_SIGMA + "2\u03B1", Strings.toCamelCase(omicronSigma + "2\u03B1"));
     }
 
-
-
     // G072-04: swapCase non-ASCII path; the per-code-point substring is only built for cased code points
     @Test
     public void testSwapCase_unicodeUncasedAndCasedCodePoints() {
@@ -2746,8 +2714,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals('1', Strings.swapCase('1'));
         assertEquals(' ', Strings.swapCase(' '));
     }
-
-
 
     // C-014: swapCase applies the Unicode Final_Sigma rule, toLowerCase follows the JDK approximation
     @Test
@@ -2856,9 +2822,7 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("x" + ROMAN_EIGHT_UPPER, Strings.toCamelCase(Strings.toSnakeCase("x" + ROMAN_EIGHT_UPPER)));
     }
 
-
-
- // 🄰 SQUARED LATIN CAPITAL LETTER A (no lowercase mapping)
+    // 🄰 SQUARED LATIN CAPITAL LETTER A (no lowercase mapping)
     @Test
     public void testToCamelCase_CasedNonLetterSymbols() {
         // The JDK classifies these as cased but not as letters; that combination is what the old predicate missed.
@@ -2901,8 +2865,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("a'!'", Strings.toCamelCase("a_'!'"));
     }
 
-
-
     /**
      * Contract pin for the {@code toCamelCase(String)} javadoc: the "2beta" -> "2Beta" titlecase rule applies to a
      * capitalized WORD, never to the first word of a camelCase result, so on a whole string {@code toCamelCase} and
@@ -2939,8 +2901,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("2Beta", Strings.toUpperCamelCase("2beta"));
         assertEquals("", Strings.toCamelCase("___"));
     }
-
-
 
     /**
      * Regression tests for the bug where toCamelCase / toUpperCamelCase used
@@ -2979,8 +2939,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         // next non-empty token becomes the first (lowercase) word
         assertEquals("world", Strings.toCamelCase("_world"));
     }
-
-
 
     // D1 : camel case capitalizes with the titlecase mapping, like capitalize()
     @Test
@@ -3257,8 +3215,6 @@ public class StringsCaseConversionTest extends StringsTestSupport {
         assertEquals("x" + EMOJI + "y", Strings.toSnakeCase("x" + EMOJI + "Y"));
         assertEquals("x" + EMOJI + "_ya", Strings.toSnakeCase("x" + EMOJI + "Ya"));
     }
-
-
 
     // C-010 (documented, unchanged): a digit does not start a new word
     @Test

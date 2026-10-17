@@ -298,8 +298,6 @@ public class BeansGetTest extends BeansTestSupport {
         assertNotNull(setters.get("value"));
     }
 
-
-
     /**
      * Pins the precondition both builder paragraphs state: a builder class is resolvable here only because the
      * bean it builds was introspected. Looked up on its own first, it has no setter model at all - an empty map,
@@ -373,8 +371,6 @@ public class BeansGetTest extends BeansTestSupport {
         assertTrue(Beans.getPropValueIfPresent(nb2, "address.nope").isEmpty());
     }
 
-
-
     /**
      * A builder-based bean with a property its builder does not expose. {@code scanPropAccessors} promotes a
      * field-backed getter to a property without requiring the builder to be able to set it, so this is a legal
@@ -415,8 +411,6 @@ public class BeansGetTest extends BeansTestSupport {
             }
         }
     }
-
-
 
     /** Its own bean, referenced by no other test, so the lookups below really do see the cold path. */
     public static class ColdBuilderBean {

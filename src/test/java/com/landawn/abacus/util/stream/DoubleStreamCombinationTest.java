@@ -111,8 +111,6 @@ public class DoubleStreamCombinationTest extends DoubleStreamTestSupport {
         assertArrayEquals(new double[] { 1.0, 2.0, 3.0, 4.0, 5.0 }, stream.toArray(), 0.0001);
     }
 
-
-
     // G094-01: bulk paths after partial consumption (skip lands inside a segment, at a segment end, beyond the end)
     @Test
     public void testConcatListOfArrays_bulkOpsAfterSkip() {
@@ -135,8 +133,6 @@ public class DoubleStreamCombinationTest extends DoubleStreamTestSupport {
         assertArrayEquals(new double[] { 2, 3, 4, 5, 6 }, iter.toArray());
         assertFalse(iter.hasNext());
     }
-
-
 
     // G094-01: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
     @Test
@@ -176,8 +172,6 @@ public class DoubleStreamCombinationTest extends DoubleStreamTestSupport {
         assertFalse(result2 == b);
         assertEquals(100.0, DoubleStream.concat(b, a).toArray()[0]);
     }
-
-
 
     // G094-01: concat(List<double[]>) bulk toArray/count/toDoubleList must equal the element-wise results
     @Test
@@ -652,8 +646,6 @@ public class DoubleStreamCombinationTest extends DoubleStreamTestSupport {
         });
         assertEquals(2, result.count());
     }
-
-
 
     // Additional coverage tests for 2025
     @Test

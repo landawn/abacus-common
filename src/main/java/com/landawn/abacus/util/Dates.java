@@ -2566,8 +2566,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * and {@link #ISO_8601_TIMESTAMP_FORMAT}, and to auto-detected ISO-8601 input whose value ends in the
      * {@code 'Z'} designator (when no explicit format is given). Such input is always interpreted in UTC.
      * Supplying one of the two constants together with a non-UTC {@code timeZone} throws an
-     * {@code IllegalArgumentException}, while a {@code null} or UTC-equivalent zone (a fixed zero offset
-     * under any ID) is accepted and resolved to UTC; the {@code format} counterpart applies the same rule,
+     * {@code IllegalArgumentException}, while a {@code null} or UTC-equivalent zone (a registered zone whose rules are a fixed zero offset, such as {@code UTC},
+     * or a plain {@code SimpleTimeZone} with a fixed zero offset under any ID) is accepted and resolved to UTC; the {@code format} counterpart applies the same rule,
      * see {@link #format(java.util.Date, String, TimeZone)}. Auto-detected text is different: the
      * {@code Z} it carries is data, so it wins over {@code timeZone} exactly as a numeric offset or a
      * bracketed region does, and {@code timeZone} is simply not consulted. A quoted {@code 'Z'} in any
@@ -3047,8 +3047,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * <p>Note: the two fixed-{@code 'Z'} UTC constants and {@link #HTTP_DATE_FORMAT}, when supplied
-     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a fixed zero offset under any ID
-     * qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
+     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a registered zone whose rules are a fixed zero offset, such as {@code UTC}, or a
+     * plain {@code SimpleTimeZone} with a fixed zero offset under any ID, qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
      * {@code timeZone} exactly as a numeric offset or a bracketed region does, and no conflict arises.
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} accepts either {@code Z} or a numeric offset; that offset is
      * authoritative and {@code timeZone} is only a fallback.</p>
@@ -3891,8 +3891,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * <p>Note: the two fixed-{@code 'Z'} UTC constants and {@link #HTTP_DATE_FORMAT}, when supplied
-     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a fixed zero offset under any ID
-     * qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
+     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a registered zone whose rules are a fixed zero offset, such as {@code UTC}, or a
+     * plain {@code SimpleTimeZone} with a fixed zero offset under any ID, qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
      * {@code timeZone} exactly as a numeric offset or a bracketed region does, and no conflict arises.
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} accepts either {@code Z} or a numeric offset; that offset is
      * authoritative and {@code timeZone} is only a fallback.</p>
@@ -4065,8 +4065,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * <p>Note: the two fixed-{@code 'Z'} UTC constants and {@link #HTTP_DATE_FORMAT}, when supplied
-     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a fixed zero offset under any ID
-     * qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
+     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a registered zone whose rules are a fixed zero offset, such as {@code UTC}, or a
+     * plain {@code SimpleTimeZone} with a fixed zero offset under any ID, qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
      * {@code timeZone} exactly as a numeric offset or a bracketed region does, and no conflict arises.
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} accepts either {@code Z} or a numeric offset; that offset is
      * authoritative and {@code timeZone} is only a fallback.</p>
@@ -4242,8 +4242,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * <p>Note: the two fixed-{@code 'Z'} UTC constants and {@link #HTTP_DATE_FORMAT}, when supplied
-     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a fixed zero offset under any ID
-     * qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
+     * explicitly, reject a {@code timeZone} that is not UTC-equivalent (a registered zone whose rules are a fixed zero offset, such as {@code UTC}, or a
+     * plain {@code SimpleTimeZone} with a fixed zero offset under any ID, qualifies). With auto-detection the {@code Z} or {@code GMT} the text carries is data, so it wins over
      * {@code timeZone} exactly as a numeric offset or a bracketed region does, and no conflict arises.
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} accepts either {@code Z} or a numeric offset; that offset is
      * authoritative and {@code timeZone} is only a fallback.</p>
@@ -6316,8 +6316,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p>This is {@link DateTimeFormatter#ISO_ZONED_DATE_TIME}'s form, which differs from
      * {@link #ISO_ZONED_DATE_TIME_FORMAT} in two ways: the fraction is written when non-zero (the constant
-     * writes none), and a fixed-offset zone that is not a registered region ({@code SimpleTimeZone}, a
-     * custom {@code TimeZone} subclass) writes its offset alone, {@code 2025-01-15T11:30:45+01:00}, where the
+     * writes none), and a fixed-offset zone that is not a registered region (a plain {@code SimpleTimeZone};
+     * a custom {@code TimeZone} subclass is rejected, see below) writes its offset alone, {@code 2025-01-15T11:30:45+01:00}, where the
      * constant writes {@code 2025-01-15T11:30:45+01:00[+01:00]}. Both forms parse back with auto-detection.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -15717,8 +15717,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @return a string representation of the provided date, or {@code null} if {@code date} is {@code null}.
          * @throws IllegalArgumentException if this is {@link #HTTP_DATE} and the instant's GMT year is
          *         outside Common Era 0001 through 9999, or if this is not a fixed UTC/GMT formatter and the
-         *         live default time zone cannot be expressed as a {@link ZoneId} (custom daylight-saving
-         *         rules, or a fixed offset that is sub-second or beyond +/-18:00; the zone is converted
+         *         live default time zone cannot be expressed as a {@link ZoneId} (custom rules that cannot be
+         *         verified against a {@code ZoneId}, or a fixed offset that is sub-second or beyond +/-18:00; the zone is converted
          *         whatever fields the pattern has).
          * @throws DateTimeException if the formatter requires an unavailable temporal field or cannot represent its value
          * @see DateTimeFormatter#format(TemporalAccessor)
@@ -15766,8 +15766,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws IllegalArgumentException if {@code calendar} is non-lenient and contains invalid fields,
          *         if this is {@link #HTTP_DATE} and the instant's GMT year is
          *         outside Common Era 0001 through 9999, or if this is not a fixed UTC/GMT formatter and the
-         *         calendar's own time zone cannot be expressed as a {@link ZoneId} (custom daylight-saving
-         *         rules, or a fixed offset that is sub-second or beyond +/-18:00; the zone is converted
+         *         calendar's own time zone cannot be expressed as a {@link ZoneId} (custom rules that cannot be
+         *         verified against a {@code ZoneId}, or a fixed offset that is sub-second or beyond +/-18:00; the zone is converted
          *         whatever fields the pattern has).
          * @throws DateTimeException if the formatter requires an unavailable temporal field or cannot represent its value
          * @see DateTimeFormatter#format(TemporalAccessor)
@@ -15876,7 +15876,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param appendable the Appendable to which the formatted string will be appended; must not be {@code null}.
          * @throws IllegalArgumentException if {@code appendable} is {@code null}, or this is {@link #HTTP_DATE} and the instant's GMT year is outside
          *         Common Era 0001 through 9999, or if the zone the value is rendered in cannot be expressed as a {@link ZoneId} (custom
-         *         daylight-saving rules, or a fixed offset that is sub-second or beyond +/-18:00).
+         *         rules that cannot be verified against a {@code ZoneId}, or a fixed offset that is sub-second or beyond +/-18:00).
          * @throws DateTimeException if the formatter requires an unavailable temporal field or cannot represent its value
          * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
          * @see Dates#formatTo(java.util.Date, String, Appendable)
@@ -15912,7 +15912,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @throws IllegalArgumentException if {@code appendable} is {@code null}, {@code calendar} is non-lenient and contains invalid fields,
          *         or this is {@link #HTTP_DATE} and the instant's GMT year is outside
          *         Common Era 0001 through 9999, or if the zone the value is rendered in cannot be expressed as a {@link ZoneId} (custom
-         *         daylight-saving rules, or a fixed offset that is sub-second or beyond +/-18:00).
+         *         rules that cannot be verified against a {@code ZoneId}, or a fixed offset that is sub-second or beyond +/-18:00).
          * @throws DateTimeException if the formatter requires an unavailable temporal field or cannot represent its value
          * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
          * @see #format(java.util.Calendar)

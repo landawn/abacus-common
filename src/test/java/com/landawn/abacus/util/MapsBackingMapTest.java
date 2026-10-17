@@ -27,7 +27,6 @@ public class MapsBackingMapTest extends MapsTestSupport {
     private record Box(int v) {
     }
 
-
     // A named class whose constructor puts an entry: its reflective new instance is pre-filled like a double-brace map's.
     public static class G117PrefillingMap extends HashMap<String, Integer> {
         private static final long serialVersionUID = 1L;

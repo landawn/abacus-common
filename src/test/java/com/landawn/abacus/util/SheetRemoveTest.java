@@ -73,8 +73,6 @@ public class SheetRemoveTest extends SheetTestSupport {
         assertNull(objectSheet.getAt(1, 0));
     }
 
-
-
     /**
      * {@code set(Point, V)} and {@code remove(Point)} used to disagree on a frozen sheet with a {@code null}
      * point: {@code set} checked the frozen state first and threw {@link IllegalStateException}, while
@@ -90,8 +88,6 @@ public class SheetRemoveTest extends SheetTestSupport {
         assertThrows(IllegalStateException.class, () -> sheet.set((Point) null, 9));
         assertThrows(IllegalStateException.class, () -> sheet.remove(Point.of(0, 0)));
     }
-
-
 
     /**
      * The state check must not swallow the argument check: on an open sheet a {@code null} point is still
@@ -288,6 +284,5 @@ public class SheetRemoveTest extends SheetTestSupport {
             sheet.removeAt(0, 10);
         });
     }
-
 
 }

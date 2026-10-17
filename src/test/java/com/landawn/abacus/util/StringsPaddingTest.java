@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 /** Strings padding contracts, including regression cases. */
 public class StringsPaddingTest extends StringsTestSupport {
 
-
-
     // O-1 : repeat(String, int, String, String, String)
 
     /** Independent reference: the plainly written definition of the documented contract. */
@@ -128,8 +126,6 @@ public class StringsPaddingTest extends StringsTestSupport {
         assertEquals("", Strings.abbreviate("", 5));
     }
 
-
-
     /**
      * abbreviate's length errors report the offending maxLength (not just the minimum), the marker's length
      * rather than its contents (so a huge marker cannot produce a huge message), and — for the offset form —
@@ -202,8 +198,6 @@ public class StringsPaddingTest extends StringsTestSupport {
         assertEquals("abcd*", Strings.abbreviate("abcdefg", "*", 5));
         assertNull(Strings.abbreviate(null, "...", 5));
     }
-
-
 
     // C-005 / C-008: the documented abbreviate offset and surrogate examples
     @Test
@@ -362,8 +356,6 @@ public class StringsPaddingTest extends StringsTestSupport {
         assertEquals("bc.cb", result);
         assertTrue(result.length() >= 5 && result.length() <= 6);
     }
-
-
 
     // C-011: abbreviateMiddle hands the budget lost to surrogate rounding to the other side
     @Test
@@ -767,8 +759,6 @@ public class StringsPaddingTest extends StringsTestSupport {
         assertThrows(OutOfMemoryError.class, () -> Strings.repeat('a', Integer.MAX_VALUE, '-'));
     }
 
-
-
     // Cross-check: the rewritten repeat is still the exact inverse of split for the shapes that round-trip
     @Test
     public void testRepeat_roundTripsThroughSplit() {
@@ -835,8 +825,6 @@ public class StringsPaddingTest extends StringsTestSupport {
         assertEquals("[,,]", Strings.repeat("", 3, ",", "[", "]"));
         assertEquals("xxx", Strings.repeat("x", 3, null, null, null));
     }
-
-
 
     /**
      * The shape the first cut of this fix got wrong: WRAPPED (non-empty affixes) with both a body token and a

@@ -1006,8 +1006,9 @@ public class AbstractShortStreamTest extends TestBase {
 
                     // nextShort() for the first k elements, then toArray(); advance(k), then toArray()
                     for (int k = 0; k <= len + 1; k++) {
-                        final ShortIteratorEx byNext = (source == 0 ? ShortStream.of(backing, from, from + len)
-                                : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
+                        final ShortIteratorEx byNext = (source == 0 ? ShortStream.of(backing, from, from + len) : ShortStream.of(ShortIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
 
                         for (int j = 0; j < Math.min(k, len); j++) {
                             assertEquals(expected[j], byNext.nextShort(), msg + ", k=" + k + ", j=" + j);
@@ -1016,8 +1017,9 @@ public class AbstractShortStreamTest extends TestBase {
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
                         assertFalse(byNext.hasNext(), msg);
 
-                        final ShortIteratorEx byAdvance = (source == 0 ? ShortStream.of(backing, from, from + len)
-                                : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
+                        final ShortIteratorEx byAdvance = (source == 0 ? ShortStream.of(backing, from, from + len) : ShortStream.of(ShortIterator.of(copy)))
+                                .rotated(distance)
+                                .iteratorEx();
                         byAdvance.advance(k);
                         assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);
                     }

@@ -636,7 +636,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <p>This method handles the conversion of collections to arrays during deserialization,
      * with special handling for:</p>
      * <ul>
-     *   <li>Primitive arrays: Uses the target type's conversion method</li>
+     *   <li>Primitive arrays: Uses the target type's conversion method; a {@code null} element (an explicit null
+     *       marker in the input) becomes the primitive default value ({@code 0}, {@code false}, ...), as the JSON
+     *       parser reads {@code [1, null]} into an {@code int[]}</li>
      *   <li>Object arrays: Always creates an array of the declared component type</li>
      *   <li>Empty collections: Returns an empty array of the target type</li>
      * </ul>
@@ -652,14 +654,44 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param targetType the target array type
      * @return an array containing the collection elements, or {@code null} if the collection is {@code null}
      * @throws ParsingException if a {@code non-null} element cannot be stored in an array of the declared
-     *         component type
+     *         component type (for a primitive array: an element that is not an instance of the component's wrapper
+     *         class, such as a nested array or map)
      */
+    @SuppressWarnings("unchecked")
     protected static <T> T collectionToArray(final Collection<?> c, final Type<?> targetType) throws ParsingException {
         if (c == null) {
             return null;
         }
 
-        if (!targetType.isPrimitiveArray()) {
+        if (targetType.isPrimitiveArray()) {
+            try {
+                try {
+                    return (T) targetType.collectionToArray(c);
+                } catch (final NullPointerException e) {
+                    // The primitive types' collectionToArray unboxes every element, so a null element (an explicit null
+                    // marker such as <e isNull="true"/>) escaped as a raw NullPointerException. It reads as the primitive
+                    // default instead, like the JSON parser's primitive arrays. Handled on this failure path only, so the
+                    // common all-non-null conversion pays nothing.
+                    if (!N.anyNull(c)) {
+                        throw e;
+                    }
+
+                    final Object defaultValue = targetType.elementType().defaultValue();
+                    final List<Object> list = new ArrayList<>(c.size());
+
+                    for (final Object element : c) {
+                        list.add(element == null ? defaultValue : element);
+                    }
+
+                    return (T) targetType.collectionToArray(list);
+                }
+            } catch (final ClassCastException e) {
+                // The unboxing cast also fails for a mistyped element (a nested array, map or list item). Report it as
+                // the same parse error as the object-array check below instead of a raw ClassCastException; found on
+                // this failure path only, so the common conversion pays nothing.
+                throw primitiveElementMismatch(c, targetType, e);
+            }
+        } else {
             final Type<?> elementType = targetType.elementType();
             final Class<?> componentClass = elementType.javaType();
 
@@ -682,6 +714,26 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
         }
 
         return (T) targetType.collectionToArray(c);
+    }
+
+    // The ParsingException for the first non-null element of c that the primitive array targetType cannot hold (not an
+    // instance of the component's wrapper class); the original exception when no such element is found (a failure from
+    // the collection itself).
+    private static RuntimeException primitiveElementMismatch(final Collection<?> c, final Type<?> targetType, final ClassCastException cause) {
+        final Type<?> elementType = targetType.elementType();
+        final Class<?> wrapperClass = ClassUtil.wrap(elementType.javaType());
+        int index = 0;
+
+        for (final Object e : c) {
+            if (e != null && !wrapperClass.isInstance(e)) {
+                return new ParsingException("Element at index " + index + " is a " + e.getClass().getName() + ", which cannot be stored in " + targetType.name()
+                        + " (expected " + elementType.name() + ")", cause);
+            }
+
+            index++;
+        }
+
+        return cause;
     }
 
     /**

@@ -31,17 +31,12 @@ import com.landawn.abacus.util.Strings.StrUtil;
 /** Strings search contracts, including regression cases. */
 public class StringsSearchTest extends StringsTestSupport {
 
-
-
     // shouldUseCharMembership: valueCount >= 8 && (long) strLength * valueCount >= 4096.
     // minLastIndexOfAll passes (startIndexFromBack + 1) as strLength, so with 8 candidates the fast path
     // starts exactly at startIndexFromBack == 511 (512 * 8 == 4096).
     private static final int MIN_VALUE_COUNT_FOR_FAST_PATH = 8;
 
     private static final int FIRST_FAST_PATH_START_INDEX = 511;
-
-
-
 
     /** Scalar reference: the minimum, over the candidates, of each candidate's last index at or before the bound. */
     private static int refMinLastIndexOfAll(final String str, final int startIndexFromBack, final char... valuesToFind) {
@@ -992,8 +987,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertFalse(StringUtils.containsOnly(null, 'a'));
     }
 
-
-
     // D-3: containsOnly with an empty allowed set
     @Test
     public void testD3_containsOnlyWithEmptyAllowedChars() {
@@ -1105,8 +1098,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(6, Strings.countMatches("aabaabaa", 'a'));
         assertEquals(2, Strings.countMatches("aabaabaa", 'b'));
     }
-
-
 
     // G073-01: countMatches(String, char) switches from indexOf hopping to a plain scan on dense input; pin both regimes.
     @Test
@@ -1318,8 +1309,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals("a@[1.2.3.4]", Strings.findFirstEmailAddress("a@[1.2.3.4] x"));
     }
 
-
-
     // C-436: no fragment of a different address is returned
     @Test
     public void testC436_emailFindingRespectsBoundaries() {
@@ -1401,8 +1390,6 @@ public class StringsSearchTest extends StringsTestSupport {
     }
 
     // indexOf
-
-
 
     // J-1: the empty-needle contract past the end of the string
     @Test
@@ -1554,8 +1541,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(1, Strings.indexOf("aabaabaa", "ab"));
     }
 
-
-
     /**
      * Contract pin for the delimiter-in-token rule now documented on the four {@code indexOfToken} javadocs: with a
      * NON-EMPTY delimiter, a token that itself contains the delimiter spans more than one field and can never match,
@@ -1699,8 +1684,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(3, Strings.indexOfAny("abcabc", 1, 'a'));
         assertEquals(-1, Strings.indexOfAny("abc", 5, 'a'));
     }
-
-
 
     /**
      * Contract pin for the "Passing exactly one character" note on {@code indexOfAny(String, char...)}: all four
@@ -1873,8 +1856,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(-1, Strings.indexOfDifference("", ""));
         assertEquals(-1, Strings.indexOfDifference(null, ""));
     }
-
-
 
     // C-025 / C-028: indexOfDifference results (the removed tail was unreachable)
     @Test
@@ -2143,8 +2124,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(4, Strings.lastIndexOf("aabaabaa", "ab"));
     }
 
-
-
     /**
      * Contract pin for the delimiter-in-token rule now documented on the four {@code lastIndexOfToken} javadocs:
      * with a NON-EMPTY delimiter, a token that itself contains the delimiter spans more than one field and can never
@@ -2181,8 +2160,6 @@ public class StringsSearchTest extends StringsTestSupport {
 
         assertEquals(-1, StrUtil.lastIndexOfToken(null, "b", ","));
     }
-
-
 
     /**
      * Regression: lastIndexOf(str, value, delimiter, startIndexFromBack) must not
@@ -2366,8 +2343,6 @@ public class StringsSearchTest extends StringsTestSupport {
 
     // maxIndexOfAll
 
-
-
     // D-4: saturating early-exit bounds in the max* families; == retained in the min* families
     @Test
     public void testD4_maxFamilySaturatingBound() {
@@ -2547,8 +2522,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(-1, Strings.minIndexOfAll(null, "a"));
     }
 
-
-
     // G073-02: minIndexOfAll bounds each later candidate's search by the current hit; pin matches that straddle the
     // bound, empty/null/overlong candidates and every fromIndex against an unbounded reference.
     @Test
@@ -2680,8 +2653,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(-1, Strings.minLastIndexOfAll(null, "a"));
     }
 
-
-
     /**
      * The fast path must agree with the scalar path on both sides of the exact {@code shouldUseCharMembership}
      * crossover, so the optimization cannot be "verified" only where it never runs.
@@ -2715,8 +2686,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(refMinLastIndexOfAll(str, str.length(), all), Strings.minLastIndexOfAll(str, str.length(), all));
     }
 
-
-
     /** A candidate larger than every character in the string sizes the bitset; it must simply never match. */
     @Test
     public void testMinLastIndexOfAll_fastPathCandidateAboveEveryCharacterInTheString() {
@@ -2736,8 +2705,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(Strings.minLastIndexOfAll(str, str.length(), deduplicated), Strings.minLastIndexOfAll(str, str.length(), withDuplicates));
         assertEquals(refMinLastIndexOfAll(str, str.length(), withDuplicates), Strings.minLastIndexOfAll(str, str.length(), withDuplicates));
     }
-
-
 
     /** A match at index 0 short-circuits the scalar loop; the fast path must reach the same answer. */
     @Test
@@ -2788,8 +2755,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(refMinLastIndexOfAll(str, str.length(), candidates), Strings.minLastIndexOfAll(str, str.length(), candidates));
     }
 
-
-
     /** Guard against the fast path being silently disabled: the gated and ungated results must agree. */
     @Test
     public void testMinLastIndexOfAll_gatedAndUngatedInputsGiveTheSameAnswerForTheSameContent() {
@@ -2804,8 +2769,6 @@ public class StringsSearchTest extends StringsTestSupport {
         assertEquals(refMinLastIndexOfAll(shortStr, shortStr.length(), eight), Strings.minLastIndexOfAll(shortStr, shortStr.length(), eight));
         assertEquals(refMinLastIndexOfAll(longStr, longStr.length(), eight), Strings.minLastIndexOfAll(longStr, longStr.length(), eight));
     }
-
-
 
     /** The no-index overload delegates with {@code N.len(str)} and must behave the same. */
     @Test
@@ -2853,8 +2816,6 @@ public class StringsSearchTest extends StringsTestSupport {
                     "len=" + len + " start=" + start + " count=" + values.length);
         }
     }
-
-
 
     /** The {@code String...} overload has no fast path; it must be unaffected by this change. */
     @Test

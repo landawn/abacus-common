@@ -55,10 +55,11 @@ import java.util.function.Supplier;
  * ({@code %d}, {@code %n}, {@code %5s}, ... are plain text, and a {@code %s} inside prose such as
  * {@code "90%sure"} is consumed), and there is no escape sequence ({@code \{}} and {@code %%} are not
  * special). To emit a literal {@code {}} or {@code %s}, pass it as an argument: substituted arguments are
- * never re-scanned for placeholders. Arguments are rendered with {@code N.toString(Object)}; an argument
- * whose {@code toString()} throws is rendered as a {@code [FAILED toString() of <class>@<hash>: <error>]}
- * marker, including stack overflow from a self-referential collection. Other {@link VirtualMachineError}s
- * propagate. Concrete formatting is performed by {@link AbstractLogger}.</p>
+ * never re-scanned for placeholders. Arguments are rendered with {@code N.toString(Object)}. Rendering
+ * failures, including {@link AssertionError} and {@link StackOverflowError}, produce a
+ * {@code [FAILED toString() of <class>@<hash>: <error>]} marker. The exceptions to this rule are
+ * {@link ThreadDeath} and {@link VirtualMachineError}s other than {@code StackOverflowError}, which
+ * propagate unchanged. Concrete formatting is performed by {@link AbstractLogger}.</p>
  *
  * <p><b>Overload capture of {@code xxx(String, Throwable)}:</b> a call such as
  * {@code logger.error("Failed {}", ex)} whose single argument is a {@code Throwable} binds to the more

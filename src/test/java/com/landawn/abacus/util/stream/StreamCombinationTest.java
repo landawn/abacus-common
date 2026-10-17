@@ -118,8 +118,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertTrue(result.contains(Arrays.asList(2, 4)));
     }
 
-
-
     // Stream review 2026-09-09 (pass B) - cartesianProduct null-array handling
 
     /**
@@ -366,8 +364,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(0, Stream.concat(empty).count());
     }
 
-
-
     // concat(Iterable...) (lines 19227-19233).
     @Test
     public void testConcatIterablesVarargs_uncovered() {
@@ -382,8 +378,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         final Iterator<Integer>[] empty = new Iterator[0];
         assertEquals(0, Stream.concat(empty).count());
     }
-
-
 
     // concat(Iterator...) (lines 19259-19265).
     @Test
@@ -674,8 +668,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(0, Stream.merge(streams, (x, y) -> MergeResult.TAKE_FIRST).count());
     }
 
-
-
     // merge(Collection<Stream>, nextSelector): size==1 (line 26370).
     @Test
     public void testMergeCollection_singleStream_uncovered() {
@@ -683,16 +675,12 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(N.asList(1, 2, 3), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
 
-
-
     // merge(Collection<Stream>, nextSelector): size>=3 iterative path (lines 26376-26383).
     @Test
     public void testMergeCollection_threeStreams_uncovered() {
         final List<Stream<Integer>> streams = N.asList(Stream.of(1, 4, 7), Stream.of(2, 5, 8), Stream.of(3, 6, 9));
         assertEquals(N.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), Stream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
-
-
 
     // merge(Collection<Stream>, nextSelector): size==2 (lines 26371-26373).
     @Test
@@ -720,8 +708,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), result);
     }
 
-
-
     // mergeIterables(Collection<Iterable>, nextSelector) (line 26412).
     @Test
     public void testMergeIterables_uncovered() {
@@ -747,16 +733,12 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(1, 2, 3, 4), result);
     }
 
-
-
     // mergeIterators(Collection<Iterator>, nextSelector): size==1 (line 26446).
     @Test
     public void testMergeIterators_single_uncovered() {
         final List<Iterator<Integer>> iterators = N.asList(N.asList(1, 2, 3).iterator());
         assertEquals(N.asList(1, 2, 3), Stream.mergeIterators(iterators, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList());
     }
-
-
 
     // mergeIterators(Collection<Iterator>, nextSelector): size==2 (lines 26447-26449).
     @Test
@@ -2776,8 +2758,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(111, 222, 333), result);
     }
 
-
-
     // zipIterables(Collection<Iterable>, valuesForNone, fn) ragged padding (line 24841).
     @Test
     public void testZipIterablesWithValuesForNone_uncovered() {
@@ -2843,8 +2823,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         assertEquals(Collections.emptyList(), result);
     }
 
-
-
     // zipIterators(Collection<Iterator>, valuesForNone, fn): empty -> empty (line 24876).
     @Test
     public void testZipIteratorsWithValuesForNone_empty_uncovered() {
@@ -2853,8 +2831,6 @@ public class StreamCombinationTest extends StreamTestSupport {
         final Function<List<Integer>, Integer> sumFn = list -> list.stream().mapToInt(Integer::intValue).sum();
         assertEquals(0, Stream.zipIterators(iterators, none, sumFn).count());
     }
-
-
 
     // zipIterators(Collection<Iterator>, valuesForNone, fn): size mismatch throws (line 24882).
     @Test

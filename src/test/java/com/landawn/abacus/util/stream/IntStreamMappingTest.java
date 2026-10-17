@@ -457,8 +457,6 @@ public class IntStreamMappingTest extends IntStreamTestSupport {
         assertArrayEquals(new int[] { 3, 6, 9, 12, 15 }, result);
     }
 
-
-
     // transformViaJdkStream(Function, boolean) - with deferred=true path
     @Test
     public void testTransformViaJdkStream_WithDeferred_True() {

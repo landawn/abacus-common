@@ -280,6 +280,12 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                // A supplier can catch recursive-access failure and return a source.
+                                // Failed initialization never uses that source, so release its backing data.
+                                if (initializationFailure != null) {
+                                    iter = null;
+                                }
+
                                 supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;

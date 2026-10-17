@@ -503,8 +503,6 @@ public class FloatListTest extends FloatListTestSupport {
         }
     }
 
-
-
     // G111-01: containsAll set path, both orientations, duplicates, NaN == NaN, 0.0f != -0.0f
     @Test
     public void testContainsAll_setPathBothOrientationsG111() {
@@ -524,8 +522,6 @@ public class FloatListTest extends FloatListTestSupport {
         assertTrue(big.containsAll(new float[] { 0, 0, Float.NaN, 8 }));
         assertFalse(big.containsAll(new float[] { 0, 0, Float.NaN, -0.0f }));
     }
-
-
 
     // G111-01: randomized differential check of containsAll/disjoint/containsAny against a naive nested scan (Float.compare)
     @Test
@@ -793,8 +789,6 @@ public class FloatListTest extends FloatListTestSupport {
         FloatList fl2 = FloatList.of(2f, 4f, 6f, 8f, 10f, 12f, 14f, 16f, 18f, 20f, 22f, 24f);
         assertTrue(fl1.disjoint(fl2));
     }
-
-
 
     // G111-01: disjoint / containsAny set path, both orientations and self
     @Test
@@ -1799,8 +1793,6 @@ public class FloatListTest extends FloatListTestSupport {
         assertEquals(3, list.size());
     }
 
-
-
     // G111-01: removeDuplicates unsorted path keeps first occurrences in order (Float.compare rules) and clears the tail
     @Test
     @SuppressWarnings("deprecation")
@@ -2608,7 +2600,6 @@ public class FloatListTest extends FloatListTestSupport {
 
         return true;
     }
-
 
     // ---- perf review 2026-09-26 G111 end ----
 }

@@ -186,8 +186,6 @@ public class CollectorsCompositionTest extends CollectorsTestSupport {
         assertEquals("abc", result);
     }
 
-
-
     // G112-06: commonPrefix()/commonSuffix() compare at most (current length + 1) chars per element - randomized differential test
     // against the previous full-scan accumulator, incl. surrogate pairs and lone surrogates at the boundary, null/empty elements,
     // long shared runs, StringBuilder elements and the combiner

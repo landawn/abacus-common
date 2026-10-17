@@ -405,8 +405,6 @@ public class JoinerAppendTest extends JoinerTestSupport {
         assertEquals("", Joiner.with(",").appendIfNotNull(null).appendIfNotNull(null).toString());
     }
 
-
-
     /**
      * R10 review of r9506: {@code append(Object)} was changed to call {@code assertNotClosed()} before rendering,
      * so that a closed Joiner never runs the element's {@code toString()}. Its one-element sibling
@@ -470,8 +468,6 @@ public class JoinerAppendTest extends JoinerTestSupport {
         Joiner.with(",").setEmptyValue("EMPTY").appendTo(namedEmpty);
         assertEquals("prefix:EMPTY", namedEmpty.toString());
     }
-
-
 
     /**
      * Pins the {@code null}-key rendering that the {@code appendEntry} javadoc now states on the six

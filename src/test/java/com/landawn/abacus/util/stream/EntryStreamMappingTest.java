@@ -264,8 +264,6 @@ public class EntryStreamMappingTest extends EntryStreamTestSupport {
         assertEquals(10, result.size());
     }
 
-
-
     // G095-01: the parallel path (left on the Stream-based expansion) still yields every expanded entry
     @Test
     public void testFlatmapKeyValue_parallel() {
@@ -301,8 +299,6 @@ public class EntryStreamMappingTest extends EntryStreamTestSupport {
         assertEquals(expectedValues, values);
     }
 
-
-
     // G095-01: pins the order of keyMapper / collection iterator / Entry accessor calls and the laziness under a short-circuit
     @Test
     public void testFlatmapKeyValue_sequentialCallOrderAndLaziness() {
@@ -329,8 +325,6 @@ public class EntryStreamMappingTest extends EntryStreamTestSupport {
         assertEquals(g095Entry("b", 20), first);
         assertEquals(Arrays.asList("getKey:a", "getValue:1", "map:a=1", "getKey:b", "getValue:2", "map:b=2", "iterator", "next:20", "getKey:b"), log);
     }
-
-
 
     // G095-01: sequential flatmapKey/flatmapValue expand null, empty, singleton and duplicate collections as before
     @Test

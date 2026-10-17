@@ -427,5 +427,4 @@ public class RowDatasetGetTest extends RowDatasetTestSupport {
         Assertions.assertEquals((short) 1, dataset.getShort("id"));
     }
 
-
 }

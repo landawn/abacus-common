@@ -167,8 +167,6 @@ public class FloatStreamCombinationTest extends FloatStreamTestSupport {
         assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f, 4.0f }, stream.toArray());
     }
 
-
-
     // G112-01: bulk count()/toFloatList()/toArray() of concat(List<float[]>) / concat(float[]...) - null/empty arrays, skip into/at/after a
     // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
     @Test
@@ -662,8 +660,6 @@ public class FloatStreamCombinationTest extends FloatStreamTestSupport {
         float[] result = FloatStream.zip(streams, values -> values[0] + values[1]).toArray();
         assertArrayEquals(new float[] { 11.0f, 22.0f }, result, DELTA);
     }
-
-
 
     // Additional coverage improvement tests - Collection-based factory methods
     @Test

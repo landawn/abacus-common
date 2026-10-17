@@ -175,8 +175,6 @@ public class ShortStreamCreationTest extends ShortStreamTestSupport {
         assertArrayEquals(new short[] { 1, 4, 2, 5, 3, 6 }, stream2.toArray());
     }
 
-
-
     // G114-01: flatten(short[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
     @Test
@@ -247,8 +245,6 @@ public class ShortStreamCreationTest extends ShortStreamTestSupport {
         assertEquals(0, ShortStream.flatten(new short[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G105-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -293,8 +289,6 @@ public class ShortStreamCreationTest extends ShortStreamTestSupport {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new short[0], ShortStream.flatten(new short[][] { null, {}, null }, true).toArray());
     }
-
-
 
     // G105-01: pins the column-major order of flatten(short[][], true) for jagged input with null/empty/short rows
     @Test

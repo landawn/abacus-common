@@ -72,4 +72,24 @@ public class FloatArrayTypeTest extends TestBase {
         assertEquals(Float[].class, type.javaType());
     }
 
+    // ---- deep review 2026-10-16 G151 begin ----
+
+    // G151 (owner: consistency, reverses G143): quoted elements are read like unquoted ones, as Long[], the primitive arrays
+    // and N.fromJson do; r89 threw NumberFormatException for ["1", 2].
+    @Test
+    public void testValueOf_quotedElementsReadLikeUnquoted() {
+        final com.landawn.abacus.type.Type<Float[]> type = com.landawn.abacus.type.TypeFactory.getType(Float[].class);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Float[] { 1.5f, null, -3f }, type.valueOf("[\"1.5\", null, \"-3\"]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Float[] { 1f, 2f }, type.valueOf("['1', 2]"));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new Float[] { 1f }, type.valueOf("[\"\\u0031\"]")); // JSON escape
+        org.junit.jupiter.api.Assertions.assertArrayEquals(com.landawn.abacus.util.N.fromJson("[\"1\", 2]", Float[].class), type.valueOf("[\"1\", 2]"));
+
+        // null handling is unchanged: only the bare literal is a null element; empty or quoted null still fail, as for Long[]
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
+        org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("[\"1']"));
+    }
+
+    // ---- deep review 2026-10-16 G151 end ----
 }

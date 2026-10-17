@@ -238,8 +238,6 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(OptionalInt.of(1), Index.ofIgnoreCase("aBcAbC", "bc", -1));
     }
 
-
-
     /**
      * G31-003 contract pin: the ignore-case substring searches are a same-length UTF-16 compare via
      * {@link String#regionMatches(boolean, int, String, int, int)}, not Unicode case folding - a length-changing
@@ -382,8 +380,6 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(Index.ofSubList(raSource, 2, raSub), Index.ofSubList(raSource, 2, llSub));
         assertEquals(Index.lastOfSubList(raSource, 2, raSub), Index.lastOfSubList(raSource, 2, llSub));
     }
-
-
 
     /**
      * G31-002 contract pin: a negative {@code sizeToMatch} comes back from {@code N.checkFromIndexSize} as an

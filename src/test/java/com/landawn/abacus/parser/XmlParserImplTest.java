@@ -116,16 +116,12 @@ public class XmlParserImplTest extends TestBase {
     public static class EmptyBean {
     }
 
-
-
     /** Review fixes 2026-09-06: a bean whose properties are all {@code null} by default (P5-01). */
     @Data
     public static class NullableOnlyBean {
         private String a;
         private String b;
     }
-
-
 
     /** Review fixes 2026-09-06: outer bean for the empty-nested-bean round trip (P5-01/P5-02). */
     @Data
@@ -138,8 +134,6 @@ public class XmlParserImplTest extends TestBase {
         private String tail;
     }
 
-
-
     /** Review fixes 2026-09-06: mixed (bean + scalar) array and collection properties (P5-05). */
     @Data
     public static class MixedBean {
@@ -147,15 +141,11 @@ public class XmlParserImplTest extends TestBase {
         private List<Object> los;
     }
 
-
-
     /** Review fixes 2026-09-06: a map property whose keys are not valid XML element names (P5-08). */
     @Data
     public static class MapKeyBean {
         private Map<Integer, String> byId;
     }
-
-
 
     /** Review fixes 2026-09-06: optional/nullable and tuple-like properties (T6-02). */
     @Data
@@ -188,8 +178,6 @@ public class XmlParserImplTest extends TestBase {
     private static Document document(final String xml) throws Exception {
         return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes()));
     }
-
-
 
     // R4-01: an adopted type attribute naming a class whose codec cannot read text at all (Number) is a document error reported as
     // ParsingException naming the attribute on the standard StAX and DOM readers too (the StAX reader leaked the codec's
@@ -310,8 +298,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> staxParser.deserialize("<AtomicInteger>123</AtomicInteger>", null, AtomicInteger.class));
     }
 
-
-
     // G134-01: a collection's type attribute (type="LinkedHashSet<Object>", "ArrayList<Object>") must not erase a declared Optional/Nullable
     // element type either, at the root or as a map value: the elements are written as the values they hold (<set>[1, 2]</set>), so
     // without the declared wrapper they came back unwrapped ([1, 2] instead of [Optional[1], Optional[2]]). An Optional<Object> argument
@@ -335,8 +321,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G114-04: DOM started the root with the configured element type as the declared type, so a List<Integer> element type
     // was applied one level too deep: <list><list>[1, 2]</list></list> failed with NumberFormatException (StAX reads [[1, 2]]).
     @Test
@@ -353,8 +337,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(List.of(1, 2), array[0], arrayXml);
         }
     }
-
-
 
     // G114-04/G115-02 completed for a MapEntity root (an Object or MapEntity target): DOM took the value type of a configured
     // Map<K, V> element type for the root entity's own properties, so "x" failed with NumberFormatException and "1" became 1.
@@ -373,8 +355,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G114-04 completed for a map root: DOM took the key/value types of a configured Map<K, V> element type for the root map
     // itself, overriding even an explicitly typed target (<map><a>1</a></map> read "1" as Integer, or failed on key "a").
     @Test
@@ -390,8 +370,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(Map.of("a", 1), parser.deserialize(xml, Type.of("Map<String, Integer>")), xml);
         }
     }
-
-
 
     // Neighbours of the root fixes that must stay unchanged: a configured map value type still types the root entity's values,
     // and a non-container element type still types the elements of a root list/array.
@@ -410,8 +388,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(List.of(1, 2), parser.deserialize(listXml, integerElements, List.class), listXml);
         }
     }
-
-
 
     // G126-01: DOM let an untyped FIRST element of a root array/collection - <null isNull="true" />, or a tuple-like <e> written as its
     // text - decide that the whole document carried no type information, so a typed bean or map after it was read as a list
@@ -438,8 +414,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals(Arrays.asList(bean, null), domParser.deserialize(typedFirstXml, null, List.class), typedFirstXml);
     }
 
-
-
     // G126-01: the same for a root map whose first entry is a tuple-like value (written as text, without a type attribute): every later
     // value - and everything inside it - was read without its type on DOM ({p=Pair, c=42} -> c="42"); StAX read it correctly.
     @Test
@@ -463,8 +437,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G126-01 neighbours (unchanged): a bean element WITHOUT a type attribute still makes DOM ignore the type attributes below it (that
     // decision is made by the bean element, not by a sibling); with a type attribute on the bean element they are used.
     @Test
@@ -479,8 +451,6 @@ public class XmlParserImplTest extends TestBase {
                         .getAttrs()
                         .get("a"));
     }
-
-
 
     // G134-01/02: explicitly parameterized wrapped values (Optional<List<Map<String, Long>>> and the other wrappers) keep their declared
     // element types with and without type information, under an interface and a concrete root type.
@@ -506,8 +476,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G010-06: ignoredPropNames was matched against the element name only, so a case or naming-policy variant that
     // getPropInfo resolves to the ignored property (<firstname>, <first_name>) bound it anyway, on both backends.
@@ -551,8 +519,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertTrue(ex.getCause() instanceof IOException);
     }
 
-
-
     // G115-01 neighbour: Map.Entry text written before the fix (String slots unquoted) is read exactly as before, by both readers.
     @Test
     public void testDeserialize_mapEntryUnquotedTextOfOldOutputStillRead() {
@@ -567,8 +533,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(java.util.Optional.of(Map.entry("k", "v")), back.getOptionalEntry());
         }
     }
-
-
 
     // G010-01: a property (or map value) whose element type is itself a collection/array of beans lost every bean on read:
     // each inner <list>/<array> element was read as a map ([{"g010Item": {}}]) or failed with a ParsingException.
@@ -606,8 +570,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G010-01: the same for a MapEntity value whose configured value type is a wrapper (MAP_ENTITY branches).
     @Test
     public void testDeserialize_optionalMapEntityValueHoldingStructuredValue() {
@@ -628,8 +590,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(java.util.Optional.of("v"), back.get("s"), xml);
         }
     }
-
-
 
     // G010-01: writeMap writes a present Optional/Nullable map value as the value it holds, so a bean, list or map arrives as nested
     // elements. Both backends read those with the wrapper type itself and stored an ArrayList in the map (of empty beans for a list).
@@ -652,8 +612,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G134-02: with type information the element of a present Optional/Nullable value carries the type attribute of the value it holds
     // (type="ArrayList<Object>", type="Integer"); it names no wrapper, so it was dropped: StAX read a list as its first map, DOM read a map
@@ -680,8 +638,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G134 neighbours (unchanged): an empty wrapper (the isNull marker: Optional.empty on StAX, null on DOM - the open G010-03 decision), a
     // configured value type taking precedence over the value's own type attribute (which is still approved), unapproved type attributes
@@ -728,8 +684,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G134-01: a root whose type attribute names a subclass with another parameter layout (G134StringKeyMap<V> extends HashMap<String, V>
     // is written as type="...G134StringKeyMap<Object, Object>"): the declared Map<String, X> is the schema the content is read with and the
     // subclass is only instantiated; no type argument is transplanted onto it.
@@ -752,8 +706,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertTrue(wrapped instanceof G134StringKeyMap, g134Name(parser) + " " + wrapped.getClass().getName());
         }
     }
-
-
 
     // G134-01: on DOM the root element's type attribute - the RAW runtime class, type="LinkedHashMap<Object, Object>" - replaced the
     // declared root type, so every type argument below the root was lost (Map<String, Optional<Object>> came back without its wrappers,
@@ -789,8 +741,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertTrue(raw instanceof java.util.TreeMap, raw.getClass().getName());
         }
     }
-
-
 
     // G134-03: a present Optional/Nullable map value is written as the value it holds, a list of maps as one child element per item. Without
     // type information the StAX reader read only the FIRST child of a declared Optional<Object> value and silently dropped the others; all
@@ -830,8 +780,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G119-01: with writeTypeInfo a java.time.Duration property is written with its handler's name (type="JdkDuration",
     // type="Map<String, JdkDuration>"), which both readers rejected - the same defect as the JdkOptional names of G115-02.
     @Test
@@ -853,8 +801,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(unapproved, null, G119DurationHolder.class));
         }
     }
-
-
 
     // G115-02: with writeTypeInfo a property parameterized by a java.util optional type is written with the handler's name
     // (type="Map<String, JdkOptional<String>>"), which both readers rejected ("XML type attribute is not allowed"). The writer's
@@ -1047,8 +993,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G01-18: the DOM ENTITY branch threw when a child element had no `name` attribute, while the MAP and
     // MAP_ENTITY branches - and the whole StAX reader - fall back to the element's own name.
     @Test
@@ -1075,8 +1019,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G01-02: writeBean rejected a bean with no serializable property whatever failOnEmptyBean said, while the
     // JSON writer already honoured the flag.
     @Test
@@ -1099,8 +1041,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertThrows(ParsingException.class, () -> parser.serialize(bean, XmlSerConfig.create().setFailOnEmptyBean(true)));
         }
     }
-
-
 
     // G01-16: the MapEntity's own entity name goes into element-name position too, but only its property names
     // were checked, so new MapEntity("a b") emitted <a b>...</a b>.
@@ -1128,8 +1068,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(N.asMap(supplementary, "v")));
         Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(new MapEntity(supplementary)));
     }
-
-
 
     // G01-17: writeMap/writeMapEntity emitted a tuple-like value's OWN type name under writeTypeInfo, unlike
     // writeProperties and writeElement - a name the shared allowlist rejects, so the DOM backend could not read
@@ -1171,8 +1109,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G04-85: DocumentBuilder.parse hands back a Document, which is not an element - deserialize(Node, ..) read
     // it as null (and the nodeTypes overload looked its target up under "#document").
     @Test
@@ -1201,8 +1137,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertNull(domParser.deserialize(noRoot, null, TestBean.class));
     }
 
-
-
     // G04-86: a null map key is written as the element <null>, but the ignore filter tested the bare null key,
     // so setIgnoredPropNames(Map.class, N.asSet("null")) did not filter it while the reader did - and a Set that
     // rejects a null argument threw from contains(null).
@@ -1224,8 +1158,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G04-85: the shape belongs to the bean element, not to the document. Decided once from the outermost
     // element, a bean nested in a map entry inherited the mode from the entry element (<p1>), which never
     // carries a `name` attribute, and the DOM reader then keyed every <property name=".."> child as "property"
@@ -1246,8 +1178,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(30, back.get("p1").getAge(), xml);
         }
     }
-
-
 
     // Fix pass 2026-09-08 (G04)
 
@@ -1331,8 +1261,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals(30, result.getAge());
     }
 
-
-
     // G12-01: isCompactMapText reads the first non-whitespace code unit in place instead of copying the stripped text; the
     // decision is pinned for the whitespace String.strip()/isBlank() skip, for the characters they do not skip, for lone
     // surrogates and for a supplementary first code point, and for blank and null text.
@@ -1352,8 +1280,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertFalse(AbstractXmlParser.isCompactMapText(stray[i]), "stray[" + i + "]");
         }
     }
-
-
 
     // G12-01: whitespace around compact map text (ASCII, Unicode spaces and line separators) still reads the same map at
     // the root and inside a nested map element on both backends; blank text is still an empty map, and a leading
@@ -1414,8 +1340,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertNull(array[1]);
         Assertions.assertEquals("b", array[2].getName());
     }
-
-
 
     // G11-01: the empty element of a property-less class is pinned on both backends for the first write (the name tags
     // are built) and the later ones (the tags are cached per class): root, list, map value and bean property, both tag
@@ -1521,8 +1445,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals("val2", result.get("key2"));
     }
 
-
-
     // G10-01: the readers skip refineSlot for scalar, bean and Object slots (it hands back the schema itself for them) and still
     // refine container, array and wrapper slots. Pins every slot kind on the bean-property, map-entry and MapEntity-entry
     // branches of both backends, with and without global element / map-type configuration and per-key value types.
@@ -1597,8 +1519,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * P5-12: a String or a file is one whole document, so a second root element or trailing text must be
      * reported. A caller-supplied stream may carry further documents and is deliberately not drained.
@@ -1633,8 +1553,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertEquals("a", staxParser.deserialize(new ByteArrayInputStream((valid + "<testBean/>").getBytes()), null, TestBean.class).getName());
     }
 
-
-
     /**
      * P5-09: a named String property element with no text is the empty string on both backends (2026-10-06: StAX used
      * to yield the property default, null, while DOM and the Abacus readers read the empty string the writer emits for
@@ -1654,8 +1572,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertNull(staxParser.deserialize(nullMarker, null, TestBean.class).getName());
         Assertions.assertNull(domParser.deserialize(nullMarker, null, TestBean.class).getName());
     }
-
-
 
     /**
      * P5-13: {@code writeTypeInfo=true} makes both writers emit {@code type="MapEntity"}, which the DOM backend
@@ -1698,8 +1614,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class,
                 () -> domParser.deserialize("<Account type=\"com.example.NotRegistered\"><name>x</name></Account>", null, MapEntity.class));
     }
-
-
 
     /**
      * P5-08: a map key becomes an element name, and XML has no escaping in name position, so a key that is not
@@ -1759,8 +1673,6 @@ public class XmlParserImplTest extends TestBase {
         final String filtered = staxParser.serialize(ignored, new XmlSerConfig().setIgnoredPropNames(Map.class, N.asSet("a b")));
         Assertions.assertEquals("<map><keep>1</keep></map>", filtered);
     }
-
-
 
     /**
      * P5-05: scalar elements of a mixed (bean + scalar) array or collection used to be written as bare text, so
@@ -1844,8 +1756,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * T6-02: an empty {@code Optional}/{@code Nullable} property was written as the text {@code null}, which no
      * numeric or bean element type can read back; a tuple-like property was written with unquoted String slots,
@@ -1913,8 +1823,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * P5-01: a pretty-printed bean holding a nested bean with no written property must round trip. The
      * whitespace between the nested start and end tags used to be treated as scalar text of the OUTER
@@ -1967,8 +1875,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * P5-10: a processing instruction is not character data, so the text around it must be coalesced. The StAX
      * reader stopped at the instruction and dropped everything before it.
@@ -1988,8 +1894,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals("ab", map.get("k"));
         }
     }
-
-
 
     /**
      * P5-06: an {@code isJsonRawValue} payload was written without any escaping, so any JSON holding
@@ -2020,8 +1924,6 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertTrue(xml.contains("{\"k\":\"a&lt;b&amp;c\"}"), xml);
         Assertions.assertFalse(xml.contains("&quot;"), xml);
     }
-
-
 
     /**
      * P5-15: a cyclic graph is rejected by the serialization depth guard instead of unwinding in a
@@ -2058,8 +1960,6 @@ public class XmlParserImplTest extends TestBase {
         // The counter is per thread and released again, so the next serialization starts from zero.
         Assertions.assertTrue(staxParser.serialize(new TestBean("after", 1)).contains("after"));
     }
-
-
 
     /**
      * P5-02/P5-03: {@code tagByPropertyName=false} output must be readable again. The StAX reader ignored the
@@ -2109,8 +2009,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * P5-04: with {@code writeTypeInfo=true} the DOM backend read a {@code List<Bean>} property back as a list
      * of HashMaps, because the resolved {@code type} attribute was reduced to a raw Class.
@@ -2148,8 +2046,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals("child", back.getMoreNested().get(0).getName());
         }
     }
-
-
 
     /**
      * P5-07: text XML 1.0 cannot carry was written as a numeric character reference (or raw, for surrogates),
@@ -2194,8 +2090,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * Self-review R2 of T6-02 / P5-05: the same rule for an ARRAY or COLLECTION element of a mixed value. An
      * empty wrapper now produces the {@code <null isNull="true" />} marker both backends read as {@code null}
@@ -2231,8 +2125,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     /**
      * Self-review R2 of P5-02: the StAX MAP branch resolved a key from the element's local name only, so a
@@ -2280,8 +2172,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     /**
      * G05-108: the two backends applied different rules for recognising the {@code <e>} scalar wrapper - the DOM
      * reader also required the element to have no children, which a stream reader cannot test - so a hand-written
@@ -2313,8 +2203,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(Arrays.asList(null, "1"), parser.deserialize("<list><e isNull=\"true\"/><e>1</e></list>", null, List.class));
         }
     }
-
-
 
     // R02: the map-key / MapEntity element-name check was never extended to a bean property, although
     // ParserUtil.XmlNameTag escapes such a name only for the <property name=".."> style and its own comment
@@ -2361,8 +2249,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // X03/R03-8, the second half: the element-name check above covers tagByPropertyName=true, but with
     // tagByPropertyName=false the name goes in ATTRIBUTE position, where XmlNameTag escapes it - and escaping a
     // character XML 1.0 has no representation for produces <property name="a&#x1;b">, which this parser's own
@@ -2400,8 +2286,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals("v", parser.deserialize(xml, MarkupXmlPropNameBean.class).value);
         }
     }
-
-
 
     // X03/R03-9: writeMap took key.toString() for an Optional/Nullable key, so a PRESENT wrapper key failed
     // ("Map key 'Optional[k]' is not a valid XML element name") and an EMPTY one was written as the element
@@ -2509,8 +2393,6 @@ public class XmlParserImplTest extends TestBase {
 
     // serialize
 
-
-
     // G115-01: a Map.Entry value was written through MapEntryType with the XML configuration, i.e. with unquoted String slots
     // ({"a,b":c,d}), and N.fromXml failed on its own output; with writeTypeInfo its handler name became a type attribute the
     // readers reject. It is now written as JSON text like Pair/Tuple (the JSON round trip of the same bean always worked).
@@ -2547,8 +2429,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G010-01: with circularReferenceSupported a repeated object is written as an empty element, but pretty format put
     // the closing line break + indentation into it, so an Object-typed value read back as that whitespace.
     @Test
@@ -2579,8 +2459,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G010-01: pretty format appended the closing line break + indentation INSIDE the text of an Object property holding a scalar.
     @Test
     public void testSerialize_prettyFormatObjectPropertyHoldingScalar() {
@@ -2607,10 +2485,6 @@ public class XmlParserImplTest extends TestBase {
                 staxParser.serialize(bean, pretty));
     }
 
-
-
-
-
     // pretty format: an Object property reads back on StAX and DOM exactly as the compact form does, for scalars
     // (including surrounding blanks and the empty String) and for a structured value alike.
     @Test
@@ -2632,8 +2506,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G115-01 neighbours: the output of the tuple-like types that already round-tripped is unchanged.
     @Test
@@ -2807,8 +2679,6 @@ public class XmlParserImplTest extends TestBase {
             Objectory.recycle(bw);
         }
     }
-
-
 
     /**
      * Self-review R2 of T6-02: an empty {@code Optional}/{@code Nullable} must produce the {@code isNull} form
@@ -3049,8 +2919,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G09-01: the XML and the XML-1.0 rejection messages of scalar elements inside element-by-element array/collection
     // properties, map values and roots are unchanged (the property name is formatted into the message only on failure).
     @Test
@@ -3108,8 +2976,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // G11-01: two property-less classes written alternately each keep their own element name
     @Test
     public void testWriteEmptyObject_distinctClassesKeepTheirOwnTags() {
@@ -3125,8 +2991,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
 
     // G11-01: an anonymous class has an empty simple name: the element-name check fails on every write (a cached tag
     // never suppresses the failure), while the attribute style still writes the empty name as before
@@ -3148,10 +3012,6 @@ public class XmlParserImplTest extends TestBase {
             }
         }
     }
-
-
-
-
 
     // R2C-03: the per-class cache of a property-less class's name tags serves the class's own Type; another Type instance
     // describing the same class (a parameterized spelling, whose name differs) takes the rebuild branch and gets tags built
@@ -3180,8 +3040,6 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals(rawNamed, r2WriteEmptyObject(raw, named), "round " + round);
         }
     }
-
-
 
     // G113-02: the XML and the XML-1.0 rejection messages of present optional/tuple properties and map values are unchanged.
     @Test
@@ -3241,8 +3099,6 @@ public class XmlParserImplTest extends TestBase {
         return bean;
     }
 
-
-
     // Fix pass 2026-09-08 (G01)
 
     /** A recognized bean (getter + setter) whose only property is excluded from serialization. */
@@ -3259,8 +3115,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
     // Review R02 of the 2026-09-08 fix pass
 
     /** A bean whose custom property name cannot be written in element-name position. */
@@ -3269,15 +3123,11 @@ public class XmlParserImplTest extends TestBase {
         public String value;
     }
 
-
-
     /** A bean whose custom property name is escapable in attribute position but not writable as an element name. */
     public static class MarkupXmlPropNameBean {
         @JsonXmlField(name = "a&b")
         public String value;
     }
-
-
 
     /** A bean whose custom property name needs no escaping and is a valid element name. */
     public static class PlainCustomXmlPropNameBean {
@@ -3285,15 +3135,11 @@ public class XmlParserImplTest extends TestBase {
         public String value;
     }
 
-
-
     /** A custom property name that attribute escaping turns into a character reference XML 1.0 forbids. */
     public static class ControlCharXmlPropNameBean {
         @JsonXmlField(name = "a" + (char) 1 + "b")
         public String value;
     }
-
-
 
     /** A custom property name holding an isolated surrogate, which no XML document can carry. */
     public static class LoneSurrogateXmlPropNameBean {
@@ -3333,9 +3179,6 @@ public class XmlParserImplTest extends TestBase {
         private int age;
     }
 
-
-
-
     /** G113-02: optional, nullable and tuple-like properties written through the propName-aware writeUnwrappedValue. */
     @Data
     public static class PerfG113Bean {
@@ -3345,19 +3188,11 @@ public class XmlParserImplTest extends TestBase {
         private java.util.Optional<StringBuilder> jo;
     }
 
-
-
-
-
     /** G010-01: a property declared as Object, which is written through write(...) rather than as a scalar. */
     @Data
     public static class PrettyObjectPropBean {
         private Object any;
     }
-
-
-
-
 
     /** G010-01: a bean whose Object-typed property and Object-valued map can hold a repeated (circular) reference. */
     @Data
@@ -3406,8 +3241,6 @@ public class XmlParserImplTest extends TestBase {
         private java.util.Optional<Object> any;
     }
 
-
-
     // A map subclass with another parameter layout than Map<K, V>: its key type is fixed, its only parameter is the value type.
     public static class G134StringKeyMap<V> extends HashMap<String, V> {
         private static final long serialVersionUID = 1L;
@@ -3418,8 +3251,6 @@ public class XmlParserImplTest extends TestBase {
     private static final String G134_U_OPTIONAL = "com.landawn.abacus.util.u.Optional";
 
     private static final String G134_NULLABLE = "com.landawn.abacus.util.u.Nullable";
-
-
 
     // Wraps a value in the wrapper named by its type name (one of the three constants above).
     private static Object g134Wrap(final String wrapper, final Object value) {
@@ -3440,16 +3271,11 @@ public class XmlParserImplTest extends TestBase {
         return map;
     }
 
-
-
-
     /** G09-01: a bean element makes an array/collection property non-JSON, so it is written element by element. */
     @Data
     public static class PerfG09Child {
         private String id;
     }
-
-
 
     /** G09-01: collection and array properties taken through the element-by-element write path. */
     @Data
@@ -3459,15 +3285,11 @@ public class XmlParserImplTest extends TestBase {
         private Object[] values;
     }
 
-
-
     /** G10-01: the nested bean of {@link G10SlotBean}. */
     @Data
     public static class G10SlotChild {
         private String name;
     }
-
-
 
     /** G10-01: one slot of every kind the readers refine differently (scalar, Object, list, array, map, wrapper, bean, typed list). */
     @Data
@@ -3501,26 +3323,18 @@ public class XmlParserImplTest extends TestBase {
         return config.setElementType(Type.of(Long.class)).setMapKeyType(Type.of(String.class)).setMapValueType(Type.of(Long.class));
     }
 
-
-
     /** G11-01: a property-less class (an ObjectType, not a bean) written by AbstractXmlParser.writeEmptyObject. */
     public static class PerfReviewMarker {
     }
-
-
 
     /** G11-01: a property-less class whose annotation selects the naming policy of its element name. */
     @com.landawn.abacus.annotation.JsonXmlConfig(namingPolicy = NamingPolicy.SNAKE_CASE)
     public static class PerfReviewAnnotatedMarker {
     }
 
-
-
     /** G11-01: a second property-less class, interleaved with the first one. */
     public static class PerfReviewOtherMarker {
     }
-
-
 
     /** G11-01: a bean holding property-less values. */
     public static class PerfReviewMarkerHolder {
@@ -3563,10 +3377,6 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
-
-
-
     /** R4-01: a bean with an open property, written with its class name as the standard writer does. */
     public static class R4OpenHolder {
         private Object open;
@@ -3580,6 +3390,30 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
-
     // ---- perf review 2026-10-07 round 4 R4 end ----
+
+    // ---- deep review 2026-10-16 G153 begin ----
+
+    // G153-03 (G145 coverage on the standard readers): the shared collectionToArray reads a null-marked element of a primitive array
+    // property as the primitive default on both backends (r89: raw NullPointerException); wrapper arrays keep the null.
+    @Test
+    public void testDeserialize_nullMarkerInPrimitiveArrayPropertyReadsAsDefault() {
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final G153PrimitiveArrays back = parser
+                    .deserialize("<g153PrimitiveArrays><nums><e>1</e><e isNull=\"true\"/><e>3</e></nums><flags><e isNull=\"true\"/><e>true</e></flags>"
+                            + "<boxed><e>1</e><e isNull=\"true\"/></boxed></g153PrimitiveArrays>", G153PrimitiveArrays.class);
+
+            Assertions.assertArrayEquals(new int[] { 1, 0, 3 }, back.nums);
+            Assertions.assertArrayEquals(new boolean[] { false, true }, back.flags);
+            Assertions.assertArrayEquals(new Integer[] { 1, null }, back.boxed);
+        }
+    }
+
+    public static class G153PrimitiveArrays {
+        public int[] nums;
+        public boolean[] flags;
+        public Integer[] boxed;
+    }
+
+    // ---- deep review 2026-10-16 G153 end ----
 }

@@ -39,8 +39,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         assertEquals("1904-06-15 12:00:00", local(Dates.addYears(at("1899-06-15 12:00:00", KOLKATA), 5), KOLKATA));
     }
 
-
-
     // C-083: the Calendar range checks reject a non-lenient calendar holding invalid fields
     @Test
     public void c083_calendarRangeChecksRejectANonLenientCalendarWithInvalidFields() {
@@ -84,8 +82,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         assertTrue(Dates.isOverlapping(c1, lenient, c5, c15));
     }
 
-
-
     // C-041: the Calendar truncation comparison keeps the null-zone fallback through zoneOf
     @Test
     public void c041_calendarWithNullZoneIsComparedInTheLiveDefaultZone() {
@@ -124,8 +120,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         }
     }
 
-
-
     // C-028: the offset-versus-zone check applies to the civil-field parsers too
     @Test
     public void c028_civilParsersRejectAnOffsetInconsistentWithItsZone() {
@@ -138,8 +132,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
 
         assertEquals(LocalDate.of(2023, 7, 1), DTF.ISO_ZONED_DATE_TIME.parseToLocalDate("2023-07-01T12:00:00-07:00[America/Los_Angeles]"));
     }
-
-
 
     // C-129: the create*(Calendar) factories pass on a non-lenient calendar's own rejection
     @Test
@@ -169,8 +161,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         lenient.set(Calendar.MONTH, 13);
         assertEquals(Instant.parse("2026-02-15T10:30:45Z").toEpochMilli(), Dates.createJUDate(lenient).getTime());
     }
-
-
 
     // C-017: the documented split between the Date and the Calendar overloads
     @Test
@@ -214,8 +204,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         assertEquals("1883-11-19 00:01:00", local(Dates.setDays(at("1883-11-18 00:01:00", NY), 19), NY));
     }
 
-
-
     // C-076 (cycle 2): set* resolves the zone once; behaviour is unchanged
     @Test
     public void c076_settersStillResolveEveryDocumentedCaseTheSameWay() {
@@ -238,8 +226,6 @@ public class DatesCalendarResolutionTest extends DatesResolutionTestSupport {
         final java.util.Date custom = new java.util.Date(Instant.parse("2025-06-15T16:00:00Z").toEpochMilli()); // 12:00 under +1 h saving
         assertEquals(custom.getTime() + 3_600_000, Dates.setHours(custom, 13).getTime());
     }
-
-
 
     // C-002
     @Test

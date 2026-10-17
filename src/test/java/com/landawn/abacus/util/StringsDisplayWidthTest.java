@@ -109,8 +109,6 @@ public class StringsDisplayWidthTest extends StringsTestSupport {
         assertTrue((Boolean) method.invoke(null, 0x094D)); // Devanagari virama
     }
 
-
-
     // G075-01: the East Asian display-width shortcut must agree with the Unicode 17 property tables it bypasses.
     @Test
     public void testCodePointDisplayWidth_commonWideRangesMatchPropertyTables() {
@@ -245,8 +243,6 @@ public class StringsDisplayWidthTest extends StringsTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Strings.codePointDisplayWidth(0x110000));
         assertThrows(IllegalArgumentException.class, () -> Strings.codePointDisplayWidth('a', null));
     }
-
-
 
     // G075-01: code points at the edges of the shortcut ranges and mixed with marks, joiners and surrogates.
     @Test

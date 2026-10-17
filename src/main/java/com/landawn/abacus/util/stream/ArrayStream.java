@@ -1141,16 +1141,22 @@ class ArrayStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private Iterator<? extends R> cur = null;
-            private Collection<? extends R> c = null;
 
             @Override
             public boolean hasNext() {
                 while ((cur == null || !cur.hasNext()) && cursor < toIndex) {
-                    c = mapper.apply(elements[cursor++]);
+                    cur = null;
+                    final Collection<? extends R> c = mapper.apply(elements[cursor++]);
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override

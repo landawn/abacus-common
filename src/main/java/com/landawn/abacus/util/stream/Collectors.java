@@ -2974,7 +2974,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector concatenates all elements directly without any delimiter between them.
      * It's equivalent to calling {@code joining("", "", "")}. The elements are converted
-     * to strings using their {@code toString()} method.</p>
+     * to strings by {@link N#toString(Object)}: an array is rendered by its contents (e.g. {@code [1, 2]})
+     * and {@code null} as {@code "null"}.</p>
      *
      * <p>This is useful for simple string concatenation where no formatting is needed.</p>
      *
@@ -2998,7 +2999,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector joins elements with the specified delimiter between each element.
      * No prefix or suffix is added to the result. The elements are converted to strings
-     * using their {@code toString()} method.</p>
+     * by {@link N#toString(Object)}: an array is rendered by its contents (e.g. {@code [1, 2]})
+     * and {@code null} as {@code "null"}.</p>
      *
      * <p>This is one of the most commonly used string collectors for creating
      * comma-separated values, space-separated words, etc.</p>
@@ -3029,8 +3031,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * wrapped with the specified prefix and suffix.</p>
      *
      * <p>The collector uses an efficient {@code Joiner} implementation that reuses
-     * internal buffers for better performance. Elements are converted to strings using
-     * their {@code toString()} method.</p>
+     * internal buffers for better performance. Elements are converted to strings by
+     * {@link N#toString(Object)}: an array is rendered by its contents (e.g. {@code [1, 2]})
+     * and {@code null} as {@code "null"}.</p>
      *
      * <p>The delimiter, prefix, and suffix are converted to immutable {@code String}
      * snapshots when this method is called. Later mutations of a supplied mutable

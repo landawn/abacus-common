@@ -3,11 +3,14 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,6 +64,24 @@ class PrimitiveBufferLifecycleReview20261010Test extends TestBase {
     }
 
     @Test
+    void closeKeepsTheLastValueAlreadyCachedByHasNext() throws Exception {
+        for (final boolean cancel : new boolean[] { false, true }) {
+            final LongIteratorEx ring = ring(List.of(LongIterator.of(7)), cancel, Runnable::run);
+            try {
+                assertTrue(ring.hasNext());
+                ring.closeResource();
+                ring.closeResource();
+                assertTrue(ring.hasNext());
+                assertEquals(7, ring.nextLong());
+                assertFalse(ring.hasNext());
+                assertThrows(NoSuchElementException.class, ring::nextLong);
+            } finally {
+                ring.closeResource();
+            }
+        }
+    }
+
+    @Test
     void workersSubmittedBeforeTheyRunStillDeliverTheirValues() throws Exception {
         final List<Runnable> queued = new ArrayList<>();
         final LongIteratorEx ring = ring(List.of(LongIterator.of(1, 2), LongIterator.of(3)), true, queued::add);
@@ -93,6 +114,30 @@ class PrimitiveBufferLifecycleReview20261010Test extends TestBase {
         // The reentrant close must stop startup before the second worker is submitted, without failing it.
         active[0] = ring(List.of(source, LongIterator.of(2)), true, Runnable::run);
         try {
+            assertFalse(active[0].hasNext());
+        } finally {
+            active[0].closeResource();
+        }
+    }
+
+    @Test
+    void closeDuringWorkerReadStopsPublication() throws Exception {
+        final LongIteratorEx[] active = new LongIteratorEx[1];
+        final LongIterator source = new LongIterator() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public long nextLong() {
+                active[0].closeResource();
+                return 1;
+            }
+        };
+        active[0] = ring(List.of(source), false, Runnable::run);
+        try {
+            assertFalse(active[0].hasNext());
             assertFalse(active[0].hasNext());
         } finally {
             active[0].closeResource();

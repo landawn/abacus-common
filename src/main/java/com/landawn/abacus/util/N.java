@@ -19424,8 +19424,9 @@ public final class N extends CommonUtil {
      * The sum is accumulated exactly in a {@code long}. If that total overflows, a quotient/remainder decomposition
      * avoids integer overflow without allocating arbitrary-precision numbers; the double result is subject to floating-point rounding.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -19460,8 +19461,9 @@ public final class N extends CommonUtil {
      * The sum is accumulated exactly in a {@code long}. If that total overflows, a quotient/remainder decomposition
      * avoids integer overflow without allocating arbitrary-precision numbers; the double result is subject to floating-point rounding.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20780,8 +20782,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toInt(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code int} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#intValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20816,8 +20819,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toInt(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code int} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#intValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20849,8 +20853,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array using the provided function to convert each element to an integer.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20881,8 +20886,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input array using the provided function to convert each element to an integer.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20927,8 +20933,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toInt(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code int} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#intValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -20959,8 +20966,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input collection using the provided function to convert each element to an integer.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21024,8 +21032,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toInt(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code int} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#intValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21051,8 +21060,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given iterable using the provided function to convert each element to an integer.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21090,8 +21100,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toLong(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code long} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#longValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21126,8 +21137,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toLong(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code long} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#longValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21159,8 +21171,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array using the provided function to convert each element to a long.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21191,8 +21204,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input array using the provided function to convert each element to a long.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21237,8 +21251,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toLong(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code long} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#longValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21269,8 +21284,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input collection using the provided function to convert each element to a long.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21334,8 +21350,9 @@ public final class N extends CommonUtil {
      *
      * <p>Non-null elements are converted exactly (see {@link Numbers#toLong(Object)}): a fractional value is truncated toward zero ({@code 1.7} counts as {@code 1}), but {@code NaN}, an infinity, or a value whose integer part is outside the {@code long} range throws {@code ArithmeticException} instead of silently wrapping or saturating as {@link Number#longValue()} does. Null elements contribute zero and are included in the divisor.</p>
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -21361,8 +21378,9 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given iterable using the provided function to convert each element to a long.
      *
-     * <p>The integral total is exact, but it is converted to {@code double} before the final division (and, beyond the
-     * {@code long} range, split into quotient and remainder), so once the sum exceeds 2<sup>53</sup> in magnitude the
+     * <p>The integral total is exact, but it is converted to {@code double} before the final division (beyond the
+     * {@code long} range, the boxed {@code averageLong}/{@code averageInt} routes keep it as a 128-bit integer, while the
+     * primitive {@code average(long[])} splits it into per-element quotients and remainders), so once the sum exceeds 2<sup>53</sup> in magnitude the
      * result can differ from the correctly rounded mean by one ulp; the primitive {@code average(long[])} and the
      * boxed {@code averageLong}/{@code averageInt} routes can differ from each other by that ulp.</p>
      *
@@ -48955,6 +48973,9 @@ public final class N extends CommonUtil {
      * Processes elements in batches: applies element consumer to each element, then runs batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
      *
+     * <p>Indexes start at zero and continue across batches. The batch action also runs after a final nonempty partial batch.
+     * If either callback throws, processing stops immediately without invoking either callback again.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] items = {"A", "B", "C", "D", "E"};
@@ -48998,6 +49019,11 @@ public final class N extends CommonUtil {
      * Does nothing if the iterable is {@code null} or empty.
      * Processes elements in batches: applies element consumer to each element, then runs batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
+     *
+     * <p>Indexes start at zero and continue across batches, wrapping from {@link Integer#MAX_VALUE} to
+     * {@link Integer#MIN_VALUE} for sufficiently long inputs. Batch boundaries are unaffected by index overflow.
+     * The batch action also runs after a final nonempty partial batch. If either callback throws, processing stops
+     * immediately without invoking either callback again.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -49044,6 +49070,11 @@ public final class N extends CommonUtil {
      * Processes elements in batches: applies element consumer to each element, then runs batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
      *
+     * <p>Indexes start at zero and continue across batches, wrapping from {@link Integer#MAX_VALUE} to
+     * {@link Integer#MIN_VALUE} for sufficiently long inputs. Batch boundaries are unaffected by index overflow.
+     * The batch action also runs after a final nonempty partial batch. If either callback throws, processing stops
+     * immediately without invoking either callback again.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Prepares elements 0-1, runs batch action, prepares 2-3, runs batch action, etc.
@@ -49080,17 +49111,20 @@ public final class N extends CommonUtil {
         }
 
         int cnt = 0;
+        // The callback index can wrap on long inputs; track each batch independently of it.
+        int batchCount = 0;
 
         while (iterator.hasNext()) {
             elementConsumer.accept(cnt, iterator.next());
             cnt++;
 
-            if (cnt % batchSize == 0) {
+            if (++batchCount == batchSize) {
                 batchAction.run();
+                batchCount = 0;
             }
         }
 
-        if (cnt % batchSize != 0) {
+        if (batchCount != 0) {
             batchAction.run();
         }
     }
@@ -49254,6 +49288,9 @@ public final class N extends CommonUtil {
      * Processes elements in batches: applies element consumer to each element, then calls batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
      *
+     * <p>Indexes start at zero and continue across batches. The batch action also runs after a final nonempty partial batch.
+     * If either callback throws, processing stops immediately without invoking either callback again, and no result list is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Prepares elements 0-1, calls batch action, prepares 2-3, calls batch action, etc.
@@ -49299,6 +49336,11 @@ public final class N extends CommonUtil {
      * Returns an empty list if the iterable is {@code null} or empty.
      * Processes elements in batches: applies element consumer to each element, then calls batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
+     *
+     * <p>Indexes start at zero and continue across batches, wrapping from {@link Integer#MAX_VALUE} to
+     * {@link Integer#MIN_VALUE} for sufficiently long inputs. Batch boundaries are unaffected by index overflow.
+     * The batch action also runs after a final nonempty partial batch. If either callback throws, processing stops
+     * immediately without invoking either callback again, and no result list is returned.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -49347,6 +49389,11 @@ public final class N extends CommonUtil {
      * Processes elements in batches: applies element consumer to each element, then calls batch action.
      * Useful for preparing batch operations where each element needs preprocessing before batch execution.
      *
+     * <p>Indexes start at zero and continue across batches, wrapping from {@link Integer#MAX_VALUE} to
+     * {@link Integer#MIN_VALUE} for sufficiently long inputs. Batch boundaries are unaffected by index overflow.
+     * The batch action also runs after a final nonempty partial batch. If either callback throws, processing stops
+     * immediately without invoking either callback again, and no result list is returned.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Prepares elements 0-1, calls batch action, prepares 2-3, calls batch action, etc.
@@ -49387,16 +49434,19 @@ public final class N extends CommonUtil {
 
         final List<R> result = new ArrayList<>();
         int cnt = 0;
+        // The callback index can wrap on long inputs; track each batch independently of it.
+        int batchCount = 0;
 
         while (iterator.hasNext()) {
             elementConsumer.accept(cnt++, iterator.next());
 
-            if (cnt % batchSize == 0) {
+            if (++batchCount == batchSize) {
                 result.add(batchAction.call());
+                batchCount = 0;
             }
         }
 
-        if (cnt % batchSize != 0) {
+        if (batchCount != 0) {
             result.add(batchAction.call());
         }
 

@@ -277,5 +277,4 @@ public class RowDatasetRemoveTest extends RowDatasetTestSupport {
         assertEquals(sizeBefore - 2, dataset.size());
     }
 
-
 }

@@ -3070,7 +3070,8 @@ abstract class AbstractStream<T> extends Stream<T> {
             } else if (a.length == 1 || (a.length == 2 && N.equals(a[0], a[1]))) {
                 return anyMatch(Fn.equal(a[0]));
             } else {
-                return containsAll(N.toSet(a));
+                final Set<T> set = N.toSet(a);
+                return sequential().anyMatch(value -> set.remove(value) && set.isEmpty());
             }
         } catch (final Throwable e) {
             closeAfterFailure(e);
@@ -3092,8 +3093,6 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return anyMatch(Fn.equal(val));
             } else {
                 final Set<T> set = N.newHashSet(c);
-
-                // Match using Object.equals even when stream distinctness has special handling for arrays.
                 return sequential().anyMatch(value -> set.remove(value) && set.isEmpty());
             }
         } catch (final Throwable e) {
@@ -3148,7 +3147,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 final T val = c instanceof List ? ((List<T>) c).get(0) : c.iterator().next();
                 return anyMatch(Fn.equal(val));
             } else {
-                final Set<T> set = N.newHashSet(c);
+                final Set<T> set = asMembershipSet(c);
 
                 return anyMatch(set::contains);
             }
@@ -3158,6 +3157,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         } finally {
             close();
         }
+    }
+
+    // Only these two exact classes may be reused: a null-hostile set (Set.of(..), a natural-order TreeSet) throws on a
+    // null probe, and a set with its own equality rule (comparator TreeSet, identity set) would change the answer.
+    @SuppressWarnings("unchecked")
+    private static <T> Set<T> asMembershipSet(final Collection<? extends T> c) {
+        return c.getClass() == java.util.HashSet.class || c.getClass() == java.util.LinkedHashSet.class ? (Set<T>) c : N.newHashSet(c);
     }
 
     @SafeVarargs

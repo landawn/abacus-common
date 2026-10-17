@@ -679,15 +679,21 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             return super.mapFirstOrElse(mapperForFirst, mapperForElse);
         }
 
-        if (elements.hasNext()) {
-            final Function<T, R> mapperForFirst2 = (Function<T, R>) mapperForFirst;
-            final Function<T, R> mapperForElse2 = (Function<T, R>) mapperForElse;
-            final T first = elements.next();
+        try {
+            if (elements.hasNext()) {
+                final Function<T, R> mapperForFirst2 = (Function<T, R>) mapperForFirst;
+                final Function<T, R> mapperForElse2 = (Function<T, R>) mapperForElse;
+                final T first = elements.next();
 
-            //noinspection resource
-            return map(mapperForElse2).prepend(Stream.of(first).map(mapperForFirst2));
-        } else {
-            return (Stream<R>) this;
+                //noinspection resource
+                return map(mapperForElse2).prepend(Stream.of(first).map(mapperForFirst2));
+            } else {
+                return (Stream<R>) this;
+            }
+        } catch (final Throwable e) {
+            // The first read is eager, so failures precede the terminal operation that normally closes the source.
+            closeAfterFailure(e);
+            throw e;
         }
     }
 
@@ -1295,11 +1301,11 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             iters.add(new ObjIteratorEx<>() {
                 private T next = null;
                 private Iterator<? extends R> cur = null;
-                private Collection<? extends R> c = null;
 
                 @Override
                 public boolean hasNext() {
                     while ((cur == null || !cur.hasNext()) && next != NONE) {
+                        cur = null;
                         synchronized (elements) {
                             if (elements.hasNext()) {
                                 next = elements.next();
@@ -1310,11 +1316,17 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        c = mapper.apply(next);
+                        final Collection<? extends R> c = mapper.apply(next);
                         cur = N.isEmpty(c) ? null : c.iterator();
                     }
 
-                    return cur != null && cur.hasNext();
+                    if (cur != null && cur.hasNext()) {
+                        return true;
+                    }
+
+                    // An exhausted iterator can retain the entire mapped collection.
+                    cur = null;
+                    return false;
                 }
 
                 @Override

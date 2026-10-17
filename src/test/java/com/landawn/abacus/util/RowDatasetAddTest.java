@@ -612,5 +612,4 @@ public class RowDatasetAddTest extends RowDatasetTestSupport {
         assertEquals(11, (int) dataset.get(2, 0));
     }
 
-
 }

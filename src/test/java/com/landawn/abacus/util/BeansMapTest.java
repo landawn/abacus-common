@@ -91,8 +91,6 @@ public class BeansMapTest extends BeansTestSupport {
         assertNull(beans.get(0).getActive());
     }
 
-
-
     /**
      * {@code mapToBean(Map, Collection, Class)} validates every selected name whether or not the map carries
      * it, so a name the target bean has no setter for is rejected with {@code IllegalArgumentException}. The

@@ -372,8 +372,6 @@ public class NAsyncTest extends NTestSupport {
         }
     }
 
-
-
     /** A {@code Collection} whose {@code size()} deliberately disagrees with what its iterator yields. */
     private static final class InconsistentSizeCollection<T> extends java.util.AbstractCollection<T> {
         private final List<T> elements;

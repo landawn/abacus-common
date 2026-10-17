@@ -523,8 +523,6 @@ public class StreamLifecycleTest extends StreamTestSupport {
 
     // defer
 
-
-
     // Neighbours unchanged: a deferred stream that returns ANOTHER deferred stream, and the supplied stream is closed once.
     @Test
     public void testDefer_otherDeferredStreamAndInnerCloseUnchanged() {
@@ -538,8 +536,6 @@ public class StreamLifecycleTest extends StreamTestSupport {
         assertEquals(6, IntStream.defer(() -> IntStream.of(1, 2, 3)).parallel(2).sum());
         assertEquals(0, IntStream.defer(() -> null).count());
     }
-
-
 
     // Closing a self-returning deferred stream, before or after a failed traversal, runs the supplier once, does not
     // recurse, and runs the stream's own close handlers once.
@@ -1323,8 +1319,6 @@ public class StreamLifecycleTest extends StreamTestSupport {
     public void testTakeWhileSubscriberPreservesInterruptedOffer() {
         assertSubscriberOfferPreservesInterrupt(2);
     }
-
-
 
     /**
      * {@code transform}/{@code sps}/{@code psp} hand the pipeline to a caller-supplied function and link this

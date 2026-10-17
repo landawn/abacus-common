@@ -203,8 +203,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(true, result);
     }
 
-
-
     // G007-03: 'columnTypes' shorter than the column list is an invalid document, not an IndexOutOfBoundsException
     @Test
     public void testDeserialize_datasetAndSheetColumnTypesTooShort() {
@@ -315,8 +313,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertTrue(result4.isEmpty());
     }
 
-
-
     // G007-01: an ignored property must stay ignored when the JSON key reaches it through another spelling
     @Test
     public void testDeserialize_ignoredPropNames_nameVariants() {
@@ -382,8 +378,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("key", result.getKey());
         assertEquals(Integer.valueOf(42), result.getValue());
     }
-
-
 
     // G125: a blank quoted Indexed index inside a bean property or a list element was read as index 0, although IndexedType.valueOf
     // (the root path) rejects it; only a JSON null index means 0. String and Reader sources; null / quoted / bare integers unchanged.
@@ -496,8 +490,6 @@ public class JsonParserImplTest extends TestBase {
         String result = parser.deserialize("\"test\"", String.class);
         assertEquals("\"test\"", result);
     }
-
-
 
     // G139: a blank quoted Timed timestamp (root, bean property, list element; String and Reader sources) is rejected like an
     // Indexed index - it was read as timestamp 0; null / quoted / bare integers unchanged.
@@ -949,8 +941,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("Line1\nLine2\tTabbed\"Quoted\"", map.get("text"));
     }
 
-
-
     // G08-53: writeLongAsString is honoured by AbstractLongType, AtomicLongType and MutableLongType, but the
     // map-key predicate only tested Type.isLong(). A MutableLong key (whose handler does report isNumber())
     // was therefore written unquoted through stringOf while the identical value was written as "1".
@@ -969,8 +959,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("{1: 1}", parser.serialize(N.asMap(com.landawn.abacus.util.MutableLong.of(1L), com.landawn.abacus.util.MutableLong.of(1L)), plain));
         assertEquals("{1: 1}", parser.serialize(N.asMap(1L, 1L), plain));
     }
-
-
 
     // G08-105: both @JsonXmlField(isJsonRawValue=true) capture loops treated EOF as a normal terminator and
     // counted only their own delimiter, so a mismatched payload was stored as malformed "raw JSON" and an
@@ -1144,8 +1132,6 @@ public class JsonParserImplTest extends TestBase {
     }
 
     // parse
-
-
 
     // G08-54: parse(String, JsonDeserConfig, Type) dereferenced a null targetType (NPE in emptyOrDefault for an
     // empty source, in targetType.serializationType() otherwise) while every deserialize sibling reports
@@ -1439,8 +1425,6 @@ public class JsonParserImplTest extends TestBase {
         }
     }
 
-
-
     // Explicit values pin compatibility. Comparing only with primitive arrays hid CharList/BooleanList value changes.
     @Test
     public void testPrimitiveListConversionsMatchAtRootAndNested(@TempDir final Path directory) throws IOException {
@@ -1523,8 +1507,6 @@ public class JsonParserImplTest extends TestBase {
         }
     }
 
-
-
     // G03-02: readBracketedValue returns the untyped collection directly (the tuple-converter lookup after the tuple dispatch
     // could never match); untyped nested arrays stay fresh ArrayLists and tuple/wrapper targets are still converted.
     @Test
@@ -1573,9 +1555,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals(java.util.Arrays.asList(1, null, 2), ds2.getColumn("a"));
     }
 
-
-
-
     // G02-01: maps with boxed-primitive keys read the same values (scalar, braced and bracketed entries, unquoted and
     // null keys, String and Reader sources) whether or not the per-entry key name is materialized.
     @Test
@@ -1604,8 +1583,6 @@ public class JsonParserImplTest extends TestBase {
         // An Integer key that is not a number still fails the same way.
         Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("{\"x\": 1}", Type.of("Map<Integer, Integer>")));
     }
-
-
 
     // G02-01: per-key value types and ignored names still see the key name of a boxed-primitive key.
     @Test
@@ -1636,8 +1613,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals(Double.doubleToLongBits(-0.0d), Double.doubleToLongBits(((Number) nz.get(0)).doubleValue()));
     }
 
-
-
     // G007-01: the arity error message is now built lazily; pin the exact message on every failing branch
     @Test
     public void testReadTupleValue_arityErrorMessages() {
@@ -1656,8 +1631,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("Invalid Tuple3<String, Integer, Long> format: expected exactly 3 elements", e.getMessage());
     }
 
-
-
     // G007-01: an enclosing element-type hint must still not leak into a nested tuple slot (slot config built on demand)
     @Test
     public void testReadTupleValue_elementHintDoesNotLeakIntoNestedSlot() {
@@ -1674,8 +1647,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(Integer.valueOf(1), triple.middle());
         assertEquals(Boolean.TRUE, triple.right());
     }
-
-
 
     // G03-01: readTupleValue reads the Indexed/Timed metadata slot's token text once; every outcome of that slot (unquoted,
     // quoted, null, suffixed, extreme, blank-quoted, non-integer, overflow) and the value-slot shapes are pinned on the String
@@ -1728,8 +1699,6 @@ public class JsonParserImplTest extends TestBase {
                 Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[[\"\\t\", \"a\"]]", timedType)).getMessage());
         Assertions.assertThrows(ArithmeticException.class, () -> parser.deserialize("[[9223372036854775808, \"a\"]]", indexedStringType));
     }
-
-
 
     // G007-01: the tuple slot config is now created only for nested slots; nested slots must still read with their declared types
     @Test
@@ -1955,8 +1924,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(expectedWrapped, parser.serialize(rb, JsonSerConfig.create().setPrettyFormat(true).setIndentation("  ").setWrapRootValue(true)));
     }
 
-
-
     // P7-01 negatives: real content after the root is still rejected through a Reader.
     @Test
     public void reviewFixes20260906_P7_01_contentAfterRootStillRejectedThroughReader() {
@@ -1968,8 +1935,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(reviewFixes20260906_P7_reader("{\"a\":1} trailing"), Map.class));
         Assertions.assertThrows(ParsingException.class, () -> parser.stream(reviewFixes20260906_P7_reader("[{}] x"), true, Type.of(Map.class)).toList());
     }
-
-
 
     // P7-01: the pooled 16 KB buffer boundary - documents of length 16382..16386 plus a tail, through a Reader.
     @Test
@@ -1992,8 +1957,6 @@ public class JsonParserImplTest extends TestBase {
         }
     }
 
-
-
     // P7-01: a whitespace-only Reader/InputStream yields the empty value, like the String overload (it used to
     // fabricate a single " " element from the phantom text).
     @Test
@@ -2006,8 +1969,6 @@ public class JsonParserImplTest extends TestBase {
             assertEquals(Map.of(), parser.deserialize(reviewFixes20260906_P7_reader(ws), Map.class));
         }
     }
-
-
 
     // P7-02/P7-03: a near-miss literal used to swallow the structural char after it ("[tru,1]" -> ONE element
     // "tru,1"; "[t]" through a Reader -> ParsingException). Both overloads now agree with "[abc,1]".
@@ -2046,8 +2007,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[fal se]", List.class));
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(reviewFixes20260906_P7_reader("[t rue]"), List.class));
     }
-
-
 
     // P7-04: an unquoted number read into a String target keeps its spelling ("1.50" used to become "1.5",
     // "007" -> "7", "+5" -> "5", "123L" -> "123" - only when the 18-digit fast path had accepted the token).
@@ -2224,8 +2183,6 @@ public class JsonParserImplTest extends TestBase {
         assertTrue(!p.isB());
     }
 
-
-
     // P2-02 / P2-11 (+ R1): a member after "columns" was rejected outright; a key type after its key set was
     // silently ignored, and so were columnNames/columnTypes after "columns".
     @Test
@@ -2278,8 +2235,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(sh.toString(), parser.deserialize(parser.serialize(sh), sheetType).toString());
     }
 
-
-
     // P2-03 (+ R1): the abstract java.lang.Number target could not be deserialized at all.
     @Test
     public void reviewFixes20260907_R1_P2_03_abstractNumberTarget() {
@@ -2309,8 +2264,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("abc", Number.class));
     }
 
-
-
     // P2-04 / P2-05 / P2-16: the row-oriented Dataset dialect.
     @Test
     public void reviewFixes20260907_R1_P2_04_05_16_rowOrientedDatasetDialect() {
@@ -2336,8 +2289,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[{\"a\":1},2]", Dataset.class));
     }
 
-
-
     // P2-06: a structurally inconsistent document reached the caller as an IllegalArgumentException from the
     // Dataset/Sheet constructor; it is now a ParsingException like every other malformed input.
     @Test
@@ -2360,8 +2311,6 @@ public class JsonParserImplTest extends TestBase {
         // around the RowDataset constructor is defensive only
         assertEquals("[a, b]|[1, null][3, 4]|frozen=false", reviewFixes20260907_ds(parser.deserialize("[{\"a\":1},{\"a\":2,\"a\":3,\"b\":4}]", Dataset.class)));
     }
-
-
 
     // P2-07: an unquoted scalar root returned an EMPTY map and discarded the text; the empty/blank source must
     // still give the empty map, and the JSON null literal must fail the way it already does for every other
@@ -2394,8 +2343,6 @@ public class JsonParserImplTest extends TestBase {
         }
     }
 
-
-
     // P2-12: a structural value in a scalar/wrapper slot polluted the generics (ClassCastException at the USE
     // site) or produced a raw JVM exception; it now fails exactly like the un-wrapped scalar slot.
     @Test
@@ -2419,8 +2366,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(com.landawn.abacus.util.u.Optional.of(N.asMap("a", 1)), parser.deserialize("{\"a\":1}", Type.of("Optional<Map<String, Integer>>")));
         assertEquals(N.asList(N.asList(1), N.asMap("a", 1)), parser.deserialize("[[1],{\"a\":1}]", Type.of("List<Object>")));
     }
-
-
 
     // P2-13: an EnumMap-typed target failed with "No default constructor found in class: java.util.EnumMap".
     @Test
@@ -2453,8 +2398,6 @@ public class JsonParserImplTest extends TestBase {
                 parser.deserialize("{\"RED\":1}", Type.of("Map<com.landawn.abacus.parser.JsonParserImplTest$ReviewFixes20260907_Color, Integer>")).getClass());
     }
 
-
-
     // P2-14 / T2-09: MapEntity and EntityId accepted a scalar after the entity name, and could not read back the
     // empty entity name their own factories produce.
     @Test
@@ -2486,8 +2429,6 @@ public class JsonParserImplTest extends TestBase {
         assertNull(parser.deserialize("{}", com.landawn.abacus.util.EntityId.class));
     }
 
-
-
     // P2-15: the Type overloads answered NullPointerException where the Class siblings answer IllegalArgumentException.
     @Test
     public void reviewFixes20260907_R1_P2_15_nullTargetTypeIsIllegalArgument() {
@@ -2501,8 +2442,6 @@ public class JsonParserImplTest extends TestBase {
         // The range parameters precede targetType and are validated first when both are invalid.
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> parser.deserialize("1", 5, 1, null, nullType));
     }
-
-
 
     /**
      * R02-8: an <b>unquoted</b> decimal token read into an integral slot truncates toward zero. This is the
@@ -2642,8 +2581,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals("[1, 2, 3]", result3);
     }
 
-
-
     // Config-sensitive map keys under each stringQuotation: '\'' keeps the type's own quotes ({'5': 1}), '"' and none are
     // unchanged, and a String key whose text is wrapped in quotes is still quoted as a String (not taken as type-quoted).
     @Test
@@ -2723,8 +2660,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("", json);
     }
 
-
-
     // G125: a raw-value (isJsonRawValue) primitive list property is written like a top-level one (JSON writer, configuration applied);
     // it was written as its stringOf text (CharList single-quoted, writeLongAsString ignored). A raw String / array value is unchanged.
     @Test
@@ -2786,8 +2721,6 @@ public class JsonParserImplTest extends TestBase {
 
         assertEquals("456", baos.toString());
     }
-
-
 
     // G007-02: with a single-quote stringQuotation, a config-sensitive map key (writeLongAsString / textual dateTimeFormat)
     // quoted by its type was wrapped in a second pair of quotes ("'5'") and no longer read back as the key.
@@ -2859,8 +2792,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals("", baos2.toString());
     }
 
-
-
     // G122 neighbours: a top-level CharList follows the configured char quotation exactly as char[] does, and a top-level value written
     // by its own type handler (Pair, Multiset) or an enum is unchanged (raw text without configuration, enum as a JSON string).
     @Test
@@ -2877,8 +2808,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("{\"x\": 2}", parser.serialize(multiset, prettyLong));
         assertEquals("\"RED\"", parser.serialize(G125Color.RED, prettyLong));
     }
-
-
 
     // G122: a top-level primitive list is written through the JSON writer like the matching primitive array (it was written
     // as its raw stringOf text: configuration ignored, CharList single-quoted).
@@ -2922,8 +2851,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("[\"a\", \"\\\"\", \"'\"]", N.toJson(com.landawn.abacus.util.CharList.of('a', '"', '\'')));
     }
 
-
-
     // G136: with bracketRootValue=false a top-level primitive list drops its brackets like the matching primitive array
     // (LongList + writeLongAsString gave ["1", "2"] while long[] gave "1", "2").
     @Test
@@ -2953,8 +2880,6 @@ public class JsonParserImplTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals("\"1\", \"2\"",
                 N.toJson(com.landawn.abacus.util.LongList.of(1, 2), JsonSerConfig.create().setBracketRootValue(false).setWriteLongAsString(true)));
     }
-
-
 
     // G144: the OutputStream overload writes a top-level primitive list without root brackets like the matching array (the
     // flush after the primitive-list branch).
@@ -3053,8 +2978,6 @@ public class JsonParserImplTest extends TestBase {
         Dataset ds2 = parser.deserialize(json, null, Dataset.class);
         assertEquals(ds, ds2);
     }
-
-
 
     // writeNullToEmpty covers collection/map/charSequence/other null-value rendering
     @Test
@@ -3338,8 +3261,6 @@ public class JsonParserImplTest extends TestBase {
         assertTrue(json.contains("\"boolean\": null"));
     }
 
-
-
     // G122: unchanged - a top-level scalar is still written as its raw text and the configuration does not apply to it.
     @Test
     public void testSerialize_topLevelScalarStillRawText() {
@@ -3491,8 +3412,6 @@ public class JsonParserImplTest extends TestBase {
 
     // stream
 
-
-
     // P7-01 (blocker): a document that ends with whitespace (every JSON file on disk ends with a newline) was
     // rejected with "Unexpected content after the root JSON value" on the Reader/InputStream/File overloads
     // and by stream(Reader/InputStream/File), because JsonStreamReader reported the stale buffer tail as text.
@@ -3529,8 +3448,6 @@ public class JsonParserImplTest extends TestBase {
         // the document without a trailing newline was never affected
         assertEquals(Map.of("a", 1), parser.deserialize(reviewFixes20260906_P7_file("p701_nonl.json", "{\"a\":1}"), Map.class));
     }
-
-
 
     // P2-01: stream() dropped the LAST element when it was an unquoted scalar or null, and silently accepted a
     // missing comma before it. Every case is asserted against deserialize() of the same document.
@@ -3573,8 +3490,6 @@ public class JsonParserImplTest extends TestBase {
             assertFalse(iter.hasNext());
         }
     }
-
-
 
     // P2-09 / P2-10: stream() ignored ignoreNullOrEmpty / readNullToEmpty for scalar and null elements, and
     // leaked the caller's source when the element type was rejected.
@@ -3705,8 +3620,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertEquals(0, stream3.count());
     }
 
-
-
     // G007-01: a quoted element in stream() was handed to the Collection/array reader as if it were '[', which then swallowed the
     // following elements and the root's closing bracket: stream("[\"a\",\"b\"]", List<String>).first() -> [a, b] (one element), and
     // limit(2) of [["x"],"a","b"] -> [[x], [a, b]] silently. deserialize reads each quoted element as a scalar: [[a], [b]].
@@ -3739,8 +3652,6 @@ public class JsonParserImplTest extends TestBase {
         }
     }
 
-
-
     // G007-01: quoted elements under ARRAY and Set element types, and quoted empty elements under ignoreNullOrEmpty/readNullToEmpty,
     // stream exactly as deserialize reads them (before the fix each quoted element swallowed the rest of the array).
     @Test
@@ -3768,8 +3679,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("[[a], [b]]", g115Deep(parser.stream("[\"a\",\"b\"]", Type.of("String[]")).toList()));
     }
 
-
-
     // G007-01: a quoted JSON object under a bean element type is converted as deserialize converts it; a quoted empty element
     // is null, and dropped with ignoreNullOrEmpty (before the fix both streams threw ParsingException).
     @Test
@@ -3793,8 +3702,6 @@ public class JsonParserImplTest extends TestBase {
                 parser.stream("[[],[1]]", null, Type.of(java.util.List.class)).toList());
     }
 
-
-
     // Text after an EMPTY structured element and before the comma ([{} 1,{}], [{} null,{}]) is rejected by every stream
     // source like deserialize, instead of being dropped ([{}, {}]).
     @Test
@@ -3814,8 +3721,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(parser.deserialize("[{} ,{}]", listOfMap), parser.stream("[{} ,{}]", mapType).toList());
         assertEquals(parser.deserialize("[{},{}]", listOfMap), parser.stream(new StringReader("[{},{}]"), true, mapType).toList());
     }
-
-
 
     // stream() rejects text between a structured element and the following comma ([{"a":1} x, {"b":2}]) like deserialize,
     // for the String, Reader and InputStream sources and with ignoreNullOrEmpty; well-formed separators stream as before.
@@ -3846,8 +3751,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals(Arrays.asList(Arrays.asList(1), Arrays.asList(3)), parser.stream("[[1] ,[3]]", Type.of("List<Integer>")).toList());
     }
 
-
-
     // G007-01: stream() silently dropped unquoted text directly before a structured element ([1 {"a":1}] -> [{a=1}])
     // while deserialize() of the same document rejects the missing comma.
     @Test
@@ -3869,8 +3772,6 @@ public class JsonParserImplTest extends TestBase {
             assertEquals(parser.deserialize(json, listOfMap), parser.stream(new StringReader(json), true, mapType).toList(), json);
         }
     }
-
-
 
     // G145 (documented): stream(..) returns before any element is read, so an element class that cannot be instantiated fails
     // when the stream is consumed, and an empty array never does.
@@ -3980,8 +3881,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1] [2]]", null, Type.of(java.util.List.class)).toList());
     }
 
-
-
     // G122: N.toJson of a primitive list equals N.toJson of its toArray() - default, pretty and writeLongAsString configs.
     @Test
     public void testToJson_primitiveListEqualsToArray() {
@@ -4007,8 +3906,6 @@ public class JsonParserImplTest extends TestBase {
             parser.stream("[1,2,3]", null, Type.of(StringBuilder.class));
         });
     }
-
-
 
     // G03-03: readValue tests the null literal of wrapper and single-value slots with the shared Object type (no per-token
     // type lookup); the null literal, values and the Reader path are pinned for every wrapper kind.
@@ -4260,8 +4157,6 @@ public class JsonParserImplTest extends TestBase {
         return json.toString();
     }
 
-
-
     // Review fixes 2026-09-06, P7 (JsonStreamReader/JsonStringReader): end-to-end cases.
     private static Reader reviewFixes20260906_P7_reader(final String json) {
         return new StringReader(json);
@@ -4350,8 +4245,6 @@ public class JsonParserImplTest extends TestBase {
         n.setId(id);
         return n;
     }
-
-
 
     // deserialization-side findings P2-01..P2-16 / T2-09 landed in r9486 with no test of their own.
     public enum ReviewFixes20260907_Color {
@@ -4578,4 +4471,383 @@ public class JsonParserImplTest extends TestBase {
 
     // ---- perf review 2026-10-07 G03 end ----
 
+    // ---- deep review 2026-10-16 G131 begin ----
+
+    // G131-01: an empty Reader / InputStream / File read into Object.class threw ParsingException ("Unsupported class"),
+    // while deserialize("", Object.class) returns null.
+    @Test
+    public void testDeserialize_EmptyReaderObjectRootReturnsNull(@TempDir final Path directory) throws IOException {
+        final File emptyFile = directory.resolve("empty.json").toFile();
+        Files.write(emptyFile.toPath(), new byte[0]);
+        final JsonDeserConfig readNullToEmpty = new JsonDeserConfig().setReadNullToEmpty(true);
+
+        assertNull(parser.deserialize("", null, Object.class));
+        assertNull(parser.deserialize(new StringReader(""), null, Object.class));
+        assertNull(parser.deserialize(new StringReader(""), null, Type.of(Object.class)));
+        assertNull(parser.deserialize(new StringReader(""), readNullToEmpty, Object.class));
+        assertNull(parser.deserialize(new ByteArrayInputStream(new byte[0]), null, Object.class));
+        assertNull(parser.deserialize(new ByteArrayInputStream(new byte[0]), null, Type.of(Object.class)));
+        assertNull(parser.deserialize(emptyFile, null, Object.class));
+        assertNull(parser.deserialize(emptyFile, null, Type.of(Object.class)));
+        assertNull(parser.deserialize(new StringReader(""), null, CharSequence.class));
+
+        // a Reader that reports one 0-char read before end of input is empty too (the stream reader retries once)
+        final Reader zeroThenEnd = new Reader() {
+            private boolean zeroReturned;
+
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) {
+                if (!zeroReturned) {
+                    zeroReturned = true;
+                    return 0;
+                }
+
+                return -1;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        assertNull(parser.deserialize(zeroThenEnd, null, Object.class));
+    }
+
+    // G131-01: for every target kind, an empty Reader reads exactly like the empty String.
+    @Test
+    public void testDeserialize_EmptyReaderMatchesEmptyStringForAllTargets() {
+        final List<Type<?>> targetTypes = Arrays.asList(Type.of(Object.class), Type.of(CharSequence.class), Type.of(String.class), Type.of(int.class),
+                Type.of(Integer.class), Type.of(boolean.class), Type.of(char.class), Type.of(List.class), Type.of(Map.class), Type.of(String[].class),
+                Type.of(int[].class), Type.of(com.landawn.abacus.util.IntList.class), Type.of(TestBean.class), Type.of(MapEntity.class), Type.of(Dataset.class),
+                Type.of(Sheet.class), Type.of("List<String>"), Type.of("Map<String, Integer>"));
+
+        for (final JsonDeserConfig config : Arrays.asList(null, new JsonDeserConfig().setReadNullToEmpty(true))) {
+            for (final Type<?> targetType : targetTypes) {
+                final Object fromString = parser.deserialize("", config, targetType);
+                final Object fromReader = parser.deserialize(new StringReader(""), config, targetType);
+                final Object fromStream = parser.deserialize(new ByteArrayInputStream(new byte[0]), config, targetType);
+
+                assertTrue(java.util.Objects.deepEquals(fromString, fromReader), targetType.name() + ": " + fromString + " vs " + fromReader);
+                assertTrue(java.util.Objects.deepEquals(fromString, fromStream), targetType.name() + ": " + fromString + " vs " + fromStream);
+                assertEquals(fromString == null ? null : fromString.getClass(), fromReader == null ? null : fromReader.getClass(), targetType.name());
+            }
+        }
+    }
+
+    // G131-01: neighbours that must not change - blank (whitespace-only) input still throws for an Object root on both
+    // paths, and non-empty Object roots, including ones read through a 1-char Reader, read as before.
+    @Test
+    public void testDeserialize_BlankOrNonEmptyReaderObjectRootUnchanged() {
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("   ", null, Object.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader("   "), null, Object.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader("\n"), null, Object.class));
+
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(new StringReader("[1,2]"), null, Object.class));
+        assertEquals(N.asMap("a", 1), parser.deserialize(new StringReader("{\"a\":1}"), null, Object.class));
+        assertEquals(new ArrayList<>(), parser.deserialize(new StringReader(""), null, List.class));
+
+        final String json = "{\"a\":[1,{\"b\":\"x\"}],\"c\":null}";
+        final Reader oneCharReader = new Reader() {
+            private int position;
+
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) {
+                if (position >= json.length()) {
+                    return -1;
+                }
+
+                buffer[offset] = json.charAt(position++);
+                return 1;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        assertEquals((Object) parser.deserialize(json, null, Object.class), parser.deserialize(oneCharReader, null, Object.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader("[1]x"), null, Object.class));
+    }
+
+    // G131-02: a raw Optional / Nullable root read from an empty Reader held the empty text (Optional[""], Nullable[""]),
+    // while the empty String gives Optional.empty() / Nullable.empty().
+    @Test
+    public void testDeserialize_EmptyReaderRawOptionalRootIsEmpty() {
+        assertEquals(java.util.Optional.empty(), parser.deserialize("", null, java.util.Optional.class));
+        assertEquals(java.util.Optional.empty(), parser.deserialize(new StringReader(""), null, java.util.Optional.class));
+        assertEquals(java.util.Optional.empty(), parser.deserialize(new ByteArrayInputStream(new byte[0]), null, java.util.Optional.class));
+        assertFalse(parser.deserialize(new StringReader(""), null, com.landawn.abacus.util.u.Nullable.class).isPresent());
+
+        // non-empty input is unchanged
+        assertEquals(java.util.Optional.of("x"), parser.deserialize(new StringReader("x"), null, java.util.Optional.class));
+        assertEquals("  ", parser.deserialize(new StringReader("  "), null, com.landawn.abacus.util.u.Nullable.class).get());
+    }
+
+    // ---- deep review 2026-10-16 G131 end ----
+
+    // ---- deep review 2026-10-16 verify G136 begin ----
+
+    /** A Reader that hands out at most {@code chunk} chars per read, returns 0 once before the data reads listed in
+     *  {@code zeroBeforeRead} (1-based data-read numbers), and counts every read call. */
+    private static final class CountingChunkReader extends Reader {
+        private final String text;
+        private final int chunk;
+        private final Set<Integer> zeroBeforeRead;
+        private int position;
+        private int dataReads;
+        private boolean zeroPending = true;
+        int reads;
+
+        CountingChunkReader(final String text, final int chunk, final Integer... zeroBeforeRead) {
+            this.text = text;
+            this.chunk = chunk;
+            this.zeroBeforeRead = new HashSet<>(Arrays.asList(zeroBeforeRead));
+        }
+
+        @Override
+        public int read(final char[] buffer, final int offset, final int length) {
+            reads++;
+
+            if (zeroPending && zeroBeforeRead.contains(dataReads + 1)) {
+                zeroPending = false;
+                return 0;
+            }
+
+            zeroPending = true;
+
+            if (position >= text.length()) {
+                return -1;
+            }
+
+            final int count = Math.min(Math.min(chunk, length), text.length() - position);
+            text.getChars(position, position + count, buffer, offset);
+            position += count;
+            dataReads++;
+            return count;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    // G131 neighbour: the first chunk is now read by read(Reader, ...) itself; a single 0-char read before the first chunk or
+    // in the middle of the input is retried exactly as before, so no data is lost for any root kind.
+    @Test
+    public void testDeserialize_ReaderSingleZeroReadsKeepAllData() {
+        final String json = "{\"name\":\"n\",\"value\":3,\"tags\":[\"a\",\"b\"]}";
+
+        for (final int chunk : new int[] { 1, 3, 8192 }) {
+            assertEquals(N.asMap("name", "n", "value", 3, "tags", Arrays.asList("a", "b")),
+                    parser.deserialize(new CountingChunkReader(json, chunk, 1, 2, 5), null, Object.class));
+            assertEquals(parser.deserialize(json, null, TestBean.class), parser.deserialize(new CountingChunkReader(json, chunk, 1, 3), null, TestBean.class));
+            assertEquals(Arrays.asList(1, 2), parser.deserialize(new CountingChunkReader("[1,2]", chunk, 1, 2), null, List.class));
+            assertEquals("[1,2]", parser.deserialize(new CountingChunkReader("[1,2]", chunk, 1, 2), null, String.class));
+        }
+    }
+
+    // G131 efficiency guard: a non-empty structured root costs exactly the same read calls as before (no extra read, no
+    // whole-input buffering); an empty source is now detected by the first read.
+    @Test
+    public void testDeserialize_ReaderReadCallsUnchangedForNonEmptyInput() {
+        CountingChunkReader reader = new CountingChunkReader("[1,2]", 8192);
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(reader, null, List.class));
+        assertEquals(2, reader.reads);
+
+        reader = new CountingChunkReader("[1,2]", 1);
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(reader, null, Object.class));
+        assertEquals(6, reader.reads);
+
+        reader = new CountingChunkReader("[1,2]", 8192, 1);
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(reader, null, List.class));
+        assertEquals(3, reader.reads);
+
+        reader = new CountingChunkReader("", 8192);
+        assertEquals(new ArrayList<>(), parser.deserialize(reader, null, List.class));
+        assertEquals(1, reader.reads);
+    }
+
+    // G131 neighbour: an IOException from the (moved) first read is still reported as UncheckedIOException.
+    @Test
+    public void testDeserialize_ReaderFirstReadFailureStillUnchecked() {
+        for (final Class<?> targetClass : Arrays.asList(Object.class, List.class, TestBean.class, String.class)) {
+            final Reader failing = new Reader() {
+                @Override
+                public int read(final char[] buffer, final int offset, final int length) throws IOException {
+                    throw new IOException("boom");
+                }
+
+                @Override
+                public void close() {
+                }
+            };
+
+            Assertions.assertThrows(UncheckedIOException.class, () -> parser.deserialize(failing, null, targetClass), targetClass.getName());
+        }
+    }
+
+    // G131 neighbour: a UTF-8 BOM alone is one character (U+FEFF), not an empty source: the InputStream path still reads it
+    // exactly like the String "\uFEFF" (it throws for an Object root and keeps the character for String / List roots).
+    @Test
+    public void testDeserialize_BomOnlyStreamIsNotEmpty() {
+        final byte[] bomOnly = { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("\uFEFF", null, Object.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new ByteArrayInputStream(bomOnly), null, Object.class));
+        assertEquals("\uFEFF", parser.deserialize(new ByteArrayInputStream(bomOnly), null, String.class));
+        assertEquals((Object) parser.deserialize("\uFEFF", null, List.class), parser.deserialize(new ByteArrayInputStream(bomOnly), null, List.class));
+    }
+
+    // G131-01 on the subclass (streaming scalar-capable) path: CompactJsonParser also reads an empty Reader into an
+    // Object / CharSequence root as null and into a List as an empty list; non-empty roots are unchanged.
+    @Test
+    public void testDeserialize_EmptyReaderSubclassParser() {
+        final JsonParser compact = new AbstractXmlParser.CompactJsonParser();
+
+        assertNull(compact.deserialize(new StringReader(""), null, Object.class));
+        assertNull(compact.deserialize(new StringReader(""), null, CharSequence.class));
+        assertEquals(new ArrayList<>(), compact.deserialize(new StringReader(""), null, List.class));
+        assertEquals(Arrays.asList(1), compact.deserialize(new StringReader("[1]"), null, Object.class));
+        Assertions.assertThrows(ParsingException.class, () -> compact.deserialize(new StringReader("  "), null, Object.class));
+    }
+
+    // ---- deep review 2026-10-16 verify G136 end ----
+
+    // ---- deep review 2026-10-16 G140 begin ----
+
+    /** A Reader that violates the Reader contract: returns 0 for the first {@code zeros} reads, then the text, then -1. */
+    private static final class ZeroReadsThenTextReader extends Reader {
+        private final String text;
+        private int zeros;
+        private int position;
+
+        ZeroReadsThenTextReader(final int zeros, final String text) {
+            this.zeros = zeros;
+            this.text = text;
+        }
+
+        @Override
+        public int read(final char[] buffer, final int offset, final int length) {
+            if (zeros > 0) {
+                zeros--;
+                return 0;
+            }
+
+            if (position >= text.length()) {
+                return -1;
+            }
+
+            final int count = Math.min(length, text.length() - position);
+            text.getChars(position, position + count, buffer, offset);
+            position += count;
+            return count;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    // G140 (G136-02): a Reader that returns 0 characters twice in a row before any data is rejected with a ParsingException
+    // for a structured root (as before the empty-Reader change), instead of being read as empty input.
+    @Test
+    public void testDeserialize_ReaderReturningZeroTwiceIsRejected() {
+        for (final int zeros : new int[] { 2, 3 }) {
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "[1,2]"), null, List.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "{\"a\":1}"), null, Map.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "{\"a\":1}"), null, Object.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "{\"name\":\"n\"}"), null, TestBean.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, ""), null, Object.class));
+        }
+    }
+
+    // G140 neighbours: a real end of input still reads like the empty String, and a single 0-char read is still retried.
+    @Test
+    public void testDeserialize_ReaderEndOfInputAndSingleZeroReadUnchanged() {
+        assertNull(parser.deserialize(new ZeroReadsThenTextReader(0, ""), null, Object.class));
+        assertEquals(parser.deserialize("", null, List.class), parser.deserialize(new ZeroReadsThenTextReader(0, ""), null, List.class));
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(new ZeroReadsThenTextReader(1, "[1,2]"), null, List.class));
+        assertEquals(N.asMap("a", 1), parser.deserialize(new ZeroReadsThenTextReader(1, "{\"a\":1}"), null, Object.class));
+        assertEquals(Arrays.asList(1, 2), parser.deserialize(new ZeroReadsThenTextReader(0, "[1,2]"), null, List.class));
+    }
+
+    // ---- deep review 2026-10-16 G140 end ----
+
+    // ---- deep review 2026-10-16 G152 begin ----
+
+    // G152 (G131 coverage): an empty File / InputStream / Reader reads exactly like the empty String through every
+    // Type and Class overload, with and without readNullToEmpty, for scalar (primitive, Optional, Nullable, number,
+    // date), container (Set, immutable list, arrays, Multiset) and bean roots.
+    @Test
+    public void testDeserialize_EmptyFileMatchesEmptyStringForMoreTargets(@TempDir final Path directory) throws IOException {
+        final File emptyFile = directory.resolve("g152-empty.json").toFile();
+        Files.write(emptyFile.toPath(), new byte[0]);
+        final List<Type<?>> targetTypes = Arrays.asList(Type.of(Object.class), Type.of(CharSequence.class), Type.of(long.class), Type.of(double.class),
+                Type.of(java.util.Optional.class), Type.of("Optional<String>"), Type.of("Optional<Integer>"), Type.of(java.util.OptionalInt.class),
+                Type.of(com.landawn.abacus.util.u.Nullable.class), Type.of(java.math.BigDecimal.class), Type.of(java.util.Date.class), Type.of(Set.class),
+                Type.of("ImmutableList<String>"), Type.of(Object[].class), Type.of(char[].class), Type.of("Multiset<String>"), Type.of(TestBean.class));
+
+        for (final JsonDeserConfig config : Arrays.asList(null, new JsonDeserConfig().setReadNullToEmpty(true))) {
+            for (final Type<?> targetType : targetTypes) {
+                final Object expected = parser.deserialize("", config, targetType);
+                final List<Object> actuals = new ArrayList<>();
+                actuals.add(parser.deserialize(emptyFile, config, targetType));
+                actuals.add(parser.deserialize(emptyFile, config, targetType.javaType()));
+                actuals.add(parser.deserialize(new ByteArrayInputStream(new byte[0]), config, targetType.javaType()));
+                actuals.add(parser.deserialize(new StringReader(""), config, targetType.javaType()));
+
+                for (final Object actual : actuals) {
+                    final String message = targetType.name() + " (" + (config == null ? "default" : "readNullToEmpty") + "): " + expected + " vs " + actual;
+                    assertTrue(java.util.Objects.deepEquals(expected, actual), message);
+                    assertEquals(expected == null ? null : expected.getClass(), actual == null ? null : actual.getClass(), message);
+                }
+            }
+        }
+    }
+
+    // ---- deep review 2026-10-16 G152 end ----
+
+    // ---- deep review 2026-10-16 G157 begin ----
+
+    // G157 (G152-08): the "0 characters twice before any data" rejection also applies to a scalar root (String, int, Integer, Optional,
+    // BigDecimal) read from a Reader; r89 silently read such a Reader as empty input ("" / 0 / null / Optional[""]).
+    @Test
+    public void testDeserialize_ReaderReturningZeroTwiceIsRejectedForScalarRoots() {
+        for (final int zeros : new int[] { 2, 3 }) {
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "\"abc\""), null, String.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "1"), null, int.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "1"), null, Integer.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "\"x\""), null, java.util.Optional.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, "1.5"), null, java.math.BigDecimal.class));
+            org.junit.jupiter.api.Assertions.assertThrows(ParsingException.class,
+                    () -> parser.deserialize(new ZeroReadsThenTextReader(zeros, ""), null, String.class));
+        }
+    }
+
+    // G157 neighbours: a real end of input and a single 0-char read read a scalar root exactly like the String source; long text is read whole.
+    @Test
+    public void testDeserialize_ScalarRootFromReaderEndOfInputSingleZeroReadAndLongTextUnchanged() {
+        assertEquals(parser.deserialize("", null, String.class), parser.deserialize(new ZeroReadsThenTextReader(0, ""), null, String.class));
+        assertEquals(0, (int) parser.deserialize(new ZeroReadsThenTextReader(0, ""), null, int.class));
+        assertNull(parser.deserialize(new ZeroReadsThenTextReader(0, ""), null, Integer.class));
+        assertEquals(parser.deserialize("\"abc\"", null, String.class), parser.deserialize(new ZeroReadsThenTextReader(1, "\"abc\""), null, String.class));
+        assertEquals(42, (int) parser.deserialize(new ZeroReadsThenTextReader(1, "42"), null, int.class));
+        assertEquals(new java.math.BigDecimal("1.5"), parser.deserialize(new ZeroReadsThenTextReader(0, "1.5"), null, java.math.BigDecimal.class));
+
+        final String longText = com.landawn.abacus.util.Strings.repeat('x', 20000);
+        assertEquals(longText, parser.deserialize(new ZeroReadsThenTextReader(0, longText), null, String.class));
+        assertEquals(longText, parser.deserialize(new ZeroReadsThenTextReader(1, longText), null, String.class));
+    }
+
+    // ---- deep review 2026-10-16 G157 end ----
 }

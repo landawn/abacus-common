@@ -173,8 +173,6 @@ public class AbstractStreamCombinationTest extends AbstractStreamTestSupport {
         assertTrue(list.contains(Pair.of(2, "b")));
     }
 
-
-
     /**
      * {@code crossJoin(Collection)} silently returned an empty stream for a null right-hand side, while its
      * own javadoc says "must not be null" and every sibling join family - and {@code crossJoin(Stream, func)}

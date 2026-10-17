@@ -115,8 +115,6 @@ public class ByteStreamConcurrencyTest extends ByteStreamTestSupport {
         assertTrue(parallelStream.isParallel());
     }
 
-
-
     // Parallel operations
     @Test
     public void testParallelStreamOperations() {

@@ -140,6 +140,8 @@ public final class ExceptionUtil {
     /**
      * Registers a custom mapper for converting specific exception types to RuntimeException.
      * This allows customization of how checked exceptions are converted to unchecked exceptions.
+     * The mapper also participates in custom-wrapper recognition as described by
+     * {@link #registerRuntimeExceptionMapper(Class, Function, boolean)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -172,6 +174,10 @@ public final class ExceptionUtil {
     /**
      * Registers a custom mapper for converting specific exception types to RuntimeException,
      * with an option to force overwrite existing mappings.
+     *
+     * <p>The mapper is also invoked by {@link #tryToGetOriginalCheckedException(Exception)} to recognize
+     * custom wrappers. It may choose a wrapper class based on the particular cause. Replacing it affects
+     * subsequent recognition calls; a call already in progress may complete with the previous mapper.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -393,22 +399,15 @@ public final class ExceptionUtil {
     static final Predicate<String> uncheckedExceptionNameTester = Pattern.compile("^Unchecked[a-zA-Z0-9]*Exception$").asPredicate();
 
     /**
-     * Cache mapping a runtime wrapper exception class to the checked exception class it was observed
-     * to wrap, so that repeated unwrapping does not have to re-derive the pairing. Each entry has the
-     * runtime wrapper class's lifetime and does not root its class loader.
-     */
-    static final ClassValue<java.util.concurrent.atomic.AtomicReference<Class<? extends Throwable>>> runtimeToCheckedExceptionClassMap = new ClassValue<>() {
-        @Override
-        protected java.util.concurrent.atomic.AtomicReference<Class<? extends Throwable>> computeValue(final Class<?> type) {
-            return new java.util.concurrent.atomic.AtomicReference<>();
-        }
-    };
-
-    /**
      * Attempts to extract the original checked exception from a wrapper exception.
      * This is useful when dealing with wrapped exceptions from reflection or concurrent operations.
      * A custom runtime wrapper is also recognized when its class matches the result of the checked cause's
      * registered mapper, including a mapper inherited from the nearest registered superclass.
+     *
+     * <p>Custom-wrapper recognition invokes the mapper for the actual cause on each call: its result may
+     * depend on exception data or mapper state. A call overlapping mapper replacement may use the previous
+     * mapping; later calls use the replacement. Built-in wrapper types and the {@code Unchecked...Exception}
+     * naming convention are recognized without invoking a mapper.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -452,27 +451,17 @@ public final class ExceptionUtil {
             }
 
             final Throwable cause = e.getCause();
-
-            if (cause.getClass().equals(runtimeToCheckedExceptionClassMap.get(e.getClass()).get())) {
-                return (Exception) cause;
-            }
-
             Function<Throwable, RuntimeException> mapper = toRuntimeExceptionFuncMap.get(cause.getClass());
-            final boolean directlyRegistered = mapper != null;
 
-            if (!directlyRegistered) {
+            if (mapper == null) {
                 // Match forward conversion's nearest-superclass lookup and registration invalidation.
                 mapper = resolvedToRuntimeExceptionFuncCache.get(cause.getClass());
             }
 
+            // A mapper may choose different wrapper classes for different causes or change its own state.
+            // A cached class pair would bypass that decision, so recognize the actual cause on every call.
             // The default wrapper was already handled above; constructing it here cannot establish a match.
             if (mapper != CHECKED_FUNC && mapper.apply(cause).getClass().equals(e.getClass())) {
-                // Registered classes are already retained by the registry. A derived cause class may belong to
-                // a disposable loader and must not be retained by a longer-lived runtime wrapper's cache entry.
-                if (directlyRegistered) {
-                    runtimeToCheckedExceptionClassMap.get(e.getClass()).set(cause.getClass());
-                }
-
                 return (Exception) cause;
             }
         } else if (e.getCause() instanceof Exception && (e instanceof InvocationTargetException || e instanceof ExecutionException)) {

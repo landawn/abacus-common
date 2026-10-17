@@ -116,8 +116,6 @@ public class DifferenceMapTest extends DifferenceTestSupport {
         assertEquals(2, MapDifference.of(null, one).onlyOnRight().size());
     }
 
-
-
     /**
      * Contract pin for the third rejection shape documented on {@link MapDifference#of(Map, Map)}: two
      * {@code equals}-equal but distinct keys are rejected only when both would be filed into the <i>same</i>

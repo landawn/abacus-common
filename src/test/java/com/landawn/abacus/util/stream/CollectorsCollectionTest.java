@@ -1355,8 +1355,6 @@ public class CollectorsCollectionTest extends CollectorsTestSupport {
         assertTrue(result.isEmpty());
     }
 
-
-
     // Stream review 2026-09-09 (pass B) - toSet(int) allocation
 
     /**

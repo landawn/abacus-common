@@ -65,8 +65,6 @@ public class LongStreamLifecycleTest extends LongStreamTestSupport {
         assertEquals(2, closeCount.get());
     }
 
-
-
     // G100-06: the list is still read lazily (at terminal-operation time), and close handlers still run
     @Test
     public void testConcatListOfArrays_lazyReadAndCloseHandler() {
@@ -158,8 +156,6 @@ public class LongStreamLifecycleTest extends LongStreamTestSupport {
         assertArrayEquals(new long[] {}, LongStream.rangeClosed(5L, 0L).toArray());
     }
 
-
-
     // Covers count() in rangeClosed(long, long) inner LongIteratorEx
     @Test
     public void testRangeClosed_Count() {
@@ -172,8 +168,6 @@ public class LongStreamLifecycleTest extends LongStreamTestSupport {
         long[] result = LongStream.rangeClosed(7L, 7L).toArray();
         assertArrayEquals(new long[] { 7L }, result);
     }
-
-
 
     // Covers advance() in rangeClosed(long, long) inner LongIteratorEx
     @Test
@@ -221,8 +215,6 @@ public class LongStreamLifecycleTest extends LongStreamTestSupport {
         assertEquals(0L, LongStream.rangeClosed(5L, 1L, 2L).count());
         assertEquals(0L, LongStream.range(5L, 1L, 2L).count());
     }
-
-
 
     // Covers advance() in rangeClosed(long, long, long) inner LongIteratorEx
     @Test

@@ -185,8 +185,6 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         assertArrayEquals(new String[] { "a", "c", "e" }, CommonUtil.copyOfRange(new String[] { "a", "b", "c", "d", "e" }, 0, 5, 2, String[].class));
     }
 
-
-
     // G030-02: copyOfRange(String, from, to, step) reads chars directly; pin every (from, to, step) combination against a reference.
     @Test
     public void testCopyOfRangeStringStep_allRanges() {

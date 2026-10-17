@@ -2957,9 +2957,10 @@ public final class ParserUtil {
          * The JSON/XML exposure setting for this property.
          * Controls when this property should be included in serialization/deserialization.
          *
-         * <p>Taken from {@code @JsonXmlField(direction = ...)} when declared; otherwise {@link Direction#BOTH},
-         * except for a read-only property ({@link #isReadOnlyProperty}), which is {@link Direction#SERIALIZE_ONLY}
-         * so that a document carrying its value is read without error and the value is skipped.</p>
+         * <p>Taken from {@code @JsonXmlField(direction = ...)} when declared; otherwise {@link Direction#BOTH}.
+         * A read-only property ({@link #isReadOnlyProperty}) whose direction is {@code BOTH} - by default or as
+         * declared - is {@link Direction#SERIALIZE_ONLY} instead, so that a document carrying its value is read
+         * without error and the value is skipped.</p>
          */
         public final Direction jsonXmlExpose;
 

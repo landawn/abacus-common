@@ -839,9 +839,6 @@ public class NTest extends NTestSupport {
         assertEquals(Map.of("a", 3, "b", 2, "c", 1, "D", 1), N.frequencyMap(CommonUtil.toList("a", "b", "a", "c", "a", "D", "b")));
     }
 
-
-
-
     // G055-01: frequencyMap(T[], Supplier) wrapped a pre-populated count to a negative value; its Iterable/Iterator siblings throw.
     @Test
     public void testFrequencyMap_arraySupplierCountOverflowThrows() {
@@ -906,9 +903,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList("Alice", "Bob"), N.fromXml(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(true), listType));
     }
 
-
-
-
     // G059-01: the eight fromXml(.., Class) overloads reported a null targetType as 'targetClass' (the parser's name), unlike
     // their fromJson twins and the fromXml(.., Type) overloads, which all name N's own parameter 'targetType'.
     @Test
@@ -943,8 +937,6 @@ public class NTest extends NTestSupport {
         int[] longLengths = N.filter(wordLengths, len -> len > 4);
         assertArrayEquals(new int[] { 5, 5, 11 }, longLengths);
     }
-
-
 
     // G058-02: groupBy(.., Collector) creates exactly one downstream container per distinct key, for Iterable and Iterator inputs.
     @Test
@@ -1051,9 +1043,6 @@ public class NTest extends NTestSupport {
             assertTrue(N.contains(a, Float.NaN));
         }
     }
-
-
-
 
     // G113-04 (OPEN, code unchanged): multi-key Dataset intersection/difference consume one occurrence of b per matching row of a.
     @Test
@@ -1626,8 +1615,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), result);
     }
 
-
-
     // key-caching fix (minBy/maxBy) neighbour: without an instance repeated inside one comparison, the extractor call sequence is unchanged
     @Test
     public void testMinByMaxBy_extractorCallSequenceForDistinctElementsUnchanged() {
@@ -1658,8 +1645,6 @@ public class NTest extends NTestSupport {
         assertSame(d, calls.get(3));
         assertSame(b, calls.get(4));
     }
-
-
 
     // key-caching fix (minBy/maxBy): a null element repeated in the first comparison is extracted once, like any repeated instance
     @Test
@@ -2192,8 +2177,6 @@ public class NTest extends NTestSupport {
 
     // removeAll
 
-
-
     // A large recognised argument is probed, never copied: copying a HashSet would hash every one of its elements.
     @Test
     public void testRemoveAll_largeRecognisedSetArgumentIsNotCopied() {
@@ -2213,8 +2196,6 @@ public class NTest extends NTestSupport {
         assertEquals(-1, small.peekFirst().value);
         assertEquals(0, RemoveAllCountingKey.argumentHashCodes);
     }
-
-
 
     // removeAll rework: a Multiset receiver (removeIf is evaluated once per distinct element) loses every occurrence of each match
     // under the argument's rule, and keeps everything when nothing matches
@@ -2237,8 +2218,6 @@ public class NTest extends NTestSupport {
         assertFalse(N.removeAll(noMatch, new HashSet<>(Arrays.asList("z"))));
         assertEquals(2, noMatch.getCount("a"));
     }
-
-
 
     // Duplicates, nulls, no match, and an unmodifiable receiver with no match (its UnsupportedOperationException is preserved).
     @Test
@@ -2270,8 +2249,6 @@ public class NTest extends NTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> N.removeAll(unmodifiable, new HashSet<>(Arrays.asList("z"))));
     }
 
-
-
     // The argument's own rule decides: comparator equality that differs from equals, and identity with equal-but-distinct objects.
     @Test
     public void testRemoveAll_recognisedSetArgumentKeepsItsMembershipRule() {
@@ -2300,8 +2277,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList("s", "t"), backing);
     }
 
-
-
     // removeAll rework: a recognised argument may share storage with the receiver (an exact TreeSet/ConcurrentSkipListSet sub-set view
     // of the receiver's backing, or the backing itself); it is read completely before anything is removed, and a view's range holds
     @Test
@@ -2322,8 +2297,6 @@ public class NTest extends NTestSupport {
         assertTrue(hashSet.isEmpty());
     }
 
-
-
     // removeAll rework: the recorded matches use the sorted argument's own comparator - elements that are not Comparable at all are
     // matched by it, on a plain receiver and on a view that creates new elements on every traversal
     @Test
@@ -2342,8 +2315,6 @@ public class NTest extends NTestSupport {
         assertTrue(N.removeAll(com.google.common.collect.Collections2.transform(backing, s -> new AtomicInteger(Integer.parseInt(s))), skipList));
         assertEquals(Arrays.asList("7"), backing);
     }
-
-
 
     // removeAll rework: a re-creating view whose matches are partly cached (same instance) and partly not loses exactly its matches
     // for each recognised value-rule class, including the comparator-copying path (reverse-order TreeSet/ConcurrentSkipListSet)
@@ -2372,8 +2343,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList("1000", "5", "2000"), identityBacking);
     }
 
-
-
     // The same over backings that reorder (PriorityQueue re-heapifies) or regroup (Multiset) their elements on removal: exactly the
     // matches go - before, a PriorityQueue view kept 1003/1006 and a Multiset view could lose a non-matching element ("127").
     @Test
@@ -2400,8 +2369,6 @@ public class NTest extends NTestSupport {
         assertEquals(0, cachedMs.getCount("2"));
         assertEquals(1, cachedMs.getCount("3"));
     }
-
-
 
     // A non-List/non-Set receiver that hands out a NEW instance for the same element on every traversal (a transforming view)
     // loses exactly its matches when the Set argument's membership rule is known exactly (HashSet/LinkedHashSet, TreeSet/
@@ -2432,8 +2399,6 @@ public class NTest extends NTestSupport {
         assertFalse(N.removeAll(com.google.common.collect.Collections2.transform(none, Integer::valueOf), new HashSet<>(Arrays.asList(2, 2000))));
         assertEquals(Arrays.asList("1", "1000"), none);
     }
-
-
 
     // Unrecognised Set arguments (a subclass overriding contains, an identity set from Collections.newSetFromMap, Set.of, a key-set
     // view) keep the previous identity-based removal: correct for receivers that hand out the same instances.
@@ -2477,8 +2442,6 @@ public class NTest extends NTestSupport {
 
     // removeDuplicates
 
-
-
     // A custom List whose removeIf tests every element, removes nothing and then fails: nothing to remove -> false,
     // in both modes; with a duplicate the failure still propagates.
     @Test
@@ -2505,8 +2468,6 @@ public class NTest extends NTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(new ScanThenFail(Arrays.asList(1, 2, 1))));
     }
 
-
-
     // Only the list's own rejection is absorbed: an element whose hashCode/equals throws UnsupportedOperationException
     // still fails an unmodifiable list (both modes), and a CopyOnWriteArrayList is deduplicated as before.
     @Test
@@ -2532,8 +2493,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList(3, 1, 2), cow);
     }
 
-
-
     // Neighbours of the UOE handling: modifiable and fixed-size lists, and an unmodifiable list with an adjacent duplicate.
     @Test
     public void testRemoveDuplicates_modifiableAndFixedSizeListsUnchanged() {
@@ -2549,9 +2508,6 @@ public class NTest extends NTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(Arrays.asList(1, 2, 1)));
         assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(CommonUtil.asList(1, 2, 2), true));
     }
-
-
-
 
     // A list whose removeIf removes the duplicates and THEN fails: the failure still propagates - the read-only recheck
     // of the now duplicate-free content must not turn it into a silent false.
@@ -2571,10 +2527,6 @@ public class NTest extends NTestSupport {
         assertEquals(Arrays.asList(1, 2), list);
     }
 
-
-
-
-
     // G057-01: an unmodifiable List without duplicates has nothing to remove -> false (documented: UOE only if c holds duplicates)
     @Test
     public void testRemoveDuplicates_unmodifiableListWithoutDuplicates() {
@@ -2593,8 +2545,6 @@ public class NTest extends NTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(List.of(1, 1, 2), true));
         assertEquals(Arrays.asList(1, 2, 1), withDuplicates);
     }
-
-
 
     // G056-01: unsorted float/double paths keep Float.equals/Double.equals semantics (NaNs equal, -0.0 != 0.0, first NaN's bits kept)
     @Test
@@ -2630,8 +2580,6 @@ public class NTest extends NTestSupport {
             assertEquals(referenceDistinct(d, 0, size).length != size, N.containsDuplicates(d, false));
         }
     }
-
-
 
     // G056-01: unsorted int/long removeDuplicates/distinct/containsDuplicates use an unboxed hash set - pins first-occurrence order and results
     @Test
@@ -2686,8 +2634,6 @@ public class NTest extends NTestSupport {
         assertTrue(N.containsDuplicates(new int[] { 0, 1, 2, 0 }, false));
         assertFalse(N.containsDuplicates(new long[] { 0L, 1L, 2L, -1L }, false));
     }
-
-
 
     // G056-01: the primitive key sets move to a boxed set instead of growing past 2^30 slots; exercise that fallback directly
     @Test
@@ -3029,8 +2975,6 @@ public class NTest extends NTestSupport {
         assertThrows(UnsupportedOperationException.class, () -> N.streamJson(new StringReader("{}"), mapType));
     }
 
-
-
     // G056-02: sumToBigInteger accumulates in a long and carries into the BigInteger only on overflow - pins exact results
     @Test
     public void testSumToBigInteger_longCarryPinning() {
@@ -3300,8 +3244,6 @@ public class NTest extends NTestSupport {
         assertEquals(3, res.length);
     }
 
-
-
     // G058-01: top(.., keepEncounterOrder=true) against a reference selection (distinct values) on array, RandomAccess and sequential inputs.
     @Test
     public void testTopKeepEncounterOrder_matchesReferenceOnAllInputForms() {
@@ -3341,8 +3283,6 @@ public class NTest extends NTestSupport {
             assertEquals(expected, N.top(new LinkedHashSet<>(values), fromIndex, toIndex, n, cmp, true));
         }
     }
-
-
 
     // G058-01: top(.., keepEncounterOrder=true) must make the same comparator calls, in the same order, on every input form.
     @Test

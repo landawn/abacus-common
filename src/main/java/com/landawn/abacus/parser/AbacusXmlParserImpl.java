@@ -2888,6 +2888,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
             case ARRAY: {
                 boolean untypedArray = false;
+                // An untyped <array> whose items the configured element type types gets an array of the configured class
+                // (Integer[] for configured Integer items, as the SAX reader builds it): the String[] placeholder cannot hold them.
+                boolean configuredUntypedArray = false;
 
                 if ((targetType == null) || !targetType.isArray()) {
                     if ((propType != null) && propType.javaType().isArray()) {
@@ -2912,6 +2915,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     // The configured component types the open elements once, never a configured item's own elements.
                     if (elementConfigurationApplies(config, null)) {
                         eleType = config.getElementType();
+                        configuredUntypedArray = untypedArray;
                         untypedArray = false;
                     } else {
                         eleType = targetType.isArray() ? targetType.elementType() : strType;
@@ -2995,19 +2999,23 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     if (propValue != null) {
                                         return (T) propValue;
                                     } else {
-                                        return collectionToArray(list, untypedArray ? inferArrayType(list) : arrayDestination);
+                                        return collectionToArray(list, configuredUntypedArray ? configuredArrayType(list, eleType)
+                                                : untypedArray ? inferArrayType(list) : arrayDestination);
                                     }
                                 } else if (event == XMLStreamConstants.START_ELEMENT) {
                                     // The for-loop update would step past this element; read it here.
-                                    list.add(readWrappedItem(xmlReader, itemConfig(config, declaredSlot, eleType), eleType, checkedAttr, isTagByPropertyName,
-                                            ignoreTypeInfo, inputType));
+                                    // An untyped array's String placeholder only describes text items. Keep structured
+                                    // items open here too, so ignored mixed text cannot change the following item's type.
+                                    list.add(readWrappedItem(xmlReader, itemConfig(config, declaredSlot, eleType), untypedArray ? defaultValueType : eleType,
+                                            checkedAttr, isTagByPropertyName, ignoreTypeInfo, inputType));
                                 }
 
                                 break;
                             }
 
                             case XMLStreamConstants.END_ELEMENT: {
-                                return collectionToArray(list, untypedArray ? inferArrayType(list) : arrayDestination);
+                                return collectionToArray(list,
+                                        configuredUntypedArray ? configuredArrayType(list, eleType) : untypedArray ? inferArrayType(list) : arrayDestination);
                             }
 
                             default:
@@ -3344,6 +3352,22 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
 
         return cls == null || cls == String.class ? strArrayType : Type.of(N.newArray(cls, 0).getClass());
+    }
+
+    /**
+     * Chooses the array type for an {@code <array>} element without a declared array type whose items the configured
+     * element type typed: an array of the configured class, as the SAX reader builds it. Items that are all Strings or
+     * {@code null} keep the {@code String[]} placeholder (the readers' result for them before the configured class was
+     * used), and a configured {@code String} infers the class from the items, both as for an unconfigured untyped array.
+     *
+     * @param c the collected elements
+     * @param configuredType the configured element type that typed the elements
+     * @return the array type to convert {@code c} to
+     */
+    private static Type<?> configuredArrayType(final Collection<?> c, final Type<?> configuredType) {
+        final Type<?> inferred = inferArrayType(c);
+
+        return inferred == strArrayType || configuredType == strType ? inferred : Type.of(N.newArray(configuredType.javaType(), 0).getClass());
     }
 
     private static boolean isBeanWrapperName(final String nodeName, final Class<?> beanClass) {
@@ -4290,6 +4314,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
 
                 boolean untypedArray = false;
+                // An untyped <array> whose items the configured element type types gets an array of the configured class
+                // (Integer[] for configured Integer items, as the SAX reader builds it): the String[] placeholder cannot hold them.
+                boolean configuredUntypedArray = false;
 
                 if ((targetType == null) || !targetType.isArray()) {
                     if ((propType != null) && propType.isArray()) {
@@ -4316,6 +4343,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     // The configured component types the open elements once, never a configured item's own elements.
                     if (elementConfigurationApplies(config, null)) {
                         eleType = config.getElementType();
+                        configuredUntypedArray = untypedArray;
                         untypedArray = false;
                     } else {
                         eleType = targetType.isArray() ? targetType.elementType() : objType;
@@ -4398,7 +4426,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             }
                         }
 
-                        return collectionToArray(c, untypedArray ? inferArrayType(c) : arrayDestination);
+                        return collectionToArray(c,
+                                configuredUntypedArray ? configuredArrayType(c, eleType) : untypedArray ? inferArrayType(c) : arrayDestination);
                     } finally {
                         Objectory.recycle(c);
                     }
@@ -6249,6 +6278,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         throw new ParsingException(MALFORMED_MAP_ENTRY); // defensive: the checks above cover every known shape
                     }
 
+                    // Entry text belongs to its key/value. If every entry was ignored, stale JSON-looking text
+                    // must not be reparsed as the enclosing map's compact representation.
+                    sb.setLength(0);
                     break;
 
                 default:

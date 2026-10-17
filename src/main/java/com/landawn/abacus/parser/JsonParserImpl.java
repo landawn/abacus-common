@@ -635,8 +635,8 @@ class JsonParserImpl extends AbstractJsonParser {
      * String json = parser.serialize(user, config);
      * // Result (formatted):
      * // {
-     * //   "name": "John",
-     * //   "age": 30
+     * //     "name": "John",
+     * //     "age": 30
      * // }
      * }</pre>
      *
@@ -2960,7 +2960,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the file containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the file supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory, or a
      *         collection or map class to be instantiated for the result cannot be constructed (constructor failures are unwrapped
      *         and converted to runtime exceptions)
@@ -3005,7 +3007,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the file containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the file supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}, or {@code source} is a directory, or a
      *         collection or map class to be instantiated for the result cannot be constructed (constructor failures are unwrapped
      *         and converted to runtime exceptions)
@@ -3044,7 +3048,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the input stream containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the stream supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or a collection or map class to be instantiated for
      *         the result cannot be constructed (constructor failures are unwrapped and converted to runtime exceptions)
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
@@ -3087,7 +3093,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the input stream containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the stream supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}, or a collection or map class to be instantiated for
      *         the result cannot be constructed (constructor failures are unwrapped and converted to runtime exceptions)
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
@@ -3124,7 +3132,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the reader containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the reader supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or a collection or map class to be instantiated for
      *         the result cannot be constructed (constructor failures are unwrapped and converted to runtime exceptions)
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
@@ -3161,7 +3171,9 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the reader containing the JSON data to deserialize; must not be {@code null}
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
-     * @return the deserialized object of type {@code T}
+     * @return the deserialized object of type {@code T}; if the reader supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target
      * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}, or a collection or map class to be instantiated for
      *         the result cannot be constructed (constructor failures are unwrapped and converted to runtime exceptions)
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
@@ -3186,22 +3198,57 @@ class JsonParserImpl extends AbstractJsonParser {
      * @param source the reader containing JSON data
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the type of the object to create
-     * @return the deserialized object of type {@code T}
-     * @throws ParsingException if the JSON is invalid or doesn't match the target type
+     * @return the deserialized object of type {@code T}; if the reader supplies no characters at all, the same
+     *         empty value (or default value, depending on the target type) as an empty {@code String} source, for example
+     *         {@code null} for an {@code Object} or bean target and an empty list for a {@code List} target (a subclass
+     *         still converts a scalar root, such as {@code Optional}, from the empty text)
+     * @throws ParsingException if the JSON is invalid or doesn't match the target type, or if {@code source} returns 0
+     *         characters twice in a row before any data without reaching the end of input (a {@code Reader} contract
+     *         violation), for every target type
      * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      */
     protected <T> T read(final Reader source, final JsonDeserConfig config, final Type<? extends T> targetType) throws ParsingException, UncheckedIOException {
         final JsonDeserConfig configToUse = check(config);
 
         if (canReadRootScalarDirectly(targetType)) {
-            return readRootScalar(IOUtil.readAllToString(source), configToUse, targetType);
+            final String text = readRootText(source);
+
+            // An empty source reads like the empty String in deserialize(String, JsonDeserConfig, Type).
+            return text.isEmpty() ? emptyOrDefault(targetType) : readRootScalar(text, configToUse, targetType);
         }
 
         final char[] rbuf = Objectory.createCharArrayBuffer();
         final char[] cbuf = Objectory.createCharArrayBuffer();
 
         try {
-            final JsonReader jr = JsonStreamReader.parse(source, rbuf, cbuf);
+            final JsonReader jr;
+
+            if (targetType.serializationType() == SerializationType.SERIALIZABLE && !targetType.isArray() && !targetType.isCollection()
+                    && !targetType.isPrimitiveList()) {
+                // A scalar root (reached here only by a subclass) is converted from the Reader's whole text by the root
+                // dispatch, so nothing may be read from the Reader before it.
+                jr = JsonStreamReader.parse(source, rbuf, cbuf);
+            } else {
+                // Read the first chunk here, exactly as JsonStreamReader.refill() would (including its single retry after a
+                // 0-char read), so that an empty source is detected without an extra read or buffering the input: it must
+                // read like the empty String in deserialize(String, JsonDeserConfig, Type), not fall into the root dispatch
+                // (which rejects an Object/CharSequence root at end of input).
+                int n = source.read(rbuf, 0, rbuf.length);
+
+                if (n == 0) {
+                    n = source.read(rbuf, 0, rbuf.length);
+                }
+
+                if (n < 0) {
+                    return emptyOrDefault(targetType);
+                } else if (n == 0) {
+                    // Two 0-char reads in a row without end of input: the Reader violates its contract (a read of a
+                    // non-empty buffer blocks or returns -1). Reject it instead of reading it as empty input.
+                    throw new ParsingException("The Reader returned 0 characters twice without reaching the end of input");
+                }
+
+                jr = new JsonStreamReader(source, rbuf, 0, n, cbuf);
+            }
 
             return read(source, jr, configToUse, targetType.javaType(), targetType);
         } catch (final IOException e) {
@@ -3509,10 +3556,8 @@ class JsonParserImpl extends AbstractJsonParser {
                 } else if (targetType.isPrimitiveList()) {
                     return readPrimitiveList(jr, isFirstCall, targetType);
                 } else {
-                    return (T) readNullToEmpty(targetType,
-                            rootScalarValue(targetType,
-                                    source instanceof String ? (String) source
-                                            : (source instanceof Reader ? IOUtil.readAllToString(((Reader) source)) : source.toString())),
+                    return (T) readNullToEmpty(targetType, rootScalarValue(targetType,
+                            source instanceof String ? (String) source : (source instanceof Reader ? readRootText((Reader) source) : source.toString())),
                             config.isReadNullToEmpty());
                 }
 
@@ -3892,6 +3937,45 @@ class JsonParserImpl extends AbstractJsonParser {
 
     // Scalar roots have always used the original text without consuming or validating a JsonReader.
     // Keep the reader-based dispatch for subclasses, whose protected parse/read hooks may inspect it.
+    // IOUtil.readAllToString(source) for a scalar root, except that a Reader whose first two reads both return 0 characters
+    // without reaching the end of input is rejected, as read(Reader, ...) does for the other roots, instead of silently
+    // reading as empty input. After the first chunk the remaining text is read exactly as IOUtil.readAllToString does.
+    private static String readRootText(final Reader source) throws ParsingException, UncheckedIOException {
+        final char[] buf = Objectory.createCharArrayBuffer();
+        StringBuilder sb = null;
+
+        try {
+            int n = source.read(buf, 0, buf.length);
+
+            if (n == 0) {
+                n = source.read(buf, 0, buf.length);
+            }
+
+            if (n < 0) {
+                return Strings.EMPTY;
+            } else if (n == 0) {
+                throw new ParsingException("The Reader returned 0 characters twice without reaching the end of input");
+            }
+
+            sb = Objectory.createStringBuilder();
+            sb.append(buf, 0, n);
+
+            while ((n = IOUtil.read(source, buf, 0, buf.length)) > 0) {
+                sb.append(buf, 0, n);
+            }
+
+            return sb.toString();
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        } finally {
+            Objectory.recycle(buf);
+
+            if (sb != null) {
+                Objectory.recycle(sb);
+            }
+        }
+    }
+
     private boolean canReadRootScalarDirectly(final Type<?> targetType) {
         return getClass() == JsonParserImpl.class && targetType.serializationType() == SerializationType.SERIALIZABLE && !targetType.isArray()
                 && !targetType.isCollection() && !targetType.isPrimitiveList();

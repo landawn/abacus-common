@@ -487,16 +487,26 @@ class IteratorLongStream extends AbstractLongStream {
 
         return newStream(new LongIteratorEx() { //NOSONAR
             private Iterator<Long> cur = null;
-            private Collection<Long> c = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-                    c = mapper.apply(elements.nextLong());
+                while (cur == null || !cur.hasNext()) {
+                    // Release the exhausted collection even if querying the outer source fails.
+                    cur = null;
+                    if (!elements.hasNext()) {
+                        break;
+                    }
+                    final Collection<Long> c = mapper.apply(elements.nextLong());
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override
@@ -871,16 +881,26 @@ class IteratorLongStream extends AbstractLongStream {
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private Iterator<? extends T> cur = null;
-            private Collection<? extends T> c = null;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
-                    c = mapper.apply(elements.nextLong());
+                while (cur == null || !cur.hasNext()) {
+                    // Release the exhausted collection even if querying the outer source fails.
+                    cur = null;
+                    if (!elements.hasNext()) {
+                        break;
+                    }
+                    final Collection<? extends T> c = mapper.apply(elements.nextLong());
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override

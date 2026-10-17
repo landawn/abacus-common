@@ -136,8 +136,6 @@ public class ShortStreamTransformationTest extends ShortStreamTestSupport {
         assertEquals(0, result.length);
     }
 
-
-
     // G088-01: every distinct() call gets its own seen-set; a large random input matches the LinkedHashSet oracle
     @Test
     public void testDistinct_unsortedArray_randomMatchesOracle() {
@@ -156,8 +154,6 @@ public class ShortStreamTransformationTest extends ShortStreamTestSupport {
         assertEquals(N.toList((short) 7, (short) -7), ShortStream.of((short) 7, (short) -7, (short) 7, (short) -7).distinct().toList());
         assertEquals(0, ShortStream.of(new short[0]).distinct().count());
     }
-
-
 
     // G088-01: unsorted ArrayShortStream.distinct keeps first occurrences in encounter order, incl. sign/word boundaries
     @Test

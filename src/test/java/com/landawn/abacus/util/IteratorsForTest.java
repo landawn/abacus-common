@@ -49,8 +49,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertEquals(1, completeCount.get());
     }
 
-
-
     /**
      * D1: {@code processThreads} is a tuning knob, but it used to change the exception <i>type</i> a caller saw -
      * a checked exception came back wrapped in a {@code RuntimeException}, so the {@code catch} clause the
@@ -74,8 +72,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         Iterators.forEach(Collections.<Integer> emptyList().iterator(), v -> count.incrementAndGet());
         assertEquals(0, count.get());
     }
-
-
 
     /** D1: when several workers fail, the first failure is thrown and the rest are suppressed onto it. */
     @Test
@@ -143,8 +139,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertTrue(completed.get());
     }
 
-
-
     /**
      * The four {@code forEach} overloads that do <i>not</i> declare an {@code onComplete} parameter documented one
      * anyway. This pins what their corrected {@code @param} text claims: a {@code null} source is treated as
@@ -182,8 +176,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertTrue(result.isEmpty());
     }
 
-
-
     /** D1: the same must hold for {@code onComplete}'s {@code E2}. */
     @Test
     public void testForEach_onCompleteCheckedExceptionPropagatesUnwrappedWhateverProcessThreadsIs() {
@@ -199,8 +191,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
             assertEquals(3, processed.get(), "onComplete runs only after every element has been processed");
         }
     }
-
-
 
     /**
      * B3: the worker pool was built by {@code Executors.newFixedThreadPool(n)} with no thread factory, so its
@@ -224,8 +214,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         }
     }
 
-
-
     /** B2: {@code queueSize} alone must not move reading off the calling thread. */
     @Test
     public void testForEach_queueSizeAloneDoesNotStartAReaderThread() throws Exception {
@@ -248,8 +236,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertFalse(concurrent.readerThreads.equals(Collections.singleton(caller)), "readThreads > 0 must read on a pool thread");
     }
 
-
-
     /** B2: a queueSize set together with readThreads is still honoured and still delivers every element. */
     @Test
     public void testForEach_queueSizeWithReadThreadsStillDeliversEverything() throws Exception {
@@ -269,8 +255,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertEquals(400, out.size());
         assertEquals(400, new HashSet<>(out).size());
     }
-
-
 
     /**
      * B2: the {@code readThreads > 0} path pulled its iterator with {@code Stream.iterator()}, which logs
@@ -315,8 +299,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertTrue(logged.stream().noneMatch(m -> m.contains("Remember to close")),
                 "forEach closes the stream it creates, so it must not ask the caller to: " + logged);
     }
-
-
 
     /**
      * The {@code IterateOptions} "Thread budget" note used to say the shared read pool's threads are <i>not</i>
@@ -369,8 +351,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         }
     }
 
-
-
     /** D1: unchecked failures and {@code Error}s keep passing through untouched on both paths. */
     @Test
     public void testForEach_uncheckedFailuresAndErrorsPassThroughOnBothPaths() {
@@ -413,8 +393,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertEquals(testList, processed);
     }
 
-
-
     /** B1: a collection made up entirely of {@code null}s behaves exactly like an empty collection. */
     @Test
     public void testForEachCollection_allNullMembersRunsOnCompleteAndProcessesNothing() throws Exception {
@@ -430,8 +408,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         }
     }
 
-
-
     /** B1: a {@code null} iterator inside the collection must be skipped, whatever the reading mode is. */
     @Test
     public void testForEachCollection_nullIteratorMemberIsSkipped_inEveryReadingMode() throws Exception {
@@ -446,8 +422,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
             assertTrue(done.get(), "readThreads=" + readThreads);
         }
     }
-
-
 
     /** B1: the positional (sequential) overload skips {@code null} members too. */
     @Test
@@ -735,8 +709,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         Iterators.forEach((Iterator<Integer>) null, n -> count.incrementAndGet());
         assertEquals(0, count.get());
     }
-
-
 
     /** D1: the single-iterator fast path must honour offset/count/onComplete exactly as the general path did. */
     @Test
@@ -1181,8 +1153,6 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertTrue(processed.contains(0));
         assertTrue(processed.contains(199));
     }
-
-
 
     /** See {@link #testParallelForEachPropagatesCheckedExceptionUnwrapped()} - same rule, consumer-only overload. */
     @Test

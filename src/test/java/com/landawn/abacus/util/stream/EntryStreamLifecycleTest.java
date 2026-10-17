@@ -63,8 +63,6 @@ public class EntryStreamLifecycleTest extends EntryStreamTestSupport {
         Assertions.assertThrows(IllegalStateException.class, stream::values);
     }
 
-
-
     /**
      * r9502 added {@code checkArgNotNull(collector, cs.collector)} to both three-arg {@code collapseBy*}
      * overloads; r9509 (a blank-message revert of that commit's EntryStream work) removed it and the matching
@@ -113,8 +111,6 @@ public class EntryStreamLifecycleTest extends EntryStreamTestSupport {
         assertThrows(IllegalStateException.class, () -> mappedKeys.count());
         assertThrows(IllegalStateException.class, () -> mappedValues.count());
     }
-
-
 
     // G095-01: close handlers still run exactly once, and a mapper failure propagates unchanged and closes the stream
     @Test
@@ -197,8 +193,6 @@ public class EntryStreamLifecycleTest extends EntryStreamTestSupport {
 
         assertTrue(resourceClosed.get());
     }
-
-
 
     // Stream review 2026-09-09 (pass B) - selectByKey/selectByValue argument validation
 

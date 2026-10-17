@@ -134,8 +134,6 @@ public class ArrayTest extends ArrayTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Array.random(10, 0, 1));
     }
 
-
-
     // G018-01: pins random(int) across the bulk-chunk boundaries - length, freshness and full 32-bit coverage.
     @Test
     public void testRandom_chunkBoundariesAndBitCoverage() {
@@ -173,8 +171,6 @@ public class ArrayTest extends ArrayTestSupport {
         }
         assertEquals(-1, tailOr);
     }
-
-
 
     // G115-01: Array.random(..) called from several threads at once - lengths/ranges hold, values vary, threads differ.
     @Test
@@ -267,8 +263,6 @@ public class ArrayTest extends ArrayTestSupport {
             assertTrue(value >= 0 && value < 10, String.valueOf(value));
         }
     }
-
-
 
     // G115-01: the random-value helpers use ThreadLocalRandom.current(); no class keeps a shared static generator field.
     @Test

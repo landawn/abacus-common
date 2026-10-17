@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 
 public class BeansRegisterTest extends BeansTestSupport {
 
-
-
     /**
      * Invalidating a bean drops its builder class's metadata too, and that drop has to cover the same pools as
      * the bean's own: a partial drop leaves the builder's <i>lookup</i> getter pool answering from the model the
@@ -50,8 +48,6 @@ public class BeansRegisterTest extends BeansTestSupport {
 
     // getPropSetters
 
-
-
     /**
      * A second registration against the bean must not make {@code getPropSetters(builderClass)} spin forever.
      *
@@ -77,8 +73,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean2.Builder.class)));
     }
 
-
-
     /**
      * A registration against the bean must not change <i>what</i> {@code getPropSetters(builderClass)} answers -
      * the two sibling tests above pin termination only.
@@ -100,8 +94,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertEquals(1, Beans.getPropSetters(BuilderContentBean.Builder.class).size());
         assertEquals("name", Beans.getPropSetter(BuilderContentBean.Builder.class, "name").getName());
     }
-
-
 
     /**
      * A registration against the bean must leave {@code getPropSetters(builderClass)} able to answer.
@@ -174,8 +166,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertNull(Beans.getPropSetter(AccessorCacheBean.class, "hidden"));
         assertTrue(Beans.getPropNameList(AccessorCacheBean.class).contains("visible"));
     }
-
-
 
     // G020-01: a registration against a nested bean type must also drop the dotted-path getter chains cached for the
     // beans that reach it ("inner.city" on the outer class); otherwise the answer depends on whether the path was read
@@ -332,8 +322,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertFalse(Beans.isRegisteredXmlBindingClass(CollectionBean.class));
     }
 
-
-
     /**
      * A builder-based bean used only by the builder-invalidation tests below, so that the registrations they
      * perform (which are permanent and process-wide) cannot leak into any other test's expectations.
@@ -367,8 +355,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-
-
     /** Separate class from {@link BuilderInvalidationBean} so the two tests cannot influence each other. */
     public static class BuilderInvalidationBean2 {
         private String name;
@@ -398,8 +384,6 @@ public class BeansRegisterTest extends BeansTestSupport {
             }
         }
     }
-
-
 
     /** Separate class again, so no other test's introspection order can reach this one. */
     public static class BuilderContentBean {
@@ -431,8 +415,6 @@ public class BeansRegisterTest extends BeansTestSupport {
         }
     }
 
-
-
     /**
      * Gives {@link BuilderSymmetryBean.Builder} two properties of its own: one a registration takes away, and one
      * that keeps the builder a bean class in its own right afterwards.
@@ -457,8 +439,6 @@ public class BeansRegisterTest extends BeansTestSupport {
             this.keptNote = keptNote;
         }
     }
-
-
 
     /** Separate class again, so no other test's introspection order can reach this one. */
     public static class BuilderSymmetryBean {

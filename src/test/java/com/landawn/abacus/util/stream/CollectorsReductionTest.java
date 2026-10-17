@@ -1220,8 +1220,6 @@ public class CollectorsReductionTest extends CollectorsTestSupport {
         assertFalse(result.isPresent());
     }
 
-
-
     /**
      * Bug fix regression: previously {@code onlyOne()} used Optional.empty() as a sentinel for
      * "not yet seen", which collapses with the result of seeing a single null element. As a

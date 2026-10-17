@@ -29,8 +29,6 @@ import com.landawn.abacus.util.Dates.DTF;
 /** Date resolution and diagnostic regression contracts. */
 public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
 
-
-
     // C-125 (cycle 3): an inadmissible millisecond amount at the range edge is still an IllegalArgumentException
     @Test
     public void c125_anInadmissibleMillisecondAmountAtTheRangeEdgeIsStillAnIllegalArgument() {
@@ -54,8 +52,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals(Long.MIN_VALUE + 807, Dates.setMilliseconds(new java.util.Date(Long.MIN_VALUE), 999).getTime());
     }
 
-
-
     // C-081: the auto-detected JDBC branch still owns every fraction length (dead length guard removed)
     @Test
     public void c081_autoDetectedJdbcBranchStillOwnsEveryFractionLength() {
@@ -66,8 +62,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertTrue(messageOf(() -> Dates.parseToJUDate("2025-01-15 10:30:45.1234567890", null, UTC)).contains("the auto-detected format"));
         assertTrue(messageOf(() -> Dates.parseToJUDate("2025-01-15 10:30:45.5", Dates.LOCAL_TIMESTAMP_FORMAT, UTC)).contains("exactly three"));
     }
-
-
 
     // C-124 (cycle 3): a carried 31st into the first month of the range keeps the day
     @Test
@@ -98,8 +92,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals(java.time.ZonedDateTime.of(java.time.LocalDateTime.of(-292275055, 5, 31, 12, 0), NY.toZoneId()).toInstant().toEpochMilli(),
                 Dates.setYears(at("2024-05-31 12:00:00", NY), -292275055).getTime());
     }
-
-
 
     // C-092 (cycle 2): the documented whitespace rule of custom legacy patterns
     @Test
@@ -134,8 +126,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         final String invalid = messageOf(() -> DTF.ISO_ZONED_DATE_TIME.parseToInstant("2025-11-02T01:30:00-03:00[America/New_York]"));
         assertTrue(invalid.contains("Offset -03:00 is not valid for local date-time 2025-11-02T01:30 in zone America/New_York"), invalid);
     }
-
-
 
     // C-126 (cycle 3): the DTF legacy-type parsers reject an instant beyond the epoch-millisecond range uniformly
     @Test
@@ -182,8 +172,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals(1736937045123L, DTF.of("uuuu-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX").parseToTimestamp("2025-01-15T10:30:45.123456789Z", NY).getTime());
     }
 
-
-
     // C-027: the documented example values of the DTF (CharSequence, TimeZone) trio
     @Test
     public void c027_dtfTimeZoneOverloadExamplesHold() {
@@ -221,8 +209,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertTrue(named.contains("Offset +01:00 is not valid"), named);
     }
 
-
-
     // C-053: DTF.format(Date)/format(Calendar) reject a fixed offset no ZoneOffset can express
     @Test
     public void c053_dtfFormatRejectsSubSecondAndOutOfRangeFixedOffsets() {
@@ -247,8 +233,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         beyond.setTimeInMillis(0L);
         assertTrue(messageOf(() -> DTF.LOCAL_DATE_TIME.format(beyond)).contains("outside the java.time range"));
     }
-
-
 
     // C-043: the utility-class constructor is private
     @Test
@@ -280,8 +264,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertTrue(Dates.isSameDay(a, b));
     }
 
-
-
     // C-025: the bracketed-zone form may omit the seconds field on every target
     @Test
     public void c025_bracketedZoneFormWithoutSecondsParsesOnEveryTarget() {
@@ -310,8 +292,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals(source, Dates.addMonths(Dates.addMonths(source, -300), 300));
     }
 
-
-
     // C-004
 
     // The java.util.Date overloads of add*/set* evaluate in the live default zone, so each case sets it.
@@ -337,8 +317,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals("1895-06-15 12:00:00", local(Dates.addYears(at("1890-06-15 12:00:00", berlin), 5), berlin));
     }
 
-
-
     // C-007
     @Test
     public void c007_fixedOffsetDefaultUnderARegionIdIsReadAsThatOffset() {
@@ -361,8 +339,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals(31, Dates.lengthOfMonth(c));
         assertEquals(365, Dates.lengthOfYear(e));
     }
-
-
 
     // C-121 (cycle 3): a Timestamp copy, comparison or rendering at the epoch floor does not wrap
     @Test
@@ -455,8 +431,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertTrue(Dates.isSameDay(a, b));
     }
 
-
-
     // C-144 / C-145: DTF zone resolution is unchanged without the dead offset fallbacks, and the
     // fixed formatters' accessors carry their override zone (UTC, and GMT for HTTP_DATE)
     @Test
@@ -482,8 +456,6 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertNull(DTF.LOCAL_DATE_TIME.parseToTemporalAccessor("2025-01-15 10:30:45").query(java.time.temporal.TemporalQueries.zone()));
     }
 
-
-
     // C-030: the zone-ID constants are region IDs, not ZoneOffset.UTC
     @Test
     public void c030_zoneIdConstantsAreRegionIdsWithUtcRules() {
@@ -500,9 +472,7 @@ public class DatesZoneResolutionTest extends DatesResolutionTestSupport {
         assertEquals("1970-01-01T00:00Z[GMT]", ZonedDateTime.ofInstant(Instant.EPOCH, Dates.GMT_ZONE_ID).toString());
     }
 
-
-
- // 2023-11-05T01:30-04:00[America/New_York]
+    // 2023-11-05T01:30-04:00[America/New_York]
     @Test
     public void c003_zoneNameDisambiguatesAnOverlapOnTheDtfParsers() {
         final DTF dtf = DTF.of("uuuu-MM-dd HH:mm:ss z");

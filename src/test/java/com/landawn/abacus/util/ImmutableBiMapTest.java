@@ -822,4 +822,48 @@ public class ImmutableBiMapTest extends TestBase {
         final java.util.Map<String, Integer> viewAsMap = view;
         assertThrows(IllegalArgumentException.class, () -> ImmutableBiMap.copyOf(viewAsMap));
     }
+
+    // ---- deep review 2026-10-16 G049 begin ----
+    // G049-01: empty() was HashMap-backed, so its views dropped ORDERED, unlike of(...)/builder() views.
+    @Test
+    public void testEmpty_viewSpliteratorsReportOrdered() {
+        final ImmutableBiMap<String, Integer> empty = ImmutableBiMap.empty();
+
+        assertTrue(empty.keySet().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        assertTrue(empty.values().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        assertTrue(empty.entrySet().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        assertTrue(empty.keySet().spliterator().hasCharacteristics(java.util.Spliterator.DISTINCT));
+
+        final java.util.stream.Stream<String> concat = java.util.stream.Stream.concat(empty.keySet().stream(),
+                ImmutableBiMap.of("x", 1, "y", 2, "z", 3).keySet().stream());
+        assertTrue(concat.spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+
+        // unchanged: shared, empty, its own inverse, null-tolerant lookups, unmodifiable
+        assertSame(ImmutableBiMap.empty(), ImmutableBiMap.empty());
+        assertSame(empty, empty.inverse());
+        assertTrue(empty.isEmpty());
+        assertNull(empty.get(null));
+        assertNull(empty.getByValue(null));
+        assertFalse(empty.containsKey(null));
+        assertEquals(java.util.Collections.emptyMap(), empty);
+        assertEquals(0, empty.hashCode());
+        assertThrows(UnsupportedOperationException.class, () -> empty.put("a", 1));
+    }
+    // ---- deep review 2026-10-16 G049 end ----
+
+    // ---- deep review 2026-10-16 verify G121 begin ----
+    // copyOf(empty source) returns the shared empty instance, so it reports ORDERED too; its toString is unchanged.
+    @Test
+    public void testEmpty_copyOfEmptySourcesShareOrderedEmpty() {
+        final ImmutableBiMap<String, Integer> fromTreeMap = ImmutableBiMap.copyOf(new java.util.TreeMap<String, Integer>());
+        final ImmutableBiMap<String, Integer> fromBiMap = ImmutableBiMap.copyOf(new BiMap<String, Integer>());
+
+        assertSame(ImmutableBiMap.empty(), fromTreeMap);
+        assertSame(ImmutableBiMap.empty(), fromBiMap);
+        assertTrue(fromTreeMap.keySet().spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+        assertEquals(ImmutableBiMap.of("a", 1).keySet().spliterator().characteristics(), fromBiMap.keySet().spliterator().characteristics());
+        assertEquals("{}", fromBiMap.toString());
+        assertEquals(new BiMap<String, Integer>(), fromBiMap);
+    }
+    // ---- deep review 2026-10-16 verify G121 end ----
 }

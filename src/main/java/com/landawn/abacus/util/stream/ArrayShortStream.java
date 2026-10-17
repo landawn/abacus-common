@@ -625,16 +625,22 @@ class ArrayShortStream extends AbstractShortStream {
         return newStream(new ShortIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
             private Iterator<Short> cur = null;
-            private Collection<Short> c = null;
 
             @Override
             public boolean hasNext() {
                 while ((cur == null || !cur.hasNext()) && cursor < toIndex) {
-                    c = mapper.apply(elements[cursor++]);
+                    cur = null;
+                    final Collection<Short> c = mapper.apply(elements[cursor++]);
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override
@@ -855,16 +861,22 @@ class ArrayShortStream extends AbstractShortStream {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private Iterator<? extends T> cur = null;
-            private Collection<? extends T> c = null;
 
             @Override
             public boolean hasNext() {
                 while ((cur == null || !cur.hasNext()) && cursor < toIndex) {
-                    c = mapper.apply(elements[cursor++]);
+                    cur = null;
+                    final Collection<? extends T> c = mapper.apply(elements[cursor++]);
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override

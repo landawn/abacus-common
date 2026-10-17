@@ -98,8 +98,6 @@ public class StringsConversionTest extends StringsTestSupport {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfNull("abc", (Supplier<String>) null));
     }
 
-
-
     // C-004: the supplier-returned-null message names the supplier, not a non-existent 'defaultValue' parameter
     @Test
     public void testC004_defaultIfSupplierMessagesNameTheSupplier() {
@@ -296,8 +294,6 @@ public class StringsConversionTest extends StringsTestSupport {
         assertEquals("null1", Strings.lenientFormat("%s%s", null, 1));
     }
 
-
-
     // J-3 : lenientFormat differences from Guava
     @Test
     public void testLenientFormat_surplusArgumentsUseColonSeparator() {
@@ -381,8 +377,6 @@ public class StringsConversionTest extends StringsTestSupport {
         assertArrayEquals(new char[] { 'h', 'i' }, Strings.toCharArray("hi"));
     }
 
-
-
     // G072-03: toCharArray(StringBuilder) bulk copy returns the same fresh array as the charAt loop
     @Test
     public void testToCharArray_stringBuilderAndOtherCharSequences() {
@@ -438,8 +432,6 @@ public class StringsConversionTest extends StringsTestSupport {
             assertArrayEquals(s.codePoints().toArray(), Strings.toCodePoints(s), s);
         }
     }
-
-
 
     // D3 : toCodePoints(CharSequence) does not go through toString()
     @Test

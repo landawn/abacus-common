@@ -313,8 +313,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertEquals("start", Strings.replaceBetween("start", "<", ">", "replacement"));
     }
 
-
-
     /**
      * C-022: {@code StrUtil.substringAfterAny} answers an empty {@code Optional} for a {@code null} or empty
      * delimiter array, and tries delimiters in ARGUMENT order rather than by their position in the string.
@@ -538,8 +536,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertNull(Strings.substring("Hello", counting, -1));
         assertEquals(0, calls[0]);
     }
-
-
 
     // D1 : substring(String, IntUnaryOperator, int) clamps the end before the operator sees it
     @Test
@@ -1367,8 +1363,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertEquals("ello", result);
     }
 
-
-
     // D2 : substringBetween(String, IntUnaryOperator, int) accepts an end index of 0
     @Test
     public void testSubstringBetween_OperatorBeginEndZero() {
@@ -1615,8 +1609,6 @@ public class StringsSubstringTest extends StringsTestSupport {
 
     // substringBetweenFirstAndLast
 
-
-
     // C-036: the three StrUtil.substringBetweenFirstAndLast wrappers agree with the Strings originals
     @Test
     public void testC036_strUtilSubstringBetweenFirstAndLast() {
@@ -1749,8 +1741,6 @@ public class StringsSubstringTest extends StringsTestSupport {
         String result = StrUtil.substringOrElse("hello", len -> 0, 5, "default");
         assertEquals("hello", result);
     }
-
-
 
     /**
      * Contract pin for the empty-delimiter note on the four String-delimiter {@code ...OrElse} extractors:

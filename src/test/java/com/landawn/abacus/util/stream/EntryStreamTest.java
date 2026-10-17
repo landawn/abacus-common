@@ -365,8 +365,6 @@ public class EntryStreamTest extends EntryStreamTestSupport {
         assertEquals(new HashSet<>(Arrays.asList("x", "y", "z")), keySet);
     }
 
-
-
     // SUSPECT #3: keys() / values() must work in both sequential and parallel modes
     // (annotation changed from @SequentialOnly to @ParallelSupported).
     @Test

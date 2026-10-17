@@ -514,8 +514,6 @@ public class LongListTest extends LongListTestSupport {
         assertTrue(list.containsAll(new LongList()));
     }
 
-
-
     // G051-01: containsAll set path, both orientations (this larger / argument larger), duplicates, missing values
     @Test
     public void testContainsAll_setPathBothOrientations() {
@@ -537,8 +535,6 @@ public class LongListTest extends LongListTestSupport {
         assertFalse(wide.containsAll(new long[] { 0, 0, -1, 1 }));
         assertTrue(LongList.of(1, 2, 3, 4).containsAll(LongList.of(4, 3, 2, 1, 1, 2, 3, 4, 4, 4)));
     }
-
-
 
     // G051-01/02: randomized differential check of containsAll/disjoint against a naive nested scan
     @Test
@@ -822,8 +818,6 @@ public class LongListTest extends LongListTestSupport {
             assertFalse(list.disjoint(list));
         }
     }
-
-
 
     // G051-02: disjoint set path, both orientations and self
     @Test
@@ -2046,8 +2040,6 @@ public class LongListTest extends LongListTestSupport {
             assertEquals(3, list.size());
         }
     }
-
-
 
     // G051-03: removeDuplicates unsorted path keeps first occurrences in order and clears the tail
     @Test

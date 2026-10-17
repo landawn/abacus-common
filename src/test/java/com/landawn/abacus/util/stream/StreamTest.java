@@ -2955,4 +2955,128 @@ public class StreamTest extends StreamTestSupport {
         assertEquals(N.toList("2b", "3c"), Stream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(Stream.of("a", "b", "c"), zipFunc).skip(1).toList());
     }
 
+    // ---- deep review 2026-10-16 G139 begin ----
+    // G139-01: containsAny(Collection) may probe a caller's plain HashSet/LinkedHashSet directly; it must not modify it
+    // and must answer exactly as with a private copy.
+    @Test
+    public void testContainsAny_callerHashSetNotModifiedAndSameAnswer() {
+        final java.util.Set<String> hashSet = new java.util.HashSet<>(Arrays.asList("b", null, "q"));
+        final java.util.Set<String> linkedHashSet = new java.util.LinkedHashSet<>(Arrays.asList("q", "b", null));
+
+        assertTrue(Stream.of("a", null, "x").containsAny(hashSet));
+        assertTrue(Stream.of("a", null, "x").containsAny(linkedHashSet));
+        assertTrue(Stream.of("a", "q").containsAny(hashSet));
+        assertFalse(Stream.of("a", "x").containsAny(hashSet));
+        assertFalse(Stream.of("a", "x").containsAny(linkedHashSet));
+        assertFalse(Stream.<String> empty().containsAny(hashSet));
+        assertTrue(Stream.of("a", "x").containsNone(hashSet));
+        assertFalse(Stream.of("a", "b").containsNone(linkedHashSet));
+
+        assertEquals(new java.util.HashSet<>(Arrays.asList("b", null, "q")), hashSet);
+        assertEquals(Arrays.asList("q", "b", null), new ArrayList<>(linkedHashSet));
+
+        // the same answers through the containsAll consuming path, which works on a private copy
+        assertTrue(Stream.of("q", null, "b", "z").containsAll(hashSet));
+        assertFalse(Stream.of("q", "b").containsAll(linkedHashSet));
+        assertEquals(3, hashSet.size());
+        assertEquals(3, linkedHashSet.size());
+    }
+
+    // G139-01: a null stream element must not reach a null-hostile or non-equals argument set: those are copied.
+    @Test
+    public void testContainsAny_nullElementWithHashSetTreeSetAndSetOf() {
+        assertTrue(Stream.of("x", null, "a").containsAny(new java.util.HashSet<>(Arrays.asList("a", "b"))));
+        assertTrue(Stream.of("x", null, "a").containsAny(new java.util.TreeSet<>(Arrays.asList("a", "b"))));
+        assertTrue(Stream.of("x", null, "a").containsAny(java.util.Set.of("a", "b")));
+        assertTrue(Stream.of("x", null, "a").containsAny(java.util.Collections.unmodifiableSet(new java.util.HashSet<>(Arrays.asList("a", "b")))));
+        assertFalse(Stream.of(null, "z").containsAny(new java.util.TreeSet<>(Arrays.asList("a", "b"))));
+        assertFalse(Stream.of(null, "z").containsAny(java.util.Set.of("a", "b")));
+        assertTrue(Stream.of(null, "z").containsNone(java.util.Set.of("a", "b")));
+
+        // a comparator-based or identity set is copied into an equals/hashCode set, so its own rule is not used
+        final java.util.TreeSet<String> caseInsensitive = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitive.addAll(Arrays.asList("a", "b"));
+        assertFalse(Stream.of("A", null).containsAny(caseInsensitive));
+
+        final java.util.Set<String> identitySet = java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        identitySet.addAll(Arrays.asList("a", "b"));
+        assertTrue(Stream.of(new String("a"), null).containsAny(identitySet));
+    }
+
+    // G139-02: containsAll(T...) builds its set once; duplicates (also duplicates collapsing to one value) and nulls.
+    @Test
+    public void testContainsAll_varargsDuplicatesAndNulls() {
+        assertTrue(Stream.of("a", null, "b").containsAll("a", "a", "a"));
+        assertTrue(Stream.of("a", null, "b").containsAll((String) null, null, null));
+        assertTrue(Stream.of("a", null, "b").containsAll("a", null, "b", "a"));
+        assertTrue(Stream.of("b", "a", "b", null).containsAll("b", "a", "b"));
+        assertFalse(Stream.of("a", "b").containsAll("a", "a", null));
+        assertFalse(Stream.of("a", null, "b").containsAll("a", "c", "a"));
+        assertFalse(Stream.of("b").containsAll("a", "a", "a"));
+        assertFalse(Stream.<String> empty().containsAll("a", "a", "a"));
+        assertTrue(Stream.of("a", "b", "c", "d", "e").containsAll("e", "d", "c", "b", "a"));
+        assertTrue(Stream.of("a", "b", "c").parallel().containsAll("c", "a", "c", "b"));
+        assertFalse(Stream.of("a", "b", "c").parallel().containsAll("c", "a", "x"));
+
+        // arrays are matched by identity, also when duplicates collapse the request to one element
+        final int[] first = { 1 };
+        final int[] sameContent = { 1 };
+        assertTrue(Stream.of(first, sameContent).containsAll(first, first, first));
+        assertFalse(Stream.of(java.util.Collections.singletonList(sameContent)).containsAll(first, first, first));
+        assertFalse(Stream.of(Arrays.asList(sameContent, new int[] { 2 })).containsAll(first, first, sameContent));
+    }
+
+    // G139-01/02: parallel streams, close handlers and already-closed streams behave as before.
+    @Test
+    public void testContainsAny_parallelStreamWithHashSet() {
+        final List<Integer> values = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            values.add(i);
+        }
+
+        final java.util.Set<Integer> wanted = new java.util.HashSet<>(Arrays.asList(-1, 500, null));
+        final java.util.Set<Integer> missing = new java.util.LinkedHashSet<>(Arrays.asList(-1, -2, null));
+        final AtomicInteger closeCount = new AtomicInteger();
+
+        assertTrue(Stream.of(values).onClose(closeCount::incrementAndGet).parallel().containsAny(wanted));
+        assertFalse(Stream.of(values).onClose(closeCount::incrementAndGet).parallel(4).containsAny(missing));
+        assertTrue(Stream.of(values).onClose(closeCount::incrementAndGet).parallel().containsNone(missing));
+        assertTrue(Stream.of(values.iterator()).onClose(closeCount::incrementAndGet).parallel().containsAll(999, 0, 999));
+        assertEquals(4, closeCount.get());
+        assertEquals(new java.util.HashSet<>(Arrays.asList(-1, 500, null)), wanted);
+        assertEquals(Arrays.asList(-1, -2, null), new ArrayList<>(missing));
+
+        final Stream<Integer> closed = Stream.of(values);
+        closed.close();
+        assertThrows(IllegalStateException.class, () -> closed.containsAny(wanted));
+        final Stream<Integer> closed2 = Stream.of(values);
+        closed2.close();
+        assertThrows(IllegalStateException.class, () -> closed2.containsAll(1, 2, 3));
+    }
+    // ---- deep review 2026-10-16 G139 end ----
+
+    // ---- deep review 2026-10-16 G155 begin ----
+    // G155-T4: containsAny/containsNone(Collection) reusing a caller's HashSet/LinkedHashSet keep matching arrays by
+    // IDENTITY (Object.equals), sequential and parallel, exactly as the former private HashSet copy did
+    @Test
+    public void testContainsAny_reusedHashSetMatchesArraysByIdentity() {
+        final int[] first = { 1 };
+        final int[] sameContent = { 1 };
+        final int[] other = { 2 };
+        final java.util.Set<int[]> hashSet = new java.util.HashSet<>(Arrays.asList(first, other));
+        final java.util.Set<int[]> linkedHashSet = new java.util.LinkedHashSet<>(Arrays.asList(other, first, null));
+
+        assertFalse(Stream.of(sameContent, new int[] { 2 }).containsAny(hashSet));
+        assertTrue(Stream.of(sameContent, first).containsAny(hashSet));
+        assertFalse(Stream.of(sameContent, new int[] { 2 }).containsAny(linkedHashSet));
+        assertTrue(Stream.of(sameContent, null).containsAny(linkedHashSet));
+        assertTrue(Stream.of(sameContent, new int[] { 2 }).containsNone(linkedHashSet));
+        assertFalse(Stream.of(sameContent, new int[] { 2 }).parallel(2).containsAny(hashSet));
+        assertTrue(Stream.of(sameContent, new int[] { 2 }, first).parallel(2).containsAny(hashSet));
+        assertFalse(Stream.of(sameContent, first).containsAll(hashSet));
+        assertTrue(Stream.of(other, sameContent, first).containsAll(hashSet));
+        assertEquals(2, hashSet.size());
+        assertEquals(Arrays.asList(other, first, null), new ArrayList<>(linkedHashSet));
+    }
+    // ---- deep review 2026-10-16 G155 end ----
 }

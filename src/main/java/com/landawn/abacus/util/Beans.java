@@ -274,8 +274,9 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Caller Coordination:</b> Internal cache synchronization does not protect bean fields, getters/setters,
  *       nested mutable values or user callbacks from concurrent access. Coordinate those according to their own contracts</li>
  *   <li><b>Shared State:</b> Internal static caches are mutable but thread-safe (concurrent/synchronized access).
- *       Every read-modify-write of the property model - registration, publication of a scan, and the alias
- *       scans in the {@code getProp*} lookups - is serialized on one private monitor</li>
+ *       Every read-modify-write of the property model - registration and the publication of a scan - is
+ *       serialized on one private monitor; the alias scans in the {@code getProp*} lookups only read published
+ *       metadata and do not take it</li>
  *   <li><b>Builder:</b> {@link BeanMapBuilder} is <i>not</i> thread-safe; configure and consume it on one thread</li>
  * </ul>
  *
@@ -885,6 +886,9 @@ public final class Beans {
      *       {@link CharSequence}, {@link Number}, {@link Map}, {@link Collection}, or {@link Map.Entry} implementation</li>
      * </ul>
      *
+     * <p>A call overlapping a property registration may return its earlier property snapshot's classification.
+     * That result is not cached across the registration; calls begun after registration completes use the updated model.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Beans.isBeanClass(User.class);     // returns true  (POJO with a getter/setter pair)
@@ -920,11 +924,32 @@ public final class Beans {
         Boolean ret = beanClassPool.get(targetClass);
 
         if (ret == null) {
+            final long epoch;
+
+            synchronized (METADATA_LOCK) {
+                ret = beanClassPool.get(targetClass);
+
+                if (ret != null) {
+                    return ret;
+                }
+
+                // Invalidation advances the epoch before clearing its pools. Capture it under the same
+                // lock so a pre-registration property snapshot cannot be paired with the new epoch.
+                epoch = beanMetadataEpoch.get();
+            }
+
+            // Property discovery may execute application code; keep it outside the metadata monitor.
             ret = annotatedWithEntity(targetClass) || isRecordClass(targetClass)
                     || (!CharSequence.class.isAssignableFrom(targetClass) && !Number.class.isAssignableFrom(targetClass)
                             && !Map.class.isAssignableFrom(targetClass) && !Collection.class.isAssignableFrom(targetClass)
                             && !Map.Entry.class.isAssignableFrom(targetClass) && N.notEmpty(getPropNameList(targetClass)));
-            beanClassPool.put(targetClass, ret);
+
+            synchronized (METADATA_LOCK) {
+                // An overlapping call may return its old snapshot, but must not cache it after registration.
+                if (beanMetadataEpoch.get() == epoch) {
+                    beanClassPool.put(targetClass, ret);
+                }
+            }
         }
 
         return ret;
@@ -1907,10 +1932,11 @@ public final class Beans {
      *
      * <p><b>Order.</b> Every field-backed property comes first - superclasses first, then the class itself, in
      * backing-field declaration order within each level - followed by every property discovered from an accessor
-     * alone, across all levels. The two groups are not interleaved: for a subclass whose superclass has both a
-     * field-backed and an accessor-only property, the subclass's field-backed property still precedes the
-     * superclass's accessor-only one. That trailing group is ordered by {@link Class#getMethods()}, whose order
-     * the JLS does not specify - do not depend on it.</p>
+     * alone, across all levels (a {@code static} field never backs a property, so a getter whose name matches only
+     * a {@code static} field belongs to this second group). The two groups are not interleaved: for a subclass
+     * whose superclass has both a field-backed and an accessor-only property, the subclass's field-backed property
+     * still precedes the superclass's accessor-only one. That trailing group is ordered by
+     * {@link Class#getMethods()}, whose order the JLS does not specify - do not depend on it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2347,7 +2373,15 @@ public final class Beans {
 
             final Object bean = instance.get();
 
-            return bean != null && ClassUtil.invokeMethod(bean, method) != null;
+            if (bean == null) {
+                return false;
+            }
+
+            // A public getter of a non-public class cannot be invoked from here otherwise; the scan makes an
+            // accepted getter accessible anyway.
+            ClassUtil.setAccessibleQuietly(method, true);
+
+            return ClassUtil.invokeMethod(bean, method) != null;
         } catch (final Throwable e) { // NOSONAR - Error as well: this constructs the bean and invokes a user getter
             return false;
         }
@@ -2672,7 +2706,8 @@ public final class Beans {
     }
 
     /**
-     * Pairs each field {@code targetClass} declares with the getter that backs it, in field-declaration order.
+     * Pairs each non-{@code static} field {@code targetClass} declares with the getter that backs it, in
+     * field-declaration order.
      *
      * <p>A field with no matching getter is kept only when it is a {@code public} non-{@code static}
      * non-{@code final} field - a bare public field is a property in its own right. When several methods
@@ -2696,6 +2731,11 @@ public final class Beans {
         Set<Method> exactlyOwnedGetters = null;
 
         for (final Field field : declaredFields) {
+            // A static field is class state, never a property's backing field (see the pairing loop below).
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
             for (final Method method : methods) {
                 if (isFieldGetMethod(method, field) && isExactFieldGetMethod(method, field)) {
                     if (exactlyOwnedGetters == null) {
@@ -2709,6 +2749,13 @@ public final class Beans {
 
         // sort the methods by the order of declared fields
         for (final Field field : declaredFields) {
+            // A static field must not back a property: a getter matching it by name (`static String NAME` with a
+            // getName() over another field) became a property read through the static field - a
+            // WrongMethodTypeException on every read, and writes that changed the class's static state.
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
             Method fieldGetMethod = null;
             boolean fieldGetMethodIsExact = false;
 
@@ -3212,7 +3259,12 @@ public final class Beans {
             }
 
             try {
-                instance = cls.getDeclaredConstructor().newInstance();
+                // Accessible like the constructor BeanInfo.createBeanResult() uses: for a non-public class (or
+                // constructor) the plain newInstance() failed with IllegalAccessException, which demoted the class's
+                // XML-binding registration and dropped its getter-only collections, although mapToBean can create it.
+                final Constructor<?> constructor = cls.getDeclaredConstructor();
+                ClassUtil.setAccessibleQuietly(constructor, true);
+                instance = constructor.newInstance();
             } catch (final Throwable e) { // NOSONAR - Error as well: newInstance() runs <clinit> and a user constructor
                 if (logger.isDebugEnabled() && !(Strings.isNotEmpty(cls.getPackageName()) && cls.getPackageName().startsWith("java."))) {
                     logger.debug(e, "Unable to instantiate {} while discovering property accessors; getter-based setter checks will be skipped", cls.getName());

@@ -1,5 +1,7 @@
+## 8.2.1
+* Improvements and bug fixes
+
 ## 8.2.0
-* Naming convention improvements
 * Improvements and bug fixes
 
 ## 8.1.0

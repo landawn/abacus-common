@@ -181,8 +181,6 @@ public class DoubleStreamCreationTest extends DoubleStreamTestSupport {
         assertArrayEquals(new double[] { 1.0, 2.0, 0.0, 3.0, 0.0, 0.0, 4.0, 5.0, 6.0 }, result, 0.0001);
     }
 
-
-
     // G114-01: flatten(double[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
     @Test
@@ -253,8 +251,6 @@ public class DoubleStreamCreationTest extends DoubleStreamTestSupport {
         assertEquals(0, DoubleStream.flatten(new double[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G094-02: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -300,8 +296,6 @@ public class DoubleStreamCreationTest extends DoubleStreamTestSupport {
         assertArrayEquals(new double[0], DoubleStream.flatten(new double[][] { null, {}, null }, true).toArray());
         assertArrayEquals(new double[] { 1, 3, 2, 4 }, DoubleStream.flatten(new double[][] { { 1, 2 }, { 3, 4 } }, true).toArray());
     }
-
-
 
     // G094-02: pins the column-major order of flatten(double[][], true) for jagged input with null/empty/short rows
     @Test

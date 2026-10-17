@@ -808,8 +808,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
     @Test
     public void u28_intAbstractTerminalsKeepThePrimaryFailure() {
         assertPrimaryWins("int", "array.map(boom)", () -> IntStream.of(1, 2, 3).map(x -> boom(x)), intAbstractTerminals());
-        assertPrimaryWins("int", "iterator.map(boom)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> boom(x)),
-                intAbstractTerminals());
+        assertPrimaryWins("int", "iterator.map(boom)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> boom(x)), intAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
         assertPrimaryWins("int", "iterator (2 elements)", () -> IntStream.of(IntIterator.of(1, 2)),
                 new Terms<IntStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
@@ -822,11 +821,9 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_intIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("int", "iterator.map(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> failOn2(x)),
-                intIteratorTerminals());
+        assertPrimaryWins("int", "iterator.map(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).map(x -> failOn2(x)), intIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("int", "iterator.filter(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
-                intIteratorTerminals());
+        assertPrimaryWins("int", "iterator.filter(failOn2)", () -> IntStream.of(IntIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0), intIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
         assertPrimaryWins("int", "iterator", () -> IntStream.of(IntIterator.of(1, 2, 3)), intNullFactoryTerminals());
         assertPrimaryWins("int", "empty iterator", () -> IntStream.of(IntIterator.of(1)).filter(x -> false), intNullFactoryTerminals());
@@ -1004,8 +1001,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
     @Test
     public void u28_longAbstractTerminalsKeepThePrimaryFailure() {
         assertPrimaryWins("long", "array.map(boom)", () -> LongStream.of(1, 2, 3).map(x -> (long) boom(x)), longAbstractTerminals());
-        assertPrimaryWins("long", "iterator.map(boom)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) boom(x)),
-                longAbstractTerminals());
+        assertPrimaryWins("long", "iterator.map(boom)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) boom(x)), longAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
         assertPrimaryWins("long", "iterator (2 elements)", () -> LongStream.of(LongIterator.of(1, 2)),
                 new Terms<LongStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
@@ -1018,8 +1014,7 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_longIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("long", "iterator.map(failOn2)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) failOn2(x)),
-                longIteratorTerminals());
+        assertPrimaryWins("long", "iterator.map(failOn2)", () -> LongStream.of(LongIterator.of(1, 2, 3)).map(x -> (long) failOn2(x)), longIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
         assertPrimaryWins("long", "iterator.filter(failOn2)", () -> LongStream.of(LongIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
                 longIteratorTerminals());
@@ -1201,10 +1196,8 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_floatAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("float", "array.map(boom)", () -> FloatStream.of(1, 2, 3).map(x -> (float) boom(x)),
-                floatAbstractTerminals());
-        assertPrimaryWins("float", "iterator.map(boom)", () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) boom(x)),
-                floatAbstractTerminals());
+        assertPrimaryWins("float", "array.map(boom)", () -> FloatStream.of(1, 2, 3).map(x -> (float) boom(x)), floatAbstractTerminals());
+        assertPrimaryWins("float", "iterator.map(boom)", () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) boom(x)), floatAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
         assertPrimaryWins("float", "iterator (2 elements)", () -> FloatStream.of(FloatIterator.of(1, 2)),
                 new Terms<FloatStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
@@ -1217,11 +1210,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_floatIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("float", "iterator.map(failOn2)",
-                () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) failOn2(x)), floatIteratorTerminals());
+        assertPrimaryWins("float", "iterator.map(failOn2)", () -> FloatStream.of(FloatIterator.of(1, 2, 3)).map(x -> (float) failOn2(x)),
+                floatIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("float", "iterator.filter(failOn2)",
-                () -> FloatStream.of(FloatIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0), floatIteratorTerminals());
+        assertPrimaryWins("float", "iterator.filter(failOn2)", () -> FloatStream.of(FloatIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
+                floatIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
         assertPrimaryWins("float", "iterator", () -> FloatStream.of(FloatIterator.of(1, 2, 3)), floatNullFactoryTerminals());
         assertPrimaryWins("float", "empty iterator", () -> FloatStream.of(FloatIterator.of((float) 1)).filter(x -> false), floatNullFactoryTerminals());
@@ -1402,10 +1395,9 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u28_doubleAbstractTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("double", "array.map(boom)", () -> DoubleStream.of(1, 2, 3).map(x -> (double) boom(x)),
+        assertPrimaryWins("double", "array.map(boom)", () -> DoubleStream.of(1, 2, 3).map(x -> (double) boom(x)), doubleAbstractTerminals());
+        assertPrimaryWins("double", "iterator.map(boom)", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) boom(x)),
                 doubleAbstractTerminals());
-        assertPrimaryWins("double", "iterator.map(boom)",
-                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) boom(x)), doubleAbstractTerminals());
         // onlyOne(): the TooManyElementsException raised INSIDE the try also wins over the close failure (Abstract + Array impl)
         assertPrimaryWins("double", "iterator (2 elements)", () -> DoubleStream.of(DoubleIterator.of(1, 2)),
                 new Terms<DoubleStream>().expect("onlyOne", s -> s.onlyOne(), TooManyElementsException.class, null));
@@ -1418,11 +1410,11 @@ public class PrimitiveStreamsCloseFailureReview20260925Test extends TestBase {
 
     @Test
     public void u30_doubleIteratorTerminalsKeepThePrimaryFailure() {
-        assertPrimaryWins("double", "iterator.map(failOn2)",
-                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) failOn2(x)), doubleIteratorTerminals());
+        assertPrimaryWins("double", "iterator.map(failOn2)", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).map(x -> (double) failOn2(x)),
+                doubleIteratorTerminals());
         // the failure raised from hasNext() (filter predicate) instead of nextX()
-        assertPrimaryWins("double", "iterator.filter(failOn2)",
-                () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0), doubleIteratorTerminals());
+        assertPrimaryWins("double", "iterator.filter(failOn2)", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)).filter(x -> failOn2(x) > 0),
+                doubleIteratorTerminals());
         // null factories on iterator-backed sources, non-empty and empty
         assertPrimaryWins("double", "iterator", () -> DoubleStream.of(DoubleIterator.of(1, 2, 3)), doubleNullFactoryTerminals());
         assertPrimaryWins("double", "empty iterator", () -> DoubleStream.of(DoubleIterator.of((double) 1)).filter(x -> false), doubleNullFactoryTerminals());

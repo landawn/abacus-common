@@ -282,8 +282,7 @@ public class NReview20260924Test extends com.landawn.abacus.TestBase {
                 () -> N.merge(Arrays.asList(Arrays.asList("a"), Arrays.asList("b")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
         assertThrows(NullPointerException.class,
                 () -> N.merge(Arrays.asList(Arrays.asList("a"), Arrays.asList("b"), Arrays.asList("c")), (a, b) -> MergeResult.TAKE_FIRST, nullSupplier));
-        final NullPointerException e3 = assertThrows(NullPointerException.class,
-                () -> N.groupBy((Iterable<String>) null, s -> s, () -> null));
+        final NullPointerException e3 = assertThrows(NullPointerException.class, () -> N.groupBy((Iterable<String>) null, s -> s, () -> null));
         assertEquals("mapSupplier returned null", e3.getMessage());
         assertThrows(NullPointerException.class, () -> N.countBy(Arrays.asList("a"), s -> s, () -> null));
 

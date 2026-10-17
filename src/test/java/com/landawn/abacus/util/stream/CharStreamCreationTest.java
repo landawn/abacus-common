@@ -177,8 +177,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
         assertArrayEquals(new char[] { 'a', 'b', 'c', 'd', 'e' }, stream.toArray());
     }
 
-
-
     // G114-01: flatten(char[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
     @Test
@@ -249,8 +247,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
         assertEquals(0, CharStream.flatten(new char[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G091-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -298,8 +294,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
         assertArrayEquals(new char[0], CharStream.flatten(new char[][] { null, {}, null }, true).toArray());
     }
 
-
-
     // G091-01: pins the column-major order of flatten(char[][], true) for jagged input with null/empty/short rows
     @Test
     public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
@@ -344,8 +338,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
             }
         }
     }
-
-
 
     // Edge cases
     @Test
@@ -866,8 +858,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CharStream.repeat('A', -1));
     }
 
-
-
     // G112-02: of(Reader) count()/toArray()/toCharList() consume whole buffered chunks - same read() calls, same results
     @Test
     public void testOfReader_bulkToArrayCountToList_chunks_G112() {
@@ -907,8 +897,6 @@ public class CharStreamCreationTest extends CharStreamTestSupport {
         assertArrayEquals(Arrays.copyOfRange(big, 1, big.length), CharStream.of(new StringReader(new String(big))).skip(1).toArray());
         assertEquals(CharList.of(Arrays.copyOfRange(big, 5, big.length)), CharStream.of(new StringReader(new String(big))).skip(5).toCharList());
     }
-
-
 
     // G112-02: empty input, read() == 0, a read failure in a later call, and close handling
     @Test

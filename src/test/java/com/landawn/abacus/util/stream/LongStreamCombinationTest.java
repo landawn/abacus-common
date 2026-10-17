@@ -232,8 +232,6 @@ public class LongStreamCombinationTest extends LongStreamTestSupport {
         assertEquals(Arrays.asList(2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L), LongStream.concat(list).map(e -> e).skip(1).toList());
     }
 
-
-
     // G100-06: bulk paths after partial consumption (skip inside a segment, at a segment end, beyond the end)
     @Test
     public void testConcatListOfArrays_bulkOpsAfterSkip() {
@@ -255,8 +253,6 @@ public class LongStreamCombinationTest extends LongStreamTestSupport {
         assertArrayEquals(new long[] { 2, 3, 4, 5, 6 }, iter.toArray());
         assertFalse(iter.hasNext());
     }
-
-
 
     // G100-06: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
     @Test
@@ -296,8 +292,6 @@ public class LongStreamCombinationTest extends LongStreamTestSupport {
         assertFalse(result2 == b);
         assertEquals(100L, LongStream.concat(b, a).toArray()[0]);
     }
-
-
 
     // G100-06: concat(List<long[]>) bulk toArray/count/toLongList must equal the element-wise results
     @Test

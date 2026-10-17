@@ -192,8 +192,6 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         assertFalse(CommonUtil.isSorted(byLength, 0, 3, Comparator.naturalOrder()));
     }
 
-
-
     // G030-01: the range overloads position a List iterator at fromIndex; pin results and the exact comparator call sequence.
     @Test
     public void testIsSortedCollectionRange_listIteratorPositioning() {
@@ -235,8 +233,6 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
             }
         }
     }
-
-
 
     // G030-01: nulls sort first in the natural-order range overload, for List and non-List sources.
     @Test

@@ -40,6 +40,13 @@ class PrimitiveBufferRetentionReview20261010Test extends TestBase {
         return (List<?>) field.get(ring);
     }
 
+    private static int retainedCapacity(final LongIteratorEx ring) throws Exception {
+        final Field field = ring.getClass().getDeclaredField("values");
+        field.setAccessible(true);
+        final long[] values = (long[]) field.get(ring);
+        return values == null ? 0 : values.length;
+    }
+
     private static void start(final LongIteratorEx ring) throws Exception {
         final Method method = ring.getClass().getDeclaredMethod("start");
         method.setAccessible(true);
@@ -52,6 +59,7 @@ class PrimitiveBufferRetentionReview20261010Test extends TestBase {
             final LongIteratorEx ring = ring(List.of(LongIterator.of(1, 2), LongIterator.of(3)), cancel, Runnable::run);
             try {
                 assertArrayEquals(new long[] { 1, 2, 3 }, ring.toArray());
+                assertEquals(0, retainedCapacity(ring), "exhaustion must release the primitive handoff allocation");
                 assertTrue(retained(ring, "iterators").isEmpty(), "the completed handoff must release iterator source graphs");
                 if (cancel) {
                     assertTrue(retained(ring, "futures").isEmpty(), "completed futures no longer serve a cancellation purpose");
@@ -60,6 +68,52 @@ class PrimitiveBufferRetentionReview20261010Test extends TestBase {
             } finally {
                 ring.closeResource();
             }
+        }
+    }
+
+    @Test
+    void closeReleasesAnEmptyStartedBuffer() throws Exception {
+        final List<Runnable> queued = new ArrayList<>();
+        final LongIteratorEx ring = ring(List.of(LongIterator.of(1, 2)), false, queued::add);
+        try {
+            start(ring);
+            assertTrue(retainedCapacity(ring) > 0);
+            ring.closeResource();
+            assertEquals(0, retainedCapacity(ring));
+            queued.forEach(Runnable::run);
+            assertFalse(ring.hasNext());
+        } finally {
+            ring.closeResource();
+            queued.forEach(Runnable::run);
+        }
+    }
+
+    @Test
+    void closeReleasesStorageWhilePreservingTheCachedLastValue() throws Exception {
+        final LongIteratorEx ring = ring(List.of(LongIterator.of(7)), false, Runnable::run);
+        try {
+            assertTrue(ring.hasNext());
+            assertTrue(retainedCapacity(ring) > 0);
+            ring.closeResource();
+            assertEquals(0, retainedCapacity(ring));
+            assertEquals(7, ring.nextLong());
+            assertFalse(ring.hasNext());
+        } finally {
+            ring.closeResource();
+        }
+    }
+
+    @Test
+    void drainingAfterCloseReleasesTheBufferWithoutLosingPublishedValues() throws Exception {
+        final LongIteratorEx ring = ring(List.of(LongIterator.of(1, 2, 3)), false, Runnable::run);
+        try {
+            start(ring);
+            assertTrue(retainedCapacity(ring) > 0);
+            ring.closeResource();
+            assertArrayEquals(new long[] { 1, 2, 3 }, ring.toArray());
+            assertEquals(0, retainedCapacity(ring));
+        } finally {
+            ring.closeResource();
         }
     }
 

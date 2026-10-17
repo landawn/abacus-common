@@ -196,8 +196,6 @@ public class ByteStreamTransformationTest extends ByteStreamTestSupport {
         assertArrayEquals(new byte[] { 5 }, stream3.distinct().toArray());
     }
 
-
-
     // G087-01: unsorted ArrayByteStream.distinct() keeps first occurrences in encounter order over the full byte domain
     @Test
     public void testDistinct_unsortedArrayFullDomainMatchesFirstOccurrenceOrder() {
@@ -237,8 +235,6 @@ public class ByteStreamTransformationTest extends ByteStreamTestSupport {
             assertArrayEquals(sortedExpected, parallelResult);
         }
     }
-
-
 
     // G087-01: the distinct filter is lazy and each distinct() call has its own seen-table
     @Test

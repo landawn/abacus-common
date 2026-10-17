@@ -187,5 +187,4 @@ public class RowDatasetMoveTest extends RowDatasetTestSupport {
         assertThrows(Exception.class, () -> dataset.moveToRow(100));
     }
 
-
 }

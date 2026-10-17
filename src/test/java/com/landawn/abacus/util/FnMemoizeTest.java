@@ -213,8 +213,6 @@ public class FnMemoizeTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.memoize((java.util.function.Supplier<Object>) null));
     }
 
-
-
     // FINDING G20-002 (doc-only contract pins): re-entering get() from inside the delegate throws
     // IllegalStateException, and that failure is not cached - both now stated in the Fn javadocs.
     @Test
@@ -310,8 +308,6 @@ public class FnMemoizeTest extends FnTestSupport {
         assertEquals(2, attempts.get());
     }
 
-
-
     // FINDING R09-5 (the same defect Fnn.memoizeWithExpiration was fixed for): the returned supplier is handed
     // back to the caller, so refreshing under `synchronized (this)` let caller code holding that monitor block -
     // and interleave with - every refresh. Refreshes now run under a private lock.
@@ -325,8 +321,6 @@ public class FnMemoizeTest extends FnTestSupport {
         assertEquals(1, memo.get());
     }
 
-
-
     // The Duration overload delegates to the (long, TimeUnit) one, so it hands back the very same object.
     @Test
     public void reviewFixes20260908_memoizeWithExpirationDurationDoesNotSynchronizeOnTheReturnedSupplier() throws Exception {
@@ -337,8 +331,6 @@ public class FnMemoizeTest extends FnTestSupport {
         assertEquals(1, calls.get());
         assertEquals(1, memo.get());
     }
-
-
 
     /**
      * Calls {@code get()} on another thread while this thread holds the supplier's own monitor, and returns

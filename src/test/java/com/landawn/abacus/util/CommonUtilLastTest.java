@@ -123,8 +123,6 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
         Assertions.assertThrows(IllegalArgumentException.class, () -> CommonUtil.lastElements(list.iterator(), -1));
     }
 
-
-
     // G05-130: the window is collected in a pre-sized ArrayDeque again, with a null element held as an internal
     // sentinel; the sentinel must never reach the caller and the window must keep its encounter order.
     @Test
@@ -486,6 +484,5 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
 
         Assertions.assertNull(CommonUtil.lastOrNullIfEmpty((Iterator<String>) null));
     }
-
 
 }

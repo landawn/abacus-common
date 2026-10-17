@@ -147,8 +147,6 @@ public class ByteStreamCombinationTest extends ByteStreamTestSupport {
         assertArrayEquals(new byte[] { 1, 2 }, stream2.toArray());
     }
 
-
-
     // G090-02: bulk toArray/toByteList/count of concat(List<byte[]>) / concat(byte[]...) - null and empty arrays, mid-array start
     @Test
     public void testConcatArrays_bulkToArrayCountToList() {
@@ -911,8 +909,6 @@ public class ByteStreamCombinationTest extends ByteStreamTestSupport {
         });
         assertEquals(3, result.count());
     }
-
-
 
     // Additional coverage improvement tests - Collection-based factory methods
     @Test

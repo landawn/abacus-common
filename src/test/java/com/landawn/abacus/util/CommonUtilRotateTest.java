@@ -472,5 +472,4 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
         Assertions.assertArrayEquals(expected, a);
     }
 
-
 }

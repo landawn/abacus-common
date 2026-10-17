@@ -929,8 +929,6 @@ public class SeqRateTest extends SeqTestSupport {
         assertEquals(1, closed.get());
     }
 
-
-
     // top(n) for n > 0 drains and CLOSES the upstream inside its lazy init(), exactly as takeLast(..) does - its
     // javadoc used to claim "will not close the sequence", which holds only for n == 0.
     @Test

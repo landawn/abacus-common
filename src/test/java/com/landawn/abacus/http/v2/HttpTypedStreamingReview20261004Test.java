@@ -386,4 +386,133 @@ public class HttpTypedStreamingReview20261004Test extends HttpRequestTestSupport
         return response;
     }
 
+    // ---- deep review 2026-10-16 G127 begin ----
+
+    private static Throwable g127Failure(final org.junit.jupiter.api.function.Executable executable) {
+        final Throwable thrown = assertThrows(Throwable.class, executable);
+        return thrown instanceof java.util.concurrent.CompletionException || thrown instanceof java.util.concurrent.ExecutionException ? thrown.getCause()
+                : thrown;
+    }
+
+    // Pins the current (owner-accepted) behaviour: a typed XML result is parsed from the arriving stream (lower memory), whose
+    // Reader parse stops at the end of the root element, so a second root element or trailing text is not rejected - the
+    // first root is read - for get/asyncGet, with and without Content-Encoding. (The String parser would reject such a body.)
+    @Test
+    public void testGet_xmlTrailingContentAfterRootIsReadAsFirstRoot() throws Exception {
+        for (final String body : new String[] { "<map><a>1</a></map><map><b>2</b></map>", "<map><a>1</a></map>junk" }) {
+            final byte[] plain = body.getBytes(StandardCharsets.UTF_8);
+            for (final boolean compressed : new boolean[] { false, true }) {
+                final HttpServer server = startResponseServer(compressed ? gzip(plain) : plain, "application/xml; charset=UTF-8", compressed ? "gzip" : null);
+                try {
+                    final String url = localUrl(server);
+                    assertEquals(Map.of("a", "1"), HttpRequest.url(url).get(Map.class), body + " compressed=" + compressed);
+                    assertEquals(Map.of("a", "1"), HttpRequest.url(url).asyncGet(Map.class).get(10, TimeUnit.SECONDS), body + " compressed=" + compressed);
+                } finally {
+                    server.stop(0);
+                }
+            }
+        }
+    }
+
+    // The same when a client hands the body over as an InputStream (bypassing the result body handler): the first root is
+    // read, and the body and the owned client are closed exactly once.
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void testExecute_xmlTrailingContentInDeliveredStreamIsReadAsFirstRoot(final boolean async) throws Exception {
+        final AtomicInteger bodyCloses = new AtomicInteger();
+        final InputStream input = new ByteArrayInputStream("<map><a>1</a></map>junk".getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public void close() {
+                bodyCloses.incrementAndGet();
+            }
+        };
+        final HttpResponse<InputStream> response = response(input, "application/xml", null);
+        final HttpClient client = mock(HttpClient.class);
+        when(client.send(any(java.net.http.HttpRequest.class), any(BodyHandler.class))).thenReturn(response);
+        when(client.sendAsync(any(java.net.http.HttpRequest.class), any(BodyHandler.class)))
+                .thenReturn((CompletableFuture) CompletableFuture.completedFuture(response));
+        final HttpRequest request = HttpRequest.create(TEST_URL, client).closeHttpClientAfterExecution(true);
+        assertEquals(Map.of("a", "1"), execute(request, HttpMethod.GET, Map.class, async));
+        assertEquals(1, bodyCloses.get());
+        verify(client, times(1)).close();
+    }
+
+    // Neighbours: legal XML epilogs (whitespace, comment, processing instruction) and a declared
+    // charset still parse; JSON trailing content is still rejected; String results still return the raw text.
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testExecute_xmlLegalEpilogAndJsonTrailingContentUnchanged(final boolean async) throws Exception {
+        for (final String body : new String[] { "<map><a>1</a></map>", " <map><a>1</a></map> \r\n", "<map><a>1</a></map><!-- c -->",
+                "<map><a>1</a></map><?pi x?>" }) {
+            for (final boolean compressed : new boolean[] { false, true }) {
+                for (final Charset charset : new Charset[] { StandardCharsets.UTF_8, StandardCharsets.UTF_16LE }) {
+                    final byte[] plain = body.getBytes(charset);
+                    final AtomicInteger closes = new AtomicInteger();
+                    final HttpRequest request = responseRequest(compressed ? gzip(plain) : plain, "application/xml; charset=" + charset.name(),
+                            compressed ? "gzip" : null, 200, closes);
+                    assertEquals(Map.of("a", "1"), execute(request, HttpMethod.GET, Map.class, async), body);
+                    assertEquals(1, closes.get());
+                }
+            }
+        }
+
+        final AtomicInteger closes = new AtomicInteger();
+        final HttpRequest json = responseRequest("{\"a\":1}{\"b\":2}".getBytes(StandardCharsets.UTF_8), "application/json", null, 200, closes);
+        assertInstanceOf(com.landawn.abacus.exception.ParsingException.class, g127Failure(() -> execute(json, HttpMethod.GET, Map.class, async)));
+
+        final HttpRequest text = responseRequest("<map><a>1</a></map>junk".getBytes(StandardCharsets.UTF_8), "application/xml", null, 200, closes);
+        assertEquals("<map><a>1</a></map>junk", execute(text, HttpMethod.GET, String.class, async));
+    }
+
+    // ---- deep review 2026-10-16 G127 end ----
+
+    // ---- deep review 2026-10-16 verify G132 begin ----
+
+    // Every XML content type (text/xml, +xml suffixes, x-xml) and every XML content encoding (lz4, snappy, x-gzip) is parsed
+    // from the arriving stream: the first root element is read whether or not content follows it, and the owned client is
+    // closed once either way.
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testExecute_xmlTrailingContentReadAsFirstRootForAllXmlContentTypesAndEncodings(final boolean async) throws Exception {
+        final String[][] contentTypesAndEncodings = { { "text/xml", "lz4" }, { "application/atom+xml; charset=UTF-8", "snappy" },
+                { "application/vnd.test+xml", null }, { "application/x-xml", "x-gzip" } };
+        for (final String[] contentTypeAndEncoding : contentTypesAndEncodings) {
+            final String contentType = contentTypeAndEncoding[0];
+            final String encoding = contentTypeAndEncoding[1];
+            final ContentFormat compression = encoding == null ? null
+                    : "lz4".equals(encoding) ? ContentFormat.LZ4 : "snappy".equals(encoding) ? ContentFormat.SNAPPY : ContentFormat.GZIP;
+            for (final String body : new String[] { "<map><a>1</a></map>junk", "<map><a>1</a></map><map><b>2</b></map>", "<map><a>1</a></map>" }) {
+                final byte[] plain = body.getBytes(StandardCharsets.UTF_8);
+                byte[] wire = plain;
+                if (compression != null) {
+                    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    try (java.io.OutputStream compressed = HttpUtil.wrapOutputStream(out, compression)) {
+                        compressed.write(plain);
+                    }
+                    wire = out.toByteArray();
+                }
+                final AtomicInteger closes = new AtomicInteger();
+                final HttpRequest request = responseRequest(wire, contentType, encoding, 200, closes);
+                assertEquals(Map.of("a", "1"), execute(request, HttpMethod.GET, Map.class, async), contentType + " " + encoding + " " + body);
+                assertEquals(1, closes.get());
+            }
+        }
+    }
+
+    // The parser choice follows the Content-Type only - an XML-looking body served as application/json is still given to
+    // the JSON parser (which rejects it), and its String result is the raw text.
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testExecute_xmlLookingJsonBodyStaysOnJsonParser(final boolean async) throws Exception {
+        final byte[] body = "<map><a>1</a></map>".getBytes(StandardCharsets.UTF_8);
+        final AtomicInteger closes = new AtomicInteger();
+        final HttpRequest request = responseRequest(body, "application/json", null, 200, closes);
+        final Throwable failure = g127Failure(() -> execute(request, HttpMethod.GET, Map.class, async));
+        assertInstanceOf(com.landawn.abacus.exception.ParsingException.class, failure);
+        assertTrue(String.valueOf(failure.getMessage()).contains("Can't parse"), String.valueOf(failure.getMessage()));
+        assertEquals("<map><a>1</a></map>", execute(responseRequest(body, "application/json", null, 200, closes), HttpMethod.GET, String.class, async));
+    }
+
+    // ---- deep review 2026-10-16 verify G132 end ----
 }

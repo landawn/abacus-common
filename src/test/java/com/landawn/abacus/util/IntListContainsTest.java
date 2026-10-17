@@ -43,8 +43,6 @@ public class IntListContainsTest extends IntListTestSupport {
         }
     }
 
-
-
     // G047-01: randomized equivalence with a naive model over both size orderings and the needToSet boundary
     @Test
     public void testContainsAll_disjoint_matchesNaiveModel() {
@@ -131,8 +129,6 @@ public class IntListContainsTest extends IntListTestSupport {
         }
     }
 
-
-
     // G047-01: containsAll/disjoint/containsAny when this list is larger than the argument (hash side switched to the argument)
     @Test
     public void testContainsAll_largerReceiverEdgeCases() {
@@ -207,8 +203,6 @@ public class IntListContainsTest extends IntListTestSupport {
         IntList list = IntList.of(1, 2, 3, 4);
         assertFalse(list.containsDuplicates());
     }
-
-
 
     // G047-02: removeDuplicates unsorted path (membership set changed from LinkedHashSet to HashSet) keeps first occurrences in order
     @Test

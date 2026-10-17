@@ -108,10 +108,7 @@ class PrimitiveArrayShortSliceReview20261010Test extends TestBase {
         assertWorkers(2, 26,
                 executor -> shorts(executor).flatMapToObj(value -> Stream.of((int) value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
         assertWorkers(2, 26,
-                executor -> shorts(executor).flatmapToObj(value -> Arrays.asList((int) value, value + 10))
-                        .sequential()
-                        .mapToInt(Integer::intValue)
-                        .sum());
+                executor -> shorts(executor).flatmapToObj(value -> Arrays.asList((int) value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
         assertWorkers(2, 3, executor -> shorts(executor).mapToInt(value -> (int) value).sequential().sum());
         assertWorkers(2, 6, executor -> shorts(executor).flatMapToInt(value -> IntStream.of(value, value)).sequential().sum());
     }
@@ -132,10 +129,8 @@ class PrimitiveArrayShortSliceReview20261010Test extends TestBase {
         assertWorkers(2, 3, executor -> ints(executor).flatmap(value -> Arrays.asList(value, null)).sequential().sum());
         assertWorkers(2, 26, executor -> ints(executor).flatMapArray(value -> new int[] { value, value + 10 }).sequential().sum());
         assertWorkers(2, 3, executor -> ints(executor).mapToObj(value -> (int) value).sequential().mapToInt(Integer::intValue).sum());
-        assertWorkers(2, 26,
-                executor -> ints(executor).flatMapToObj(value -> Stream.of(value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
-        assertWorkers(2, 26,
-                executor -> ints(executor).flatmapToObj(value -> Arrays.asList(value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
+        assertWorkers(2, 26, executor -> ints(executor).flatMapToObj(value -> Stream.of(value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
+        assertWorkers(2, 26, executor -> ints(executor).flatmapToObj(value -> Arrays.asList(value, value + 10)).sequential().mapToInt(Integer::intValue).sum());
         assertWorkers(2, 3, executor -> ints(executor).mapToByte(value -> (byte) value).sequential().sum());
         assertWorkers(2, 6, executor -> ints(executor).flatMapToByte(value -> ByteStream.of((byte) value, (byte) value)).sequential().sum());
         assertWorkers(2, 3, executor -> ints(executor).mapToChar(value -> (char) value).sequential().sum());

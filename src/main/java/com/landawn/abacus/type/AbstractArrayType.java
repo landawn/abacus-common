@@ -40,6 +40,17 @@ import com.landawn.abacus.util.SK;
 public abstract class AbstractArrayType<T> extends AbstractType<T> {
 
     /**
+     * The powers of ten from 1e0 to 1e22, every one of them exactly representable as a {@code double}.
+     */
+    private static final double[] EXACT_DOUBLE_POWERS_OF_TEN = { 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
+            1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22 };
+
+    /**
+     * The powers of ten from 1e0 to 1e10, every one of them exactly representable as a {@code float}.
+     */
+    private static final float[] EXACT_FLOAT_POWERS_OF_TEN = { 1e0f, 1e1f, 1e2f, 1e3f, 1e4f, 1e5f, 1e6f, 1e7f, 1e8f, 1e9f, 1e10f };
+
+    /**
      * Constructs a new {@code AbstractArrayType} with the specified type name.
      *
      * @param typeName the name of the array type (e.g., "int[]", "String[]", "Object[]")
@@ -141,11 +152,15 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
     /**
      * Parses the ordinary decimal form of a built-in numeric array without materializing a token list.
      * <p>
-     * The admitted form is a literal {@code [} ... {@code ]} pair around ASCII decimal elements separated by
-     * commas, with optional ASCII spaces around each element. Only an exact captured built-in handler may take
-     * this path: no application conversion is attempted, and fallback must never replay application callbacks.
-     * Any other input, and any element the conversion rejects, yields {@code null} so that the caller's original
-     * parser produces the result or the failure, with its diagnostics and validation precedence.
+     * The admitted form is a {@code [} ... {@code ]} pair around ASCII decimal elements separated by commas, with
+     * optional structural whitespace around the array and each element, as in {@link #split(String)}. A decimal
+     * element may be enclosed in matching single or double quotes; escapes and whitespace inside quotes are left
+     * to the original parser. An element may also be the bare {@code null} token,
+     * read as the original parser reads it: a {@code null} element of a wrapper array and the default (zero) of a
+     * primitive array. Only an exact captured built-in handler may take this path: no application conversion is
+     * attempted, and fallback must never replay application callbacks. Any other input, and any element the
+     * conversion rejects, yields {@code null} so that the caller's original parser produces the result or the
+     * failure, with its diagnostics and validation precedence.
      * </p>
      *
      * @param str the non-blank array text
@@ -185,182 +200,480 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
             return null;
         }
 
-        final int limit = str.length() - 1;
+        final int start = skipArrayWhitespace(str, 0, str.length());
+        int limit = str.length() - 1;
 
-        if (limit < 2 || str.charAt(0) != '[' || str.charAt(limit) != ']') {
+        while (limit > start && Character.isWhitespace(str.charAt(limit))) {
+            limit--;
+        }
+
+        if (limit - start < 2 || str.charAt(start) != '[' || str.charAt(limit) != ']') {
             return null;
         }
 
         final boolean floatingPoint = kind % 6 >= 4;
+        final int first = skipArrayWhitespace(str, start + 1, limit);
 
-        // A null, quoted or suffixed element is the usual reason for falling back, and a trailing one would
-        // otherwise be found only after the scan below has read every element before it. Checking the last
-        // element first rejects that input in time proportional to the element; it only returns earlier for
-        // input the complete scan rejects as well.
-        int pos = str.lastIndexOf(',', limit - 1) + 1;
+        // An escaped or suffixed element is a common reason for falling back, and a trailing one would otherwise be
+        // found only after the pass below has converted every element before it. Checking the last element first
+        // rejects that input in time proportional to the element; it only returns earlier for input the complete
+        // pass rejects as well.
+        int pos = skipArrayWhitespace(str, Math.max(start + 1, str.lastIndexOf(',', limit - 1) + 1), limit);
+        pos = numericElementEnd(str, pos, limit, floatingPoint);
 
-        if (pos == 0) {
-            pos = 1;
-        }
-
-        while (pos < limit && str.charAt(pos) == ' ') {
-            pos++;
-        }
-
-        pos = decimalEnd(str, pos, limit, floatingPoint);
-
-        if (pos < 0) {
+        if (pos < 0 || skipArrayWhitespace(str, pos, limit) != limit) {
             return null;
         }
 
-        while (pos < limit && str.charAt(pos) == ' ') {
-            pos++;
-        }
-
-        if (pos != limit) {
-            return null;
-        }
-
-        int count = 0;
-        pos = 1;
-
-        // Complete lexical validation precedes every conversion, just as split does. In particular,
-        // a missing final slot must win over an earlier malformed or overflowing numeric value.
-        while (pos < limit) {
-            while (pos < limit && str.charAt(pos) == ' ') {
-                pos++;
-            }
-
-            pos = decimalEnd(str, pos, limit, floatingPoint);
+        // A quoted first element with escapes or other unsupported content can be rejected before allocating the
+        // result. Ordinary quoted decimals are read directly, without copying or unescaping their content.
+        if (str.charAt(first) == '"' || str.charAt(first) == '\'') {
+            pos = numericElementEnd(str, first, limit, floatingPoint);
 
             if (pos < 0) {
                 return null;
             }
 
-            while (pos < limit && str.charAt(pos) == ' ') {
-                pos++;
-            }
+            pos = skipArrayWhitespace(str, pos, limit);
 
-            count++;
-
-            if (pos == limit) {
-                break;
-            }
-
-            if (str.charAt(pos++) != ',' || pos == limit) {
+            if (pos != limit && str.charAt(pos) != ',') {
                 return null;
             }
         }
 
+        // Every comma separates two elements of any input this method accepts. Input with a comma anywhere else is
+        // rejected below, and the array is then simply discarded. Rejecting an empty element here bounds that array by
+        // the size a valid input of the same length needs: a run of commas is not worth an allocation.
+        int count = 1;
+
+        for (int previous = start, i = str.indexOf(',', first); i >= 0 && i < limit; previous = i, i = str.indexOf(',', i + 1)) {
+            if (i - previous < 2) {
+                return null;
+            }
+
+            count++;
+        }
+
+        // Bulk searches let quote handling stay invariant throughout the loop for ordinary unquoted arrays.
+        final boolean quotedElements = str.indexOf('"', first) >= 0 || str.indexOf('\'', first) >= 0;
         final Object result = Array.newInstance(componentType, count);
-        pos = 1;
+        pos = first;
 
-        try {
-            for (int i = 0; i < count; i++) {
-                while (str.charAt(pos) == ' ') {
-                    pos++;
+        // One pass reads and converts each element. Unlike split, it does not check the whole input before the
+        // first conversion: the order cannot matter, because the result is returned only when every element was
+        // read. Input with a malformed, missing or out-of-range element anywhere is left to the original parser,
+        // which reproduces its result or its failure, including split's precedence (a missing final slot wins over
+        // an earlier overflowing value).
+        for (int i = 0; i < count; i++) {
+            pos = skipArrayWhitespace(str, pos, limit);
+            final char quote = quotedElements && pos < limit && (str.charAt(pos) == '"' || str.charAt(pos) == '\'') ? str.charAt(pos) : 0;
+
+            if (quote != 0) {
+                pos++;
+            }
+
+            if (quote == 0 && isNullToken(str, pos, limit)) {
+                // The new array already holds the null element or the primitive default.
+                pos += NULL_STRING.length();
+            } else {
+                pos = floatingPoint ? readFloatingElement(str, pos, limit, kind, result, i) : readIntegralElement(str, pos, limit, kind, result, i);
+
+                if (pos < 0) {
+                    return null;
                 }
+            }
 
-                final int from = pos;
-
-                // The first pass has already checked this token's entire grammar.
-                while (pos < limit && str.charAt(pos) != ',' && str.charAt(pos) != ' ') {
-                    pos++;
-                }
-
-                switch (kind) {
-                    case 0, 6: {
-                        final long value = Long.parseLong(str, from, pos, 10);
-
-                        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-                            return null;
-                        }
-
-                        if (kind == 0) {
-                            ((int[]) result)[i] = (int) value;
-                        } else {
-                            ((Integer[]) result)[i] = (int) value;
-                        }
-
-                        break;
-                    }
-
-                    case 1, 7: {
-                        final long value = Long.parseLong(str, from, pos, 10);
-
-                        if (kind == 1) {
-                            ((long[]) result)[i] = value;
-                        } else {
-                            ((Long[]) result)[i] = value;
-                        }
-
-                        break;
-                    }
-
-                    case 2, 8: {
-                        final long value = Long.parseLong(str, from, pos, 10);
-
-                        if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
-                            return null;
-                        }
-
-                        if (kind == 2) {
-                            ((byte[]) result)[i] = (byte) value;
-                        } else {
-                            ((Byte[]) result)[i] = (byte) value;
-                        }
-
-                        break;
-                    }
-
-                    case 3, 9: {
-                        final long value = Long.parseLong(str, from, pos, 10);
-
-                        if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
-                            return null;
-                        }
-
-                        if (kind == 3) {
-                            ((short[]) result)[i] = (short) value;
-                        } else {
-                            ((Short[]) result)[i] = (short) value;
-                        }
-
-                        break;
-                    }
-
-                    case 4:
-                        ((float[]) result)[i] = Float.parseFloat(str.substring(from, pos));
-                        break;
-
-                    case 5:
-                        ((double[]) result)[i] = Double.parseDouble(str.substring(from, pos));
-                        break;
-
-                    case 10:
-                        ((Float[]) result)[i] = Float.valueOf(str.substring(from, pos));
-                        break;
-
-                    case 11:
-                        ((Double[]) result)[i] = Double.valueOf(str.substring(from, pos));
-                        break;
-
-                    default:
-                        throw new AssertionError("Unexpected numeric array kind: " + kind);
-                }
-
-                while (pos < limit && str.charAt(pos) == ' ') {
-                    pos++;
+            if (quote != 0) {
+                if (pos == limit || str.charAt(pos) != quote) {
+                    return null;
                 }
 
                 pos++;
             }
-        } catch (final NumberFormatException e) {
-            // The existing handlers distinguish overflow from malformed input and retain their diagnostics.
-            return null;
+
+            if (i == count - 1) {
+                if (skipArrayWhitespace(str, pos, limit) != limit) {
+                    return null;
+                }
+            } else {
+                // The usual spelling has a comma immediately after the number. Only inspect structural
+                // whitespace here when that delimiter is not already at the current index.
+                if (pos < limit && str.charAt(pos) != ',') {
+                    pos = skipArrayWhitespace(str, pos, limit);
+                }
+
+                if (pos == limit || str.charAt(pos++) != ',') {
+                    return null;
+                }
+            }
         }
 
         return result;
+    }
+
+    /**
+     * Skips structural whitespace without creating the stripped strings used by {@link #split(String)}.
+     *
+     * @param str the array text
+     * @param from the first index to inspect
+     * @param limit the exclusive end of the region
+     * @return the first non-whitespace index, or {@code limit}
+     */
+    private static int skipArrayWhitespace(final String str, final int from, final int limit) {
+        int pos = from;
+
+        // Spaces are common, and other printable ASCII characters cannot be whitespace. Consult the Unicode
+        // classification only for controls and non-ASCII text, keeping ordinary numeric elements inexpensive.
+        char ch;
+
+        while (pos < limit && ((ch = str.charAt(pos)) == ' ' || ((ch < ' ' || ch >= '\u0080') && Character.isWhitespace(ch)))) {
+            pos++;
+        }
+
+        return pos;
+    }
+
+    /**
+     * Checks one fast-path element, including optional matching quotes around a decimal number.
+     *
+     * @param str the array text
+     * @param from the first non-whitespace index of the element
+     * @param limit the index of the closing bracket
+     * @param floatingPoint whether fractions and exponents are admitted
+     * @return the index after the element, or {@code -1} for unsupported content; the caller checks the separator
+     */
+    private static int numericElementEnd(final String str, final int from, final int limit, final boolean floatingPoint) {
+        if (from == limit) {
+            return -1;
+        }
+
+        final char quote = str.charAt(from);
+
+        if (quote == '"' || quote == '\'') {
+            final int end = decimalEnd(str, from + 1, limit, floatingPoint);
+            return end >= 0 && end < limit && str.charAt(end) == quote ? end + 1 : -1;
+        }
+
+        return isNullToken(str, from, limit) ? from + NULL_STRING.length() : decimalEnd(str, from, limit, floatingPoint);
+    }
+
+    /**
+     * Tests whether the bare {@code null} token starts at {@code pos}; the caller checks what follows it.
+     *
+     * @param str the array text
+     * @param pos the index of the element's first character
+     * @param limit the index of the closing bracket
+     * @return {@code true} if {@code null} starts at {@code pos} and ends before {@code limit}
+     */
+    private static boolean isNullToken(final String str, final int pos, final int limit) {
+        return pos + NULL_STRING.length() <= limit && str.startsWith(NULL_STRING, pos);
+    }
+
+    /**
+     * Reads one decimal integer element of {@link #parseNumericArray(String, Type, Class)} and stores it.
+     * <p>
+     * Leading zeros are skipped and at most 19 significant digits can be accepted. Their magnitude fits in an
+     * unsigned {@code long}, so a negative accumulated magnitude marks signed overflow, except for the magnitude of
+     * {@link Long#MIN_VALUE} with a minus sign. Checking the length and sign after the digit scan admits the full
+     * {@code long} range without rescanning a token or adding overflow checks to each digit of shorter numbers.
+     * A rejected value is left to the original parser to retain its overflow diagnostics and validation order.
+     * </p>
+     *
+     * @param str the array text
+     * @param from the index of the element's first character (an optional sign)
+     * @param limit the index of the closing bracket
+     * @param kind the array kind chosen by {@code parseNumericArray}
+     * @param result the array to store the element into
+     * @param index the element's index in {@code result}
+     * @return the index after the element, or {@code -1} if it has no digits or is out of the component's range
+     */
+    private static int readIntegralElement(final String str, final int from, final int limit, final int kind, final Object result, final int index) {
+        int pos = from;
+        boolean negative = false;
+
+        if (pos < limit) {
+            final char sign = str.charAt(pos);
+
+            if (sign == '-') {
+                negative = true;
+                pos++;
+            } else if (sign == '+') {
+                pos++;
+            }
+        }
+
+        final int digitStart = pos;
+        long value = 0;
+
+        while (pos < limit && str.charAt(pos) == '0') {
+            pos++;
+        }
+
+        final int significantStart = pos;
+
+        for (char ch; pos < limit && (ch = str.charAt(pos)) >= '0' && ch <= '9'; pos++) {
+            value = value * 10 + (ch - '0');
+        }
+
+        // A 19-digit magnitude is below 10^19 < 2^64, so wrapping cannot turn an overflowing magnitude positive.
+        // For longer runs the wrapped value is ignored. MIN_VALUE intentionally negates to itself below.
+        if (pos == digitStart || pos - significantStart > 19 || (value < 0 && (!negative || value != Long.MIN_VALUE))) {
+            return -1;
+        }
+
+        if (negative) {
+            value = -value;
+        }
+
+        switch (kind) {
+            case 0, 6: {
+                if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                    return -1;
+                }
+
+                if (kind == 0) {
+                    ((int[]) result)[index] = (int) value;
+                } else {
+                    ((Integer[]) result)[index] = (int) value;
+                }
+
+                break;
+            }
+
+            case 1, 7: {
+                if (kind == 1) {
+                    ((long[]) result)[index] = value;
+                } else {
+                    ((Long[]) result)[index] = value;
+                }
+
+                break;
+            }
+
+            case 2, 8: {
+                if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+                    return -1;
+                }
+
+                if (kind == 2) {
+                    ((byte[]) result)[index] = (byte) value;
+                } else {
+                    ((Byte[]) result)[index] = (byte) value;
+                }
+
+                break;
+            }
+
+            case 3, 9: {
+                if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+                    return -1;
+                }
+
+                if (kind == 3) {
+                    ((short[]) result)[index] = (short) value;
+                } else {
+                    ((Short[]) result)[index] = (short) value;
+                }
+
+                break;
+            }
+
+            default:
+                throw new AssertionError("Unexpected integral array kind: " + kind);
+        }
+
+        return pos;
+    }
+
+    /**
+     * Reads one decimal floating-point element of {@link #parseNumericArray(String, Type, Class)} and stores it.
+     * <p>
+     * The element has the grammar {@link #decimalEnd(String, int, int, boolean)} admits. When its significant digits
+     * form an integer {@code m} of at most 2<sup>53</sup> ({@code double}) or 2<sup>24</sup> ({@code float}) and its
+     * decimal exponent {@code e} is at most 22 (10) in magnitude, both {@code m} and 10<sup>|e|</sup> are exact, so one
+     * multiplication or division gives the correctly rounded value, the one {@link Double#parseDouble(String)} /
+     * {@link Float#parseFloat(String)} return (the classic Clinger fast path). Trailing significand zeros may be
+     * removed, increasing the decimal exponent by the same amount, to bring a longer spelling into these bounds.
+     * No nonzero digits are discarded. Any other element is parsed by those methods from its original text.
+     * </p>
+     *
+     * @param str the array text
+     * @param from the index of the element's first character (an optional sign)
+     * @param limit the index of the closing bracket
+     * @param kind the array kind chosen by {@code parseNumericArray}
+     * @param result the array to store the element into
+     * @param index the element's index in {@code result}
+     * @return the index after the element, or {@code -1} if it is not a decimal number
+     */
+    private static int readFloatingElement(final String str, final int from, final int limit, final int kind, final Object result, final int index) {
+        int pos = from;
+        boolean negative = false;
+
+        if (pos < limit) {
+            final char sign = str.charAt(pos);
+
+            if (sign == '-') {
+                negative = true;
+                pos++;
+            } else if (sign == '+') {
+                pos++;
+            }
+        }
+
+        long significand = 0;
+        int significantDigits = 0; // digits after the leading zeros; the significand wraps only beyond 18 of them
+        int digits = 0;
+        int fractionDigits = 0;
+
+        for (char ch; pos < limit && (ch = str.charAt(pos)) >= '0' && ch <= '9'; pos++) {
+            digits++;
+
+            if (significantDigits != 0 || ch != '0') {
+                significantDigits++;
+                significand = significand * 10 + (ch - '0');
+            }
+        }
+
+        if (pos < limit && str.charAt(pos) == '.') {
+            pos++;
+
+            for (char ch; pos < limit && (ch = str.charAt(pos)) >= '0' && ch <= '9'; pos++) {
+                digits++;
+                fractionDigits++;
+
+                if (significantDigits != 0 || ch != '0') {
+                    significantDigits++;
+                    significand = significand * 10 + (ch - '0');
+                }
+            }
+        }
+
+        if (digits == 0) {
+            return -1;
+        }
+
+        final int significandEnd = pos;
+        int exponent = 0;
+        boolean exactExponent = true;
+
+        if (pos < limit && (str.charAt(pos) == 'e' || str.charAt(pos) == 'E')) {
+            pos++;
+            boolean negativeExponent = false;
+
+            if (pos < limit && (str.charAt(pos) == '+' || str.charAt(pos) == '-')) {
+                negativeExponent = str.charAt(pos) == '-';
+                pos++;
+            }
+
+            final int exponentStart = pos;
+
+            for (char ch; pos < limit && (ch = str.charAt(pos)) >= '0' && ch <= '9'; pos++) {
+                if (exponent < 100_000) {
+                    exponent = exponent * 10 + (ch - '0');
+                } else {
+                    // A capped exponent can be cancelled by a long fractional part. Never use that approximation
+                    // for direct conversion, even if the resulting scale appears to fall inside the exact range.
+                    exactExponent = false;
+                }
+            }
+
+            if (pos == exponentStart) {
+                return -1;
+            }
+
+            if (negativeExponent) {
+                exponent = -exponent;
+            }
+        }
+
+        long scale = (long) exponent - fractionDigits;
+        final boolean singlePrecision = kind == 4 || kind == 10;
+        final int maxScale = singlePrecision ? 10 : 22;
+        final long maxSignificand = singlePrecision ? 1L << 24 : 1L << 53;
+
+        boolean directlyConvertible = exactExponent && significantDigits <= 18 && significand <= maxSignificand && scale >= -maxScale && scale <= maxScale;
+
+        // The ordinary short-decimal path needs no extra scan. Only try normalization when it can turn a fallback
+        // into one exact multiplication/division; raising a scale already above the bound cannot help.
+        if (!directlyConvertible && exactExponent && significantDigits > 0 && scale <= maxScale) {
+            int end = significandEnd;
+            int trailingZeros = 0;
+
+            while (end > from) {
+                final char ch = str.charAt(end - 1);
+
+                if (ch == '0') {
+                    trailingZeros++;
+                } else if (ch != '.') {
+                    break;
+                }
+
+                end--;
+            }
+
+            final int retainedDigits = significantDigits - trailingZeros;
+
+            if (trailingZeros > 0 && retainedDigits <= 18) {
+                // The original accumulator may have wrapped. Rebuild only the retained digits (at most 18),
+                // working backwards to avoid rescanning an arbitrarily long run of leading zeros.
+                significand = 0;
+                long place = 1;
+
+                for (int remaining = retainedDigits; remaining > 0;) {
+                    final char ch = str.charAt(--end);
+
+                    if (ch != '.') {
+                        significand += (ch - '0') * place;
+                        place *= 10;
+                        remaining--;
+                    }
+                }
+
+                scale += trailingZeros;
+                directlyConvertible = significand <= maxSignificand && scale >= -maxScale && scale <= maxScale;
+            }
+        }
+
+        try {
+            if (singlePrecision) {
+                final float value;
+
+                if (directlyConvertible) {
+                    final float magnitude = scale < 0 ? significand / EXACT_FLOAT_POWERS_OF_TEN[(int) -scale]
+                            : significand * EXACT_FLOAT_POWERS_OF_TEN[(int) scale];
+                    value = negative ? -magnitude : magnitude;
+                } else {
+                    value = Float.parseFloat(str.substring(from, pos));
+                }
+
+                if (kind == 4) {
+                    ((float[]) result)[index] = value;
+                } else {
+                    ((Float[]) result)[index] = value;
+                }
+            } else {
+                final double value;
+
+                if (directlyConvertible) {
+                    final double magnitude = scale < 0 ? significand / EXACT_DOUBLE_POWERS_OF_TEN[(int) -scale]
+                            : significand * EXACT_DOUBLE_POWERS_OF_TEN[(int) scale];
+                    value = negative ? -magnitude : magnitude;
+                } else {
+                    value = Double.parseDouble(str.substring(from, pos));
+                }
+
+                if (kind == 5) {
+                    ((double[]) result)[index] = value;
+                } else {
+                    ((Double[]) result)[index] = value;
+                }
+            }
+        } catch (final NumberFormatException e) {
+            // Not expected for the admitted grammar; the original parser then reports the element.
+            return -1;
+        }
+
+        return pos;
     }
 
     /**

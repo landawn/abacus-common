@@ -940,5 +940,4 @@ public class DatasetAddTest extends DatasetTestSupport {
         assertThrows(IllegalArgumentException.class, () -> dataset.addRows(rows));
     }
 
-
 }

@@ -226,5 +226,4 @@ public class SheetColumnsTest extends SheetTestSupport {
         assertNull(cMap.get("col1").get("row1"));
     }
 
-
 }

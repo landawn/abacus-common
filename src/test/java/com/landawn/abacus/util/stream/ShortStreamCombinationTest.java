@@ -176,8 +176,6 @@ public class ShortStreamCombinationTest extends ShortStreamTestSupport {
         assertArrayEquals(new short[] { 1, 2, 3, 4, 5 }, stream.toArray());
     }
 
-
-
     // G112-01: bulk count()/toShortList()/toArray() of concat(List<short[]>) / concat(short[]...) - null/empty arrays, skip into/at/after a
     // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
     @Test

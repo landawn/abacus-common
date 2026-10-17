@@ -103,8 +103,6 @@ public class CharStreamConcurrencyTest extends CharStreamTestSupport {
         assertTrue(result.isParallel());
     }
 
-
-
     // Parallel operations
     @Test
     public void testParallelStreamOperationsForCoverage() {

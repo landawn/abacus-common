@@ -309,14 +309,16 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
             }
 
             for (int round = 0; round < 3; round++) {
-                final IllegalArgumentException anonymousContainer = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(anonymousList.getClass()));
+                final IllegalArgumentException anonymousContainer = assertThrows(IllegalArgumentException.class,
+                        () -> CommonUtil.newInstance(anonymousList.getClass()));
                 assertEquals("Cannot reflectively instantiate anonymous collection/map class: " + anonymousList.getClass().getName()
                         + ". Use a named container class.", anonymousContainer.getMessage());
 
                 final IllegalArgumentException local = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(LocalBean.class));
                 assertTrue(local.getMessage().startsWith("No default constructor found in class: "), local.getMessage());
 
-                final IllegalArgumentException member = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(InnerWithoutUsableConstructor.class));
+                final IllegalArgumentException member = assertThrows(IllegalArgumentException.class,
+                        () -> CommonUtil.newInstance(InnerWithoutUsableConstructor.class));
                 assertTrue(member.getMessage().startsWith("No constructor accepting an enclosing instance found in class: "), member.getMessage());
 
                 final IllegalArgumentException noDefault = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newInstance(Integer.class));
@@ -446,7 +448,8 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
             assertEquals("Cyclic container conversion is not supported",
                     assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(cyclic, listOfInteger)).getMessage());
 
-            final IllegalArgumentException notBoolean = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(new Object[] { 1, 2 }, Boolean[].class));
+            final IllegalArgumentException notBoolean = assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.convert(new Object[] { 1, 2 }, Boolean[].class));
             assertTrue(notBoolean.getMessage().startsWith("Cannot convert"), notBoolean.getMessage());
         }
     }
@@ -1048,7 +1051,8 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
 
             // zero-column datasets
             assertEquals(0, CommonUtil.merge(Arrays.asList(CommonUtil.newEmptyDataset(), CommonUtil.newEmptyDataset()), true).columnCount());
-            assertEquals(0, CommonUtil.merge(Arrays.asList(CommonUtil.newEmptyDataset(), CommonUtil.newEmptyDataset(), CommonUtil.newEmptyDataset()), true).columnCount());
+            assertEquals(0, CommonUtil.merge(Arrays.asList(CommonUtil.newEmptyDataset(), CommonUtil.newEmptyDataset(), CommonUtil.newEmptyDataset()), true)
+                    .columnCount());
             assertEquals(G118_SAME_COLUMNS_MESSAGE + "[], [a]", g118MergeFailure(CommonUtil.newEmptyDataset(), a));
             assertEquals(G118_SAME_COLUMNS_MESSAGE + "[a], []", g118MergeFailure(a, CommonUtil.newEmptyDataset(), a));
 
@@ -1233,14 +1237,13 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
             g118AssertSameValue(-2L, ds.get(2, 1));
             g118AssertSameValue((short) -9, ds.get(9, 1));
 
-            assertEquals("The length of row array (3) does not match the length of column name list (2)",
-                    assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(columnNames, Arrays.asList(new int[] { 1, 2 }, new int[] { 1, 2, 3 })))
-                            .getMessage());
-            assertEquals("The length of row array (1) does not match the length of column name list (2)",
-                    assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(columnNames, Arrays.asList(new long[] { 1, 2 }, new double[] { 1 })))
-                            .getMessage());
+            assertEquals("The length of row array (3) does not match the length of column name list (2)", assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.newDataset(columnNames, Arrays.asList(new int[] { 1, 2 }, new int[] { 1, 2, 3 }))).getMessage());
+            assertEquals("The length of row array (1) does not match the length of column name list (2)", assertThrows(IllegalArgumentException.class,
+                    () -> CommonUtil.newDataset(columnNames, Arrays.asList(new long[] { 1, 2 }, new double[] { 1 }))).getMessage());
             assertEquals("The length of row array (2) does not match the length of column name list (1)",
-                    assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList("a"), Arrays.asList(new long[] { 1, 2 }))).getMessage());
+                    assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList("a"), Arrays.asList(new long[] { 1, 2 })))
+                            .getMessage());
             assertEquals("The length of row array (0) does not match the length of column name list (1)",
                     assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList("a"), Arrays.asList(new boolean[0]))).getMessage());
             assertEquals("The length of row array (3) does not match the length of column name list (2)", assertThrows(IllegalArgumentException.class,
@@ -1341,7 +1344,8 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
                 }
             }
 
-            final NumberFormatException listFailure = assertThrows(NumberFormatException.class, () -> CommonUtil.convert(Arrays.asList("1", "abc"), int[].class));
+            final NumberFormatException listFailure = assertThrows(NumberFormatException.class,
+                    () -> CommonUtil.convert(Arrays.asList("1", "abc"), int[].class));
             assertEquals("abc is not a valid Integer.", listFailure.getMessage());
             assertEquals("x is not a valid Integer.",
                     assertThrows(NumberFormatException.class, () -> CommonUtil.convert(new String[] { "1", "x" }, int[].class)).getMessage());

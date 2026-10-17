@@ -523,8 +523,6 @@ public class HttpRequestTest extends HttpRequestTestSupport {
         assertNotNull(result);
     }
 
-
-
     // G04-103: decompress() ran every response body through wrapInputStream + readAllBytes, even for the formats
     // that carry no Content-Encoding, where the stream comes back unchanged - a full copy of every uncompressed
     // body. The short-circuit must leave compressed, uncompressed and empty responses reading the same.
@@ -1169,8 +1167,6 @@ public class HttpRequestTest extends HttpRequestTestSupport {
         assertSame(request, request.readTimeout(0L));
     }
 
-
-
     // 2026-09-08 spillover S3 ITEM 3 (finding 46): a Cookie collection reaches the wire as ONE header
     // line whose cookie-pairs are separated by "; " (RFC 6265 5.4), not comma-joined.
     @Test
@@ -1205,8 +1201,6 @@ public class HttpRequestTest extends HttpRequestTestSupport {
             server.stop(0);
         }
     }
-
-
 
     // 2026-09-08 spillover S3 ITEM 5 (finding 44): inside one class connectTimeout(Duration.ofMillis(-1))
     // threw while connectTimeout(-1L) was a silent no-op. Every millis entry point now rejects a negative,

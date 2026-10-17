@@ -198,8 +198,6 @@ public class ByteListTest extends ByteListTestSupport {
         assertArrayEquals(new byte[] { 3, 5 }, list.toArray());
     }
 
-
-
     // G024-02: removeAll/retainAll/containsAll/disjoint/containsAny match a boxed-set reference on both the linear and the set path.
     @Test
     public void testBulkMembershipOps_matchBoxedReference() {
@@ -227,8 +225,6 @@ public class ByteListTest extends ByteListTestSupport {
             assertEquals(!java.util.Collections.disjoint(aSet, bSet), ByteList.of(a).containsAny(b));
         }
     }
-
-
 
     // G024-02: a list that shares its backing array with the argument (self or a window) is compacted against the original membership.
     @Test
@@ -649,8 +645,6 @@ public class ByteListTest extends ByteListTestSupport {
         assertEquals(0, list.size());
     }
 
-
-
     // Doc pin for the @throws NullPointerException added on 2026-09-11: the three-arg copyOf REJECTS a null array,
     // unlike the one-arg copyOf, which documents (and returns) an empty list for null.
     @Test
@@ -1021,8 +1015,6 @@ public class ByteListTest extends ByteListTestSupport {
                 () -> list.forEach(0, 0, (com.landawn.abacus.util.function.ByteConsumer) null));
     }
 
-
-
     // Doc pin for the javadoc corrected on 2026-09-11: forEach(fromIndex, toIndex, action) validates the RANGE
     // [min, max), never the individual start index, so a backward fromIndex == size() is accepted and clamped by
     // `N.min(size - 1, fromIndex)` to the last LOGICAL element. That clamp is deliberate - it is what keeps the
@@ -1352,8 +1344,6 @@ public class ByteListTest extends ByteListTestSupport {
         }
     }
 
-
-
     // Doc pin for the lowerMedian() example corrected on 2026-09-11: the old comment read "returns sorted:
     // [1, 2, 5, 8, 9]", which suggests the call sorts the list or returns a list. It does neither - N.lowerMedian
     // selects through a PriorityQueue and returns an OptionalByte.
@@ -1517,8 +1507,6 @@ public class ByteListTest extends ByteListTestSupport {
             assertNotNull(list);
         }
     }
-
-
 
     // G024-03: intersection/difference/symmetricDifference keep multiplicity and encounter order of the boxed Multiset algorithm.
     @Test
@@ -1744,8 +1732,6 @@ public class ByteListTest extends ByteListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(-1));
         assertThrows(IndexOutOfBoundsException.class, () -> list.removeAt(2));
     }
-
-
 
     // G024-01: removeDuplicates (unsorted path) keeps the first occurrence of each value, in order, and zeroes the vacated tail.
     @Test
@@ -2424,8 +2410,6 @@ public class ByteListTest extends ByteListTestSupport {
         }
     }
 
-
-
     // G024-04: toMultiset still counts every occurrence when the list is larger than the 256 distinct byte values.
     @Test
     public void testToMultiset_largeListCountsEveryOccurrence() {
@@ -2565,7 +2549,6 @@ public class ByteListTest extends ByteListTestSupport {
 
         return result.toArray();
     }
-
 
     // ---- perf review 2026-09-26 G024 end ----
 }

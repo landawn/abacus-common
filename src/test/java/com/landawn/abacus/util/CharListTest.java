@@ -199,8 +199,6 @@ public class CharListTest extends CharListTestSupport {
         }
     }
 
-
-
     // G111-02: removeAll/retainAll (hash set or bit set of the argument), containsAll/disjoint/containsAny (hash set or bit set
     // of this list) and the linear path must all agree with a boxed-set reference, for both overloads and around every threshold.
     @Test
@@ -251,8 +249,6 @@ public class CharListTest extends CharListTestSupport {
             }
         }
     }
-
-
 
     // G111-02: self-aliased and shared-backing-array arguments must still see the argument's original membership.
     @Test
@@ -1370,8 +1366,6 @@ public class CharListTest extends CharListTestSupport {
         assertEquals('e', list.get(4));
     }
 
-
-
     // G111-03: intersection/difference/symmetricDifference (boxed Multiset up to 1024 elements of b, int[65536] count table above)
     // must match a boxed counting reference, incl. the order of b's surviving occurrences in symmetricDifference.
     @Test
@@ -1649,8 +1643,6 @@ public class CharListTest extends CharListTestSupport {
         list.removeAllAt();
         assertEquals(3, list.size());
     }
-
-
 
     // G024-05: removeDuplicates (unsorted path, both the small hash-set and the large bit-set branch) keeps the first occurrence of each
     // value, in order, and zeroes the vacated tail.
@@ -2203,8 +2195,6 @@ public class CharListTest extends CharListTestSupport {
         }
     }
 
-
-
     // G024-06: toMultiset and the Multiset-based set operations still count every occurrence of a large list.
     @Test
     public void testToMultiset_largeListCountsEveryOccurrence() {
@@ -2389,7 +2379,6 @@ public class CharListTest extends CharListTestSupport {
 
         return new char[][] { intersection.toArray(), difference.toArray(), symmetricDifference.toArray() };
     }
-
 
     // ---- perf review 2026-09-26 G111 end ----
 }

@@ -1340,5 +1340,4 @@ public class RowDatasetToTest extends RowDatasetTestSupport {
         assertTrue(xml.contains("Bob"));
     }
 
-
 }

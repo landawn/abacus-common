@@ -265,8 +265,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertEquals(N.toList((byte) 4, (byte) 2, (byte) 5, (byte) 3, (byte) 6), ByteStream.flatten(array, true).map(e -> e).skip(1).toList());
     }
 
-
-
     // G114-01: flatten(byte[][], true) keeps the original walk for dense input and uses a compacted row walk when
     // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
     @Test
@@ -337,8 +335,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertEquals(0, ByteStream.flatten(new byte[][] { null, {}, null, {} }, true).count());
     }
 
-
-
     // G090-03: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
     @Test
     public void testFlattenVertically_iteratorExhaustionAndLongRow() {
@@ -383,8 +379,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertArrayEquals(expected.toArray(), result);
         assertArrayEquals(new byte[0], ByteStream.flatten(new byte[][] { null, {}, null }, true).toArray());
     }
-
-
 
     // G090-03: pins the column-major order of flatten(byte[][], true) for jagged input with null/empty/short rows
     @Test
@@ -451,8 +445,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertEquals(N.toList((byte) 3, (byte) 6, (byte) 2, (byte) 4, (byte) 0, (byte) 0, (byte) 5, (byte) 0),
                 ByteStream.flatten(array, (byte) 0, true).map(e -> e).skip(1).toList());
     }
-
-
 
     // Edge cases
     @Test
@@ -1047,8 +1039,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
 
     // toArray
 
-
-
     // G090-01: empty / fully skipped / read()==0 inputs
     @Test
     public void testOfInputStream_bulkToArrayCountToList_emptyAndEdge() {
@@ -1086,8 +1076,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertEquals(0, ByteStream.of(zeroRead).count());
     }
 
-
-
     // G090-01: bulk toArray/toByteList/count of of(InputStream) - same content and same read(buf) calls as element-wise iteration
     @Test
     public void testOfInputStream_bulkToArrayCountToList_multiChunk() {
@@ -1121,8 +1109,6 @@ public class ByteStreamCreationTest extends ByteStreamTestSupport {
         assertArrayEquals(Arrays.copyOfRange(big, 8192, big.length), ByteStream.of(new ByteArrayInputStream(big)).skip(8192).toArray());
         assertEquals(ByteList.of(Arrays.copyOfRange(big, 1, big.length)), ByteStream.of(new ByteArrayInputStream(big)).skip(1).toByteList());
     }
-
-
 
     // G090-01: an IOException in a later read still surfaces as UncheckedIOException from toArray/count/toByteList
     @Test

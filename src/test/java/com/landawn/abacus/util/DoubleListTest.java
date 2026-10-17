@@ -378,8 +378,6 @@ public class DoubleListTest extends DoubleListTestSupport {
         assertTrue(list.containsAll(new DoubleList()));
     }
 
-
-
     // G037-05: containsAll set path, both orientations, duplicates, NaN == NaN, 0.0 != -0.0
     @Test
     public void testContainsAll_setPathBothOrientationsG037() {
@@ -398,8 +396,6 @@ public class DoubleListTest extends DoubleListTestSupport {
         assertTrue(big.containsAll(new double[] { 0, 0, Double.NaN, 8 }));
         assertFalse(big.containsAll(new double[] { 0, 0, Double.NaN, -0.0 }));
     }
-
-
 
     // G037-05/06: randomized differential check of containsAll/disjoint against a naive nested scan
     @Test
@@ -691,8 +687,6 @@ public class DoubleListTest extends DoubleListTestSupport {
         DoubleList empty = new DoubleList();
         assertTrue(list.disjoint(empty));
     }
-
-
 
     // G037-06: disjoint / containsAny set path, both orientations and self
     @Test
@@ -1672,8 +1666,6 @@ public class DoubleListTest extends DoubleListTestSupport {
         list.removeAllAt();
         assertEquals(3, list.size());
     }
-
-
 
     // G037-07: removeDuplicates unsorted path keeps first occurrences in order and clears the tail
     @Test

@@ -599,8 +599,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
             // Overloads that check closed first refuse even an empty or null source.
             assertEquals("Joiner has been closed",
-                    assertThrows(IllegalStateException.class, () -> closed().appendAll(Collections.<Object> emptyList(), x -> true))
-                            .getMessage());
+                    assertThrows(IllegalStateException.class, () -> closed().appendAll(Collections.<Object> emptyList(), x -> true)).getMessage());
             assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed().appendBean(null)).getMessage());
             assertEquals("Joiner has been closed", assertThrows(IllegalStateException.class, () -> closed().repeat("x", 0)).getMessage());
         }

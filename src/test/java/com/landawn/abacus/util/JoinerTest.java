@@ -174,9 +174,6 @@ public class JoinerTest extends JoinerTestSupport {
         assertEquals("c|d", Joiner.with(", ").merge(Joiner.with("|").append("c").append("d")).toString());
     }
 
-
-
-
     // G113-01: merge bulk-copies the other Joiner's content (empty prefix, non-empty prefix, self-merge).
     @Test
     public void testMerge_bulkCopyPrefixSuffixAndOtherState() {
@@ -264,8 +261,6 @@ public class JoinerTest extends JoinerTestSupport {
 
         assertEquals("a,b", Joiner.with(",").skipNulls().trimBeforeAppend().append("  a  ").append((String) null).append("  b  ").toString());
     }
-
-
 
     /**
      * Pins the scope of the two monitors the class javadoc documents: {@link Joiner#toString()} and
@@ -415,8 +410,6 @@ public class JoinerTest extends JoinerTestSupport {
         assertEquals(emSpace + "a" + emSpace, Joiner.with(",").stripBeforeAppend().trimBeforeAppend().append(emSpace + "a" + emSpace).toString());
         assertEquals("a", Joiner.with(",").trimBeforeAppend().stripBeforeAppend().append(emSpace + "a" + emSpace).toString());
     }
-
-
 
     /**
      * A {@code toString()} racing a {@code close()} used to hand the SAME pooled {@code StringBuilder} back to
@@ -611,7 +604,6 @@ public class JoinerTest extends JoinerTestSupport {
             throw new IllegalStateException(e);
         }
     }
-
 
     // ---- perf review 2026-09-26 G113 end ----
 }

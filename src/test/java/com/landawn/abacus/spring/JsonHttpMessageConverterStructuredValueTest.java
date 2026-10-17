@@ -48,6 +48,12 @@ public class JsonHttpMessageConverterStructuredValueTest extends TestBase {
     private IntList primitiveList;
     private Holder<List<String>> holder;
     private Holder<Optional<String>> nestedHolder;
+    private Optional<? extends Pair<Long, List<String>>> wildcardPair;
+    private Optional<? extends ArrayValue> wildcardCustomValue;
+    private Optional<? extends ArrayEnum> wildcardEnum;
+    private Optional<? extends List<Long>> wildcardList;
+    private Optional<? extends Long[]> wildcardArray;
+    private Optional<? extends String> wildcardScalar;
 
     private final JsonHttpMessageConverter converter = new JsonHttpMessageConverter();
 
@@ -115,6 +121,28 @@ public class JsonHttpMessageConverterStructuredValueTest extends TestBase {
         assertThrows(ParsingException.class, () -> read("[1,2] [3]", ArrayValue.class));
         for (final Class<?> scalar : List.of(String.class, Boolean.class, Pattern.class)) {
             assertThrows(ParsingException.class, () -> read("[1,2]", scalar));
+        }
+    }
+
+    @Test
+    public void upperBoundedHandlersKeepStructuredShapeAndConversionRules() throws Exception {
+        assertEquals(Optional.of(Pair.of(1L, List.of("a"))), read("[1,[\"a\"]]", fieldType("wildcardPair")));
+        final ArrayValue value = (ArrayValue) ((Optional<?>) read("[1,2]", fieldType("wildcardCustomValue"))).orElseThrow();
+        assertArrayEquals(new int[] { 1, 2 }, value.values());
+        assertEquals(Optional.of(ArrayEnum.VALUE), read("[1,2]", fieldType("wildcardEnum")));
+        assertThrows(ParsingException.class, () -> read("[1,[\"a\"]] true", fieldType("wildcardPair")));
+        for (final String field : List.of("wildcardCustomValue", "wildcardEnum")) {
+            assertThrows(ParsingException.class, () -> read("[1,2] true", fieldType(field)), field);
+        }
+    }
+
+    @Test
+    public void upperBoundedScalarsCollectionsAndArraysRetainGenericTypes() throws Exception {
+        assertEquals(Optional.of("[1]"), read("\"[1]\"", fieldType("wildcardScalar")));
+        assertEquals(Optional.of(List.of(1L, 2L)), read("[1,2]", fieldType("wildcardList")));
+        assertArrayEquals(new Long[] { 1L, 2L }, (Long[]) ((Optional<?>) read("[1,2]", fieldType("wildcardArray"))).orElseThrow());
+        for (final String field : List.of("wildcardScalar", "wildcardList", "wildcardArray")) {
+            assertEquals(Optional.empty(), read("null", fieldType(field)));
         }
     }
 

@@ -80,8 +80,6 @@ public class FnTest extends FnTestSupport {
         assertTrue(snapshotBiOr.test("a", "a"));
     }
 
-
-
     // G039-01: concurrent callers never accept more than the limit, and accept exactly the limit in total
     @Test
     public void testAtMost_concurrentExactLimit() throws Exception {
@@ -127,8 +125,6 @@ public class FnTest extends FnTestSupport {
         assertEquals(limit, acceptedFtl.get());
     }
 
-
-
     // G039-01: atMost keeps returning false after exhaustion (fast path skips the CAS), incl. count 0
     @Test
     public void testAtMost_exhaustionPinned() {
@@ -162,8 +158,6 @@ public class FnTest extends FnTestSupport {
         assertThrows(RuntimeException.class, () -> Fn.close(throwing).run());
         assertDoesNotThrow(() -> Fn.closeQuietly(throwing).run());
     }
-
-
 
     // FINDING G20-006: the eight close/shutdown runnables used to synchronize on `this` - the object handed to
     // the caller - so caller code holding that monitor could block, or deadlock against, a close in flight. The
@@ -246,8 +240,6 @@ public class FnTest extends FnTestSupport {
                 "Fn.closeAllQuietly(Collection).run() blocked on the caller-held monitor of the returned Runnable");
         assertEquals(1, a4.getCloseCount());
     }
-
-
 
     // FINDING G20-005 (doc-only contract pin): closeAll*/closeAllQuietly read the caller's array or collection
     // live at run() time, which the javadoc now states explicitly. Passes on both sides of the fix by design.
@@ -345,8 +337,6 @@ public class FnTest extends FnTestSupport {
         assertFalse(Fn.<String, String> equal().test("a", "b"));
     }
 
-
-
     // G039-01: filterThenLimit still invokes the predicate for every element after the limit is used up
     @Test
     public void testFilterThenLimit_predicateCallsPinned() {
@@ -390,8 +380,6 @@ public class FnTest extends FnTestSupport {
         final IllegalStateException taskFailure = new IllegalStateException("task failure");
         assertSame(taskFailure, assertThrows(IllegalStateException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskFailure))));
     }
-
-
 
     // FINDING G20-004 (doc-only contract pin): a cancelled task's CancellationException is unchecked and is not
     // folded into defaultValue; the InterruptedException path does return it and restores the interrupt flag.
@@ -495,8 +483,6 @@ public class FnTest extends FnTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Fn.cast(null));
     }
 
-
-
     // G039-01: limitThenFilter never invokes the predicate once the limit is used up
     @Test
     public void testLimitThenFilter_predicateCallsPinned() {
@@ -529,8 +515,6 @@ public class FnTest extends FnTestSupport {
         assertFalse(none.test(2));
         assertTrue(seenZero.isEmpty());
     }
-
-
 
     // R07 (2026-09-08): the r9506 memoize javadoc said a swallowed recursion means "the enclosing call fails and
     // nothing is cached". Poisoning is per input, so in a two-input cycle the OTHER input is computed and cached
@@ -598,8 +582,6 @@ public class FnTest extends FnTestSupport {
         assertThrows(NullPointerException.class, () -> Fn.in(List.of("a")).test(null));
         assertThrows(NullPointerException.class, () -> Fn.notIn(List.of("a")).test(null));
     }
-
-
 
     // FINDING G20-001 (doc-only contract pin): numToDouble widens a Float through its decimal spelling rather
     // than Number#doubleValue(), and all three numTo* functions map null to 0.
@@ -797,8 +779,6 @@ public class FnTest extends FnTestSupport {
         assertEquals("http://example.com", urls.get(0).toString());
         assertNull(urls.get(1));
     }
-
-
 
     /**
      * Runs {@code task} on another thread while this thread holds {@code task}'s own monitor and reports whether

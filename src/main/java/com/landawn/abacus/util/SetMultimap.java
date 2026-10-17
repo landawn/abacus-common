@@ -793,6 +793,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * mutable - and {@link #copy()} reproduces such a key faithfully. The check exists to catch a malformed
      * map up front, not to guarantee the state can never occur.</p>
      *
+     * <p><b>WARNING:</b> each key of {@code map} must map to its own set - never the same set instance as
+     * another key, nor a view of another key's set (for example {@code Collections.unmodifiableSet(set)}).
+     * Sharing is not detected and is not supported, also when it is introduced later through the wrapped
+     * map; see the {@link Multimap} class javadoc.</p>
+     *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param map the map to be wrapped into a SetMultimap; must not be {@code null} and must not contain {@code null} or empty values
@@ -844,6 +849,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * SetMultimap.wrap(bad, TreeSet::new);  // throws IllegalArgumentException (empty value)
      * }</pre>
      *
+     * <p><b>WARNING:</b> each key of {@code map} must map to its own set - never the same set instance as
+     * another key, nor a view of another key's set (for example {@code Collections.unmodifiableSet(set)}).
+     * Sharing is not detected and is not supported, also when it is introduced later through the wrapped
+     * map; see the {@link Multimap} class javadoc. {@code valueSupplier} must likewise return a new, empty set
+     * on every call.</p>
+     *
      * @param <K> the type of the keys in the map
      * @param <E> the type of the elements in the set
      * @param <V> the type of the value set, which must extend {@code Set<E>}
@@ -888,7 +899,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * because its key handling (a comparator, reference equivalence, thread safety, weak keys) applies to the
      * original keys, not to the inverted ones: a sorted multimap does <i>not</i> invert into a sorted one, and a
      * {@link java.util.concurrent.ConcurrentHashMap}-backed one does <i>not</i> invert into a concurrent one -
-     * unlike {@link #copy()}, which does reuse this multimap's map supplier. Nor is a {@link BiMap}, whose
+     * unlike {@link #copy()}, which reuses this multimap's map supplier, or the kind of its backing map when it
+     * has no map supplier. Nor is a {@link BiMap}, whose
      * value-uniqueness would reject two inverted keys with equal value sets.
      *
      * <p><b>Usage Examples:</b></p>
@@ -942,6 +954,11 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * membership and ordering policies. Sorted subset bounds and concurrent implementation types
      * are not retained. Other sets use the original set supplier, which must preserve their contents.
      * The original suppliers are retained for future new keys.</p>
+     *
+     * <p>The new SetMultimap uses the same map supplier as the original when this multimap was created with one.
+     * A multimap built over an existing map (by {@link #wrap(Map)}, {@link #fromMap(Map)} or {@code of(..)}, for
+     * example) has no map supplier; its copy gets a compatible empty map of the same kind, with the same fallbacks
+     * as {@link #fromMap(Map)} for a runtime map type that cannot be instantiated.</p>
      *
      * <p>Structural modifications to the returned multimap will not affect the original and vice versa.
      * Keys and individual values are shared references, so changes to those objects remain visible through both multimaps.

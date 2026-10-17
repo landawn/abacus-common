@@ -313,5 +313,4 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
         assertEquals(3, filtered.size());
     }
 
-
 }

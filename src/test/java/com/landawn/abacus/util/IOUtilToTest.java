@@ -26,10 +26,6 @@ public class IOUtilToTest extends IOUtilTestSupport {
         assertTrue(path.contains("\u20ac+%bad%zz.txt"));
     }
 
-
-
-
-
     // G131-01: java.io.File drops EVERY leading separator before a drive letter, so a drive-relative path after four
     // or more slashes - plain or escaped - is refused like "file:///C:x" (it became File("C:x\\y")); the same spellings
     // of an absolute path, and a UNC host followed by such a name, are unchanged
@@ -60,9 +56,6 @@ public class IOUtilToTest extends IOUtilTestSupport {
         assertFalse(withFragment.getPath().contains("#"));
     }
 
-
-
-
     // G045-02: a bare or drive-relative Windows drive spelled with an escaped letter or colon is refused like its plain
     // spelling; it used to decode to File("C:") / File("C:x"), the process's current directory on drive C:
     @Test
@@ -79,10 +72,6 @@ public class IOUtilToTest extends IOUtilTestSupport {
         assertEquals(new File("C:\\x"), IOUtil.toFile(new URL("file:///C%3A/x")));
         assertEquals(new File("C:\\x y"), IOUtil.toFile(new URL("file:///%43:/x%20y")));
     }
-
-
-
-
 
     // G045-02: the escaped bare / drive-relative drive is refused in the other URL forms that reach the decoded check too
     // ("localhost" authority, one-slash form, lower-case escaped letter); a decoded colon that does not follow a lone drive
@@ -304,7 +293,6 @@ public class IOUtilToTest extends IOUtilTestSupport {
     public void testToUrls_NullFileCollection() throws Exception {
         assertThrows(Exception.class, () -> IOUtil.toUrls((java.util.Collection<File>) null));
     }
-
 
     // ---- bug review 2026-10-02 final G131 end ----
 }

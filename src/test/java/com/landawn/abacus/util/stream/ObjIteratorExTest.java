@@ -3,15 +3,25 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
 
@@ -569,6 +579,235 @@ public class ObjIteratorExTest extends TestBase {
 
         Assertions.assertThrows(IllegalStateException.class, () -> iter[0].hasNext());
         Assertions.assertThrows(IllegalStateException.class, () -> iter[0].next());
+    }
+
+    @Test
+    public void testDeferRejectedIteratorExIsClosedAndReleased() throws Exception {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final IllegalArgumentException closeFailure = new IllegalArgumentException("close failed");
+        final Iterator<Object> source = rejectedIterator(true, () -> {
+            closeCalls.incrementAndGet();
+            throw closeFailure;
+        });
+        final ObjIteratorEx<Object> deferred = deferredWithRejectedSource(source, recursiveFailure, supplierCalls);
+
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, deferred::hasNext);
+        Assertions.assertSame(recursiveFailure.get(), failure);
+        Assertions.assertArrayEquals(new Throwable[] { closeFailure }, failure.getSuppressed());
+        assertNoRetainedDelegate(deferred);
+        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, deferred::next));
+        deferred.closeResource();
+        deferred.closeResource();
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    @Test
+    public void testDeferRejectedAutoCloseableIteratorIsClosedAndReleased() throws Exception {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final Iterator<Object> source = rejectedIterator(false, closeCalls::incrementAndGet);
+        final ObjIteratorEx<Object> deferred = deferredWithRejectedSource(source, recursiveFailure, supplierCalls);
+
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, deferred::count);
+        Assertions.assertSame(recursiveFailure.get(), failure);
+        Assertions.assertEquals(0, failure.getSuppressed().length);
+        assertNoRetainedDelegate(deferred);
+        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, () -> deferred.advance(1)));
+        deferred.closeResource();
+        deferred.closeResource();
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    public void testDeferRejectedCloseObservesPublishedFailureOutsideInitializationLock(final boolean extended) throws Exception {
+        final AtomicReference<ObjIteratorEx<Object>> deferred = new AtomicReference<>();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicBoolean heldLock = new AtomicBoolean();
+        final AtomicBoolean callbackCompleted = new AtomicBoolean();
+        final Iterator<Object> source = rejectedIterator(extended, () -> {
+            closeCalls.incrementAndGet();
+            heldLock.set(Thread.holdsLock(deferred.get()));
+
+            // Fail deterministically on the old implementation without blocking a test thread on its monitor.
+            if (heldLock.get()) {
+                return;
+            }
+
+            assertDoesNotThrow(() -> assertNoRetainedDelegate(deferred.get()));
+            deferred.get().closeResource();
+            Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, deferred.get()::hasNext));
+            Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, deferred.get()::count));
+
+            final FutureTask<IllegalStateException> observation = new FutureTask<>(
+                    () -> Assertions.assertThrows(IllegalStateException.class, deferred.get()::hasNext));
+            final Thread observer = new Thread(observation, "defer-rejected-close-observer");
+            observer.setDaemon(true);
+            observer.start();
+
+            try {
+                Assertions.assertSame(recursiveFailure.get(), observation.get(5, TimeUnit.SECONDS));
+                callbackCompleted.set(true);
+            } catch (final Exception e) {
+                throw new AssertionError("A cleanup callback must be able to wait for another traversal of the failed iterator", e);
+            } finally {
+                observer.interrupt();
+            }
+        });
+        deferred.set(deferredWithRejectedSource(source, recursiveFailure, supplierCalls));
+
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, deferred.get()::hasNext);
+        Assertions.assertFalse(heldLock.get(), "Rejected cleanup must not run under the deferred iterator's initialization monitor");
+        Assertions.assertArrayEquals(new Throwable[0], failure.getSuppressed());
+        Assertions.assertTrue(callbackCompleted.get());
+        Assertions.assertSame(recursiveFailure.get(), failure);
+        assertNoRetainedDelegate(deferred.get());
+        deferred.get().closeResource();
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    @ParameterizedTest
+    @MethodSource("fatalDeferCloseFailures")
+    public void testDeferFatalRejectedClosePropagatesWithInitializationContext(final boolean extended, final Error closeFailure) throws Exception {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final Iterator<Object> source = rejectedIterator(extended, () -> {
+            closeCalls.incrementAndGet();
+            throw closeFailure;
+        });
+        final ObjIteratorEx<Object> deferred = deferredWithRejectedSource(source, recursiveFailure, supplierCalls);
+
+        Assertions.assertSame(closeFailure, Assertions.assertThrows(Error.class, deferred::hasNext));
+        Assertions.assertArrayEquals(new Throwable[] { recursiveFailure.get() }, closeFailure.getSuppressed());
+        Assertions.assertEquals(0, recursiveFailure.get().getSuppressed().length);
+        assertNoRetainedDelegate(deferred);
+        Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, deferred::hasNext));
+        Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, deferred::next));
+        Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, deferred::count));
+        Assertions.assertSame(recursiveFailure.get(), Assertions.assertThrows(IllegalStateException.class, () -> deferred.advance(1)));
+        deferred.closeResource();
+        deferred.closeResource();
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    @SuppressWarnings("removal")
+    private static java.util.stream.Stream<Arguments> fatalDeferCloseFailures() {
+        // Construct sentinels directly; never exhaust heap/stack space or stop a real thread.
+        return java.util.stream.Stream.of(true, false)
+                .flatMap(extended -> java.util.stream.Stream.of(Arguments.of(extended, new ThreadDeath()),
+                        Arguments.of(extended, new OutOfMemoryError("close failed")), Arguments.of(extended, new StackOverflowError("close failed"))));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    public void testDeferRejectedCloseSuppressesOrdinaryError(final boolean extended) throws Exception {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final AssertionError closeFailure = new AssertionError("close failed");
+        final ObjIteratorEx<Object> deferred = deferredWithRejectedSource(rejectedIterator(extended, () -> {
+            closeCalls.incrementAndGet();
+            throw closeFailure;
+        }), recursiveFailure, supplierCalls);
+
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, deferred::hasNext);
+        Assertions.assertSame(recursiveFailure.get(), failure);
+        Assertions.assertArrayEquals(new Throwable[] { closeFailure }, failure.getSuppressed());
+        assertNoRetainedDelegate(deferred);
+        deferred.closeResource();
+        Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, deferred::hasNext));
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    public void testDeferRejectedCloseDoesNotSuppressFailureOnItself(final boolean extended) throws Exception {
+        final AtomicInteger closeCalls = new AtomicInteger();
+        final AtomicInteger supplierCalls = new AtomicInteger();
+        final AtomicReference<IllegalStateException> recursiveFailure = new AtomicReference<>();
+        final ObjIteratorEx<Object> deferred = deferredWithRejectedSource(rejectedIterator(extended, () -> {
+            closeCalls.incrementAndGet();
+            throw recursiveFailure.get();
+        }), recursiveFailure, supplierCalls);
+
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, deferred::hasNext);
+        Assertions.assertSame(recursiveFailure.get(), failure);
+        Assertions.assertEquals(0, failure.getSuppressed().length);
+        assertNoRetainedDelegate(deferred);
+        deferred.closeResource();
+        Assertions.assertEquals(1, closeCalls.get());
+        Assertions.assertEquals(1, supplierCalls.get());
+    }
+
+    private static ObjIteratorEx<Object> deferredWithRejectedSource(final Iterator<Object> source,
+            final AtomicReference<IllegalStateException> recursiveFailure, final AtomicInteger supplierCalls) {
+        final AtomicReference<ObjIteratorEx<Object>> deferred = new AtomicReference<>();
+        deferred.set(ObjIteratorEx.defer(() -> {
+            supplierCalls.incrementAndGet();
+            recursiveFailure.set(Assertions.assertThrows(IllegalStateException.class, deferred.get()::hasNext));
+            return source;
+        }));
+        return deferred.get();
+    }
+
+    private static Iterator<Object> rejectedIterator(final boolean extended, final Runnable onClose) {
+        if (extended) {
+            return new ObjIteratorEx<>() {
+                @Override
+                public boolean hasNext() {
+                    throw new AssertionError("A rejected iterator must never be traversed");
+                }
+
+                @Override
+                public Object next() {
+                    throw new AssertionError("A rejected iterator must never be traversed");
+                }
+
+                @Override
+                public void closeResource() {
+                    onClose.run();
+                }
+            };
+        }
+
+        class CloseableIterator implements Iterator<Object>, AutoCloseable {
+            @Override
+            public boolean hasNext() {
+                throw new AssertionError("A rejected iterator must never be traversed");
+            }
+
+            @Override
+            public Object next() {
+                throw new AssertionError("A rejected iterator must never be traversed");
+            }
+
+            @Override
+            public void close() {
+                onClose.run();
+            }
+        }
+
+        return new CloseableIterator();
+    }
+
+    private static void assertNoRetainedDelegate(final ObjIteratorEx<?> deferred) throws Exception {
+        // Inspect ownership directly; this regression does not need GC timing or large allocations.
+        for (final String name : List.of("iter", "iterEx")) {
+            final Field field = deferred.getClass().getDeclaredField(name);
+            field.setAccessible(true);
+            Assertions.assertNull(field.get(deferred), "Failed initialization retained " + name);
+        }
     }
 
     // A self-returning deferred iterator fails on every traversal path; closeResource stays a safe no-op.

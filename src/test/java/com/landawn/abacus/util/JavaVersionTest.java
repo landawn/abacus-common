@@ -347,11 +347,13 @@ public class JavaVersionTest extends TestBase {
             assertTrue(Strings.isNumeric(digits), "Strings.isNumeric accepts Unicode decimal digits: " + digits);
             assertFalse(Strings.isAsciiNumeric(digits), "... but they are not ASCII digits, which is what the guard tests: " + digits);
 
-            final IllegalArgumentException fromOf = assertThrows(IllegalArgumentException.class, () -> JavaVersion.of(digits), "of(\"" + digits + "\") must be rejected");
+            final IllegalArgumentException fromOf = assertThrows(IllegalArgumentException.class, () -> JavaVersion.of(digits),
+                    "of(\"" + digits + "\") must be rejected");
             assertEquals("Invalid Java version: " + digits, fromOf.getMessage());
             assertNull(fromOf.getCause(), "rejected by the guard, so there is no parse failure to report as a cause");
 
-            final IllegalArgumentException fromGet = assertThrows(IllegalArgumentException.class, () -> JavaVersion.get(digits), "get(\"" + digits + "\") must be rejected");
+            final IllegalArgumentException fromGet = assertThrows(IllegalArgumentException.class, () -> JavaVersion.get(digits),
+                    "get(\"" + digits + "\") must be rejected");
             assertEquals("Invalid Java version: " + digits, fromGet.getMessage());
             assertNull(fromGet.getCause(), "rejected by the guard, so there is no parse failure to report as a cause");
         }

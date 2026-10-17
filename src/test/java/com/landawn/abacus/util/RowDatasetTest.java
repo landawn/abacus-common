@@ -1004,8 +1004,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertNull(result.moveToRow(0).get("salary"));
     }
 
-
-
     // G066-01: multi-key groupBy/distinctBy keep their groups (duplicates and null keys) with plain key arrays.
     @Test
     public void testGroupBy_multiKeyIdentityPaths_pinned() {
@@ -1371,8 +1369,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         Assertions.assertEquals(2, count);
     }
 
-
-
     // G066-01/G066-02: multi-key and single-key joins, with duplicate, null and unmatched keys on both sides.
     @Test
     public void testJoins_multiKeyAndRightColumnPaths_pinned() {
@@ -1414,8 +1410,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), selfFull.copyColumn("id_2"));
         assertEquals(left.copyColumn("v"), selfFull.copyColumn("v_2"));
     }
-
-
 
     // G066-01: multi-key joins that build a new row-typed column, with and without a collection per left row.
     @Test
@@ -1860,8 +1854,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         }
     }
 
-
-
     // G066-01: parallelSortBy shares the sort path; a keyExtractor that removes a row failed with an IndexOutOfBoundsException.
     @Test
     public void testParallelSortBy_keyExtractorRemovingRowThrowsCme() {
@@ -1959,10 +1951,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertThrows(IllegalArgumentException.class, () -> ds.merge(null, Arrays.asList("id")));
         assertThrows(IllegalArgumentException.class, () -> ds.merge(null, 0, 0, Arrays.asList("id")));
     }
-
-
-
-
 
     // G113-03: multi-key removeDuplicateRowsBy keeps the first row of each key (deep array equality, nulls, many keys).
     @Test
@@ -2545,9 +2533,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
     // sortBy
 
-
-
-
     // G066-01: a sortBy comparator that removes a row failed part way through the row permutation with an
     // IndexOutOfBoundsException after it had already moved rows - losing one row and duplicating another.
     @Test
@@ -2566,8 +2551,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
         assertEquals(Arrays.asList(3, 1), ds.copyColumn("id"));
     }
-
-
 
     // G066-01: a same-size structural change (a nested sortBy) from the comparator went undetected, and the stale
     // permutation was applied to the re-ordered rows, silently leaving them in the wrong order.
@@ -2589,8 +2572,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList("c", "b", "a"), ds.copyColumn("name"));
     }
 
-
-
     // G066-01: writing cell values from a comparator stays allowed (not a structural modification).
     @Test
     public void testSortBy_comparatorWritingCellDoesNotThrow() {
@@ -2604,8 +2585,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList(1, 2), ds.copyColumn("id"));
         assertEquals(Arrays.asList("a", "w"), ds.copyColumn("name"));
     }
-
-
 
     // G066-01: a sortBy keyExtractor that adds a row failed with ArrayIndexOutOfBoundsException.
     @Test
@@ -2775,9 +2754,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         Assertions.assertEquals(5, symmetricDiff.size());
     }
 
-
-
-
     // G065-01: an empty column selection wrote "[]" without flushing the caller's Writer (the non-empty path flushes).
     @Test
     public void testToJson_emptySelectionFlushesWriter() {
@@ -2816,8 +2792,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
     // toList
 
-
-
     // G065-01: immutable (record) beans still go through the finishing pass.
     @Test
     public void testToListBean_immutableRecordsStillFinished() {
@@ -2827,8 +2801,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList(new G065Point(1, "a"), new G065Point(2, "b"), new G065Point(0, null)), ds.toList(G065Point.class));
         assertEquals(Arrays.asList(new G065Point(2, "b")), ds.toList(1, 2, G065Point.class));
     }
-
-
 
     // G065-01: toEntities skips the identity-finishing pass for mutable beans; pins values, fresh distinct instances and a mutable result.
     @Test
@@ -2858,8 +2830,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertTrue(ds.toList(1, 1, Person.class).isEmpty());
         assertEquals(2, ds.toEntities(0, 2, null, Person.class).size());
     }
-
-
 
     // G065-01: nested mutable beans (single child and child collection), with and without merging, keep their shape and identities.
     @Test
@@ -2914,10 +2884,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
     // toMergedEntities
 
-
-
-
-
     // G067-01: toMergedEntities read a nested collection back from a builder-based immutable bean's BUILDER through the bean's
     // property accessor -> ClassCastException (records and mutable beans were fine; toList on the same bean was fine).
     @Test
@@ -2941,10 +2907,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList(11), perRow.get(1).getChildren().stream().map(G067Child::getId).toList());
     }
 
-
-
-
-
     // G120 verify of G067-01: a builder may copy (or append) the collection it is given, so the merged collection is handed to
     // each builder once, complete; setting it empty and filling it afterwards left such beans with empty lists.
     @Test
@@ -2962,9 +2924,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         assertEquals(Arrays.asList(10, 11), appended.get(0).getChildren().stream().map(G067Child::getId).toList());
         assertEquals(Arrays.asList(20), appended.get(1).getChildren().stream().map(G067Child::getId).toList());
     }
-
-
-
 
     // toMergedEntities of a record parent (Object[] intermediate, read back directly, not deferred like a builder) still merges
     // its nested collection.
@@ -2991,12 +2950,9 @@ public class RowDatasetTest extends RowDatasetTestSupport {
                 () -> ds.toMergedEntities((String) null, Arrays.asList("id", "name"), RowDatasetTestSupport.Person.class));
         assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
 
-        e = assertThrows(IllegalArgumentException.class,
-                () -> ds.toMergedEntities((String) null, new HashMap<>(), RowDatasetTestSupport.Person.class));
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toMergedEntities((String) null, new HashMap<>(), RowDatasetTestSupport.Person.class));
         assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
     }
-
-
 
     // G065-01: an empty column selection wrote "<dataset></dataset>" without flushing the caller's Writer.
     @Test
@@ -3457,7 +3413,6 @@ public class RowDatasetTest extends RowDatasetTestSupport {
 
     public record G130RecordParent(@com.landawn.abacus.annotation.Id int id, List<G067Child> children) {
     }
-
 
     // ---- bug review 2026-10-02 final G130 end ----
 }

@@ -635,8 +635,6 @@ public class ThrowablesTest extends ThrowablesTestSupport {
         assertEquals(1, callCount.get(), "Supplier should only be called once even with concurrent access");
     }
 
-
-
     // FINDING R09-6 (the same defect com.landawn.abacus.util.LazyInitializer was fixed for): this object is what
     // Fnn.memoize(Throwables.Supplier) and N.lazyInitChecked(Throwables.Supplier) hand back to callers, so
     // initializing under `synchronized (this)` let caller code holding that monitor block the initialization.
@@ -1904,8 +1902,6 @@ public class ThrowablesTest extends ThrowablesTestSupport {
         assertUncheckedWrapsError(boom, () -> consumer.unchecked().accept("a"));
         assertUncheckedWrapsError(boom, () -> biConsumer.unchecked().accept("a", "b"));
     }
-
-
 
     /**
      * Calls {@code get()} on another thread while this thread holds the supplier's own monitor, and returns

@@ -568,6 +568,44 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
+    public void testGetTextContent_preservesWhitespaceRulesAndUnicode() throws Exception {
+        final Document document = XmlUtil.createDOMParser().newDocument();
+        // Build DOM text directly: an XML parser would normalize line endings and reject some control/surrogate cases.
+        final String[][] cases = { { "", "" }, { " \t\b\n\r\f ", "" }, { "  a  b  ", "a  b" }, { "a\t\b\n\r\fb", "a b" }, { "a\n b", "a  b" },
+                { "a \n b", "a  b" }, { "a  \n\t  b", "a    b" }, { " \uD83D\uDE03\n\u4E2D\u6587 ", "\uD83D\uDE03 \u4E2D\u6587" },
+                { "\t\uD800\uDC00a\uDBFF\uDFFF\r", "\uD800\uDC00a\uDBFF\uDFFF" }, { "\t\uD800\nx\r\uDFFF\f", "\uD800 x \uDFFF" },
+                { "\uD83D\n\uDE03", "\uD83D \uDE03" }, { " e\u0301\n\u03A9\uFFFD ", "e\u0301 \u03A9\uFFFD" },
+                { "\u00A0a\u000Bb\u00A0", "\u00A0a\u000Bb\u00A0" }, { " \u0085\u00A0\u1680\u2000\u2007\u2028\u2029\u202F\u205F\u3000\uFEFF ",
+                        "\u0085\u00A0\u1680\u2000\u2007\u2028\u2029\u202F\u205F\u3000\uFEFF" } };
+
+        for (int i = 0; i < cases.length; i++) {
+            final Node text = document.createTextNode(cases[i][0]);
+            assertEquals(cases[i][1], XmlUtil.getTextContent(text, true), "Normalized case " + i);
+            assertEquals(cases[i][0], XmlUtil.getTextContent(text, false), "Raw case " + i);
+            assertEquals(cases[i][0], XmlUtil.getTextContent(text), "Default case " + i);
+        }
+    }
+
+    @Test
+    public void testGetTextContent_preservesUnicodeAcrossDomNodeBoundaries() throws Exception {
+        final Document document = XmlUtil.createDOMParser().newDocument();
+        final Element root = document.createElement("root");
+        document.appendChild(root);
+        root.appendChild(document.createTextNode(" \uD83D"));
+        root.appendChild(document.createCDATASection("\uDE03\t\u4E2D"));
+        final Element child = document.createElement("child");
+        child.appendChild(document.createTextNode("\u6587"));
+        root.appendChild(child);
+        root.appendChild(document.createComment("not text content"));
+        root.appendChild(document.createTextNode("\r\uDBFF\uDFFF "));
+
+        final String raw = " \uD83D\uDE03\t\u4E2D\u6587\r\uDBFF\uDFFF ";
+        assertEquals("\uD83D\uDE03 \u4E2D\u6587 \uDBFF\uDFFF", XmlUtil.getTextContent(root, true));
+        assertEquals(raw, XmlUtil.getTextContent(root, false));
+        assertEquals(raw, XmlUtil.getTextContent(root));
+    }
+
+    @Test
     public void testWriteCharacters() throws Exception {
         StringBuilder sb = new StringBuilder();
         XmlUtil.writeCharacters("<hello> & \"world\"".toCharArray(), sb);

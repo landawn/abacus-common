@@ -165,8 +165,6 @@ public class StreamTransformationTest extends StreamTestSupport {
         assertEquals(Arrays.asList(1, 2, 3), stream.toList());
     }
 
-
-
     // Covers Stream.distinct(BinaryOperator) parallel path
     @Test
     public void testDistinct_BinaryOperator_Parallel() {
@@ -212,8 +210,6 @@ public class StreamTransformationTest extends StreamTestSupport {
         Stream<String> stream = Stream.of("a", "bb", "c", "dd").distinctBy(String::length);
         assertEquals(Arrays.asList("a", "bb"), stream.toList());
     }
-
-
 
     // Covers Stream.distinctBy(Function, BinaryOperator) parallel path
     @Test

@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 /** Strings validation contracts, including regression cases. */
 public class StringsValidationTest extends StringsTestSupport {
 
-
-
     // B1 : isValidJavaIdentifier and the JLS 17 restricted identifiers
     private static final String[] RESTRICTED = { "permits", "record", "sealed", "var", "yield" };
 
@@ -192,8 +190,6 @@ public class StringsValidationTest extends StringsTestSupport {
         assertFalse(Strings.isAnyEmpty("foo", "bar"));
     }
 
-
-
     // C-007: the rewritten varargs examples really exercise the varargs overloads
     @Test
     public void testC007_varargsIsAllIsAnyExamples() {
@@ -352,8 +348,6 @@ public class StringsValidationTest extends StringsTestSupport {
         assertFalse(Strings.isAsciiPrintable(""));
     }
 
-
-
     /**
      * Contract pin for the Commons Lang comparison note on {@code isAsciiPrintable(CharSequence)}: only the EMPTY
      * result diverges - both libraries return {@code false} for {@code null}.
@@ -442,8 +436,6 @@ public class StringsValidationTest extends StringsTestSupport {
 
     // isValidEmailAddress
 
-
-
     // C-001: long dotted / escaped inputs no longer overflow the stack
     @Test
     public void testC001_emailValidationAndFindingDoNotOverflowTheStack() throws Exception {
@@ -459,8 +451,6 @@ public class StringsValidationTest extends StringsTestSupport {
         // "!x@y.z" directly follows a '.', so it is a continuation of the previous token, not a separate address (C-436)
         assertEquals(Arrays.asList("a@b.c"), Strings.findAllEmailAddresses("a@b.c.!x@y.z"));
     }
-
-
 
     // C-002: the general address literal is a top-level alternative of the bracketed domain
     @Test
@@ -688,8 +678,6 @@ public class StringsValidationTest extends StringsTestSupport {
         assertTrue(Strings.isValidUrl("file:///C:/Users/doc.txt"));
     }
 
-
-
     // C-009: documented host rules of isValidUrl / isValidHttpUrl
     @Test
     public void testC009_isValidUrlHostRules() {
@@ -738,8 +726,6 @@ public class StringsValidationTest extends StringsTestSupport {
             }
         }
     }
-
-
 
     // O-2 : isWrappedWith(String, String)
     @Test

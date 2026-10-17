@@ -58,8 +58,9 @@ public class ExcReviewC4Test extends TestBase {
         // valid range + null supplier: still IllegalArgumentException, naming the supplier
         assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.toCollection(new int[1], 0, 1, (IntFunction<List<Integer>>) null)).getMessage()
                 .contains("supplier"));
-        assertTrue(assertThrows(IllegalArgumentException.class, () -> CommonUtil.toCollection(new String[1], 0, 1, (IntFunction<List<String>>) null)).getMessage()
-                .contains("supplier"));
+        assertTrue(
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.toCollection(new String[1], 0, 1, (IntFunction<List<String>>) null)).getMessage()
+                        .contains("supplier"));
         // and the happy path is untouched
         assertTrue(CommonUtil.toCollection(new int[] { 7 }, 0, 1, ArrayList::new).contains(7));
     }

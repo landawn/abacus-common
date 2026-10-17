@@ -213,8 +213,7 @@ public class XMLTypeTest extends TestBase {
 
         org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class,
                 () -> objectType.valueOf((Object) new java.util.ArrayList<>(List.of("p", "q"))));
-        org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class,
-                () -> objectType.valueOf(new String[] { "a", "b" }));
+        org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> objectType.valueOf(new String[] { "a", "b" }));
         org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class,
                 () -> objectType.valueOf((Object) new HashMap<>(Map.of("a", 1))));
         org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> objectType.valueOf(bean));

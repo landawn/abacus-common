@@ -1182,6 +1182,10 @@ public final class Throwables {
          * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access
          * while the wrapper remains open.
          * Recursive initialization throws {@link IllegalStateException} and also leaves creation retryable.
+         * If the supplier catches that failure and still returns an iterator, the returned iterator is closed before the
+         * failure is thrown. A failure while closing it is suppressed on the {@code IllegalStateException}, except that
+         * {@link ThreadDeath} and {@link VirtualMachineError} propagate instead, with the {@code IllegalStateException}
+         * suppressed on them.
          * If the supplier closes the wrapper during creation, its returned iterator is immediately closed
          * and the wrapper remains exhausted.
          * The returned iterator throws {@link IllegalStateException} on access if {@code iteratorSupplier}
@@ -1311,6 +1315,7 @@ public final class Throwables {
                 }
             }
 
+            @SuppressWarnings("removal")
             private boolean init() {
                 if (isClosed) {
                     return false;
@@ -1339,6 +1344,15 @@ public final class Throwables {
                             // Even if the supplier swallowed the recursive failure, its abandoned resource must be closed.
                             try {
                                 supplied.closeResource();
+                            } catch (final ThreadDeath | VirtualMachineError closeFailure) {
+                                // Same rule as ObjIteratorEx.defer: a fatal close failure propagates and carries the recursive failure.
+                                try {
+                                    closeFailure.addSuppressed(recursiveFailure);
+                                } catch (final Throwable ignored) { //NOSONAR
+                                    // Recording context must not replace the fatal error, even if it runs out of memory.
+                                }
+
+                                throw closeFailure;
                             } catch (final Throwable failure) {
                                 if (failure != recursiveFailure) {
                                     recursiveFailure.addSuppressed(failure);

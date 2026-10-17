@@ -20,8 +20,11 @@ package com.landawn.abacus.pool;
  *
  * <p>The eviction policy controls only the <em>order</em> in which objects are selected for
  * removal during balancing/vacate operations when the pool needs to free capacity. Expired
- * objects are always removed by the periodic eviction task regardless of the configured
+ * objects are removed by the periodic eviction task regardless of the configured
  * policy — the policy does not influence whether or how soon an expired object is reclaimed.
+ * That task exists only when the pool's {@code evictDelayInMillis} is positive; with {@code 0}
+ * nothing removes expired objects in the background, and an expired object is discarded only
+ * when an operation such as {@code poll} (or a keyed pool's {@code get}) encounters it.
  *
  * <p>Each policy uses different criteria from the object's {@link ActivityPrint} to determine
  * eviction priority. Objects with lower values according to the policy's criteria are

@@ -73,8 +73,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertEquals(1, names.size());
     }
 
-
-
     /**
      * C-027/C-028: an <i>empty</i> column selection is "nothing to do" for the three column mutators and "no
      * columns" for {@code println} — while {@code null} is still rejected by the mutators — and a {@code null}
@@ -237,8 +235,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         });
     }
 
-
-
     /**
      * C-014: the positional {@code addColumns} accepts {@code columnCount()} (append) and seeds a Dataset that has
      * no columns yet, neither of which its javadoc described.
@@ -259,8 +255,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
     }
 
     // combineColumns
-
-
 
     /**
      * C-018b: the {@code Tuple3} form of {@code combineColumns} enforces the same four rejections as the
@@ -376,8 +370,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertNotEquals(Dataset.rows(CommonUtil.asList("a"), new Object[0][]), Dataset.empty());
     }
 
-
-
     /**
      * C-011: {@code topBy}/{@code distinctBy} returned {@code this.copy()} when the operation could not shrink the
      * input, and a copy carries the missing-property policy over. The policy of a transformation result therefore
@@ -427,8 +419,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
     }
 
     // divideColumn
-
-
 
     /**
      * C-013: the Tuple overloads of {@code divideColumn} hand the same {@code Pair}/{@code Triple} to every row,
@@ -668,8 +658,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertEquals(1, result.size());
     }
 
-
-
     /**
      * C-025/C-026/C-029: contracts the cycle-2 javadoc pass added — the twentieth {@code filter} overload's
      * null-filter rejection, the stale-row-index {@code IndexOutOfBoundsException} that {@code Row}'s four core
@@ -830,8 +818,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertEquals(4, result.size());
         assertTrue(result.containsColumn("mergedData"));
     }
-
-
 
     /**
      * C-009: the aggregate column selection and the row type were only resolved by the {@code toList(..)} call
@@ -1261,8 +1247,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertNotNull(props);
     }
 
-
-
     /**
      * C-012: {@code renameColumns(Function)} validates the <i>resulting</i> name list, not the current one - its
      * javadoc claimed an exception for any new name that already existed, which no input can trigger.
@@ -1283,8 +1267,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         assertThrows(IllegalArgumentException.class, () -> collide.renameColumns((java.util.function.Function<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> collide.renameColumns(name -> null));
     }
-
-
 
     /**
      * C-010: rollup/cube document "arguments are validated when this method is called, before the Stream is
@@ -1332,8 +1314,6 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
             assertNotNull(free.get().toList());
         }
     }
-
-
 
     /**
      * C-036: the {@code rollup}/{@code cube} Streams read the <i>live</i> Dataset as each level is pulled, and
@@ -2015,6 +1995,5 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
 
         return result;
     }
-
 
 }

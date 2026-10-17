@@ -258,5 +258,4 @@ public class SheetSetTest extends SheetTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> sheet.setAt(0, 10, 1));
     }
 
-
 }

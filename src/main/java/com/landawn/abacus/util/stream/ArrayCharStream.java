@@ -700,16 +700,22 @@ class ArrayCharStream extends AbstractCharStream {
         return newStream(new CharIteratorEx() { //NOSONAR
             private int cursor = fromIndex;
             private Iterator<Character> cur = null;
-            private Collection<Character> c = null;
 
             @Override
             public boolean hasNext() {
                 while ((cur == null || !cur.hasNext()) && cursor < toIndex) {
-                    c = mapper.apply(elements[cursor++]);
+                    cur = null;
+                    final Collection<Character> c = mapper.apply(elements[cursor++]);
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override
@@ -968,16 +974,22 @@ class ArrayCharStream extends AbstractCharStream {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private Iterator<? extends T> cur = null;
-            private Collection<? extends T> c = null;
 
             @Override
             public boolean hasNext() {
                 while ((cur == null || !cur.hasNext()) && cursor < toIndex) {
-                    c = mapper.apply(elements[cursor++]);
+                    cur = null;
+                    final Collection<? extends T> c = mapper.apply(elements[cursor++]);
                     cur = N.isEmpty(c) ? null : c.iterator();
                 }
 
-                return cur != null && cur.hasNext();
+                if (cur != null && cur.hasNext()) {
+                    return true;
+                }
+
+                // An exhausted iterator can retain the entire mapped collection.
+                cur = null;
+                return false;
             }
 
             @Override

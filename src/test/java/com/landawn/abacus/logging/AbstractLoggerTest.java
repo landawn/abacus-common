@@ -562,6 +562,30 @@ public class AbstractLoggerTest extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("removal")
+    public void testFormatPropagatesThreadDeath() {
+        final ThreadDeath fatal = new ThreadDeath();
+        final Object value = new Object() {
+            @Override
+            public String toString() {
+                throw fatal;
+            }
+        };
+
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{}", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{} {}", "ok", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{} {} {}", "ok", "ok", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{}", new Object[] { value })));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{} {} {} {}", new Object[] { "ok", "ok", "ok", value })));
+
+        // Extra arguments use separate rendering paths after all placeholders have been consumed.
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("message", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{}", "ok", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{} {}", "ok", "ok", value)));
+        assertSame(fatal, assertThrows(ThreadDeath.class, () -> AbstractLogger.format("{} {} {}", new Object[] { "ok", "ok", "ok", value })));
+    }
+
+    @Test
     public void testSelfReferentialCollectionAndArrayDoNotOverflowTheLogCall() {
         final List<Object> list = new ArrayList<>();
         list.add("x");

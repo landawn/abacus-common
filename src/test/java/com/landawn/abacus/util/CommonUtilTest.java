@@ -42,8 +42,6 @@ import com.landawn.abacus.type.Type;
 
 public class CommonUtilTest extends CommonUtilTestSupport {
 
-
-
     // Anonymous containers are rejected rather than substituted or recreated with initializer data. Anonymous beans
     // retain their runtime type and existing initialization/copy behavior.
     @Test
@@ -307,8 +305,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertFalse(CommonUtil.containsSameElements(new double[] { 0.0 }, new double[] { -0.0 }));
     }
 
-
-
     // G029-01: sorted-copy comparison must match the boxed-Multiset semantics for every primitive overload.
     @Test
     public void testContainsSameElements_primitiveDifferentialAgainstCounts() {
@@ -368,8 +364,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         }
     }
 
-
-
     // G029-01: explicit edge cases of the primitive containsSameElements overloads.
     @Test
     public void testContainsSameElements_primitiveEdgeCases() {
@@ -427,6 +421,79 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange(new int[] { 1, 2 }, 0, 2, 0));
         assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0, 2));
         assertArrayEquals(new int[] { 1, 3 }, CommonUtil.copyOfRange(new int[] { 1, 2, 3, 4 }, 0, 4, 2));
+    }
+
+    @Test
+    public void testConvertDropsComparatorWhenNullBecomesNonNullDefault() {
+        final TreeMap<Object, String> source = new TreeMap<>((left, right) -> 0);
+        source.put(null, "7");
+
+        final Type<TreeMap<Integer, Integer>> primitiveKeyType = Type.of("TreeMap<int, Integer>");
+        final TreeMap<Integer, Integer> primitiveKeys = CommonUtil.convert(source, primitiveKeyType);
+        assertNull(primitiveKeys.comparator());
+        assertEquals(Map.of(0, 7), primitiveKeys);
+
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(source, new TypeReference<TreeMap<java.util.Optional<String>, Integer>>() {
+        }.type()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(source, new TypeReference<TreeMap<Holder<String>, Integer>>() {
+        }.type()));
+        assertEquals("7", source.get(null));
+    }
+
+    @Test
+    public void testConvertPreservesNullAwareMapComparators() {
+        final List<Type<? extends SortedMap<String, Integer>>> targets = List.of(new TypeReference<TreeMap<String, Integer>>() {
+        }.type(), new TypeReference<SortedMap<String, Integer>>() {
+        }.type(), new TypeReference<NavigableMap<String, Integer>>() {
+        }.type(), new TypeReference<ImmutableSortedMap<String, Integer>>() {
+        }.type(), new TypeReference<ImmutableNavigableMap<String, Integer>>() {
+        }.type());
+
+        for (final Comparator<String> comparator : List.of(Comparator.nullsFirst(Comparator.<String> reverseOrder()),
+                Comparator.nullsLast(Comparator.<String> reverseOrder()))) {
+            final TreeMap<String, String> source = new TreeMap<>(comparator);
+            source.put(null, "1");
+            source.put("a", "2");
+            source.put("b", "3");
+
+            for (final Type<? extends SortedMap<String, Integer>> target : targets) {
+                final SortedMap<String, Integer> result = CommonUtil.convert(source, target);
+                assertNotSame(source, result);
+                assertSame(comparator, result.comparator(), target.name());
+                assertEquals(new ArrayList<>(source.keySet()), new ArrayList<>(result.keySet()), target.name());
+                assertEquals(Integer.valueOf(1), result.get(null), target.name());
+                assertEquals(Integer.valueOf(2), result.get("a"), target.name());
+                assertEquals(Integer.valueOf(3), result.get("b"), target.name());
+            }
+
+            assertEquals(Arrays.asList("1", "2", "3"), Arrays.asList(source.get(null), source.get("a"), source.get("b")));
+        }
+    }
+
+    @Test
+    public void testConvertPreservesNullAwareSetComparators() {
+        final List<Type<? extends SortedSet<String>>> targets = List.of(new TypeReference<TreeSet<String>>() {
+        }.type(), new TypeReference<SortedSet<String>>() {
+        }.type(), new TypeReference<NavigableSet<String>>() {
+        }.type(), new TypeReference<ImmutableSortedSet<String>>() {
+        }.type(), new TypeReference<ImmutableNavigableSet<String>>() {
+        }.type());
+
+        for (final Comparator<String> comparator : List.of(Comparator.nullsFirst(Comparator.<String> reverseOrder()),
+                Comparator.nullsLast(Comparator.<String> reverseOrder()))) {
+            final TreeSet<String> source = new TreeSet<>(comparator);
+            source.addAll(Arrays.asList(null, "a", "b"));
+
+            for (final Type<? extends SortedSet<String>> target : targets) {
+                final SortedSet<String> result = CommonUtil.convert(source, target);
+                assertNotSame(source, result);
+                assertSame(comparator, result.comparator(), target.name());
+                assertEquals(new ArrayList<>(source), new ArrayList<>(result), target.name());
+                assertTrue(result.contains(null), target.name());
+            }
+
+            assertEquals(3, source.size());
+        }
     }
 
     @Test
@@ -547,8 +614,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
 
     // lastEntry
 
-
-
     // G029-02: reading the last entry must not reorder an access-ordered LinkedHashMap.
     @Test
     public void testLastEntry_accessOrderedLinkedHashMapKeepsOrder() {
@@ -564,8 +629,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertEquals("a", CommonUtil.lastEntry(lru).orElseThrow().getKey());
         assertEquals(Arrays.asList("b", "c", "a"), new ArrayList<>(lru.keySet()));
     }
-
-
 
     // G029-02: lastEntry of a LinkedHashMap is read from the end of the entry set; it must still be the map's own entry.
     @Test
@@ -598,8 +661,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         single.clear();
         assertFalse(CommonUtil.lastEntry(single).isPresent());
     }
-
-
 
     // G029-02: maps without a reverse traversal still return the last entry of their iteration order.
     @Test
@@ -867,8 +928,10 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertArrayEquals(new short[] { -1, 0, 0, 0 }, CommonUtil.toShortArray(values));
         assertArrayEquals(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0, 0 }, CommonUtil.toIntArray(values));
         assertArrayEquals(new long[] { Long.MAX_VALUE, Long.MIN_VALUE, 0, 0 }, CommonUtil.toLongArray(values));
-        assertArrayEquals(new float[] { Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN, Float.POSITIVE_INFINITY }, CommonUtil.toFloatArray(values));
-        assertArrayEquals(new double[] { Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY }, CommonUtil.toDoubleArray(values));
+        assertArrayEquals(new float[] { Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NaN, Float.POSITIVE_INFINITY },
+                CommonUtil.toFloatArray(values));
+        assertArrayEquals(new double[] { Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY },
+                CommonUtil.toDoubleArray(values));
     }
 
     @Test
@@ -1208,9 +1271,6 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.valueOf(null, null));
         assertEquals("'targetType' cannot be null", e2.getMessage());
     }
-
-
-
 
     /**
      * Reference semantics of the primitive containsSameElements overloads: equal length and equal per-value counts,

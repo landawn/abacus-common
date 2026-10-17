@@ -129,8 +129,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         assertEquals(Arrays.asList(Set.of(1), Set.of(2), Set.of(3)), result);
     }
 
-
-
     // G110-06: a null merge function passed to collapse(BiPredicate, init, mergeFunction) is reported under its public name
     @Test
     public void testCollapse_biPredicateInitNullMergeFunction_messageNamesMergeFunction() {
@@ -138,8 +136,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
                 () -> Stream.of(1, 2).collapse((a, b) -> true, "", (java.util.function.BiFunction<String, Integer, String>) null));
         assertEquals("'mergeFunction' cannot be null", e.getMessage());
     }
-
-
 
     // G110-06: same for collapse(TriPredicate, init, mergeFunction)
     @Test
@@ -456,8 +452,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         assertEquals(input, lines);
     }
 
-
-
     // onEachSave(Connection, batch): a failed first prepareStatement loses only the element pulled by that next(); the
     // batch count starts from the retry, so the remaining elements are flushed in full batches plus one tail batch on close.
     @Test
@@ -484,10 +478,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         verify(connection, times(0)).close();
     }
 
-
-
-
-
     // onEachSave(DataSource): each failed prepareStatement (SQLException) releases the connection it obtained, a later
     // next() retries with a fresh connection, and closing the stream afterwards releases nothing twice.
     @Test
@@ -512,8 +502,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         verify(conn1, times(1)).close();
         verify(conn2, times(1)).close();
     }
-
-
 
     // onEachSave(DataSource): after an unchecked failure of prepareStatement the retry reuses the connection already
     // obtained (it is not replaced and leaked), and close() then executes nothing more and releases it exactly once.
@@ -541,10 +529,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         verify(conn1, times(1)).close();
         verify(conn2, times(0)).close();
     }
-
-
-
-
 
     // G114-06: onEachSave(Connection/DataSource, ...) marked itself initialized before preparing the statement, so
     // after a failed prepareStatement/getConnection the next next() passed a null statement on (NPE) instead of
@@ -959,8 +943,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         assertEquals(java.util.Arrays.asList(3, 4, 5, 1, 2), result);
     }
 
-
-
     // G086-02 corrected 2026-10-03: the 09-26 performance oracle pinned overwrite corruption.
     // toArray must preserve the rotated encounter order even when the destination aliases the source.
     @Test
@@ -973,8 +955,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         org.junit.jupiter.api.Assertions.assertSame(backing, iter.toArray(backing));
         assertArrayEquals(expected, backing);
     }
-
-
 
     // G086-02: a target array whose type cannot hold the elements still fails element by element with the usual ArrayStoreException
     @Test
@@ -1328,8 +1308,6 @@ public class AbstractStreamTransformationTest extends AbstractStreamTestSupport 
         assertTrue(list.contains(5));
         assertTrue(list.contains(6));
     }
-
-
 
     // G086-02: rotated() toArray(A[]) copies the two contiguous runs in bulk when no array-store check can fail; checked against a modulo oracle
     @Test

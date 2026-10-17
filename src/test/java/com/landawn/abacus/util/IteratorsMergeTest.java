@@ -54,8 +54,6 @@ public class IteratorsMergeTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(1, 2), result.toList());
     }
 
-
-
     /** B3: the same for {@code merge}, whose "both sides exhausted" branch had no guard. */
     @Test
     public void testMerge_nextPastEndThrowsNoSuchElement() {
@@ -424,8 +422,6 @@ public class IteratorsMergeTest extends IteratorsTestSupport {
         assertEquals("f", iter.next());
         assertFalse(iter.hasNext());
     }
-
-
 
     /** J3: the no-comparator {@code mergeSorted} uses the library's null-friendly natural order (nulls first). */
     @Test
