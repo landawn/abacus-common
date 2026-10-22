@@ -234,7 +234,7 @@ public final class ExceptionUtil {
 
     /**
      * Converts the specified Exception to a RuntimeException if it's a checked exception.
-     * If it's already a RuntimeException, returns itself.
+     * Recognized wrapper exceptions are unwrapped before conversion; see {@link #toRuntimeException(Throwable, boolean, boolean)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -247,7 +247,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to convert; must not be {@code null}
-     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @return the converted runtime exception after wrapper unwrapping and mapper selection
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -273,7 +273,7 @@ public final class ExceptionUtil {
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException.
      *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
      *        thread and never interrupts this one, whatever this flag says
-     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @return the converted runtime exception after wrapper unwrapping and mapper selection
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -283,7 +283,7 @@ public final class ExceptionUtil {
 
     /**
      * Converts the specified Throwable to a RuntimeException if it's a checked exception.
-     * If it's already a RuntimeException, returns itself.
+     * Recognized wrapper exceptions are unwrapped before conversion; see {@link #toRuntimeException(Throwable, boolean, boolean)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -292,7 +292,7 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the throwable to convert; must not be {@code null}
-     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @return the converted runtime exception after wrapper unwrapping and mapper selection
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -315,7 +315,7 @@ public final class ExceptionUtil {
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException.
      *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
      *        thread and never interrupts this one, whatever this flag says
-     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @return the converted runtime exception after wrapper unwrapping and mapper selection
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable, boolean, boolean)
      */
@@ -331,7 +331,8 @@ public final class ExceptionUtil {
      * wrappers with a non-{@code null} cause are unwrapped first (repeatedly), and both flags and the conversion
      * apply to the innermost cause. Consequently an {@code UndeclaredThrowableException} that has a cause is not
      * returned as is, although it is a {@code RuntimeException}: {@code new UndeclaredThrowableException(new IOException())}
-     * converts to an {@link UncheckedIOException}.</p>
+     * converts to an {@link UncheckedIOException}. Unwrapping stops after {@value #MAX_DEPTH_FOR_LOOP_CAUSE} wrappers;
+     * a remaining wrapper with a non-{@code null} cause is wrapped directly in {@link UncheckedException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -344,7 +345,7 @@ public final class ExceptionUtil {
      *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
      *        thread and never interrupts this one, whatever this flag says
      * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
-     * @return the converted runtime exception, or the (unwrapped) instance itself if it is already a {@code RuntimeException}
+     * @return the selected mapper's result for the unwrapped throwable, or a direct wrapper when the unwrapping depth limit is reached
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @throws Error if {@code throwIfItIsError} is true and the exception remaining after unwrapping execution, invocation, or undeclared-throwable wrappers is an {@code Error}
      */
@@ -423,10 +424,10 @@ public final class ExceptionUtil {
      * @return the checked cause if {@code e} is a recognized runtime wrapper (e.g.
      *         {@link com.landawn.abacus.exception.UncheckedException}) whose cause is a checked (non-runtime) exception.
      *         An {@link java.util.concurrent.ExecutionException} or {@link java.lang.reflect.InvocationTargetException}
-     *         whose cause is an {@code Exception} is always unwrapped, and that cause is examined in turn: so for such a
-     *         wrapper the result may be a {@code RuntimeException} cause (for example
+     *         whose cause is an {@code Exception} is unwrapped, and that cause is examined in turn, subject to a limit of
+     *         {@value #MAX_DEPTH_FOR_LOOP_CAUSE} inspection steps. The result may be a {@code RuntimeException} cause (for example
      *         {@code new ExecutionException(new IllegalStateException())} yields the {@code IllegalStateException}),
-     *         never the wrapper itself. In every other case {@code e} itself is returned.
+     *         or a remaining wrapper when the depth limit is reached. In every other case {@code e} itself is returned.
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @throws NullPointerException if a registered exception mapper invoked to identify the wrapper returns {@code null}
      */

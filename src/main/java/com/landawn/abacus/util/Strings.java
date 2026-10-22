@@ -53,6 +53,7 @@ import javax.lang.model.SourceVersion;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.util.function.IntBiFunction;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.IntStream;
 
@@ -3174,8 +3175,12 @@ public final class Strings {
         final int strLen = str.length();
         final int pads = minLength - strLen;
 
-        str = padStart(str, strLen + pads / 2, padChar);
-        return padEnd(str, minLength, padChar);
+        // Tiny pads favor the existing concatenation paths, especially when a Unicode pad inflates ASCII input.
+        if (pads <= 2) {
+            return padEnd(padStart(str, strLen + pads / 2, padChar), minLength, padChar);
+        }
+
+        return new StringBuilder(minLength).repeat(padChar, pads / 2).append(str).repeat(padChar, pads - pads / 2).toString();
     }
 
     /**
@@ -3732,7 +3737,7 @@ public final class Strings {
         long remaining = N.MAX_ARRAY_SIZE - (long) prefixLen - suffixLen;
 
         if (remaining < 0 || (n > 0 && strLen > remaining / n)) {
-            throw repeatResultTooLarge();
+            throw stringResultTooLarge();
         }
 
         remaining -= (long) n * strLen;
@@ -3740,11 +3745,12 @@ public final class Strings {
         final int delimiterCount = Math.max(0, n - 1);
 
         if (delimiterCount > 0 && delimiterLen > remaining / delimiterCount) {
-            throw repeatResultTooLarge();
+            throw stringResultTooLarge();
         }
     }
 
     /**
+     * Reports an oversized result for repetition and concatenation before allocating the result buffer.
      * Mirrors {@link String#repeat(int)}, which also computes the required length from its arguments and throws
      * {@code OutOfMemoryError("Required length exceeds implementation limit")} before allocating anything.
      * The delimiter/prefix/suffix overloads must report the same condition with the same exception type, because a
@@ -3752,7 +3758,7 @@ public final class Strings {
      * from the JDK's). Do not "fix" this to {@code IllegalArgumentException}: it would make these methods diverge from
      * the JDK method they wrap.
      */
-    private static OutOfMemoryError repeatResultTooLarge() {
+    private static OutOfMemoryError stringResultTooLarge() {
         return new OutOfMemoryError("Required string length exceeds the implementation limit of " + N.MAX_ARRAY_SIZE);
     }
 
@@ -3888,11 +3894,11 @@ public final class Strings {
              * UTF-8 can map every char, so the only failure is malformed UTF-16 (a lone surrogate), which the JDK's
              * intrinsic String encoder replaces with '?' and otherwise encodes exactly like the reporting
              * CharsetEncoder (without its growing ByteBuffer and final copy). So its bytes are the answer when they
-             * contain no '?' or the input has no surrogate at all; anything else takes the reporting encoder below.
+             * contain no '?' or the input has no unpaired surrogate; malformed input takes the reporting encoder below.
              */
             final byte[] bytes = str.getBytes(Charsets.UTF_8);
 
-            if (N.indexOf(bytes, (byte) '?') < 0 || !containsSurrogate(str, 0, str.length())) {
+            if (N.indexOf(bytes, (byte) '?') < 0 || !containsUnpairedSurrogate(str)) {
                 return bytes;
             }
         }
@@ -3908,6 +3914,27 @@ public final class Strings {
         } catch (final CharacterCodingException e) {
             throw new IllegalArgumentException("Input contains malformed UTF-16 or a character not representable in " + charset.name(), e);
         }
+    }
+
+    private static boolean containsUnpairedSurrogate(final String str) {
+        return containsUnpairedSurrogate(str, 0, str.length());
+    }
+
+    // A range can cut a valid pair: only code units without a mate in the whole string count as malformed.
+    private static boolean containsUnpairedSurrogate(final String str, final int fromIndex, final int toIndex) {
+        for (int i = fromIndex, len = str.length(); i < toIndex; i++) {
+            final char ch = str.charAt(i);
+
+            if (Character.isHighSurrogate(ch)) {
+                if (++i == len || !Character.isLowSurrogate(str.charAt(i))) {
+                    return true;
+                }
+            } else if (Character.isLowSurrogate(ch) && !(i == fromIndex && i > 0 && Character.isHighSurrogate(str.charAt(i - 1)))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -5427,6 +5454,10 @@ public final class Strings {
     private static String swapCaseUnicode(final String str) {
         final int strLen = str.length();
         final StringBuilder result = new StringBuilder(strLen);
+        int lastCodePoint = -1;
+        String lastMapping = null;
+        int[] cachedCodePoints = null;
+        String[] cachedMappings = null;
 
         for (int fromIndex = 0; fromIndex < strLen;) {
             final int codePoint = str.codePointAt(fromIndex);
@@ -5450,12 +5481,41 @@ public final class Strings {
             // the one-code-point substring is only materialized for the case-mapped branches
             if (codePoint == 0x03A3 && isFinalSigmaContext(str, fromIndex, toIndex)) {
                 result.append('\u03C2');
-            } else if (Character.isUpperCase(codePoint) || Character.isTitleCase(codePoint)) {
-                result.append(str.substring(fromIndex, toIndex).toLowerCase(Locale.ROOT));
-            } else if (Character.isLowerCase(codePoint)) {
-                result.append(str.substring(fromIndex, toIndex).toUpperCase(Locale.ROOT));
+            } else if (codePoint == lastCodePoint) {
+                result.append(lastMapping);
             } else {
-                result.append(str, fromIndex, toIndex);
+                final boolean toLowerCase = Character.isUpperCase(codePoint) || Character.isTitleCase(codePoint);
+
+                if (toLowerCase || Character.isLowerCase(codePoint)) {
+                    // A single-entry cache costs no arrays for short text or repeated runs. Longer, varied text
+                    // uses a bounded per-call cache; collisions replace an entry and never retain an input globally.
+                    if (cachedCodePoints == null && lastCodePoint >= 0 && strLen >= 256) {
+                        cachedCodePoints = new int[64];
+                        cachedMappings = new String[64];
+                        final int previousSlot = (lastCodePoint * 0x9E3779B9) >>> 26;
+                        cachedCodePoints[previousSlot] = lastCodePoint;
+                        cachedMappings[previousSlot] = lastMapping;
+                    }
+
+                    final int slot = (codePoint * 0x9E3779B9) >>> 26;
+                    String mapping = cachedCodePoints != null && cachedCodePoints[slot] == codePoint ? cachedMappings[slot] : null;
+
+                    if (mapping == null) {
+                        final String original = str.substring(fromIndex, toIndex);
+                        mapping = toLowerCase ? original.toLowerCase(Locale.ROOT) : original.toUpperCase(Locale.ROOT);
+
+                        if (cachedCodePoints != null) {
+                            cachedCodePoints[slot] = codePoint;
+                            cachedMappings[slot] = mapping;
+                        }
+                    }
+
+                    lastCodePoint = codePoint;
+                    lastMapping = mapping;
+                    result.append(mapping);
+                } else {
+                    result.append(str, fromIndex, toIndex);
+                }
             }
 
             fromIndex = toIndex;
@@ -5526,6 +5586,10 @@ public final class Strings {
     @MayReturnNull
     public static String uncapitalize(final String str) {
         if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        if (str.charAt(0) < 128 && !isAsciiUpperCase(str.charAt(0))) {
             return str;
         }
 
@@ -5759,10 +5823,29 @@ public final class Strings {
     }
 
     private static String capitalizeAsciiWhitespaceSeparatedWords(final String str, final boolean lowercaseRemainder) {
-        final char[] result = str.toCharArray();
+        final int len = str.length();
         boolean atWordStart = true;
+        int firstChange = 0;
 
-        for (int i = 0; i < result.length; i++) {
+        for (; firstChange < len; firstChange++) {
+            final char ch = str.charAt(firstChange);
+
+            if (Character.isWhitespace(ch)) {
+                atWordStart = true;
+            } else if (atWordStart ? isAsciiLowerCase(ch) : lowercaseRemainder && isAsciiUpperCase(ch)) {
+                break;
+            } else {
+                atWordStart = false;
+            }
+        }
+
+        if (firstChange == len) {
+            return str;
+        }
+
+        final char[] result = str.toCharArray();
+
+        for (int i = firstChange; i < result.length; i++) {
             final char ch = result[i];
 
             if (Character.isWhitespace(ch)) {
@@ -5809,8 +5892,8 @@ public final class Strings {
      * {@link #isAsciiString(String)} test before delegating here.
      */
     private static String capitalizeAsciiDelimitedWords(final String str, final String delimiter, final boolean lowercaseRemainder) {
-        final char[] result = str.toCharArray();
-        final int len = result.length;
+        char[] result = null;
+        final int len = str.length();
         final int delimiterLength = delimiter.length();
         int wordStart = 0;
 
@@ -5823,14 +5906,30 @@ public final class Strings {
             final int wordEnd = delimiterIndex < 0 ? len : delimiterIndex;
 
             if (wordStart < wordEnd) {
-                final char first = result[wordStart];
+                final char first = str.charAt(wordStart);
 
                 if (isAsciiLowerCase(first)) {
+                    if (result == null) {
+                        result = str.toCharArray();
+                    }
+
                     result[wordStart] = (char) (first - ('a' - 'A'));
                 }
 
                 if (lowercaseRemainder) {
-                    for (int i = wordStart + 1; i < wordEnd; i++) {
+                    int i = wordStart + 1;
+
+                    if (result == null) {
+                        while (i < wordEnd && !isAsciiUpperCase(str.charAt(i))) {
+                            i++;
+                        }
+
+                        if (i < wordEnd) {
+                            result = str.toCharArray();
+                        }
+                    }
+
+                    for (; i < wordEnd; i++) {
                         final char ch = result[i];
 
                         if (isAsciiUpperCase(ch)) {
@@ -5847,7 +5946,7 @@ public final class Strings {
             wordStart = delimiterIndex + delimiterLength;
         }
 
-        return new String(result);
+        return result == null ? str : new String(result);
     }
 
     /**
@@ -6422,11 +6521,33 @@ public final class Strings {
         }
 
         final int len = str.length();
-        final StringBuilder sb = new StringBuilder(len);
-        boolean lastWasWhitespace = true; // suppress leading whitespace
-        boolean sawNonWhitespace = false;
+        int begin = 0;
+        int end = len;
 
-        for (int i = 0; i < len;) {
+        while (begin < end) {
+            final int codePoint = str.codePointAt(begin);
+            if (!isNormalizeSpaceWhitespace(codePoint)) {
+                break;
+            }
+            begin += Character.charCount(codePoint);
+        }
+
+        if (begin == end) {
+            return EMPTY;
+        }
+
+        while (end > begin) {
+            final int codePoint = str.codePointBefore(end);
+            if (!isNormalizeSpaceWhitespace(codePoint)) {
+                break;
+            }
+            end -= Character.charCount(codePoint);
+        }
+
+        final StringBuilder sb = new StringBuilder(end - begin);
+        boolean lastWasWhitespace = true; // suppress leading whitespace
+
+        for (int i = begin; i < end;) {
             final int cp = str.codePointAt(i);
 
             if (isNormalizeSpaceWhitespace(cp)) {
@@ -6437,18 +6558,9 @@ public final class Strings {
             } else {
                 sb.appendCodePoint(cp);
                 lastWasWhitespace = false;
-                sawNonWhitespace = true;
             }
 
             i += Character.charCount(cp);
-        }
-
-        if (!sawNonWhitespace) {
-            return EMPTY;
-        }
-
-        if (lastWasWhitespace) {
-            sb.setLength(sb.length() - 1); // drop trailing single space
         }
 
         return sb.toString();
@@ -7018,6 +7130,10 @@ public final class Strings {
             replacement = "";
         }
 
+        if (!ignoreCase && target.equals(replacement)) {
+            return str;
+        }
+
         // Search on the original string (regionMatches-based for ignoreCase): lowercasing the whole
         // string would shift the indices for length-changing case mappings (e.g. U+0130 -> "i" + U+0307).
         final char[] foldedTarget;
@@ -7040,13 +7156,34 @@ public final class Strings {
             return str;
         }
 
-        // One match is already known. Preallocate only the minimum growth guaranteed by that match;
-        // estimating multiple matches can request a huge buffer even when only one match exists.
-        final long minimumCapacity = (long) str.length() + Math.max(0, replacement.length() - target.length());
-        final int initialCapacity = minimumCapacity <= N.MAX_ARRAY_SIZE ? (int) minimumCapacity : str.length();
-        final StringBuilder sb = new StringBuilder(initialCapacity);
         final int substrLength = target.length();
         int start = fromIndex;
+        int removedPrefixLength = 0;
+
+        // Consume a discarded prefix before allocating. Once output survives, keep the main append loop branch-free.
+        if (replacement.isEmpty() && end == 0) {
+            do {
+                start = end + substrLength;
+
+                if (--max == 0) {
+                    return str.substring(start);
+                }
+
+                end = ignoreCase ? indexOfIgnoreCase(str, target, start, foldedTarget, failure) : str.indexOf(target, start);
+            } while (end == start);
+
+            if (end == N.INDEX_NOT_FOUND) {
+                return str.substring(start);
+            }
+
+            removedPrefixLength = start;
+        }
+
+        // One match is already known. Preallocate only the minimum growth guaranteed by that match;
+        // estimating multiple matches can request a huge buffer even when only one match exists.
+        final long minimumCapacity = (long) str.length() - removedPrefixLength + Math.max(0, replacement.length() - target.length());
+        final int initialCapacity = minimumCapacity <= N.MAX_ARRAY_SIZE ? (int) minimumCapacity : str.length();
+        final StringBuilder sb = new StringBuilder(initialCapacity);
 
         sb.append(str, 0, fromIndex);
 
@@ -7438,7 +7575,17 @@ public final class Strings {
         if (index == N.INDEX_NOT_FOUND) {
             return str;
         } else {
-            final char[] cbuf = new char[str.length()];
+            int end = str.length();
+
+            while (end > index && str.charAt(end - 1) == removeChar) {
+                end--;
+            }
+
+            if (end == index) {
+                return str.substring(0, index);
+            }
+
+            final char[] cbuf = new char[end - 1];
 
             if (index > 0) {
                 str.getChars(0, index, cbuf, 0);
@@ -7446,7 +7593,7 @@ public final class Strings {
 
             int count = index;
 
-            for (int i = index + 1, len = str.length(); i < len; i++) {
+            for (int i = index + 1; i < end; i++) {
                 final char ch = str.charAt(i);
 
                 if (ch != removeChar) {
@@ -8538,35 +8685,50 @@ public final class Strings {
         }
 
         final int len = str.length();
-        final List<String> substrs = new ArrayList<>();
 
-        int sizePlus1 = 1;
-        int i = 0;
-        int start = 0;
-        boolean match = false;
-        boolean lastMatch = false;
+        if (max == 1) {
+            int start = 0;
 
-        while (i < len) {
-            if (str.charAt(i) == delimiter) {
-                if (match || preserveAllTokens) {
-                    lastMatch = true;
-                    if (sizePlus1++ == max) {
-                        i = len;
-                        lastMatch = false;
-                    }
-                    substrs.add(splitToken(str, start, i, trim));
-                    match = false;
+            if (!preserveAllTokens) {
+                while (start < len && str.charAt(start) == delimiter) {
+                    start++;
                 }
-                start = ++i;
-                continue;
             }
-            lastMatch = false;
-            match = true;
-            i++;
+
+            return start < len || preserveAllTokens ? new String[] { splitToken(str, start, len, trim) } : N.EMPTY_STRING_ARRAY;
         }
 
-        if (match || (preserveAllTokens && lastMatch)) {
-            substrs.add(splitToken(str, start, i, trim));
+        final List<String> substrs = new ArrayList<>();
+
+        int start = 0;
+        int index;
+
+        while ((index = str.indexOf(delimiter, start)) >= 0) {
+            if (index > start || preserveAllTokens) {
+                substrs.add(splitToken(str, start, index, trim));
+
+                if (substrs.size() == max - 1) {
+                    start = index + 1;
+
+                    if (!preserveAllTokens) {
+                        while (start < len && str.charAt(start) == delimiter) {
+                            start++;
+                        }
+                    }
+
+                    if (start < len || preserveAllTokens) {
+                        substrs.add(splitToken(str, start, len, trim));
+                    }
+
+                    return substrs.toArray(N.EMPTY_STRING_ARRAY);
+                }
+            }
+
+            start = index + 1;
+        }
+
+        if (start < len || preserveAllTokens) {
+            substrs.add(splitToken(str, start, len, trim));
         }
 
         return substrs.toArray(N.EMPTY_STRING_ARRAY);
@@ -8601,25 +8763,31 @@ public final class Strings {
 
         final int delimiterLength = delimiter.length();
         final int len = str.length();
+
+        if (max == 1) {
+            int start = 0;
+
+            if (!preserveAllTokens) {
+                while (str.startsWith(delimiter, start)) {
+                    start += delimiterLength;
+                }
+            }
+
+            return start < len || preserveAllTokens ? new String[] { splitToken(str, start, len, trim) } : N.EMPTY_STRING_ARRAY;
+        }
+
         final List<String> substrs = new ArrayList<>();
 
         int i = 0;
         int idx = -1;
-        boolean maxReached = false;
 
         while (i <= len - delimiterLength) {
-            if ((idx = str.indexOf(delimiter, i)) < 0) {
-                break;
+            if (substrs.size() == max - 1 && (preserveAllTokens || !str.startsWith(delimiter, i))) {
+                substrs.add(splitToken(str, i, len, trim));
+                return substrs.toArray(N.EMPTY_STRING_ARRAY);
             }
 
-            // Decide whether this hit produces a token before consuming the limit. Checking after
-            // add made max == 1 never match (size became 1, max - 1 is 0), so
-            // split("a::b::c", "::", 1) kept splitting instead of returning the remainder.
-            final boolean hasToken = idx > i || preserveAllTokens;
-
-            if (hasToken && substrs.size() == max - 1) {
-                substrs.add(splitToken(str, i, len, trim));
-                maxReached = true;
+            if ((idx = str.indexOf(delimiter, i)) < 0) {
                 break;
             }
 
@@ -8632,14 +8800,11 @@ public final class Strings {
             i = idx + delimiterLength;
         }
 
-        if (!maxReached) {
-            if (i < len) {
-                substrs.add(splitToken(str, i, len, trim));
-            } else if (preserveAllTokens) {
-                // i == len only when the input ends with the delimiter: keep the empty token that follows it,
-                // mirroring the single-char splitWorker.
-                substrs.add(EMPTY);
-            }
+        if (i < len) {
+            substrs.add(splitToken(str, i, len, trim));
+        } else if (preserveAllTokens) {
+            // Keep the empty token after a trailing delimiter, as in the single-character worker.
+            substrs.add(EMPTY);
         }
 
         return substrs.toArray(N.EMPTY_STRING_ARRAY);
@@ -8656,6 +8821,19 @@ public final class Strings {
      */
     private static String[] splitOnWhitespaceWorker(final String str, final int max, final boolean trim, final boolean preserveAllTokens) {
         final int len = str.length();
+
+        if (max == 1) {
+            int start = 0;
+
+            if (!preserveAllTokens) {
+                while (start < len && Character.isWhitespace(str.charAt(start))) {
+                    start++;
+                }
+            }
+
+            return start < len || preserveAllTokens ? new String[] { splitToken(str, start, len, trim) } : N.EMPTY_STRING_ARRAY;
+        }
+
         final List<String> substrs = new ArrayList<>();
 
         int start = 0;
@@ -8668,12 +8846,25 @@ public final class Strings {
             if (Character.isWhitespace(str.charAt(i))) {
                 if (match || preserveAllTokens) {
                     lastMatch = true;
-                    if (sizePlus1++ == max) {
-                        i = len;
-                        lastMatch = false;
-                    }
+                    sizePlus1++;
                     substrs.add(splitToken(str, start, i, trim));
                     match = false;
+
+                    if (sizePlus1 == max) {
+                        start = i + 1;
+
+                        if (!preserveAllTokens) {
+                            while (start < len && Character.isWhitespace(str.charAt(start))) {
+                                start++;
+                            }
+                        }
+
+                        if (start < len || preserveAllTokens) {
+                            substrs.add(splitToken(str, start, len, trim));
+                        }
+
+                        return substrs.toArray(N.EMPTY_STRING_ARRAY);
+                    }
                 }
                 start = ++i;
                 continue;
@@ -8825,34 +9016,36 @@ public final class Strings {
     }
 
     private static String[] splitToLinesAndTrim(final String str, final boolean omitEmptyLines) {
-        final String[] lines = lineSplitter.splitToArray(str);
-        trimEach(lines);
+        final List<String> lines = new ArrayList<>();
+        final int len = str.length();
+        int start = 0;
 
-        if (!omitEmptyLines) {
-            return lines;
-        }
+        for (int i = 0; i < len; i++) {
+            final char ch = str.charAt(i);
 
-        int nonEmptyLineCount = 0;
+            // Same line boundaries as Splitter.forLines(), including CRLF as one separator.
+            if (ch <= '\r' ? ch >= '\n' : ch == 0x85 || ch == 0x2028 || ch == 0x2029) {
+                final String line = trimmedSubstring(str, start, i);
 
-        for (final String line : lines) {
-            if (!line.isEmpty()) {
-                nonEmptyLineCount++;
+                if (!omitEmptyLines || !line.isEmpty()) {
+                    lines.add(line);
+                }
+
+                if (ch == '\r' && i + 1 < len && str.charAt(i + 1) == '\n') {
+                    i++;
+                }
+
+                start = i + 1;
             }
         }
 
-        if (nonEmptyLineCount == lines.length) {
-            return lines;
+        final String line = trimmedSubstring(str, start, len);
+
+        if (!omitEmptyLines || !line.isEmpty()) {
+            lines.add(line);
         }
 
-        final String[] result = new String[nonEmptyLineCount];
-
-        for (int sourceIndex = 0, resultIndex = 0; sourceIndex < lines.length; sourceIndex++) {
-            if (!lines[sourceIndex].isEmpty()) {
-                result[resultIndex++] = lines[sourceIndex];
-            }
-        }
-
-        return result;
+        return lines.toArray(N.EMPTY_STRING_ARRAY);
     }
 
     // -----------------------------------------------------------------------
@@ -10290,11 +10483,21 @@ public final class Strings {
             return str;
         }
 
-        final char[] cbuf = new char[len];
+        int end = len;
+
+        while (end > firstWhitespace && Character.isWhitespace(str.charAt(end - 1))) {
+            end--;
+        }
+
+        if (end == firstWhitespace) {
+            return str.substring(0, firstWhitespace);
+        }
+
+        final char[] cbuf = new char[end - 1];
         str.getChars(0, firstWhitespace, cbuf, 0);
         int count = firstWhitespace;
 
-        for (int i = firstWhitespace + 1; i < len; i++) {
+        for (int i = firstWhitespace + 1; i < end; i++) {
             final char ch = str.charAt(i);
 
             if (!Character.isWhitespace(ch)) {
@@ -12541,9 +12744,16 @@ public final class Strings {
         }
 
         if (shouldUseCharMembership(strLen - fromIndex, valuesToFind.length)) {
+            final int firstIndex = str.indexOf(valuesToFind[0], fromIndex);
+
+            if (firstIndex >= 0) {
+                return firstIndex;
+            }
+
             final long[] presentChars = createPresentCharMembership(str, fromIndex, strLen, valuesToFind);
 
-            for (final char ch : valuesToFind) {
+            for (int i = 1; i < valuesToFind.length; i++) {
+                final char ch = valuesToFind[i];
                 if (containsChar(presentChars, ch)) {
                     return str.indexOf(ch, fromIndex);
                 }
@@ -12878,27 +13088,6 @@ public final class Strings {
         final long[] membership = new long[(max >>> 6) + 1];
 
         for (final char value : values) {
-            membership[value >>> 6] |= 1L << (value & 63);
-        }
-
-        return membership;
-    }
-
-    private static long[] createCharMembership(final String str) {
-        char max = 0;
-
-        for (int i = 0, len = str.length(); i < len; i++) {
-            final char value = str.charAt(i);
-
-            if (value > max) {
-                max = value;
-            }
-        }
-
-        final long[] membership = new long[(max >>> 6) + 1];
-
-        for (int i = 0, len = str.length(); i < len; i++) {
-            final char value = str.charAt(i);
             membership[value >>> 6] |= 1L << (value & 63);
         }
 
@@ -13495,9 +13684,16 @@ public final class Strings {
         }
 
         if (shouldUseCharMembership(startIndexFromBack + 1, valuesToFind.length)) {
+            final int firstIndex = str.lastIndexOf(valuesToFind[0], startIndexFromBack);
+
+            if (firstIndex >= 0) {
+                return firstIndex;
+            }
+
             final long[] presentChars = createPresentCharMembership(str, 0, startIndexFromBack + 1, valuesToFind);
 
-            for (final char ch : valuesToFind) {
+            for (int i = 1; i < valuesToFind.length; i++) {
+                final char ch = valuesToFind[i];
                 if (containsChar(presentChars, ch)) {
                     return str.lastIndexOf(ch, startIndexFromBack);
                 }
@@ -15140,20 +15336,25 @@ public final class Strings {
             return false;
         }
 
-        // The membership set of str costs two full scalar passes over it, while String.indexOf(char) is a vectorized
-        // intrinsic that stops at the first occurrence (and this loop stops at the first missing candidate). With fewer
-        // than 16 candidates the indexOf loop measured faster in every input shape, by orders of magnitude when the
-        // candidates occur early or one is missing.
+        // Small query sets favor the JDK's intrinsic indexOf. Larger sets share one scan and stop as soon as
+        // every distinct requested code unit has appeared; duplicates do not require extra occurrences.
         if (valuesToFind.length >= 16 && shouldUseCharMembership(str.length(), valuesToFind.length)) {
-            final long[] membership = createCharMembership(str);
+            final long[] missingChars = createCharMembership(valuesToFind);
+            int remaining = countDistinctChars(missingChars);
 
-            for (final char ch : valuesToFind) {
-                if (!containsChar(membership, ch)) {
-                    return false;
+            for (int i = 0, len = str.length(); i < len; i++) {
+                final char ch = str.charAt(i);
+
+                if (containsChar(missingChars, ch)) {
+                    missingChars[ch >>> 6] &= ~(1L << (ch & 63));
+
+                    if (--remaining == 0) {
+                        return true;
+                    }
                 }
             }
 
-            return true;
+            return false;
         }
 
         for (final char ch : valuesToFind) {
@@ -16479,21 +16680,35 @@ public final class Strings {
             return EMPTY;
         }
 
-        String commonPrefix = commonPrefix(strs[0], strs[1]);
+        final CharSequence first = strs[0];
+        CharSequence shortest = first;
+        int commonLength = first.length();
 
-        if (isEmpty(commonPrefix)) {
-            return EMPTY;
-        }
+        for (int i = 1; i < strs.length; i++) {
+            final CharSequence next = strs[i];
+            final int limit = Math.min(commonLength, next.length());
+            int matched = 0;
 
-        for (int i = 2, len = strs.length; i < len; i++) {
-            commonPrefix = commonPrefix(commonPrefix, strs[i]);
+            while (matched < limit && first.charAt(matched) == next.charAt(matched)) {
+                matched++;
+            }
 
-            if (isEmpty(commonPrefix)) {
-                return commonPrefix;
+            if (validSurrogatePairAt(first, matched - 1) || validSurrogatePairAt(next, matched - 1)) {
+                matched--;
+            }
+
+            if (matched == 0) {
+                return EMPTY;
+            }
+
+            commonLength = matched;
+
+            if (next.length() < shortest.length()) {
+                shortest = next;
             }
         }
 
-        return commonPrefix;
+        return commonLength == shortest.length() ? shortest.toString() : first.subSequence(0, commonLength).toString();
     }
 
     /**
@@ -16581,21 +16796,37 @@ public final class Strings {
             return EMPTY;
         }
 
-        String commonSuffix = commonSuffix(strs[0], strs[1]);
+        final CharSequence first = strs[0];
+        final int firstLength = first.length();
+        CharSequence shortest = first;
+        int commonLength = firstLength;
 
-        if (isEmpty(commonSuffix)) {
-            return EMPTY;
-        }
+        for (int i = 1; i < strs.length; i++) {
+            final CharSequence next = strs[i];
+            final int nextLength = next.length();
+            final int limit = Math.min(commonLength, nextLength);
+            int matched = 0;
 
-        for (int i = 2, len = strs.length; i < len; i++) {
-            commonSuffix = commonSuffix(commonSuffix, strs[i]);
+            while (matched < limit && first.charAt(firstLength - matched - 1) == next.charAt(nextLength - matched - 1)) {
+                matched++;
+            }
 
-            if (isEmpty(commonSuffix)) {
-                return commonSuffix;
+            if (validSurrogatePairAt(first, firstLength - matched - 1) || validSurrogatePairAt(next, nextLength - matched - 1)) {
+                matched--;
+            }
+
+            if (matched == 0) {
+                return EMPTY;
+            }
+
+            commonLength = matched;
+
+            if (nextLength < shortest.length()) {
+                shortest = next;
             }
         }
 
-        return commonSuffix;
+        return commonLength == shortest.length() ? shortest.toString() : first.subSequence(firstLength - commonLength, firstLength).toString();
     }
 
     /**
@@ -16686,6 +16917,10 @@ public final class Strings {
 
         if (a.length() == 0 || b.length() == 0) {
             return EMPTY;
+        }
+
+        if (a == b || (a instanceof String && a.equals(b))) {
+            return a.toString();
         }
 
         if (!containsSurrogate(a) && !containsSurrogate(b)) {
@@ -16907,13 +17142,15 @@ public final class Strings {
             classCount = newClassCount;
         }
 
-        final int[] suffixRanks = new int[len];
+        // Sorting is complete; both work arrays can now hold the inverse order and LCP values.
+        final int[] suffixRanks = newRanks;
 
         for (int i = 0; i < len; i++) {
             suffixRanks[suffixArray[i]] = i;
         }
 
-        final int[] longestCommonPrefixes = new int[len];
+        final int[] longestCommonPrefixes = tempSuffixArray;
+        longestCommonPrefixes[0] = 0;
         int commonPrefixLength = 0;
         int maxLen = 0;
 
@@ -17343,7 +17580,7 @@ public final class Strings {
             return substring(str, 0, exclusiveEndIndex);
         }
 
-        final int index = str.indexOf(delimiterOfExclusiveBeginIndex);
+        final int index = str.indexOf(delimiterOfExclusiveBeginIndex, 0, Math.min(exclusiveEndIndex, str.length()));
 
         if (index < 0 || index + delimiterOfExclusiveBeginIndex.length() > exclusiveEndIndex) {
             return null;
@@ -18332,7 +18569,7 @@ public final class Strings {
             return null;
         }
 
-        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex, 0, Math.min(exclusiveEndIndex, str.length()));
 
         if (startIndex < 0 || startIndex >= exclusiveEndIndex) {
             return null;
@@ -18387,7 +18624,7 @@ public final class Strings {
             return null;
         }
 
-        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex);
+        int startIndex = str.indexOf(delimiterOfExclusiveBeginIndex, 0, Math.min(exclusiveEndIndex, str.length()));
 
         if (startIndex < 0 || startIndex > exclusiveEndIndex) {
             return null;
@@ -19401,6 +19638,14 @@ public final class Strings {
             final String delimiterOfExclusiveEndIndex, final DelimiterMatchMode delimiterMatchMode, final int maxCount)
             throws IndexOutOfBoundsException, IllegalArgumentException {
 
+        if (delimiterMatchMode == DelimiterMatchMode.SEQUENTIAL) {
+            N.checkFromToIndex(fromIndex, toIndex, N.len(str));
+            N.checkArgNotNegative(maxCount, cs.maxCount);
+
+            return sequentialSubstringsBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, maxCount,
+                    (begin, end) -> str.substring(begin, end));
+        }
+
         final List<IndexRange> substringIndices = substringIndicesBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex,
                 delimiterMatchMode, maxCount);
 
@@ -19776,13 +20021,18 @@ public final class Strings {
         N.checkArgNotNull(delimiterMatchMode, cs.delimiterMatchMode);
         N.checkArgNotNegative(maxCount, cs.maxCount);
 
+        if (delimiterMatchMode == DelimiterMatchMode.SEQUENTIAL) {
+            return sequentialSubstringsBetween(str, fromIndex, toIndex, delimiterOfExclusiveBeginIndex, delimiterOfExclusiveEndIndex, maxCount,
+                    IndexRange::new);
+        }
+
         if (str == null || isEmpty(delimiterOfExclusiveBeginIndex) || isEmpty(delimiterOfExclusiveEndIndex) || maxCount == 0) {
             return new ArrayList<>();
         }
 
-        int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex);
+        int idx = str.indexOf(delimiterOfExclusiveBeginIndex, fromIndex, toIndex);
 
-        if (idx < 0 || idx > toIndex - delimiterOfExclusiveBeginIndex.length()) {
+        if (idx < 0) {
             return new ArrayList<>();
         }
 
@@ -19793,128 +20043,135 @@ public final class Strings {
 
         idx += lengthOfDelimiterOfExclusiveBeginIndex;
 
-        if (delimiterMatchMode == DelimiterMatchMode.SEQUENTIAL) {
-            int endIndex = -1;
+        final Deque<Integer> queue = new ArrayDeque<>();
 
-            do {
-                endIndex = str.indexOf(delimiterOfExclusiveEndIndex, idx);
+        queue.add(idx);
+        int next = -1;
+        // An earlier scan that started at noBeginFrom found no begin delimiter at all, so none starts at or after
+        // it. Together with next (the first begin delimiter found at or after the last scan's end) this keeps a
+        // deep nest from rescanning the whole remaining tail after every end delimiter (quadratic before).
+        int noBeginFrom = Integer.MAX_VALUE;
+        // C-542: the end index of the most recent match, whether or not it was stored in res (see below).
+        int lastEnd = -1;
 
-                if (endIndex < 0 || endIndex > toIndex - lengthOfDelimiterOfExclusiveEndIndex) {
-                    break;
-                }
-
-                res.add(new IndexRange(idx, endIndex));
-
-                if (res.size() >= maxCount) {
-                    break;
-                }
-
-                idx = str.indexOf(delimiterOfExclusiveBeginIndex, endIndex + lengthOfDelimiterOfExclusiveEndIndex);
+        for (int i = idx; i < toIndex;) {
+            if (queue.isEmpty()) {
+                idx = next >= i ? next : (i >= noBeginFrom ? -1 : str.indexOf(delimiterOfExclusiveBeginIndex, i, toIndex));
 
                 if (idx < 0) {
                     break;
-                }
-
-                idx += lengthOfDelimiterOfExclusiveBeginIndex;
-            } while (idx < toIndex);
-        } else {
-            final Deque<Integer> queue = new ArrayDeque<>();
-
-            queue.add(idx);
-            int next = -1;
-            // An earlier scan that started at noBeginFrom found no begin delimiter at all, so none starts at or after
-            // it. Together with next (the first begin delimiter found at or after the last scan's end) this keeps a
-            // deep nest from rescanning the whole remaining tail after every end delimiter (quadratic before).
-            int noBeginFrom = Integer.MAX_VALUE;
-            // C-542: the end index of the most recent match, whether or not it was stored in res (see below).
-            int lastEnd = -1;
-
-            for (int i = idx; i < toIndex;) {
-                if (queue.isEmpty()) {
-                    idx = next >= i ? next : (i >= noBeginFrom ? -1 : str.indexOf(delimiterOfExclusiveBeginIndex, i));
-
-                    if (idx < 0) {
-                        break;
-                    } else {
-                        idx += lengthOfDelimiterOfExclusiveBeginIndex;
-                        queue.add(idx);
-                        i = idx;
-                    }
-                }
-
-                idx = str.indexOf(delimiterOfExclusiveEndIndex, i);
-
-                if (idx < 0 || idx > toIndex - lengthOfDelimiterOfExclusiveEndIndex) {
-                    break;
                 } else {
-                    final int endIndex = idx;
-                    idx = lastEnd >= 0 ? Math.max(lastEnd + lengthOfDelimiterOfExclusiveEndIndex, queue.peekLast()) : queue.peekLast();
-
-                    // A begin delimiter counts as nested only when its entire span ends at or before the
-                    // current end delimiter's start. With multi-character delimiters the two occurrences may
-                    // overlap (e.g. begin "ab" and end "bc" sharing a 'b'); accepting one by its start index
-                    // alone would push a content start past endIndex and produce an inverted range.
-                    // Every begin delimiter found by an earlier scan either was pushed or overlaps a pushed one (and so
-                    // starts before the current end delimiter), hence the first begin at or after idx is next when
-                    // next >= idx, and there is none when idx >= noBeginFrom.
-                    int scanFrom = idx;
-                    idx = next >= scanFrom ? next : (scanFrom >= noBeginFrom ? -1 : str.indexOf(delimiterOfExclusiveBeginIndex, scanFrom));
-
-                    while (true) {
-                        if (idx < 0) {
-                            noBeginFrom = Math.min(noBeginFrom, scanFrom);
-                            break;
-                        }
-
-                        if (idx + lengthOfDelimiterOfExclusiveBeginIndex > endIndex) {
-                            break;
-                        }
-
-                        idx += lengthOfDelimiterOfExclusiveBeginIndex;
-                        queue.push(idx);
-                        scanFrom = idx;
-                        idx = str.indexOf(delimiterOfExclusiveBeginIndex, scanFrom);
-                    }
-
-                    // If the scan stopped at a begin delimiter at or after the current end delimiter,
-                    // retain it as the next candidate after the current nesting stack is exhausted.
-                    // (A candidate rejected for overlapping the end delimiter starts before the resumed
-                    // scan position and is ignored there.)
-                    if (idx >= 0) {
-                        next = idx;
-                    }
-
-                    final int startIndex = queue.pop();
-
-                    if (delimiterMatchMode == DelimiterMatchMode.OUTERMOST_ONLY && res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
-                        while (res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
-                            res.remove(res.size() - 1);
-                        }
-                    }
-
-                    // C-542: in OUTERMOST_ONLY an entry stored at index >= maxCount could never survive the final trim
-                    // (an enclosing match only ever removes a suffix of res, which would include it), so it is not
-                    // stored at all; the match is still consumed, and lastEnd keeps the scan position.
-                    if (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || res.size() < maxCount) {
-                        res.add(new IndexRange(startIndex, endIndex));
-                    }
-
-                    lastEnd = endIndex;
-
-                    // For OUTERMOST_ONLY, an entry already collected may still be replaced by an enclosing match whose
-                    // end delimiter has not been reached yet (every pending begin delimiter on the stack opened before
-                    // the current match and would enclose it), so only stop once no enclosing match can absorb it.
-                    if (res.size() >= maxCount && (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || queue.isEmpty())) {
-                        break;
-                    }
-
-                    i = endIndex + lengthOfDelimiterOfExclusiveEndIndex;
+                    idx += lengthOfDelimiterOfExclusiveBeginIndex;
+                    queue.add(idx);
+                    i = idx;
                 }
             }
 
+            idx = str.indexOf(delimiterOfExclusiveEndIndex, i, toIndex);
+
+            if (idx < 0 || idx > toIndex - lengthOfDelimiterOfExclusiveEndIndex) {
+                break;
+            } else {
+                final int endIndex = idx;
+                idx = lastEnd >= 0 ? Math.max(lastEnd + lengthOfDelimiterOfExclusiveEndIndex, queue.peekLast()) : queue.peekLast();
+
+                // A begin delimiter counts as nested only when its entire span ends at or before the
+                // current end delimiter's start. With multi-character delimiters the two occurrences may
+                // overlap (e.g. begin "ab" and end "bc" sharing a 'b'); accepting one by its start index
+                // alone would push a content start past endIndex and produce an inverted range.
+                // Every begin delimiter found by an earlier scan either was pushed or overlaps a pushed one (and so
+                // starts before the current end delimiter), hence the first begin at or after idx is next when
+                // next >= idx, and there is none when idx >= noBeginFrom.
+                int scanFrom = idx;
+                idx = next >= scanFrom ? next : (scanFrom >= noBeginFrom ? -1 : str.indexOf(delimiterOfExclusiveBeginIndex, scanFrom, toIndex));
+
+                while (true) {
+                    if (idx < 0) {
+                        noBeginFrom = Math.min(noBeginFrom, scanFrom);
+                        break;
+                    }
+
+                    if (idx + lengthOfDelimiterOfExclusiveBeginIndex > endIndex) {
+                        break;
+                    }
+
+                    idx += lengthOfDelimiterOfExclusiveBeginIndex;
+                    queue.push(idx);
+                    scanFrom = idx;
+                    idx = str.indexOf(delimiterOfExclusiveBeginIndex, scanFrom, toIndex);
+                }
+
+                // If the scan stopped at a begin delimiter at or after the current end delimiter,
+                // retain it as the next candidate after the current nesting stack is exhausted.
+                // (A candidate rejected for overlapping the end delimiter starts before the resumed
+                // scan position and is ignored there.)
+                if (idx >= 0) {
+                    next = idx;
+                }
+
+                final int startIndex = queue.pop();
+
+                if (delimiterMatchMode == DelimiterMatchMode.OUTERMOST_ONLY && res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
+                    while (res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
+                        res.remove(res.size() - 1);
+                    }
+                }
+
+                // C-542: in OUTERMOST_ONLY an entry stored at index >= maxCount could never survive the final trim
+                // (an enclosing match only ever removes a suffix of res, which would include it), so it is not
+                // stored at all; the match is still consumed, and lastEnd keeps the scan position.
+                if (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || res.size() < maxCount) {
+                    res.add(new IndexRange(startIndex, endIndex));
+                }
+
+                lastEnd = endIndex;
+
+                // For OUTERMOST_ONLY, an entry already collected may still be replaced by an enclosing match whose
+                // end delimiter has not been reached yet (every pending begin delimiter on the stack opened before
+                // the current match and would enclose it), so only stop once no enclosing match can absorb it.
+                if (res.size() >= maxCount && (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || queue.isEmpty())) {
+                    break;
+                }
+
+                i = endIndex + lengthOfDelimiterOfExclusiveEndIndex;
+            }
         }
 
         return res;
+    }
+
+    private static <T> List<T> sequentialSubstringsBetween(final String str, final int fromIndex, final int toIndex, final String beginDelimiter,
+            final String endDelimiter, final int maxCount, final IntBiFunction<T> resultFactory) {
+        if (str == null || isEmpty(beginDelimiter) || isEmpty(endDelimiter) || maxCount == 0) {
+            return new ArrayList<>();
+        }
+
+        int begin = str.indexOf(beginDelimiter, fromIndex, toIndex);
+
+        if (begin < 0) {
+            return new ArrayList<>();
+        }
+
+        final List<T> result = new ArrayList<>(Math.min(maxCount, 10));
+
+        do {
+            begin += beginDelimiter.length();
+            final int end = str.indexOf(endDelimiter, begin, toIndex);
+
+            if (end < 0) {
+                break;
+            }
+
+            result.add(resultFactory.apply(begin, end));
+
+            if (result.size() == maxCount) {
+                break;
+            }
+
+            begin = str.indexOf(beginDelimiter, end + endDelimiter.length(), toIndex);
+        } while (begin >= 0);
+
+        return result;
     }
 
     /**
@@ -20491,6 +20748,10 @@ public final class Strings {
             }
         } else if (toIndex - fromIndex == 1 && isEmpty(prefix) && isEmpty(suffix)) {
             return N.toString(a[fromIndex]);
+        }
+
+        if (isEmpty(delimiter) && isEmpty(prefix) && isEmpty(suffix)) {
+            return new String(a, fromIndex, toIndex - fromIndex);
         }
 
         final StringBuilder sb = new StringBuilder(calculateBufferSize(toIndex - fromIndex, 1, N.len(delimiter), N.len(prefix), N.len(suffix)));
@@ -22618,6 +22879,13 @@ public final class Strings {
             }
         }
 
+        final String first = toString(iterator.next(), trim);
+        boolean hasNext = iterator.hasNext();
+
+        if (!hasNext && isEmpty(prefix) && isEmpty(suffix)) {
+            return first == null ? NULL : first;
+        }
+
         final String actualDelimiter = nullToEmpty(delimiter);
         final StringBuilder sb = new StringBuilder(calculateBufferSize(estimatedElementCount, 16, actualDelimiter.length(), N.len(prefix), N.len(suffix)));
 
@@ -22625,16 +22893,12 @@ public final class Strings {
             sb.append(prefix);
         }
 
-        boolean isFirst = true;
+        sb.append(first);
 
-        do {
-            if (!isFirst) {
-                sb.append(actualDelimiter);
-            }
-
-            sb.append(toString(iterator.next(), trim));
-            isFirst = false;
-        } while (iterator.hasNext());
+        while (hasNext) {
+            sb.append(actualDelimiter).append(toString(iterator.next(), trim));
+            hasNext = iterator.hasNext();
+        }
 
         if (isNotEmpty(suffix)) {
             sb.append(suffix);
@@ -23581,6 +23845,7 @@ public final class Strings {
      *
      * @param a the array of strings to concatenate, may be {@code null} or empty
      * @return the concatenated string. Returns an empty string if the array is {@code null} or empty.
+     * @throws OutOfMemoryError if the required result length exceeds the implementation limit
      */
     public static String concatNullToEmpty(final String... a) {
         final int len = N.len(a);
@@ -23629,7 +23894,11 @@ public final class Strings {
                     return EMPTY;
                 }
 
-                final StringBuilder result = new StringBuilder(boundedInitialStringBuilderCapacity(totalLength));
+                if (totalLength > N.MAX_ARRAY_SIZE) {
+                    throw stringResultTooLarge();
+                }
+
+                final StringBuilder result = new StringBuilder((int) totalLength);
 
                 for (final String str : a) {
                     if (str != null) {
@@ -23964,6 +24233,8 @@ public final class Strings {
 
         if (arguments == null) {
             arguments = new Object[] { "(Object[])null" };
+        } else if (arguments.length == 0) {
+            return template;
         }
 
         // start substituting the arguments into the '%s' placeholders
@@ -27768,7 +28039,7 @@ public final class Strings {
                     return index;
                 }
 
-                if (kmpFallback && (remainingWork -= tokenLength + delimiterLength) <= 0) {
+                if (kmpFallback && (remainingWork -= (long) tokenLength + delimiterLength) <= 0) {
                     return findDelimitedKmp(str, token, delimiter, index + 1, false);
                 }
 
@@ -27902,14 +28173,22 @@ public final class Strings {
                 return N.INDEX_NOT_FOUND;
             }
 
-            if (Strings.indexOfIgnoreCase(token, delimiter) >= 0) {
+            if (containsTokenDelimiterIgnoreCase(token, delimiter)) {
                 return N.INDEX_NOT_FOUND;
             }
 
-            if (shouldUseIgnoreCaseKmp(len - fromIndex, tokenLength) && !containsSurrogate(token, 0, tokenLength)) {
+            final boolean compositeKmp = Math.max(tokenLength, delimiterLength) >= 16 && token.codePointCount(0, tokenLength) == tokenLength
+                    && delimiter.codePointCount(0, delimiterLength) == delimiterLength;
+
+            if (shouldUseIgnoreCaseKmp(len - fromIndex, tokenLength)) {
+                if (compositeKmp) {
+                    return findDelimitedKmp(str, token, delimiter, fromIndex, false, true);
+                }
+
                 return findDelimitedIgnoreCaseKmp(str, token, delimiter, fromIndex, false);
             }
 
+            long remainingWork = tokenSearchBudget(len - fromIndex);
             int searchFrom = fromIndex;
 
             while (searchFrom <= len - tokenLength) {
@@ -27921,6 +28200,11 @@ public final class Strings {
 
                 if (isDelimitedValueMatch(str, index, tokenLength, delimiter, delimiterLength, len, true)) {
                     return index;
+                }
+
+                if ((remainingWork -= (long) tokenLength + delimiterLength) <= 0) {
+                    return compositeKmp ? findDelimitedKmp(str, token, delimiter, index + 1, false, true)
+                            : findDelimitedIgnoreCaseKmp(str, token, delimiter, index + 1, false);
                 }
 
                 searchFrom = index + 1;
@@ -27935,11 +28219,12 @@ public final class Strings {
          */
         private static boolean isDelimitedValueMatch(final String str, final int index, final int tokenLength, final String delimiter,
                 final int delimiterLength, final int length, final boolean ignoreCase) {
-            final boolean leftOk = index == 0 || (index >= delimiterLength && regionMatches(str, index - delimiterLength, delimiter, ignoreCase));
-            final int valueEnd = index + tokenLength;
-            final boolean rightOk = valueEnd == length || (delimiterLength <= length - valueEnd && regionMatches(str, valueEnd, delimiter, ignoreCase));
+            if (index != 0 && (index < delimiterLength || !regionMatches(str, index - delimiterLength, delimiter, ignoreCase))) {
+                return false;
+            }
 
-            return leftOk && rightOk;
+            final int valueEnd = index + tokenLength;
+            return valueEnd == length || (delimiterLength <= length - valueEnd && regionMatches(str, valueEnd, delimiter, ignoreCase));
         }
 
         private static boolean regionMatches(final String str, final int strOffset, final String expected, final boolean ignoreCase) {
@@ -28089,7 +28374,7 @@ public final class Strings {
                     return index;
                 }
 
-                if (kmpFallback && index > 0 && (remainingWork -= tokenLength + delimiterLength) <= 0) {
+                if (kmpFallback && index > 0 && (remainingWork -= (long) tokenLength + delimiterLength) <= 0) {
                     return findDelimitedKmp(str, token, delimiter, index - 1, true);
                 }
 
@@ -28107,7 +28392,7 @@ public final class Strings {
         private static final long TOKEN_SCAN_LIMIT = 1L << 24;
 
         /**
-         * Returns the candidate-rejection work, in compared characters, that a case-sensitive token scan may spend before
+         * Returns the candidate-rejection work, in compared characters, that a token scan may spend before
          * switching to KMP: four characters per searched character, at least 64.
          */
         private static long tokenSearchBudget(final int searchLength) {
@@ -28128,18 +28413,41 @@ public final class Strings {
             return token.contains(delimiter);
         }
 
+        private static boolean containsTokenDelimiterIgnoreCase(final String token, final String delimiter) {
+            if (delimiter.length() > token.length()) {
+                return false;
+            }
+            if (shouldUseIgnoreCaseKmp(token.length(), delimiter.length()) && containsSurrogate(delimiter, 0, delimiter.length())) {
+                if (delimiter.codePointCount(0, delimiter.length()) == delimiter.length()) {
+                    return findExactKmp(token, delimiter, 0, false, true) >= 0;
+                }
+                if (!containsUnpairedSurrogate(delimiter) && !containsUnpairedSurrogate(token)) {
+                    return new IgnoreCaseMatchCursor(token, new IgnoreCasePattern(delimiter, false), 0, false).next() >= 0;
+                }
+            }
+            return Strings.indexOfIgnoreCase(token, delimiter) >= 0;
+        }
+
         /** Matches complete boundaries as part of the pattern, avoiding repeated long delimiter checks. */
         private static int findDelimitedKmp(final String str, final String token, final String delimiter, final int bound, final boolean reverse) {
+            return findDelimitedKmp(str, token, delimiter, bound, reverse, false);
+        }
+
+        // Matching the delimiters as part of the pattern bounds the total work even when every raw token matches.
+        // Ignore-case callers use this only when neither region contains a surrogate pair. Lone surrogate units
+        // compare literally, including when concatenation assembles a pair across a token/delimiter boundary.
+        private static int findDelimitedKmp(final String str, final String token, final String delimiter, final int bound, final boolean reverse,
+                final boolean ignoreCase) {
             final int length = str.length();
             final int tokenLength = token.length();
             final int delimiterLength = delimiter.length();
             final int lastStart = length - tokenLength;
 
             // End-of-input boundaries need no delimiter. Check the nearer end first without allocating.
-            if (!reverse && bound == 0 && isDelimitedTokenAt(str, 0, token, delimiter)) {
+            if (!reverse && bound == 0 && isDelimitedTokenAt(str, 0, token, delimiter, ignoreCase)) {
                 return 0;
             }
-            if (reverse && lastStart <= bound && isDelimitedTokenAt(str, lastStart, token, delimiter)) {
+            if (reverse && lastStart <= bound && isDelimitedTokenAt(str, lastStart, token, delimiter, ignoreCase)) {
                 return lastStart;
             }
 
@@ -28148,36 +28456,41 @@ public final class Strings {
             if (tokenLength + 2L * delimiterLength <= length) {
                 final String pattern = delimiter + token + delimiter;
                 final int patternBound = reverse ? bound - delimiterLength : Math.max(0, bound - delimiterLength);
-                final int index = findExactKmp(str, pattern, patternBound, reverse);
+                final int index = findExactKmp(str, pattern, patternBound, reverse, ignoreCase);
                 if (index >= 0) {
                     return index + delimiterLength;
                 }
             }
 
-            if (!reverse && lastStart >= bound && isDelimitedTokenAt(str, lastStart, token, delimiter)) {
+            if (!reverse && lastStart >= bound && isDelimitedTokenAt(str, lastStart, token, delimiter, ignoreCase)) {
                 return lastStart;
             }
-            if (reverse && isDelimitedTokenAt(str, 0, token, delimiter)) {
+            if (reverse && isDelimitedTokenAt(str, 0, token, delimiter, ignoreCase)) {
                 return 0;
             }
             return N.INDEX_NOT_FOUND;
         }
 
         /**
-         * Returns {@code true} when {@code token} occurs at {@code index} as a whole delimited value, compared
-         * case-sensitively; the boundary rule is {@link #isDelimitedValueMatch}'s.
+         * Returns {@code true} when {@code token} occurs at {@code index} as a whole delimited value, with token
+         * and boundary comparisons controlled by {@code ignoreCase}; the boundary rule is {@link #isDelimitedValueMatch}'s.
          */
-        private static boolean isDelimitedTokenAt(final String str, final int index, final String token, final String delimiter) {
-            return str.startsWith(token, index) && isDelimitedValueMatch(str, index, token.length(), delimiter, delimiter.length(), str.length(), false);
+        private static boolean isDelimitedTokenAt(final String str, final int index, final String token, final String delimiter, final boolean ignoreCase) {
+            return regionMatches(str, index, token, ignoreCase)
+                    && isDelimitedValueMatch(str, index, token.length(), delimiter, delimiter.length(), str.length(), ignoreCase);
         }
 
         private static int findExactKmp(final String str, final String needle, final int bound, final boolean reverse) {
+            return findExactKmp(str, needle, bound, reverse, false);
+        }
+
+        private static int findExactKmp(final String str, final String needle, final int bound, final boolean reverse, final boolean ignoreCase) {
             final int size = needle.length();
             if (reverse && bound < 0) {
                 return N.INDEX_NOT_FOUND;
             }
-            final char[] pattern = needle.toCharArray();
-            if (reverse) {
+            final char[] pattern = ignoreCase ? foldIgnoreCase(needle, reverse) : needle.toCharArray();
+            if (reverse && !ignoreCase) {
                 N.reverse(pattern);
             }
             final int[] failure = createKmpFailureTable(pattern);
@@ -28185,7 +28498,7 @@ public final class Strings {
             final int step = reverse ? -1 : 1;
 
             for (int i = first, matched = 0; i >= 0 && i < str.length(); i += step) {
-                final char ch = str.charAt(i);
+                final char ch = ignoreCase ? foldIgnoreCase(str.charAt(i)) : str.charAt(i);
                 while (matched > 0 && ch != pattern[matched]) {
                     matched = failure[matched - 1];
                 }
@@ -28199,9 +28512,101 @@ public final class Strings {
         private static int findDelimitedIgnoreCaseKmp(final String str, final String token, final String delimiter, final int bound, final boolean reverse) {
             final int tokenLength = token.length();
             final int length = str.length();
+            final int first = reverse ? Math.min(bound, length - tokenLength) : bound;
+
+            if (first < 0 || first > length - tokenLength) {
+                return N.INDEX_NOT_FOUND;
+            }
+            if (isDelimitedTokenAt(str, first, token, delimiter, true)) {
+                return first;
+            }
+
+            // If both delimiters cannot fit, only the two end-of-input candidates are possible. The nearer one
+            // was just checked (if allowed by the bound); test the other without building any patterns.
+            if (tokenLength + 2L * delimiter.length() > length) {
+                final int otherEnd = reverse ? 0 : length - tokenLength;
+                return isDelimitedTokenAt(str, otherEnd, token, delimiter, true) ? otherEnd : N.INDEX_NOT_FOUND;
+            }
+
+            // JDK regionMatches can align malformed surrogate sequences differently from code-point matching:
+            // "\uD801\uDC00a".regionMatches(true, 0, "\uD801\uD801\uDC00", 0, 3) is true on JDK 21/25.
+            // Validate patterns up front, but let the cursors validate text as they read it so nearby matches
+            // do not require scanning the entire remaining text. Only the compatibility fallback is unbounded.
+            if (containsUnpairedSurrogate(token) || containsUnpairedSurrogate(delimiter)) {
+                return findDelimitedIgnoreCaseFallback(str, token, delimiter, first, reverse);
+            }
+
+            // Three monotonic cursors bound well-formed UTF-16 searches by O(length + token + delimiter), including
+            // overlapping matches, without storing an occurrence list or rechecking long delimiters. The two
+            // delimiter cursors share a pattern, so auxiliary memory is O(token + delimiter), independent of text size.
+            final int validationBound = reverse ? first + tokenLength + Math.min(delimiter.length(), length - first - tokenLength)
+                    : Math.max(0, first - delimiter.length());
+            final IgnoreCaseValidation validation = new IgnoreCaseValidation(str, validationBound, reverse);
+            final IgnoreCaseMatchCursor tokens = new IgnoreCaseMatchCursor(str, new IgnoreCasePattern(token, reverse), first, reverse, validation);
+            final IgnoreCasePattern delimiterPattern = new IgnoreCasePattern(delimiter, reverse);
+            final IgnoreCaseMatchCursor left = new IgnoreCaseMatchCursor(str, delimiterPattern,
+                    reverse ? first - delimiter.length() : Math.max(0, first - delimiter.length()), reverse, validation);
+            final IgnoreCaseMatchCursor right = new IgnoreCaseMatchCursor(str, delimiterPattern, first + tokenLength, reverse, validation);
+
+            int index;
+            while ((index = tokens.next()) >= 0) {
+                if (index != 0) {
+                    if (index < delimiter.length()) {
+                        continue;
+                    }
+                    final int leftIndex = left.atOrBeyond(index - delimiter.length());
+                    if (leftIndex != index - delimiter.length()) {
+                        if (leftIndex == IgnoreCaseMatchCursor.MALFORMED) {
+                            return findDelimitedIgnoreCaseFallback(str, token, delimiter, first, reverse);
+                        }
+                        continue;
+                    }
+                }
+                if (index + tokenLength == length) {
+                    return index;
+                }
+                final int rightIndex = right.atOrBeyond(index + tokenLength);
+                if (rightIndex == IgnoreCaseMatchCursor.MALFORMED) {
+                    return findDelimitedIgnoreCaseFallback(str, token, delimiter, first, reverse);
+                }
+                if (rightIndex == index + tokenLength) {
+                    return index;
+                }
+            }
+            return index == IgnoreCaseMatchCursor.MALFORMED ? findDelimitedIgnoreCaseFallback(str, token, delimiter, first, reverse) : N.INDEX_NOT_FOUND;
+        }
+
+        // Restart at the original bound: a JDK-compatible match can begin before the malformed code unit
+        // detected by any cursor, including a delimiter cursor. Resuming at that code unit could skip it.
+        private static int findDelimitedIgnoreCaseFallback(final String str, final String token, final String delimiter, final int first,
+                final boolean reverse) {
+            final int tokenLength = token.length();
+            final int length = str.length();
+
+            // Keep one token table for the whole compatibility scan rather than rebuilding it per candidate.
+            if (shouldUseIgnoreCaseKmp(reverse ? first + tokenLength : length - first, tokenLength) && token.codePointCount(0, tokenLength) == tokenLength) {
+                return findDelimitedIgnoreCaseCharKmp(str, token, delimiter, first, reverse);
+            }
+            for (int searchFrom = first; reverse ? searchFrom >= 0 : searchFrom <= length - tokenLength;) {
+                final int index = reverse ? Strings.lastIndexOfIgnoreCase(str, token, searchFrom) : Strings.indexOfIgnoreCase(str, token, searchFrom);
+                if (index < 0) {
+                    return N.INDEX_NOT_FOUND;
+                }
+                if (isDelimitedValueMatch(str, index, tokenLength, delimiter, delimiter.length(), length, true)) {
+                    return index;
+                }
+                searchFrom = index + (reverse ? -1 : 1);
+            }
+            return N.INDEX_NOT_FOUND;
+        }
+
+        private static int findDelimitedIgnoreCaseCharKmp(final String str, final String token, final String delimiter, final int bound,
+                final boolean reverse) {
+            final int tokenLength = token.length();
+            final int length = str.length();
             final char[] pattern = foldIgnoreCase(token, reverse);
             final int[] failure = createKmpFailureTable(pattern);
-            final int first = reverse ? Math.min(bound, length - tokenLength) + tokenLength - 1 : bound;
+            final int first = reverse ? bound + tokenLength - 1 : bound;
             final int step = reverse ? -1 : 1;
 
             for (int i = first, matched = 0; i >= 0 && i < length; i += step) {
@@ -28214,11 +28619,157 @@ public final class Strings {
                     if (isDelimitedValueMatch(str, index, tokenLength, delimiter, delimiter.length(), length, true)) {
                         return index;
                     }
-                    // A rejected boundary may overlap the next occurrence. Keep its prefix state.
                     matched = failure[matched - 1];
                 }
             }
             return N.INDEX_NOT_FOUND;
+        }
+
+        /** A code-point KMP pattern for well-formed UTF-16, with its original UTF-16 length for returned offsets. */
+        private static final class IgnoreCasePattern {
+            private final int length;
+            private final int[] folded;
+            private final int[] failure;
+
+            private IgnoreCasePattern(final String value, final boolean reverse) {
+                length = value.length();
+                folded = new int[value.codePointCount(0, length)];
+                failure = new int[folded.length];
+
+                for (int i = 0, slot = reverse ? folded.length - 1 : 0; i < length; slot += reverse ? -1 : 1) {
+                    final int codePoint = value.codePointAt(i);
+                    folded[slot] = Character.toLowerCase(Character.toUpperCase(codePoint));
+                    i += Character.charCount(codePoint);
+                }
+                for (int i = 1, matched = 0; i < folded.length;) {
+                    if (folded[i] == folded[matched]) {
+                        failure[i++] = ++matched;
+                    } else if (matched > 0) {
+                        matched = failure[matched - 1];
+                    } else {
+                        i++;
+                    }
+                }
+            }
+        }
+
+        /** Validates a growing text window once for all three cursors, starting with a small look-ahead. */
+        private static final class IgnoreCaseValidation {
+            private final String str;
+            private final boolean reverse;
+            private int limit;
+            private int chunkSize = 64;
+
+            private IgnoreCaseValidation(final String str, final int limit, final boolean reverse) {
+                this.str = str;
+                this.limit = limit;
+                this.reverse = reverse;
+            }
+
+            private boolean advance(final int scanIndex) {
+                final int remaining = reverse ? limit : str.length() - limit;
+                final int distance = reverse ? limit - scanIndex + 1 : scanIndex - limit + 1;
+                final int size = Math.min(remaining, Math.max(chunkSize, distance));
+                final int nextLimit = limit + (reverse ? -size : size);
+                // Range endpoints may split valid pairs; the validator checks their mates in the whole string.
+                if (containsUnpairedSurrogate(str, reverse ? nextLimit : limit, reverse ? limit : nextLimit)) {
+                    return false;
+                }
+                limit = nextLimit;
+                chunkSize = Math.min(8192, chunkSize * 2);
+                return true;
+            }
+        }
+
+        /** Streams overlapping matches in either direction; the two delimiter cursors share one compiled pattern. */
+        private static final class IgnoreCaseMatchCursor {
+            // Distinct from exhaustion (-1): callers must restart with JDK-compatible region matching.
+            private static final int MALFORMED = -2;
+
+            private final String str;
+            private final IgnoreCasePattern pattern;
+            private final boolean reverse;
+            private final IgnoreCaseValidation validation;
+            private int scanIndex;
+            private int matched;
+            private int occurrence = N.INDEX_NOT_FOUND;
+            private boolean exhausted;
+
+            // For text already checked as well-formed, such as the token/delimiter containment check.
+            private IgnoreCaseMatchCursor(final String str, final IgnoreCasePattern pattern, final int bound, final boolean reverse) {
+                this(str, pattern, bound, reverse, null);
+            }
+
+            private IgnoreCaseMatchCursor(final String str, final IgnoreCasePattern pattern, final int bound, final boolean reverse,
+                    final IgnoreCaseValidation validation) {
+                this.str = str;
+                this.pattern = pattern;
+                this.reverse = reverse;
+                this.validation = validation;
+                final int first = reverse ? Math.min(bound, str.length() - pattern.length) : bound;
+                exhausted = first < 0 || first > str.length() - pattern.length;
+                scanIndex = first + (reverse ? pattern.length : 0);
+            }
+
+            private int atOrBeyond(final int bound) {
+                while (!exhausted && (occurrence < 0 || (reverse ? occurrence > bound : occurrence < bound))) {
+                    occurrence = next();
+                }
+                return occurrence;
+            }
+
+            private int next() {
+                if (exhausted) {
+                    return N.INDEX_NOT_FOUND;
+                }
+                if (pattern.folded.length == 0) {
+                    return nextEmpty();
+                }
+                while (true) {
+                    final int limit = validation == null ? (reverse ? 0 : str.length()) : validation.limit;
+                    final int index = nextMatch(limit);
+                    if (index >= 0) {
+                        return index;
+                    }
+                    if (reverse ? scanIndex <= 0 : scanIndex >= str.length()) {
+                        exhausted = true;
+                        return N.INDEX_NOT_FOUND;
+                    }
+                    if (!validation.advance(scanIndex)) {
+                        exhausted = true;
+                        return MALFORMED;
+                    }
+                }
+            }
+
+            private int nextEmpty() {
+                // Empty tokens are candidates at every UTF-16 offset, including the end of the text.
+                if (scanIndex >= 0 && scanIndex <= str.length()) {
+                    final int start = scanIndex;
+                    scanIndex += reverse ? -1 : 1;
+                    return start;
+                }
+                exhausted = true;
+                return N.INDEX_NOT_FOUND;
+            }
+
+            // Keep the matching loop independent of validation and small enough for hot-call inlining.
+            private int nextMatch(final int limit) {
+                while (reverse ? scanIndex > limit : scanIndex < limit) {
+                    final int codePoint = reverse ? str.codePointBefore(scanIndex) : str.codePointAt(scanIndex);
+                    scanIndex += reverse ? -Character.charCount(codePoint) : Character.charCount(codePoint);
+                    final int folded = Character.toLowerCase(Character.toUpperCase(codePoint));
+
+                    while (matched > 0 && folded != pattern.folded[matched]) {
+                        matched = pattern.failure[matched - 1];
+                    }
+                    if (folded == pattern.folded[matched] && ++matched == pattern.folded.length) {
+                        matched = pattern.failure[matched - 1];
+                        return scanIndex - (reverse ? 0 : pattern.length);
+                    }
+                }
+                return N.INDEX_NOT_FOUND;
+            }
         }
 
         /**
@@ -28344,7 +28895,7 @@ public final class Strings {
                 return N.INDEX_NOT_FOUND;
             }
 
-            if (Strings.indexOfIgnoreCase(token, delimiter) >= 0) {
+            if (containsTokenDelimiterIgnoreCase(token, delimiter)) {
                 return N.INDEX_NOT_FOUND;
             }
 
@@ -28358,10 +28909,19 @@ public final class Strings {
 
             startIndexFromBack = Math.min(startIndexFromBack, len);
 
-            if (shouldUseIgnoreCaseKmp(Math.min(startIndexFromBack, len - tokenLength) + tokenLength, tokenLength)
-                    && !containsSurrogate(token, 0, tokenLength)) {
+            final int searchLength = Math.min(startIndexFromBack, len - tokenLength) + tokenLength;
+            final boolean compositeKmp = Math.max(tokenLength, delimiterLength) >= 16 && token.codePointCount(0, tokenLength) == tokenLength
+                    && delimiter.codePointCount(0, delimiterLength) == delimiterLength;
+
+            if (shouldUseIgnoreCaseKmp(searchLength, tokenLength)) {
+                if (compositeKmp) {
+                    return findDelimitedKmp(str, token, delimiter, startIndexFromBack, true, true);
+                }
+
                 return findDelimitedIgnoreCaseKmp(str, token, delimiter, startIndexFromBack, true);
             }
+
+            long remainingWork = tokenSearchBudget(searchLength);
 
             for (int searchFrom = startIndexFromBack; searchFrom >= 0;) {
                 final int index = Strings.lastIndexOfIgnoreCase(str, token, searchFrom);
@@ -28372,6 +28932,11 @@ public final class Strings {
 
                 if (isDelimitedValueMatch(str, index, tokenLength, delimiter, delimiterLength, len, true)) {
                     return index;
+                }
+
+                if (index > 0 && (remainingWork -= (long) tokenLength + delimiterLength) <= 0) {
+                    return compositeKmp ? findDelimitedKmp(str, token, delimiter, index - 1, true, true)
+                            : findDelimitedIgnoreCaseKmp(str, token, delimiter, index - 1, true);
                 }
 
                 searchFrom = index - 1;

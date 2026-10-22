@@ -294,20 +294,16 @@ final class XmlParserImpl extends AbstractXmlParser {
             throws IllegalArgumentException, ParsingException, UncheckedIOException {
         N.checkArgNotNull(output, cs.output);
 
-        Writer writer = null;
-
         try {
             createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
+            try (final Writer writer = IOUtil.newFileWriter(output)) {
+                serialize(obj, config, writer);
 
-            serialize(obj, config, writer);
-
-            writer.flush();
+                writer.flush();
+            }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            IOUtil.close(writer);
         }
     }
 
@@ -2514,12 +2510,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         propValue = readByStreamParser(xmlReader, configToUse, propInfo, propType,
                                                 propertyConstructionType(propType, propAttributeType));
 
-                                        for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
-                                            startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
-
-                                            if (startCount < 0 || !xmlReader.hasNext()) {
-                                                break;
-                                            }
+                                        // Review 2026-10-17: A single-value property must not silently discard a second child.
+                                        if (nextElementEvent(xmlReader) == XMLStreamConstants.START_ELEMENT) {
+                                            throw new ParsingException("Only one child element is supported for property: " + propName);
                                         }
 
                                     } else {
@@ -2792,12 +2785,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         propValue = readByStreamParser(xmlReader, configToUse, null, propType,
                                                 propertyConstructionType(propType, propAttributeType));
 
-                                        for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
-                                            startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
-
-                                            if (startCount < 0 || !xmlReader.hasNext()) {
-                                                break;
-                                            }
+                                        // Review 2026-10-17: A single-value property must not silently discard a second child.
+                                        if (nextElementEvent(xmlReader) == XMLStreamConstants.START_ELEMENT) {
+                                            throw new ParsingException("Only one child element is supported for property: " + propName);
                                         }
 
                                     } else {
@@ -3052,12 +3042,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         propValue = readByStreamParser(xmlReader, configToUse, null, propType,
                                                 propertyConstructionType(propType, propAttributeType));
 
-                                        for (int startCount = 0, e = xmlReader.next();; e = xmlReader.next()) {
-                                            startCount += (e == XMLStreamConstants.START_ELEMENT) ? 1 : (e == XMLStreamConstants.END_ELEMENT ? -1 : 0);
-
-                                            if (startCount < 0 || !xmlReader.hasNext()) {
-                                                break;
-                                            }
+                                        // Review 2026-10-17: A single-value property must not silently discard a second child.
+                                        if (nextElementEvent(xmlReader) == XMLStreamConstants.START_ELEMENT) {
+                                            throw new ParsingException("Only one child element is supported for property: " + propName);
                                         }
 
                                     } else {

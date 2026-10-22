@@ -1253,6 +1253,7 @@ public final class HttpUtil {
      * Gets an output stream from an HttpURLConnection with appropriate headers and wrapping.
      * Sets Content-Type and Content-Encoding headers based on the content format,
      * and wraps the stream with compression if needed.
+     * If compression initialization fails, the opened stream is closed before the exception is propagated.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1295,7 +1296,23 @@ public final class HttpUtil {
             connection.setRequestProperty(HttpHeaders.Names.CONTENT_ENCODING, contentEncoding);
         }
 
-        return wrapOutputStream(connection.getOutputStream(), contentFormat);
+        @SuppressWarnings("resource")
+        final OutputStream rawStream = connection.getOutputStream();
+
+        try {
+            return wrapOutputStream(rawStream, contentFormat);
+        } catch (final RuntimeException | Error e) {
+            // Review 2026-10-17: A failed encoder construction never transfers the opened stream to the caller.
+            try {
+                rawStream.close();
+            } catch (final IOException | RuntimeException | Error closeFailure) {
+                if (closeFailure != e) {
+                    e.addSuppressed(closeFailure);
+                }
+            }
+
+            throw e;
+        }
     }
 
     /**

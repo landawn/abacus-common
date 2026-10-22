@@ -1031,6 +1031,7 @@ public final class CsvUtil {
          * @throws IllegalStateException if no record has been read successfully, or the latest read reached EOF or failed
          * @throws IllegalArgumentException if the parser or destination is null
          * @throws ParsingException if the record is malformed, or has more fields than {@code output} has slots.
+         * @throws RuntimeException if a custom parser fails, except that an {@code IndexOutOfBoundsException} is wrapped in {@code ParsingException}
          */
         public void parseRecordInto(final BiConsumer<String, String[]> lineParser, final String[] output) throws ParsingException, RuntimeException {
             N.checkArgNotNull(lineParser, cs.lineParser);

@@ -43318,9 +43318,24 @@ public final class N extends CommonUtil {
         final org.w3c.dom.Document doc;
 
         try {
-            final javax.xml.parsers.DocumentBuilder parser = XmlUtil.createDOMParser(); // XXE-hardened: DOCTYPE is rejected
+            // Only inputs within the reuse budget borrow a pooled builder; a larger document is parsed by a fresh one
+            // (which is then discarded), because there creating the builder is negligible next to the parse.
+            FormatXmlParser pooled = xml.length() <= FORMAT_XML_PARSER_CHAR_BUDGET ? FORMAT_XML_PARSER_POOL.poll() : null;
+            final javax.xml.parsers.DocumentBuilder parser = pooled == null ? XmlUtil.createDOMParser() : pooled.parser; // XXE-hardened: DOCTYPE is rejected
             parser.setErrorHandler(THROWING_XML_ERROR_HANDLER); // no "[Fatal Error]" line on stderr
             doc = parser.parse(new org.xml.sax.InputSource(new java.io.StringReader(xml)));
+
+            // Pool the builder only after a successful parse: the JDK builder drops its document references then, while a
+            // failed parse may leave partial state behind (such a builder is simply not reused).
+            if (pooled == null) {
+                pooled = new FormatXmlParser(parser);
+            }
+
+            pooled.parsedChars += xml.length();
+
+            if (pooled.parsedChars <= FORMAT_XML_PARSER_CHAR_BUDGET) {
+                FORMAT_XML_PARSER_POOL.offer(pooled);
+            }
         } catch (final org.xml.sax.SAXException e) {
             throw new ParsingException(e.getMessage(), e);
         } catch (final java.io.IOException e) {
@@ -43351,6 +43366,31 @@ public final class N extends CommonUtil {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Reusable DOM builders for {@link #formatXml(String, XmlSerConfig)}. Creating a builder from the shared, synchronized
+     * factory costs about 20 KB and 25-30 us, roughly half of the work for a small document. A JDK builder keeps every
+     * element/attribute name it has parsed in its symbol table, and {@code reset()} does not clear it, so a pooled builder
+     * is retired once it has parsed {@link #FORMAT_XML_PARSER_CHAR_BUDGET} input chars in total. The budget bounds how
+     * many names a builder can have seen, not their bytes: a builder fed nothing but distinct short names up to the budget
+     * was measured to retain about 0.3 MB (about 2,500 names), so the {@code FORMAT_XML_PARSER_POOL_SIZE} pooled builders
+     * retain at most about 2-3 MB however many distinct names the formatted documents use. The builders come from
+     * {@link XmlUtil#createDOMParser()} (same hardened configuration) and are used by {@code formatXml} only.
+     */
+    private static final int FORMAT_XML_PARSER_POOL_SIZE = 8;
+
+    private static final int FORMAT_XML_PARSER_CHAR_BUDGET = 1 << 14;
+
+    private static final Queue<FormatXmlParser> FORMAT_XML_PARSER_POOL = new ArrayBlockingQueue<>(FORMAT_XML_PARSER_POOL_SIZE);
+
+    private static final class FormatXmlParser {
+        final javax.xml.parsers.DocumentBuilder parser;
+        long parsedChars;
+
+        FormatXmlParser(final javax.xml.parsers.DocumentBuilder parser) {
+            this.parser = parser;
+        }
     }
 
     private static final org.xml.sax.ErrorHandler THROWING_XML_ERROR_HANDLER = new org.xml.sax.ErrorHandler() {

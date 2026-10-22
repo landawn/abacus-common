@@ -278,12 +278,12 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * @param cbuf the character array containing the data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
-     * @param length the number of characters to write; must be non-negative and {@code off + len} must not
+     * @param length the number of characters to write; must be non-negative and {@code off + length} must not
      *        exceed {@code cbuf.length}
      * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
      *         output stream or writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + length}
      *         exceeds {@code cbuf.length}
      */
     @Override
@@ -362,11 +362,11 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *        is used as the source
      * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
      *        must be non-negative and not greater than the effective length
-     * @param length the number of characters to write; must be non-negative and {@code off + len} must not
+     * @param length the number of characters to write; must be non-negative and {@code off + length} must not
      *        exceed the effective length
      * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
      *         output stream or writer fails
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + length}
      *         exceeds the effective length
      */
     @Override

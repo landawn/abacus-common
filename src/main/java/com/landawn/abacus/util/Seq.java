@@ -127,6 +127,16 @@ import com.landawn.abacus.util.stream.Stream;
  * nothing. Branching a sequence is never supported (the same holds for
  * {@link com.landawn.abacus.util.stream.Stream}); derive once, or build a fresh sequence per branch.</p>
  *
+ * <p><b>Closing a sequence does not release all of its object references.</b> {@code close()} runs the close
+ * handlers and releases resources owned by the sequence, but it does not clear every field of the instance.
+ * This applies whether the sequence was closed explicitly or automatically by a terminal operation. A
+ * closed sequence that is still strongly reachable - for example, one kept as an element or value of a
+ * long-lived {@link java.util.Collection}, {@link java.util.Map}, or cache - may continue to reference its
+ * source iterator or collection, buffered or sorted elements, a flat-mapped child, an executor, its derived
+ * stages, and its close-handler chain. Those references can keep large arrays, collections, or resource wrappers
+ * alive and prevent garbage collection even though the underlying resource has already been closed. Do not cache
+ * sequences; remove closed instances from long-lived collections and let them become unreachable.</p>
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li>Supports checked exceptions in stream operations</li>

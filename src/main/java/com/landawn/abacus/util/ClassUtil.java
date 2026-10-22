@@ -2495,7 +2495,7 @@ public final class ClassUtil {
      * @param packageName the Java package name, or {@code null} for the default package.
      * @return the package directory path, always ending with a file separator.
      * @throws IllegalArgumentException if {@code sourcePath} is {@code null}.
-     * @throws IllegalStateException if the package directory does not exist and cannot be created.
+     * @throws IllegalStateException if the package directory cannot be created or its path names a non-directory.
      */
     static String makeFolderForPackage(String sourcePath, final String packageName) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(sourcePath, cs.sourcePath);
@@ -2507,7 +2507,7 @@ public final class ClassUtil {
 
         // mkdirs() returns false both when creation failed and when a concurrent caller won the race, so the
         // directory's existence - not the return value - is what decides success here.
-        if (!classFileFolder.exists() && !classFileFolder.mkdirs() && !classFileFolder.isDirectory()) {
+        if (!classFileFolder.isDirectory() && !classFileFolder.mkdirs() && !classFileFolder.isDirectory()) {
             throw new IllegalStateException("Failed to create folder: " + classFileFolder);
         }
 

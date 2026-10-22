@@ -212,7 +212,7 @@ public final class Utf8 {
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
      * @throws IllegalArgumentException if {@code bytes} is {@code null} or {@code length} is negative
      * @throws IndexOutOfBoundsException if {@code off} is negative, or
-     *         {@code off + len} is greater than {@code bytes.length}
+     *         {@code off + length} is greater than {@code bytes.length}
      */
     public static boolean isWellFormed(final byte[] bytes, final int off, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(bytes, cs.bytes);

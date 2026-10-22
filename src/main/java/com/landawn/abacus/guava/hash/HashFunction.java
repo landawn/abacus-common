@@ -201,9 +201,9 @@ public interface HashFunction {
 
     /**
      * Computes the hash code for a portion of a byte array. This is a convenience method
-     * equivalent to {@code newHasher().put(input, off, len).hash()}.
+     * equivalent to {@code newHasher().put(input, off, length).hash()}.
      *
-     * <p>Only the bytes from {@code input[off]} through {@code input[off + len - 1]}
+     * <p>Only the bytes from {@code input[off]} through {@code input[off + length - 1]}
      * are hashed. This is useful when working with buffers or when only part of an
      * array contains valid data.
      *
@@ -219,7 +219,7 @@ public interface HashFunction {
      * @param length the number of bytes to hash from the array
      * @return the hash code for the specified bytes
      * @throws NullPointerException if {@code input} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code length < 0} or {@code off + len > input.length}
+     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code length < 0} or {@code off + length > input.length}
      */
     HashCode hash(byte[] input, int off, int length) throws NullPointerException, IndexOutOfBoundsException;
 

@@ -1022,8 +1022,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     public static final int SEMI_MONTH = 1001;
 
-    @SuppressWarnings("deprecation")
-    private static final int POOL_SIZE = InternalUtil.POOL_SIZE;
+    // Only idle formatters are retained. A larger heap does not imply more concurrent date operations;
+    // cap each queue independently of heap size, and let excess borrowers create temporary formatters.
+    private static final int POOL_SIZE = 64;
 
     // Pattern values are caller controlled. Bound the number of queues retained so a service
     // that receives many one-off formats cannot grow this process-wide cache indefinitely.
@@ -3645,7 +3646,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @return {@code timeZone} itself, or a fixed-offset stand-in that agrees with its {@link ZoneRules}
      */
     private static TimeZone legacyRenderingZone(final TimeZone timeZone, final long epochMillis) {
-        if (epochMillis >= LEGACY_ZONE_HISTORY_START && epochMillis < LEGACY_ZONE_TABLE_END) {
+        if (timeZone == UTC_TIME_ZONE || timeZone == GMT_TIME_ZONE || (epochMillis >= LEGACY_ZONE_HISTORY_START && epochMillis < LEGACY_ZONE_TABLE_END)) {
             return timeZone;
         }
 
@@ -5793,17 +5794,15 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         final TimeZone timeZoneToUse = checkTimeZone(dateTime, formatToUse, timezone, zoneIsDefaultSnapshot, Strings.isEmpty(format));
 
-        // Before both resolvers, not after: a nonexistent or ambiguous wall time gets the precise
-        // diagnostic naming the local date-time, instead of a bare "Unparseable date" from
-        // SimpleDateFormat or a generic failure from the strict java.time resolver below.
-        checkGapAndOverlap(dateTime, formatToUse, timeZoneToUse);
-
         final long timeInMillis = fastDateParse(dateTime, formatToUse, timeZoneToUse);
 
         if (timeInMillis != Long.MIN_VALUE) {
             return timeInMillis;
         }
 
+        // The fast parser already resolves local times strictly. Only its fallback needs this check:
+        // preserve the precise gap/overlap diagnostic before SimpleDateFormat can lose that detail.
+        checkGapAndOverlap(dateTime, formatToUse, timeZoneToUse);
         final DateFormat sdf = getSDF(formatToUse, timeZoneToUse, locale);
 
         try {
@@ -5897,7 +5896,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             return;
         }
 
-        // This check runs before the text has been parsed, so it must confirm the shape itself: reading
+        // This check also receives unparsed text, so it must confirm the shape itself: reading
         // digits out of positions that hold something else would report malformed input as a DST gap.
         if (!hasExpectedGapCheckShape(dateTime, formatToUse, dateOnly)) {
             return;
@@ -5921,7 +5920,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
             localDateTime = LocalDateTime.of(parseInt(dateTime, 0, 4), parseInt(dateTime, 5, 7), parseInt(dateTime, 8, 10),
                     dateOnly ? 0 : parseInt(dateTime, 11, 13), dateOnly ? 0 : parseInt(dateTime, 14, 16), dateOnly ? 0 : parseInt(dateTime, 17, 19));
         } catch (final RuntimeException e) {
-            return; // the parser already accepted the text; nothing more to validate
+            return; // leave invalid-field diagnostics to the parser
         }
 
         final List<ZoneOffset> validOffsets = zoneId.getRules().getValidOffsets(localDateTime);
@@ -7412,6 +7411,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
                 } else {
                     ((Writer) appendable).write(utcTimestamp, 0, length);
                 }
+            } else if (appendable instanceof StringBuilder builder) {
+                builder.append(utcTimestamp, 0, length);
             } else {
                 appendable.append(new String(utcTimestamp));
             }
@@ -13124,6 +13125,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static void recycleSDF(final String format, final TimeZone timeZone, final Locale locale, final DateFormat sdf) {
+        // A cloned caller zone can still share an arbitrary object graph with its owner. Detach it
+        // before retaining the formatter; getSDF installs the next borrower's zone on checkout.
+        sdf.setTimeZone(UTC_TIME_ZONE);
         final Locale effectiveLocale = isPredefinedLegacyFormat(format) ? Locale.US : locale;
 
         if (Locale.US.equals(effectiveLocale) && UTC_TIME_ZONE.equals(timeZone)) {
@@ -13490,7 +13494,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         } else if (LOCAL_DATE_TIME_FORMAT.equals(format)) {
             return DTF.LOCAL_DATE_TIME;
         } else if (LOCAL_TIMESTAMP_FORMAT.equals(format)) {
-            return autoDetected ? DTF.AUTO_LOCAL_TIMESTAMP : DTF.of("uuuu-MM-dd HH:mm:ss.SSS");
+            return autoDetected ? DTF.AUTO_LOCAL_TIMESTAMP : DTF.EXPLICIT_LOCAL_TIMESTAMP;
         } else if (ISO_LOCAL_DATE_TIME_FORMAT.equals(format)) {
             return DTF.ISO_LOCAL_DATE_TIME;
         } else if (ISO_OFFSET_DATE_TIME_FORMAT.equals(format)) {
@@ -13504,7 +13508,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         } else if (ISO_8601_TIMESTAMP_FORMAT.equals(format)) {
             return autoDetected ? DTF.AUTO_ISO_8601_TIMESTAMP : DTF.ISO_8601_TIMESTAMP;
         } else if (ISO_LOCAL_TIMESTAMP_FORMAT.equals(format)) {
-            return autoDetected ? DTF.AUTO_ISO_LOCAL_TIMESTAMP : DTF.of("uuuu-MM-dd'T'HH:mm:ss.SSS");
+            return autoDetected ? DTF.AUTO_ISO_LOCAL_TIMESTAMP : DTF.EXPLICIT_ISO_LOCAL_TIMESTAMP;
         } else if (HTTP_DATE_FORMAT.equals(format)) {
             return DTF.HTTP_DATE;
         }
@@ -13869,13 +13873,21 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *         {@code timeZone}
      */
     private static void checkFixedFourDigitYear(final java.util.Date date, final TimeZone timeZone, final String format) throws IllegalArgumentException {
-        // Read the year through java.time: that is what renders ISO_ZONED_DATE_TIME_FORMAT and the
-        // Calendar default, and what the legacy formatter agrees with once legacyRenderingZone has
-        // aligned it. Reading it from a legacy Calendar let Africa/Monrovia's -00:43:08 local mean time
-        // print year 0000 for an instant this very check had just accepted as year 0001.
-        final int year = civilYear(date, timeZone);
+        final boolean inRange;
 
-        if (year < 1 || year > 9999) {
+        if (timeZone == UTC_TIME_ZONE) {
+            // UTC has fixed epoch-millisecond bounds: 0001-01-01 inclusive, 10000-01-01 exclusive.
+            // Avoid constructing a second civil date-time before fastDateFormat extracts its fields.
+            final long millis = date.getTime();
+            inRange = millis >= -62_135_596_800_000L && millis < 253_402_300_800_000L;
+        } else {
+            // Read the year through java.time, matching the renderer and legacyRenderingZone. A legacy
+            // Calendar can disagree before 1900 (for example Africa/Monrovia's -00:43:08 local mean time).
+            final int year = civilYear(date, timeZone);
+            inRange = year >= 1 && year <= 9999;
+        }
+
+        if (!inRange) {
             throw new IllegalArgumentException("Format '" + format + "' supports Common Era years from 0001 through 9999; got instant " + exactInstant(date));
         }
     }
@@ -14024,8 +14036,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
         } catch (final DateTimeException | IllegalArgumentException e) {
             // An invalid field combination (30 February) or an unresolvable wall time: fall through to
             // the strict SimpleDateFormat path so the caller gets a consistent "cannot be parsed" error.
-            // For the five formats checkGapAndOverlap covers, that check has already thrown a message
-            // naming the nonexistent or ambiguous local date-time.
+            // The caller runs checkGapAndOverlap before the legacy fallback, preserving its diagnostic
+            // for a nonexistent or ambiguous local date-time.
             return Long.MIN_VALUE;
         }
     }
@@ -14856,6 +14868,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         private static final DTF AUTO_LOCAL_TIMESTAMP = ofVariableFraction(Dates.LOCAL_TIMESTAMP_FORMAT, "uuuu-MM-dd HH:mm:ss", false);
         private static final DTF AUTO_ISO_LOCAL_TIMESTAMP = ofVariableFraction(Dates.ISO_LOCAL_TIMESTAMP_FORMAT, "uuuu-MM-dd'T'HH:mm:ss", false);
         private static final DTF AUTO_ISO_8601_TIMESTAMP = ofVariableFraction(Dates.ISO_8601_TIMESTAMP_FORMAT, "uuuu-MM-dd'T'HH:mm:ss", true);
+
+        // Built-in grammars must remain reusable even when caller-controlled patterns fill the cache.
+        private static final DTF EXPLICIT_LOCAL_TIMESTAMP = new DTF("uuuu-MM-dd HH:mm:ss.SSS");
+        private static final DTF EXPLICIT_ISO_LOCAL_TIMESTAMP = new DTF("uuuu-MM-dd'T'HH:mm:ss.SSS");
 
         // Patterns are caller controlled. Bound the cache so a service that receives many one-off
         // patterns cannot grow it indefinitely; past the bound every call builds a fresh formatter.

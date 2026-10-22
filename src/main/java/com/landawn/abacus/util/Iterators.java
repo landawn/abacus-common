@@ -17,7 +17,6 @@
 package com.landawn.abacus.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -1358,19 +1357,41 @@ public final class Iterators {
             return BooleanIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final boolean[][] sources = a.clone();
+
         return new BooleanIterator() {
-            private final Iterator<boolean[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private boolean[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1410,19 +1431,41 @@ public final class Iterators {
             return CharIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final char[][] sources = a.clone();
+
         return new CharIterator() {
-            private final Iterator<char[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private char[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1462,19 +1505,41 @@ public final class Iterators {
             return ByteIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final byte[][] sources = a.clone();
+
         return new ByteIterator() {
-            private final Iterator<byte[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private byte[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1514,19 +1579,41 @@ public final class Iterators {
             return ShortIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final short[][] sources = a.clone();
+
         return new ShortIterator() {
-            private final Iterator<short[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private short[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1567,19 +1654,41 @@ public final class Iterators {
             return IntIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final int[][] sources = a.clone();
+
         return new IntIterator() {
-            private final Iterator<int[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private int[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1619,19 +1728,41 @@ public final class Iterators {
             return LongIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final long[][] sources = a.clone();
+
         return new LongIterator() {
-            private final Iterator<long[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private long[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1670,19 +1801,41 @@ public final class Iterators {
             return FloatIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final float[][] sources = a.clone();
+
         return new FloatIterator() {
-            private final Iterator<float[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private float[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1722,19 +1875,41 @@ public final class Iterators {
             return DoubleIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its array becomes current, and
+        // the last array is dropped once hasNext() has returned false, so an array that has been run through is no
+        // longer kept reachable by the returned iterator.
+        final double[][] sources = a.clone();
+
         return new DoubleIterator() {
-            private final Iterator<double[]> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private double[] cur;
             private int cursor = 0;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || cursor >= cur.length) && iter.hasNext()) {
-                    cur = iter.next();
-                    cursor = 0;
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
                 }
 
                 return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array that has an element, if any. Only reached when the current array is used up;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+
+                    if (cur != null && cursor < cur.length) {
+                        return;
+                    }
+                }
+
+                // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                cur = null;
             }
 
             /**
@@ -1774,17 +1949,37 @@ public final class Iterators {
             return BooleanIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final BooleanIterator[] sources = a.clone();
+
         return new BooleanIterator() {
-            private final Iterator<BooleanIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private BooleanIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -1824,17 +2019,37 @@ public final class Iterators {
             return CharIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final CharIterator[] sources = a.clone();
+
         return new CharIterator() {
-            private final Iterator<CharIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private CharIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -1874,17 +2089,37 @@ public final class Iterators {
             return ByteIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final ByteIterator[] sources = a.clone();
+
         return new ByteIterator() {
-            private final Iterator<ByteIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private ByteIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -1924,17 +2159,37 @@ public final class Iterators {
             return ShortIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final ShortIterator[] sources = a.clone();
+
         return new ShortIterator() {
-            private final Iterator<ShortIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private ShortIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -1974,17 +2229,37 @@ public final class Iterators {
             return IntIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final IntIterator[] sources = a.clone();
+
         return new IntIterator() {
-            private final Iterator<IntIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private IntIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2024,17 +2299,37 @@ public final class Iterators {
             return LongIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final LongIterator[] sources = a.clone();
+
         return new LongIterator() {
-            private final Iterator<LongIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private LongIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2074,17 +2369,37 @@ public final class Iterators {
             return FloatIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final FloatIterator[] sources = a.clone();
+
         return new FloatIterator() {
-            private final Iterator<FloatIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private FloatIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2124,17 +2439,37 @@ public final class Iterators {
             return DoubleIterator.EMPTY;
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final DoubleIterator[] sources = a.clone();
+
         return new DoubleIterator() {
-            private final Iterator<DoubleIterator> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private DoubleIterator cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2176,15 +2511,64 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        final List<Iterator<? extends T>> list = new ArrayList<>(a.length);
+        // Private snapshot of the non-empty arrays: each slot is cleared as soon as its array becomes current, and the
+        // last array is dropped once hasNext() has returned false (see concat(boolean[]...)).
+        final Object[][] sources = new Object[a.length][];
+        int count = 0;
 
         for (final T[] e : a) {
             if (N.notEmpty(e)) {
-                list.add(ObjIterator.of(e));
+                sources[count++] = e;
             }
         }
 
-        return concat(list);
+        if (count == 0) {
+            return ObjIterator.empty();
+        }
+
+        final int length = count;
+
+        return new ObjIterator<>() {
+            private int index = 0;
+            private Object[] cur;
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cur == null || cursor >= cur.length) {
+                    nextSource();
+                }
+
+                return cur != null && cursor < cur.length;
+            }
+
+            // Moves on to the next array, if any. Only reached when the current array is used up; keeping it out of
+            // hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                if (index < length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+                    cursor = 0;
+                } else {
+                    // Every array is used up. An array's length is fixed, so dropping the last one cannot change a result.
+                    cur = null;
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @SuppressWarnings("unchecked")
+            @Override
+            public T next() throws NoSuchElementException {
+                if ((cur == null || cursor >= cur.length) && !hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return (T) cur[cursor++];
+            }
+        };
     }
 
     /**
@@ -2211,7 +2595,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        return concat(Arrays.asList(a.clone()));
+        return concatOwnedIterators(a.clone(), a.length);
     }
 
     /**
@@ -2242,7 +2626,7 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        return concatIterables(Arrays.asList(a.clone()));
+        return concatOwnedIterables(a.clone(), a.length);
     }
 
     /**
@@ -2272,19 +2656,21 @@ public final class Iterators {
             return ObjIterator.empty();
         }
 
-        final List<Iterable<Map.Entry<K, V>>> list = new ArrayList<>(a.length);
+        @SuppressWarnings({ "unchecked" })
+        final Iterable<Map.Entry<K, V>>[] sources = new Iterable[a.length];
+        int length = 0;
 
         for (final Map<K, V> e : a) {
             if (e != null) {
-                // Collect the entry *sets*, not their iterators: concatIterables calls iterator() only when the
-                // previous source runs out, matching concat(Iterable...). Grabbing every entrySet().iterator() up
+                // Collect the entry *sets*, not their iterators: iterator() is called only when the previous
+                // source runs out, matching concat(Iterable...). Grabbing every entrySet().iterator() up
                 // front used to make a later put() on any of these maps throw ConcurrentModificationException on
                 // the first next(), even for a map whose turn had not come yet.
-                list.add(e.entrySet());
+                sources[length++] = e.entrySet();
             }
         }
 
-        return concatIterables(list);
+        return concatOwnedIterables(sources, length);
     }
 
     /**
@@ -2423,6 +2809,121 @@ public final class Iterators {
     }
 
     /**
+     * Same traversal as {@link #concat(Collection)}, over the first {@code length} slots of a private array that
+     * the calling {@code concat} overload created and owns (never the caller's array or collection). Each slot is
+     * cleared as soon as its iterator becomes current, so a source that has been run through is no longer kept
+     * reachable by the returned iterator while later sources are traversed.
+     *
+     * @param <T> the type of elements.
+     * @param sources the private snapshot; {@code null} slots are skipped.
+     * @param length the number of slots in use.
+     * @return the concatenating iterator, or an empty iterator if {@code length} is 0.
+     */
+    private static <T> ObjIterator<T> concatOwnedIterators(final Iterator<? extends T>[] sources, final int length) {
+        if (length == 0) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private int index = 0;
+            private Iterator<? extends T> cur;
+
+            @Override
+            public boolean hasNext() {
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @Override
+            public T next() throws NoSuchElementException {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return cur.next();
+            }
+        };
+    }
+
+    /**
+     * Same traversal as {@link #concatIterables(Collection)}, over the first {@code length} slots of a private array
+     * that the calling {@code concat} overload created and owns (never the caller's array or collection). Each slot
+     * is cleared as soon as its {@code Iterable} is taken, before its {@code iterator()} is requested, so a source
+     * that has been run through is no longer kept reachable by the returned iterator while later sources are traversed.
+     *
+     * @param <T> the type of elements.
+     * @param sources the private snapshot; {@code null} slots are treated as empty.
+     * @param length the number of slots in use.
+     * @return the concatenating iterator, or an empty iterator if {@code length} is 0.
+     */
+    private static <T> ObjIterator<T> concatOwnedIterables(final Iterable<? extends T>[] sources, final int length) {
+        if (length == 0) {
+            return ObjIterator.empty();
+        }
+
+        return new ObjIterator<>() {
+            private int index = 0;
+            private Iterator<? extends T> cur;
+
+            @Override
+            public boolean hasNext() {
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
+                }
+
+                return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < length) {
+                    final Iterable<? extends T> source = sources[index];
+                    sources[index++] = null;
+                    cur = N.iterate(source);
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if no next element is available from the source iteration.
+             */
+            @Override
+            public T next() throws NoSuchElementException {
+                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return cur.next();
+            }
+        };
+    }
+
+    /**
      * Concatenates multiple BiIterators into a single BiIterator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2445,17 +2946,37 @@ public final class Iterators {
             return BiIterator.empty();
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final BiIterator<A, B>[] sources = a.clone();
+
         return new BiIterator<>() {
-            private final Iterator<BiIterator<A, B>> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private BiIterator<A, B> cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2535,8 +3056,8 @@ public final class Iterators {
                     @Override
                     public boolean hasNext() {
                         if (mappedIter == null || !mappedIter.hasNext()) {
-                            while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                                cur = iter.next();
+                            if (cur == null || !cur.hasNext()) {
+                                nextSource();
                             }
 
                             if (cur != null) {
@@ -2588,17 +3109,37 @@ public final class Iterators {
             return TriIterator.empty();
         }
 
+        // Private snapshot of the varargs array, taken here rather than inside the anonymous class so that the class
+        // does not capture (and pin) the caller's array. Each slot is cleared as soon as its iterator becomes current, so
+        // an iterator that has been run through is no longer kept reachable by the returned iterator. The current
+        // iterator - the last one too, after everything is exhausted - stays referenced, because hasNext() keeps
+        // polling it exactly as before.
+        final TriIterator<A, B, C>[] sources = a.clone();
+
         return new TriIterator<>() {
-            private final Iterator<TriIterator<A, B, C>> iter = Arrays.asList(a.clone()).iterator();
+            private int index = 0;
             private TriIterator<A, B, C> cur;
 
             @Override
             public boolean hasNext() {
-                while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                    cur = iter.next();
+                if (cur == null || !cur.hasNext()) {
+                    nextSource();
                 }
 
                 return cur != null && cur.hasNext();
+            }
+
+            // Moves on to the next source that has an element, if any. Only reached when the current source is exhausted;
+            // keeping it out of hasNext() keeps hasNext() small enough to inline.
+            private void nextSource() {
+                while (index < sources.length) {
+                    cur = sources[index];
+                    sources[index++] = null;
+
+                    if (cur != null && cur.hasNext()) {
+                        return;
+                    }
+                }
             }
 
             /**
@@ -2677,8 +3218,8 @@ public final class Iterators {
                     @Override
                     public boolean hasNext() {
                         if (mappedIter == null || !mappedIter.hasNext()) {
-                            while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                                cur = iter.next();
+                            if (cur == null || !cur.hasNext()) {
+                                nextSource();
                             }
 
                             if (cur != null) {

@@ -18,6 +18,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -388,8 +390,9 @@ public class JaxbParserTest extends TestBase {
     public void testDeserializeRecyclesHardenedSaxParser() throws Exception {
         Field field = XmlUtil.class.getDeclaredField("saxParserPool");
         field.setAccessible(true);
-        Queue<SAXParser> pool = (Queue<SAXParser>) field.get(null);
-        List<SAXParser> saved;
+        Queue<WeakReference<SAXParser>> pool = (Queue<WeakReference<SAXParser>>) field.get(null);
+        List<WeakReference<SAXParser>> saved;
+        SAXParser reused = null;
 
         synchronized (pool) {
             saved = new ArrayList<>(pool);
@@ -404,16 +407,21 @@ public class JaxbParserTest extends TestBase {
                 assertEquals(1, pool.size());
             }
 
+            // Keep the next borrowed parser alive so GC cannot turn a reuse check into a cache miss.
+            reused = XmlUtil.createSAXParser();
+            XmlUtil.recycleSAXParser(reused);
             assertEquals("Pool", parser.deserialize(new StringReader(xml), null, Person.class).getName());
 
             synchronized (pool) {
                 assertEquals(1, pool.size());
+                assertSame(reused, pool.peek().get());
             }
         } finally {
             synchronized (pool) {
                 pool.clear();
                 pool.addAll(saved);
             }
+            Reference.reachabilityFence(reused);
         }
     }
 

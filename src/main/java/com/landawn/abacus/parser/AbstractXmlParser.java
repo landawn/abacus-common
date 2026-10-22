@@ -903,6 +903,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * generic object handler: unsupported structured types such as Dataset must still fail, not lose data.
      * This serialization option does not provide a deserialization codec for the otherwise unsupported class.
      *
+     * @param type the type of the object to serialize
+     * @param config the serialization configuration
+     * @param indentation the current indentation, or {@code null} at the root
+     * @param writer the destination writer
+     * @return {@code true} if an empty element was written; {@code false} if this type or configuration is not supported
      * @throws IOException if writing the element to {@code writer} fails
      * @throws ParsingException if {@code tagByPropertyName} is enabled and the class's simple name, converted by the naming policy, is not
      *         a valid XML element name

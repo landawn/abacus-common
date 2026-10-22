@@ -49,20 +49,19 @@ import com.landawn.abacus.type.Type;
  * <p>The DOM and StAX readers convert an empty scalar {@code <e/>} wrapper in an array or collection through the
  * selected type's {@code valueOf("")}. This preserves an empty String and produces the type's default
  * for built-in numeric, boolean and character primitives and their boxed types. Types such as
- * {@code BigDecimal}, {@code Instant} and enums return {@code null}. A custom type may reject the empty
+ * {@code BigDecimal}, {@code Instant} and unannotated enums return {@code null}. A custom type may reject the empty
  * string; its conversion exception is propagated.
  * An explicit {@code isNull="true"} marker bypasses scalar conversion.</p>
  *
  * <p>That rule covers array and collection element wrappers only. An empty <i>named</i> bean-property leaf
  * element is still read differently by the two backends of the standard XML parser
  * ({@link ParserFactory#createXmlParser()}): for {@code <name/>} (or {@code <name></name>}) its DOM
- * reader converts the element's empty text content through {@code valueOf("")}, while its StAX reader observes no
- * character content and stores the property type's {@code defaultValue()}. The two agree wherever those two
- * answers agree - notably every numeric, boolean and character type, boxed or not - and differ for {@code String},
- * where DOM yields {@code ""} and StAX yields {@code null}. The Abacus XML parser
- * ({@link ParserFactory#createAbacusXmlParser()}) yields {@code ""} for such a {@code String} with every backend. For a property with a
- * {@code numberFormat} the DOM and SAX readers pass the empty text to that format, which rejects it with a
- * {@link ParsingException}, while the StAX readers store the type's default. Write {@code isNull="true"} when a {@code null}
+ * reader converts the element's empty text content through {@code valueOf("")}. Its StAX reader also uses
+ * {@code valueOf("")} for String, open Object and enum properties, and uses {@code defaultValue()} for other types.
+ * Both standard backends and every backend of the Abacus XML parser
+ * ({@link ParserFactory#createAbacusXmlParser()}) yield {@code ""} for an empty String property. For a property with a
+ * {@code numberFormat}, the standard DOM reader and all Abacus readers pass the empty text to that format, which rejects it with a
+ * {@link ParsingException}, while the standard StAX reader stores the type's default. Write {@code isNull="true"} when a {@code null}
  * property is intended, and a non-empty value otherwise.</p>
  *
  * <p><b>Usage Examples:</b></p>

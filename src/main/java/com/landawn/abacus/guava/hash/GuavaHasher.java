@@ -137,7 +137,7 @@ final class GuavaHasher implements Hasher {
      * @param length the number of bytes to add
      * @return this hasher instance
      * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + len > bytes.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + length > bytes.length}
      */
     @Override
     public Hasher put(final byte[] bytes, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException {

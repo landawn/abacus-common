@@ -245,7 +245,7 @@ public class JdkOptionalLongType extends AbstractOptionalType<OptionalLong> {
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
      * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} writes this type's JSON/XML
-     * literal form and ignores string quotation/escaping config.
+     * literal form and honors {@code writeLongAsString} when a non-zero string quotation is configured.
      *
      * @param appendable the Appendable to write to
      * @param x the OptionalLong to append

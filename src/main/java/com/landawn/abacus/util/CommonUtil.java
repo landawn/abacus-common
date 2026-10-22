@@ -8909,17 +8909,7 @@ sealed class CommonUtil permits N {
      * @see Strings#isBlank(CharSequence)
      */
     public static boolean isBlank(final CharSequence cs) {
-        if (isEmpty(cs)) {
-            return true;
-        }
-
-        for (int i = 0, len = cs.length(); i < len; i++) {
-            if (!Character.isWhitespace(cs.charAt(i))) {
-                return false;
-            }
-        }
-
-        return true;
+        return Strings.isBlank(cs);
     }
 
     /**
@@ -19086,9 +19076,15 @@ sealed class CommonUtil permits N {
 
         // at most two distinct values: presizing to the range length allocated a huge table for a large array
         final Set<Boolean> result = newHashSet(Math.min(toIndex - fromIndex, 2));
+        final boolean first = a[fromIndex];
 
-        for (int i = fromIndex; i < toIndex; i++) {
-            result.add(a[i]);
+        result.add(first);
+
+        for (int i = fromIndex + 1; i < toIndex; i++) {
+            if (a[i] != first) {
+                result.add(!first);
+                break; // both possible values are present; the rest cannot add another value
+            }
         }
 
         return result;
@@ -28939,9 +28935,10 @@ sealed class CommonUtil permits N {
      * @param a the first iterable
      * @param b the second iterable
      * @return the index of the first mismatch, or -1 if the iterables are identical or both are {@code null} or empty
+     * @throws ArithmeticException if the index of the first mismatch exceeds {@link Integer#MAX_VALUE}
      * @see Arrays#mismatch(Object[], Object[])
      */
-    public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b) {
+    public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b) throws ArithmeticException {
 
         return mismatch(a, b, Fn.<T> identity());
     }
@@ -28962,9 +28959,10 @@ sealed class CommonUtil permits N {
      * @param a the first iterator
      * @param b the second iterator
      * @return the index of the first mismatch, or -1 if the iterators are identical or both are {@code null} or empty
+     * @throws ArithmeticException if the index of the first mismatch exceeds {@link Integer#MAX_VALUE}
      * @see Arrays#mismatch(Object[], Object[])
      */
-    public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b) {
+    public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b) throws ArithmeticException {
 
         return mismatch(a, b, Fn.<T> identity());
     }
@@ -29049,9 +29047,11 @@ sealed class CommonUtil permits N {
      * @param keyExtractor the function used to extract comparison keys from iterable elements
      * @return the index of the first mismatch, or -1 if the iterables are identical or both are {@code null} or empty
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
+     * @throws ArithmeticException if the index of the first mismatch exceeds {@link Integer#MAX_VALUE}
      * @see Arrays#mismatch(Object[], Object[])
      */
-    public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+    public static <T> int mismatch(final Iterable<T> a, final Iterable<T> b, final Function<? super T, ?> keyExtractor)
+            throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (a == b) {
@@ -29088,9 +29088,11 @@ sealed class CommonUtil permits N {
      * @param keyExtractor the function used to extract comparison keys from iterator elements
      * @return the index of the first mismatch, or -1 if the iterators are identical or both are {@code null} or empty
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
+     * @throws ArithmeticException if the index of the first mismatch exceeds {@link Integer#MAX_VALUE}
      * @see Arrays#mismatch(Object[], Object[])
      */
-    public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+    public static <T> int mismatch(final Iterator<T> a, final Iterator<T> b, final Function<? super T, ?> keyExtractor)
+            throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         if (a == b) {
@@ -29103,19 +29105,18 @@ sealed class CommonUtil permits N {
             return 0;
         }
 
-        // a == null ? ObjIterator.empty() : a;
-        // b == null ? ObjIterator.empty() : b;
-        int idx = 0;
+        // Review 2026-10-17: Iterators can exceed the int index range; reject an unrepresentable mismatch without wrapping.
+        long idx = 0;
 
         while (a.hasNext() && b.hasNext()) {
             if (!N.equals(keyExtractor.apply(a.next()), keyExtractor.apply(b.next()))) {
-                return idx;
+                return Numbers.toIntExact(idx);
             }
 
             idx++;
         }
 
-        return a.hasNext() || b.hasNext() ? idx : -1;
+        return a.hasNext() || b.hasNext() ? Numbers.toIntExact(idx) : -1;
     }
 
     // ================================ get/find matched/mismatch element... ===========================================

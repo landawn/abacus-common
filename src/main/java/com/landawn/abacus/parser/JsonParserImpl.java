@@ -734,20 +734,16 @@ class JsonParserImpl extends AbstractJsonParser {
             return;
         }
 
-        Writer writer = null;
-
         try {
             createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
+            try (final Writer writer = IOUtil.newFileWriter(output)) {
+                serialize(obj, configToUse, writer);
 
-            serialize(obj, configToUse, writer);
-
-            writer.flush();
+                writer.flush();
+            }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            IOUtil.close(writer);
         }
     }
 

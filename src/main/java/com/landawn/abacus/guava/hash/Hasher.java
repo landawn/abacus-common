@@ -117,7 +117,7 @@ public interface Hasher {
 
     /**
      * Adds a portion of the given byte array to this hasher's internal state.
-     * Only bytes from {@code off} to {@code off + len - 1} (inclusive) are processed.
+     * Only bytes from {@code off} to {@code off + length - 1} (inclusive) are processed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -133,7 +133,7 @@ public interface Hasher {
      * @param length the number of bytes to process from the array
      * @return this hasher instance for method chaining
      * @throws NullPointerException if {@code bytes} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + len > bytes.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + length > bytes.length}
      */
     Hasher put(byte[] bytes, int off, int length) throws NullPointerException, IndexOutOfBoundsException;
 
@@ -280,7 +280,7 @@ public interface Hasher {
 
     /**
      * Adds a portion of the given character array to this hasher's internal state.
-     * Only characters from {@code off} to {@code off + len - 1} (inclusive) are processed.
+     * Only characters from {@code off} to {@code off + length - 1} (inclusive) are processed.
      *
      * <p>Each character is processed in little-endian order (low byte first, then high byte).
      *

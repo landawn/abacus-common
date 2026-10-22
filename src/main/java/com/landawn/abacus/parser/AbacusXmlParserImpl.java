@@ -345,20 +345,16 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             throws IllegalArgumentException, ParsingException, UncheckedIOException {
         N.checkArgNotNull(output, cs.output);
 
-        Writer writer = null;
-
         try {
             createNewFileIfNotExists(output);
 
-            writer = IOUtil.newFileWriter(output);
+            try (final Writer writer = IOUtil.newFileWriter(output)) {
+                serialize(obj, config, writer);
 
-            serialize(obj, config, writer);
-
-            writer.flush();
+                writer.flush();
+            }
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
-        } finally {
-            IOUtil.close(writer);
         }
     }
 

@@ -240,7 +240,7 @@ public final class StringWriter extends AppendableWriter {
      * @param length the number of characters to write
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
-     *         or {@code off + len} is greater than {@code cbuf.length}
+     *         or {@code off + length} is greater than {@code cbuf.length}
      */
     @Override
     public void write(final char[] cbuf, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException {
@@ -279,7 +279,7 @@ public final class StringWriter extends AppendableWriter {
      * @param off the index of the first character to write
      * @param length the number of characters to write
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
-     *         or {@code off + len} is greater than the effective sequence length (four when
+     *         or {@code off + length} is greater than the effective sequence length (four when
      *         {@code str} is {@code null})
      */
     @Override

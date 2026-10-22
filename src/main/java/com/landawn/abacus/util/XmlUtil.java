@@ -28,7 +28,6 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,13 +57,24 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.validation.Schema;
 
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.HandlerBase;
+import org.xml.sax.InputSource;
+import org.xml.sax.Parser;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParsingException;
@@ -87,7 +97,7 @@ import jakarta.xml.bind.Unmarshaller;
  * <ul>
  *   <li>JAXB operations (marshal/unmarshal with caching)</li>
  *   <li>DOM parsing and manipulation</li>
- *   <li>SAX parser creation with pooling</li>
+ *   <li>SAX parser creation with weak pooling</li>
  *   <li>StAX reader/writer creation</li>
  *   <li>XML transformation</li>
  *   <li>XML encoding/decoding using Java beans</li>
@@ -95,7 +105,9 @@ import jakarta.xml.bind.Unmarshaller;
  *   <li>Node and attribute manipulation</li>
  * </ul>
  *
- * <p>The class pools parsers and opportunistically reuses JAXB contexts. JAXB contexts are scoped by
+ * <p>The class weakly pools parsers and opportunistically reuses JAXB contexts. Pooled parsers are held
+ * through weak references, so idle instances may be reclaimed by garbage collection; callers must obtain
+ * them through {@link #createContentParser()} or {@link #createSAXParser()}. JAXB contexts are scoped by
  * binding class or context path and by the identity of the current thread context class loader.
  * Context-path construction uses that captured loader explicitly; class-based construction retains
  * JAXB's normal provider discovery. Weak context and loader references allow these caches to release
@@ -150,7 +162,7 @@ public final class XmlUtil {
 
     static final String TYPE = "type";
 
-    private static final int POOL_SIZE = 1000;
+    private static final int POOL_SIZE = 16;
 
     private static final Set<String> CRITICAL_SECURITY_NAMES = Set.of(XMLConstants.FEATURE_SECURE_PROCESSING,
             "http://apache.org/xml/features/disallow-doctype-decl", "http://xml.org/sax/features/external-general-entities",
@@ -158,7 +170,7 @@ public final class XmlUtil {
             XMLInputFactory.SUPPORT_DTD, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, XMLConstants.ACCESS_EXTERNAL_DTD, XMLConstants.ACCESS_EXTERNAL_SCHEMA,
             XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "XIncludeAware", "expandEntityReferences", "XMLResolver");
 
-    // Hardened SAX parser configuration and reusable parser pool.
+    // Hardened SAX parser configuration and weakly held reusable parser pool.
     private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
     static {
@@ -173,19 +185,9 @@ public final class XmlUtil {
         saxParserFactory.setNamespaceAware(true);
     }
 
-    private static final Queue<SAXParser> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
-    private static final WeakIdentitySet<SAXParser> ownedSaxParsers = new WeakIdentitySet<>();
+    private static final Queue<WeakReference<SAXParser>> saxParserPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /**
-     * Which parsers are currently sitting in {@link #saxParserPool}. Guarded by that queue's monitor.
-     *
-     * <p>Recycling used to scan the whole queue for an identity match, which is O(POOL_SIZE) (1000) per
-     * call on what is meant to be the fast path. This membership set answers the same question in
-     * constant time.</p>
-     */
-    private static final Map<SAXParser, Boolean> pooledSaxParsers = new IdentityHashMap<>();
-
-    // Hardened DOM builder configuration and reusable builder pool.
+    // Hardened DOM builder configuration and weakly held reusable builder pool.
     private static final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 
     static {
@@ -203,13 +205,8 @@ public final class XmlUtil {
         docBuilderFactory.setNamespaceAware(true);
     }
 
-    private static final Queue<DocumentBuilder> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
-    private static final WeakIdentitySet<DocumentBuilder> ownedContentParsers = new WeakIdentitySet<>();
+    private static final Queue<WeakReference<DocumentBuilder>> contentDocBuilderPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
-    /** Which builders are currently in {@link #contentDocBuilderPool}; see {@link #pooledSaxParsers}. */
-    private static final Map<DocumentBuilder, Boolean> pooledContentParsers = new IdentityHashMap<>();
-
-    // private static final int BUFFER_SIZE = 1024 * 16; // 16KB
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
     static {
@@ -800,7 +797,10 @@ public final class XmlUtil {
      * The parser ignores comments and requests removal of ignorable element-content whitespace.
      * As with {@link #createDOMParser(boolean, boolean)}, ordinary indentation is generally retained
      * because the factory is non-validating and disables DTDs.
-     * This method uses object pooling for better performance.
+     * This method weakly pools parsers for reuse; idle parsers may be reclaimed by garbage collection.
+     *
+     * <p>The returned object may be an internal wrapper around the provider's builder. Use it through the
+     * {@code DocumentBuilder} interface; callers must not cast it to a provider-specific implementation class.</p>
      *
      * <p>Important: Call {@link #recycleContentParser(DocumentBuilder)} when done to return the parser to the pool.</p>
      *
@@ -819,17 +819,25 @@ public final class XmlUtil {
      * @throws RuntimeException if the parser cannot be created
      */
     public static DocumentBuilder createContentParser() throws RuntimeException {
-        DocumentBuilder documentBuilder;
+        DocumentBuilder documentBuilder = null;
 
         synchronized (contentDocBuilderPool) {
-            documentBuilder = contentDocBuilderPool.poll();
+            WeakReference<DocumentBuilder> documentBuilderRef;
 
-            if (documentBuilder != null) {
-                pooledContentParsers.remove(documentBuilder);
+            // GC clears referents without removing queue entries; keep looking for a live builder.
+            while ((documentBuilderRef = contentDocBuilderPool.poll()) != null) {
+                documentBuilder = documentBuilderRef.get();
+
+                if (documentBuilder != null) {
+                    break;
+                }
             }
         }
 
         if (documentBuilder == null) {
+            // Create outside the pool monitor: provider construction may be slow, and holding the pool lock
+            // here would block recycling. All DOM creation paths still share the factory monitor while
+            // changing and restoring factory settings.
             synchronized (docBuilderFactory) {
                 final boolean orgIgnoreComments = docBuilderFactory.isIgnoringComments();
                 final boolean orgIgnoringElementContentWhitespace = docBuilderFactory.isIgnoringElementContentWhitespace();
@@ -843,8 +851,7 @@ public final class XmlUtil {
                         docBuilderFactory.setIgnoringElementContentWhitespace(true);
                     }
 
-                    documentBuilder = docBuilderFactory.newDocumentBuilder();
-                    ownedContentParsers.add(documentBuilder);
+                    documentBuilder = new CachedDocumentBuilder(docBuilderFactory.newDocumentBuilder());
                 } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } finally {
@@ -861,7 +868,8 @@ public final class XmlUtil {
      * Recycles the given DocumentBuilder instance by resetting it and adding it back to the pool.
      * Only instances obtained from {@link #createContentParser()} are accepted; foreign and duplicate
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
-     * A parser is also discarded rather than pooled when the pool is already at capacity, or when the
+     * Idle parsers are held weakly. Cleared references are discarded during checkout and when needed
+     * to make space. A parser is discarded when the live pool is at capacity, or when the
      * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
      * cannot tell whether the instance was pooled, so it must not use the parser again after calling
      * this method.
@@ -879,19 +887,30 @@ public final class XmlUtil {
      * @param docBuilder The DocumentBuilder instance to be recycled (can be null)
      */
     public static void recycleContentParser(final DocumentBuilder docBuilder) {
-        if (docBuilder == null) {
+        if (docBuilder == null || !(docBuilder instanceof CachedDocumentBuilder)) {
             return;
         }
 
         synchronized (contentDocBuilderPool) {
-            if (contentDocBuilderPool.size() >= POOL_SIZE || pooledContentParsers.containsKey(docBuilder) || !ownedContentParsers.contains(docBuilder)) {
-                return;
+            if (contentDocBuilderPool.size() >= POOL_SIZE) {
+                // A cleared reference occupies a queue slot even though its parser is no longer reusable.
+                contentDocBuilderPool.removeIf(reference -> reference.refersTo(null));
+
+                if (contentDocBuilderPool.size() >= POOL_SIZE) {
+                    return;
+                }
+            }
+
+            // Check identity before reset so duplicate returns cannot publish the same builder twice.
+            for (final WeakReference<DocumentBuilder> documentBuilderRef : contentDocBuilderPool) {
+                if (documentBuilderRef.get() == docBuilder) {
+                    return;
+                }
             }
 
             try {
                 docBuilder.reset();
-                contentDocBuilderPool.add(docBuilder);
-                pooledContentParsers.put(docBuilder, Boolean.TRUE);
+                contentDocBuilderPool.add(new WeakReference<>(docBuilder));
             } catch (final RuntimeException e) {
                 // A provider is permitted not to support reset. Discard that parser rather than
                 // masking an earlier parsing failure from a caller's finally block.
@@ -903,8 +922,11 @@ public final class XmlUtil {
     }
 
     /**
-     * Creates a new instance of {@code SAXParser} from a pool or creates a new one if the pool is empty.
-     * This method uses object pooling for better performance.
+     * Obtains a {@code SAXParser} from a weak pool or creates a new one if no live parser is available.
+     * Idle parsers may be reclaimed by garbage collection.
+     *
+     * <p>The returned object may be an internal wrapper around the provider's parser. Use it through the
+     * {@code SAXParser} interface; callers must not cast it to a provider-specific implementation class.</p>
      *
      * <p>Important: Call {@link #recycleSAXParser(SAXParser)} when done to return the parser to the pool.</p>
      *
@@ -918,39 +940,50 @@ public final class XmlUtil {
      * }
      * }</pre>
      *
-     * @return A {@code SAXParser} instance from the pool, or a newly created one if the pool is empty
+     * @return A {@code SAXParser} instance from the pool, or a newly created one if no live parser is available
      * @throws RuntimeException if the SAX parser configuration is invalid
      * @throws ParsingException if the underlying SAX implementation fails to create the parser
      * @see SAXParserFactory#newSAXParser()
      */
     public static SAXParser createSAXParser() throws RuntimeException, ParsingException {
+        SAXParser saxParser = null;
+
         synchronized (saxParserPool) {
-            SAXParser saxParser = saxParserPool.poll();
+            WeakReference<SAXParser> saxParserRef;
 
-            if (saxParser != null) {
-                pooledSaxParsers.remove(saxParser);
+            // Skip cleared entries rather than creating a parser while a live one remains in the queue.
+            while ((saxParserRef = saxParserPool.poll()) != null) {
+                saxParser = saxParserRef.get();
+
+                if (saxParser != null) {
+                    break;
+                }
             }
+        }
 
-            if (saxParser == null) {
+        if (saxParser == null) {
+            // Factory methods are not guaranteed thread-safe, so lock the factory only on a pool miss.
+            // Create outside the pool monitor so slow provider construction cannot block recycling or reuse.
+            synchronized (saxParserFactory) {
                 try {
-                    saxParser = saxParserFactory.newSAXParser();
-                    ownedSaxParsers.add(saxParser);
+                    saxParser = new CachedSAXParser(saxParserFactory.newSAXParser());
                 } catch (final ParserConfigurationException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 } catch (final SAXException e) {
                     throw new ParsingException(e);
                 }
             }
-
-            return saxParser;
         }
+
+        return saxParser;
     }
 
     /**
      * Recycles the given SAXParser instance by resetting it and adding it back to the pool.
      * Only instances obtained from {@link #createSAXParser()} are accepted; foreign and duplicate
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
-     * A parser is also discarded rather than pooled when the pool is already at capacity, or when the
+     * Idle parsers are held weakly. Cleared references are discarded during checkout and when needed
+     * to make space. A parser is discarded when the live pool is at capacity, or when the
      * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
      * cannot tell whether the instance was pooled, so it must not use the parser again after calling
      * this method.
@@ -968,19 +1001,29 @@ public final class XmlUtil {
      * @param saxParser The SAXParser instance to be recycled (can be null)
      */
     public static void recycleSAXParser(final SAXParser saxParser) {
-        if (saxParser == null) {
+        if (saxParser == null || !(saxParser instanceof CachedSAXParser)) {
             return;
         }
 
         synchronized (saxParserPool) {
-            if (saxParserPool.size() >= POOL_SIZE || pooledSaxParsers.containsKey(saxParser) || !ownedSaxParsers.contains(saxParser)) {
-                return;
+            if (saxParserPool.size() >= POOL_SIZE) {
+                saxParserPool.removeIf(reference -> reference.refersTo(null));
+
+                if (saxParserPool.size() >= POOL_SIZE) {
+                    return;
+                }
+            }
+
+            // As with DOM builders, a duplicate return must not reset or enqueue the parser again.
+            for (final WeakReference<SAXParser> saxParserRef : saxParserPool) {
+                if (saxParserRef.get() == saxParser) {
+                    return;
+                }
             }
 
             try {
                 saxParser.reset();
-                saxParserPool.add(saxParser);
-                pooledSaxParsers.put(saxParser, Boolean.TRUE);
+                saxParserPool.add(new WeakReference<>(saxParser));
             } catch (final RuntimeException e) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(e, "Discarding SAXParser that could not be reset");
@@ -1296,7 +1339,7 @@ public final class XmlUtil {
      */
     public static Transformer createXMLTransformer() throws RuntimeException {
         // TransformerFactory instances are not guaranteed thread-safe for concurrent factory-method
-        // calls (mirrors the synchronized(docBuilderFactory) / synchronized(saxParserPool) guards
+        // calls (mirrors the synchronized(docBuilderFactory) / synchronized(saxParserFactory) guards
         // used above for DocumentBuilderFactory/SAXParserFactory, for the same reason).
         synchronized (transformerFactory) {
             try {
@@ -2707,31 +2750,6 @@ public final class XmlUtil {
         }
     }
 
-    /** Weak, identity-based ownership registry used to keep caller-supplied parsers out of shared pools. */
-    private static final class WeakIdentitySet<T> {
-        private final ReferenceQueue<T> staleReferences = new ReferenceQueue<>();
-        private final Set<IdentityWeakReference<T>> references = new HashSet<>();
-
-        synchronized void add(final T value) {
-            removeStaleReferences();
-            references.add(new IdentityWeakReference<>(value, staleReferences));
-        }
-
-        synchronized boolean contains(final T value) {
-            removeStaleReferences();
-            return references.contains(new IdentityWeakReference<>(value));
-        }
-
-        @SuppressWarnings("unchecked")
-        private void removeStaleReferences() {
-            IdentityWeakReference<T> reference;
-
-            while ((reference = (IdentityWeakReference<T>) staleReferences.poll()) != null) {
-                references.remove(reference);
-            }
-        }
-    }
-
     private static final class IdentityWeakReference<T> extends WeakReference<T> {
         private final int identityHashCode;
 
@@ -2789,6 +2807,195 @@ public final class XmlUtil {
         KEY,
         /** The value child element of a map {@link #ENTRY}. */
         VALUE
+    }
+
+    /** Forwards all builder operations, including optional provider capabilities, to the wrapped builder. */
+    private static final class CachedDocumentBuilder extends DocumentBuilder {
+        private final DocumentBuilder delegate;
+
+        CachedDocumentBuilder(final DocumentBuilder documentBuilder) {
+            this.delegate = documentBuilder;
+        }
+
+        @Override
+        public void reset() {
+            delegate.reset();
+        }
+
+        @Override
+        public Document parse(final InputStream is) throws SAXException, IOException {
+            return delegate.parse(is);
+        }
+
+        @Override
+        public Document parse(final InputStream is, final String systemId) throws SAXException, IOException {
+            return delegate.parse(is, systemId);
+        }
+
+        @Override
+        public Document parse(final String uri) throws SAXException, IOException {
+            return delegate.parse(uri);
+        }
+
+        @Override
+        public Document parse(final File file) throws SAXException, IOException {
+            return delegate.parse(file);
+        }
+
+        @Override
+        public Document parse(final InputSource is) throws SAXException, IOException {
+            return delegate.parse(is);
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
+
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
+
+        @Override
+        public void setEntityResolver(final EntityResolver er) {
+            delegate.setEntityResolver(er);
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler eh) {
+            delegate.setErrorHandler(eh);
+        }
+
+        @Override
+        public Document newDocument() {
+            return delegate.newDocument();
+        }
+
+        @Override
+        public DOMImplementation getDOMImplementation() {
+            return delegate.getDOMImplementation();
+        }
+
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
+
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
+    }
+
+    /** Preserves the provider's parsing behavior and optional capabilities when identifying owned parsers. */
+    private static final class CachedSAXParser extends SAXParser {
+        private final SAXParser delegate;
+
+        CachedSAXParser(final SAXParser saxParser) {
+            this.delegate = saxParser;
+        }
+
+        @Override
+        public void reset() {
+            delegate.reset();
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void parse(final InputStream is, final HandlerBase handler) throws SAXException, IOException {
+            delegate.parse(is, handler);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void parse(final InputStream is, final HandlerBase handler, final String systemId) throws SAXException, IOException {
+            delegate.parse(is, handler, systemId);
+        }
+
+        @Override
+        public void parse(final InputStream is, final DefaultHandler handler) throws SAXException, IOException {
+            delegate.parse(is, handler);
+        }
+
+        @Override
+        public void parse(final InputStream is, final DefaultHandler handler, final String systemId) throws SAXException, IOException {
+            delegate.parse(is, handler, systemId);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void parse(final String uri, final HandlerBase handler) throws SAXException, IOException {
+            delegate.parse(uri, handler);
+        }
+
+        @Override
+        public void parse(final String uri, final DefaultHandler handler) throws SAXException, IOException {
+            delegate.parse(uri, handler);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void parse(final File file, final HandlerBase handler) throws SAXException, IOException {
+            delegate.parse(file, handler);
+        }
+
+        @Override
+        public void parse(final File file, final DefaultHandler handler) throws SAXException, IOException {
+            delegate.parse(file, handler);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public void parse(final InputSource is, final HandlerBase handler) throws SAXException, IOException {
+            delegate.parse(is, handler);
+        }
+
+        @Override
+        public void parse(final InputSource is, final DefaultHandler handler) throws SAXException, IOException {
+            delegate.parse(is, handler);
+        }
+
+        @SuppressWarnings("deprecation")
+        @Override
+        public Parser getParser() throws SAXException {
+            return delegate.getParser();
+        }
+
+        @Override
+        public XMLReader getXMLReader() throws SAXException {
+            return delegate.getXMLReader();
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
+
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
+
+        @Override
+        public void setProperty(final String name, final Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
+            delegate.setProperty(name, value);
+        }
+
+        @Override
+        public Object getProperty(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
+            return delegate.getProperty(name);
+        }
+
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
+
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
     }
 
 }

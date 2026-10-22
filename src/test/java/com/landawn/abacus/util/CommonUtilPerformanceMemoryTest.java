@@ -1359,4 +1359,123 @@ public class CommonUtilPerformanceMemoryTest extends TestBase {
                     assertThrows(UnsupportedOperationException.class, () -> CommonUtil.convert(new Object[] { "a" }, Number[].class)).getMessage());
         }
     }
+
+    // ---- perf review 2026-10-19 G002 begin ----
+    @Nested
+    class R1019G002 {
+
+        /**
+         * The per-char reference that {@code CommonUtil.isBlank} used for every {@code CharSequence} before the
+         * {@code String} fast path.
+         */
+        private boolean referenceIsBlank(final CharSequence cs) {
+            if (cs == null || cs.length() == 0) {
+                return true;
+            }
+
+            for (int i = 0, len = cs.length(); i < len; i++) {
+                if (!Character.isWhitespace(cs.charAt(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void assertBlankConsistent(final String s) {
+            final boolean expected = referenceIsBlank(s);
+
+            assertEquals(expected, CommonUtil.isBlank(s), () -> "isBlank(String) " + Arrays.toString(s.toCharArray()));
+            assertEquals(!expected, CommonUtil.notBlank(s), () -> "notBlank(String) " + Arrays.toString(s.toCharArray()));
+            assertEquals(expected, CommonUtil.isBlank(new StringBuilder(s)), () -> "isBlank(StringBuilder) " + Arrays.toString(s.toCharArray()));
+        }
+
+        // G002-01: isBlank(String) now delegates to String.isBlank; every char (as Latin-1 and as UTF-16 String), surrounded by
+        // ASCII and non-Latin-1 whitespace, gives the same result as the per-char Character.isWhitespace loop.
+        @Test
+        public void testIsBlank_stringFastPathMatchesCharLoopForEveryChar() {
+            int blankSingles = 0;
+
+            for (int c = 0; c <= Character.MAX_VALUE; c++) {
+                final String single = String.valueOf((char) c);
+
+                if (CommonUtil.isBlank(single)) {
+                    blankSingles++;
+                }
+
+                assertBlankConsistent(single);
+                assertBlankConsistent("  " + single + "\t");
+                assertBlankConsistent("\u3000" + single + "\u2003"); // forces the UTF-16 coder
+                assertBlankConsistent(single + single);
+            }
+
+            // Character.isWhitespace(char) is true for exactly these 25 chars.
+            assertEquals(25, blankSingles);
+        }
+
+        // G002-01: surrogates (paired and lone), mixed coders, long blank runs, null/empty and the any/all helpers.
+        @Test
+        public void testIsBlank_stringFastPathEdgeCases() {
+            final String[] inputs = { "", " ", "   ", "\t\n\r\u000B\f", "\u001C\u001D\u001E\u001F", "\u00A0", " \u00A0 ", "\u0085", "\u2007", "\u202F",
+                    "\u3000", "\u2028\u2029", "\u1680", "\u200B", "\uFEFF", " a ", "a", "  \u4E2D", "\u3000\u3000x", "\uD83D\uDE00", "  \uD83D\uDE00  ",
+                    "\ud83d", "\ude00", " \ud83d ", " \ude00 ", "\uDBFF\uDFFF", " ".repeat(1000), " ".repeat(1000) + "x", "\u3000".repeat(500),
+                    "\u3000".repeat(500) + "\u00E9", "x" + " ".repeat(1000) };
+
+            for (final String s : inputs) {
+                assertBlankConsistent(s);
+            }
+
+            assertTrue(CommonUtil.isBlank(null));
+            assertTrue(!CommonUtil.notBlank(null));
+            assertTrue(CommonUtil.anyBlank("a", " \u3000 "));
+            assertTrue(!CommonUtil.anyBlank("a", " \u00E9 "));
+            assertTrue(CommonUtil.anyBlank(new CharSequence[] { "a", null, "b" }));
+            assertTrue(CommonUtil.allBlank("\t", "\u2003", null));
+            assertTrue(!CommonUtil.allBlank(" ", "\uD83D\uDE00"));
+            assertTrue(CommonUtil.allBlank(Arrays.asList(" ", "", "\n")));
+            assertTrue(!CommonUtil.allBlank(Arrays.asList(" ", new StringBuilder(" x"))));
+        }
+
+        // G002-01: a non-String CharSequence still goes through the unchanged loop: one isEmpty(), one length(), and charAt
+        // calls in order up to and including the first non-whitespace char.
+        @Test
+        public void testIsBlank_customCharSequenceCallSequenceUnchanged() {
+            final List<String> calls = new ArrayList<>();
+            final String text = "  \u3000x  ";
+            final CharSequence cs = new CharSequence() {
+                @Override
+                public int length() {
+                    calls.add("length");
+                    return text.length();
+                }
+
+                @Override
+                public char charAt(final int index) {
+                    calls.add("charAt" + index);
+                    return text.charAt(index);
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    calls.add("isEmpty");
+                    return text.isEmpty();
+                }
+
+                @Override
+                public CharSequence subSequence(final int start, final int end) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public String toString() {
+                    calls.add("toString");
+                    return text;
+                }
+            };
+
+            assertTrue(!CommonUtil.isBlank(cs));
+            assertEquals(Arrays.asList("isEmpty", "length", "charAt0", "charAt1", "charAt2", "charAt3"), calls);
+        }
+    }
+    // ---- perf review 2026-10-19 G002 end ----
 }

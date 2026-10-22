@@ -245,8 +245,7 @@ class NumericTypePerformanceRegressionTest extends TestBase {
         final Type<int[]> ints = Type.of(int[].class);
         final Type<Integer[]> boxed = Type.of(Integer[].class);
 
-        for (final String text : List.of("[1, 2, 3L]", "[1, 2, 3 4]", "[1,2,]", "[1, 2,  ]", "[1, 2, 3x]", "[1, 2, [3]]", "[1, 2, 3e1]",
-                "[1, 2, nullx]")) {
+        for (final String text : List.of("[1, 2, 3L]", "[1, 2, 3 4]", "[1,2,]", "[1, 2,  ]", "[1, 2, 3x]", "[1, 2, [3]]", "[1, 2, 3e1]", "[1, 2, nullx]")) {
             assertNull(AbstractArrayType.parseNumericArray(text, Type.of(int.class), int.class), text);
         }
 

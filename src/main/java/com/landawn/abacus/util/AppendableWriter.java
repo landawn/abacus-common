@@ -195,8 +195,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param length the number of characters to write
      * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if off is negative, or len is negative,
-     *         or off+len is greater than the length of the given array
+     * @throws IndexOutOfBoundsException if off is negative, or length is negative,
+     *         or off+length is greater than the length of the given array
      */
     @Override
     public void write(final char[] cbuf, final int off, final int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
@@ -237,8 +237,8 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param off the offset from which to start writing characters
      * @param length the number of characters to write
      * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
-     * @throws IndexOutOfBoundsException if off is negative, or len is negative,
-     *         or off+len is greater than the effective sequence length (four when {@code str} is {@code null})
+     * @throws IndexOutOfBoundsException if off is negative, or length is negative,
+     *         or off+length is greater than the effective sequence length (four when {@code str} is {@code null})
      */
     @Override
     public void write(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {

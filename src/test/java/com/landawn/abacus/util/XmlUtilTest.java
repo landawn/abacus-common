@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,13 +20,24 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -115,6 +127,339 @@ public class XmlUtilTest extends TestBase {
         };
     }
 
+    private static <T> T wrapParser(final Class<T> parserType, final T delegate) throws ReflectiveOperationException {
+        final var constructor = Class.forName(XmlUtil.class.getName() + "$Cached" + parserType.getSimpleName()).getDeclaredConstructor(parserType);
+        constructor.setAccessible(true);
+        return parserType.cast(constructor.newInstance(delegate));
+    }
+
+    /** Isolates pool mutations and keeps test parsers alive independently of GC timing. */
+    private static final class ParserPoolState<T> implements AutoCloseable {
+        final Queue<WeakReference<T>> pool;
+        final int capacity;
+        private final List<WeakReference<T>> saved;
+        private final List<T> pinned = new ArrayList<>();
+
+        @SuppressWarnings("unchecked")
+        ParserPoolState(final String fieldName) throws ReflectiveOperationException {
+            final var poolField = XmlUtil.class.getDeclaredField(fieldName);
+            poolField.setAccessible(true);
+            pool = (Queue<WeakReference<T>>) poolField.get(null);
+            final var capacityField = XmlUtil.class.getDeclaredField("POOL_SIZE");
+            capacityField.setAccessible(true);
+            capacity = capacityField.getInt(null);
+            synchronized (pool) {
+                saved = new ArrayList<>(pool);
+                for (final WeakReference<T> reference : saved) {
+                    final T parser = reference.get();
+                    if (parser != null) {
+                        pinned.add(parser);
+                    }
+                }
+                pool.clear();
+            }
+        }
+
+        T keep(final T parser) {
+            pinned.add(parser);
+            return parser;
+        }
+
+        @Override
+        public void close() {
+            synchronized (pool) {
+                pool.clear();
+                pool.addAll(saved);
+            }
+            Reference.reachabilityFence(pinned);
+        }
+    }
+
+    private static <T> void assertParserPoolOwnershipAndReuse(final String fieldName, final Supplier<T> create, final Consumer<T> recycle, final T foreign)
+            throws Exception {
+        try (ParserPoolState<T> state = new ParserPoolState<>(fieldName)) {
+            recycle.accept(null);
+            recycle.accept(foreign);
+            assertTrue(state.pool.isEmpty());
+
+            final T first = state.keep(create.get());
+            final T second = state.keep(create.get());
+            assertNotSame(first, second);
+            recycle.accept(first);
+            recycle.accept(second);
+            recycle.accept(first);
+            assertEquals(2, state.pool.size(), "a duplicate return must not publish the parser twice");
+            assertSame(first, create.get());
+            assertSame(second, create.get());
+            final T third = state.keep(create.get());
+            assertNotSame(first, third);
+            assertNotSame(second, third);
+
+            recycle.accept(first);
+            assertSame(first, create.get(), "a checked-out parser must be recyclable again");
+        }
+    }
+
+    private static <T> void assertParserPoolCapacityAndResetFailure(final String fieldName, final Supplier<T> create, final Consumer<T> recycle,
+            final T resetFails) throws Exception {
+        try (ParserPoolState<T> state = new ParserPoolState<>(fieldName)) {
+            final T victim = state.keep(create.get());
+            final List<T> fillers = new ArrayList<>();
+            for (int i = 0; i < state.capacity; i++) {
+                fillers.add(state.keep(create.get()));
+            }
+            fillers.forEach(recycle);
+            assertDoesNotThrow(() -> recycle.accept(victim));
+            assertEquals(state.capacity, state.pool.size());
+            assertFalse(state.pool.stream().anyMatch(reference -> reference.refersTo(victim)));
+
+            state.pool.clear();
+            assertDoesNotThrow(() -> recycle.accept(resetFails));
+            assertTrue(state.pool.isEmpty(), "a provider that cannot reset must be discarded");
+        }
+    }
+
+    private static <T> void assertParserPoolSkipsClearedReferences(final String fieldName, final Supplier<T> create) throws Exception {
+        try (ParserPoolState<T> state = new ParserPoolState<>(fieldName)) {
+            final T first = state.keep(create.get());
+            final T second = state.keep(create.get());
+            final WeakReference<T> cleared = new WeakReference<>(first);
+            // Simulate a cleared entry directly instead of depending on System.gc().
+            cleared.clear();
+            state.pool.add(cleared);
+            state.pool.add(new WeakReference<>(null));
+            state.pool.add(new WeakReference<>(first));
+            state.pool.add(new WeakReference<>(null));
+            state.pool.add(new WeakReference<>(second));
+
+            assertSame(first, create.get());
+            assertSame(second, create.get());
+            assertTrue(state.pool.isEmpty());
+
+            state.pool.add(new WeakReference<>(null));
+            state.pool.add(new WeakReference<>(null));
+            final T replacement = state.keep(create.get());
+            assertNotNull(replacement);
+            assertNotSame(first, replacement);
+            assertNotSame(second, replacement);
+            assertTrue(state.pool.isEmpty(), "an all-cleared queue must be drained before creating a parser");
+        }
+    }
+
+    private static <T> void assertParserPoolReclaimsClearedCapacity(final String fieldName, final Supplier<T> create, final Consumer<T> recycle)
+            throws Exception {
+        try (ParserPoolState<T> state = new ParserPoolState<>(fieldName)) {
+            final T returned = state.keep(create.get());
+            final List<T> live = new ArrayList<>();
+            for (int i = 0; i < state.capacity - 1; i++) {
+                live.add(state.keep(create.get()));
+            }
+            live.forEach(parser -> state.pool.add(new WeakReference<>(parser)));
+            state.pool.add(new WeakReference<>(null));
+            recycle.accept(returned);
+            assertEquals(state.capacity, state.pool.size());
+            assertTrue(state.pool.stream().anyMatch(reference -> reference.refersTo(returned)));
+            assertTrue(state.pool.stream().allMatch(reference -> reference.get() != null));
+
+            state.pool.clear();
+            for (int i = 0; i < state.capacity; i++) {
+                state.pool.add(new WeakReference<>(null));
+            }
+            recycle.accept(returned);
+            assertEquals(1, state.pool.size());
+            assertSame(returned, create.get());
+        }
+    }
+
+    private static void assertBlockedOnMonitor(final Thread thread, final Object monitor, final String message) {
+        final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        final var threadBean = ManagementFactory.getThreadMXBean();
+        boolean blockedOnMonitor = false;
+        while (thread.isAlive() && System.nanoTime() < deadline) {
+            final var info = threadBean.getThreadInfo(thread.threadId());
+            if (info != null && info.getThreadState() == Thread.State.BLOCKED && info.getLockInfo() != null
+                    && info.getLockInfo().getIdentityHashCode() == System.identityHashCode(monitor)
+                    && info.getLockInfo().getClassName().equals(monitor.getClass().getName()) && info.getLockOwnerId() == Thread.currentThread().threadId()) {
+                blockedOnMonitor = true;
+                break;
+            }
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
+        }
+        assertTrue(blockedOnMonitor, message);
+    }
+
+    @Test
+    public void testContentParserSkipsClearedReferences() throws Exception {
+        assertParserPoolSkipsClearedReferences("contentDocBuilderPool", XmlUtil::createContentParser);
+    }
+
+    @Test
+    public void testSAXParserSkipsClearedReferences() throws Exception {
+        assertParserPoolSkipsClearedReferences("saxParserPool", XmlUtil::createSAXParser);
+    }
+
+    @Test
+    public void testContentParserReclaimsClearedCapacity() throws Exception {
+        assertParserPoolReclaimsClearedCapacity("contentDocBuilderPool", XmlUtil::createContentParser, XmlUtil::recycleContentParser);
+    }
+
+    @Test
+    public void testSAXParserReclaimsClearedCapacity() throws Exception {
+        assertParserPoolReclaimsClearedCapacity("saxParserPool", XmlUtil::createSAXParser, XmlUtil::recycleSAXParser);
+    }
+
+    @Test
+    public void testContentParserUsesSharedFactoryLock() throws Exception {
+        try (ParserPoolState<DocumentBuilder> state = new ParserPoolState<>("contentDocBuilderPool")) {
+            final var factoryField = XmlUtil.class.getDeclaredField("docBuilderFactory");
+            factoryField.setAccessible(true);
+            final DocumentBuilderFactory factory = (DocumentBuilderFactory) factoryField.get(null);
+            final CountDownLatch started = new CountDownLatch(1);
+            final AtomicReference<DocumentBuilder> created = new AtomicReference<>();
+            final AtomicReference<Throwable> failure = new AtomicReference<>();
+            final DocumentBuilder recyclable = state.keep(XmlUtil.createContentParser());
+            final CountDownLatch recyclerStarted = new CountDownLatch(1);
+            final CountDownLatch recyclerDone = new CountDownLatch(1);
+            final AtomicReference<Throwable> recycleFailure = new AtomicReference<>();
+            final Thread creator = new Thread(() -> {
+                started.countDown();
+                try {
+                    created.set(XmlUtil.createContentParser());
+                } catch (final Throwable e) {
+                    failure.set(e);
+                }
+            }, "xml-content-factory-test");
+            creator.setDaemon(true);
+            final Thread recycler = new Thread(() -> {
+                recyclerStarted.countDown();
+                try {
+                    XmlUtil.recycleContentParser(recyclable);
+                } catch (final Throwable e) {
+                    recycleFailure.set(e);
+                } finally {
+                    recyclerDone.countDown();
+                }
+            }, "xml-content-recycle-test");
+            recycler.setDaemon(true);
+            final boolean originalComments;
+            final boolean originalWhitespace;
+
+            try {
+                synchronized (factory) {
+                    originalComments = factory.isIgnoringComments();
+                    originalWhitespace = factory.isIgnoringElementContentWhitespace();
+                    creator.start();
+                    assertTrue(started.await(5, TimeUnit.SECONDS));
+                    assertBlockedOnMonitor(creator, factory, "content creation must wait for the same factory monitor as createDOMParser");
+
+                    // Parser construction must happen without holding the pool monitor, otherwise recycling
+                    // would be blocked while a creator waits for the factory.
+                    recycler.start();
+                    assertTrue(recyclerStarted.await(5, TimeUnit.SECONDS));
+                    assertTrue(recyclerDone.await(5, TimeUnit.SECONDS), "recycling must not wait for the factory monitor");
+                }
+            } finally {
+                creator.join(5000);
+                if (creator.isAlive()) {
+                    creator.interrupt();
+                }
+                recycler.join(5000);
+                if (recycler.isAlive()) {
+                    recycler.interrupt();
+                }
+            }
+
+            assertFalse(creator.isAlive());
+            assertFalse(recycler.isAlive());
+            assertNull(failure.get());
+            assertNull(recycleFailure.get());
+            final DocumentBuilder builder = state.keep(created.get());
+            assertNotNull(builder);
+            final Document document = builder.parse(new org.xml.sax.InputSource(new StringReader("<root><!-- ignored --><child/></root>")));
+            assertEquals(Node.ELEMENT_NODE, document.getDocumentElement().getFirstChild().getNodeType());
+            synchronized (factory) {
+                assertEquals(originalComments, factory.isIgnoringComments());
+                assertEquals(originalWhitespace, factory.isIgnoringElementContentWhitespace());
+            }
+        }
+    }
+
+    @Test
+    public void testSAXParserPoolReuseDoesNotAcquireFactoryLock() throws Exception {
+        try (ParserPoolState<SAXParser> state = new ParserPoolState<>("saxParserPool")) {
+            final var factoryField = XmlUtil.class.getDeclaredField("saxParserFactory");
+            factoryField.setAccessible(true);
+            final SAXParserFactory factory = (SAXParserFactory) factoryField.get(null);
+            final SAXParser first = state.keep(XmlUtil.createSAXParser());
+            final SAXParser second = state.keep(XmlUtil.createSAXParser());
+            XmlUtil.recycleSAXParser(first);
+            XmlUtil.recycleSAXParser(second);
+
+            final FutureTask<SAXParser> firstCheckout = new FutureTask<>(XmlUtil::createSAXParser);
+            final FutureTask<SAXParser> secondCheckout = new FutureTask<>(XmlUtil::createSAXParser);
+            final Thread firstBorrower = new Thread(firstCheckout, "xml-sax-first-checkout-test");
+            final Thread secondBorrower = new Thread(secondCheckout, "xml-sax-second-checkout-test");
+            firstBorrower.setDaemon(true);
+            secondBorrower.setDaemon(true);
+            try {
+                // Both checkouts must finish while another thread owns the factory monitor. Keeping the
+                // parsers strongly reachable prevents GC from turning either checkout into a pool miss.
+                synchronized (factory) {
+                    firstBorrower.start();
+                    secondBorrower.start();
+                    final SAXParser firstResult = firstCheckout.get(5, TimeUnit.SECONDS);
+                    final SAXParser secondResult = secondCheckout.get(5, TimeUnit.SECONDS);
+                    assertTrue(firstResult == first || firstResult == second);
+                    assertTrue(secondResult == first || secondResult == second);
+                    assertNotSame(firstResult, secondResult, "concurrent borrowers must receive distinct pooled parsers");
+                }
+            } finally {
+                firstBorrower.join(5000);
+                secondBorrower.join(5000);
+            }
+            assertFalse(firstBorrower.isAlive());
+            assertFalse(secondBorrower.isAlive());
+        }
+    }
+
+    @Test
+    public void testSAXParserUsesSharedFactoryLock() throws Exception {
+        try (ParserPoolState<SAXParser> state = new ParserPoolState<>("saxParserPool")) {
+            final var factoryField = XmlUtil.class.getDeclaredField("saxParserFactory");
+            factoryField.setAccessible(true);
+            final SAXParserFactory factory = (SAXParserFactory) factoryField.get(null);
+            final SAXParser recyclable = state.keep(XmlUtil.createSAXParser());
+            final FutureTask<SAXParser> creation = new FutureTask<>(XmlUtil::createSAXParser);
+            final FutureTask<SAXParser> recycleAndReuse = new FutureTask<>(() -> {
+                XmlUtil.recycleSAXParser(recyclable);
+                return XmlUtil.createSAXParser();
+            });
+            final Thread creator = new Thread(creation, "xml-sax-factory-test");
+            final Thread recycler = new Thread(recycleAndReuse, "xml-sax-recycle-test");
+            creator.setDaemon(true);
+            recycler.setDaemon(true);
+            try {
+                synchronized (factory) {
+                    creator.start();
+                    assertBlockedOnMonitor(creator, factory, "SAX creation on a pool miss must wait for the shared factory monitor");
+
+                    // A creator waiting for the factory must release the pool monitor so a different
+                    // thread can return and borrow a parser without waiting for provider construction.
+                    recycler.start();
+                    assertSame(recyclable, recycleAndReuse.get(5, TimeUnit.SECONDS));
+                }
+            } finally {
+                creator.join(5000);
+                recycler.join(5000);
+            }
+            assertFalse(creator.isAlive());
+            assertFalse(recycler.isAlive());
+            final SAXParser created = state.keep(creation.get(5, TimeUnit.SECONDS));
+            assertNotNull(created);
+            assertNotSame(recyclable, created);
+        }
+    }
+
     @Test
     public void testMarshalUnmarshal() {
         Person original = new Person("John", 30);
@@ -182,90 +527,15 @@ public class XmlUtilTest extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testContentParserPool() throws Exception {
-        DocumentBuilder p1 = XmlUtil.createContentParser();
-        DocumentBuilder p2 = XmlUtil.createContentParser();
-        assertNotNull(p1);
-        assertNotNull(p2);
-        XmlUtil.recycleContentParser(p1);
-        XmlUtil.recycleContentParser(p2);
-        XmlUtil.recycleContentParser(null);
-        assertNotNull(XmlUtil.createContentParser());
-
-        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
-        poolField.setAccessible(true);
-        Queue<DocumentBuilder> pool = (Queue<DocumentBuilder>) poolField.get(null);
-
-        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledContentParsers");
-        pooledField.setAccessible(true);
-        Map<DocumentBuilder, Boolean> pooled = (Map<DocumentBuilder, Boolean>) pooledField.get(null);
-
-        synchronized (pool) {
-            // pooledContentParsers mirrors the queue, so both have to be cleared together. Clearing only the
-            // queue would strand a strong entry for a builder that is no longer pooled, and
-            // recycleContentParser would then refuse that live builder as a duplicate for the rest of the JVM.
-            pool.clear();
-            pooled.clear();
-        }
-        XmlUtil.recycleContentParser(DocumentBuilderFactory.newInstance().newDocumentBuilder());
-        synchronized (pool) {
-            assertTrue(pool.isEmpty());
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
-        DocumentBuilder owned = XmlUtil.createContentParser();
-        XmlUtil.recycleContentParser(owned);
-        XmlUtil.recycleContentParser(owned);
-        synchronized (pool) {
-            assertEquals(1, pool.size());
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-            pool.clear();
-            pooled.clear();
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
+        assertParserPoolOwnershipAndReuse("contentDocBuilderPool", XmlUtil::createContentParser, XmlUtil::recycleContentParser,
+                DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testSAXParserPool() throws Exception {
-        SAXParser s1 = XmlUtil.createSAXParser();
-        SAXParser s2 = XmlUtil.createSAXParser();
-        assertNotNull(s1);
-        assertNotNull(s2);
-        XmlUtil.recycleSAXParser(s1);
-        XmlUtil.recycleSAXParser(s2);
-        XmlUtil.recycleSAXParser(null);
-        assertNotNull(XmlUtil.createSAXParser());
-
-        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("saxParserPool");
-        poolField.setAccessible(true);
-        Queue<SAXParser> pool = (Queue<SAXParser>) poolField.get(null);
-
-        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledSaxParsers");
-        pooledField.setAccessible(true);
-        Map<SAXParser, Boolean> pooled = (Map<SAXParser, Boolean>) pooledField.get(null);
-
-        synchronized (pool) {
-            // See the DocumentBuilder twin: the queue and its membership map must be cleared together, or a
-            // live owned parser stays in the map and recycleSAXParser refuses it as a duplicate forever.
-            pool.clear();
-            pooled.clear();
-        }
-        XmlUtil.recycleSAXParser(SAXParserFactory.newInstance().newSAXParser());
-        synchronized (pool) {
-            assertTrue(pool.isEmpty());
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
-        SAXParser owned = XmlUtil.createSAXParser();
-        XmlUtil.recycleSAXParser(owned);
-        XmlUtil.recycleSAXParser(owned);
-        synchronized (pool) {
-            assertEquals(1, pool.size());
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-            pool.clear();
-            pooled.clear();
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
+        assertParserPoolOwnershipAndReuse("saxParserPool", XmlUtil::createSAXParser, XmlUtil::recycleSAXParser,
+                SAXParserFactory.newDefaultInstance().newSAXParser());
     }
 
     @Test
@@ -990,62 +1260,10 @@ public class XmlUtilTest extends TestBase {
      * an exception) when the pool is at capacity, and likewise when the provider's {@code reset()} throws.
      */
     @Test
-    @SuppressWarnings("unchecked")
     public void testRecycleContentParserDropsWhenPoolIsFullOrResetFails() throws Exception {
-        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
-        poolField.setAccessible(true);
-        Queue<DocumentBuilder> pool = (Queue<DocumentBuilder>) poolField.get(null);
-
-        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledContentParsers");
-        pooledField.setAccessible(true);
-        Map<DocumentBuilder, Boolean> pooled = (Map<DocumentBuilder, Boolean>) pooledField.get(null);
-
-        java.lang.reflect.Field poolSizeField = XmlUtil.class.getDeclaredField("POOL_SIZE");
-        poolSizeField.setAccessible(true);
-        int poolSize = (Integer) poolSizeField.get(null);
-
-        DocumentBuilder victim = XmlUtil.createContentParser();
-
-        synchronized (pool) {
-            // pooledContentParsers mirrors the queue, so both have to be rewritten together. Clearing only
-            // the queue would strand a strong entry for a builder that is no longer pooled, and
-            // recycleContentParser would then refuse that live builder as a duplicate for the rest of the JVM.
-            pool.clear();
-            pooled.clear();
-
-            for (int i = 0; i < poolSize; i++) {
-                DocumentBuilder filler = new ResetUnsupportedDocumentBuilder();
-                pool.add(filler);
-                pooled.put(filler, Boolean.TRUE);
-            }
-        }
-
-        assertDoesNotThrow(() -> XmlUtil.recycleContentParser(victim));
-
-        synchronized (pool) {
-            assertEquals(poolSize, pool.size());
-            assertFalse(pooled.containsKey(victim));
-            pool.clear();
-            pooled.clear();
-        }
-
-        java.lang.reflect.Field ownedField = XmlUtil.class.getDeclaredField("ownedContentParsers");
-        ownedField.setAccessible(true);
-        Object owned = ownedField.get(null);
-        java.lang.reflect.Method add = owned.getClass().getDeclaredMethod("add", Object.class);
-        add.setAccessible(true);
-
-        DocumentBuilder resetFails = new ResetUnsupportedDocumentBuilder();
+        final DocumentBuilder resetFails = wrapParser(DocumentBuilder.class, new ResetUnsupportedDocumentBuilder());
         assertThrows(UnsupportedOperationException.class, resetFails::reset);
-        add.invoke(owned, resetFails);
-
-        assertDoesNotThrow(() -> XmlUtil.recycleContentParser(resetFails));
-
-        synchronized (pool) {
-            assertEquals(0, pool.size());
-            assertFalse(pooled.containsKey(resetFails));
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
+        assertParserPoolCapacityAndResetFailure("contentDocBuilderPool", XmlUtil::createContentParser, XmlUtil::recycleContentParser, resetFails);
     }
 
     /** A {@code SAXParser} whose {@code reset()} is unsupported, which JAXP explicitly permits. */
@@ -1087,60 +1305,10 @@ public class XmlUtilTest extends TestBase {
      * silent drops are documented on {@code recycleSAXParser}, so they are pinned the same way.
      */
     @Test
-    @SuppressWarnings("unchecked")
     public void testRecycleSaxParserDropsWhenPoolIsFullOrResetFails() throws Exception {
-        java.lang.reflect.Field poolField = XmlUtil.class.getDeclaredField("saxParserPool");
-        poolField.setAccessible(true);
-        Queue<SAXParser> pool = (Queue<SAXParser>) poolField.get(null);
-
-        java.lang.reflect.Field pooledField = XmlUtil.class.getDeclaredField("pooledSaxParsers");
-        pooledField.setAccessible(true);
-        Map<SAXParser, Boolean> pooled = (Map<SAXParser, Boolean>) pooledField.get(null);
-
-        java.lang.reflect.Field poolSizeField = XmlUtil.class.getDeclaredField("POOL_SIZE");
-        poolSizeField.setAccessible(true);
-        int poolSize = (Integer) poolSizeField.get(null);
-
-        SAXParser victim = XmlUtil.createSAXParser();
-
-        synchronized (pool) {
-            // See the DocumentBuilder twin: the queue and its membership map must be rewritten together.
-            pool.clear();
-            pooled.clear();
-
-            for (int i = 0; i < poolSize; i++) {
-                SAXParser filler = new ResetUnsupportedSaxParser();
-                pool.add(filler);
-                pooled.put(filler, Boolean.TRUE);
-            }
-        }
-
-        assertDoesNotThrow(() -> XmlUtil.recycleSAXParser(victim));
-
-        synchronized (pool) {
-            assertEquals(poolSize, pool.size());
-            assertFalse(pooled.containsKey(victim));
-            pool.clear();
-            pooled.clear();
-        }
-
-        java.lang.reflect.Field ownedField = XmlUtil.class.getDeclaredField("ownedSaxParsers");
-        ownedField.setAccessible(true);
-        Object owned = ownedField.get(null);
-        java.lang.reflect.Method add = owned.getClass().getDeclaredMethod("add", Object.class);
-        add.setAccessible(true);
-
-        SAXParser resetFails = new ResetUnsupportedSaxParser();
+        final SAXParser resetFails = wrapParser(SAXParser.class, new ResetUnsupportedSaxParser());
         assertThrows(UnsupportedOperationException.class, resetFails::reset);
-        add.invoke(owned, resetFails);
-
-        assertDoesNotThrow(() -> XmlUtil.recycleSAXParser(resetFails));
-
-        synchronized (pool) {
-            assertEquals(0, pool.size());
-            assertFalse(pooled.containsKey(resetFails));
-            assertEquals(pool.size(), pooled.size(), "the membership map must still mirror the queue");
-        }
+        assertParserPoolCapacityAndResetFailure("saxParserPool", XmlUtil::createSAXParser, XmlUtil::recycleSAXParser, resetFails);
     }
 
     /**

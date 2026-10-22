@@ -2315,7 +2315,8 @@ public final class Profiler {
         @Override
         public double getMethodAverageElapsedTimeInMillis(final String methodName) throws NullPointerException {
             double totalTime = 0;
-            int methodNum = 0;
+            // Review 2026-10-17: Combined loop counts can exceed int even when each loop's count fits.
+            long methodNum = 0;
             for (final LoopStatistics loopStatistics : loopStatisticsList) {
                 final double loopMethodTotalTime = loopStatistics.getMethodTotalElapsedTimeInMillis(methodName);
                 final int loopMethodSize = loopStatistics.getMethodInvocationCount(methodName);

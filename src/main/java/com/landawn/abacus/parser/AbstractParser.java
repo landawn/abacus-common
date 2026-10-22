@@ -421,6 +421,10 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * Builds an exact JDK copy-on-write list in bulk when no caller observes intermediate insertions.
      * Subclasses retain their own construction and insertion behavior; the exact JDK class cannot have a
      * registered collection factory. JSON callers must disable this path for existing output or property handlers.
+     *
+     * @param targetClass the requested collection class
+     * @param allowBulkCopyOnWrite whether an exact {@code CopyOnWriteArrayList} may be accumulated in a temporary list
+     * @return the creator and final converter, or {@code null} if no special construction is registered for the class
      */
     protected static Tuple2<Function<Class<?>, Object>, Function<Object, Object>> collectionCreatorAndConverter(final Class<?> targetClass,
             final boolean allowBulkCopyOnWrite) {

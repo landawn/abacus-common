@@ -41,6 +41,18 @@
  * <i>Shared pipeline naming</i> section on {@link Stream}
  * ({@code Stream.html#shared-pipeline-naming}).</p>
  *
+ * <h2>Closing does not release every reference</h2>
+ * <p>Closing any stream type in this package (including the primitive specializations and
+ * {@link EntryStream}), or a {@link com.landawn.abacus.util.Seq}, runs its close handlers and releases the
+ * resources it owns, but it does not clear every field of the instance. This holds whether the close was
+ * explicit or performed automatically by a terminal operation. A closed stream or sequence kept strongly
+ * reachable - in a collection, map, cache, or other long-lived object - may still reference its source
+ * iterator or collection, buffered or sorted elements, a flat-mapped child, an executor, and its
+ * close-handler chain. Those references can keep large arrays, collections, or resource wrappers alive and
+ * prevent garbage collection even though the underlying resource has already been closed. Do not use streams
+ * or sequences as cache entries; remove closed instances from long-lived collections and let them become
+ * unreachable.</p>
+ *
  * @see Stream
  * @see EntryStream
  * @see Collectors

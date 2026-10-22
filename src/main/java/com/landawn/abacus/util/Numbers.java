@@ -218,7 +218,7 @@ import com.landawn.abacus.type.Type;
  * </ul>
  * <p>{@code isParsable} is {@code true} if and only if the raw input is at most
  * {@value #MAX_FLOATING_POINT_TOKEN_LENGTH} UTF-16 code units and {@link Double#parseDouble(String)} succeeds
- * (after an ASCII/whitespace pre-filter); it is not a nested subset of {@code isCreatable}.
+ * for the same text; syntax is checked directly without constructing a numeric value. It is not a nested subset of {@code isCreatable}.
  * {@code tryParseInt}/{@code tryParseLong} use the same decimal-first grammar as {@code toInt}/{@code toLong};
  * {@code tryParseFloat}/{@code tryParseDouble} use the same grammar and result as
  * {@code parseFloat}/{@code parseDouble}, respectively, for non-empty input;
@@ -362,7 +362,7 @@ import com.landawn.abacus.type.Type;
  *     </tr>
  *     <tr>
  *       <td>{@code isParsable(String)}</td>
- *       <td><b><i>Numbers</i></b>: {@code true} iff the raw input is at most {@value #MAX_FLOATING_POINT_TOKEN_LENGTH} UTF-16 code units and {@link Double#parseDouble(String)} succeeds after an ASCII/whitespace pre-filter; {@code parseFloat} uses the same bounded lexical grammar, while {@code parseBigDecimal} is decimal-only and unbounded by this floating-point limit &middot; &#9888;&#65039; <b><i>Commons</i></b> {@code NumberUtils.isParsable} is a limited decimal grammar using {@code Character.isDigit} (Unicode digits; no exponent, suffix, or {@code NaN})</td>
+ *       <td><b><i>Numbers</i></b>: {@code true} iff the raw input is at most {@value #MAX_FLOATING_POINT_TOKEN_LENGTH} UTF-16 code units and {@link Double#parseDouble(String)} accepts the text; {@code parseFloat} uses the same bounded lexical grammar, while {@code parseBigDecimal} is decimal-only and unbounded by this floating-point limit &middot; &#9888;&#65039; <b><i>Commons</i></b> {@code NumberUtils.isParsable} is a limited decimal grammar using {@code Character.isDigit} (Unicode digits; no exponent, suffix, or {@code NaN})</td>
  *     </tr>
  *     <tr>
  *       <td>{@code gcd}/{@code lcm} (int, long)</td>
@@ -708,6 +708,9 @@ public final class Numbers {
      */
     private static final int DECIMAL_FORMAT_CACHE_CAPACITY = 16;
 
+    /** Bounds retained pattern text as well as entry count; longer valid patterns are formatted without caching. */
+    private static final int MAX_CACHED_DECIMAL_FORMAT_PATTERN_LENGTH = 1024;
+
     /**
      * Per-thread {@link DecimalFormat} cache, keyed by pattern and valid for one FORMAT locale at a time.
      * {@code DecimalFormat} is not thread-safe, so each thread owns its own instances; reuse avoids rebuilding
@@ -715,7 +718,8 @@ public final class Numbers {
      *
      * <p>Eviction follows access order: a cache hit refreshes the pattern's recency, and an insertion
      * beyond the capacity evicts the least recently used entry. A cyclic workload with more distinct
-     * patterns than the capacity can require rebuilding a formatter on every call.</p>
+     * patterns than the capacity can require rebuilding a formatter on every call. Patterns longer than
+     * {@value #MAX_CACHED_DECIMAL_FORMAT_PATTERN_LENGTH} characters are never retained.</p>
      *
      * <p>Only one FORMAT locale is retained. The next lookup after a locale change clears the map,
      * so a long-lived thread does not accumulate a map for each locale it has used.</p>
@@ -1319,9 +1323,10 @@ public final class Numbers {
      * {@code "1e2147483647"}) would overflow and misreport a colossal value as a sub-one one &mdash; so the
      * widening stays, to keep the guard correct on its own terms if the gate is ever loosened.</p>
      *
-     * <p>The check is gated on {@link #MAX_CHEAP_RESCALE_SCALE} because {@link BigDecimal#precision()} is
-     * potentially expensive for a wide unscaled value. <b>Correctness does not depend on the gate</b>, only cost: a sub-one value
-     * below the bound simply takes the plain path, which still returns zero.</p>
+     * <p>A sufficient bound from the unscaled value's bit length handles small fractions without computing
+     * decimal precision. When that bound is inconclusive, the precision check is gated on
+     * {@link #MAX_CHEAP_RESCALE_SCALE} because {@link BigDecimal#precision()} can be expensive for a wide
+     * unscaled value. Below that gate the JDK still returns the exact truncated result.</p>
      *
      * @param bd the value to truncate; must not be {@code null}
      * @return {@code bd} truncated toward zero
@@ -1330,6 +1335,13 @@ public final class Numbers {
      *         own exception as the cause
      */
     private static BigInteger bigDecimalToBigInteger(final BigDecimal bd) throws ArithmeticException {
+        // A sufficient binary bound avoids computing decimal precision or constructing 10^scale.
+        // The extra bit covers BigInteger.bitLength()'s two's-complement definition for negative values.
+        // Preserve a subclass's toBigInteger implementation on paths that previously called it.
+        if (bd.getClass() == BigDecimal.class && bd.scale() > 18 && (bd.signum() == 0 || bd.unscaledValue().bitLength() + 1L <= 3L * bd.scale())) {
+            return BigInteger.ZERO;
+        }
+
         if (bd.scale() > MAX_CHEAP_RESCALE_SCALE && (bd.signum() == 0 || bd.precision() - (long) bd.scale() <= 0)) {
             return BigInteger.ZERO;
         }
@@ -2041,7 +2053,7 @@ public final class Numbers {
      * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of an integer value.
-     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * It scans ASCII digit runs with an optional immediately preceding sign, including negative numbers.
      * If no integer is found in the string, an empty OptionalInt is returned.</p>
      *
      * <p><b>By design:</b> a matched digit run that does not fit in an {@code int} throws
@@ -2102,10 +2114,10 @@ public final class Numbers {
             return u.OptionalInt.empty();
         }
 
-        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        final long span = firstIntegerTokenSpan(str);
 
-        if (matcher.find()) {
-            return u.OptionalInt.of(parseExtractedInt(str, matcher.start(1), matcher.end(1)));
+        if (span >= 0) {
+            return u.OptionalInt.of(parseExtractedInt(str, (int) (span >>> 32), (int) span));
         }
 
         return u.OptionalInt.empty();
@@ -2118,7 +2130,7 @@ public final class Numbers {
      * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of an integer value.
-     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * It scans ASCII digit runs with an optional immediately preceding sign, including negative numbers.
      * If no integer is found in the string, the specified default value is returned.</p>
      *
      * <p><b>By design:</b> {@code defaultValue} is used only when no integer token is found ({@code null}, empty,
@@ -2166,10 +2178,10 @@ public final class Numbers {
             return defaultValue;
         }
 
-        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        final long span = firstIntegerTokenSpan(str);
 
-        if (matcher.find()) {
-            return parseExtractedInt(str, matcher.start(1), matcher.end(1));
+        if (span >= 0) {
+            return parseExtractedInt(str, (int) (span >>> 32), (int) span);
         }
 
         return defaultValue;
@@ -2182,7 +2194,7 @@ public final class Numbers {
      * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of a long value.
-     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * It scans ASCII digit runs with an optional immediately preceding sign, including negative numbers.
      * If no long value is found in the string, an empty OptionalLong is returned.</p>
      *
      * <p><b>By design:</b> a matched digit run that does not fit in a {@code long} throws
@@ -2228,10 +2240,10 @@ public final class Numbers {
             return u.OptionalLong.empty();
         }
 
-        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
+        final long span = firstIntegerTokenSpan(str);
 
-        if (matcher.find()) {
-            return u.OptionalLong.of(parseExtractedLong(str, matcher.start(1), matcher.end(1)));
+        if (span >= 0) {
+            return u.OptionalLong.of(parseExtractedLong(str, (int) (span >>> 32), (int) span));
         }
 
         return u.OptionalLong.empty();
@@ -2244,7 +2256,7 @@ public final class Numbers {
      * {@link Strings#findFirstInteger(String)} to obtain the matched text instead.</p>
      *
      * <p>This method searches through the provided string to find the first occurrence of a long value.
-     * It uses a regular expression pattern to identify integer patterns, including negative numbers.
+     * It scans ASCII digit runs with an optional immediately preceding sign, including negative numbers.
      * If no long value is found in the string, the specified default value is returned.</p>
      *
      * <p><b>By design:</b> {@code defaultValue} is used only when no integer token is found ({@code null}, empty,
@@ -2291,12 +2303,30 @@ public final class Numbers {
             return defaultValue;
         }
 
-        final Matcher matcher = RegExUtil.INTEGER_FINDER.matcher(str);
-        if (matcher.find()) {
-            return parseExtractedLong(str, matcher.start(1), matcher.end(1));
+        final long span = firstIntegerTokenSpan(str);
+
+        if (span >= 0) {
+            return parseExtractedLong(str, (int) (span >>> 32), (int) span);
         }
 
         return defaultValue;
+    }
+
+    /** Finds the first {@code [+-]?[0-9]+} token; packs its start/end indexes without allocating a matcher. */
+    private static long firstIntegerTokenSpan(final String str) {
+        final int length = str.length();
+
+        for (int pos = 0; pos < length; pos++) {
+            final char ch = str.charAt(pos);
+
+            if (ch >= '0' && ch <= '9') {
+                final int start = pos > 0 && (str.charAt(pos - 1) == '+' || str.charAt(pos - 1) == '-') ? pos - 1 : pos;
+                final int end = decimalDigitsEnd(str, pos + 1, length);
+                return ((long) start << 32) | end;
+            }
+        }
+
+        return -1;
     }
 
     /**
@@ -3900,6 +3930,12 @@ public final class Numbers {
             return null;
         }
 
+        return parseScannedBigDecimalQuietly(str);
+    }
+
+    /** Parses an already scanned token; the JDK remains the final arbiter of exponent and scale limits. */
+    @MayReturnNull
+    private static BigDecimal parseScannedBigDecimalQuietly(final String str) {
         try {
             return new BigDecimal(str);
         } catch (final NumberFormatException ignored) {
@@ -4215,7 +4251,15 @@ public final class Numbers {
      */
     private static BigInteger unknownNumberToBigInteger(final Number num) throws ArithmeticException {
         final String text = num.toString();
-        final BigDecimal decimal = parseBigDecimalQuietly(text);
+        final DecimalTextScan scan = text == null ? null : scanDecimalText(text);
+
+        // Without an exponent, the validated grammar and scale suffice to prove BigDecimal accepts the
+        // token. Keep exponent-bearing texts on the JDK path so its additional exponent limits still apply.
+        if (scan != null && scan.significandEnd == text.length() && (scan.firstDigit < 0 || scan.pointPosition <= 0)) {
+            return BigInteger.ZERO;
+        }
+
+        final BigDecimal decimal = scan == null ? null : parseScannedBigDecimalQuietly(text);
 
         if (decimal != null) {
             try {
@@ -4249,7 +4293,8 @@ public final class Numbers {
      * <p>A magnitude below one truncates to zero, so its potentially long exact decimal form need not
      * be built. {@code -0.0} also yields {@link BigInteger#ZERO}; {@code BigInteger} has no negative zero.
      * Inside the {@code long} range the narrowing cast {@code (long) d} is already the exact value truncated
-     * toward zero, so only a magnitude of at least 2<sup>63</sup> builds the exact decimal form.</p>
+     * toward zero. Larger finite doubles are already integers and are built directly from their binary
+     * significand and exponent.</p>
      *
      * <p>A {@code NaN}/{@code ±Infinity} input cannot be represented as an exact value, so it is rejected with
      * {@link ArithmeticException}, consistent with the integer targets (a {@code float}/{@code double}
@@ -4277,7 +4322,15 @@ public final class Numbers {
             return BigInteger.valueOf((long) d);
         }
 
-        return new BigDecimal(d).toBigInteger();
+        return largeIntegralDoubleToBigInteger(d);
+    }
+
+    /** Converts a finite, integral double outside the long range directly from its binary representation. */
+    private static BigInteger largeIntegralDoubleToBigInteger(final double x) {
+        final int exponent = getExponent(x);
+        final long significand = getSignificand(x);
+        final BigInteger result = BigInteger.valueOf(significand).shiftLeft(exponent - SIGNIFICAND_BITS);
+        return x < 0 ? result.negate() : result;
     }
 
     /**
@@ -5270,7 +5323,8 @@ public final class Numbers {
      *
      * <p>Valid input first uses an allocation-free primitive scanner: a value within the {@code long} range is
      * produced from it without a {@code BigInteger} parse (apart from the required returned {@code BigInteger}),
-     * and only a wider magnitude, every character already validated, is handed to
+     * and only a wider magnitude needs further construction after every character has been validated.
+     * Hexadecimal and octal magnitudes are packed directly into bytes; decimal magnitudes use
      * {@link BigInteger#BigInteger(String, int)}. Input that is invalid or beyond the {@code long} range is
      * rescanned to tell the two apart; a malformed token then yields detailed diagnostics, and retained failure
      * messages contain only a bounded preview of the input.</p>
@@ -5317,11 +5371,51 @@ public final class Numbers {
 
         // SCAN_OVERFLOW: every character was validated for its radix, so only the magnitude remains, and the
         // only failure left is the JDK's ArithmeticException for a value beyond its supported range. The scan
-        // already located the digits and the radix; BigInteger(String, int) understands no 0x/# prefix, so the
-        // magnitude is parsed from the first digit and the sign is applied afterwards for every radix.
+        // already located the digits and the radix. Hexadecimal and octal digits pack directly into bytes;
+        // the JDK String constructor otherwise accumulates digit groups by repeated multiplication.
+        if (scan.radix == 16 || scan.radix == 8) {
+            return packPowerOfTwoRadix(str, scan.digitStart, end, scan.radix, scan.negate);
+        }
+
         final BigInteger magnitude = new BigInteger(str.substring(scan.digitStart, end), scan.radix);
 
         return scan.negate ? magnitude.negate() : magnitude;
+    }
+
+    /** Packs a fully validated, nonzero octal/hexadecimal magnitude that exceeds the long range. */
+    private static BigInteger packPowerOfTwoRadix(final String str, int start, final int end, final int radix, final boolean negate) {
+        while (str.charAt(start) == '0') {
+            start++;
+        }
+
+        final int width = radix == 16 ? 4 : 3;
+        final long bits = (long) (end - start - 1) * width + Integer.SIZE - Integer.numberOfLeadingZeros(digitOf(str.charAt(start), radix));
+
+        if (bits > Integer.MAX_VALUE) {
+            throw new ArithmeticException("BigInteger would overflow supported range");
+        }
+
+        final byte[] magnitude = new byte[(int) ((bits + 7) / 8)];
+        int target = magnitude.length - 1;
+        int value = 0;
+        int used = 0;
+
+        for (int pos = end - 1; pos >= start; pos--) {
+            value |= digitOf(str.charAt(pos), radix) << used;
+            used += width;
+
+            if (used >= Byte.SIZE) {
+                magnitude[target--] = (byte) value;
+                value >>>= Byte.SIZE;
+                used -= Byte.SIZE;
+            }
+        }
+
+        if (target >= 0) {
+            magnitude[target] = (byte) value;
+        }
+
+        return new BigInteger(negate ? -1 : 1, magnitude);
     }
 
     /**
@@ -5538,7 +5632,7 @@ public final class Numbers {
     /**
      * Returns {@code true} if and only if {@code str} contains at most
      * {@value #MAX_FLOATING_POINT_TOKEN_LENGTH} UTF-16 code units and {@link Double#parseDouble(String)}
-     * succeeds after a lightweight ASCII/whitespace pre-filter.
+     * would succeed. Syntax is checked without constructing a numeric value.
      *
      * <p>{@code parseFloat} and {@code parseDouble} share that JDK floating-point grammar.
      * {@code null} and empty strings return {@code false} ({@code parseFloat}/{@code parseDouble} return
@@ -5588,7 +5682,7 @@ public final class Numbers {
      *       Unicode digit; no sign, decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix
      *       (non-ASCII digits ARE accepted).</li>
      *   <li>{@code isParsable} &mdash; {@code true} iff the raw input is within the documented length limit and
-     *       {@link Double#parseDouble(String)} succeeds after the ASCII/whitespace pre-filter. It accepts scientific notation, a trailing decimal point,
+     *       {@link Double#parseDouble(String)} accepts the text. It accepts scientific notation, a trailing decimal point,
      *       {@code f}/{@code F}/{@code d}/{@code D} suffixes, {@code NaN}, infinity, hex floats, and surrounding
      *       whitespace, and rejects integer hex, a trailing {@code L}/{@code l}, and non-ASCII digits.</li>
      *   <li>{@code isCreatable} &mdash; validates the grammar and required decimal scale used by
@@ -5639,33 +5733,20 @@ public final class Numbers {
      * @see Strings#isAsciiInteger(CharSequence)
      */
     public static boolean isParsable(final String str) {
-        if ((str != null && str.length() > MAX_FLOATING_POINT_TOKEN_LENGTH) || !quickCheckForIsParsable(str)) {
-            return false;
-        }
-
-        try {
-            // Float.parseFloat and Double.parseDouble accept the same lexical grammar; range differences
-            // produce zero or infinity rather than a parse failure.
-            Double.parseDouble(str);
-            return true;
-        } catch (final NumberFormatException ignored) {
-            return false;
-        }
+        // Both JDK parsers accept this grammar; out-of-range magnitudes produce zero or infinity.
+        return (str == null || str.length() <= MAX_FLOATING_POINT_TOKEN_LENGTH) && quickCheckForIsParsable(str);
     }
 
     /**
-     * Cheap, allocation-free pre-filter for {@link #isParsable(String)}. This method recognizes the outer
-     * shape and character set of the JDK floating-point grammar, including trim-style surrounding whitespace,
-     * signed {@code NaN}/{@code Infinity}, decimal forms and hexadecimal floating-point forms. It deliberately
-     * leaves detailed syntax validation to {@link Double#parseDouble(String)}.
+     * Allocation-free validation of the JDK floating-point grammar, including trim-style surrounding
+     * whitespace, signed {@code NaN}/{@code Infinity}, decimal and hexadecimal forms, and type suffixes.
      *
-     * <p>A {@code false} result means that parsing is guaranteed to fail. A {@code true} result only means that
-     * full parsing is required; for example, {@code "1e+"} and {@code "1.2.3"} pass this pre-filter but are
-     * rejected by {@code Double.parseDouble}. This helper checks lexical shape only; callers enforce the separate
+     * <p>No numeric value needs to be constructed to decide parsability. Quiet parsers also use this check
+     * to reject malformed tokens without constructing an exception. Callers enforce the separate
      * {@value #MAX_FLOATING_POINT_TOKEN_LENGTH}-code-unit API limit.</p>
      *
-     * @param str the string to pre-check; may be {@code null}
-     * @return {@code false} if {@code str} is definitely not parsable, {@code true} if full parsing is needed
+     * @param str the string to check; may be {@code null}
+     * @return whether {@code str} has valid floating-point syntax
      */
     static boolean quickCheckForIsParsable(final String str) {
         if (Strings.isEmpty(str)) {
@@ -5709,39 +5790,70 @@ public final class Numbers {
         }
 
         final boolean isHex = end - start > 2 && ch == '0' && (str.charAt(start + 1) == 'x' || str.charAt(start + 1) == 'X');
-        boolean hasDigit = false;
-        boolean hasBinaryExponent = !isHex;
+        final int firstDigit = isHex ? start + 2 : start;
+        int pos = isHex ? hexadecimalDigitsEnd(str, firstDigit, end) : decimalDigitsEnd(str, firstDigit, end);
+        boolean hasDigit = pos > firstDigit;
 
-        for (int i = isHex ? start + 2 : start; i < end; i++) {
-            ch = str.charAt(i);
+        if (pos < end && str.charAt(pos) == '.') {
+            final int fractionStart = ++pos;
+            pos = isHex ? hexadecimalDigitsEnd(str, pos, end) : decimalDigitsEnd(str, pos, end);
+            hasDigit |= pos > fractionStart;
+        }
 
-            if (ch >= '0' && ch <= '9') {
-                hasDigit = true;
-                continue;
-            }
-
-            if (isHex) {
-                if ((ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')) {
-                    hasDigit = true;
-                    continue;
-                }
-
-                if (ch == '.' || ch == '+' || ch == '-') {
-                    continue;
-                }
-
-                if (ch == 'p' || ch == 'P') {
-                    hasBinaryExponent = true;
-                    continue;
-                }
-            } else if (ch == '.' || ch == '+' || ch == '-' || ch == 'e' || ch == 'E' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D') {
-                continue;
-            }
-
+        if (!hasDigit) {
             return false;
         }
 
-        return hasDigit && hasBinaryExponent;
+        final boolean hasExponent = pos < end && (isHex ? str.charAt(pos) == 'p' || str.charAt(pos) == 'P' : str.charAt(pos) == 'e' || str.charAt(pos) == 'E');
+
+        if (isHex && !hasExponent) {
+            return false;
+        }
+
+        if (hasExponent) {
+            pos++;
+
+            if (pos < end && (str.charAt(pos) == '+' || str.charAt(pos) == '-')) {
+                pos++;
+            }
+
+            final int exponentStart = pos;
+            pos = decimalDigitsEnd(str, pos, end);
+
+            if (pos == exponentStart) {
+                return false;
+            }
+        }
+
+        if (pos < end && (str.charAt(pos) == 'f' || str.charAt(pos) == 'F' || str.charAt(pos) == 'd' || str.charAt(pos) == 'D')) {
+            pos++;
+        }
+
+        return pos == end;
+    }
+
+    /** Returns the first index at or after {@code start} that is not an ASCII decimal digit. */
+    private static int decimalDigitsEnd(final String str, int start, final int end) {
+        while (start < end) {
+            final char ch = str.charAt(start);
+
+            if (ch < '0' || ch > '9') {
+                break;
+            }
+
+            start++;
+        }
+
+        return start;
+    }
+
+    /** Separate from the decimal loop so the common decimal case does not test the radix per character. */
+    private static int hexadecimalDigitsEnd(final String str, int start, final int end) {
+        while (start < end && digitOf(str.charAt(start), 16) >= 0) {
+            start++;
+        }
+
+        return start;
     }
 
     /**
@@ -6655,7 +6767,7 @@ public final class Numbers {
      *       Unicode digit; no sign, decimal point, exponent, {@code 0x}/{@code #} prefix or type suffix
      *       (non-ASCII digits ARE accepted).</li>
      *   <li>{@code isParsable} &mdash; {@code true} iff the raw input is within the documented length limit and
-     *       {@link Double#parseDouble(String)} succeeds after the ASCII/whitespace pre-filter. It accepts scientific notation, a trailing decimal point,
+     *       {@link Double#parseDouble(String)} accepts the text. It accepts scientific notation, a trailing decimal point,
      *       {@code f}/{@code F}/{@code d}/{@code D} suffixes, {@code NaN}, infinity, hex floats, and surrounding
      *       whitespace, and rejects integer hex, a trailing {@code L}/{@code l}, and non-ASCII digits.</li>
      *   <li>{@code isCreatable} &mdash; validates the grammar and required decimal scale used by
@@ -7736,6 +7848,14 @@ public final class Numbers {
                         return logFloor + 1;
                     }
                 }
+                // Only an equal 257-bit prefix can straddle sqrt(2) * 2^logFloor. Classify all other
+                // values using a small temporary rather than squaring the entire magnitude.
+                final int prefixComparison = x.shiftRight(logFloor - SQRT2_PRECOMPUTE_THRESHOLD).compareTo(SQRT2_PRECOMPUTED_BITS);
+
+                if (prefixComparison != 0) {
+                    return prefixComparison < 0 ? logFloor : logFloor + 1;
+                }
+
                 // Since sqrt(2) is irrational, log2(x) - logFloor cannot be exactly 0.5
                 //
                 // To determine which side of logFloor.5 the logarithm is,
@@ -7959,6 +8079,46 @@ public final class Numbers {
     public static int log10(final double x, final RoundingMode mode) throws IllegalArgumentException, ArithmeticException {
         N.checkArgument(x > 0.0 && isFinite(x), "x must be positive and finite");
         N.checkArgNotNull(mode, cs.mode);
+
+        if (mode != RoundingMode.UNNECESSARY) {
+            final double estimate = Math.log10(x);
+            // Math.log10 is accurate to one ulp. Four ulps conservatively cover spacing changes and
+            // the boundary-distance calculation; ambiguous estimates retain the exact path below.
+            final double margin = 4 * Math.ulp(estimate);
+
+            if (Math.abs(estimate - Math.rint(estimate)) > margin) {
+                final int floor = (int) Math.floor(estimate);
+
+                switch (mode) {
+                    case FLOOR:
+                        return floor;
+                    case CEILING:
+                        return floor + 1;
+                    case DOWN:
+                        return estimate < 0 ? floor + 1 : floor;
+                    case UP:
+                        return estimate < 0 ? floor : floor + 1;
+                    case HALF_DOWN, HALF_UP, HALF_EVEN:
+                        final double half = floor + 0.5;
+
+                        if (Math.abs(estimate - half) > margin) {
+                            return estimate < half ? floor : floor + 1;
+                        }
+
+                        break;
+                    default:
+                        throw new AssertionError();
+                }
+            }
+
+            // Exact powers are intentionally inside the ambiguity interval. A table equality decides
+            // them without constructing the exact decimal expansion; nearby doubles still fall through.
+            final int power = (int) estimate;
+
+            if (power >= 0 && power < EXACT_DOUBLE_POWERS_OF_TEN.length && x == EXACT_DOUBLE_POWERS_OF_TEN[power]) {
+                return power;
+            }
+        }
 
         // BigDecimal(double) captures the exact binary floating-point value. Its decimal value lies in
         // [10^(precision-scale-1), 10^(precision-scale)), so floor(log10(x)) follows directly — no
@@ -8214,7 +8374,8 @@ public final class Numbers {
      * @see #floorPowerOfTwo(BigInteger)
      */
     public static BigInteger ceilingPowerOfTwo(final BigInteger x) throws IllegalArgumentException, ArithmeticException {
-        return BigInteger.ZERO.setBit(log2(x, RoundingMode.CEILING));
+        final int exponent = log2(x, RoundingMode.CEILING);
+        return x.getClass() == BigInteger.class && exponent == x.bitLength() - 1 ? x : BigInteger.ZERO.setBit(exponent);
     }
 
     /**
@@ -11426,7 +11587,8 @@ public final class Numbers {
     public static float round(final float x, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(roundingMode, cs.roundingMode);
 
-        if (!Float.isFinite(x)) {
+        // Every finite float's canonical decimal scale is at most 46. Zero is unchanged at every scale.
+        if (!Float.isFinite(x) || x == 0.0f || scale >= 46) {
             return x;
         }
 
@@ -11493,7 +11655,8 @@ public final class Numbers {
     public static double round(final double x, final int scale, final RoundingMode roundingMode) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(roundingMode, cs.roundingMode);
 
-        if (!Double.isFinite(x)) {
+        // 400 exceeds every finite double's canonical decimal scale (at most 325).
+        if (!Double.isFinite(x) || x == 0.0d || scale >= 400) {
             return x;
         }
 
@@ -11563,6 +11726,12 @@ public final class Numbers {
         if (!locale.equals(cache[CACHE_LOCALE])) {
             cache[CACHE_LOCALE] = locale;
             byPattern.clear();
+        }
+
+        if (decimalFormat.length() > MAX_CACHED_DECIMAL_FORMAT_PATTERN_LENGTH) {
+            final DecimalFormat uncached = newDecimalFormat(decimalFormat, locale);
+            uncached.setRoundingMode(RoundingMode.HALF_EVEN);
+            return uncached;
         }
 
         DecimalFormat df = byPattern.get(decimalFormat);
@@ -11732,10 +11901,7 @@ public final class Numbers {
         if (MIN_LONG_AS_DOUBLE - x < 1.0 && x < MAX_LONG_AS_DOUBLE_PLUS_ONE) {
             return BigInteger.valueOf((long) x);
         }
-        final int exponent = getExponent(x);
-        final long significand = getSignificand(x);
-        final BigInteger result = BigInteger.valueOf(significand).shiftLeft(exponent - SIGNIFICAND_BITS);
-        return (x < 0) ? result.negate() : result;
+        return largeIntegralDoubleToBigInteger(x);
     }
 
     /**
@@ -12133,7 +12299,8 @@ public final class Numbers {
      */
     private static BigInteger checkPositive(final BigInteger x, final String role) throws IllegalArgumentException {
         if (x.signum() <= 0) {
-            throw new IllegalArgumentException(role + " (" + x + ") must be > 0");
+            final String value = x.bitLength() > MAX_NUMBER_ERROR_BIT_LENGTH ? describeNumberForError(x, null) : x.toString();
+            throw new IllegalArgumentException(role + " (" + value + ") must be > 0");
         }
         return x;
     }
@@ -12178,7 +12345,8 @@ public final class Numbers {
      */
     private static BigInteger checkNonNegative(final BigInteger x, final String role) throws IllegalArgumentException {
         if (x.signum() < 0) {
-            throw new IllegalArgumentException(role + " (" + x + ") must be >= 0");
+            final String value = x.bitLength() > MAX_NUMBER_ERROR_BIT_LENGTH ? describeNumberForError(x, null) : x.toString();
+            throw new IllegalArgumentException(role + " (" + value + ") must be >= 0");
         }
         return x;
     }

@@ -1,3 +1,6 @@
+## 8.3.0
+* Improvements and bug fixes
+
 ## 8.2.1
 * Improvements and bug fixes
 

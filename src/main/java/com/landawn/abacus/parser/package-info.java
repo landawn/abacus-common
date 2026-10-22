@@ -782,8 +782,8 @@
  * <h4>L16  The standard StAX reader reads a bean property element without content with its own fallback</h4>
  * <p><b>Status:</b> remaining difference</p>
  * <p><b>Problem.</b> A bean property element without content is the empty text, read with the property's text rule, on the three Abacus
- * readers (I55) and the standard DOM reader. The standard StAX reader reads it as the selected type's value of the empty string, the fallback
- * the Abacus StAX reader used before I55: an Optional&lt;Object&gt; property under int metadata or without metadata is Optional.empty where
+ * readers (I55) and the standard DOM reader. The standard StAX reader uses the selected type's {@code defaultValue()}, except that String,
+ * open Object and enum properties are read through {@code valueOf("")}: an Optional&lt;Object&gt; property under int metadata or without metadata is Optional.empty where
  * the other four read Optional[0] and Optional[""], and a property with a number format is null where the other four fail with the format's
  * ParsingException (as all five do for blank text). Map values follow I20 on all five.</p>
  * <p><b>Sample input</b></p>

@@ -194,6 +194,16 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   <li>Streams are automatically closed after terminal operations complete</li>
  * </ul>
  *
+ * <p><b>Closing a stream does not release all of its object references.</b> {@code close()} invokes the
+ * close handlers and releases resources owned by the stream, but it does not clear every field of the
+ * instance. This applies whether the stream was closed explicitly or automatically by a terminal operation.
+ * A closed stream that is still strongly reachable - for example, one kept as an element or value
+ * of a long-lived {@link java.util.Collection}, {@link java.util.Map}, or cache - may continue to reference
+ * its source iterator or collection, buffered or sorted elements, a flat-mapped child, an executor, and its
+ * close-handler chain. Those references can keep large arrays, collections, or resource wrappers alive and
+ * prevent garbage collection even though the underlying resource has already been closed. Do not cache
+ * streams; remove closed instances from long-lived collections and let them become unreachable.</p>
+ *
  * <p>Collector-based {@code split}, {@code sliding}, {@code collapse}, and {@code joinByRange} stages obtain
  * collector functions during construction. If a collector accessor throws at that point, the source is closed
  * before the original failure is rethrown, with distinct close failures suppressed on it. Collector-based

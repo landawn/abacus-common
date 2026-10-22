@@ -210,10 +210,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * @param cbuf the character array containing data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
-     * @param length the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
+     * @param length the number of characters to write; must be non-negative and {@code off + length} must not exceed {@code cbuf.length}
      * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len} exceeds {@code cbuf.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + length} exceeds {@code cbuf.length}
      */
     public void writeCharacter(final char[] cbuf, final int off, int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
@@ -292,10 +292,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param str the string containing data to write; if {@code null}, the literal {@code "null"} is used
      * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
      *            must be non-negative and not greater than the effective string length
-     * @param length the number of characters to write; must be non-negative and {@code off + len} must
+     * @param length the number of characters to write; must be non-negative and {@code off + length} must
      *            not exceed the effective string length
      * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
-     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + length}
      *         exceeds the effective string length
      */
     public void writeCharacter(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {
