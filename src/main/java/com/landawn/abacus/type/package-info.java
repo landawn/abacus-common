@@ -31,12 +31,17 @@
  * <ul>
  *   <li>Primitives, wrappers, arrays, and Abacus primitive lists ({@code IntList}, …)</li>
  *   <li>Strings, numbers, enums, UUID/URI/URL, {@code Pattern}, optional and nullable wrappers</li>
- *   <li>JDK and Joda time, SQL date/time, JDBC Blob/Clob/Array/SQLXML</li>
+ *   <li>JDK and Joda time, SQL date/time, JDBC Blob/Clob/NClob/Array/Ref/RowId/SQLXML/Struct</li>
  *   <li>Collections, maps, Guava {@code Multiset}/{@code Multimap} (when Guava is present)</li>
  *   <li>Abacus {@code Pair}, {@code Triple}, {@code Tuple}, {@code Range}, {@code Dataset}, {@code Sheet},
  *       {@code Multiset}, {@code Multimap}, immutable collections</li>
  *   <li>Bean types and JSON/XML-as-value wrappers</li>
  * </ul>
+ *
+ * <p>{@link SQLArrayType}, {@link RefType}, {@link RowIdType}, {@link SQLXMLType}, and {@link StructType}
+ * handle their JDBC interfaces and implementation classes. A lookup by implementation class preserves
+ * that class in {@link Type#javaType()} while keeping the JDBC family name in {@link Type#name()}.
+ * These handlers transfer JDBC values directly and do not reconstruct them from strings.</p>
  *
  * <p>Concrete {@code *Type} classes in this package are the registered implementations. Prefer
  * {@link Type#of} over constructing them. For capturing generics at a call site, use

@@ -21,20 +21,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.N;
 
 /**
- * Type handler for java.sql.Ref objects.
+ * Type handler for {@link Ref} objects and their driver-specific implementations.
  * A SQL REF is a reference to an SQL structured type value in the database. It is used in
  * object-relational mapping to reference rows or objects in the database.
  *
- * <p>This type handler provides limited functionality because Ref objects are database-specific
- * and cannot be meaningfully serialized to or deserialized from strings. The primary use case
- * is for reading Ref values from ResultSets and setting them in PreparedStatements or CallableStatements.
+ * <p>This type handler reads Ref values from ResultSets and binds them to PreparedStatements or CallableStatements.
+ * {@link #stringOf(Ref)} dereferences the value with {@link Ref#getObject()} and formats the result with
+ * {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}. The formatted value
+ * cannot recreate the database reference through {@link #valueOf(String)}.</p>
+ *
+ * <p>{@link TypeFactory#getType(Class)} supports both {@code Ref.class} and implementation classes.
+ * {@link #javaType()} retains the requested class, while {@link #name()} remains {@code "Ref"}.
+ * Selecting an implementation class does not construct or convert reference values; JDBC operations
+ * transfer the supplied or retrieved instances unchanged.</p>
  *
  * <p><b>Important Notes:</b></p>
  * <ul>
  *   <li>This type is NOT serializable (isSerializable() returns false)</li>
- *   <li>stringOf() and valueOf(String) operations are not supported and will throw UnsupportedOperationException</li>
+ *   <li>stringOf() formats the referenced object; valueOf(String) throws UnsupportedOperationException</li>
  *   <li>valueOf(Object) returns an object that already is a Ref unchanged, maps null to null, and rejects
  *       everything else without touching it</li>
  *   <li>Ref objects are typically obtained from database queries and represent references to structured types</li>
@@ -60,8 +68,9 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     }
  * }
  *
- * // Note: These operations are NOT supported
- * // String str = type.stringOf(ref);   // Throws UnsupportedOperationException
+ * // Format the referenced object for display; this may access the database.
+ * String str = type.stringOf(ref);
+ * // Reconstructing the Ref from text is NOT supported.
  * // Ref ref = type.valueOf("string");   // Throws UnsupportedOperationException
  * }</pre>
  *
@@ -73,34 +82,49 @@ public class RefType extends AbstractType<Ref> {
      */
     public static final String REF = Ref.class.getSimpleName();
 
+    /** The {@link Ref} interface or implementation class represented by this handler. */
+    private final Class<Ref> clazz;
+
     /**
-     * Constructs a new RefType instance.
-     * This constructor is package-private and intended to be called only by the TypeFactory.
+     * Constructs a handler for the standard Ref interface, for use by {@link TypeFactory}.
      */
     RefType() {
-        super(REF);
+        this(Ref.class);
     }
 
     /**
-     * Returns the Class object representing the SQL Ref type.
+     * Constructs a handler for a specific SQL Ref interface or implementation class.
+     * The class is retained as metadata; the handler name remains {@code "Ref"}.
+     *
+     * @param targetClass the Ref interface or implementation class managed by this handler
+     */
+    RefType(final Class<? extends Ref> targetClass) {
+        super(REF);
+        this.clazz = (Class<Ref>) targetClass;
+    }
+
+    /**
+     * Returns the Ref interface or implementation class selected for this handler.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * Class<Ref> clazz = type.javaType();
      * System.out.println(clazz.getName());   // Output: java.sql.Ref
+     * Type<Ref> implementationType = TypeFactory.getType(ref.getClass());
+     * Class<Ref> implementationClass = implementationType.javaType();   // Returns ref.getClass()
      * }</pre>
      *
-     * @return the Class object for java.sql.Ref.class
+     * @return the Ref interface or implementation class managed by this handler
      */
     @Override
     public Class<Ref> javaType() {
-        return Ref.class;
+        return clazz;
     }
 
     /**
      * Indicates whether this type is serializable.
-     * SQL Ref types are not serializable as they represent database references.
+     * Formatting the referenced object is supported, but reconstructing the database reference from that text is not.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -117,28 +141,32 @@ public class RefType extends AbstractType<Ref> {
     }
 
     /**
-     * Converts a Ref object to its string representation.
-     * This operation is not supported for SQL Ref types as they represent
-     * database-specific references that cannot be meaningfully serialized to string.
+     * Reads the referenced object with {@link Ref#getObject()} and formats it with {@link N#stringOf(Object)}.
+     * The runtime type handler of the referenced object determines the text format. This operation may
+     * access the database; it does not preserve the reference identity in the text or support reconstruction
+     * through {@link #valueOf(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
-     * Ref ref = rs.getRef("person_ref");
-     * try {
-     *     String str = type.stringOf(ref);
-     * } catch (UnsupportedOperationException e) {
-     *     System.out.println("Cannot convert Ref to string");   // This branch always runs
-     * }
+     * String referencedValue = type.stringOf(ref);
      * }</pre>
      *
-     * @param x the Ref object to convert
-     * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as Ref cannot be converted to string
+     * @param x the Ref to dereference; may be {@code null}
+     * @return the formatted referenced object, or {@code null} if {@code x} or the referenced object is null
+     * @throws UncheckedSQLException if reading the referenced object fails; the original SQLException is retained as the cause
      */
     @Override
-    public String stringOf(final Ref x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Ref cannot be converted to string representation");
+    public String stringOf(final Ref x) throws UncheckedSQLException {
+        if (x == null) {
+            return null;
+        }
+
+        try {
+            return N.stringOf(x.getObject());
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
     }
 
     /**

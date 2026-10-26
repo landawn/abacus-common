@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.CallableStatement;
@@ -17,8 +20,13 @@ import java.sql.SQLXML;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.N;
 
 public class SQLXMLTypeTest extends TestBase {
 
@@ -35,14 +43,73 @@ public class SQLXMLTypeTest extends TestBase {
     }
 
     @Test
+    public void testImplementationHandlerPreservesJdbcValuesAndNulls() throws SQLException {
+        final SQLXML value = mock(SQLXML.class);
+        final Type<SQLXML> implementationType = TypeFactory.getType(value.getClass());
+        final ResultSet rs = mock(ResultSet.class);
+        final PreparedStatement statement = mock(PreparedStatement.class);
+        final CallableStatement callableStatement = mock(CallableStatement.class);
+        when(rs.getSQLXML(1)).thenReturn(value);
+        when(rs.getSQLXML("value")).thenReturn(value);
+
+        assertEquals(value.getClass(), implementationType.javaType());
+        assertSame(value, implementationType.get(rs, 1));
+        assertSame(value, implementationType.get(rs, "value"));
+        assertNull(implementationType.get(rs, 2));
+        assertNull(implementationType.get(rs, "empty"));
+
+        implementationType.set(statement, 1, value);
+        implementationType.set(statement, 2, null);
+        implementationType.set(callableStatement, "value", value);
+        implementationType.set(callableStatement, "empty", null);
+
+        verify(statement).setSQLXML(1, value);
+        verify(statement).setSQLXML(2, null);
+        verify(callableStatement).setSQLXML("value", value);
+        verify(callableStatement).setSQLXML("empty", null);
+        verifyNoInteractions(value);
+    }
+
+    @Test
     public void testIsSerializable() {
         assertFalse(sqlXMLType.isSerializable());
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = { "<root/>", "<?xml version=\"1.0\"?>\n<root name=\"x\">a &amp; b</root>" })
+    public void testStringOf(final String xmlText) throws SQLException {
+        final SQLXML value = mock(SQLXML.class);
+        when(value.getString()).thenReturn(xmlText);
+        final Type<SQLXML> implementationType = TypeFactory.getType(value.getClass());
+
+        assertEquals(xmlText, sqlXMLType.stringOf(value));
+        assertEquals(xmlText, implementationType.stringOf(value));
+        assertEquals(xmlText, N.stringOf(value));
+        verify(value, times(3)).getString();
+        verifyNoMoreInteractions(value);
+    }
+
     @Test
-    public void testStringOf() {
-        SQLXML sqlxml = mock(SQLXML.class);
-        assertThrows(UnsupportedOperationException.class, () -> sqlXMLType.stringOf(sqlxml));
+    public void testStringOfNull() {
+        assertNull(sqlXMLType.stringOf(null));
+    }
+
+    @Test
+    public void testStringOfWrapsSqlException() throws SQLException {
+        final SQLXML value = mock(SQLXML.class);
+        final SQLException failure = new SQLException("Cannot read JDBC value", "HY000", 17);
+        when(value.getString()).thenThrow(failure);
+        final Type<SQLXML> implementationType = TypeFactory.getType(value.getClass());
+
+        for (final Type<SQLXML> handler : java.util.List.of(sqlXMLType, implementationType)) {
+            final UncheckedSQLException thrown = assertThrows(UncheckedSQLException.class, () -> handler.stringOf(value));
+            assertSame(failure, thrown.getCause());
+            assertEquals("HY000", thrown.getSQLState());
+            assertEquals(17, thrown.getErrorCode());
+        }
+        verify(value, times(2)).getString();
+        verifyNoMoreInteractions(value);
     }
 
     @Test

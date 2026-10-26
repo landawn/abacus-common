@@ -26,7 +26,7 @@ import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
 /**
- * Type handler for java.sql.RowId objects.
+ * Type handler for {@link RowId} objects and their driver-specific implementations.
  * A SQL ROWID identifies a row in a database table. Its representation and whether it denotes a
  * physical or logical location are database-specific; RowId values are typically used for efficient
  * row identification and retrieval.
@@ -35,6 +35,11 @@ import com.landawn.abacus.util.CharacterWriter;
  * identifiers that cannot be reliably reconstructed from strings across different database sessions
  * or database restarts. The primary use cases are for reading RowId values from ResultSets and
  * setting them in PreparedStatements or CallableStatements.
+ *
+ * <p>{@link TypeFactory#getType(Class)} supports both {@code RowId.class} and implementation classes.
+ * {@link #javaType()} retains the requested class, while {@link #name()} remains {@code "RowId"}.
+ * Selecting an implementation class does not construct or convert row identifiers; JDBC operations
+ * transfer the supplied or retrieved instances unchanged.</p>
  *
  * <p><b>Important Notes:</b></p>
  * <ul>
@@ -80,28 +85,43 @@ public class RowIdType extends AbstractType<RowId> {
      */
     public static final String ROW_ID = RowId.class.getSimpleName();
 
+    /** The {@link RowId} interface or implementation class represented by this handler. */
+    private final Class<RowId> clazz;
+
     /**
-     * Constructs a new RowIdType instance.
-     * This constructor is package-private and intended to be called only by the TypeFactory.
+     * Constructs a handler for the standard RowId interface, for use by {@link TypeFactory}.
      */
     RowIdType() {
-        super(ROW_ID);
+        this(RowId.class);
     }
 
     /**
-     * Returns the Class object representing the SQL RowId type.
+     * Constructs a handler for a specific SQL RowId interface or implementation class.
+     * The class is retained as metadata; the handler name remains {@code "RowId"}.
+     *
+     * @param targetClass the RowId interface or implementation class managed by this handler
+     */
+    RowIdType(final Class<? extends RowId> targetClass) {
+        super(ROW_ID);
+        this.clazz = (Class<RowId>) targetClass;
+    }
+
+    /**
+     * Returns the RowId interface or implementation class selected for this handler.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
      * Class<RowId> clazz = type.javaType();   // Returns RowId.class
+     * Type<RowId> implementationType = TypeFactory.getType(rowId.getClass());
+     * Class<RowId> implementationClass = implementationType.javaType();   // Returns rowId.getClass()
      * }</pre>
      *
-     * @return the Class object for java.sql.RowId.class
+     * @return the RowId interface or implementation class managed by this handler
      */
     @Override
     public Class<RowId> javaType() {
-        return RowId.class;
+        return clazz;
     }
 
     /**

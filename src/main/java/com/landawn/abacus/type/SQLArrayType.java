@@ -21,17 +21,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.UncheckedSQLException;
+import com.landawn.abacus.util.N;
 
 /**
  * Type handler for {@link java.sql.Array} objects, used primarily for JDBC operations that read
  * SQL ARRAY values from a {@link ResultSet} and bind them to {@link PreparedStatement}/{@link CallableStatement}
- * parameters. SQL Arrays are database-specific structures and cannot be meaningfully serialized to or
- * deserialized from a string; {@link #stringOf(Array)} and {@link #valueOf(String)} therefore throw
- * {@link UnsupportedOperationException}, while {@link #valueOf(Object)} returns an object that already is an
+ * parameters. {@link #stringOf(Array)} reads the Java array through {@link Array#getArray()} and formats
+ * it with {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}.
+ * {@link #valueOf(String)} remains unsupported and {@link #isSerializable()} returns {@code false}:
+ * the formatted contents do not recreate a database-specific SQL Array. {@link #valueOf(Object)} returns an object that already is an
  * {@link Array} unchanged, maps {@code null} to {@code null}, and rejects everything else without touching it.
  *
- * <p>Note: {@link Array} instances are bound to the active database connection. Callers are
- * responsible for invoking {@link Array#free()} when the array is no longer needed; this type
+ * <p>{@link TypeFactory#getType(Class)} supports both {@code Array.class} and implementation classes.
+ * {@link #javaType()} retains the requested class, while {@link #name()} remains {@code "SQLArray"}.
+ * Selecting an implementation class does not construct or convert array values; JDBC operations
+ * transfer the supplied or retrieved instances unchanged.</p>
+ *
+ * <p>Database-backed {@link Array} instances may depend on the active connection. Callers are
+ * responsible for invoking {@link Array#free()} when such an array is no longer needed; this type
  * handler does not manage the array lifecycle.
  */
 public class SQLArrayType extends AbstractType<Array> {
@@ -41,33 +49,48 @@ public class SQLArrayType extends AbstractType<Array> {
      */
     static final String SQL_ARRAY = "SQLArray";
 
+    /** The {@link Array} interface or implementation class represented by this handler. */
+    private final Class<Array> clazz;
+
     /**
-     * Constructs a new SQLArrayType instance.
-     * This constructor is package-private and intended to be called only by the TypeFactory.
+     * Constructs a handler for the standard Array interface, for use by {@link TypeFactory}.
      */
     SQLArrayType() {
-        super(SQL_ARRAY);
+        this(Array.class);
     }
 
     /**
-     * Returns the Class object representing the SQL Array type.
+     * Constructs a handler for a specific SQL Array interface or implementation class.
+     * The class is retained as metadata; the handler name remains {@value #SQL_ARRAY}.
+     *
+     * @param targetClass the Array interface or implementation class managed by this handler
+     */
+    SQLArrayType(final Class<? extends Array> targetClass) {
+        super(SQL_ARRAY);
+        this.clazz = (Class<Array>) targetClass;
+    }
+
+    /**
+     * Returns the Array interface or implementation class selected for this handler.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * Class<Array> clazz = type.javaType();   // Returns Array.class
+     * Type<Array> implementationType = TypeFactory.getType(sqlArray.getClass());
+     * Class<Array> implementationClass = implementationType.javaType();   // Returns sqlArray.getClass()
      * }</pre>
      *
-     * @return the Class object for java.sql.Array.class
+     * @return the Array interface or implementation class managed by this handler
      */
     @Override
     public Class<Array> javaType() {
-        return Array.class;
+        return clazz;
     }
 
     /**
      * Indicates whether this type is serializable.
-     * SQL Array types are not serializable as they represent database-specific array structures.
+     * Formatting the array contents is supported, but recreating a database-specific SQL Array from that text is not.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -83,24 +106,32 @@ public class SQLArrayType extends AbstractType<Array> {
     }
 
     /**
-     * Converts an Array object to its string representation.
-     * This operation is not supported for SQL Array types as they are database-specific
-     * and cannot be reliably converted to a string format.
+     * Reads the Java array with {@link Array#getArray()} and formats it with {@link N#stringOf(Object)}.
+     * Primitive and object arrays use their corresponding type handlers; nested values are formatted by
+     * those handlers as well. The result contains the array contents, not the SQL type metadata, and cannot
+     * be converted back through {@link #valueOf(String)}. This method does not free the SQL Array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * // This will throw UnsupportedOperationException
-     * String str = type.stringOf(sqlArray);
+     * String contents = type.stringOf(sqlArray);   // For an int[] payload {1, 2}: "[1, 2]"
      * }</pre>
      *
-     * @param x the Array object to convert
-     * @return never returns normally
-     * @throws UnsupportedOperationException always thrown as Array cannot be converted to string
+     * @param x the SQL Array to read; may be {@code null}
+     * @return the formatted Java array, or {@code null} if {@code x} or the retrieved array is null
+     * @throws UncheckedSQLException if reading the array fails; the original SQLException is retained as the cause
      */
     @Override
-    public String stringOf(final Array x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("SQL Array cannot be converted to string representation");
+    public String stringOf(final Array x) throws UncheckedSQLException {
+        if (x == null) {
+            return null;
+        }
+
+        try {
+            return N.stringOf(x.getArray());
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
     }
 
     /**

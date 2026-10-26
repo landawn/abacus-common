@@ -21,17 +21,23 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.UncheckedSQLException;
 
 /**
  * Type handler for {@link java.sql.SQLXML} objects. Provides JDBC support for reading SQLXML values
  * from a {@link ResultSet} and binding them to {@link PreparedStatement}/{@link CallableStatement} parameters.
- * This handler deliberately limits database-managed SQLXML instances to JDBC transfer;
- * {@link #stringOf(SQLXML)} and {@link #valueOf(String)} throw {@link UnsupportedOperationException},
- * while {@link #valueOf(Object)} returns an object that already is a {@link SQLXML} unchanged, maps
- * {@code null} to {@code null}, and rejects everything else without touching it. Callers that
- * need the XML text can use {@link SQLXML#getString()} directly and handle its {@link SQLException} and lifecycle.
+ * {@link #stringOf(SQLXML)} reads the XML text through {@link SQLXML#getString()} and wraps SQL failures
+ * in {@link UncheckedSQLException}. {@link #valueOf(String)} remains unsupported, and
+ * {@link #isSerializable()} returns {@code false}: extracting text does not recreate a JDBC SQLXML instance.
+ * {@link #valueOf(Object)} returns an object that already is a {@link SQLXML} unchanged, maps
+ * {@code null} to {@code null}, and rejects everything else without touching it.
  * Callers retain ownership of retrieved values and must invoke {@link SQLXML#free()} when the value is no longer
  * needed; this handler does not release a value passed to or returned from a JDBC operation.
+ *
+ * <p>{@link TypeFactory#getType(Class)} supports both {@code SQLXML.class} and implementation classes.
+ * {@link #javaType()} retains the requested class, while {@link #name()} remains {@code "SQLXML"}.
+ * Selecting an implementation class does not construct or convert SQLXML values; JDBC operations
+ * transfer the supplied or retrieved instances unchanged.</p>
  */
 public class SQLXMLType extends AbstractType<SQLXML> {
 
@@ -40,33 +46,48 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      */
     public static final String SQL_XML = SQLXML.class.getSimpleName();
 
+    /** The {@link SQLXML} interface or implementation class represented by this handler. */
+    private final Class<SQLXML> clazz;
+
     /**
-     * Constructs a new SQLXMLType instance.
-     * This constructor is package-private and intended to be called only by the TypeFactory.
+     * Constructs a handler for the standard SQLXML interface, for use by {@link TypeFactory}.
      */
     SQLXMLType() {
-        super(SQL_XML);
+        this(SQLXML.class);
     }
 
     /**
-     * Returns the Class object representing the SQL XML type.
+     * Constructs a handler for a specific SQLXML interface or implementation class.
+     * The class is retained as metadata; the handler name remains {@code "SQLXML"}.
+     *
+     * @param targetClass the SQLXML interface or implementation class represented by this handler
+     */
+    SQLXMLType(final Class<? extends SQLXML> targetClass) {
+        super(SQL_XML);
+        this.clazz = (Class<SQLXML>) targetClass;
+    }
+
+    /**
+     * Returns the SQLXML interface or implementation class selected for this handler.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
      * Class<SQLXML> clazz = type.javaType();   // Returns SQLXML.class
+     * Type<SQLXML> implementationType = TypeFactory.getType(sqlXml.getClass());
+     * Class<SQLXML> implementationClass = implementationType.javaType();   // Returns sqlXml.getClass()
      * }</pre>
      *
-     * @return the Class object for java.sql.SQLXML.class
+     * @return the SQLXML interface or implementation class represented by this handler
      */
     @Override
     public Class<SQLXML> javaType() {
-        return SQLXML.class;
+        return clazz;
     }
 
     /**
      * Indicates whether this type is serializable.
-     * SQL XML types are not serializable as they represent database-specific XML data.
+     * Extracting XML text is supported, but recreating a database-specific SQLXML value from that text is not.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -82,24 +103,32 @@ public class SQLXMLType extends AbstractType<SQLXML> {
     }
 
     /**
-     * Converts a SQLXML object to its string representation.
-     * This operation is not supported by this JDBC-locator handler. Use {@link SQLXML#getString()} directly when
-     * extracting XML text, retaining responsibility for checked exceptions and locator cleanup.
+     * Reads the XML text using {@link SQLXML#getString()} without freeing the SQLXML value.
+     * The text is returned unchanged; no additional quoting or escaping is applied.
+     * The driver determines whether the value is still readable. This operation does not make
+     * {@link #valueOf(String)} supported or change {@link #isSerializable()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * // This will throw UnsupportedOperationException
-     * String str = type.stringOf(sqlXml);
+     * String xmlText = type.stringOf(sqlXml);
      * }</pre>
      *
-     * @param x the SQLXML object to convert
-     * @return never returns normally
-     * @throws UnsupportedOperationException always thrown because text extraction is outside this handler's contract
+     * @param x the SQLXML value to read; may be {@code null}
+     * @return the XML text, or {@code null} if {@code x} is null or the driver returns null
+     * @throws UncheckedSQLException if reading the XML text fails; the original SQLException is retained as the cause
      */
     @Override
-    public String stringOf(final SQLXML x) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("SQLXML cannot be converted to string representation");
+    public String stringOf(final SQLXML x) throws UncheckedSQLException {
+        if (x == null) {
+            return null;
+        }
+
+        try {
+            return x.getString();
+        } catch (SQLException e) {
+            throw new UncheckedSQLException(e);
+        }
     }
 
     /**

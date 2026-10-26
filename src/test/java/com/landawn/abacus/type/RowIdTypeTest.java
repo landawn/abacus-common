@@ -2,12 +2,12 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -36,6 +36,34 @@ public class RowIdTypeTest extends TestBase {
     @Test
     public void testClazz() {
         assertEquals(RowId.class, rowIdType.javaType());
+    }
+
+    @Test
+    public void testImplementationHandlerPreservesJdbcValuesAndNulls() throws SQLException {
+        final RowId value = mock(RowId.class);
+        final Type<RowId> implementationType = TypeFactory.getType(value.getClass());
+        final ResultSet rs = mock(ResultSet.class);
+        final PreparedStatement statement = mock(PreparedStatement.class);
+        final CallableStatement callableStatement = mock(CallableStatement.class);
+        when(rs.getRowId(1)).thenReturn(value);
+        when(rs.getRowId("value")).thenReturn(value);
+
+        assertEquals(value.getClass(), implementationType.javaType());
+        assertSame(value, implementationType.get(rs, 1));
+        assertSame(value, implementationType.get(rs, "value"));
+        assertNull(implementationType.get(rs, 2));
+        assertNull(implementationType.get(rs, "empty"));
+
+        implementationType.set(statement, 1, value);
+        implementationType.set(statement, 2, null);
+        implementationType.set(callableStatement, "value", value);
+        implementationType.set(callableStatement, "empty", null);
+
+        verify(statement).setRowId(1, value);
+        verify(statement).setRowId(2, null);
+        verify(callableStatement).setRowId("value", value);
+        verify(callableStatement).setRowId("empty", null);
+        verifyNoInteractions(value);
     }
 
     @Test
@@ -100,10 +128,14 @@ public class RowIdTypeTest extends TestBase {
 
         RowId rowId = mock(RowId.class);
         when(rowId.toString()).thenReturn("rowid123");
-        rowIdType.serializeTo(writer, rowId, config);
+        final Type<RowId> implementationType = TypeFactory.getType(rowId.getClass());
+        assertEquals("rowid123", implementationType.stringOf(rowId));
+        implementationType.serializeTo(writer, rowId, config);
 
-        rowIdType.serializeTo(writer, null, config);
-        assertNotNull(rowId);
+        implementationType.serializeTo(writer, null, config);
+        verify(writer).write("rowid123");
+        verify(writer).write(NULL_CHAR_ARRAY);
+        verifyNoInteractions(config);
     }
 
     // FINDING R04-6 (2026-09-08): BlobType/ClobType/NClobType were given a valueOf(Object) identity/null override;

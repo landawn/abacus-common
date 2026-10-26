@@ -187,7 +187,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Array Types:</b> All primitive and object array types</li>
  *   <li><b>Optional Types:</b> Optional, OptionalInt, OptionalLong, OptionalDouble, Nullable</li>
  *   <li><b>Utility Types:</b> Pair, Triple, Tuple types, Indexed, Timed</li>
- *   <li><b>Database Types:</b> Blob, Clob, Array, SQLXML, ResultSet parameter types</li>
+ *   <li><b>Database Types:</b> Blob, Clob, NClob, Array, Ref, RowId, SQLXML, Struct, and JDBC parameter types</li>
  * </ul>
  *
  * <p><b>Type Name Formats:</b>
@@ -413,6 +413,7 @@ public final class TypeFactory {
             classes.add(com.landawn.abacus.type.StringType.class);
             classes.add(com.landawn.abacus.type.StringBuilderType.class);
             classes.add(com.landawn.abacus.type.StringBufferType.class);
+            classes.add(com.landawn.abacus.type.StructType.class);
             classes.add(com.landawn.abacus.type.Type.SerializationType.class);
             classes.add(com.landawn.abacus.type.Type.class);
             classes.add(com.landawn.abacus.type.TypeType.class);
@@ -1308,7 +1309,10 @@ public final class TypeFactory {
                 || Tuple5.class.equals(targetClass) || Tuple6.class.equals(targetClass) || Tuple7.class.equals(targetClass) || Tuple8.class.equals(targetClass)
                 || Tuple9.class.equals(targetClass) || Indexed.class.equals(targetClass) || Timed.class.equals(targetClass)
                 || Map.Entry.class.isAssignableFrom(targetClass) || Type.class.isAssignableFrom(targetClass) || NClob.class.isAssignableFrom(targetClass)
-                || Clob.class.isAssignableFrom(targetClass) || Blob.class.isAssignableFrom(targetClass) || Object[].class.isAssignableFrom(targetClass);
+                || Clob.class.isAssignableFrom(targetClass) || Blob.class.isAssignableFrom(targetClass) || java.sql.SQLXML.class.isAssignableFrom(targetClass)
+                || java.sql.Array.class.isAssignableFrom(targetClass) || java.sql.Ref.class.isAssignableFrom(targetClass)
+                || java.sql.RowId.class.isAssignableFrom(targetClass) || java.sql.Struct.class.isAssignableFrom(targetClass)
+                || Object[].class.isAssignableFrom(targetClass);
     }
 
     /**
@@ -2006,6 +2010,21 @@ public final class TypeFactory {
                 } else if (Number.class.isAssignableFrom(targetClass)) {
                     checkNoParameters(typeName, parameters, targetClass);
                     type = new NumberType(targetClass);
+                } else if (java.sql.SQLXML.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new SQLXMLType(targetClass);
+                } else if (java.sql.Array.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new SQLArrayType(targetClass);
+                } else if (java.sql.Ref.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new RefType(targetClass);
+                } else if (java.sql.RowId.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new RowIdType(targetClass);
+                } else if (java.sql.Struct.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new StructType(targetClass);
                 } else if (Beans.isBeanClass(targetClass) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(targetClass))) {
                     checkNoParameters(typeName, parameters, targetClass);
                     type = new BeanType(targetClass, javaType == null && typeName.indexOf('<') >= 0 ? parseBeanReflectionType(typeName) : javaType);
@@ -2119,6 +2138,16 @@ public final class TypeFactory {
      * The method supports built-in types, primitive types, collections, maps, optional types,
      * and custom bean types. For generic types, use {@link #getType(String)} with a type name
      * that includes type parameters.
+     * </p>
+     * <p>
+     * Implementations of {@link java.sql.Array}, {@link java.sql.Ref}, {@link java.sql.RowId},
+     * {@link java.sql.SQLXML}, and {@link java.sql.Struct} use their dedicated JDBC handlers, even when
+     * their accessors resemble bean properties. The handler's {@link Type#javaType()} and
+     * {@link Type#reflectType()} retain {@code targetClass}; {@link Type#name()} remains the JDBC family
+     * name ({@code SQLArray}, {@code Ref}, {@code RowId}, {@code SQLXML}, or {@code Struct}). These handlers
+     * transfer JDBC values without constructing implementation instances or enabling string deserialization.
+     * Registration by class cannot replace them; a named custom registration may provide an alternate
+     * handler selected explicitly by that custom name.
      * </p>
      * <p>
      * This method never returns {@code null}: a class with no dedicated {@code Type} resolves to a
