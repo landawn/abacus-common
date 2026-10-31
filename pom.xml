@@ -37,11 +37,11 @@
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.release>21</maven.compiler.release>
 		<lombok.version>1.18.48</lombok.version>
-		<jackson.version>2.22.3</jackson.version>
+		<jackson.version>2.22.4</jackson.version>
 		<jackson.annotations.version>2.22</jackson.annotations.version>
 		<log4j.version>2.26.1</log4j.version>
-		<spring.version>7.0.9</spring.version>
-		<okhttp.version>5.5.0</okhttp.version>
+		<spring.version>7.0.10</spring.version>
+		<okhttp.version>5.5.1</okhttp.version>
 		<junit.jupiter.version>6.1.3</junit.jupiter.version>
 		<junit.platform.version>6.1.3</junit.platform.version>
 		<mockito.version>5.24.0</mockito.version>
@@ -68,21 +68,21 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>33.7.1-jre</version>
+			<version>33.7.2-jre</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.14.0</version>
+			<version>2.15.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.20.0</version>
+			<version>3.21.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -103,7 +103,7 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.22.1</version>
+			<version>1.23.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -166,7 +166,7 @@
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>
 			<artifactId>woodstox-core</artifactId>
-			<version>7.2.2</version>
+			<version>7.3.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -222,35 +222,35 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>5.5.1</version>
+			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>5.5.1</version>
+			<version>6.0.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.14.4</version>
+			<version>2.15.1</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>bson</artifactId>
-			<version>5.13.0</version>
+			<version>5.14.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.alibaba.fastjson2</groupId>
 			<artifactId>fastjson2</artifactId>
-			<version>2.0.65</version>
+			<version>2.0.66</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -264,7 +264,7 @@
 		<dependency>
 			<groupId>at.yawk.lz4</groupId>
 			<artifactId>lz4-java</artifactId>
-			<version>1.12.0</version>
+			<version>1.12.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -285,7 +285,7 @@
 		<dependency>
 			<groupId>com.esotericsoftware</groupId>
 			<artifactId>kryo</artifactId>
-			<version>5.6.2</version>
+			<version>5.7.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -300,7 +300,7 @@
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
-			<version>9.10.1</version>
+			<version>9.11.1</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -449,7 +449,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.6.0</version>
+				<version>3.6.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -533,7 +533,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.15</version>
+				<version>0.8.16</version>
 				<executions>
 					<!-- Prepare agent in all modules via inheritance -->
 					<execution>
@@ -556,7 +556,7 @@
 	        <plugin>
 	          <groupId>org.sonatype.central</groupId>
 	          <artifactId>central-publishing-maven-plugin</artifactId>
-	          <version>0.11.0</version>
+	          <version>0.12.0</version>
 	          <extensions>true</extensions>
 	          <configuration>
 	             <publishingServerId>central</publishingServerId>

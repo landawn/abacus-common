@@ -279,15 +279,15 @@ public class StringsPaddingTest extends StringsTestSupport {
     }
 
     @Test
-    public void testC546_emptyMarkerNonPositiveMaxLengthThrowsWhereCommonsReturnsInput() {
+    public void testC546_emptyMarkerNonPositiveMaxLengthThrowsLikeCommons() {
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdef", "", 0));
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdef", "", -1));
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdef", "", 100, 0));
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdef", "", 0, Integer.MIN_VALUE));
 
-        // the other side of the documented divergence
-        assertEquals("abcdef", StringUtils.abbreviate("abcdef", "", 0));
-        assertEquals("abcdef", StringUtils.abbreviate("abcdef", "", 100, 0));
+        // Commons Lang 3.21.0 also rejects these (up to 3.20.0 it returned the input unchanged)
+        assertThrows(IllegalArgumentException.class, () -> StringUtils.abbreviate("abcdef", "", 0));
+        assertThrows(IllegalArgumentException.class, () -> StringUtils.abbreviate("abcdef", "", 100, 0));
 
         // boundary: maxLength 1 is accepted by both and truncates
         assertEquals("a", Strings.abbreviate("abcdef", "", 1));

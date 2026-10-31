@@ -1167,9 +1167,9 @@ public class StringsWhitespaceTest extends StringsTestSupport {
         Strings.stripEndEach(endArray, SMILE);
         assertArrayEquals(new String[] { "a" + GRIN, "a" }, endArray);
 
-        // the documented Commons Lang divergence: StringUtils matches per code unit and splits the pair
-        assertEquals("\uDE01", StringUtils.strip(GRIN, SMILE));
-        assertEquals("x\uD83C", StringUtils.stripEnd("x" + CYCLONE, QUINTESSENCE));
+        // Commons Lang 3.21.0 matches whole code points too (up to 3.20.0 it matched per code unit and split the pair)
+        assertEquals(GRIN, StringUtils.strip(GRIN, SMILE));
+        assertEquals("x" + CYCLONE, StringUtils.stripEnd("x" + CYCLONE, QUINTESSENCE));
     }
 
     @Test

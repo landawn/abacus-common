@@ -1377,7 +1377,8 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("\"", StringUtils.wrapIfMissing("\"", "\""));
 
         assertEquals("a", Strings.chop("a" + EMOJI));
-        assertEquals("a\uD83D", StringUtils.chop("a" + EMOJI));
+        // Commons Lang 3.21.0 no longer splits the surrogate pair (up to 3.20.0 it left the lone high surrogate)
+        assertEquals("a", StringUtils.chop("a" + EMOJI));
 
         assertTrue(Strings.isMixedCase("\u01C5a"));
         assertFalse(StringUtils.isMixedCase("\u01C5a"));
