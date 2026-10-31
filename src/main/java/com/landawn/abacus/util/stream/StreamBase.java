@@ -2256,13 +2256,33 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     @SuppressWarnings("rawtypes")
     static LocalRunnable newCloseHandler(final Supplier<? extends StreamBase> streamSupplier) {
-        return () -> {
-            final StreamBase s = streamSupplier != null ? streamSupplier.get() : null;
+        if (streamSupplier == null) {
+            return LocalRunnable.wrap((Runnable) () -> {
+                // nothing was supplied
+            });
+        }
 
-            if (s != null && !s.isClosed) {
-                s.close();
-            }
-        };
+        // The defer factories pass the DeferredSupplier their traversal uses, so a failed traversal is not retried here;
+        // any other supplier gets one of its own and is invoked at most once, by this handler.
+        final DeferredSupplier<? extends StreamBase> deferred = streamSupplier instanceof DeferredSupplier<? extends StreamBase> d ? d
+                : new DeferredSupplier<>(streamSupplier);
+
+        // Run-once (wrap, not a bare LocalRunnable): a derived stage reaches this handler both through its inherited handler
+        // group and through the deferred stream's own close().
+        return LocalRunnable.wrap((Runnable) deferred::closeSupplied);
+    }
+
+    /**
+     * Returns the supplier a {@code defer} factory traverses and hands to {@link #newCloseHandler(Supplier)}: it invokes
+     * {@code supplier} at most once and memoizes the outcome, a failure included.
+     *
+     * @param <S> the type of the supplied stream
+     * @param supplier the user's stream supplier
+     * @return the memoizing supplier
+     */
+    @SuppressWarnings("rawtypes")
+    static <S extends StreamBase> DeferredSupplier<S> deferredSupplier(final Supplier<? extends S> supplier) {
+        return new DeferredSupplier<>(supplier);
     }
 
     @SuppressWarnings("rawtypes")
@@ -4005,6 +4025,177 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
             this.group = group;
             this.handlers = handlers;
             this.parent = parent;
+        }
+    }
+
+    /**
+     * The memoized stream supplier of the {@code defer} factories. The user's supplier is invoked at most once, and the
+     * outcome is remembered: not called yet, succeeded (the supplied stream, possibly {@code null}) or failed. Traversal
+     * ({@link #get()}) gets the supplied stream or the failure; the close handler ({@link #closeSupplied()}) closes the
+     * supplied stream and invokes the supplier first only if it has never been called. After a failed call it never
+     * invokes the supplier again: retrying a failed supplier at close time would repeat its side effects - for example
+     * read further from a caller's {@code Reader} - and attach that retry's failure as a bogus suppressed exception.
+     *
+     * @param <S> the type of the supplied stream
+     */
+    @SuppressWarnings("rawtypes")
+    static final class DeferredSupplier<S extends StreamBase> implements Supplier<S> {
+        private static final int NOT_CALLED = 0;
+        private static final int SUCCEEDED = 1;
+        private static final int FAILED = 2;
+
+        private final Object lock = new Object();
+        private Supplier<? extends S> supplier;
+        private volatile int state = NOT_CALLED;
+        // The stream the supplier returned. Also kept when that call is failed for re-entering this supplier (a supplier
+        // that catches the recursion failure still returns a stream), so that closing still closes what was opened -
+        // unless that call closes it itself (closedWhileRunning), which leaves nothing for a later close.
+        private S supplied;
+        private Throwable failure;
+        private boolean running;
+        private IllegalStateException recursiveFailure;
+        // Set when the close handler re-enters the running call: the deferred stream is being closed while its supplier
+        // runs, and its close handler runs only once, so a stream the supplier still returns must be closed right away.
+        private boolean closedWhileRunning;
+
+        DeferredSupplier(final Supplier<? extends S> supplier) {
+            this.supplier = supplier;
+        }
+
+        /**
+         * Returns the supplied stream, invoking the supplier on the first call; a failure of that call is rethrown on
+         * every call.
+         *
+         * @return the supplied stream, possibly {@code null}
+         */
+        @Override
+        public S get() {
+            return supply(true);
+        }
+
+        /**
+         * Closes the supplied stream if there is one and it is still open. The supplier is invoked first, once, only if it
+         * has never been called (a failure of that call propagates); after a failed call it is never invoked again. A
+         * failed call leaves a stream to close only when it failed for re-entering this supplier although the supplier
+         * still returned a stream: that stream is closed here, or as soon as the supplier returns it if this handler is
+         * the re-entry (the deferred stream was closed while its supplier was running). In that second case the stream is
+         * closed by the failing call after its failure is recorded and outside the lock, as {@code ObjIteratorEx.defer}
+         * closes a rejected iterator: a failure of that close is suppressed on the recursion failure, except that
+         * {@link ThreadDeath} and {@link VirtualMachineError} propagate with the recursion failure suppressed on them.
+         */
+        void closeSupplied() {
+            final StreamBase s = supply(false);
+
+            if (s != null && !s.isClosed) {
+                s.close();
+            }
+        }
+
+        private S supply(final boolean rethrowFailure) {
+            if (state == SUCCEEDED) {
+                return supplied;
+            }
+
+            StreamBase rejected = null;
+            IllegalStateException rejection = null;
+
+            synchronized (lock) {
+                if (state == SUCCEEDED) {
+                    return supplied;
+                } else if (state == FAILED) {
+                    if (rethrowFailure) {
+                        throw DeferredSupplier.<RuntimeException> rethrow(failure);
+                    }
+
+                    return supplied; // null unless that call was failed for re-entering this supplier
+                }
+
+                // Same recursion guard as Fn.memoize: re-entering from the running supplier (the monitor is reentrant)
+                // fails, and so does the running call even if the supplier catches that failure.
+                if (running) {
+                    if (!rethrowFailure) {
+                        closedWhileRunning = true;
+                    }
+
+                    if (recursiveFailure == null) {
+                        recursiveFailure = new IllegalStateException("Recursive initialization of deferred value");
+                    }
+
+                    throw recursiveFailure;
+                }
+
+                running = true;
+
+                try {
+                    final S result = supplier.get();
+                    final StreamBase returned = result;
+
+                    if (recursiveFailure == null) {
+                        supplied = result;
+                        state = SUCCEEDED;
+                        return result;
+                    } else if (!closedWhileRunning || returned == null || returned.isClosed) {
+                        supplied = result; // a later closeSupplied() closes it
+                        throw recursiveFailure;
+                    }
+
+                    // The deferred stream was closed during this call (for example by the supplier, or by a terminal
+                    // operation it ran on the deferred stream), so no later close reaches the stream it returned: this
+                    // call closes it below, after recording the failure and leaving the lock.
+                    failure = recursiveFailure;
+                    state = FAILED;
+                    rejected = returned;
+                    rejection = recursiveFailure;
+                } catch (final Throwable e) { // NOSONAR: the outcome is final whatever the supplier threw.
+                    failure = e;
+                    state = FAILED;
+                    throw e;
+                } finally {
+                    running = false;
+                    recursiveFailure = null;
+                    closedWhileRunning = false;
+                    supplier = null; // the outcome is final: release what the supplier captured
+                }
+            }
+
+            // Outside the lock: a close handler of the rejected stream may wait for another thread that uses this supplier.
+            closeRejected(rejected, rejection);
+
+            throw rejection;
+        }
+
+        /**
+         * Closes a stream that the supplier returned although its call failed with {@code rejection}, the way
+         * {@code ObjIteratorEx.defer} closes a rejected iterator: a failure of the close is suppressed on
+         * {@code rejection}, except that {@link ThreadDeath} and {@link VirtualMachineError} propagate with
+         * {@code rejection} suppressed on them.
+         *
+         * @param rejected the stream to close
+         * @param rejection the failure of the call that returned it
+         */
+        @SuppressWarnings("removal")
+        private static void closeRejected(final StreamBase rejected, final IllegalStateException rejection) {
+            try {
+                rejected.close();
+            } catch (final ThreadDeath | VirtualMachineError closeFailure) {
+                // The rejection exists before this close runs, so this fatal error is never the rejection itself.
+                try {
+                    closeFailure.addSuppressed(rejection);
+                } catch (final Throwable ignored) { //NOSONAR
+                    // Recording context must not replace the fatal error, even if it runs out of memory.
+                }
+
+                throw closeFailure;
+            } catch (final Throwable closeFailure) { // NOSONAR: reported with the rejection
+                if (closeFailure != rejection) {
+                    rejection.addSuppressed(closeFailure);
+                }
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <E extends Throwable> E rethrow(final Throwable e) throws E {
+            throw (E) e;
         }
     }
 

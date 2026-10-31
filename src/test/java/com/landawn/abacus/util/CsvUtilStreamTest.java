@@ -310,4 +310,94 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
         }
     }
 
+    // ---- deep review 2026-10-27 G137 begin ----
+
+    /** Counts the read calls and characters delivered by the caller's reader. */
+    private static final class CountingReader extends Reader {
+        private final StringReader in;
+        private int reads;
+        private long chars;
+        private boolean closed;
+
+        CountingReader(final String text) {
+            in = new StringReader(text);
+        }
+
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) throws IOException {
+            reads++;
+            final int n = in.read(cbuf, off, len);
+
+            if (n > 0) {
+                chars += n;
+            }
+
+            return n;
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+            in.close();
+        }
+    }
+
+    private static String csvWithManyRows() {
+        final StringBuilder sb = new StringBuilder("a,b\n");
+
+        for (int i = 0; i < 20000; i++) {
+            sb.append(i).append(',').append(i * 2).append('\n');
+        }
+
+        return sb.toString();
+    }
+
+    // G035-02: the stream(Reader, ...) engines wrap their work in Stream.defer. When the deferred supplier failed (here: a
+    // missing selected column), closing the stream - which the terminal operation does - ran the supplier again: it read
+    // another block from the caller's reader, parsed a data fragment as the header and attached that second failure
+    // ("... not found in CSV header: [3608]") as a suppressed exception.
+    @Test
+    public void testStreamWithMissingColumnDoesNotReadCallerReaderAgainOnClose() {
+        final String csv = csvWithManyRows();
+        final BiFunction<List<String>, DisposableArray<String>, String> rowMapper = (columns, row) -> row.get(0);
+
+        for (final boolean closeReader : new boolean[] { false, true }) {
+            for (final boolean useRowMapper : new boolean[] { false, true }) {
+                final String what = "closeReader=" + closeReader + ", rowMapper=" + useRowMapper;
+
+                // A failed traversal through the iterator, then an explicit close: close reads nothing and throws nothing.
+                final CountingReader reader = new CountingReader(csv);
+                final Stream<?> stream = useRowMapper ? CsvUtil.stream(reader, List.of("zzz"), rowMapper, closeReader)
+                        : CsvUtil.stream(reader, List.of("zzz"), Clazz.<String, Object> ofMap(), closeReader);
+                final IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> stream.iterator().hasNext(), what);
+                assertTrue(failure.getMessage().contains("[zzz]") && failure.getMessage().contains("[a, b]"), failure.getMessage());
+                final int readsAtFailure = reader.reads;
+                final long charsAtFailure = reader.chars;
+                stream.close();
+                assertEquals(readsAtFailure, reader.reads, what);
+                assertEquals(charsAtFailure, reader.chars, what);
+                assertEquals(closeReader, reader.closed, what);
+
+                // A terminal operation: the same reads, and no suppressed exception.
+                final CountingReader reader2 = new CountingReader(csv);
+                final IllegalArgumentException failure2 = assertThrows(IllegalArgumentException.class,
+                        () -> (useRowMapper ? CsvUtil.stream(reader2, List.of("zzz"), rowMapper, closeReader)
+                                : CsvUtil.stream(reader2, List.of("zzz"), Clazz.<String, Object> ofMap(), closeReader)).count(),
+                        what);
+                assertEquals(failure.getMessage(), failure2.getMessage(), what);
+                assertEquals(0, failure2.getSuppressed().length, what);
+                assertEquals(readsAtFailure, reader2.reads, what);
+                assertEquals(charsAtFailure, reader2.chars, what);
+                assertEquals(closeReader, reader2.closed, what);
+            }
+        }
+
+        // Unchanged: a selection that exists streams every row once.
+        final CountingReader ok = new CountingReader(csv);
+        assertEquals(20000, CsvUtil.stream(ok, List.of("b"), Clazz.<String, Object> ofMap(), false).count());
+        assertFalse(ok.closed);
+    }
+
+    // ---- deep review 2026-10-27 G137 end ----
+
 }

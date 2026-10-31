@@ -1907,8 +1907,10 @@ public final class HttpClient implements AutoCloseable {
                 // below, so it is not sent chunked to servers or HTTP/1.0 proxies that reject chunked uploads.
                 final byte[] stringBytes = request instanceof String str ? str.getBytes(requestCharset) : null;
 
-                if (resolveFlag(settings == null ? null : settings.streamRequestBodyOrNull(), _settings.streamRequestBodyOrNull(),
-                        HttpSettings.DEFAULT_STREAM_REQUEST_BODY)) {
+                final boolean streamRequestBody = resolveFlag(settings == null ? null : settings.streamRequestBodyOrNull(), _settings.streamRequestBodyOrNull(),
+                        HttpSettings.DEFAULT_STREAM_REQUEST_BODY);
+
+                if (streamRequestBody) {
                     // Set the mode before getOutputStream connects. Compressed sizes and serialized/streamed
                     // bodies are unknown without buffering or consuming them a second time.
                     final boolean compressed = requestContentFormat != ContentFormat.KRYO
@@ -1924,49 +1926,69 @@ public final class HttpClient implements AutoCloseable {
                     }
                 }
 
-                os = HttpUtil.getOutputStream(connection, requestContentFormat, requestContentType, requestContentEncoding);
+                // A File body is opened before getOutputStream(): in streaming mode that call already sends the request
+                // headers, and with the Content-Length of a missing file (0) the request would be complete before the open fails.
+                try (InputStream fileInputStream = request instanceof File fileRequest ? IOUtil.newFileInputStream(fileRequest) : null) {
+                    os = HttpUtil.getOutputStream(connection, requestContentFormat, requestContentType, requestContentEncoding);
 
-                if (request instanceof File fileRequest) {
-                    try (InputStream fileInputStream = IOUtil.newFileInputStream(fileRequest)) {
+                    if (fileInputStream != null) {
                         IOUtil.write(fileInputStream, os);
-                    }
-                } else if (type.isInputStream()) {
-                    IOUtil.write((InputStream) request, os);
-                } else if (type.isReader()) {
-                    final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
+                    } else if (type.isInputStream()) {
+                        IOUtil.write((InputStream) request, os);
+                    } else if (type.isReader()) {
+                        final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
 
-                    try {
-                        IOUtil.write((Reader) request, bw);
+                        try {
+                            IOUtil.write((Reader) request, bw);
 
-                        bw.flush();
-                    } finally {
-                        Objectory.recycle(bw);
-                    }
-                } else {
-                    if (stringBytes != null) {
-                        IOUtil.write(stringBytes, os);
-                    } else if (request.getClass().equals(byte[].class)) {
-                        IOUtil.write((byte[]) request, os);
+                            bw.flush();
+                        } finally {
+                            Objectory.recycle(bw);
+                        }
                     } else {
-                        if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
-                            HttpUtil.kryoParser.serialize(request, os);
-                        } else if (requestContentFormat == ContentFormat.FORM_URL_ENCODED) {
-                            IOUtil.write(URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset), os);
+                        if (stringBytes != null) {
+                            IOUtil.write(stringBytes, os);
+                        } else if (request.getClass().equals(byte[].class)) {
+                            IOUtil.write((byte[]) request, os);
                         } else {
-                            final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
+                            if (requestContentFormat == ContentFormat.KRYO && HttpUtil.kryoParser != null) {
+                                HttpUtil.kryoParser.serialize(request, os);
+                            } else if (requestContentFormat == ContentFormat.FORM_URL_ENCODED) {
+                                IOUtil.write(URLEncodedUtil.encode(request, requestCharset).getBytes(requestCharset), os);
+                            } else {
+                                final BufferedWriter bw = Objectory.createBufferedWriter(IOUtil.newOutputStreamWriter(os, requestCharset));
 
-                            try {
-                                HttpUtil.getParser(requestContentFormat).serialize(request, bw);
+                                try {
+                                    HttpUtil.getParser(requestContentFormat).serialize(request, bw);
 
-                                bw.flush();
-                            } finally {
-                                Objectory.recycle(bw);
+                                    bw.flush();
+                                } finally {
+                                    Objectory.recycle(bw);
+                                }
                             }
                         }
                     }
-                }
 
-                HttpUtil.flush(os);
+                    HttpUtil.flush(os);
+
+                    if (streamRequestBody) {
+                        // Finish and close the encoder before getResponseCode closes the underlying JDK stream.
+                        // Closing it afterwards can flush into a closed stream (Snappy), and would only log a failure
+                        // instead of reporting that the request body could not be completed.
+                        os.close();
+                        os = null;
+                    }
+                } catch (final IOException | RuntimeException | Error e) {
+                    if (streamRequestBody) {
+                        // A streamed body is already (partly) on the wire: closing its stream normally would terminate it
+                        // (the final chunk) as if it were complete, and the server would process a truncated request.
+                        // Drop the connection first. The default buffered mode has sent nothing yet, so it is left as is.
+                        abortStreamedRequestBody(connection, os);
+                        os = null;
+                    }
+
+                    throw e;
+                }
             }
 
             final int statusCode = connection.getResponseCode();
@@ -2080,6 +2102,20 @@ public final class HttpClient implements AutoCloseable {
             // The status code is what matters here; a failure to read the error body must never
             // replace the HttpResponseException that is about to be thrown.
             return Strings.EMPTY;
+        }
+    }
+
+    // Disconnecting closes the socket, so the following close can no longer complete the streamed body on the wire; it only
+    // releases the encoder (if any) and is expected to fail. The caller rethrows the original failure.
+    private static void abortStreamedRequestBody(final HttpURLConnection connection, final OutputStream os) {
+        connection.disconnect();
+
+        if (os != null) {
+            try {
+                os.close();
+            } catch (final Exception e) {
+                // ignore
+            }
         }
     }
 

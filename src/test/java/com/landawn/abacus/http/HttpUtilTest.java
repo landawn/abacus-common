@@ -1304,4 +1304,100 @@ public class HttpUtilTest extends TestBase {
         assertNull(settings.getContentFormat());
         assertTrue(settings.toString().contains("headers=null"), settings.toString());
     }
+
+    // ---- deep review 2026-10-26 G004 begin ----
+    // G004-02: when the request encoder cannot be built (Brotli), getOutputStream closed the raw stream; in chunked streaming
+    // mode that close sent the final chunk, so the server processed a complete EMPTY request although the call failed.
+    @Test
+    public void testGetOutputStream_failedEncoderInStreamingModeDoesNotCompleteTheRequest() throws Exception {
+        final java.util.concurrent.BlockingQueue<String> outcomes = new java.util.concurrent.LinkedBlockingQueue<>();
+        final com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/upload", exchange -> {
+            try (exchange) {
+                try {
+                    outcomes.add("complete:" + exchange.getRequestBody().readAllBytes().length);
+                } catch (final IOException e) {
+                    outcomes.add("aborted");
+                    return;
+                }
+
+                exchange.sendResponseHeaders(204, -1);
+            }
+        });
+        server.start();
+
+        try {
+            final HttpURLConnection connection = (HttpURLConnection) new URL("http://127.0.0.1:" + server.getAddress().getPort() + "/upload").openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setChunkedStreamingMode(8192);
+            connection.setReadTimeout(5000);
+
+            assertThrows(UnsupportedOperationException.class, () -> HttpUtil.getOutputStream(connection, ContentFormat.JSON_BR, null, null));
+
+            assertEquals("aborted", outcomes.poll(10, TimeUnit.SECONDS));
+        } finally {
+            server.stop(0);
+        }
+    }
+    // ---- deep review 2026-10-26 G004 end ----
+
+    // ---- deep review 2026-10-26 verify G120 begin ----
+    // G004-02 neighbours: a failed encoder sends nothing in the default buffered mode, aborts a chunked request without attaching the
+    // post-disconnect close noise, and keeps the close failure of a caller-chosen fixed-length mode attached exactly as before.
+    @Test
+    public void testGetOutputStream_failedEncoderInOtherModesBehavesAsBefore() throws Exception {
+        final java.util.concurrent.BlockingQueue<String> outcomes = new java.util.concurrent.LinkedBlockingQueue<>();
+        final com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/upload", exchange -> {
+            try (exchange) {
+                try {
+                    outcomes.add("complete:" + exchange.getRequestBody().readAllBytes().length);
+                } catch (final IOException e) {
+                    outcomes.add("aborted");
+                    return;
+                }
+
+                exchange.sendResponseHeaders(204, -1);
+            }
+        });
+        server.start();
+
+        try {
+            final URL url = new URL("http://127.0.0.1:" + server.getAddress().getPort() + "/upload");
+
+            for (final String mode : new String[] { "buffered", "chunked", "fixed" }) {
+                final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setReadTimeout(5000);
+
+                if (mode.equals("chunked")) {
+                    connection.setChunkedStreamingMode(8192);
+                } else if (mode.equals("fixed")) {
+                    connection.setFixedLengthStreamingMode(5);
+                }
+
+                final UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class,
+                        () -> HttpUtil.getOutputStream(connection, ContentFormat.XML_BR, null, null));
+                assertEquals("Unsupported content encoding: Brotli for HTTP request", e.getMessage());
+
+                if (mode.equals("buffered")) {
+                    assertEquals(0, e.getSuppressed().length);
+                    assertNull(outcomes.poll(200, TimeUnit.MILLISECONDS), mode);
+                } else if (mode.equals("chunked")) {
+                    assertEquals(0, e.getSuppressed().length);
+                    assertEquals("aborted", outcomes.poll(10, TimeUnit.SECONDS), mode);
+                } else {
+                    // "insufficient data written": the announced 5 bytes were never sent, so the server sees an aborted request.
+                    assertEquals(1, e.getSuppressed().length);
+                    assertTrue(e.getSuppressed()[0] instanceof IOException, String.valueOf(e.getSuppressed()[0]));
+                    assertEquals("aborted", outcomes.poll(10, TimeUnit.SECONDS), mode);
+                }
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+    // ---- deep review 2026-10-26 verify G120 end ----
 }

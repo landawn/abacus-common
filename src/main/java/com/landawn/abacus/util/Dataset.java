@@ -787,7 +787,7 @@ public sealed interface Dataset permits RowDataset {
      * @param function a function that takes the current column name as input and returns the new column name; must not
      *            be {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if func or columnNames is null, the selection is empty while the Dataset has columns, a selected name is
+     * @throws IllegalArgumentException if function or columnNames is null, the selection is empty while the Dataset has columns, a selected name is
      *         missing or repeated, or a generated name is null, empty, or creates a duplicate
      * @throws RuntimeException if {@code function} throws while mapping a selected column name
      */
@@ -1753,7 +1753,7 @@ public sealed interface Dataset permits RowDataset {
      * @param fromColumnName the name of the existing column to be used as input for the function.
      * @param function the function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
      * @throws RuntimeException if {@code function} throws while processing selected cell values
@@ -1780,7 +1780,7 @@ public sealed interface Dataset permits RowDataset {
      * @param function the function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
      * @throws RuntimeException if {@code function} throws while processing selected cell values
@@ -1806,7 +1806,7 @@ public sealed interface Dataset permits RowDataset {
      * @param fromColumnNames the names of the existing columns to be used as input for the function.
      * @param function the function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing, the selection repeats a name or is empty while the Dataset has columns
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -1835,7 +1835,7 @@ public sealed interface Dataset permits RowDataset {
      * @param function the function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing, the selection repeats a name or is empty while the Dataset has columns
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -1862,7 +1862,7 @@ public sealed interface Dataset permits RowDataset {
      * @param fromColumnNames a Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
      * @param function the BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -1891,7 +1891,7 @@ public sealed interface Dataset permits RowDataset {
      * @param function the BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -1918,7 +1918,7 @@ public sealed interface Dataset permits RowDataset {
      * @param fromColumnNames a Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
      * @param function the TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -1947,7 +1947,7 @@ public sealed interface Dataset permits RowDataset {
      * @param function the TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     * @throws IllegalArgumentException if function is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
      * @throws ConcurrentModificationException if {@code function} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -2286,7 +2286,7 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunction the function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IllegalArgumentException if combineFunc or columnNames is null, the selection is empty, repeats a name, or selects a missing column, or
+     * @throws IllegalArgumentException if combineFunction or columnNames is null, the selection is empty, repeats a name, or selects a missing column, or
      *         newColumnName is null, empty, or already present
      * @throws ConcurrentModificationException if {@code combineFunction} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)
@@ -2402,12 +2402,12 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param columnName the name of the column to be divided. It should be a name that exists in the Dataset and will be removed after division.
-     * @param newColumnNames a collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection should match the size of the Lists returned by the divideFunc.
+     * @param newColumnNames a collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection should match the size of the Lists returned by the divideFunction.
      * @param divideFunction the function to be applied to each value in the column. It takes the current value and returns a List of new values. The size of this List should match the size of the newColumnNames collection.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, if {@code newColumnNames} is {@code null} or empty
      *         or contains duplicates, or if any of the new column names is {@code null} or empty or already exists in the Dataset, if {@code
-     *         divideFunc} is null, or if it returns a list whose size differs from the number of replacement names.
+     *         divideFunction} is null, or if it returns a list whose size differs from the number of replacement names.
      * @throws NullPointerException if {@code divideFunction} returns {@code null}.
      * @throws ConcurrentModificationException if {@code divideFunction} structurally modifies this Dataset (adds, removes, moves, swaps or
      *         sorts rows or columns, or renames a column)

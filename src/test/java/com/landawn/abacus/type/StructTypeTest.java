@@ -158,4 +158,64 @@ public class StructTypeTest extends TestBase {
         assertThrows(NullPointerException.class, () -> type.set((PreparedStatement) null, 1, null));
         assertThrows(NullPointerException.class, () -> type.set((CallableStatement) null, "value", null));
     }
+
+    // ---- deep review 2026-10-27 G135 begin ----
+    // G135 (G019-02, doc fix): the attribute array is written by the JSON serializer, which rejects a nested JDBC value
+    // (Struct, java.sql.Array, Ref, SQLXML, RowId) with ParsingException "Unsupported class ..." although each of them formats
+    // on its own. Pinned as documented.
+    static java.util.Map<String, Object> nestedJdbcValues() throws SQLException {
+        final Struct struct = mock(Struct.class);
+        when(struct.getAttributes()).thenReturn(new Object[] { "Main St", 123 });
+        final java.sql.Array array = mock(java.sql.Array.class);
+        when(array.getArray()).thenReturn(new int[] { 1, 2 });
+        final java.sql.Ref ref = mock(java.sql.Ref.class);
+        when(ref.getObject()).thenReturn("referenced");
+        final java.sql.SQLXML sqlXml = mock(java.sql.SQLXML.class);
+        when(sqlXml.getString()).thenReturn("<a/>");
+        final java.sql.RowId rowId = mock(java.sql.RowId.class);
+
+        final java.util.Map<String, Object> values = new java.util.LinkedHashMap<>();
+        values.put("Struct", struct);
+        values.put("Array", array);
+        values.put("Ref", ref);
+        values.put("SQLXML", sqlXml);
+        values.put("RowId", rowId);
+        return values;
+    }
+
+    @Test
+    public void testStringOf_nestedJdbcValueThrowsParsingException() throws SQLException {
+        final java.util.Map<String, String> directText = java.util.Map.of("Struct", "[\"Main St\", 123]", "Array", "[1, 2]", "Ref", "referenced", "SQLXML",
+                "<a/>");
+
+        for (final java.util.Map.Entry<String, Object> e : nestedJdbcValues().entrySet()) {
+            final Object nested = e.getValue();
+
+            // Passed directly, the value is formatted by its own handler ...
+            if (directText.containsKey(e.getKey())) {
+                assertEquals(directText.get(e.getKey()), N.stringOf(nested), e.getKey());
+            } else {
+                assertEquals(nested.toString(), N.stringOf(nested), e.getKey());
+            }
+
+            // ... but as an attribute, or inside a collection or array attribute, it is rejected.
+            for (final Object[] attributes : new Object[][] { { "Alice", nested }, { java.util.List.of(nested) }, { new Object[] { nested } } }) {
+                final Struct value = mock(Struct.class);
+                when(value.getAttributes()).thenReturn(attributes);
+                final Type<Struct> implementationType = TypeFactory.getType(value.getClass());
+
+                final com.landawn.abacus.exception.ParsingException thrown = assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                        () -> type.stringOf(value), e.getKey());
+                org.junit.jupiter.api.Assertions.assertTrue(thrown.getMessage().startsWith("Unsupported class: "), thrown.getMessage());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> implementationType.stringOf(value), e.getKey());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> N.stringOf(value), e.getKey());
+            }
+        }
+
+        // A Blob attribute is rejected the same way.
+        final Struct withBlob = mock(Struct.class);
+        when(withBlob.getAttributes()).thenReturn(new Object[] { mock(java.sql.Blob.class) });
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> type.stringOf(withBlob));
+    }
+    // ---- deep review 2026-10-27 G135 end ----
 }

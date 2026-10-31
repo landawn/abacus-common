@@ -178,4 +178,39 @@ public class SQLArrayTypeTest extends TestBase {
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> sqlArrayType.valueOf("x"));
     }
+
+    // ---- deep review 2026-10-27 G135 begin ----
+    // G135 (G019-02, doc fix): the Java array is written by the JSON serializer, which rejects a nested JDBC value (Struct,
+    // java.sql.Array, Ref, SQLXML, RowId) with ParsingException "Unsupported class ...", also in a typed payload such as
+    // Struct[]. Pinned as documented.
+    @Test
+    public void testStringOf_nestedJdbcValueThrowsParsingException() throws SQLException {
+        for (final java.util.Map.Entry<String, Object> e : StructTypeTest.nestedJdbcValues().entrySet()) {
+            final Object nested = e.getValue();
+            // Typed payload, e.g. Struct[] or RowId[], as a driver returns for an ARRAY of such values.
+            final Class<?> jdbcInterface = switch (e.getKey()) {
+                case "Struct" -> java.sql.Struct.class;
+                case "Array" -> Array.class;
+                case "Ref" -> java.sql.Ref.class;
+                case "SQLXML" -> java.sql.SQLXML.class;
+                default -> java.sql.RowId.class;
+            };
+            final Object[] typedPayload = (Object[]) java.lang.reflect.Array.newInstance(jdbcInterface, 1);
+            typedPayload[0] = nested;
+
+            for (final Object payload : new Object[] { new Object[] { "a", nested }, typedPayload, new Object[] { java.util.List.of(nested) },
+                    new Object[] { java.util.Map.of("key", nested) } }) {
+                final Array value = mock(Array.class);
+                when(value.getArray()).thenReturn(payload);
+                final Type<Array> implementationType = TypeFactory.getType(value.getClass());
+
+                final com.landawn.abacus.exception.ParsingException thrown = assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                        () -> sqlArrayType.stringOf(value), e.getKey());
+                org.junit.jupiter.api.Assertions.assertTrue(thrown.getMessage().startsWith("Unsupported class: "), thrown.getMessage());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> implementationType.stringOf(value), e.getKey());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> N.stringOf(value), e.getKey());
+            }
+        }
+    }
+    // ---- deep review 2026-10-27 G135 end ----
 }

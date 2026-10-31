@@ -294,7 +294,8 @@ public final class PropertiesUtil {
      * auto-refreshed {@code Properties} instance (and, through the registered target class, the class
      * loader that defined its type) stays reachable for the lifetime of the JVM. Applications that
      * redeploy, or that load configuration for short-lived components, should unregister when done. The
-     * shared poll thread stops automatically once the last resource is unregistered.</p>
+     * shared poll task is cancelled automatically once the last resource is unregistered; the scheduler's
+     * idle daemon worker thread, once started, is not terminated.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

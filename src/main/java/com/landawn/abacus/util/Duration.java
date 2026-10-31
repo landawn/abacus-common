@@ -1301,7 +1301,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Gets the number of milliseconds within a second in this duration (the part of the millisecond count that does not form a whole second).
      * <p>
      * The returned value is in the range -999 to 999 (inclusive) and is the signed remainder of
-     * the total millisecond value. For negative durations this differs from
+     * the total millisecond value. For a negative duration with a sub-second remainder this differs from
      * {@code java.time.Duration.toMillisPart()}, which derives a non-negative part from its
      * normalized nanosecond field.
      * </p>

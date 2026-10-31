@@ -506,6 +506,17 @@ public final class HttpSettings {
      * The body is consumed once, and caller-owned streams/readers are not closed. A file must remain
      * unchanged while it is being transmitted.
      *
+     * <p>If producing the body fails while it is being streamed (a stream or reader throws, a file cannot be
+     * opened, the body cannot be serialized or its request content format cannot be encoded), the connection is
+     * disconnected instead of finishing the request, so the server never receives a truncated or empty body as a
+     * complete request. The failure itself reaches the caller as it does in buffered mode.</p>
+     *
+     * <p>A streamed body is finished - the compression encoder flushed and closed, the final chunk or the declared
+     * length completed - before the response is read. A failure while finishing it (for example a fixed-length body
+     * that ended short, or a connection reset) is treated the same way: the connection is disconnected and the failure
+     * reaches the caller ({@code UncheckedIOException} for an {@code IOException}) instead of being logged while the
+     * response is read.</p>
+     *
      * <p>This is opt-in because {@link java.net.HttpURLConnection} cannot automatically replay a
      * streaming body for authentication challenges or redirects. Such responses can fail instead of
      * being retried. Leave this disabled when automatic replay is required. Some servers do not accept
@@ -597,9 +608,10 @@ public final class HttpSettings {
      * }</pre>
      *
      * @return the configured content format; when none is configured ({@code null} or
-     *         {@link ContentFormat#NONE}) and any header has been set, the format derived from the
-     *         headers, which is {@link ContentFormat#NONE} when they carry no {@code Content-Type} or
-     *         {@code Content-Encoding}; {@code null} only when neither a format nor any header was ever set
+     *         {@link ContentFormat#NONE}) and the headers object exists (for example a header was set, or {@link #headers()}
+     *         was called), the format derived from the headers, which is {@link ContentFormat#NONE} when they carry
+     *         no {@code Content-Type} or {@code Content-Encoding}; {@code null} only when no format is set and
+     *         the headers object was never created
      */
     public ContentFormat getContentFormat() {
         if ((contentFormat == null || contentFormat == ContentFormat.NONE) && headers != null) {

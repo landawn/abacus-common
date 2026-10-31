@@ -170,7 +170,8 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
  * <p><b>Naming Policy Integration:</b> the supported policies are the values of the
  * {@link NamingPolicy} enum:
  * <ul>
- *   <li><b>CAMEL_CASE:</b> Convert property names to camelCase format</li>
+ *   <li><b>CAMEL_CASE:</b> Convert Map keys and {@code Object[]} names to camelCase format; bean property names are kept
+ *       verbatim, as {@link Beans} does for this policy</li>
  *   <li><b>UPPER_CAMEL_CASE:</b> Convert to UpperCamelCase (Pascal case) format</li>
  *   <li><b>SNAKE_CASE:</b> Convert to snake_case format</li>
  *   <li><b>SCREAMING_SNAKE_CASE:</b> Convert to SCREAMING_SNAKE_CASE format</li>
@@ -563,7 +564,9 @@ public final class URLEncodedUtil {
      *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
-     *                     if {@code null} or NO_CHANGE, names are not transformed.
+     *                     if {@code null} or NO_CHANGE, names are not transformed. Bean property names are also kept
+     *                     verbatim under CAMEL_CASE (the {@link Beans} convention); it converts only Map keys and
+     *                     {@code Object[]} names.
      * @return a URL-encoded query string; returns empty string if {@code parameters} is {@code null}.
      * @throws IllegalArgumentException if a Map key or {@code Object[]} name element is {@code null}, an
      *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that
@@ -717,7 +720,9 @@ public final class URLEncodedUtil {
      *        <b>not</b> one of the empty cases below - it encodes as the text {@code []}.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
-     *                     if {@code null} or NO_CHANGE, names are not transformed.
+     *                     if {@code null} or NO_CHANGE, names are not transformed. Bean property names are also kept
+     *                     verbatim under CAMEL_CASE (the {@link Beans} convention); it converts only Map keys and
+     *                     {@code Object[]} names.
      * @return the URL with the encoded query string appended;
      *         returns the original URL if {@code parameters} is {@code null}, an empty {@code Map},
      *         an empty {@code CharSequence}, an empty {@code Object[]}, or otherwise produces no encoded fields.
@@ -903,7 +908,9 @@ public final class URLEncodedUtil {
      *        name/value pairs.
      * @param charset the charset to use for percent-encoding; if {@code null}, defaults to UTF-8.
      * @param namingPolicy the naming policy to transform property/key names (e.g., CAMEL_CASE, SCREAMING_SNAKE_CASE);
-     *                     if {@code null} or NO_CHANGE, names are not transformed.
+     *                     if {@code null} or NO_CHANGE, names are not transformed. Bean property names are also kept
+     *                     verbatim under CAMEL_CASE (the {@link Beans} convention); it converts only Map keys and
+     *                     {@code Object[]} names.
      * @param output the {@code Appendable} to which the encoded query string will be appended.
      * @throws IllegalArgumentException if {@code output} is {@code null}, or if a Map key or {@code Object[]} name element is {@code null}, an
      *         {@code Object[]} has odd length, an effective name is empty and its value is null, or text to encode contains malformed UTF-16 or a character that

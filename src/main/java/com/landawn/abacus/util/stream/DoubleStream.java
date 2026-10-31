@@ -56,7 +56,6 @@ import com.landawn.abacus.util.Array;
 import com.landawn.abacus.util.BiConsumers;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.DoubleList;
-import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Fn.FD;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IndexedDouble;
@@ -3276,11 +3275,12 @@ public abstract class DoubleStream
      * Returns a DoubleStream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
-     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
-     * invoke the supplier once more so that a stream it then supplies can be closed.
-     * A {@code null} result is treated as an empty stream. Closing the returned stream before traversal may still invoke
-     * the supplier so the supplied stream can be closed.
+     * <p>The supplier is invoked at most once, and its outcome is memoized: a successful result is reused, and a failure
+     * is final - a later traversal rethrows it, and closing the returned stream (as a terminal operation does, even when
+     * it fails) does not invoke the supplier again. Closing the returned stream closes the stream the supplier returned,
+     * if any; a {@code null} result is treated as an empty stream. Closing the returned stream before any traversal
+     * invokes the supplier once so that the stream it supplies can be closed; a failure of that call propagates from
+     * {@code close()}.
      *
      * <p><b>Implementation Note:</b> a supplier that returns the deferred stream itself fails with {@code IllegalStateException}
      * instead of {@code StackOverflowError}; a stream derived from the deferred stream (for example {@code self.map(f)}) is
@@ -3309,7 +3309,7 @@ public abstract class DoubleStream
     public static DoubleStream defer(final Supplier<DoubleStream> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Supplier<DoubleStream> s = Fn.memoize(supplier);
+        final Supplier<DoubleStream> s = deferredSupplier(supplier);
         // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
         final Holder<DoubleStream> deferred = new Holder<>();
 

@@ -593,16 +593,30 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @see #fromCollection(Collection, Function)
      */
     public static <K, E> ListMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map) {
+        return fromMap(map, N.size(map));
+    }
+
+    // fromMap(map) for a caller that puts the keys of further maps into the result afterwards (the merge methods).
+    // maxKeyCount must bound ALL the keys the result receives: a mirrored map class whose int constructor is not a
+    // known capacity gets it as that argument (see Maps.newTargetMap(Map, int, int)), and an LRU-style class reads it
+    // as its eviction cap - sized for the first map only, it evicted that map's keys while the later maps were merged.
+    private static <K, E> ListMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map, final int maxKeyCount) {
         // A BiMap template is not mirrored: this multimap's backing-map values are the value lists, and a BiMap
         // requires its values to be unique, so a second key receiving an equal list (e.g. [1]) would be rejected.
         //noinspection rawtypes
-        final ListMultimap<K, E> multimap = new ListMultimap<>(map instanceof BiMap ? N.newLinkedHashMap(map.size()) : Maps.newTargetMap(map), ArrayList.class);
+        final ListMultimap<K, E> multimap = new ListMultimap<>(
+                map instanceof BiMap ? N.newLinkedHashMap(map.size()) : Maps.newTargetMap(map, N.size(map), maxKeyCount), ArrayList.class);
 
         if (N.notEmpty(map)) {
             multimap.putAll(map);
         }
 
         return multimap;
+    }
+
+    // The number of entries of all the maps, saturated at Integer.MAX_VALUE: an upper bound of a merge result's keys.
+    private static int totalSize(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
+        return (int) Math.min((long) N.size(a) + N.size(b) + N.size(c), Integer.MAX_VALUE);
     }
 
     /**
@@ -739,7 +753,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
         if (a == null) {
             return b == null ? N.newListMultimap() : fromMap(b);
         } else {
-            final ListMultimap<K, E> res = fromMap(a);
+            final ListMultimap<K, E> res = fromMap(a, totalSize(a, b, null));
             res.putAll(b);
             return res;
         }
@@ -789,12 +803,12 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             if (b == null) {
                 return c == null ? N.newListMultimap() : fromMap(c);
             } else {
-                final ListMultimap<K, E> res = fromMap(b);
+                final ListMultimap<K, E> res = fromMap(b, totalSize(b, c, null));
                 res.putAll(c);
                 return res;
             }
         } else {
-            final ListMultimap<K, E> res = fromMap(a);
+            final ListMultimap<K, E> res = fromMap(a, totalSize(a, b, c));
             res.putAll(b);
             res.putAll(c);
             return res;
@@ -827,7 +841,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param c the collection of maps whose key-value pairs are to be merged; may be {@code null} or empty.
-     *          The first map is copied with {@link #fromMap(Map)}; subsequent maps are merged into the new multimap via {@code putAll}.
+     *          The first map is copied into a new map of its type (see {@link #fromMap(Map)}); subsequent maps are merged into the new multimap via {@code putAll}.
      * @return a new instance of ListMultimap with the key-value pairs from all maps in the collection,
      *         or an empty ListMultimap if the collection is {@code null} or empty
      * @see #merge(Map, Map)
@@ -838,8 +852,14 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
             return N.newListMultimap();
         }
 
+        long total = 0;
+
+        for (final Map<? extends K, ? extends E> m : c) {
+            total += N.size(m);
+        }
+
         final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
-        final ListMultimap<K, E> res = fromMap(iter.next());
+        final ListMultimap<K, E> res = fromMap(iter.next(), (int) Math.min(total, Integer.MAX_VALUE));
 
         while (iter.hasNext()) {
             res.putAll(iter.next());

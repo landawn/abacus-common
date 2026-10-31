@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -158,8 +159,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
+     * <p>The entry is a new mutable {@link AbstractMap.SimpleEntry}, so it can be stored in a slot declared either as
+     * {@code Map.Entry} or as {@code AbstractMap.SimpleEntry} (both are handled by this type).</p>
+     *
      * @param str the JSON string to parse; may be {@code null}, empty, blank, or {@code "{}"}
-     * @return the parsed {@code Map.Entry}, or {@code null} if the input is {@code null},
+     * @return the parsed entry (an {@code AbstractMap.SimpleEntry}), or {@code null} if the input is {@code null},
      *         empty, blank, or an empty JSON object ({@code "{}"})
      * @throws IllegalArgumentException if the JSON object contains more than one entry.
      * @throws ParsingException if {@code str} is not a JSON object: a JSON array, a
@@ -187,7 +191,8 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
             throw new IllegalArgumentException("Map.Entry JSON must contain exactly one entry, but got: " + map.size());
         }
 
-        return map.entrySet().iterator().next();
+        // TypeFactory maps AbstractMap.SimpleEntry to this type as well; the parsed map's own node is no SimpleEntry.
+        return new AbstractMap.SimpleEntry<>(map.entrySet().iterator().next());
     }
 
     /**

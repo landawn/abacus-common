@@ -95,7 +95,8 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param calendar the {@code Calendar} value to convert
      * @return the formatted string representation of the calendar, or {@code null} if the input is {@code null}
      * @throws IllegalArgumentException if the instant, in the calendar's own time zone, lies outside Common Era years
-     *         0001 through 9999, the range the default ISO 8601 format supports (see {@link Dates#format(Calendar)})
+     *         0001 through 9999, the range the default ISO 8601 format supports, or that zone cannot be represented by a
+     *         {@code ZoneId} (see {@link Dates#format(Calendar)})
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */

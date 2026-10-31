@@ -675,7 +675,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed();
-     * // Produces: IndexedShort(index=0, value=10), IndexedShort(index=1, value=20), IndexedShort(index=2, value=30)
+     * // Produces: [0]=10, [1]=20, [2]=30
      * }</pre>
      *
      * @return an {@link ObjIterator} of {@link IndexedShort} objects with indices starting at 0
@@ -694,7 +694,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of(new short[] {10, 20, 30});
      * ObjIterator<IndexedShort> indexed = iter.indexed(100);
-     * // Produces: IndexedShort(index=100, value=10), IndexedShort(index=101, value=20), IndexedShort(index=102, value=30)
+     * // Produces: [100]=10, [101]=20, [102]=30
      * }</pre>
      *
      * <p>The returned iterator throws {@link ArithmeticException} from {@code next()} if another element would require an index greater than {@link Long#MAX_VALUE}.</p>

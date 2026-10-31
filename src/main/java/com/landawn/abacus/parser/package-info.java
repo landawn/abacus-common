@@ -57,7 +57,7 @@
  * five backends, fixed, and pinned by a test in CodexXmlParserTest (I44 .. I55: in AbacusXmlParserImplTest and XmlParserImplTest; the method
  * names are listed per issue). The "before" and "after" columns are the outputs of the sample documents on the main classes of the revision
  * before the fix and of the revision with the fix, obtained by running one probe against each revision r46 .. r57 (I44 .. I48: against r61 and
- * r62; I49 .. I55: against r62 and r63). Part 1 lists the known limitations and the remaining issues (L01 .. L16; L12 was fixed and moved to
+ * r62; I49 .. I55: against r62 and r63). Part 1 lists the known limitations and the remaining issues (L01 .. L17; L12 was fixed and moved to
  * part 2 as I50) with their current behavior; part 2 is the history of the fixed issues (I01 .. I55). I33 .. I40 are the third review round
  * (r56), I41 .. I43 the fourth (r57). I44 .. I48 are the backend-agreement fixes that followed the performance review of 2026-10-07 (its
  * ledger: scripts/cross_review/Parser_perf_memory_review_ledger_2026-10-07.md, rounds 2 to 4), committed as r62: their "before" column is r61
@@ -79,6 +79,13 @@
  * <ul>
  *   <li>Compact JSON text accepts surrounding Unicode whitespace and JSON string escapes, at the root and inside properties, on every
  *   backend.</li>
+ *   <li>A collection root with no items or only blank text, such as &lt;list/&gt;, is an empty collection of the requested type on
+ *   every reader. A root of any type (bean, map, array, collection or scalar) marked isNull="true" is null on every reader, whatever payload it
+ *   carries; a null collection root is distinct from an empty collection or a collection containing a null item. A blank map, bean or MapEntity
+ *   item of an array or collection is an empty value of that type on both standard readers. Declared MapEntity elements retain their names
+ *   and type in root containers and collection/array properties; a blank
+ *   nested list or array item written by hand (&lt;list&gt;&lt;list/&gt;&lt;/list&gt;) remains backend-specific on the standard parser
+ *   (L18); the writers emit [] or isNull="true" for those.</li>
  *   <li>Map implementation metadata never breaks the declared value shape: a list-valued map (Spring MultiValueMap) that cannot hold the
  *   declared, configured or overridden values falls back to an ordinary LinkedHashMap; a declared reference array keeps its class, metadata
  *   types the items.</li>
@@ -132,6 +139,8 @@
  *   <li>L15  Without type information, an Optional type attribute on an Object bean property is adopted by the StAX and SAX readers and kept
  *   as text by the DOM readers  [remaining difference]</li>
  *   <li>L16  The standard StAX reader reads a bean property element without content with its own fallback  [remaining difference]</li>
+ *   <li>L17  Text followed by a nested element in a known property or map value: the StAX readers reject it, the DOM and SAX readers read
+ *   the nested element and drop the text  [remaining difference]</li>
  * </ul>
  * <h3>Index of fixed issues (history)</h3>
  * <ul>
@@ -603,7 +612,9 @@
  * declared Object is read as the declared Object's text by the standard DOM reader and by the three Abacus readers, but the standard StAX
  * reader adopts it and converts the text. With type information all five adopt it (I44). The Abacus readers also differ from the standard ones
  * for a primitive name: type="int" on an Object property is Integer 5 on XML StAX/DOM and the text "5" on Abacus StAX/DOM/SAX (a primitive
- * name does not fit an Object slot there), with and without type information.</p>
+ * name does not fit an Object slot there), with and without type information. Container metadata splits the other way (as in L15): without
+ * type information an array or collection attribute (type="char[]", "int[]", "String[]", "List&lt;Integer&gt;") is kept as text by the
+ * standard DOM reader and adopted by the other four.</p>
  * <p><b>Sample input</b></p>
  * <pre>
  * public static class Holder &#123; public Object open; /* getter and setter *&#47; &#125;   // the root element carries NO type attribute
@@ -616,6 +627,7 @@
  * <tr><th scope="col">Document</th><th scope="col">XML StAX</th><th scope="col">XML DOM</th><th scope="col">Abacus StAX/DOM/SAX</th></tr>
  * <tr><td>untyped root, type="Long"</td><td>5L</td><td>"5"</td><td>"5"</td></tr>
  * <tr><td>untyped root, type="Integer"</td><td>5 (Integer)</td><td>"5"</td><td>"5"</td></tr>
+ * <tr><td>untyped root, type="char[]", text [1,1]</td><td>char[]&#123;'1', '1'&#125;</td><td>"[1,1]"</td><td>char[]&#123;'1', '1'&#125;</td></tr>
  * <tr><td>typed root, type="int"</td><td>5 (Integer)</td><td>5 (Integer)</td><td>"5"</td></tr>
  * </table>
  * <p><b>Worth knowing</b></p>
@@ -785,7 +797,9 @@
  * readers (I55) and the standard DOM reader. The standard StAX reader uses the selected type's {@code defaultValue()}, except that String,
  * open Object and enum properties are read through {@code valueOf("")}: an Optional&lt;Object&gt; property under int metadata or without metadata is Optional.empty where
  * the other four read Optional[0] and Optional[""], and a property with a number format is null where the other four fail with the format's
- * ParsingException (as all five do for blank text). Map values follow I20 on all five.</p>
+ * ParsingException (as all five do for blank text). String and open Object map values follow I20 on all five; an Optional or Nullable
+ * map value gets the same StAX fallback as a property (Map&lt;String,Optional&lt;String&gt;&gt; &lt;k&gt;&lt;/k&gt;: Optional.empty on the
+ * standard StAX reader, Optional[""] on the other four).</p>
  * <p><b>Sample input</b></p>
  * <pre>
  * public static class Rec &#123; &#64;JsonXmlField(numberFormat = "#,##0") Integer amount; Optional&lt;Object&gt; opt; /* getters and setters *&#47; &#125;
@@ -814,6 +828,49 @@
  *   <li>Where the standard readers adopt a scalar attribute that the Abacus readers ignore (L11), the empty value of that type follows:
  *   &lt;open type="int"&gt;&lt;/open&gt; is 0 (Integer) on both standard readers, and without type information &lt;open
  *   type="Long"&gt;&lt;/open&gt; is null on the standard StAX reader.</li>
+ * </ul>
+ * <h4>L17  Text followed by a nested element in a known property or map value: the StAX readers reject it, the DOM and SAX readers read
+ * the nested element and drop the text</h4>
+ * <p><b>Status:</b> remaining difference</p>
+ * <p><b>Problem.</b> Mixed content - non-blank text and then a child element inside the element of a known bean property (or of a map
+ * value on the standard reader) - is not supported. Both StAX readers reject it with ParsingException "Mixed scalar and nested XML values are
+ * not supported": before the 2026-10-26 review they stepped past the child, took its end for the property's end and ended the bean or map
+ * there, silently dropping the following properties or entries, or failed with an unrelated message. The DOM and SAX readers drop the text
+ * and read the child as the property's value (the Abacus DOM and SAX readers fail when the child's element name resolves to no class). Text
+ * after the child element of a bean property, and mixed content in an unknown or ignored property (skipped whole), are read the same way by
+ * all five; after the child of a String or Object property the standard StAX reader fails with "Unknown parser error at element: text:
+ * ...". A SERIALIZE_ONLY property is ignored when reading, so both StAX readers skip its mixed content whole, as for an ignored property
+ * (r107 dropped the following properties there, r108 rejected it as mixed content); its plain text is still decoded and discarded.</p>
+ * <p><b>Sample input</b></p>
+ * <pre>
+ * public static class Holder &#123; String name; Child friend; String after; /* getters and setters *&#47; &#125;
+ * public static class Child &#123; String v; /* getter and setter *&#47; &#125;    // resolvable from Holder's package
+ * &lt;holder&gt;&lt;friend&gt;ab&lt;child&gt;&lt;v&gt;x&lt;/v&gt;&lt;/child&gt;&lt;/friend&gt;&lt;after&gt;z&lt;/after&gt;&lt;/holder&gt;
+ * &lt;holder&gt;&lt;name&gt;ab&lt;child&gt;&lt;v&gt;x&lt;/v&gt;&lt;/child&gt;&lt;/name&gt;&lt;after&gt;z&lt;/after&gt;&lt;/holder&gt;
+ * &lt;holder&gt;&lt;name&gt;ab&lt;zqx/&gt;&lt;/name&gt;&lt;after&gt;z&lt;/after&gt;&lt;/holder&gt;      (no class named zqx)
+ * </pre>
+ * <p><b>Output</b></p>
+ * <table class="striped">
+ * <caption>Output of L17 on the backends</caption>
+ * <tr><th scope="col">Document</th><th scope="col">XML StAX, Abacus StAX</th><th scope="col">XML DOM</th><th scope="col">Abacus DOM/SAX</th></tr>
+ * <tr><td>friend: ab&lt;child&gt;...</td><td>ParsingException (mixed)</td><td>friend.v=x, after=z</td><td>friend.v=x, after=z</td></tr>
+ * <tr><td>name: ab&lt;child&gt;...</td><td>ParsingException (mixed)</td><td>name=[&#123;"v": "x"&#125;], after=z</td><td>name=&#123;"v": "x"&#125;, after=z</td></tr>
+ * <tr><td>name: ab&lt;zqx/&gt;</td><td>ParsingException (mixed)</td><td>name=[&#123;&#125;], after=z</td><td>ParsingException: No bean class found for node name: zqx ...</td></tr>
+ * <tr><td>control: the same content in an ignored or unknown (ignoreUnmatchedProperty) property</td><td>skipped, after=z</td><td>the same</td><td>the same</td></tr>
+ * <tr><td>the same content in a SERIALIZE_ONLY String property</td><td>skipped, after=z</td><td>read and dropped, after=z</td><td>read and dropped, after=z (ab&lt;zqx/&gt;: ParsingException: No bean class found ...)</td></tr>
+ * </table>
+ * <p><b>Worth knowing</b></p>
+ * <ul>
+ *   <li>Blank text (indentation) before a nested value is structural, not mixed content, on all five readers; comments and processing
+ *   instructions inside the text do not make it mixed either (&lt;name&gt;ab&lt;?pi x?&gt;cd&lt;/name&gt; is "abcd").</li>
+ *   <li>Abacus maps are written as entry elements with key and value children, so the standard map form of this content fails on all
+ *   three Abacus readers ("An XML map entry must contain exactly one key element and one value element"); inside an Abacus value element
+ *   the Abacus StAX reader rejects mixed content as in a property.</li>
+ *   <li>Text next to the child elements of an array or collection element is ignored by both standard readers, in a root and in an item
+ *   container alike, and by the Abacus readers in a root container: &lt;list&gt;x&lt;e&gt;1&lt;/e&gt;&lt;e&gt;2&lt;/e&gt;&lt;/list&gt; is
+ *   [1, 2]. Before the 2026-10-27 verification the standard StAX reader stepped past the following child there as well, ended the
+ *   container at that child's end and lost the following items and containers, or replaced the items read before trailing text by that
+ *   text.</li>
  * </ul>
  * <h3>Part 2: Fixed issues (history, r47 to r57, r62 and the recheck fixes of 2026-10-07)</h3>
  *

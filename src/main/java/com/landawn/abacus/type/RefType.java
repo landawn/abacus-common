@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.N;
 
@@ -31,8 +32,10 @@ import com.landawn.abacus.util.N;
  *
  * <p>This type handler reads Ref values from ResultSets and binds them to PreparedStatements or CallableStatements.
  * {@link #stringOf(Ref)} dereferences the value with {@link Ref#getObject()} and formats the result with
- * {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}. The formatted value
- * cannot recreate the database reference through {@link #valueOf(String)}.</p>
+ * {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}; a JDBC value nested inside the
+ * referenced object, such as a Struct attribute of a referenced Struct, is rejected with {@link ParsingException}
+ * (see {@link #stringOf(Ref)}). The formatted value cannot recreate the database reference through
+ * {@link #valueOf(String)}.</p>
  *
  * <p>{@link TypeFactory#getType(Class)} supports both {@code Ref.class} and implementation classes.
  * {@link #javaType()} retains the requested class, while {@link #name()} remains {@code "Ref"}.
@@ -142,22 +145,30 @@ public class RefType extends AbstractType<Ref> {
 
     /**
      * Reads the referenced object with {@link Ref#getObject()} and formats it with {@link N#stringOf(Object)}.
-     * The runtime type handler of the referenced object determines the text format. This operation may
-     * access the database; it does not preserve the reference identity in the text or support reconstruction
-     * through {@link #valueOf(String)}.
+     * The runtime type handler of the referenced object determines the text format; a referenced
+     * {@link java.sql.Struct}, {@link java.sql.Array}, {@code Ref}, {@link java.sql.SQLXML} or {@link java.sql.RowId} is
+     * formatted by its own handler. Values nested inside the referenced object are not formatted when they are JDBC
+     * values: if the referenced object is a Struct, SQL Array, Java array, collection, map or bean, any value inside it
+     * (for example a Struct attribute) that is a Struct, Array, Ref, SQLXML or RowId makes this method throw
+     * {@link ParsingException}, and so does a {@link java.sql.Blob} or any other value the JSON serializer does not
+     * support. This operation may access the database; it does not preserve the reference identity in the text or
+     * support reconstruction through {@link #valueOf(String)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Ref> type = TypeFactory.getType(Ref.class);
      * String referencedValue = type.stringOf(ref);
+     * type.stringOf(personRef);   // referenced Struct with attributes {"Alice", address}: throws ParsingException (nested Struct)
      * }</pre>
      *
      * @param x the Ref to dereference; may be {@code null}
      * @return the formatted referenced object, or {@code null} if {@code x} or the referenced object is null
      * @throws UncheckedSQLException if reading the referenced object fails; the original SQLException is retained as the cause
+     * @throws ParsingException if a nested value cannot be formatted: a value inside the referenced object that is a
+     *         Struct, Array, Ref, SQLXML, RowId or Blob, or any other value the JSON serializer does not support
      */
     @Override
-    public String stringOf(final Ref x) throws UncheckedSQLException {
+    public String stringOf(final Ref x) throws UncheckedSQLException, ParsingException {
         if (x == null) {
             return null;
         }

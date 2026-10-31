@@ -97,6 +97,15 @@ package com.landawn.abacus.parser;
  * default. Unicode whitespace between primitive tokens is also ignored. For example, {@code ["1", null, "65"]}
  * read as {@code char[]} yields {@code {'1', '\0', 'A'}}. Whitespace inside quoted string elements is preserved.</p>
  *
+ * <p>A collection root with no items or only blank text ({@code <list/>}, {@code <list> </list>}) is an empty collection of
+ * the requested type on every backend. A root of any type - bean, map, array, collection or scalar - marked {@code isNull="true"}
+ * is {@code null} on every backend, whatever payload it carries, after its {@code type} attribute has been checked against
+ * the type allowlist. A blank map, bean or {@code MapEntity} item of an array or collection ({@code <list><map></map></list>}, the standard
+ * writer's empty structured item) is an empty value of that type on both standard backends; declared {@code MapEntity} elements also retain
+ * their entity names and type in collection/array properties. A blank nested list or array item
+ * written by hand ({@code <list><list/></list>}) is backend-specific on the standard parser (an empty container on its
+ * StAX reader, {@code null} on its DOM reader); the writers emit {@code []} or {@code isNull="true"} for those.</p>
+ *
  * <p><b>Note — intentional omission of the JSON-only deser knobs:</b> the
  * {@code setMapInstanceType} / {@code setReadNullToEmpty} / {@code setIgnoreNullOrEmpty}
  * options live on {@link JsonDeserConfig} on purpose: they are read only by the JSON

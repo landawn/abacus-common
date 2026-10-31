@@ -60,6 +60,9 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings("java:S6548")
 public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
+    // Reused holders are not cleared after each element solely for GC, matching TriIterator and the iterator/stream policy.
+    // Generator output is still cleared BEFORE its callback so partially assigned pairs cannot retain stale components.
+
     /**
      * Constructs a new {@code BiIterator}.
      * Intended for use by subclasses only.
@@ -1650,17 +1653,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
             public boolean hasNext() {
                 if (!hasNextFlag) {
                     while (iter.hasNext()) {
-                        try {
-                            iter.next(setNext);
+                        iter.next(setNext);
 
-                            if (predicate.test(next.left(), next.right())) {
-                                hasNextFlag = true;
-                                break;
-                            }
-                        } finally {
-                            if (!hasNextFlag) {
-                                next.set(null, null);
-                            }
+                        if (predicate.test(next.left(), next.right())) {
+                            hasNextFlag = true;
+                            break;
                         }
                     }
                 }
@@ -1679,9 +1676,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 }
 
                 hasNextFlag = false;
-                final Pair<A, B> result = next.copy();
-                next.set(null, null);
-                return result;
+                return next.copy();
             }
 
             /**
@@ -1700,10 +1695,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 }
 
                 hasNextFlag = false;
-                final A a = next.left();
-                final B b = next.right();
-                next.set(null, null);
-                action.accept(a, b);
+                action.accept(next.left(), next.right());
             }
 
             /**
@@ -1715,10 +1707,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
-                    final A a = next.left();
-                    final B b = next.right();
-                    next.set(null, null);
-                    action.accept(a, b);
+                    action.accept(next.left(), next.right());
                 }
             }
 
@@ -1732,10 +1721,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 while (hasNextFlag || hasNext()) {
                     hasNextFlag = false;
-                    final A a = next.left();
-                    final B b = next.right();
-                    next.set(null, null);
-                    action.accept(a, b);
+                    action.accept(next.left(), next.right());
                 }
             }
 
@@ -1789,16 +1775,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
              */
             @Override
             public R next() throws NoSuchElementException {
-                final A a;
-                final B b;
-                try {
-                    iter.next(setNext); // throws NoSuchElementException when exhausted
-                    a = tmp.left();
-                    b = tmp.right();
-                } finally {
-                    tmp.set(null, null);
-                }
-                return mapper.apply(a, b);
+                iter.next(setNext); // throws NoSuchElementException when exhausted
+                return mapper.apply(tmp.left(), tmp.right());
             }
         };
     }

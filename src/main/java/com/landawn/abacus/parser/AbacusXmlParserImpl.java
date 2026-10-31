@@ -207,6 +207,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     // Reusable SAX handlers; each handler is reset before it returns to this pool.
     private static final Queue<XmlSAXHandler<?>> xmlSAXHandlerPool = new ArrayBlockingQueue<>(POOL_SIZE);
 
+    // Pool ordinary traversal stacks, but let unusually large backing arrays be reclaimed after a parse.
+    // This is a pooling threshold, not a limit on the depth of accepted SAX input.
+    private static final int MAX_POOLED_SAX_DEPTH = 256;
+
     private final XmlParserType parserType;
 
     /**
@@ -263,9 +267,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * embedded JSON payloads; an
      * omitted property (the {@code Exclusion.NULL} default) leaves the field at whatever the bean
      * initializes it to. Wrappers and tuple-like values are unwrapped the same way in a map key, a map
-     * value, an array element and a collection element; those elements carry no {@code type} attribute
-     * under {@code writeTypeInfo}, since the element holds the unwrapped or JSON form and the wrapper's own
-     * name is not a type attribute the readers accept.</p>
+     * value, an array element and a collection element; under {@code writeTypeInfo} those elements carry no
+     * {@code type} attribute naming the wrapper or tuple (a present wrapper's element names its value's runtime
+     * type, a tuple-like value's element carries none), since the element holds the unwrapped or JSON form and
+     * the wrapper's own name is not a type attribute the readers accept.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -468,7 +473,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
      * @param bw the buffered XML writer
      * @param flush whether to flush the writer after writing
-     * @throws ParsingException if the object type is not supported and {@code failOnEmptyBean} is set, if a String/character value contains a code
+     * @throws ParsingException if the object type is not supported (a generic property-less object only when {@code failOnEmptyBean} is set;
+     *         {@code Dataset}, {@code Sheet} and {@code MapEntity} always), if a String/character value contains a code
      *         unit that cannot be represented in XML 1.0, if a bean property's custom name is not usable in the position {@code tagByPropertyName}
      *         writes it, or if more than {@link #MAX_SERIALIZATION_DEPTH} values are nested on one path (a circular reference)
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
@@ -2335,6 +2341,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             }
         } else {
             nodeType = getNodeType(nodeName, null);
+
+            if (isWrapperNodeType(nodeType) && declaredTargetType != null && declaredTargetType.isBean()) {
+                // A declared bean slot reads an element named <e>, <entry>, <key> or <value> as the bean: such a wrapper is
+                // never a value itself, and the writer names a bean element after its class, so the parser's own output
+                // for a bean class named E, Entry, Key or Value could not be read back.
+                nodeType = NodeType.ENTITY;
+            }
         }
 
         if ((nodeType == NodeType.ENTITY || nodeType == NodeType.MAP || nodeType == NodeType.ARRAY || nodeType == NodeType.COLLECTION)
@@ -2558,20 +2571,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             }
 
                             text = xmlReader.getText();
-                            // Only read for an unknown property (propInfo == null): whether ALL of its text fragments are blank.
-                            boolean isUnknownPropTextBlank = true;
 
                             if (propInfo == null) {
                                 // An unknown property's text is dropped, so its fragments are not joined: a large value
-                                // used to grow sb, whose capacity was then kept for the rest of the bean. The only thing
-                                // the text decides is the blank-before-START_ELEMENT check below.
+                                // used to grow sb, whose capacity was then kept for the rest of the bean.
                                 if (text != null) {
-                                    isUnknownPropTextBlank = text.isBlank();
-
+                                    //noinspection StatementWithEmptyBody
                                     while (isTextEvent(event = xmlReader.next())) {
-                                        if (isUnknownPropTextBlank) {
-                                            isUnknownPropTextBlank = xmlReader.getText().isBlank();
-                                        }
+                                        // skip the remaining fragments
                                     }
                                 }
                             } else if (text != null && isTextEvent(event = xmlReader.next())) {
@@ -2590,7 +2597,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         }
                                     }
 
-                                    sb.append(xmlReader.getText());
+                                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                 } while (isTextEvent(event = xmlReader.next()));
 
                                 // Always drain the buffer: when the later fragments are empty (an empty CDATA section) the
@@ -2600,9 +2607,25 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                 sb.setLength(0);
                             }
 
-                            // Indentation before a nested value is structural. Replay its START_ELEMENT;
-                            // whitespace ending at the property end is scalar content and must be kept.
-                            if (event == XMLStreamConstants.START_ELEMENT && (propInfo == null ? isUnknownPropTextBlank : text.isBlank())) {
+                            // Indentation before a nested value is structural, and an unknown or ignored property is skipped
+                            // whole, text included, as the DOM and SAX readers skip it: replay the START_ELEMENT (the
+                            // START_ELEMENT branch reads or skips up to the property's end). Whitespace ending at the property
+                            // end is scalar content and must be kept. Without the replay the loop stepped into the nested
+                            // element and ended the bean at its end, silently dropping every following property.
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                if (propInfo != null && !text.isBlank()) {
+                                    if (propInfo.jsonXmlExpose != JsonXmlField.Direction.SERIALIZE_ONLY) {
+                                        // Non-blank text before a nested value of a known property is mixed content, rejected as in
+                                        // an item, key or value wrapper (readWrappedValue).
+                                        throw new ParsingException("Mixed scalar and nested XML values are not supported");
+                                    }
+
+                                    // A SERIALIZE_ONLY property is ignored when reading: skip its mixed content whole, as an ignored
+                                    // property is skipped (with propInfo cleared, the START_ELEMENT branch skips to the property's
+                                    // end). Its plain text is still decoded, as before.
+                                    propInfo = null;
+                                }
+
                                 advanceEvent = false;
                                 break;
                             }
@@ -2972,7 +2995,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                             }
                                         }
 
-                                        sb.append(xmlReader.getText());
+                                        sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                     } while (isTextEvent(event = xmlReader.next()));
 
                                     // Always drain the buffer (see the bean branch): an empty trailing fragment must not leave it filled.
@@ -3095,7 +3118,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         }
                                     }
 
-                                    sb.append(xmlReader.getText());
+                                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                 } while (isTextEvent(event = xmlReader.next()));
 
                                 // Always drain the buffer: when the later fragments are empty (an empty CDATA section) the
@@ -3599,7 +3622,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     if (sb == null) {
                         sb = new StringBuilder(text);
                     }
-                    sb.append(xmlReader.getText());
+                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                 }
             } else if (event == XMLStreamConstants.START_ELEMENT) {
                 if (text != null && !(sb == null ? text : sb.toString()).isBlank()) {
@@ -3911,7 +3934,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             targetType = containerReadType(targetType, targetClass);
         }
 
-        final NodeType nodeType = getNodeType(nodeName, null);
+        // A declared bean slot reads an element named <e>, <entry>, <key> or <value> as the bean, as on the StAX reader:
+        // the element is named after a bean class E, Entry, Key or Value there, not a wrapper.
+        NodeType nodeType = getNodeType(nodeName, null);
+
+        if (isWrapperNodeType(nodeType) && declaredTargetType != null && declaredTargetType.isBean()) {
+            nodeType = NodeType.ENTITY;
+        }
 
         if ((nodeType == NodeType.ENTITY || nodeType == NodeType.MAP || nodeType == NodeType.ARRAY || nodeType == NodeType.COLLECTION)
                 && Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL))) {
@@ -4822,6 +4851,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         return nodeType;
     }
 
+    // Whether nodeType is the type reserved for <e>, <entry>, <key> or <value>: structural elements that are never a value.
+    private static boolean isWrapperNodeType(final NodeType nodeType) {
+        return nodeType == NodeType.ELEMENT || nodeType == NodeType.ENTRY || nodeType == NodeType.KEY || nodeType == NodeType.VALUE;
+    }
+
     /**
      * Resolves the bean class whose simple name matches an XML element name, searching the package of
      * {@code targetClass} (or, for {@code java.lang}/{@code java.util} classes and classes without a package, the package
@@ -4963,8 +4997,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     }
 
     /**
-     * Resets a SAX handler and returns it to the pool. A {@code null} handler, or one offered when the
-     * pool is already full, is discarded.
+     * Resets a SAX handler and returns it to the pool. A {@code null} handler, one with unusually large
+     * traversal stacks, or one offered when the pool is already full, is discarded.
      *
      * @param xmlSAXHandler the handler to recycle, may be {@code null}
      */
@@ -4973,12 +5007,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             return;
         }
 
-        synchronized (xmlSAXHandlerPool) {
-            if (xmlSAXHandlerPool.size() < POOL_SIZE) {
-                xmlSAXHandler.reset();
-                xmlSAXHandler.xmlParser = null;
-                xmlSAXHandlerPool.add(xmlSAXHandler);
-            }
+        final boolean reusable = xmlSAXHandler.maxNodeStackDepth <= MAX_POOLED_SAX_DEPTH;
+        xmlSAXHandler.reset();
+        xmlSAXHandler.xmlParser = null;
+
+        if (reusable) {
+            xmlSAXHandlerPool.offer(xmlSAXHandler);
         }
     }
 
@@ -5001,6 +5035,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         private final Holder<T> resultHolder = new Holder<>();
 
         private StringBuilder sb = null;
+
+        private int maxNodeStackDepth;
 
         private Map<String, Type<?>> nodeTypes;
 
@@ -5193,6 +5229,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 return;
             }
 
+            // Record before processing the frame so an exception cannot hide an oversized partial stack.
+            maxNodeStackDepth = Math.max(maxNodeStackDepth, nodeTypeQueue.size() + 1);
+
             typeAttributeChecked = false;
             elementTypeAttributeResolved = false;
             elementTypeAttribute = null;
@@ -5208,7 +5247,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             // the same properties as the StAX reader does.
             nodeName = Strings.isEmpty(localName) ? qName : localName;
             final NodeType previousNodeType = nodeTypeQueue.isEmpty() ? null : nodeTypeQueue.get(nodeTypeQueue.size() - 1);
-            final NodeType nodeType = getNodeType(nodeName, previousNodeType);
+            NodeType nodeType = getNodeType(nodeName, previousNodeType);
             final Type<?> wrapperMetadata = valueMetadata;
             valueMetadata = null;
 
@@ -5255,6 +5294,15 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             }
 
             final Type<?> declaredTargetType = targetType;
+
+            if (isWrapperNodeType(nodeType) && declaredTargetType != null && declaredTargetType.isBean()
+                    && (previousNodeType == null || previousNodeType == NodeType.PROPERTY || previousNodeType == NodeType.ELEMENT
+                            || previousNodeType == NodeType.KEY || previousNodeType == NodeType.VALUE)) {
+                // A declared bean slot (the root or a wrapper's child) reads an element named <e>, <entry>, <key> or <value>
+                // as the bean, as on the StAX and DOM readers: it is named after a bean class E, Entry, Key or Value there.
+                nodeType = NodeType.ENTITY;
+            }
+
             // The metadata-refined schema, kept beside the declared array that openArrayDestination may restore below.
             Type<?> refinedTargetType = targetType;
             if (nodeType == NodeType.MAP || nodeType == NodeType.COLLECTION || nodeType == NodeType.ARRAY) {
@@ -5396,7 +5444,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         } else if ((attributeBeanType = objectSlotBeanType(attrs, propType)) != null) {
                             targetType = attributeBeanType;
                         } else {
-                            if (inputType.isBean() && ClassUtil.getSimpleClassName(inputType.javaType()).equalsIgnoreCase(beanOrPropName)) {
+                            // In the name-attribute form an element without a name attribute (an anonymous <bean> in an Object
+                            // property, a stray child of a property) is looked up by its local name, as the StAX and DOM readers
+                            // look it up: the missing name reached the node-name cache as a null key (NullPointerException).
+                            final String elementName = beanOrPropName == null ? nodeName : beanOrPropName;
+
+                            if (inputType.isBean() && ClassUtil.getSimpleClassName(inputType.javaType()).equalsIgnoreCase(elementName)) {
                                 targetType = inputType;
                             } else {
                                 final Class<?> classByNodeName;
@@ -5409,10 +5462,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     // The search starts at the slot's declared class when it is more specific than Object (an
                                     // interface component type of an array root), as the StAX reader's does.
                                     classByNodeName = isFirstCall ? null
-                                            : getClassByNodeName(beanOrPropName, propType != null && propType.javaType() != Object.class ? propType.javaType()
+                                            : getClassByNodeName(elementName, propType != null && propType.javaType() != Object.class ? propType.javaType()
                                                     : config.getElementType() != null ? config.getElementType().javaType() : inputType.javaType());
                                 } else {
-                                    classByNodeName = getClassByNodeName(beanOrPropName, inputType.javaType());
+                                    classByNodeName = getClassByNodeName(elementName, inputType.javaType());
                                 }
 
                                 // propType is the slot's own type (a map value's, an item's): the element type of an enclosing
@@ -6504,6 +6557,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             resultHolder.setValue(null);
             Objectory.recycle(sb);
             sb = null;
+            maxNodeStackDepth = 0;
 
             // Root parse context.
             nodeTypes = null;

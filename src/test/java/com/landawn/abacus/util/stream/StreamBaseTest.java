@@ -3417,4 +3417,552 @@ public class StreamBaseTest extends TestBase {
     }
 
     // ---- deep review 2026-09-25 G105 end ----
+
+    // ---- deep review 2026-10-26 G117 begin ----
+
+    // G117-01: closing a stage derived from a deferred stream reached the deferred stream's close handler twice (through the
+    // inherited handler group and through the deferred stream's own close()), so a failing supplier ran twice in one close.
+    @Test
+    public void testNewCloseHandlerSupplier_derivedStageInvokesFailingSupplierOnce() {
+        final AtomicInteger calls = new AtomicInteger();
+        final java.util.function.Supplier<Stream<Integer>> failing = () -> {
+            throw new IllegalStateException("supplier failure " + calls.incrementAndGet());
+        };
+
+        final IllegalStateException closeFailure = Assertions.assertThrows(IllegalStateException.class, () -> Stream.defer(failing).map(x -> x).close());
+        Assertions.assertEquals(1, calls.get());
+        Assertions.assertEquals(0, closeFailure.getSuppressed().length);
+
+        // The failed traversal invokes it once; the terminal operation's close no longer invokes it again (2026-10-27 G137,
+        // owner decision G035-02: a failed supplier outcome is memoized) - as on the deferred stream itself.
+        calls.set(0);
+        Assertions.assertThrows(IllegalStateException.class, () -> Stream.defer(failing).map(x -> x).filter(x -> true).count());
+        Assertions.assertEquals(1, calls.get());
+
+        calls.set(0);
+        Assertions.assertThrows(IllegalStateException.class, () -> Stream.defer(failing).count());
+        Assertions.assertEquals(1, calls.get());
+
+        final AtomicInteger intCalls = new AtomicInteger();
+        final IntStream derived = IntStream.defer(() -> {
+            throw new IllegalStateException("int supplier failure " + intCalls.incrementAndGet());
+        }).map(x -> x);
+        Assertions.assertThrows(IllegalStateException.class, derived::close);
+        Assertions.assertEquals(1, intCalls.get());
+    }
+
+    // G117-01: the supplier-based close handler runs at most once, like every handler created by LocalRunnable.wrap.
+    @Test
+    public void testNewCloseHandlerSupplier_runsAtMostOnce() {
+        final AtomicInteger calls = new AtomicInteger();
+        final LocalRunnable handler = StreamBase.newCloseHandler((java.util.function.Supplier<Stream<Integer>>) () -> {
+            throw new IllegalStateException("supplier failure " + calls.incrementAndGet());
+        });
+
+        Assertions.assertThrows(IllegalStateException.class, handler::run);
+        handler.run();
+        Assertions.assertEquals(1, calls.get());
+    }
+
+    // ---- deep review 2026-10-26 G117 end ----
+
+    // ---- deep review 2026-10-26 verify G124 begin ----
+
+    // G117-01 (verify): a derived stage closed after its deferred parent must not re-run a failing supplier (the parent's handler
+    // already ran); EntryStream.defer (delegates to Stream.defer) and a supplier that would succeed on a retry are covered too.
+    @Test
+    public void testDeferCloseHandler_derivedStageAfterParentCloseDoesNotRerunSupplier() {
+        final AtomicInteger calls = new AtomicInteger();
+        final java.util.function.Supplier<Stream<Integer>> failing = () -> {
+            throw new IllegalStateException("supplier failure " + calls.incrementAndGet());
+        };
+
+        final Stream<Integer> parent = Stream.defer(failing);
+        final Stream<Integer> derived = parent.map(x -> x);
+        Assertions.assertThrows(IllegalStateException.class, parent::close);
+        derived.close();
+        Assertions.assertEquals(1, calls.get());
+
+        calls.set(0);
+        final IllegalStateException entryFailure = Assertions.assertThrows(IllegalStateException.class, () -> EntryStream.<String, Integer> defer(() -> {
+            throw new IllegalStateException("entry supplier failure " + calls.incrementAndGet());
+        }).filter((k, v) -> true).close());
+        Assertions.assertEquals(1, calls.get());
+        Assertions.assertEquals(0, entryFailure.getSuppressed().length);
+
+        // Fails on the first call only: closing the never-started derived stage must not open a source just to close it.
+        final AtomicInteger transientCalls = new AtomicInteger();
+        final AtomicInteger suppliedCloses = new AtomicInteger();
+        final Stream<Integer> transientDerived = Stream.<Integer> defer(() -> {
+            if (transientCalls.incrementAndGet() == 1) {
+                throw new IllegalStateException("first call fails");
+            }
+
+            return Stream.of(1, 2).onClose(suppliedCloses::incrementAndGet);
+        }).map(x -> x);
+        Assertions.assertThrows(IllegalStateException.class, transientDerived::close);
+        Assertions.assertEquals(1, transientCalls.get());
+        Assertions.assertEquals(0, suppliedCloses.get());
+    }
+
+    // G117-01 (verify): unchanged neighbours - a successful supplier of a never-started (derived) stream is invoked once and its
+    // stream closed once; handler order and suppression of other failing handlers stay as before.
+    @Test
+    public void testDeferCloseHandler_successfulSupplierOrderAndSuppressionUnchanged() {
+        final AtomicInteger calls = new AtomicInteger();
+        final List<String> events = new ArrayList<>();
+        final java.util.function.Supplier<Stream<Integer>> ok = () -> {
+            calls.incrementAndGet();
+            return Stream.of(1, 2, 3).onClose(() -> events.add("supplied"));
+        };
+
+        Stream.defer(ok).onClose(() -> events.add("a")).map(x -> x).onClose(() -> events.add("b")).filter(x -> true).close();
+        Assertions.assertEquals(1, calls.get());
+        Assertions.assertEquals(Arrays.asList("supplied", "a", "b"), events);
+
+        calls.set(0);
+        events.clear();
+        Stream.defer(ok).map(x -> x).close();
+        Assertions.assertEquals(1, calls.get());
+        Assertions.assertEquals(Arrays.asList("supplied"), events);
+
+        calls.set(0);
+        events.clear();
+        Assertions.assertEquals(Arrays.asList(2, 4, 6), Stream.defer(ok).map(x -> x * 2).toList());
+        Assertions.assertEquals(1, calls.get());
+        Assertions.assertEquals(Arrays.asList("supplied"), events);
+
+        final AtomicInteger failingCalls = new AtomicInteger();
+        final IllegalStateException failure = Assertions.assertThrows(IllegalStateException.class, () -> Stream.<Integer> defer(() -> {
+            throw new IllegalStateException("supplier failure " + failingCalls.incrementAndGet());
+        }).onClose(() -> {
+            throw new IllegalArgumentException("handler a");
+        }).map(x -> x).onClose(() -> {
+            throw new UnsupportedOperationException("handler b");
+        }).close());
+        Assertions.assertEquals("supplier failure 1", failure.getMessage());
+        Assertions.assertEquals(1, failingCalls.get());
+        Assertions.assertEquals(2, failure.getSuppressed().length);
+        Assertions.assertEquals("handler a", failure.getSuppressed()[0].getMessage());
+        Assertions.assertEquals("handler b", failure.getSuppressed()[1].getMessage());
+    }
+
+    // ---- deep review 2026-10-26 verify G124 end ----
+
+    // ---- deep review 2026-10-27 G137 begin ----
+
+    // G035-02: every defer variant memoizes the outcome of its supplier. A supplier that failed during traversal was invoked
+    // again by close() (which a terminal operation runs even when it fails), repeating its side effects.
+    private static final List<String> DEFER_VARIANTS = Arrays.asList("Stream", "EntryStream", "ByteStream", "CharStream", "ShortStream", "IntStream",
+            "LongStream", "FloatStream", "DoubleStream");
+
+    // A deferred stream of the given family with 3 elements. Its supplier counts its calls and throws failure (if not null);
+    // the supplied stream counts its closes.
+    private static BaseStream<?, ?, ?, ?, ?, ?, ?, ?> deferredOf(final String variant, final AtomicInteger calls, final RuntimeException failure,
+            final AtomicInteger suppliedCloses) {
+        final Runnable call = () -> {
+            calls.incrementAndGet();
+
+            if (failure != null) {
+                throw failure;
+            }
+        };
+
+        final Runnable closed = suppliedCloses::incrementAndGet;
+
+        switch (variant) {
+            case "Stream":
+                return Stream.defer(() -> {
+                    call.run();
+                    return Stream.of(1, 2, 3).onClose(closed);
+                });
+            case "EntryStream":
+                return EntryStream.defer(() -> {
+                    call.run();
+                    return EntryStream.of("a", 1, "b", 2, "c", 3).onClose(closed);
+                });
+            case "ByteStream":
+                return ByteStream.defer(() -> {
+                    call.run();
+                    return ByteStream.of((byte) 1, (byte) 2, (byte) 3).onClose(closed);
+                });
+            case "CharStream":
+                return CharStream.defer(() -> {
+                    call.run();
+                    return CharStream.of('a', 'b', 'c').onClose(closed);
+                });
+            case "ShortStream":
+                return ShortStream.defer(() -> {
+                    call.run();
+                    return ShortStream.of((short) 1, (short) 2, (short) 3).onClose(closed);
+                });
+            case "IntStream":
+                return IntStream.defer(() -> {
+                    call.run();
+                    return IntStream.of(1, 2, 3).onClose(closed);
+                });
+            case "LongStream":
+                return LongStream.defer(() -> {
+                    call.run();
+                    return LongStream.of(1L, 2L, 3L).onClose(closed);
+                });
+            case "FloatStream":
+                return FloatStream.defer(() -> {
+                    call.run();
+                    return FloatStream.of(1f, 2f, 3f).onClose(closed);
+                });
+            case "DoubleStream":
+                return DoubleStream.defer(() -> {
+                    call.run();
+                    return DoubleStream.of(1d, 2d, 3d).onClose(closed);
+                });
+            default:
+                throw new IllegalArgumentException(variant);
+        }
+    }
+
+    @Test
+    public void testDefer_failingSupplierIsCalledOnceAcrossTraversalAndClose() {
+        for (final String variant : DEFER_VARIANTS) {
+            final IllegalStateException failure = new IllegalStateException("supplier failure");
+
+            // A terminal operation: the traversal fails, then the operation closes the stream.
+            final AtomicInteger calls = new AtomicInteger();
+            final IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class,
+                    () -> deferredOf(variant, calls, failure, new AtomicInteger()).count(), variant);
+            Assertions.assertSame(failure, thrown, variant);
+            Assertions.assertEquals(0, thrown.getSuppressed().length, variant);
+            Assertions.assertEquals(1, calls.get(), variant);
+
+            // A failed traversal through the iterator, a second attempt (the cached failure), then an explicit close.
+            calls.set(0);
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = deferredOf(variant, calls, failure, new AtomicInteger());
+            final Iterator<?> iter = stream.iterator();
+            Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::hasNext), variant);
+            Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, iter::hasNext), variant);
+            Assertions.assertDoesNotThrow(stream::close, variant);
+            Assertions.assertEquals(1, calls.get(), variant);
+        }
+    }
+
+    @Test
+    public void testDefer_successfulSupplierIsCalledOnceAndItsStreamClosedOnce() {
+        for (final String variant : DEFER_VARIANTS) {
+            // Never traversed: closing invokes the supplier once, so that the supplied stream can be closed.
+            final AtomicInteger calls = new AtomicInteger();
+            final AtomicInteger closes = new AtomicInteger();
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> neverTraversed = deferredOf(variant, calls, null, closes);
+            Assertions.assertEquals(0, calls.get(), variant);
+            neverTraversed.close();
+            neverTraversed.close();
+            Assertions.assertEquals(1, calls.get(), variant);
+            Assertions.assertEquals(1, closes.get(), variant);
+
+            // Traversed by a terminal operation, then closed again: one call in total.
+            calls.set(0);
+            closes.set(0);
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> traversed = deferredOf(variant, calls, null, closes);
+            Assertions.assertEquals(3, traversed.count(), variant);
+            traversed.close();
+            Assertions.assertEquals(1, calls.get(), variant);
+            Assertions.assertEquals(1, closes.get(), variant);
+
+            // Partly traversed through its iterator, then closed.
+            calls.set(0);
+            closes.set(0);
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> partly = deferredOf(variant, calls, null, closes);
+            Assertions.assertTrue(partly.iterator().hasNext(), variant);
+            partly.close();
+            Assertions.assertEquals(1, calls.get(), variant);
+            Assertions.assertEquals(1, closes.get(), variant);
+        }
+    }
+
+    @Test
+    public void testDefer_neverTraversedFailingSupplierFailsCloseOnce() {
+        for (final String variant : DEFER_VARIANTS) {
+            final IllegalStateException failure = new IllegalStateException("supplier failure");
+            final AtomicInteger calls = new AtomicInteger();
+            final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = deferredOf(variant, calls, failure, new AtomicInteger());
+
+            Assertions.assertSame(failure, Assertions.assertThrows(IllegalStateException.class, stream::close), variant);
+            stream.close();
+            Assertions.assertEquals(1, calls.get(), variant);
+        }
+    }
+
+    @Test
+    public void testDefer_nullResultAndSelfReturnGuardsUnchanged() {
+        Assertions.assertEquals(0, Stream.defer(() -> null).count());
+        Assertions.assertEquals(0, EntryStream.defer(() -> null).count());
+        Assertions.assertEquals(0, IntStream.defer(() -> null).count());
+        Stream.defer(() -> null).close();
+
+        final Holder<Stream<Integer>> deferred = new Holder<>();
+        deferred.setValue(Stream.defer(deferred::value));
+        final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().toList());
+        Assertions.assertEquals("Stream supplier returned the deferred stream itself", e.getMessage());
+
+        final Holder<IntStream> deferredInt = new Holder<>();
+        deferredInt.setValue(IntStream.defer(deferredInt::value));
+        Assertions.assertThrows(IllegalStateException.class, () -> deferredInt.value().toArray());
+    }
+
+    @Test
+    public void testDeferredSupplier_recursionGuardFailureIsFinalAndRejectedStreamIsClosed() {
+        // Re-entering the supplier fails fast (not StackOverflowError), and so does the running call; that failure is final.
+        final AtomicInteger calls = new AtomicInteger();
+        final Holder<StreamBase.DeferredSupplier<Stream<Integer>>> self = new Holder<>();
+        self.setValue(StreamBase.deferredSupplier(() -> {
+            calls.incrementAndGet();
+            return self.value().get();
+        }));
+
+        final IllegalStateException recursion = Assertions.assertThrows(IllegalStateException.class, () -> self.value().get());
+        Assertions.assertEquals("Recursive initialization of deferred value", recursion.getMessage());
+        Assertions.assertSame(recursion, Assertions.assertThrows(IllegalStateException.class, () -> self.value().get()));
+        Assertions.assertDoesNotThrow(() -> self.value().closeSupplied());
+        Assertions.assertEquals(1, calls.get());
+
+        // A supplier that catches the recursion failure and returns a stream: the call still fails, but closing closes that
+        // stream instead of leaking it.
+        final AtomicInteger rejectedCloses = new AtomicInteger();
+        final Holder<StreamBase.DeferredSupplier<Stream<Integer>>> catching = new Holder<>();
+        catching.setValue(StreamBase.deferredSupplier(() -> {
+            try {
+                catching.value().get();
+            } catch (final IllegalStateException ignored) {
+                // the supplier swallows the recursion failure on purpose
+            }
+
+            return Stream.of(1).onClose(rejectedCloses::incrementAndGet);
+        }));
+
+        Assertions.assertThrows(IllegalStateException.class, () -> catching.value().get());
+        Assertions.assertEquals(0, rejectedCloses.get());
+        catching.value().closeSupplied();
+        catching.value().closeSupplied();
+        Assertions.assertEquals(1, rejectedCloses.get());
+
+        // A recursive close from inside the running supplier (the deferred stream closes itself) is rejected the same way.
+        final AtomicInteger selfCloseCalls = new AtomicInteger();
+        final Holder<Stream<Integer>> selfClosing = new Holder<>();
+        selfClosing.setValue(Stream.defer(() -> {
+            selfCloseCalls.incrementAndGet();
+            selfClosing.value().close();
+            return Stream.of(1);
+        }));
+        Assertions.assertThrows(IllegalStateException.class, () -> selfClosing.value().toList());
+        Assertions.assertEquals(1, selfCloseCalls.get());
+    }
+
+    // ---- deep review 2026-10-27 G137 end ----
+
+    // ---- deep review 2026-10-28 G149 begin ----
+
+    // G149: the supplier closes the deferred stream during the first traversal and catches the recursion failure. The close
+    // handler has already run (it re-entered the running supplier), so the stream the supplier then returns is closed at once
+    // instead of never; the traversal still fails with that same recursion failure.
+    @Test
+    public void testDeferredSupplier_streamReturnedAfterCloseDuringSupplierIsClosed() {
+        final Holder<Stream<Integer>> deferred = new Holder<>();
+        final AtomicInteger returnedCloses = new AtomicInteger();
+        final AtomicReference<Throwable> caught = new AtomicReference<>();
+
+        deferred.setValue(Stream.defer(() -> {
+            try {
+                deferred.value().close();
+            } catch (final IllegalStateException e) {
+                caught.set(e);
+            }
+
+            return Stream.of(1).onClose(returnedCloses::incrementAndGet);
+        }));
+
+        final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().toList());
+        Assertions.assertSame(caught.get(), e);
+        Assertions.assertEquals("Recursive initialization of deferred value", e.getMessage());
+        Assertions.assertEquals(1, returnedCloses.get());
+
+        deferred.value().close();
+        Assertions.assertEquals(1, returnedCloses.get());
+    }
+
+    // G149: the same when the supplier runs a terminal operation on the deferred stream (it fails and closes the deferred
+    // stream), for a primitive stream's defer as well.
+    @Test
+    public void testDeferredSupplier_streamReturnedAfterTerminalOpOnDeferredStreamIsClosed() {
+        final Holder<Stream<Integer>> deferred = new Holder<>();
+        final AtomicInteger returnedCloses = new AtomicInteger();
+
+        deferred.setValue(Stream.defer(() -> {
+            try {
+                deferred.value().count();
+            } catch (final IllegalStateException e) {
+                // the recursion failure; the deferred stream is closed now
+            }
+
+            return Stream.of(1).onClose(returnedCloses::incrementAndGet);
+        }));
+
+        Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().toList());
+        Assertions.assertEquals(1, returnedCloses.get());
+
+        final Holder<IntStream> deferredInts = new Holder<>();
+        final AtomicInteger returnedIntCloses = new AtomicInteger();
+
+        deferredInts.setValue(IntStream.defer(() -> {
+            try {
+                deferredInts.value().close();
+            } catch (final IllegalStateException e) {
+                // the recursion failure
+            }
+
+            return IntStream.of(1).onClose(returnedIntCloses::incrementAndGet);
+        }));
+
+        Assertions.assertThrows(IllegalStateException.class, () -> deferredInts.value().toArray());
+        Assertions.assertEquals(1, returnedIntCloses.get());
+    }
+
+    // G149 neighbours: a failure of closing that returned stream is attached to the recursion failure, and a supplier that
+    // returns null after closing the deferred stream fails only with the recursion failure.
+    @Test
+    public void testDeferredSupplier_closeDuringSupplierNeighbours() {
+        final Holder<Stream<Integer>> deferred = new Holder<>();
+        final RuntimeException closeFailure = new RuntimeException("close of the returned stream");
+
+        deferred.setValue(Stream.defer(() -> {
+            try {
+                deferred.value().close();
+            } catch (final IllegalStateException e) {
+                // the recursion failure
+            }
+
+            return Stream.of(1).onClose(() -> {
+                throw closeFailure;
+            });
+        }));
+
+        final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().toList());
+        Assertions.assertTrue(Arrays.asList(e.getSuppressed()).contains(closeFailure));
+
+        final Holder<Stream<Integer>> nullDeferred = new Holder<>();
+
+        nullDeferred.setValue(Stream.defer(() -> {
+            try {
+                nullDeferred.value().close();
+            } catch (final IllegalStateException ignored) {
+                // the recursion failure
+            }
+
+            return null;
+        }));
+
+        final IllegalStateException nullFailure = Assertions.assertThrows(IllegalStateException.class, () -> nullDeferred.value().toList());
+        Assertions.assertEquals("Recursive initialization of deferred value", nullFailure.getMessage());
+    }
+
+    // G149 follow-up: closing the stream the supplier returned after the deferred stream was closed during the call follows
+    // ObjIteratorEx.defer. A VirtualMachineError from that close propagates with the recursion failure suppressed on it, the
+    // cached failure stays the recursion failure, and nothing is left for a later close.
+    @Test
+    public void testDeferredSupplier_fatalErrorClosingReturnedStreamPropagates() {
+        final OutOfMemoryError fatal = new OutOfMemoryError("close of the returned stream");
+        final AtomicInteger returnedCloses = new AtomicInteger();
+        final AtomicReference<Throwable> caught = new AtomicReference<>();
+        final Holder<StreamBase.DeferredSupplier<Stream<Integer>>> deferred = new Holder<>();
+
+        deferred.setValue(StreamBase.deferredSupplier(() -> {
+            try {
+                deferred.value().closeSupplied();
+            } catch (final IllegalStateException e) {
+                caught.set(e);
+            }
+
+            return Stream.of(1).onClose(() -> {
+                returnedCloses.incrementAndGet();
+                throw fatal;
+            });
+        }));
+
+        final OutOfMemoryError thrown = Assertions.assertThrows(OutOfMemoryError.class, () -> deferred.value().get());
+        Assertions.assertSame(fatal, thrown);
+        Assertions.assertTrue(caught.get() instanceof IllegalStateException);
+        Assertions.assertTrue(Arrays.asList(thrown.getSuppressed()).contains(caught.get()));
+        Assertions.assertEquals(1, returnedCloses.get());
+
+        Assertions.assertSame(caught.get(), Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().get()));
+        Assertions.assertDoesNotThrow(() -> deferred.value().closeSupplied());
+        Assertions.assertEquals(1, returnedCloses.get());
+    }
+
+    // G149 follow-up: any other failure of that close, an Error that is not a VirtualMachineError included, is suppressed on
+    // the recursion failure, which the call throws.
+    @Test
+    public void testDeferredSupplier_nonFatalErrorClosingReturnedStreamIsSuppressed() {
+        final AssertionError closeError = new AssertionError("close of the returned stream");
+        final AtomicReference<Throwable> caught = new AtomicReference<>();
+        final Holder<StreamBase.DeferredSupplier<Stream<Integer>>> deferred = new Holder<>();
+
+        deferred.setValue(StreamBase.deferredSupplier(() -> {
+            try {
+                deferred.value().closeSupplied();
+            } catch (final IllegalStateException e) {
+                caught.set(e);
+            }
+
+            return Stream.of(1).onClose(() -> {
+                throw closeError;
+            });
+        }));
+
+        final IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().get());
+        Assertions.assertSame(caught.get(), thrown);
+        Assertions.assertTrue(Arrays.asList(thrown.getSuppressed()).contains(closeError));
+    }
+
+    // G149 follow-up: that close runs after the failure is recorded and outside the supplier's lock, so a close handler that
+    // waits for another thread using the same deferred supplier does not deadlock; that thread sees the recorded failure.
+    @Test
+    public void testDeferredSupplier_returnedStreamIsClosedOutsideTheLock() throws InterruptedException {
+        final AtomicReference<Throwable> otherThreadResult = new AtomicReference<>();
+        final AtomicBoolean otherThreadFinished = new AtomicBoolean();
+        final Holder<StreamBase.DeferredSupplier<Stream<Integer>>> deferred = new Holder<>();
+
+        deferred.setValue(StreamBase.deferredSupplier(() -> {
+            try {
+                deferred.value().closeSupplied();
+            } catch (final IllegalStateException e) {
+                // the recursion failure
+            }
+
+            return Stream.of(1).onClose(() -> {
+                final Thread other = new Thread(() -> {
+                    try {
+                        deferred.value().get();
+                    } catch (final Throwable e) {
+                        otherThreadResult.set(e);
+                    }
+                });
+
+                other.setDaemon(true);
+                other.start();
+
+                try {
+                    other.join(TimeUnit.SECONDS.toMillis(20));
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                otherThreadFinished.set(!other.isAlive());
+            });
+        }));
+
+        final IllegalStateException thrown = Assertions.assertThrows(IllegalStateException.class, () -> deferred.value().get());
+        Assertions.assertTrue(otherThreadFinished.get(), "the close handler's thread was blocked on the supplier's lock");
+        Assertions.assertSame(thrown, otherThreadResult.get());
+    }
+
+    // ---- deep review 2026-10-28 G149 end ----
 }

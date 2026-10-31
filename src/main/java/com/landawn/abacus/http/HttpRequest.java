@@ -57,8 +57,10 @@ import com.landawn.abacus.util.cs;
  *
  * <p><b>Payload routing:</b> {@link #query(Map)}/{@link #query(String)} append to the URL and are
  * valid for methods that take no body; {@link #body(Object)} and the {@code *Body} helpers send a
- * request body and are valid for POST, PUT, DELETE and OPTIONS. Mixing the two is rejected with an
- * {@link IllegalStateException} at execution time rather than silently dropping the payload.</p>
+ * request body and are valid for POST, PUT, DELETE and OPTIONS. A payload configured for a method it does not
+ * suit is rejected with an {@link IllegalStateException} at execution time rather than silently dropping it.
+ * The query and the body share one slot, so whichever of them is configured last replaces the other: for
+ * example {@code query(params).jsonBody(obj).post()} sends the body without the query.</p>
  *
  * <p><b>Asynchronous execution:</b> the {@code async*} methods validate their own arguments
  * synchronously ({@code null} method or executor) but validate output targets and perform other checks when the

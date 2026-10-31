@@ -1663,4 +1663,121 @@ public class ListMultimapTest extends TestBase {
         Assertions.assertEquals(Arrays.asList(2), result.get("b"));
     }
     // ---- bug review 2026-09-30 G114 end ----
+
+    // ---- deep review 2026-10-26 G055 begin ----
+    /** An LRU-style map whose {@code int} constructor is its eviction cap, not a capacity. */
+    public static class G055LruMap<K, V> extends LinkedHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        private final int maxEntries;
+
+        public G055LruMap(final int maxEntries) {
+            super(16, 0.75f, false);
+            this.maxEntries = maxEntries;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+            return size() > maxEntries;
+        }
+    }
+
+    // G055-01: merge(..) mirrored an LRU-style first map sized for that map's keys only, so the later maps' keys evicted them
+    @Test
+    public void testMerge_lruStyleFirstMapKeepsAllKeys() {
+        final G055LruMap<String, Integer> a = new G055LruMap<>(100);
+        a.put("a", 1);
+
+        final ListMultimap<String, Integer> merged2 = ListMultimap.merge(a, Map.of("b", 2));
+        Assertions.assertEquals(2, merged2.keyCount());
+        Assertions.assertEquals(Arrays.asList(1), merged2.get("a"));
+        Assertions.assertEquals(Arrays.asList(2), merged2.get("b"));
+
+        final ListMultimap<String, Integer> merged3 = ListMultimap.merge(a, Map.of("b", 2), Map.of("c", 3));
+        Assertions.assertEquals(3, merged3.keyCount());
+        Assertions.assertEquals(Arrays.asList(1), merged3.get("a"));
+        Assertions.assertEquals(Arrays.asList(3), merged3.get("c"));
+
+        final ListMultimap<String, Integer> mergedNullFirst = ListMultimap.merge(null, a, Map.of("c", 3));
+        Assertions.assertEquals(2, mergedNullFirst.keyCount());
+        Assertions.assertEquals(Arrays.asList(1), mergedNullFirst.get("a"));
+
+        final ListMultimap<String, Integer> mergedList = ListMultimap.merge(Arrays.asList(a, Map.of("b", 2), Map.of("c", 3)));
+        Assertions.assertEquals(3, mergedList.keyCount());
+        Assertions.assertEquals(Arrays.asList(1), mergedList.get("a"));
+
+        // an empty LRU-style first map was mirrored with a cap of 0, which dropped every merged key
+        final ListMultimap<String, Integer> mergedEmptyFirst = ListMultimap.merge(new G055LruMap<String, Integer>(10), Map.of("b", 2));
+        Assertions.assertEquals(Arrays.asList(2), mergedEmptyFirst.get("b"));
+        Assertions.assertEquals(1, mergedEmptyFirst.keyCount());
+    }
+    // ---- deep review 2026-10-26 G055 end ----
+
+    // ---- deep review 2026-10-26 verify G123 begin ----
+    // G055-01 neighbours: insertion-ordered, sorted, identity, concurrent and enum first maps are mirrored and filled as before
+    @Test
+    public void testMerge_standardFirstMapsUnchangedByMergeSizing() {
+        final Map<String, Integer> linked = new LinkedHashMap<>();
+        linked.put("z", 1);
+        linked.put("y", 2);
+        final ListMultimap<String, Integer> fromLinked = ListMultimap.merge(linked, Map.of("x", 3), Map.of("z", 4));
+        Assertions.assertEquals(LinkedHashMap.class, fromLinked.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList("z", "y", "x"), new ArrayList<>(fromLinked.keySet()));
+        Assertions.assertEquals(Arrays.asList(1, 4), fromLinked.get("z"));
+
+        final TreeMap<String, Integer> sorted = new TreeMap<>(Comparator.reverseOrder());
+        sorted.put("a", 1);
+        final ListMultimap<String, Integer> fromSorted = ListMultimap.merge(Arrays.asList(sorted, Map.of("c", 3), Map.of("b", 2, "a", 4)));
+        Assertions.assertEquals(TreeMap.class, fromSorted.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(fromSorted.keySet()));
+        Assertions.assertEquals(Arrays.asList(1, 4), fromSorted.get("a"));
+
+        final String key1 = new String("k");
+        final String key2 = new String("k");
+        final IdentityHashMap<String, Integer> identity = new IdentityHashMap<>();
+        identity.put(key1, 1);
+        final Map<String, Integer> second = new HashMap<>();
+        second.put(key2, 2);
+        final ListMultimap<String, Integer> fromIdentity = ListMultimap.merge(identity, second);
+        Assertions.assertEquals(IdentityHashMap.class, fromIdentity.backingMap.getClass());
+        Assertions.assertEquals(2, fromIdentity.keyCount());
+
+        final ListMultimap<String, Integer> fromConcurrent = ListMultimap.merge(new java.util.concurrent.ConcurrentHashMap<>(Map.of("a", 1)), Map.of("b", 2));
+        Assertions.assertEquals(java.util.concurrent.ConcurrentHashMap.class, fromConcurrent.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList(2), fromConcurrent.get("b"));
+
+        final java.util.EnumMap<java.util.concurrent.TimeUnit, Integer> enums = new java.util.EnumMap<>(java.util.concurrent.TimeUnit.class);
+        enums.put(java.util.concurrent.TimeUnit.SECONDS, 1);
+        final ListMultimap<java.util.concurrent.TimeUnit, Integer> fromEnum = ListMultimap.merge(enums,
+                Map.of(java.util.concurrent.TimeUnit.DAYS, 2, java.util.concurrent.TimeUnit.NANOSECONDS, 3));
+        Assertions.assertEquals(java.util.EnumMap.class, fromEnum.backingMap.getClass());
+        Assertions.assertEquals(
+                Arrays.asList(java.util.concurrent.TimeUnit.NANOSECONDS, java.util.concurrent.TimeUnit.SECONDS, java.util.concurrent.TimeUnit.DAYS),
+                new ArrayList<>(fromEnum.keySet()));
+
+        // an LRU-style map that is not the first map is not mirrored: unchanged
+        final G055LruMap<String, Integer> lru = new G055LruMap<>(1);
+        lru.put("b", 2);
+        final ListMultimap<String, Integer> lruSecond = ListMultimap.merge(linked, lru);
+        Assertions.assertEquals(LinkedHashMap.class, lruSecond.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList("z", "y", "b"), new ArrayList<>(lruSecond.keySet()));
+    }
+
+    // G055-01: the merged map keeps the first map's LRU-style class; fromMap still sizes it for that map alone
+    @Test
+    public void testMerge_lruStyleFirstMapIsStillMirrored() {
+        final G055LruMap<String, Integer> lru = new G055LruMap<>(100);
+        lru.put("a", 1);
+        lru.put("b", 2);
+
+        final ListMultimap<String, Integer> merged = ListMultimap.merge(lru, Map.of("c", 3), Map.of("a", 4));
+        Assertions.assertEquals(G055LruMap.class, merged.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(merged.keySet()));
+        Assertions.assertEquals(Arrays.asList(1, 4), merged.get("a"));
+
+        final ListMultimap<String, Integer> copied = ListMultimap.fromMap(lru);
+        Assertions.assertEquals(G055LruMap.class, copied.backingMap.getClass());
+        Assertions.assertEquals(2, copied.keyCount());
+    }
+    // ---- deep review 2026-10-26 verify G123 end ----
 }

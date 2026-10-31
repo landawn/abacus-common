@@ -29,6 +29,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -676,6 +677,23 @@ public final class RowDataset implements Dataset, Cloneable {
             checkVersion();
             return length;
         }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>One bulk copy of the viewed range (behind {@code copy()}/{@code split()} of a slice, and
+         * {@code addAll}/{@code new ArrayList<>(..)} of a slice column). The inherited implementation read every
+         * element through the iterator with a version and bounds check per element. No user callback runs
+         * during the copy, so one version check up front is sufficient for supported single-threaded use;
+         * concurrent dataset mutation remains unsupported.</p>
+         *
+         * @throws ConcurrentModificationException if the dataset backing this column view has changed its row layout
+         */
+        @Override
+        public Object[] toArray() throws ConcurrentModificationException {
+            checkVersion();
+            return column.subList(offset, offset + length).toArray();
+        }
     }
 
     /**
@@ -1048,15 +1066,35 @@ public final class RowDataset implements Dataset, Cloneable {
      * accepted by projections, applied twice by {@code updateColumns}, emitted twice by {@code toJson}/{@code toXml},
      * or reported late by the {@code RowDataset} constructor with an internal result-column name
      * ({@code "Duplicated column names found in: [a, a, cnt]"}) after the whole operation had already run.
-     * Resolved indexes are compared instead of the names, so this is one pass over a {@code boolean[]} of the
-     * column count and needs no hashing; {@code removeColumns} deliberately bypasses it (see there).
+     * Resolved indexes are compared instead of the names, so this needs no hashing: a short selection is compared
+     * pairwise, a longer one in one pass over a {@code boolean[]} of the column count. Either way the first entry
+     * that repeats an earlier one is reported. {@code removeColumns} deliberately bypasses this check (see there).
      *
      * @param columnNames the selection, for the error message
      * @param columnIndexes the indexes {@code columnNames} resolved to, in selection order
      * @throws IllegalArgumentException if two entries of {@code columnIndexes} are equal
      */
     private void checkNoDuplicateSelection(final Collection<String> columnNames, final int[] columnIndexes) throws IllegalArgumentException {
-        if (columnIndexes.length < 2) {
+        final int count = columnIndexes.length;
+
+        if (count < 2) {
+            return;
+        }
+
+        // Pairwise for a short selection: a boolean[] of the column count cost O(columnCount) time and memory on
+        // every call, which dominated a small selection of a wide dataset (5 KB per call for 5,000 columns).
+        if (count <= 8) {
+            for (int j = 1; j < count; j++) {
+                final int columnIndex = columnIndexes[j];
+
+                for (int i = 0; i < j; i++) {
+                    if (columnIndexes[i] == columnIndex) {
+                        throw new IllegalArgumentException("Duplicated column names in the selection: " + columnNames + " (" + _columnNameList.get(columnIndex)
+                                + " is listed more than once)");
+                    }
+                }
+            }
+
             return;
         }
 
@@ -2340,9 +2378,14 @@ public final class RowDataset implements Dataset, Cloneable {
         N.sort(columnIndexes);
         checkRemainingColumns(columnCount() - columnIndexes.length);
 
-        for (int i = 0, len = columnIndexes.length; i < len; i++) {
-            _columnNameList.remove(columnIndexes[i] - i);
-            _columnList.remove(columnIndexes[i] - i);
+        if (columnIndexes.length == 1) {
+            _columnNameList.remove(columnIndexes[0]);
+            _columnList.remove(columnIndexes[0]);
+        } else {
+            // One compaction pass per list: removing the columns one by one shifted the tail once per removed
+            // column, O(removed x columnCount).
+            removeAtSortedIndexes(_columnNameList, columnIndexes);
+            removeAtSortedIndexes(_columnList, columnIndexes);
         }
 
         _columnIndexMap = null;
@@ -2995,7 +3038,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int size = size();
         N.checkPositionIndex(newRowPosition, size);
 
-        final Object[] values = normalizeRow(row);
+        final Object[] values = normalizeRow(row, null);
 
         if (newRowPosition == size) {
             for (int columnIndex = 0, len = values.length; columnIndex < len; columnIndex++) {
@@ -3051,8 +3094,12 @@ public final class RowDataset implements Dataset, Cloneable {
         // Normalize the complete batch first. Besides allowing each row to use a different supported
         // representation, this prevents a later validation/property-access failure from leaving only
         // some columns enlarged and violating the dataset's equal-column-size invariant.
+        // One scratch row for the whole batch (collection, map and bean rows; an object-array row is read in place):
+        // each row's values are copied out before the next row is read.
+        final Object[] buffer = new Object[columnCount];
+
         for (final Object row : rows) {
-            final Object[] values = normalizeRow(row);
+            final Object[] values = normalizeRow(row, buffer);
 
             for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                 columnsToAdd.get(columnIndex).add(values[columnIndex]);
@@ -3074,16 +3121,23 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     /**
+     * Reads one row's values in column order. The returned array is only read by the caller, before the next row is
+     * normalized, and is never retained.
+     *
+     * @param row the row: an object array, a collection, a map or a bean
+     * @param buffer an array of {@code columnCount()} elements that receives the values of a collection, map or bean row
+     *            and is returned, overwriting every element, or {@code null} to use a new array. An object-array row is
+     *            returned itself, uncopied, and leaves the buffer untouched.
+     * @return the row's values, in column order
      * @throws IllegalArgumentException if this dataset has no columns, {@code row} is null or has an unsupported type, its array or collection size differs from the column count, or a required column is absent from its map or bean
      */
-    private Object[] normalizeRow(final Object row) throws IllegalArgumentException {
+    private Object[] normalizeRow(final Object row, final Object[] buffer) throws IllegalArgumentException {
         N.checkArgument(columnCount() > 0, "Cannot add a row to a Dataset without columns");
         N.checkArgNotNull(row, ROW);
 
         final Class<?> rowClass = row.getClass();
         final Type<?> rowType = Type.of(rowClass);
         final int columnCount = columnCount();
-        final Object[] values = new Object[columnCount];
 
         if (rowType.isObjectArray()) {
             final Object[] array = (Object[]) row;
@@ -3095,8 +3149,13 @@ public final class RowDataset implements Dataset, Cloneable {
                 throw new IllegalArgumentException("The size of array (" + array.length + ") does not match the number of columns (" + columnCount + ")");
             }
 
-            System.arraycopy(array, 0, values, 0, columnCount);
-        } else if (rowType.isCollection()) {
+            // Already in column order, and the caller copies each value out before anything else runs: no copy needed.
+            return array;
+        }
+
+        final Object[] values = buffer == null ? new Object[columnCount] : buffer;
+
+        if (rowType.isCollection()) {
             final Collection<?> collection = (Collection<?>) row;
 
             if (collection.size() != columnCount) {
@@ -3220,12 +3279,13 @@ public final class RowDataset implements Dataset, Cloneable {
      * every surviving element is shifted down over the gaps, then the now-duplicated tail is dropped in one
      * {@code subList(..).clear()}. This allocates nothing and touches each element at most once.
      *
-     * @param list the column to compact. It is indexed positionally, so a column that is not random-access is
-     *            quadratic here - as it already is in every other positional loop in this class
+     * @param <T> the element type
+     * @param list the column (or column-name list) to compact. It is indexed positionally, so a list that is not
+     *            random-access is quadratic here - as it already is in every other positional loop in this class
      *            ({@code updateAll}, {@code replaceIf}, {@code permuteRows}, the joins, the set operations)
      * @param sortedIndexes strictly ascending, in-range positions to remove; must not be empty
      */
-    private static void removeAtSortedIndexes(final List<Object> list, final int[] sortedIndexes) {
+    private static <T> void removeAtSortedIndexes(final List<T> list, final int[] sortedIndexes) {
         final int size = list.size();
         final int removeCount = sortedIndexes.length;
         int nextToRemove = 0;
@@ -3477,7 +3537,7 @@ public final class RowDataset implements Dataset, Cloneable {
         final int size = size();
         final int expectedModCount = modCount;
         final Set<Object> seen = N.newHashSet();
-        final java.util.BitSet retained = new java.util.BitSet();
+        final BitSet retained = new BitSet();
         // Reuse the candidate for duplicate compound keys. Allocating a key array for every
         // row would turn a constant-cardinality input into linear allocation churn.
         Object[] keyValues = columnIndexes.length > 1 ? new Object[columnIndexes.length] : null;
@@ -4098,10 +4158,11 @@ public final class RowDataset implements Dataset, Cloneable {
             throws ConcurrentModificationException, IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException, NullPointerException,
             ClassCastException, UnsupportedOperationException, RuntimeException {
         checkRowIndex(rowIndex);
-        checkColumnNames(columnNames);
+        // The validated indexes are passed on: the 4-argument getRow would resolve and validate the selection again.
+        final int[] columnIndexes = checkColumnNames(columnNames);
         N.checkArgNotNull(rowSupplier, cs.rowSupplier);
 
-        return getRow(rowIndex, columnNames, null, rowSupplier);
+        return getRow(rowIndex, columnIndexes, columnIndexes.length, null, null, null, null, rowSupplier);
     }
 
     private <T> T getRow(final int rowIndex, final Collection<String> columnNames, Class<? extends T> rowClass, IntFunction<? extends T> rowSupplier) {
@@ -6480,7 +6541,8 @@ public final class RowDataset implements Dataset, Cloneable {
     }
 
     private static boolean isXmlCharacter(final int cp) {
-        return cp == 9 || cp == 10 || cp == 13 || cp >= 0x20 && cp <= 0xD7FF || cp >= 0xE000 && cp <= 0xFFFD || cp >= 0x10000 && cp <= 0x10FFFF;
+        // The common range is tested first, so almost every character is decided by the first range test.
+        return cp >= 0x20 && cp <= 0xD7FF || cp == 9 || cp == 10 || cp == 13 || cp >= 0xE000 && cp <= 0xFFFD || cp >= 0x10000 && cp <= 0x10FFFF;
     }
 
     private static IllegalArgumentException invalidExportValue(final boolean json, final int row, final String column) {
@@ -6519,13 +6581,14 @@ public final class RowDataset implements Dataset, Cloneable {
 
     private static void checkJsonNumbers(final String text, final int row, final String column) {
         boolean quoted = false;
+        // Both markers start with 'N' or 'I': the prefix tests are skipped for every other unquoted character.
         for (int i = 0; i < text.length(); i++) {
             final char ch = text.charAt(i);
             if (quoted && ch == '\\') {
                 i++;
             } else if (ch == '"') {
                 quoted = !quoted;
-            } else if (!quoted && (text.startsWith("NaN", i) || text.startsWith("Infinity", i))) {
+            } else if (!quoted && (ch == 'N' || ch == 'I') && (text.startsWith("NaN", i) || text.startsWith("Infinity", i))) {
                 throw invalidExportValue(true, row, column);
             }
         }
@@ -10717,7 +10780,13 @@ public final class RowDataset implements Dataset, Cloneable {
             }
         } else {
             for (final int columnIndex : columnIndexes) {
-                newColumnList.add(new ArrayList<>(_columnList.get(columnIndex).subList(fromRowIndex, toRowIndex)));
+                final List<Object> column = _columnList.get(columnIndex);
+
+                // A slice column is narrowed with slice(..), not subList(..): AbstractList's sub-list copied element by
+                // element through a version and bounds check per cell, while a slice view copies its range in bulk.
+                // Both check the slice's row version first, and the range has been validated above.
+                newColumnList.add(new ArrayList<>(
+                        column instanceof SliceColumn view ? view.slice(fromRowIndex, toRowIndex - fromRowIndex) : column.subList(fromRowIndex, toRowIndex)));
             }
         }
 
@@ -11903,7 +11972,10 @@ public final class RowDataset implements Dataset, Cloneable {
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
             final List<Object>[] rightColumns = resolveColumns(right, rightColumnIndexes);
-            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
+            // A right key matched by some left row is marked at the first right row index of its list, which the
+            // lookup just returned: a set of every left key cost a second hash per left row and a node per key.
+            // One bit per right row (a boolean[] took a byte each, eight times as much for a large right side).
+            final BitSet matchedRightKeys = new BitSet(right.size());
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
@@ -11911,18 +11983,20 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, leftRowIndex, rightRowIndexList, rightColumns);
 
-                joinColumnLeftRowIndexSet.add(hashKey);
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
+                }
             }
 
             // The unmatched right rows are appended in right-row order, as rightJoin emits them. The per-key
             // index lists are ascending and disjoint, so collecting and sorting them restores that order.
-            // Sorting only the unmatched indexes stays free when every right row matched - the common case -
-            // which an O(right.size()) boolean[] mark-and-walk would not, so it is preferred here.
+            // The match bits above cost O(right.size() / 8) bytes and their initialization. Walk the distinct right-key
+            // groups, not every bit, and sort only unmatched row indexes to restore right-row order.
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
-            for (final Map.Entry<Object, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexSet.contains(rightRowIndexEntry.getKey())) {
-                    unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    unmatchedRightRowIndexes.addAll(rightRowIndexes);
                 }
             }
 
@@ -11968,9 +12042,9 @@ public final class RowDataset implements Dataset, Cloneable {
 
             final int[] rightColumnIndexes = right.getColumnIndexes(rightColumnNames);
             final List<Object>[] rightColumns = resolveColumns(right, rightColumnIndexes);
-            // Membership only, as in the single-key branch: one add() both tests and records a left key, where
-            // containsKey + put hashed every new key twice and boxed a row index that was never read.
-            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
+            // Matched right keys are marked in bits as in the single-key branch, so no left key is stored: one key array
+            // serves every left row, and each left key is hashed once (by the lookup) instead of twice.
+            final BitSet matchedRightKeys = new BitSet(right.size());
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -11986,8 +12060,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, leftRowIndex, rightRowIndexList, rightColumns);
 
-                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
-                    row = null;
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
                 }
             }
 
@@ -11998,13 +12072,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
             // The unmatched right rows are appended in right-row order, as rightJoin emits them. The per-key
             // index lists are ascending and disjoint, so collecting and sorting them restores that order.
-            // Sorting only the unmatched indexes stays free when every right row matched - the common case -
-            // which an O(right.size()) boolean[] mark-and-walk would not, so it is preferred here.
+            // The match bits above cost O(right.size() / 8) bytes and their initialization. Walk the distinct right-key
+            // groups, not every bit, and sort only unmatched row indexes to restore right-row order.
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
-            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
-                    unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    unmatchedRightRowIndexes.addAll(rightRowIndexes);
                 }
             }
 
@@ -12087,7 +12161,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
+            // Matched right keys are marked, not left keys stored (see fullJoin(Dataset, Map)).
+            final BitSet matchedRightKeys = new BitSet(right.size());
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 hashKey = hashKey(leftJoinColumn.get(leftRowIndex));
@@ -12095,18 +12170,20 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                joinColumnLeftRowIndexSet.add(hashKey);
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
+                }
             }
 
             // The unmatched right rows are appended in right-row order, as rightJoin emits them. The per-key
             // index lists are ascending and disjoint, so collecting and sorting them restores that order.
-            // Sorting only the unmatched indexes stays free when every right row matched - the common case -
-            // which an O(right.size()) boolean[] mark-and-walk would not, so it is preferred here.
+            // The match bits above cost O(right.size() / 8) bytes and their initialization. Walk the distinct right-key
+            // groups, not every bit, and sort only unmatched row indexes to restore right-row order.
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
-            for (final Map.Entry<Object, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexSet.contains(rightRowIndexEntry.getKey())) {
-                    unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    unmatchedRightRowIndexes.addAll(rightRowIndexes);
                 }
             }
 
@@ -12150,8 +12227,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            // Membership only (see fullJoin(Dataset, Map)): one add() per left row instead of containsKey + put.
-            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
+            // Matched right keys are marked, not left keys stored (see fullJoin(Dataset, Map)).
+            final BitSet matchedRightKeys = new BitSet(right.size());
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -12167,8 +12244,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
-                    row = null;
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
                 }
             }
 
@@ -12179,13 +12256,13 @@ public final class RowDataset implements Dataset, Cloneable {
 
             // The unmatched right rows are appended in right-row order, as rightJoin emits them. The per-key
             // index lists are ascending and disjoint, so collecting and sorting them restores that order.
-            // Sorting only the unmatched indexes stays free when every right row matched - the common case -
-            // which an O(right.size()) boolean[] mark-and-walk would not, so it is preferred here.
+            // The match bits above cost O(right.size() / 8) bytes and their initialization. Walk the distinct right-key
+            // groups, not every bit, and sort only unmatched row indexes to restore right-row order.
             final List<Integer> unmatchedRightRowIndexes = new ArrayList<>();
 
-            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
-                    unmatchedRightRowIndexes.addAll(rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    unmatchedRightRowIndexes.addAll(rightRowIndexes);
                 }
             }
 
@@ -12263,7 +12340,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            final Set<Object> joinColumnLeftRowIndexSet = N.newHashSet();
+            // Matched right keys are marked, not left keys stored (see fullJoin(Dataset, Map)).
+            final BitSet matchedRightKeys = new BitSet(right.size());
             List<Integer> rightRowIndexList = null;
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
@@ -12272,12 +12350,14 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                joinColumnLeftRowIndexSet.add(hashKey);
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
+                }
             }
 
-            for (final Map.Entry<Object, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowIndexSet.contains(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, rightRowIndexes);
                 }
             }
 
@@ -12316,8 +12396,8 @@ public final class RowDataset implements Dataset, Cloneable {
             }
 
             final int newColumnIndex = newColumnList.size() - 1;
-            // Membership only (see fullJoin(Dataset, Map)): one add() per left row instead of containsKey + put.
-            final Set<Wrapper<Object[]>> joinColumnLeftRowKeySet = N.newHashSet();
+            // Matched right keys are marked, not left keys stored (see fullJoin(Dataset, Map)).
+            final BitSet matchedRightKeys = new BitSet(right.size());
 
             for (int leftRowIndex = 0, size = size(); leftRowIndex < size; leftRowIndex++) {
                 if (row == null) {
@@ -12333,8 +12413,8 @@ public final class RowDataset implements Dataset, Cloneable {
 
                 fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, leftRowIndex, rightRowIndexList);
 
-                if (joinColumnLeftRowKeySet.add(rowWrapper)) {
-                    row = null;
+                if (rightRowIndexList != null) {
+                    matchedRightKeys.set(rightRowIndexList.get(0));
                 }
             }
 
@@ -12343,9 +12423,9 @@ public final class RowDataset implements Dataset, Cloneable {
                 row = null;
             }
 
-            for (final Map.Entry<Wrapper<Object[]>, List<Integer>> rightRowIndexEntry : joinColumnRightRowIndexMap.entrySet()) {
-                if (!joinColumnLeftRowKeySet.contains(rightRowIndexEntry.getKey())) {
-                    fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, rightRowIndexEntry.getValue());
+            for (final List<Integer> rightRowIndexes : joinColumnRightRowIndexMap.values()) {
+                if (!matchedRightKeys.get(rightRowIndexes.get(0))) {
+                    fullJoin(newColumnList, right, newColumnType, collectionSupplier, newColumnIndex, rightRowIndexes);
                 }
             }
 
@@ -13490,7 +13570,12 @@ public final class RowDataset implements Dataset, Cloneable {
             public <A> A[] toArray(A[] a) {
                 checkConcurrentModification();
 
-                final List<T> rows = RowDataset.this.toList(cursor, toRowIndex, selectedColumnNames, selectedPrefixes, rowClass, rowSupplier);
+                // A bulk shortcut must answer like the element-wise path: with no row left to materialize there is
+                // nothing to convert. Dataset.toList(..) validates the bean mapping up front, so an empty remainder used
+                // to fail here (e.g. MissingPropertyPolicy.ERROR with an unmapped column) while this same stream's
+                // count(), forEach(..) and toList() reported no rows and no error.
+                final List<T> rows = cursor >= toRowIndex ? new ArrayList<>(0)
+                        : RowDataset.this.toList(cursor, toRowIndex, selectedColumnNames, selectedPrefixes, rowClass, rowSupplier);
 
                 a = a.length >= rows.size() ? a : (A[]) N.newArray(a.getClass().getComponentType(), rows.size());
 

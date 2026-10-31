@@ -71,6 +71,9 @@ import com.landawn.abacus.util.stream.Stream;
 @SuppressWarnings("java:S6548")
 public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B, C>> {
 
+    // Reused holders are not cleared after each element solely for GC, matching BiIterator and the iterator/stream policy.
+    // Generator output is still cleared BEFORE its callback so partially assigned triples cannot retain stale components.
+
     /**
      * Constructs a new {@code TriIterator}.
      * Intended for use by subclasses only.
@@ -1604,17 +1607,11 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             public boolean hasNext() {
                 if (!hasNextFlag && !exhausted) {
                     while (iter.hasNext()) {
-                        try {
-                            iter.next(setNext);
+                        iter.next(setNext);
 
-                            if (predicate.test(next.left(), next.middle(), next.right())) {
-                                hasNextFlag = true;
-                                break;
-                            }
-                        } finally {
-                            if (!hasNextFlag) {
-                                next.set(null, null, null);
-                            }
+                        if (predicate.test(next.left(), next.middle(), next.right())) {
+                            hasNextFlag = true;
+                            break;
                         }
                     }
 
@@ -1637,9 +1634,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 }
 
                 hasNextFlag = false;
-                final Triple<A, B, C> result = next.copy();
-                next.set(null, null, null);
-                return result;
+                return next.copy();
             }
 
             /**
@@ -1657,11 +1652,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 }
 
                 hasNextFlag = false;
-                final A a = next.left();
-                final B b = next.middle();
-                final C c = next.right();
-                next.set(null, null, null);
-                action.accept(a, b, c);
+                action.accept(next.left(), next.middle(), next.right());
             }
 
             /**
@@ -1673,11 +1664,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
                 while (hasNext()) {
                     hasNextFlag = false;
-                    final A a = next.left();
-                    final B b = next.middle();
-                    final C c = next.right();
-                    next.set(null, null, null);
-                    action.accept(a, b, c);
+                    action.accept(next.left(), next.middle(), next.right());
                 }
             }
 
@@ -1692,11 +1679,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
                 while (hasNext()) {
                     hasNextFlag = false;
-                    final A a = next.left();
-                    final B b = next.middle();
-                    final C c = next.right();
-                    next.set(null, null, null);
-                    action.accept(a, b, c);
+                    action.accept(next.left(), next.middle(), next.right());
                 }
             }
 
@@ -1753,18 +1736,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             @Override
             public R next() {
-                final A a;
-                final B b;
-                final C c;
-                try {
-                    iter.next(setNext); // throws NoSuchElementException when exhausted
-                    a = tmp.left();
-                    b = tmp.middle();
-                    c = tmp.right();
-                } finally {
-                    tmp.set(null, null, null);
-                }
-                return mapper.apply(a, b, c);
+                iter.next(setNext); // throws NoSuchElementException when exhausted
+                return mapper.apply(tmp.left(), tmp.middle(), tmp.right());
             }
         };
     }

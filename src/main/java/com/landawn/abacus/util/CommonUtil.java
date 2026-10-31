@@ -5869,8 +5869,11 @@ sealed class CommonUtil permits N {
      * ({@link Objects#equals(Object, Object)}; array-valued properties use identity).
      *
      * <p>To match array-valued properties by content instead of by reference, use
-     * {@link Difference.BeanDifference#of(Object, Object)} and check {@link Difference#areEqual()};
-     * it compares property values with {@link #deepEquals(Object, Object)}.
+     * {@link Difference.BeanDifference#of(Object, Object, Collection)} with the common property names and check
+     * {@link Difference#areEqual()}; it compares property values with {@link #deepEquals(Object, Object)}.
+     * {@link Difference.BeanDifference#of(Object, Object)} is not a drop-in replacement: it also reports the
+     * properties found in only one of the beans (so beans whose classes do not have the same properties are never
+     * equal there) and it skips {@code @DiffIgnore} properties.
      *
      * @param bean1 the first bean to compare, must not be {@code null}
      * @param bean2 the second bean to compare, must not be {@code null}

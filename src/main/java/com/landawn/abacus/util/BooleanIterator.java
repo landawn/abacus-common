@@ -675,7 +675,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed();
-     * // Produces: IndexedBoolean(index=0, value=true), IndexedBoolean(index=1, value=false)
+     * // Produces: [0]=true, [1]=false
      * }</pre>
      *
      * @return an {@link ObjIterator} of {@link IndexedBoolean} elements with indices starting at 0
@@ -693,7 +693,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
      * ObjIterator<IndexedBoolean> indexed = iter.indexed(10);
-     * // Produces: IndexedBoolean(index=10, value=true), IndexedBoolean(index=11, value=false)
+     * // Produces: [10]=true, [11]=false
      * }</pre>
      *
      * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>

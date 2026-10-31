@@ -3544,4 +3544,59 @@ public class ParserUtilTest extends AbstractTest {
 
     // ---- perf review 2026-10-07 G07 end ----
 
+    // ---- deep review 2026-10-26 G127 begin ----
+
+    @java.lang.annotation.Inherited
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+    public @interface G127InheritedTag {
+        String value();
+    }
+
+    @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
+    public @interface G127PlainTag {
+        String value();
+    }
+
+    @G127InheritedTag("interface")
+    @G127PlainTag("interface")
+    public interface G127TaggedInterface {
+    }
+
+    @G127InheritedTag("superclass")
+    @G127PlainTag("superclass")
+    public static class G127TaggedSuper {
+        private int x;
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(final int x) {
+            this.x = x;
+        }
+    }
+
+    public static class G127TaggedSub extends G127TaggedSuper implements G127TaggedInterface {
+    }
+
+    public static class G127TaggedSubSub extends G127TaggedSub {
+    }
+
+    // G127-02: getAnnotation precedence. A plain annotation on an implemented interface wins over the superclass's, but for an
+    // @Inherited annotation type Class.getAnnotations() of the subclass already reports the superclass's declaration, which
+    // then wins over the interface's - including one level further down the hierarchy.
+    @Test
+    public void testGetAnnotation_inheritedTypeSuperclassWinsOverInterfacePlainTypeInterfaceWins() {
+        final BeanInfo sub = ParserUtil.getBeanInfo(G127TaggedSub.class);
+        assertEquals("interface", sub.getAnnotation(G127PlainTag.class).value());
+        assertEquals("superclass", sub.getAnnotation(G127InheritedTag.class).value());
+        assertEquals("superclass", ((G127InheritedTag) sub.annotations.get(G127InheritedTag.class)).value());
+
+        final BeanInfo subSub = ParserUtil.getBeanInfo(G127TaggedSubSub.class);
+        assertEquals("interface", subSub.getAnnotation(G127PlainTag.class).value());
+        assertEquals("superclass", subSub.getAnnotation(G127InheritedTag.class).value());
+    }
+
+    // ---- deep review 2026-10-26 G127 end ----
+
 }

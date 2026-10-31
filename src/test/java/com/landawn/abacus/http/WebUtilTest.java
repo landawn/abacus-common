@@ -1557,4 +1557,187 @@ public class WebUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-09-25 G004 end ----
+
+    // ---- deep review 2026-10-26 G004 begin ----
+    // G004-01: curl -A '' sends NO User-Agent (like -H 'User-Agent:'); the converters emitted an empty User-Agent header instead.
+    @Test
+    public void testCurlConverters_emptyUserAgentSuppressesTheHeader() {
+        final String target = "http://localhost:18080/x";
+
+        for (final String option : new String[] { "-A ''", "--user-agent ''", "--user-agent=''", "-sA ''" }) {
+            final String command = "curl " + option + " " + target;
+
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertFalse(code.contains(".header(\"User-Agent\""), command + " -> " + code);
+                assertTrue(code.contains("// cURL was told to suppress the header(s) User-Agent"), command + " -> " + code);
+                assertTrue(code.contains(".get();"), command + " -> " + code);
+            }
+        }
+
+        // A single space is curl's spelling for a blank User-Agent and is still sent.
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -A ' ' " + target).contains(".header(\"User-Agent\", \" \")"));
+
+        // An explicit value wins over the suppression, whatever the order, as in curl.
+        for (final String command : new String[] { "curl -A '' -H 'User-Agent: x' " + target, "curl -A '' -A x " + target }) {
+            final String code = WebUtil.curlToOkHttpRequestCode(command);
+            assertTrue(code.contains(".header(\"User-Agent\", \"x\")"), command + " -> " + code);
+            assertFalse(code.contains("suppress the header(s)"), command + " -> " + code);
+        }
+
+        // An empty -A after a captured User-Agent is still a repeated header that cannot be reproduced.
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curl -A x -A '' " + target));
+        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl -H 'User-Agent: x' -A '' " + target));
+    }
+    // ---- deep review 2026-10-26 G004 end ----
+
+    // ---- deep review 2026-10-26 verify G120 begin ----
+    // G004-01: an empty -A combined with other User-Agent spellings, in both converters, ends as curl does; non-empty values are unchanged.
+    @Test
+    public void testCurlConverters_emptyUserAgentCombinations() {
+        final String target = " http://localhost:18080/x";
+        final String note = "// cURL was told to suppress the header(s) User-Agent";
+        final java.util.function.Function<String, List<String>> both = command -> List.of(WebUtil.curlToHttpRequestCode(command),
+                WebUtil.curlToOkHttpRequestCode(command));
+
+        // Suppressed (curl sends no User-Agent): empty -A twice, or together with -H 'User-Agent:' in either order.
+        for (final String command : new String[] { "curl -A '' -A ''" + target, "curl -H 'User-Agent:' -A ''" + target,
+                "curl -A '' -H 'User-Agent:'" + target }) {
+            for (final String code : both.apply(command)) {
+                assertFalse(code.contains(".header(\"User-Agent\""), command + " -> " + code);
+                assertTrue(code.contains(note), command + " -> " + code);
+            }
+        }
+
+        // A later -H 'User-Agent;' asks for the empty header, which wins over the suppression as in curl.
+        for (final String code : both.apply("curl -A '' -H 'User-Agent;'" + target)) {
+            assertTrue(code.contains(".header(\"User-Agent\", \"\")"), code);
+            assertFalse(code.contains(note), code);
+        }
+
+        // Other headers are kept next to the suppression.
+        for (final String code : both.apply("curl -e x -A '' -H 'X-A: 1'" + target)) {
+            assertTrue(code.contains(".header(\"Referer\", \"x\")"), code);
+            assertTrue(code.contains(".header(\"X-A\", \"1\")"), code);
+            assertTrue(code.contains(note), code);
+        }
+
+        // Non-empty values, whitespace-only included, are sent exactly as before.
+        for (final String value : new String[] { "x", " ", "  ", " x " }) {
+            for (final String code : both.apply("curl -A '" + value + "'" + target)) {
+                assertTrue(code.contains(".header(\"User-Agent\", \"" + value + "\")"), value + " -> " + code);
+                assertFalse(code.contains(note), value + " -> " + code);
+            }
+        }
+
+        // Repeats that keep a captured User-Agent stay rejected.
+        for (final String command : new String[] { "curl -A x -A y" + target, "curl -H 'user-agent: x' -A ''" + target,
+                "curl -H 'User-Agent;' -A ''" + target }) {
+            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command), command);
+            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command), command);
+        }
+    }
+    // ---- deep review 2026-10-26 verify G120 end ----
+
+    // ---- deep review 2026-10-27 G138 begin ----
+    // Bash $'...' (ANSI-C) and $"..." quoting is rejected in every argument, in both converters. r108 read it as a literal '$'
+    // followed by an ordinary quoted string: --data-raw $'a\nb' became the body "$a\\nb", -H $'X-A: 1' the header "$X-A".
+    @Test
+    public void testCurlConverters_rejectBashDollarQuoting() {
+        final String target = " http://h.test/x";
+        final String[] ansiC = { "curl" + target + " --data-raw $'a\\nb'", "curl" + target + " -d $'a\\tb'", "curl" + target + " --data $'x'",
+                "curl" + target + " --data-ascii $'x'", "curl" + target + " --data-raw=$'a\\nb'", "curl" + target + " -d$'a'",
+                "curl" + target + " -H $'X-A: a\\tb'", "curl" + target + " -H$'X-A: 1'", "curl" + target + " --header=$'X-A: 1'",
+                "curl" + target + " -A $'agent'", "curl" + target + " -e $'ref'", "curl" + target + " -u $'user:pw'", "curl" + target + " -b $'c=1'",
+                "curl $'http://h.test/x'", "curl --url $'http://h.test/x'", "curl -X $'POST'" + target, "curl" + target + " -x $'proxy'",
+                // inside a word, after a continuation, after "$$" (the shell's PID parameter), and with an escaped quote that r108 read as unclosed
+                "curl" + target + " --data-raw 'a'$'b'", "curl" + target + " --data-raw a$'b'", "curl" + target + " --data-raw $\\\n'b'",
+                "curl" + target + " --data-raw $$$'b'", "curl" + target + " --data-raw $'it\\'s'" };
+
+        for (final String command : ansiC) {
+            for (final java.util.function.Function<String, String> converter : List.<java.util.function.Function<String, String>> of(
+                    WebUtil::curlToHttpRequestCode, WebUtil::curlToOkHttpRequestCode)) {
+                final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> converter.apply(command), command);
+                assertTrue(e.getMessage().startsWith("ANSI-C/bash $'...' quoting (at position "), command + " -> " + e.getMessage());
+                assertTrue(e.getMessage().endsWith(") is not supported; pass the decoded value in plain single or double quotes"), e.getMessage());
+            }
+        }
+
+        for (final String command : new String[] { "curl" + target + " --data-raw $\"a b\"", "curl" + target + " -H $\"X-A: 1\"" }) {
+            assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command)).getMessage()
+                    .startsWith("Bash $\"...\" quoting (at position "), command);
+            assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command)).getMessage()
+                    .startsWith("Bash $\"...\" quoting (at position "), command);
+        }
+
+        // The position names the '$' in the trimmed command.
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("  curl $'http://h.test/x'")).getMessage()
+                .contains("(at position 5)"));
+    }
+
+    // A '$' anywhere else - inside quotes, escaped, "$$", $NAME, ${..}, $(..), at the end or before a space - is kept exactly as before.
+    @Test
+    public void testCurlConverters_dollarOutsideBashQuotingIsUnchanged() {
+        final String target = " http://h.test/x";
+        final String[][] bodies = { { "'$a\\nb'", "$a\\nb" }, { "'$'", "$" }, { "'$\"x\"'", "$\"x\"" }, { "\"$'x'\"", "$'x'" }, { "\"\\$'x'\"", "$'x'" },
+                { "\"$\"'x'", "$x" }, { "\\$'x'", "$x" }, { "\\$\"x\"", "$x" }, { "$$'x'", "$$x" }, { "a$$'x'", "a$$x" }, { "$HOME", "$HOME" },
+                { "$HOME'x'", "$HOMEx" }, { "${HOME}'x'", "${HOME}x" }, { "$(id)", "$(id)" }, { "a$", "a$" }, { "$", "$" }, { "$\\x'y'", "$xy" },
+                { "'$'\"$\"", "$$" }, { "'a'\\''b'", "a'b" } };
+
+        for (final String[] entry : bodies) {
+            final String command = "curl" + target + " --data-raw " + entry[0];
+            final String escaped = com.landawn.abacus.util.EscapeUtil.escapeJava(entry[1]);
+            final String legacy = WebUtil.curlToHttpRequestCode(command);
+            assertTrue(legacy.contains("String requestBody = \"" + escaped + "\";"), command + " -> " + legacy);
+            final String okHttp = WebUtil.curlToOkHttpRequestCode(command);
+            assertTrue(okHttp.contains("RequestBody.create(\"" + escaped + "\","), command + " -> " + okHttp);
+        }
+
+        // "$ 'x'" is two words, as in the shell: the body is "$" and 'x' is an ignored extra argument.
+        assertTrue(WebUtil.curlToHttpRequestCode("curl" + target + " --data-raw $ 'x'").contains("String requestBody = \"$\";"));
+
+        for (final String header : new String[] { "-H 'X-A: $x'", "-H \"X-A: \\$x\"", "-H X-A:$x" }) {
+            assertTrue(WebUtil.curlToOkHttpRequestCode("curl" + target + " " + header).contains(".header(\"X-A\", \"$x\")"), header);
+        }
+
+        assertTrue(WebUtil.curlToHttpRequestCode("curl" + target + " -A $agent").contains(".header(\"User-Agent\", \"$agent\")"));
+        assertTrue(WebUtil.curlToHttpRequestCode("curl 'http://h.test/x?a=$b'").contains("HttpRequest.url(\"http://h.test/x?a=$b\")"));
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl http://h.test/x?a=$").contains("OkHttpRequest.url(\"http://h.test/x?a=$\")"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl" + target + " --data-raw 'unclosed")).getMessage()
+                .startsWith("Unclosed quote starting at position"));
+    }
+    // ---- deep review 2026-10-27 G138 end ----
+
+    // ---- deep review 2026-10-27 verify G146 begin ----
+    // The shell rules around a '$' before a quote, pinned with the reported position (an index into the trimmed command): an
+    // escaped backslash does not escape the '$', \$ does; "$$" pairs up also across line continuations (LF, CRLF, CR); a
+    // continuation followed by a space ends the word; an unclosed $'... reports the quoting, not the unclosed quote.
+    @Test
+    public void testCurlConverters_bashDollarQuotingShellRules() {
+        final String target = " http://h.test/x";
+        final Object[][] rejected = { { "curl" + target + " -d \\\\$'x'", 26, '\'' }, { "curl" + target + " -d \\$$'x'", 26, '\'' },
+                { "curl" + target + " -d '$'$\"x\"", 27, '"' }, { "curl" + target + " -d $\\\r\n'x'", 24, '\'' },
+                { "curl" + target + " -d $\\\r'x'", 24, '\'' }, { "curl" + target + " -d $\\\n$\\\n$'x'", 30, '\'' }, { "curl" + target + " -d $'x", 24, '\'' },
+                { "curl" + target + " -d $\"\"", 24, '"' }, { "\t  curl -d $'x'" + target, 8, '\'' }, { "curl\t$'http://h.test/x'", 5, '\'' },
+                { "curl" + target + " -d @$'x'", 25, '\'' } };
+
+        for (final Object[] entry : rejected) {
+            final String command = (String) entry[0];
+            final String expected = ((char) entry[2] == '\'' ? "ANSI-C/bash $'...'" : "Bash $\"...\"") + " quoting (at position " + entry[1]
+                    + ") is not supported; pass the decoded value in plain single or double quotes";
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command), command).getMessage());
+            assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command), command).getMessage());
+        }
+
+        final String[][] accepted = { { "$\\\n$'x'", "$$x" }, { "$\\\r\n$\"x\"", "$$x" }, { "$\\\n 'x'", "$" }, { "$\t'x'", "$" }, { "$1'x'", "$1x" },
+                { "$?\"x\"", "$?x" }, { "$\\'x", "$'x" }, { "\"a$\"'b'", "a$b" } };
+
+        for (final String[] entry : accepted) {
+            final String command = "curl" + target + " -d " + entry[0];
+            final String body = "String requestBody = \"" + com.landawn.abacus.util.EscapeUtil.escapeJava(entry[1]) + "\";";
+            assertTrue(WebUtil.curlToHttpRequestCode(command).contains(body), command);
+            assertTrue(WebUtil.curlToOkHttpRequestCode(command)
+                    .contains("RequestBody.create(\"" + com.landawn.abacus.util.EscapeUtil.escapeJava(entry[1]) + "\","), command);
+        }
+    }
+    // ---- deep review 2026-10-27 verify G146 end ----
 }

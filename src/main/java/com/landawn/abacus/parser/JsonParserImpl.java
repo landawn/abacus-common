@@ -60,7 +60,13 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.type.ByteType;
+import com.landawn.abacus.type.DoubleType;
+import com.landawn.abacus.type.FloatType;
+import com.landawn.abacus.type.IntegerType;
+import com.landawn.abacus.type.LongType;
 import com.landawn.abacus.type.ObjectType;
+import com.landawn.abacus.type.ShortType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.Array;
@@ -3052,7 +3058,8 @@ class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
      *         builder, has no usable no-argument constructor and no builder or constructor taking all its properties, or its
      *         constructor fails
-     * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
+     * @throws UncheckedIOException if reading JSON bytes from {@code source} fails (malformed UTF-8 is not reported: it is decoded as
+     *         U+FFFD)
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
@@ -3097,7 +3104,8 @@ class JsonParserImpl extends AbstractJsonParser {
      * @throws UnsupportedOperationException if a bean class to be instantiated for the result cannot be: it is abstract without a
      *         builder, has no usable no-argument constructor and no builder or constructor taking all its properties, or its
      *         constructor fails
-     * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
+     * @throws UncheckedIOException if reading JSON bytes from {@code source} fails (malformed UTF-8 is not reported: it is decoded as
+     *         U+FFFD)
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
@@ -4123,6 +4131,13 @@ class JsonParserImpl extends AbstractJsonParser {
         }
     }
 
+    private boolean canSkipDiscardedQuotedValue(final JsonReader jr, final JsonDeserConfig config, final Type<?> type, final boolean discard) {
+        // A quoted built-in Object value is just the already validated token text. Preserve conversion
+        // callbacks for parser/config/reader extensions and every explicitly typed value.
+        return discard && getClass() == JsonParserImpl.class && config.getClass() == JsonDeserConfig.class && type == objType
+                && type.getClass() == ObjectType.class && (jr.getClass() == JsonStringReader.class || jr.getClass() == JsonStreamReader.class);
+    }
+
     /**
      * Supplies the creator and converter for a map that {@code readMap} constructs, keyed by the map class. The
      * default is the registered pair ({@code Immutable*} maps are filled through a mutable stand-in and converted on
@@ -4323,6 +4338,8 @@ class JsonParserImpl extends AbstractJsonParser {
                     } else {
                         if (key != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(key.toString())) {
                             // ignore.
+                        } else if (canSkipDiscardedQuotedValue(jr, config, propType, discard)) {
+                            value = null;
                         } else {
                             value = readValue(jr, readNullToEmpty, propType);
 
@@ -4919,6 +4936,8 @@ class JsonParserImpl extends AbstractJsonParser {
                         ? (Collection.class.isAssignableFrom(targetClass) ? (Collection<Object>) creatorAndConverter._1.apply(targetClass) : new ArrayList<>())
                         : output;
 
+        final boolean skipQuotedValues = canSkipDiscardedQuotedValue(jr, config, eleType, discard);
+
         Object value = null;
         boolean valueComplete = false;
 
@@ -4961,7 +4980,7 @@ class JsonParserImpl extends AbstractJsonParser {
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
 
-                    value = readValue(jr, readNullToEmpty, eleType);
+                    value = skipQuotedValues ? null : readValue(jr, readNullToEmpty, eleType);
 
                     if ((!ignoreNullOrEmpty || !isNullOrEmptyValue(eleType, value)) && !discard) {
                         // result.add(propValue);
@@ -5903,7 +5922,7 @@ class JsonParserImpl extends AbstractJsonParser {
 
         List<Object> rowKeyList = null;
         List<Object> columnKeyList = null;
-        Map<Object, Integer> stringColumnIndexes = null;
+        Map<Object, Integer> columnIndexes = null;
         List<List<Object>> columnList = null;
 
         String rowKeyType = null;
@@ -6085,7 +6104,7 @@ class JsonParserImpl extends AbstractJsonParser {
 
                             columnKeyList = readCollection(jr, JsonDeserConfig.create().setElementType(columnKeyValueType), null, null, false, List.class, null,
                                     null);
-                            stringColumnIndexes = null;
+                            columnIndexes = null;
                             break;
 
                         default:
@@ -6162,14 +6181,14 @@ class JsonParserImpl extends AbstractJsonParser {
 
                                     int index = N.INDEX_NOT_FOUND;
 
-                                    if (columnKeyValueType == strType) {
-                                        // String keys have stable, content-based equality. Other key types retain
-                                        // their existing comparisons, including ordered occurrences of array keys.
-                                        if (stringColumnIndexes == null) {
-                                            stringColumnIndexes = firstColumnIndexes(columnKeyList);
+                                    if (canIndexSheetColumnKeys(columnKeyValueType)) {
+                                        // String and boxed numeric keys have stable, matching equals/hashCode
+                                        // semantics. Other types retain their existing equality comparisons.
+                                        if (columnIndexes == null) {
+                                            columnIndexes = firstColumnIndexes(columnKeyList);
                                         }
 
-                                        index = stringColumnIndexes.getOrDefault(parsedColumnKey, N.INDEX_NOT_FOUND);
+                                        index = columnIndexes.getOrDefault(parsedColumnKey, N.INDEX_NOT_FOUND);
                                     } else if (parsedColumnKey != null && parsedColumnKey.getClass().isArray()) {
                                         // JSON repeats each column key as a property name. Parsing it creates a different
                                         // array, so resolve that wire representation by content while retaining the key
@@ -6384,13 +6403,18 @@ class JsonParserImpl extends AbstractJsonParser {
     /**
      * Reads a bracketed JSON value ({@code [...]}) into an array, collection, dataset, or
      * pair/triple, tracking JSON nesting depth to guard against stack-overflow on hostile input.
+     * A map, bean, {@code MapEntity}, {@code EntityId} or {@code Sheet} type has no JSON-array form: such a slot
+     * fails exactly as a top-level read of the same array text into that type fails (usually with a
+     * {@code ParsingException}), wherever the slot is nested.
      *
      * @param jr the JSON reader positioned after the opening bracket
      * @param config the deserialization configuration
      * @param propHandler an optional handler invoked for each element being added, or {@code null}
      * @param type the target type for the bracketed value
      * @return the deserialized value
-     * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum, the JSON is invalid, or
+     *         {@code type} is a map, bean, {@code MapEntity}, {@code EntityId} or {@code Sheet} type (a map type with a
+     *         non-{@code String} key type may instead report the key conversion failure, as the top-level read does)
      * @throws UncheckedIOException if reading from the character source underlying {@code jr} fails
      * @throws IOException declared by the {@code read*} helper signatures, but not thrown by the bundled {@link JsonReader}
      *         implementations, which report read failures as {@code UncheckedIOException}
@@ -6429,6 +6453,11 @@ class JsonParserImpl extends AbstractJsonParser {
                 // type.valueOf so the outcome equals the plain scalar sibling's (e.g. NumberFormatException
                 // "[1] is not a valid Integer") instead of an ArrayList smuggled into a typed slot or wrapper.
                 return readSingleValueObject(jr, START_BRACKET, type);
+            } else if (isBracedOnlyType(type)) {
+                // A map, bean, MapEntity, EntityId or Sheet slot fed a JSON array: the generic list fallback below would
+                // put an ArrayList into the slot. Its own valueOf reads the raw text exactly as a top-level read of that
+                // text does, so the slot fails with the same exception and message as the root and bean-property reads.
+                return readSingleValueObject(jr, START_BRACKET, type);
             } else {
                 // Tuple targets were dispatched to readTupleValue above, so no list converter can apply here.
                 return readCollection(jr, config, type, propHandler, false, List.class, null, null);
@@ -6445,6 +6474,11 @@ class JsonParserImpl extends AbstractJsonParser {
 
     private static boolean isSingleValueObjectType(final Type<?> type) {
         return type instanceof ObjectType && !type.isObject();
+    }
+
+    /** The structured types {@code readBracedValueBody} builds from a JSON object and that have no JSON-array form. */
+    private static boolean isBracedOnlyType(final Type<?> type) {
+        return type.isBean() || type.isMap() || type.isMapEntity() || type.isEntityId() || Sheet.class.isAssignableFrom(type.javaType());
     }
 
     /** Hands a detected value handler its original numeric tokens instead of an inferred List/Map.
@@ -6637,13 +6671,16 @@ class JsonParserImpl extends AbstractJsonParser {
     /**
      * Reads a braced JSON value ({@code {...}}) into a bean, map, map entity, entity id,
      * dataset, or sheet, tracking JSON nesting depth to guard against stack-overflow on
-     * hostile input.
+     * hostile input. A {@code Map.Entry} slot follows the rules of a top-level read of the same object: an
+     * {@code AbstractMap.SimpleEntry} (an {@code ImmutableEntry} for an immutable entry type) is returned, an empty
+     * object is {@code null}, and an object with more than one entry is rejected.
      *
      * @param jr the JSON reader positioned after the opening brace
      * @param config the deserialization configuration
      * @param type the target type for the braced value
      * @return the deserialized value
      * @throws ParsingException if the JSON nesting depth exceeds the allowed maximum or the JSON is invalid
+     * @throws IllegalArgumentException if {@code type} is a {@code Map.Entry} type and the object has more than one entry
      * @throws UncheckedIOException if reading from the character source underlying {@code jr} fails
      * @throws IOException declared by the {@code read*} helper signatures, but not thrown by the bundled {@link JsonReader}
      *         implementations, which report read failures as {@code UncheckedIOException}
@@ -6671,6 +6708,7 @@ class JsonParserImpl extends AbstractJsonParser {
      * @throws UncheckedIOException if reading from the character source underlying {@code jr} fails
      * @throws ParsingException if the braced value is malformed or does not match {@code type}, or the JSON nesting depth exceeds the allowed
      *         maximum
+     * @throws IllegalArgumentException if {@code type} is a {@code Map.Entry} type and the object has more than one entry
      * @throws IOException declared by the {@code read*} helper signatures, but not thrown by the bundled {@link JsonReader}
      *         implementations, which report read failures as {@code UncheckedIOException}
      */
@@ -6701,9 +6739,11 @@ class JsonParserImpl extends AbstractJsonParser {
             return readMapEntity(jr, config, false, type.javaType(), type);
         } else if (type.isEntityId()) {
             return readEntityId(jr, config, false, type.javaType(), type);
-        } else if (type.isSerializable() && !type.isObject() && !Map.Entry.class.isAssignableFrom(type.javaType())
+        } else if (type.isSerializable() && !type.isObject() && (!Map.Entry.class.isAssignableFrom(type.javaType()) || type.javaType() == Pair.class)
                 && !map2TargetTypeConverterMap.containsKey(type.javaType())) {
             // A scalar slot fed a JSON object: same treatment as readBracketedValue (raw text -> type.valueOf).
+            // Pair implements Map.Entry, but its JSON form is an array like Triple's: the Map.Entry fallback below would
+            // put a HashMap$Node into the Pair slot, while the root and bean-property reads reject the object.
             return readSingleValueObject(jr, START_BRACE, type);
         } else {
             final Map<Object, Object> map = readMap(jr, config, type, false, Map.class, null, null);
@@ -6734,6 +6774,16 @@ class JsonParserImpl extends AbstractJsonParser {
         }
 
         return indexes;
+    }
+
+    private static boolean canIndexSheetColumnKeys(final Type<?> type) {
+        if (type == strType) {
+            return true;
+        }
+
+        final Class<?> typeClass = type.getClass();
+        return typeClass == ByteType.class || typeClass == ShortType.class || typeClass == IntegerType.class || typeClass == LongType.class
+                || typeClass == FloatType.class || typeClass == DoubleType.class;
     }
 
     /**
@@ -7302,14 +7352,44 @@ class JsonParserImpl extends AbstractJsonParser {
     private static final Map<Class<?>, Function<Map<Object, Object>, ?>> map2TargetTypeConverterMap = new HashMap<>();
 
     static {
-        map2TargetTypeConverterMap.put(Map.Entry.class, t -> N.isEmpty(t) ? null : t.entrySet().iterator().next());
+        // An AbstractMap.SimpleEntry, as MapEntryType.valueOf returns: SimpleEntry slots resolve to that same Map.Entry-typed
+        // handler, so the HashMap's own node could not be stored in them. The entry rules are those of the top-level read
+        // (MapEntryType/ImmutableMapEntryType.valueOf): an empty object is null and more than one entry is rejected.
+        map2TargetTypeConverterMap.put(Map.Entry.class, t -> {
+            final Map.Entry<Object, Object> entry = singleEntry(t, "Map.Entry");
+            return entry == null ? null : new AbstractMap.SimpleEntry<>(entry);
+        });
 
-        map2TargetTypeConverterMap.put(AbstractMap.SimpleEntry.class, t -> N.isEmpty(t) ? null : new AbstractMap.SimpleEntry<>(t.entrySet().iterator().next()));
+        map2TargetTypeConverterMap.put(AbstractMap.SimpleEntry.class, map2TargetTypeConverterMap.get(Map.Entry.class));
 
-        map2TargetTypeConverterMap.put(AbstractMap.SimpleImmutableEntry.class,
-                t -> N.isEmpty(t) ? null : new AbstractMap.SimpleImmutableEntry<>(t.entrySet().iterator().next()));
+        // An ImmutableEntry (a SimpleImmutableEntry), as ImmutableMapEntryType.valueOf returns: ImmutableEntry slots resolve to
+        // that same SimpleImmutableEntry-typed handler, so a plain SimpleImmutableEntry could not be stored in them.
+        map2TargetTypeConverterMap.put(AbstractMap.SimpleImmutableEntry.class, t -> {
+            final Map.Entry<Object, Object> entry = singleEntry(t, "Map.ImmutableEntry");
+            return entry == null ? null : ImmutableEntry.copyOf(entry);
+        });
 
-        map2TargetTypeConverterMap.put(ImmutableEntry.class, t -> N.isEmpty(t) ? null : ImmutableEntry.copyOf(t.entrySet().iterator().next()));
+        map2TargetTypeConverterMap.put(ImmutableEntry.class, map2TargetTypeConverterMap.get(AbstractMap.SimpleImmutableEntry.class));
+    }
+
+    /**
+     * Returns the only entry of a JSON object read for a {@code Map.Entry} slot.
+     *
+     * @param map the object's entries
+     * @param typeName the entry type name used in the error message
+     * @return the entry, or {@code null} for an empty object
+     * @throws IllegalArgumentException if the object has more than one entry
+     */
+    private static Map.Entry<Object, Object> singleEntry(final Map<Object, Object> map, final String typeName) throws IllegalArgumentException {
+        if (N.isEmpty(map)) {
+            return null;
+        }
+
+        if (map.size() != 1) {
+            throw new IllegalArgumentException(typeName + " JSON must contain exactly one entry, but got: " + map.size());
+        }
+
+        return map.entrySet().iterator().next();
     }
 
     private static final Map<Class<?>, BiFunction<List<?>, Type<?>, Object>> list2PairTripleConverterMap = new HashMap<>();

@@ -2025,6 +2025,18 @@ public final class TypeFactory {
                 } else if (java.sql.Struct.class.isAssignableFrom(targetClass)) {
                     checkNoParameters(typeName, parameters, targetClass);
                     type = new StructType(targetClass);
+                } else if (NClob.class.isAssignableFrom(targetClass)) {
+                    // LOB handlers, like the JDBC handlers above, must precede the bean check: a Clob/Blob class with a
+                    // getter/setter pair (a SerialClob subclass, a Mockito mock) was typed as a bean, so its content was
+                    // dropped ("{}") or its serialization failed, while hasBuiltInType still refused registering a handler for it.
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new NClobType(targetClass);
+                } else if (Clob.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new ClobType(targetClass);
+                } else if (Blob.class.isAssignableFrom(targetClass)) {
+                    checkNoParameters(typeName, parameters, targetClass);
+                    type = new BlobType(targetClass);
                 } else if (Beans.isBeanClass(targetClass) && !mutablePrimitiveSimpleClassName.contains(ClassUtil.getSimpleClassName(targetClass))) {
                     checkNoParameters(typeName, parameters, targetClass);
                     type = new BeanType(targetClass, javaType == null && typeName.indexOf('<') >= 0 ? parseBeanReflectionType(typeName) : javaType);
@@ -2043,15 +2055,6 @@ public final class TypeFactory {
                 } else if (Type.class.isAssignableFrom(targetClass)) {
                     // Handler classes take their own constructor arguments: "Factory(\"custom,argument\")".
                     type = TypeAttrParser.newInstance(((Class<?>) targetClass).asSubclass(Type.class), typeName);
-                } else if (NClob.class.isAssignableFrom(targetClass)) {
-                    checkNoParameters(typeName, parameters, targetClass);
-                    type = new NClobType(targetClass);
-                } else if (Clob.class.isAssignableFrom(targetClass)) {
-                    checkNoParameters(typeName, parameters, targetClass);
-                    type = new ClobType(targetClass);
-                } else if (Blob.class.isAssignableFrom(targetClass)) {
-                    checkNoParameters(typeName, parameters, targetClass);
-                    type = new BlobType(targetClass);
                 } else if (Object[].class.isAssignableFrom(targetClass)) {
                     checkNoParameters(typeName, parameters, targetClass);
                     type = new ObjectArrayType(targetClass);
@@ -2147,7 +2150,21 @@ public final class TypeFactory {
      * name ({@code SQLArray}, {@code Ref}, {@code RowId}, {@code SQLXML}, or {@code Struct}). These handlers
      * transfer JDBC values without constructing implementation instances or enabling string deserialization.
      * Registration by class cannot replace them; a named custom registration may provide an alternate
-     * handler selected explicitly by that custom name.
+     * handler selected explicitly by that custom name. Implementations of {@link java.sql.Blob},
+     * {@link java.sql.Clob} and {@link java.sql.NClob} likewise get their LOB handler, never a bean handler.
+     * </p>
+     * <p>
+     * The LOB rule holds for a class that also has bean properties (getter/setter pairs): serializing a
+     * {@code Clob}/{@code NClob} instance writes its character content (and frees it) instead of its
+     * properties, a {@code Blob} instance cannot be serialized as text, and neither is deserialized from its
+     * JSON form. No type name or annotation selects a bean handler for such a class: every spelling of its
+     * class name resolves to the LOB handler, and {@link #registerType(Class, Type)} refuses it. To keep its
+     * properties, convert explicitly through a map ({@link com.landawn.abacus.util.Beans#beanToMap(Object)}
+     * to write, {@link com.landawn.abacus.util.Beans#mapToBean(Map, Class)} to read), or register a named type
+     * that does so with {@link #registerType(String, Class, BiFunction, BiFunction)} and select it on the property
+     * with {@link com.landawn.abacus.annotation.JsonXmlField#type() @JsonXmlField(type = "...")} or
+     * {@link com.landawn.abacus.annotation.Type#value() @Type("...")}; that named type writes the properties as
+     * one string value holding their JSON, not as a nested object.
      * </p>
      * <p>
      * This method never returns {@code null}: a class with no dedicated {@code Type} resolves to a
@@ -2395,9 +2412,10 @@ public final class TypeFactory {
      *         {@code null}, if {@code targetClass} has a built-in type, if a type has already been resolved and
      *         cached for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization),
      *         or if a type is already registered under the new type's name (as returned by {@link Type#name()}).
-     *         The new type is named after the canonical class name (shortened to the simple name, e.g. {@code "Year"}
-     *         for {@code java.time.Year}, when the class is in {@code java.lang}, {@code java.util}, {@code java.time}
-     *         or {@code com.landawn.abacus} and resolvable by that simple name), so a fallback that an earlier lookup by
+     *         The new type is named after the canonical class name, shortened to the simple name as {@link Type#name()}
+     *         describes (for a public class in {@code java.lang}, {@code java.util}, {@code java.time} or
+     *         {@code com.landawn.abacus} only when that simple name resolves to the same class, e.g. {@code "Year"} for
+     *         {@code java.time.Year}), so a fallback that an earlier lookup by
      *         that name ({@code getType("com.example.Foo")}, {@code getType("Year")}) cached also makes this method
      *         throw; to supersede such a fallback, use {@link #registerType(Class, Type)} with a differently named type or
      *         {@link #registerType(String, Class, BiFunction, BiFunction)}.
@@ -2452,9 +2470,10 @@ public final class TypeFactory {
      *         {@code null}, if {@code targetClass} has a built-in type, if a type has already been resolved and cached
      *         for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization),
      *         or if a type is already registered under the new type's name (as returned by {@link Type#name()}).
-     *         The new type is named after the canonical class name (shortened to the simple name, e.g. {@code "Year"}
-     *         for {@code java.time.Year}, when the class is in {@code java.lang}, {@code java.util}, {@code java.time}
-     *         or {@code com.landawn.abacus} and resolvable by that simple name), so a fallback that an earlier lookup by
+     *         The new type is named after the canonical class name, shortened to the simple name as {@link Type#name()}
+     *         describes (for a public class in {@code java.lang}, {@code java.util}, {@code java.time} or
+     *         {@code com.landawn.abacus} only when that simple name resolves to the same class, e.g. {@code "Year"} for
+     *         {@code java.time.Year}), so a fallback that an earlier lookup by
      *         that name ({@code getType("com.example.Foo")}, {@code getType("Year")}) cached also makes this method
      *         throw; to supersede such a fallback, use {@link #registerType(Class, Type)} with a differently named type or
      *         {@link #registerType(String, Class, Function, Function)}.

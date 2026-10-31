@@ -36,6 +36,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -743,6 +744,9 @@ public final class ClassUtil {
 
     private static final ClassValue<Map<String, Map<List<Class<?>>, Method>>> classDeclaredMethodPool = classValue(cls -> new ConcurrentHashMap<>());
 
+    // Exact declared names remain cacheable; arbitrary case-insensitive caller spellings have bounded admission.
+    private static final int METHOD_ALIAS_CACHE_LIMIT = 256;
+
     private static <V> ClassValue<V> classValue(final java.util.function.Function<Class<?>, V> factory) {
         return new ClassValue<>() {
             @Override
@@ -1427,40 +1431,7 @@ public final class ClassUtil {
             final File file = new File(fullPath);
 
             if (file.exists() && file.isDirectory()) {
-                // Get the list of the files contained in the package
-                final File[] files = file.listFiles();
-
-                if (N.isEmpty(files)) {
-                    continue;
-                }
-
-                for (final File file2 : files) {
-                    if (file2 == null) {
-                        continue;
-                    }
-
-                    // we are only interested in .class files; package-info.class is a compiler artifact
-                    // (a synthetic interface named "package-info"), not a class declared in the package.
-                    if (file2.isFile() && file2.getName().endsWith(CLASS_POSTFIX) && !PACKAGE_INFO_CLASS_FILE.equals(file2.getName())) {
-                        // removes the .class extension
-                        final String className = packageName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
-
-                        final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
-
-                        // Outside the try: a failure thrown by the caller's predicate is the caller's, and must
-                        // not be swallowed by skipClassLoadingException or relabelled as a class-loading failure.
-                        if (clazz != null && predicate.test(clazz)) {
-                            classes.add(clazz);
-                        }
-                    } else if (file2.isDirectory() && isRecursive && file2.getName().indexOf('.') < 0) {
-                        // A directory whose name contains '.' (e.g. a "v1.2" resource folder) cannot be a package:
-                        // turning it into a sub-package name and back into a path splits it at the '.', so the
-                        // recursive lookup found no resource and the whole scan failed with "No resource found".
-                        final String subPkgName = packageName + SK._PERIOD + file2.getName();
-                        //noinspection ConstantValue
-                        classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
-                    }
-                }
+                findClassesInDirectory(file, packageName, isRecursive, skipClassLoadingException, predicate, classes);
             } else if (file.exists() && file.getName().endsWith(JAR_POSTFIX)) {
                 JarFile jarFile = null;
 
@@ -1505,6 +1476,36 @@ public final class ClassUtil {
         }
 
         return classes;
+    }
+
+    private static void findClassesInDirectory(final File directory, final String packageName, final boolean isRecursive,
+            final boolean skipClassLoadingException, final Predicate<? super Class<?>> predicate, final List<Class<?>> classes) {
+        final File[] files = directory.listFiles();
+
+        if (N.isEmpty(files)) {
+            return;
+        }
+
+        for (final File file : files) {
+            if (file == null) {
+                continue;
+            }
+
+            // package-info.class is a compiler artifact, not a class declared in the package.
+            if (file.isFile() && file.getName().endsWith(CLASS_POSTFIX) && !PACKAGE_INFO_CLASS_FILE.equals(file.getName())) {
+                final String className = packageName + '.' + file.getName().substring(0, file.getName().length() - CLASS_POSTFIX.length());
+                final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
+
+                // Predicate failures belong to the caller and must not be treated as class-loading failures.
+                if (clazz != null && predicate.test(clazz)) {
+                    classes.add(clazz);
+                }
+            } else if (file.isDirectory() && isRecursive && file.getName().indexOf('.') < 0) {
+                // Traverse this physical root only. Re-enumerating all roots for each child multiplies overlapping package trees.
+                // A directory containing '.' cannot represent a single Java package segment.
+                findClassesInDirectory(file, packageName + SK._PERIOD + file.getName(), true, skipClassLoadingException, predicate, classes);
+            }
+        }
     }
 
     /**
@@ -1840,7 +1841,20 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    final Method existing = methodNamePool.putIfAbsent(methodName, method);
+                    Method existing = null;
+
+                    if (methodName.equals(method.getName())) {
+                        existing = methodNamePool.putIfAbsent(methodName, method);
+                    } else if (methodName.length() <= METHOD_ALIAS_CACHE_LIMIT) {
+                        synchronized (methodNamePool) {
+                            if (methodNamePool.size() < METHOD_ALIAS_CACHE_LIMIT) {
+                                existing = methodNamePool.putIfAbsent(methodName, method);
+                            } else {
+                                existing = methodNamePool.get(methodName);
+                            }
+                        }
+                    }
+
                     if (existing != null) {
                         method = existing;
                     }
@@ -1864,12 +1878,31 @@ public final class ClassUtil {
                 // }
 
                 if (method != null) {
-                    methodPool = methodNamePool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
+                    if (methodPool == null) {
+                        if (methodName.equals(method.getName())) {
+                            methodPool = methodNamePool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
+                        } else if (methodName.length() <= METHOD_ALIAS_CACHE_LIMIT) {
+                            synchronized (methodNamePool) {
+                                methodPool = methodNamePool.get(methodName);
+
+                                if (methodPool == null && methodNamePool.size() < METHOD_ALIAS_CACHE_LIMIT) {
+                                    methodPool = new ConcurrentHashMap<>();
+                                    final Map<List<Class<?>>, Method> existingPool = methodNamePool.putIfAbsent(methodName, methodPool);
+
+                                    if (existingPool != null) {
+                                        methodPool = existingPool;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     // Missing signatures are deliberately not retained, especially child types queried on parent classes.
-                    final Method existing = methodPool.putIfAbsent(Array.asList(parameterTypes.clone()), method);
-                    if (existing != null) {
-                        method = existing;
+                    if (methodPool != null) {
+                        final Method existing = methodPool.putIfAbsent(Array.asList(parameterTypes.clone()), method);
+                        if (existing != null) {
+                            method = existing;
+                        }
                     }
                 }
             }
@@ -2870,6 +2903,16 @@ public final class ClassUtil {
         N.checkArgNotNull(method, cs.method);
 
         final Class<?> declaringClass = method.getDeclaringClass();
+
+        if (Modifier.isPublic(method.getModifiers()) && Modifier.isPublic(declaringClass.getModifiers())) {
+            try {
+                // Exported public methods need no private/module access. Caller-sensitive methods still use the fallback strategies.
+                return MethodHandles.publicLookup().unreflect(method);
+            } catch (final Exception e) {
+                // Preserve the existing privileged strategies for non-exported or caller-sensitive public methods.
+            }
+        }
+
         MethodHandles.Lookup lookup = null;
 
         try {

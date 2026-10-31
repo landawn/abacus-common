@@ -37,7 +37,8 @@ import com.landawn.abacus.annotation.Beta;
  * {@code "AB"}, but converting that result again yields {@code "Ab"} — the separator that created
  * the word boundary is gone, so {@code "AB"} reads as a single all-caps word. Apply a camel-case
  * policy to an original identifier once; do not re-apply it to its own output. {@link #SNAKE_CASE},
- * {@link #SCREAMING_SNAKE_CASE}, {@link #KEBAB_CASE} and {@link #NO_CHANGE} are idempotent.</p>
+ * {@link #SCREAMING_SNAKE_CASE} and {@link #KEBAB_CASE} are idempotent for ASCII input (see the {@link Strings}
+ * converters for the Unicode exceptions), and {@link #NO_CHANGE} always is.</p>
  *
  * <p>The available naming policies are:</p>
  * <ul>
@@ -218,8 +219,8 @@ public enum NamingPolicy {
      * {@code "AB"}, but converting that result again yields {@code "Ab"} — the separator that
      * created the word boundary is gone, so {@code "AB"} reads as a single all-caps word. Apply a
      * camel-case policy to an original identifier once; do not re-apply it to its own output.
-     * {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE}, {@link #KEBAB_CASE} and {@link #NO_CHANGE}
-     * are idempotent.</p>
+     * {@link #SNAKE_CASE}, {@link #SCREAMING_SNAKE_CASE} and {@link #KEBAB_CASE} are idempotent for ASCII input
+     * (see the {@link Strings} converters for the Unicode exceptions), and {@link #NO_CHANGE} always is.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

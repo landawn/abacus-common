@@ -276,8 +276,9 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * This affects how {@code Date}, {@code Calendar}, and other temporal objects are formatted.
      *
      * <p>{@code null} is permitted and makes each temporal type fall back to its own default textual
-     * form (ISO-8601 text such as {@code "1970-01-01T00:00:00Z"} for {@code Date} / {@code Calendar},
-     * written as a quoted string in JSON). This is NOT the same as the default {@link DateTimeFormat#LONG},
+     * form (ISO-8601 text such as {@code "1970-01-01T00:00:00Z"} for {@code Date}; a zoned date-time in the
+     * calendar's own time zone such as {@code "1970-01-01T00:00:00Z[UTC]"} for {@code Calendar}; written as a
+     * quoted string in JSON). This is NOT the same as the default {@link DateTimeFormat#LONG},
      * which writes epoch milliseconds; pass {@code DateTimeFormat.LONG} explicitly to restore the default.</p>
      *
      * <p><b>Usage Examples:</b></p>

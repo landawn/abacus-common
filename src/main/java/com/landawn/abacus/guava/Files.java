@@ -984,22 +984,8 @@ public abstract class Files { //NOSONAR
     public static void copy(final File from, final File to) throws NullPointerException, IllegalArgumentException, IOException {
         // Guava only rejects from.equals(to), a textual comparison: another spelling of the same existing file
         // ("./a.txt", relative vs absolute, a hard link) passes that check and the file is truncated to 0 bytes.
-        if (!from.equals(to) && from.isFile() && to.exists()) {
-            Path fromPath = null;
-            Path toPath = null;
-
-            try {
-                fromPath = from.toPath();
-                toPath = to.toPath();
-            } catch (final InvalidPathException e) {
-                // java.io accepts names the Path parser rejects (on Windows an NTFS alternate data
-                // stream such as "a.txt:s"), so there is no Path identity to compare. Fall through to Guava, which opens
-                // plain streams and copied such a name at r9620, instead of letting the unchecked exception escape.
-            }
-
-            if (fromPath != null && toPath != null && java.nio.file.Files.isSameFile(fromPath, toPath)) {
-                throw new IllegalArgumentException("Source " + from + " and destination " + to + " refer to the same file");
-            }
+        if (!from.equals(to) && from.isFile() && to.exists() && isSameFile(from, to)) {
+            throw new IllegalArgumentException("Source " + from + " and destination " + to + " refer to the same file");
         }
 
         com.google.common.io.Files.copy(from, to);
@@ -1029,6 +1015,12 @@ public abstract class Files { //NOSONAR
      *       volume, keeps the destination intact when the move fails.</li>
      * </ul>
      *
+     * <p>If {@code to} is another name of the existing regular file {@code from} (as determined by
+     * {@link java.nio.file.Files#isSameFile(Path, Path)}), only the rename is attempted, because the copy+delete
+     * fallback would truncate the file and then delete it. A rename that succeeds (for example onto a {@code "./"}
+     * spelling of the same name) completes as usual; when it fails (for example onto a UNC or mapped-drive alias on
+     * Windows) an {@link IllegalArgumentException} is thrown and the file is left untouched.
+     *
      * <p><b>{@link java.nio.file.Path} equivalent:</b> {@link java.nio.file.Files#move}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1043,12 +1035,42 @@ public abstract class Files { //NOSONAR
      * @param from the source file.
      * @param to the destination file (must be the complete target path, not just a directory).
      * @throws NullPointerException if a reference argument is {@code null}.
-     * @throws IllegalArgumentException if {@code from.equals(to)}.
-     * @throws IOException if renaming fails and the fallback cannot copy the contents or delete the original file;
+     * @throws IllegalArgumentException if {@code from.equals(to)}, or if {@code to} is another name of the existing regular
+     *         file {@code from} that {@link File#renameTo(File)} cannot move onto.
+     * @throws IOException if checking whether both files are the same fails, or if renaming fails and the fallback cannot
+     *         copy the contents or delete the original file;
      *         in that case {@code to} may have been overwritten or deleted, while {@code from} is left in place.
      */
     public static void move(final File from, final File to) throws NullPointerException, IllegalArgumentException, IOException {
+        // Guava falls back to copy + delete when renameTo fails. When to is another name of the same existing file that
+        // renameTo cannot move onto (a UNC or mapped-drive alias on Windows, a bind mount on Linux), that copy truncates
+        // the file to 0 bytes and the delete then removes it, without any exception. Only the rename is tried for it.
+        if (!from.equals(to) && from.isFile() && to.exists() && isSameFile(from, to)) {
+            if (!from.renameTo(to)) {
+                throw new IllegalArgumentException("Source " + from + " and destination " + to + " refer to the same file");
+            }
+
+            return;
+        }
+
         com.google.common.io.Files.move(from, to);
+    }
+
+    private static boolean isSameFile(final File file1, final File file2) throws IOException {
+        final Path path1;
+        final Path path2;
+
+        try {
+            path1 = file1.toPath();
+            path2 = file2.toPath();
+        } catch (final InvalidPathException e) {
+            // java.io accepts names the Path parser rejects (on Windows an NTFS alternate data stream such as "a.txt:s"), so
+            // there is no Path identity to compare. The callers then fall through to Guava, which opens plain streams and
+            // copied such a name at r9620, instead of letting the unchecked exception escape.
+            return false;
+        }
+
+        return java.nio.file.Files.isSameFile(path1, path2);
     }
 
     /**

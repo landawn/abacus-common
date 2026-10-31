@@ -1588,4 +1588,98 @@ public class MultimapRemoveTest extends MultimapTestSupport {
         assertSame(shared, values.get("b"));
         assertEquals(2, values.keyCount());
     }
+
+    // ---- deep review 2026-10-26 G057 begin ----
+    // G057-01: on an access-ordered LinkedHashMap, get() is a structural modification; removeValues(Map) of the
+    // wrapped backing map threw ConcurrentModificationException although its javadoc promises it empties the multimap.
+    @Test
+    public void testRemoveValues_accessOrderedWrappedBackingMap() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>(16, 0.75f, true);
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+        backing.put("b", new ArrayList<>(Collections.singletonList(3)));
+        backing.put("c", new ArrayList<>(Arrays.asList(4, 5)));
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+
+        assertTrue(mm.removeValues(backing));
+
+        assertTrue(mm.isEmpty());
+        assertTrue(backing.isEmpty());
+    }
+
+    // G057-01: same through removeValues(Multimap) with a distinct multimap wrapping the access-ordered backing map.
+    @Test
+    public void testRemoveValues_accessOrderedAliasedWrappedMultimap() {
+        final Map<String, Set<Integer>> backing = new LinkedHashMap<>(16, 0.75f, true);
+        backing.put("a", new LinkedHashSet<>(Arrays.asList(1, 2)));
+        backing.put("b", new LinkedHashSet<>(Collections.singletonList(3)));
+        final SetMultimap<String, Integer> target = SetMultimap.wrap(backing);
+        final SetMultimap<String, Integer> aliasedRemovals = SetMultimap.wrap(backing);
+
+        assertTrue(target.removeValues(aliasedRemovals));
+
+        assertTrue(target.isEmpty());
+        assertTrue(backing.isEmpty());
+    }
+
+    // G057-01: removals from a separate map on an access-ordered backing map keep the non-matching values.
+    @Test
+    public void testRemoveValues_accessOrderedBackingPartialRemoval() {
+        final ListMultimap<String, Integer> mm = CommonUtil.newListMultimap(() -> new LinkedHashMap<>(16, 0.75f, true), ArrayList::new);
+        mm.putValues("a", Arrays.asList(1, 2));
+        mm.putValues("b", Arrays.asList(3));
+        mm.putValues("c", Arrays.asList(4, 5));
+
+        final Map<String, List<Integer>> toRemove = new LinkedHashMap<>();
+        toRemove.put("c", Arrays.asList(5, 9));
+        toRemove.put("b", Arrays.asList(3));
+        toRemove.put("z", Arrays.asList(1));
+
+        assertTrue(mm.removeValues(toRemove));
+
+        assertEquals(Arrays.asList(1, 2), mm.get("a"));
+        assertNull(mm.get("b"));
+        assertEquals(Arrays.asList(4), mm.get("c"));
+        assertEquals(2, mm.keyCount());
+    }
+    // ---- deep review 2026-10-26 G057 end ----
+
+    // ---- deep review 2026-10-26 verify G123 begin ----
+    // G057-01: a read-only view of an access-ordered backing map (the javadoc's "a view of it") empties the multimap instead of throwing CME.
+    @Test
+    public void testRemoveValues_accessOrderedBackingMapUnmodifiableView() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>(16, 0.75f, true);
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+        backing.put("b", new ArrayList<>(Collections.singletonList(3)));
+        backing.put("c", new ArrayList<>(Arrays.asList(4, 5)));
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+
+        assertTrue(mm.removeValues(Collections.unmodifiableMap(backing)));
+
+        assertTrue(mm.isEmpty());
+        assertTrue(backing.isEmpty());
+    }
+
+    // G057-01 neighbour: with a separate removal map, an access-ordered backing map is looked up in the argument's key order as before,
+    // so the surviving keys end in the same access order (a, e, d, b) and only the matching values are removed.
+    @Test
+    public void testRemoveValues_accessOrderedBackingKeyOrderAfterPartialRemoval() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>(16, 0.75f, true);
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2)));
+        backing.put("b", new ArrayList<>(Arrays.asList(3, 4)));
+        backing.put("c", new ArrayList<>(Collections.singletonList(5)));
+        backing.put("d", new ArrayList<>(Arrays.asList(6, 7)));
+        backing.put("e", new ArrayList<>(Collections.singletonList(8)));
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+
+        final Map<String, List<Integer>> toRemove = new LinkedHashMap<>();
+        toRemove.put("d", Arrays.asList(7));
+        toRemove.put("b", Arrays.asList(9));
+        toRemove.put("c", Arrays.asList(5));
+
+        assertTrue(mm.removeValues(toRemove));
+
+        // toString iterates without touching the access order
+        assertEquals("{a=[1, 2], e=[8], d=[6], b=[3, 4]}", backing.toString());
+    }
+    // ---- deep review 2026-10-26 verify G123 end ----
 }

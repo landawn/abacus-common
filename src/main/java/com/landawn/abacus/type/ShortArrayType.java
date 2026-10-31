@@ -200,7 +200,7 @@ public final class ShortArrayType extends ObjectArrayType<Short> {
      * Writes the character representation of a Short array to the given CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
      * The array is formatted as comma-separated values enclosed in square brackets.
-     * Null elements are written as "null".
+     * Null elements are written as "null", or {@code 0} when {@code writeNullNumberAsZero} is enabled in {@code config}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

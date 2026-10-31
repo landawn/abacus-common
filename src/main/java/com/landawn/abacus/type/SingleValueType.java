@@ -709,7 +709,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * rejection of present-null {@code Nullable} values at any nested depth. Other configurations use escaped
      * {@code stringOf} text; a value whose runtime type is a plain {@link ObjectType} is written as its quoted,
      * escaped {@code toString()}, and a
-     * handler with no serialization category at all (the JDBC locators) writes through its own {@code serializeTo}.
+     * handler with no serialization category at all (the JDBC types Blob, Ref, RowId, SQLXML, SQL Array and Struct) writes through its
+     * own {@code serializeTo}.
      * A {@code null} value writes the literal {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
@@ -780,8 +781,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
                     }
                 } else if (realType.isSerializable() || realType.serializationType() == SerializationType.UNKNOWN) {
                     // Same rule as AbstractTupleType.serializeSlot: a handler with no serialization category (the
-                    // JDBC locators - Blob/Ref/RowId/SQLXML/Array) has no JSON shape either, so it keeps its own
-                    // form (and its own descriptive exception) instead of the parser's "Unsupported class".
+                    // JDBC types - Blob/Ref/RowId/SQLXML/SQL Array/Struct) has no JSON shape either, so it keeps its own
+                    // form (its stringOf text, or Blob's own descriptive exception) instead of the parser's "Unsupported class".
                     realType.serializeTo(writer, x, config);
                 } else if (config instanceof JsonSerConfig jsc) {
                     // Map/bean/collection: only the JSON parser can write the structural form. Pretty format is

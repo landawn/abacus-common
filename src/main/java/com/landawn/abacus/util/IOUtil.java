@@ -10746,7 +10746,7 @@ public final class IOUtil {
             // copyDirectory has already checked its own pair that way.
             final Path destInSourceSpelling = guard == null ? inSpellingOf(destLocation, srcLocation) : destLocation;
 
-            requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), destInSourceSpelling.toString(), "copy");
+            requireDestDirectoryOutsideSourceDirectory(srcLocation, destInSourceSpelling, "copy");
 
             if (guard == null) {
                 requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destLocation, srcLocation, "copy");
@@ -10756,7 +10756,7 @@ public final class IOUtil {
             final Path spelledTarget = destLocation.resolve(srcName);
 
             // Checked before createDestDirectory, so a rejected call still leaves no new directory behind.
-            requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), destInSourceSpelling.resolve(srcName).toString());
+            requireCopyTargetOutsideSourceDirectory(srcLocation, destInSourceSpelling.resolve(srcName));
 
             // srcLocation is the source's REAL path while the target is only spelled, so a directory link copied
             // into the directory that holds it (target = the link itself, which leads to the source) slipped past
@@ -10774,7 +10774,7 @@ public final class IOUtil {
 
                 if (linkTarget != null) {
                     // A link's real path is spelled on the real volume: compared in the source's own (subst/UNC) spelling.
-                    requireCopyTargetOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(linkTarget, srcLocation).toString());
+                    requireCopyTargetOutsideSourceDirectory(srcLocation, inSpellingOf(linkTarget, srcLocation));
                 }
             }
 
@@ -10964,7 +10964,7 @@ public final class IOUtil {
      * are DERIVED, never queried per directory: one {@code toRealPath()} for the source root, one for the output
      * root, one per junction met; a plain subdirectory is its parent's real path plus its name.
      *
-     * <p>Paths are compared as spelled, including case on Windows: distinct entries in a case-sensitive directory
+     * <p>Paths are compared as spelled below their roots, including case on Windows: distinct entries in a case-sensitive directory
      * must not be mistaken for a cycle. This spelling comparison fails across an ALIAS: a {@code subst} or mapped drive or a UNC share
      * names the same directories under another root, {@code toRealPath()} keeps such a spelling (no reparse point
      * on the path), {@code getCanonicalPath()} resolves a subst drive on JDK 25 but nothing on JDK 21, and a
@@ -10997,15 +10997,13 @@ public final class IOUtil {
         }
 
         private boolean leadsBackAsSpelled(final Path junctionTarget) {
-            final String targetSpelling = junctionTarget.toString();
-
             for (final Path onPath : sourcePath) {
-                if (isSameOrInside(onPath.toString(), targetSpelling)) {
+                if (isSameOrInside(onPath, junctionTarget)) {
                     return true;
                 }
             }
 
-            return outputRoot != null && (isSameOrInside(targetSpelling, outputRoot.toString()) || isSameOrInside(outputRoot.toString(), targetSpelling));
+            return outputRoot != null && (isSameOrInside(junctionTarget, outputRoot) || isSameOrInside(outputRoot, junctionTarget));
         }
 
         /**
@@ -11014,15 +11012,17 @@ public final class IOUtil {
          */
         private Path inSeedSpelling(final Path target) {
             for (final Map.Entry<Path, Path> alias : aliases.entrySet()) {
-                // Path.startsWith folds case on Windows; only an exact prefix can reuse this learned alias.
-                if (isSameOrInside(target.toString(), alias.getKey().toString())) {
+                // Only the root may differ in case; every directory name must still match exactly.
+                if (isSameOrInside(target, alias.getKey())) {
                     return alias.getValue().resolve(alias.getKey().relativize(target));
                 }
             }
 
             for (final Path seed : new Path[] { sourcePath.peekLast(), outputRoot }) {
                 if (seed == null || seed.getRoot() == null || seed.getRoot().equals(target.getRoot())) {
-                    continue; // the same root: the spelling comparison was authoritative
+                    // The same root, possibly spelled in another case: every containment check compares roots by the
+                    // filesystem's rules (isSameOrInside(Path, Path)), so the comparison as spelled was authoritative.
+                    continue;
                 }
 
                 for (Path ancestor = target; ancestor != null; ancestor = ancestor.getParent()) {
@@ -11257,7 +11257,9 @@ public final class IOUtil {
      * compares like with like; {@code location} itself otherwise. Without it {@code Q:\src\sub} (Q: a subst drive for
      * {@code C:\data}) passed as "outside" {@code C:\data\src}, and copyDirectory copied the source into itself for
      * ever on JDK 21. Same-root pairs, the common case, cost nothing; an alias is found by file identity, as
-     * {@link CopyCycleGuard} finds one.
+     * {@link CopyCycleGuard} finds one. A root that differs only in case ({@code \\localhost\C$} for
+     * {@code \\LOCALHOST\c$}) is the same root and is left as spelled: the containment checks compare roots
+     * case-insensitively themselves (see {@link #isSameOrInside(Path, Path)}).
      */
     private static Path inSpellingOf(final Path location, final Path reference) {
         final Path translated = new CopyCycleGuard(reference).inSeedSpelling(location);
@@ -11279,16 +11281,21 @@ public final class IOUtil {
      * <p>Callers pass <i>resolved</i> locations ({@link Path#toRealPath(java.nio.file.LinkOption[])} when the directory exists), not
      * merely {@link File#getCanonicalPath()}: on Windows the latter does not follow a directory junction.
      *
-     * @param srcCanonicalPath the resolved path of the source directory.
-     * @param destCanonicalPath the resolved path of the destination directory.
+     * <p>The locations are compared as {@link #isSameOrInside(Path, Path)} compares them: the root (a drive letter, a UNC
+     * server and share) by the filesystem's rules, every name below it exactly as spelled. A junction's real path carries the
+     * redirector's {@code \\localhost\C$} where the caller spelled {@code \\LOCALHOST\c$}, and that spelling of the same
+     * root used to make a destination inside the source pass as "outside" it.
+     *
+     * @param srcLocation the resolved path of the source directory.
+     * @param destLocation the resolved path of the destination directory.
      * @param operation the verb used in the message ({@code "copy"} / {@code "move"}).
      * @throws IllegalArgumentException if the destination is the source or is inside it.
      */
-    private static void requireDestDirectoryOutsideSourceDirectory(final String srcCanonicalPath, final String destCanonicalPath, final String operation)
+    private static void requireDestDirectoryOutsideSourceDirectory(final Path srcLocation, final Path destLocation, final String operation)
             throws IllegalArgumentException {
-        if (isSameOrInside(destCanonicalPath, srcCanonicalPath)) {
-            throw new IllegalArgumentException("Failed to " + operation + " due to the target directory: " + destCanonicalPath
-                    + " is in or same as the source directory: " + srcCanonicalPath);
+        if (isSameOrInside(destLocation, srcLocation)) {
+            throw new IllegalArgumentException(
+                    "Failed to " + operation + " due to the target directory: " + destLocation + " is in or same as the source directory: " + srcLocation);
         }
     }
 
@@ -11327,7 +11334,7 @@ public final class IOUtil {
 
             // Equal: no link on the way, and that spelling has been compared already.
             if (!whereCreated.toString().equals(destLocation.toString())) {
-                requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(whereCreated, srcLocation).toString(), operation);
+                requireDestDirectoryOutsideSourceDirectory(srcLocation, inSpellingOf(whereCreated, srcLocation), operation);
             }
 
             return;
@@ -11338,7 +11345,8 @@ public final class IOUtil {
      * Rejects a copy whose <i>target</i> - the directory {@code destinationDirectory/srcDir.getName()} that the source is
      * recreated as - would be the source directory itself or one of its ancestors.
      *
-     * <p>This is the other half of {@link #requireDestDirectoryOutsideSourceDirectory(String, String, String)}.
+     * <p>This is the other half of {@link #requireDestDirectoryOutsideSourceDirectory(Path, Path, String)}, and compares its
+     * locations the same way: the root by the filesystem's rules, the names below it as spelled.
      * A {@code destinationDirectory} that is an ancestor of the source is legal and stays legal, but the target <i>inside</i>
      * it must still be a place of its own. The two coincide whenever a name repeats along the path: with
      * {@code destinationDirectory} the source's own parent the target is the source, and copying {@code "g/b/c/b"} into
@@ -11347,15 +11355,14 @@ public final class IOUtil {
      * to copy, reporting success having done nothing and handing back the source as "the copy" (a caller that
      * then deleted the source, the idiom {@code moveToDirectory}'s own javadoc suggests, lost the tree).
      *
-     * @param srcCanonicalPath the canonical path of the source directory.
-     * @param targetCanonicalPath the canonical path of the directory the source would be recreated as.
+     * @param srcLocation the resolved path of the source directory.
+     * @param targetLocation the path of the directory the source would be recreated as, in the source's spelling.
      * @throws IllegalArgumentException if the target is the source directory or one of its ancestors.
      */
-    private static void requireCopyTargetOutsideSourceDirectory(final String srcCanonicalPath, final String targetCanonicalPath)
-            throws IllegalArgumentException {
-        if (isSameOrInside(srcCanonicalPath, targetCanonicalPath)) {
-            throw new IllegalArgumentException("Failed to copy due to the target directory: " + targetCanonicalPath
-                    + " is the source directory, or one of its ancestors: " + srcCanonicalPath);
+    private static void requireCopyTargetOutsideSourceDirectory(final Path srcLocation, final Path targetLocation) throws IllegalArgumentException {
+        if (isSameOrInside(srcLocation, targetLocation)) {
+            throw new IllegalArgumentException(
+                    "Failed to copy due to the target directory: " + targetLocation + " is the source directory, or one of its ancestors: " + srcLocation);
         }
     }
 
@@ -11385,6 +11392,43 @@ public final class IOUtil {
         final char next = inner.charAt(outer.length());
 
         return next == '/' || next == '\\';
+    }
+
+    /**
+     * Whether {@code inner}, which {@link Path#startsWith(Path)} already places at or inside {@code outer}, also spells
+     * every name of {@code outer} below the root exactly as {@code outer} does. On Windows {@code Path.startsWith} and
+     * {@code Path.equals} fold case, which is wrong for two entries of a case-sensitive directory ({@code out} and
+     * {@code OUT}). The root is left to them: a drive letter or a UNC server and share is case-insensitive, and its
+     * spelling depends on how the path was resolved - {@link Path#toRealPath(LinkOption...)} keeps a caller's
+     * {@code \\LOCALHOST\c$}, while a path resolved through a junction carries the redirector's {@code \\localhost\C$}.
+     * On Unix {@code Path.startsWith} is exact already.
+     *
+     * @param inner a path for which {@code inner.startsWith(outer)} holds.
+     * @param outer the path {@code inner} is the same as or lies inside.
+     * @return {@code true} if every name of {@code outer} below its root is spelled identically in {@code inner}.
+     */
+    private static boolean isSameOrInsideBelowRoot(final Path inner, final Path outer) {
+        final Path root = outer.getRoot();
+        final int rootLength = root == null ? 0 : root.toString().length();
+        final String outerSpelling = outer.toString();
+
+        return inner.toString().regionMatches(rootLength, outerSpelling, rootLength, outerSpelling.length() - rootLength);
+    }
+
+    /**
+     * Returns whether {@code inner} denotes {@code outer} itself or something inside it, comparing whole names (so
+     * {@code /a/bc} is not inside {@code /a/b}). The root - a drive letter, a UNC server and share - is matched by the
+     * filesystem's rules (case-insensitively on Windows); every name below it must be spelled exactly as in
+     * {@code outer} (see {@link #isSameOrInsideBelowRoot(Path, Path)}). All directory containment checks of the copy and
+     * move family use this comparison, so a root respelled by a junction's redirector is still the same root, while
+     * {@code out} and {@code OUT} in a case-sensitive directory stay two directories.
+     *
+     * @param inner the resolved path being tested.
+     * @param outer the resolved path it may sit inside.
+     * @return {@code true} if {@code inner} is {@code outer} or lies inside it.
+     */
+    private static boolean isSameOrInside(final Path inner, final Path outer) {
+        return inner.startsWith(outer) && isSameOrInsideBelowRoot(inner, outer);
     }
 
     private static boolean endsWithSeparator(final String path) {
@@ -11537,7 +11581,7 @@ public final class IOUtil {
         // In the source's spelling: a subst/UNC alias of a directory inside the source must not read as "outside" it.
         final Path destLocation = inSpellingOf(destResolved, srcLocation);
 
-        requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), destLocation.toString(), "copy");
+        requireDestDirectoryOutsideSourceDirectory(srcLocation, destLocation, "copy");
         requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destResolved, srcLocation, "copy");
 
         // Copying into an ANCESTOR of srcDir is legal, but the one immediate child whose name repeats the first
@@ -11551,12 +11595,14 @@ public final class IOUtil {
         // siblings), and a live junction was copied as a directory INTO the source with a normal return. Looked
         // up without following (destinationEntryExists), so a dangling link or junction is rejected too rather
         // than left out - nothing of that name can ever be recreated there.
-        if (isSameOrInside(srcLocation.toString(), destLocation.toString())) {
+        // Compared as the containment checks above compare (root by the filesystem's rules, names as spelled), so a
+        // destination ancestor spelled under another case of the same drive or UNC root is recognised too.
+        if (isSameOrInside(srcLocation, destLocation)) {
             final String collidingName = destLocation.relativize(srcLocation).getName(0).toString();
             final File collidingChild = new File(sourceDirectory, collidingName);
 
             if (destinationEntryExists(collidingChild)) {
-                requireCopyTargetOutsideSourceDirectory(srcLocation.resolve(collidingName).toString(), destLocation.resolve(collidingName).toString());
+                requireCopyTargetOutsideSourceDirectory(srcLocation.resolve(collidingName), destLocation.resolve(collidingName));
             }
         }
 
@@ -12606,7 +12652,7 @@ public final class IOUtil {
             final Path srcLocation = resolvedDirectoryLocation(source);
             final Path destResolved = resolvedDirectoryLocation(destinationDirectory);
 
-            requireDestDirectoryOutsideSourceDirectory(srcLocation.toString(), inSpellingOf(destResolved, srcLocation).toString(), "move");
+            requireDestDirectoryOutsideSourceDirectory(srcLocation, inSpellingOf(destResolved, srcLocation), "move");
             requireNewDestDirectoryOutsideSourceDirectory(destinationDirectory, destResolved, srcLocation, "move");
         }
 
@@ -12944,8 +12990,11 @@ public final class IOUtil {
      * {@code isDirectory() && isOther()}; because other directory reparse points (cloud-storage placeholders,
      * projected file systems) look the same, a redirect is confirmed by the entry's real path differing from its
      * parent's real path plus its own name, and one whose target cannot be resolved at all (dangling) counts as a
-     * link. On Unix {@code isOther()} never coincides with {@code isDirectory()}, so this is exactly
-     * {@code isSymbolicLink()} there.
+     * link. That comparison is exact below the root: {@link Path#equals(Object)} ignores case on Windows, so when it
+     * reports the two equal, the entry's own on-disk name (read without following it) decides, and a junction to a
+     * sibling whose name differs only in case ({@code J} to {@code j} in a case-sensitive directory) is a link,
+     * while the same entry spelled in another case by the caller is not. On Unix {@code isOther()} never coincides
+     * with {@code isDirectory()}, so this is exactly {@code isSymbolicLink()} there.
      *
      * <p><b>Internal API.</b> It is {@code public} only so that the directory-walking code in
      * {@code com.landawn.abacus.util.stream} can share this predicate rather than duplicate the
@@ -13005,7 +13054,30 @@ public final class IOUtil {
                 return false;
             }
 
-            return !path.toRealPath().equals(parent.toRealPath().resolve(fileName));
+            final Path real = path.toRealPath();
+            final Path unredirected = parent.toRealPath().resolve(fileName);
+
+            if (!real.equals(unredirected)) {
+                return true;
+            }
+
+            if (isSameOrInsideBelowRoot(real, unredirected)) {
+                return false;
+            }
+
+            // Path.equals folds case on Windows, so a junction to a sibling whose name differs only in case (two entries
+            // of a case-sensitive directory, "J" -> "j") read as no redirect, and the delete family emptied the sibling
+            // through it. The entry's own on-disk name, read without following it, tells that apart from a caller who
+            // merely spelled the name in another case.
+            final Path ownName = path.toRealPath(LinkOption.NOFOLLOW_LINKS).getFileName();
+
+            if (ownName == null) {
+                return false;
+            }
+
+            final Path ownPath = unredirected.resolveSibling(ownName);
+
+            return !real.equals(ownPath) || !isSameOrInsideBelowRoot(real, ownPath);
         } catch (final IOException e) {
             return true; // the redirect cannot be resolved: a dangling junction
         }
@@ -14596,7 +14668,8 @@ public final class IOUtil {
      * directory": {@code moveToDirectory(P/f.txt, p, ATOMIC_MOVE)} silently replaced {@code p/f.txt}, and
      * {@code copyToDirectory(P/g.txt, p)} created {@code "Copy of g.txt"}. {@link Path#toRealPath(LinkOption...)}
      * (following links) resolves junctions and symbolic links and returns the on-disk case, so equal strings are the
-     * same directory and strings that are equal only ignoring case are taken as two different ones (siblings in a
+     * same directory (ignoring drive-letter or UNC-root case only), and paths whose components below the root differ
+     * only in case are taken as two different ones (siblings in a
      * case-sensitive directory). It keeps a subst or mapped drive and a UNC spelling, though (no reparse point on the
      * path), so any other pair is decided by {@code Files.isSameFile}, which - the two paths no longer being equal
      * ignoring case - opens both and compares their file identity. Elsewhere {@code Files.isSameFile} compares file
@@ -14614,7 +14687,9 @@ public final class IOUtil {
                 final String spelledA = realA.toString();
                 final String spelledB = realB.toString();
 
-                if (spelledA.equals(spelledB)) {
+                // The UNC server/share or drive letter may be respelled by a junction's redirector. Only names below
+                // that root distinguish entries in a case-sensitive directory.
+                if (realA.equals(realB) && isSameOrInsideBelowRoot(realA, realB)) {
                     return true;
                 }
 
@@ -15203,7 +15278,8 @@ public final class IOUtil {
             throw new IOException("Zip entry's path passes through a link that cannot be resolved: '" + entryName + "' (" + e.getMessage() + ")", e);
         }
 
-        if (!real.startsWith(targetRealPath)) {
+        // Also compared as spelled below the root: Path.startsWith folds case on Windows (see the lexical test in unzip).
+        if (!real.startsWith(targetRealPath) || !isSameOrInsideBelowRoot(real, targetRealPath)) {
             throw new IOException("Zip entry is outside of the target dir (its path passes through a link): " + entryName);
         }
     }
@@ -15455,7 +15531,10 @@ public final class IOUtil {
                     final File newFile = canonicalEntryFile(canonicalTargetDir, platformEntryName, entryName);
                     final Path newPath = entryPath(newFile, entryName);
 
-                    if (!newPath.startsWith(canonicalTargetPath)) {
+                    // Path.startsWith folds case on Windows: in a case-sensitive directory "../OUT/x" from a target "out"
+                    // passed it and was written into the sibling OUT. Both paths are canonical (on-disk case), so the exact
+                    // spelling is compared too; Path.startsWith stays, as on Unix it compares the raw name bytes.
+                    if (!newPath.startsWith(canonicalTargetPath) || !isSameOrInside(newPath.toString(), canonicalTargetPath.toString())) {
                         throw new IOException("Zip entry is outside of the target dir: " + entryName);
                     }
 

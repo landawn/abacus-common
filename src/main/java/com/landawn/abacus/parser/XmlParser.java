@@ -46,6 +46,19 @@ import com.landawn.abacus.type.Type;
  * <p>Whitespace inside scalar values is preserved, including whitespace-only text and CDATA
  * fragments. Indentation between nested elements is ignored by the structural readers.</p>
  *
+ * <p>A collection root with no items or only blank text, such as {@code <list/>}, is an empty collection
+ * of the requested type on every reader. A root element of any type marked {@code isNull="true"} - a bean, map,
+ * array, collection or scalar - is {@code null} on every reader, whatever payload it carries; a collection root marked so is
+ * not an empty collection or a collection containing one null item. The marker's {@code type} attribute is still
+ * checked against the configured type allowlist.</p>
+ *
+ * <p>Below the root, a blank map, bean or {@code MapEntity} item of an array or collection ({@code <list><map></map></list>}, the form in which
+ * the standard writer emits an empty structured item) is an empty value of that type on both standard readers. Declared {@code MapEntity}
+ * elements retain their entity names and type in root containers and collection/array properties. A blank nested
+ * list or array item written by hand ({@code <list><list/></list>}, {@code <array><array/></array>}) is backend-specific on the
+ * standard parser: its StAX reader reads an empty container, its DOM reader {@code null}. The writers emit an empty nested
+ * list or array as {@code []} and a {@code null} one with {@code isNull="true"}; both read alike on every reader.</p>
+ *
  * <p>The DOM and StAX readers convert an empty scalar {@code <e/>} wrapper in an array or collection through the
  * selected type's {@code valueOf("")}. This preserves an empty String and produces the type's default
  * for built-in numeric, boolean and character primitives and their boxed types. Types such as

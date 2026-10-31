@@ -636,4 +636,295 @@ public class JsonHttpMessageConverterTest extends TestBase {
         assertInstanceOf(ListMultimap.class, readMultimap);
         assertEquals(List.of("v"), ((ListMultimap<?, ?>) readMultimap).get("k"));
     }
+
+    // ---- deep review 2026-10-27 G138 begin ----
+    public static class FormattedNumberBean {
+        @com.landawn.abacus.annotation.JsonXmlField(numberFormat = "#.##")
+        public double d;
+        public String s = "x";
+    }
+
+    public static class TransientNumberBean {
+        public transient double t;
+        public String s = "x";
+    }
+
+    private static List<Object> containersOf(final double d) {
+        final TestWrapper wrapper = new TestWrapper();
+        wrapper.score = d;
+        final List<Object> values = new ArrayList<>();
+        values.add(List.of(d));
+        values.add(Map.of("a", d));
+        values.add(wrapper);
+        values.add(new double[] { 1, d });
+        values.add(new Double[] { d });
+        values.add(new Object[] { "s", d });
+        values.add(new float[] { (float) d });
+        values.add(new Float[] { (float) d });
+        values.add(com.landawn.abacus.util.u.Optional.of(Map.of("a", d)));
+        values.add(com.landawn.abacus.util.u.Nullable.of(List.of(d)));
+        values.add(java.util.Optional.of(new double[] { d }));
+        values.add(List.of(com.landawn.abacus.util.u.Optional.of(d)));
+        values.add(List.of(com.landawn.abacus.util.u.Nullable.of(d)));
+        values.add(List.of(java.util.OptionalDouble.of(d)));
+        values.add(List.of(List.of(Map.of("deep", d))));
+        values.add(com.landawn.abacus.util.Pair.of(1.0, d));
+        values.add(com.landawn.abacus.util.DoubleList.of(d));
+        return values;
+    }
+
+    // r108 wrote a nonfinite double/float nested in a non-scalar root as a bare NaN/Infinity/-Infinity token ([NaN],
+    // {"a": Infinity}, {"score": -Infinity, ...}), which is not JSON; only a scalar root was rejected.
+    @Test
+    public void testWriteInternal_nestedNonfiniteNumbersAreRejected() {
+        for (final double d : new double[] { Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY }) {
+            final String token = Double.isNaN(d) ? "NaN" : (d > 0 ? "Infinity" : "-Infinity");
+            for (final Object value : containersOf(d)) {
+                final StringWriter writer = new StringWriter();
+                final ParsingException e = assertThrows(ParsingException.class, () -> converter.writeInternal(value, value.getClass(), writer),
+                        () -> token + " in " + value.getClass().getName() + " was written as " + writer);
+                assertEquals("Serialization did not produce a valid JSON value: the nonfinite number " + token + " has no JSON representation", e.getMessage());
+                // A small response fails before anything reaches the writer, like a nonfinite scalar root.
+                assertEquals("", writer.toString(), value.getClass().getName());
+            }
+        }
+
+        // The same through Spring's write(..): HttpMessageNotWritableException with the ParsingException as its cause, empty body.
+        final MockHttpOutputMessage message = new MockHttpOutputMessage();
+        final Exception e = assertThrows(org.springframework.http.converter.HttpMessageNotWritableException.class,
+                () -> converter.write(Map.of("a", Float.NaN), MediaType.APPLICATION_JSON, message));
+        assertInstanceOf(ParsingException.class, e.getCause());
+        assertEquals("", message.getBodyAsString());
+
+        // Pretty format, a wrapped root and a large response are checked too.
+        final JsonHttpMessageConverter pretty = new JsonHttpMessageConverter(new JsonSerConfig().setPrettyFormat(true).setWrapRootValue(true),
+                new JsonDeserConfig());
+        assertThrows(ParsingException.class, () -> pretty.writeInternal(containersOf(Double.NaN).get(2), TestWrapper.class, new StringWriter()));
+        final List<Object> large = new ArrayList<>();
+        for (int i = 0; i < 20_000; i++) {
+            large.add(1.0 / 3);
+        }
+        large.add(Double.NEGATIVE_INFINITY);
+        assertThrows(ParsingException.class, () -> converter.writeInternal(large, List.class, new StringWriter()));
+    }
+
+    // Finite numbers, and nonfinite values that the serializer writes as JSON strings or does not write at all, keep their r108 output.
+    @Test
+    public void testWriteInternal_finiteAndStringWrittenNumbersAreUnchanged() {
+        final java.util.function.Function<Object, String> write = value -> {
+            final StringWriter writer = new StringWriter();
+            converter.writeInternal(value, value.getClass(), writer);
+            return writer.toString();
+        };
+
+        assertEquals("[1.5, -0.0, 1.0E300, 4.9E-324, 1.0E-10]", write.apply(List.of(1.5, -0.0, 1e300, Double.MIN_VALUE, 1e-10)));
+        assertEquals("[\"NaN\", \"Infinity\", \"-Infinity\", \"a\\\"NaN\", \"\\\\\\\"Infinity\"]",
+                write.apply(List.of("NaN", "Infinity", "-Infinity", "a\"NaN", "\\\"Infinity")));
+        assertEquals("[\"N\", \"I\"]", write.apply(List.of('N', 'I')));
+        assertEquals("{\"NaN\": \"v\"}", write.apply(Map.of(Double.NaN, "v")));
+        assertEquals("{\"-Infinity\": \"Infinity\"}", write.apply(Map.of(Double.NEGATIVE_INFINITY, "Infinity")));
+        assertEquals("[1.0, -0.0]", write.apply(com.landawn.abacus.util.Pair.of(1.0, -0.0)));
+
+        final FormattedNumberBean formatted = new FormattedNumberBean();
+        formatted.d = Double.NaN;
+        assertEquals("{\"d\": \"NaN\", \"s\": \"x\"}", write.apply(formatted));
+
+        final TransientNumberBean transientBean = new TransientNumberBean();
+        transientBean.t = Double.POSITIVE_INFINITY;
+        assertEquals("{\"s\": \"x\"}", write.apply(transientBean));
+
+        final JsonSerConfig ignoring = new JsonSerConfig();
+        ignoring.setIgnoredPropNames(TestWrapper.class, N.asSet("score"));
+        final TestWrapper wrapper = new TestWrapper();
+        wrapper.score = Double.NaN;
+        final StringWriter writer = new StringWriter();
+        new JsonHttpMessageConverter(ignoring, new JsonDeserConfig()).writeInternal(wrapper, TestWrapper.class, writer);
+        assertEquals("{}", writer.toString());
+
+        // A nonfinite scalar root keeps its own message.
+        assertEquals("Scalar serialization did not produce a valid JSON value",
+                assertThrows(ParsingException.class, () -> converter.writeInternal(Double.NaN, Double.class, new StringWriter())).getMessage());
+    }
+    // ---- deep review 2026-10-27 G138 end ----
+
+    // ---- deep review 2026-10-27 verify G146 begin ----
+    private static final String NONFINITE_MESSAGE = "Serialization did not produce a valid JSON value: the nonfinite number %s has no JSON representation";
+
+    // Records what reaches the caller's writer, including flush() and close().
+    private static final class RecordingWriter extends java.io.Writer {
+        private final StringBuilder text = new StringBuilder();
+        private int flushes;
+        private int closes;
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) {
+            text.append(cbuf, off, len);
+        }
+
+        @Override
+        public void flush() {
+            flushes++;
+        }
+
+        @Override
+        public void close() {
+            closes++;
+        }
+    }
+
+    // Fails every write, as a servlet output stream does after the client went away.
+    private static final class FailingWriter extends java.io.Writer {
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            throw new IOException("Broken pipe");
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    private static java.io.Writer newNonfiniteNumberGuard(final java.io.Writer target) throws ReflectiveOperationException {
+        final java.lang.reflect.Constructor<?> constructor = Class.forName(JsonHttpMessageConverter.class.getName() + "$NonfiniteNumberGuard")
+                .getDeclaredConstructor(java.io.Writer.class);
+        constructor.setAccessible(true);
+        return (java.io.Writer) constructor.newInstance(target);
+    }
+
+    private static void write(final java.io.Writer writer, final String[] chunks, final int mode) throws IOException {
+        for (final String chunk : chunks) {
+            if (mode == 0) {
+                writer.write(chunk.toCharArray(), 0, chunk.length());
+            } else if (mode == 1) {
+                writer.write(chunk, 0, chunk.length());
+            } else {
+                for (int i = 0; i < chunk.length(); i++) {
+                    writer.write(chunk.charAt(i));
+                }
+            }
+        }
+    }
+
+    // A target that fails to take a chunk surfaces its own IOException, as in r108. The serializer re-sends the failed chunk while
+    // it unwinds; scanning it a second time, from the state after it, read string content as bare text and reported a
+    // nonexistent "nonfinite number NaN" for strings like "NaN" (the padding covers every chunk alignment).
+    @Test
+    public void testWriteInternal_failingTargetReportsItsOwnFailure() {
+        for (final String word : new String[] { "NaN", "Infinity", "x" }) {
+            for (int pad = 0; pad < 12; pad++) {
+                final List<Object> values = new ArrayList<>();
+                values.add("p".repeat(pad));
+                for (int i = 0; i < 4000; i++) {
+                    values.add(word);
+                }
+
+                final Exception e = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                        () -> converter.writeInternal(values, List.class, new FailingWriter()), word + " pad=" + pad);
+                assertInstanceOf(IOException.class, e.getCause(), word + " pad=" + pad);
+                assertEquals("Broken pipe", e.getCause().getMessage());
+            }
+        }
+    }
+
+    // A null writer is an IllegalArgumentException for a bean, map, collection or array root, as in r108.
+    @Test
+    public void testWriteInternal_nullWriterIsIllegalArgument() {
+        for (final Object value : new Object[] { List.of(1.5), Map.of("a", 1), new TestPerson(), new double[] { 1 } }) {
+            assertThrows(IllegalArgumentException.class, () -> converter.writeInternal(value, value.getClass(), null), value.getClass().getName());
+        }
+    }
+
+    // The caller's writer is flushed once and never closed, as in r108.
+    @Test
+    public void testWriteInternal_targetIsFlushedOnceAndNeverClosed() {
+        final RecordingWriter target = new RecordingWriter();
+        converter.writeInternal(List.of("NaN", 1.5, Map.of("Infinity", "-Infinity")), List.class, target);
+        assertEquals("[\"NaN\", 1.5, {\"Infinity\": \"-Infinity\"}]", target.text.toString());
+        assertEquals(1, target.flushes);
+        assertEquals(0, target.closes);
+    }
+
+    // A rejected value reaches the caller's writer not at all, not even as a flush, and the converter stays usable.
+    @Test
+    public void testWriteInternal_rejectedValueReachesTargetNotAtAll() {
+        final RecordingWriter rejected = new RecordingWriter();
+        assertThrows(ParsingException.class, () -> converter.writeInternal(List.of("x", Double.NaN), List.class, rejected));
+        assertEquals("", rejected.text.toString());
+        assertEquals(0, rejected.flushes);
+        assertEquals(0, rejected.closes);
+
+        final StringWriter again = new StringWriter();
+        converter.writeInternal(List.of(2.5), List.class, again);
+        assertEquals("[2.5]", again.toString());
+    }
+
+    // Strings longer than the serializer's buffer, full of quotes, backslashes and the words NaN/Infinity, reach the writer in several
+    // chunks: their content never trips the check, a nonfinite number after them still does, and the finite output is unchanged.
+    @Test
+    public void testWriteInternal_longEscapedStringsAcrossChunks() {
+        final String tricky = "\\\"NaN\\Infinity\"-Infinity \\u0022 ".repeat(6000);
+        final List<Object> finite = List.of(tricky, 1.5, Map.of("NaN", tricky), 1e-5);
+        final StringWriter writer = new StringWriter();
+        converter.writeInternal(finite, List.class, writer);
+        assertEquals(N.toJson(finite, new JsonSerConfig()), writer.toString());
+
+        final ParsingException e = assertThrows(ParsingException.class,
+                () -> converter.writeInternal(List.of(tricky, tricky, Double.NaN), List.class, new StringWriter()));
+        assertEquals(String.format(NONFINITE_MESSAGE, "NaN"), e.getMessage());
+
+        final StringWriter first = new StringWriter();
+        assertEquals(String.format(NONFINITE_MESSAGE, "-Infinity"),
+                assertThrows(ParsingException.class, () -> converter.writeInternal(List.of(Float.NEGATIVE_INFINITY, tricky), List.class, first)).getMessage());
+        assertEquals("", first.toString());
+    }
+
+    // The check keeps its state between writes: an escape, a string or a token split across two chunks is read correctly, through
+    // char[], String and single-char writes alike; after a failure nothing more is passed on, and close() never closes the target.
+    @Test
+    public void testNonfiniteNumberGuard_stateCarriesAcrossWrites() throws Exception {
+        final String[][] rejected = { { "[\"a\\", "\"\", NaN]" }, { "[\"a\\", "\\\", NaN]" }, { "[Na", "N]" }, { "[-", "Infinity]" }, { "[Infin", "ity]" },
+                { "{\"k\": [1e-5, ", "-Infinity]}" }, { "[\"\\\\\\\"\", ", "NaN]" } };
+        final String[][] accepted = { { "[\"a\\", "\\", "\"", ", 1]" }, { "[\"NaN", "\"]" }, { "[\"\\", "u0022NaN\", 2]" },
+                { "[1e", "-5, 1E", "+10, true, false, null]" }, { "{\"Infinity\": \"NaN\"", ", \"x\": \"-Infinity\"}" }, { "[Nan, NAN, infinity, Inf, Na]" } };
+
+        for (int mode = 0; mode < 3; mode++) {
+            final int currentMode = mode;
+
+            for (final String[] chunks : rejected) {
+                final String text = String.join("", chunks);
+                final String word = text.contains("NaN") ? "NaN" : "Infinity";
+                final String token = text.contains("-Infinity") ? "-Infinity" : word;
+                final RecordingWriter target = new RecordingWriter();
+                final java.io.Writer guard = newNonfiniteNumberGuard(target);
+                final ParsingException e = assertThrows(ParsingException.class, () -> write(guard, chunks, currentMode), text + " mode " + currentMode);
+                assertEquals(String.format(NONFINITE_MESSAGE, token), e.getMessage());
+
+                guard.write("more");
+                guard.write('x');
+                guard.flush();
+                guard.close();
+                // The chunk (or char) completing the token is not passed on, nor anything after it.
+                final String expected = mode < 2 ? String.join("", java.util.Arrays.copyOf(chunks, chunks.length - 1))
+                        : text.substring(0, text.lastIndexOf(word) + word.length() - 1);
+                assertEquals(expected, target.text.toString(), text + " mode " + mode);
+                assertEquals(0, target.flushes);
+                assertEquals(0, target.closes);
+            }
+
+            for (final String[] chunks : accepted) {
+                final RecordingWriter target = new RecordingWriter();
+                final java.io.Writer guard = newNonfiniteNumberGuard(target);
+                write(guard, chunks, mode);
+                guard.close();
+                assertEquals(String.join("", chunks), target.text.toString(), "mode " + mode);
+                assertEquals(1, target.flushes);
+                assertEquals(0, target.closes);
+            }
+        }
+    }
+    // ---- deep review 2026-10-27 verify G146 end ----
 }

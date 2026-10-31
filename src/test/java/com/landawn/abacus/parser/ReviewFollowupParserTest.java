@@ -562,7 +562,8 @@ public class ReviewFollowupParserTest extends TestBase {
     public void abacusNullRootsValidateTypeInformationBeforeReturningNull() {
         for (final XmlParserType backend : XmlParserType.values()) {
             final XmlParser parser = new AbacusXmlParserImpl(backend, null, null, Set.of(ScalarBean.class));
-            final Map<String, Class<?>> roots = Map.of("scalarBean", ScalarBean.class, "list", List.class, "map", Map.class);
+            final Map<String, Class<?>> roots = Map.of("scalarBean", ScalarBean.class, "list", List.class, "map", Map.class, "array", String[].class, "object",
+                    Object.class);
             for (final Map.Entry<String, Class<?>> root : roots.entrySet()) {
                 for (final String denied : List.of("unapproved.Payload", "List&lt;unapproved.Payload&gt;")) {
                     final String xml = "<" + root.getKey() + " type='" + denied + "' isNull='true'/>";

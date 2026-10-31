@@ -15,6 +15,7 @@
 package com.landawn.abacus.parser;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -197,10 +198,19 @@ public final class ParserFactory {
     /** Map of custom serializers and IDs registered for Kryo serialization. */
     static final Map<Class<?>, Tuple2<Serializer<?>, Integer>> _kryoClassSerializerIdMap = new ConcurrentHashMap<>();
 
+    /**
+     * Every class registered through {@code registerKryo}, in the order of its latest call, whichever overload made it.
+     * The four collections above hold what each class is registered with; Kryo instances replay them by walking this
+     * order once per kind of registration, because a class without an explicit ID receives the next free ID when it is
+     * replayed, and iterating the identity-hashed collections instead would assign different IDs in two JVMs that
+     * make the same calls. Guarded by {@link #_kryoRegistrationLock}.
+     */
+    static final Set<Class<?>> _kryoRegistrationOrder = new LinkedHashSet<>();
+
     /** Incremented after each global Kryo registration so existing parser pools can refresh. */
     static final AtomicLong _kryoRegistrationVersion = new AtomicLong();
 
-    /** Guards replacement and ID uniqueness across the four registration maps. */
+    /** Guards replacement and ID uniqueness across the four registration maps, and their replay order. */
     static final Object _kryoRegistrationLock = new Object();
 
     /**
@@ -604,6 +614,17 @@ public final class ParserFactory {
      * If this class was registered previously through another overload, this call replaces that
      * registration; the most recent call is authoritative.
      *
+     * <p>A built-in type of {@link KryoParser} keeps its built-in ID unless an explicit ID takes it (see
+     * {@link KryoParser#register(Class, int)}). Any other class receives the next free ID when it is applied: every
+     * Kryo instance applies the built-in types, then the global registrations kind by kind -
+     * {@code registerKryo(Class)}, then {@code registerKryo(Class, int)}, then {@code registerKryo(Class, Serializer)},
+     * then {@code registerKryo(Class, Serializer, int)} - each kind in the order of its calls (a class registered again
+     * takes the position of its latest call), then the registrations of its own parser in the same way (see the
+     * {@link KryoParser} class documentation). Two JVMs are therefore guaranteed to assign the same ID to such a class
+     * only when they make the same registration calls in the same order with the same library version. Only explicit
+     * IDs ({@link #registerKryo(Class, int)}) stay stable across different registration sequences and library
+     * versions; use them for data that is persisted or exchanged between processes.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Register commonly used classes
@@ -620,13 +641,15 @@ public final class ParserFactory {
         synchronized (_kryoRegistrationLock) {
             clearKryoRegistration(type);
             _kryoClassSet.add(type);
+            _kryoRegistrationOrder.add(type);
             _kryoRegistrationVersion.incrementAndGet();
         }
     }
 
     /**
      * Registers a class with Kryo using a specific ID.
-     * Using fixed IDs ensures compatibility across different JVM instances.
+     * Using fixed IDs ensures compatibility across different JVM instances: unlike the ID of a class registered
+     * without one, an explicit ID does not depend on the order of the registration calls.
      * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
@@ -650,6 +673,7 @@ public final class ParserFactory {
             checkKryoRegistrationIdAvailable(type, id);
             clearKryoRegistration(type);
             _kryoClassIdMap.put(type, id);
+            _kryoRegistrationOrder.add(type);
             _kryoRegistrationVersion.incrementAndGet();
         }
     }
@@ -658,6 +682,9 @@ public final class ParserFactory {
      * Registers a class with Kryo using a custom serializer.
      * Custom serializers can handle special serialization requirements.
      * Any earlier registration of the same class through another overload is replaced.
+     * The class has no explicit ID: it receives the next free ID when it is applied, after the global
+     * {@code registerKryo(Class)} and {@code registerKryo(Class, int)} registrations and the earlier calls of this
+     * overload, as described for {@link #registerKryo(Class)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -677,13 +704,15 @@ public final class ParserFactory {
         synchronized (_kryoRegistrationLock) {
             clearKryoRegistration(type);
             _kryoClassSerializerMap.put(type, serializer);
+            _kryoRegistrationOrder.add(type);
             _kryoRegistrationVersion.incrementAndGet();
         }
     }
 
     /**
      * Registers a class with Kryo using a custom serializer and specific ID.
-     * Combines the benefits of custom serialization and fixed IDs.
+     * Combines the benefits of custom serialization and fixed IDs; the ID does not depend on the order of the
+     * registration calls.
      * Any earlier registration of the same class through another overload is replaced.
      *
      * <p><b>Usage Examples:</b></p>
@@ -708,6 +737,7 @@ public final class ParserFactory {
             checkKryoRegistrationIdAvailable(type, id);
             clearKryoRegistration(type);
             _kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
+            _kryoRegistrationOrder.add(type);
             _kryoRegistrationVersion.incrementAndGet();
         }
     }
@@ -732,12 +762,14 @@ public final class ParserFactory {
     /**
      * Removes every previous registration form for {@code type}. A class can have exactly one
      * effective global Kryo registration; consequently, a later overload call replaces an earlier
-     * one instead of leaving stale entries that are replayed in a fixed map order.
+     * one instead of leaving stale entries that are replayed in a fixed map order. The class also
+     * leaves the replay order, so the caller's registration is appended at the position of the latest call.
      */
     private static void clearKryoRegistration(final Class<?> type) {
         _kryoClassSet.remove(type);
         _kryoClassIdMap.remove(type);
         _kryoClassSerializerMap.remove(type);
         _kryoClassSerializerIdMap.remove(type);
+        _kryoRegistrationOrder.remove(type);
     }
 }

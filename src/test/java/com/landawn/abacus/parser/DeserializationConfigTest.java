@@ -885,4 +885,59 @@ public class DeserializationConfigTest extends TestBase {
     }
     // ---- deep review 2026-09-25 G007 end ----
 
+    // ---- deep review 2026-10-26 G008 begin ----
+    // G008-02: a null key (unquoted JSON null map key) was looked up in a value-type map supplied through setValueTypes; an
+    // immutable or sorted map rejects that lookup with a NullPointerException although a null key never matches a configured type.
+    @Test
+    public void testGetValueType_nullKeyWithImmutableOrSortedValueTypeMap() {
+        final Type<Integer> intType = Type.of(Integer.class);
+        final Type<String> stringType = Type.of(String.class);
+
+        config.setValueTypes(Map.of("a", stringType));
+        assertNull(config.getValueType(null));
+        assertSame(intType, config.getValueType(null, intType));
+        assertSame(stringType, config.getValueType("a"));
+
+        config.setValueTypes(new java.util.TreeMap<>(Map.of("a", stringType)));
+        assertNull(config.getValueType(null));
+        assertSame(intType, config.getValueType(null, intType));
+
+        // The map a JsonParser writes for a null key with quoteMapKey=false reads back under such value types.
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Map<String, Object> map = new HashMap<>();
+        map.put(null, 1);
+        map.put("a", 2);
+        final String json = jp.serialize(map, new JsonSerConfig().setQuoteMapKey(false));
+        final Map<String, Object> read = jp.deserialize(json, new JsonDeserConfig().setValueTypes(Map.of("a", stringType)),
+                Type.ofMap(String.class, Object.class));
+        assertEquals(1, read.get(null));
+        assertEquals("2", read.get("a"));
+    }
+    // ---- deep review 2026-10-26 G008 end ----
+
+    // ---- deep review 2026-10-26 verify G119 begin ----
+    // G008-02: a null key with a mutable HashMap of value types still gives the default type, a copy of a configuration holding
+    // an immutable map answers it too, and a Reader source with an immutable value-type map reads the null key.
+    @Test
+    public void testGetValueType_nullKeyWithHashMapCopiedConfigAndReaderSource() {
+        final Type<Integer> intType = Type.of(Integer.class);
+        final Type<String> stringType = Type.of(String.class);
+
+        config.setValueTypes(new HashMap<>(Map.of("a", stringType)));
+        assertNull(config.getValueType(null));
+        assertSame(intType, config.getValueType(null, intType));
+
+        config.setValueTypes(Map.of("a", stringType));
+        final TestDeserializationConfig copy = config.copy();
+        assertSame(intType, copy.getValueType(null, intType));
+        assertSame(stringType, copy.getValueType("a"));
+
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Map<String, Object> read = jp.deserialize(new java.io.StringReader("{null: 1, \"a\": 2}"),
+                new JsonDeserConfig().setValueTypes(Map.of("a", stringType)), Type.ofMap(String.class, Object.class));
+        assertEquals(1, read.get(null));
+        assertEquals("2", read.get("a"));
+    }
+    // ---- deep review 2026-10-26 verify G119 end ----
+
 }

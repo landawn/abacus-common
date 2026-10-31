@@ -199,7 +199,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if {@code source} is {@code null} and the
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} (except on the Kryo parser, which reads
+     *         class-and-object data for a {@code null} class), or if {@code source} is {@code null} and the
      *         concrete parser rejects it (the Avro and Kryo parsers do; the JSON and XML parsers return the target type's
      *         default value for a {@code null} source instead)
      */
@@ -223,7 +224,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by
+     *         the Kryo parser, which then reads class-and-object data), or {@code source} is a directory.
      * @throws UncheckedIOException if opening or reading {@code source} fails, including a missing file, or an implementation cannot
      *         close its owned file resource
      */
@@ -246,7 +248,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by
+     *         the Kryo parser, which then reads class-and-object data).
      * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
@@ -273,7 +276,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *
      * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
      *         validating the arguments)
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by
+     *         the Kryo parser, which then reads class-and-object data).
      * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
@@ -489,7 +493,9 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *
      * <p>This method attempts to instantiate the most specific type available, with the following priority:</p>
      * <ol>
-     *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
+     *   <li>If attribute type is provided and compatible, instantiate attribute type; a JDK container implementation
+     *       class outside the public API ({@code Collections.emptyList()}'s class, for example) is never instantiated
+     *       and counts as a failed instantiation, with or without {@code --add-opens}</li>
      *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
      *   <li>If no property class remains after the attribute attempt, throw ParsingException, whose cause is the
      *       type-attribute failure, if any; failures instantiating a non-null property class propagate unchanged</li>
@@ -516,6 +522,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
         if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
             try {
+                // Fails as the constructor does when java.util is not opened, whatever the JVM's module flags are.
+                if (isNonPublicJdkContainerClass(attributeTypeClass)) {
+                    throw new IllegalArgumentException(
+                            "Not created from type metadata: " + attributeTypeClass.getName() + " is a JDK implementation class outside the public API");
+                }
+
                 return (T) N.newInstance(attributeTypeClass);
             } catch (final Exception e) {
                 // One line, no stack trace: the property class is tried next. When there is none, the failure (with its
@@ -551,7 +563,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *       {@code Map}/{@code Collection} implementation the readers cannot instantiate (an immutable or
      *       unmodifiable wrapper such as {@code ImmutableMap}, {@code List.of(..)} or
      *       {@code Collections.emptyMap()}); such a type class is dropped in favour of the target class, which
-     *       is what actually gets filled</li>
+     *       is what actually gets filled. A JDK implementation class outside the public API is always dropped,
+     *       even when {@code --add-opens} would make its constructor usable</li>
      *   <li>Otherwise, use target class (type class is incompatible)</li>
      * </ul>
      *
@@ -621,7 +634,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * Returns whether {@code targetClass} is a concrete {@code Map}/{@code Collection} implementation that the readers
      * cannot create. Interfaces and abstract types are excluded: those are mapped to a default implementation when
-     * the instance is created.
+     * the instance is created. A JDK implementation class outside the public API is never created
+     * (see {@link #isNonPublicJdkContainerClass(Class)}).
      */
     private static boolean isUninstantiableContainerClass(final Class<?> targetClass) {
         if (!(Map.class.isAssignableFrom(targetClass) || Collection.class.isAssignableFrom(targetClass)) || targetClass.isInterface()
@@ -629,10 +643,68 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
             return false;
         }
 
+        // Before the probe: with --add-opens java.base/java.util the probe would succeed for Collections$EmptyList.
+        if (isNonPublicJdkContainerClass(targetClass)) {
+            return true;
+        }
+
         // Ask exactly the question the reader will ask, including inaccessible or throwing constructors.
         // Retain the answer for this class's lifetime without pinning its class loader in a global map.
         return uninstantiableContainerClassPool.get(targetClass).failed(targetClass);
     }
+
+    /**
+     * Returns whether {@code containerClass} is a concrete {@code Map}/{@code Collection} implementation of the JDK that
+     * is not public API: a class of a {@code java.*} or {@code jdk.*} module of the boot layer that is not public, is
+     * nested in a class that is not public, or is declared in a package that its module does not export unconditionally.
+     * Examples are the classes of {@code Collections.emptyList()}, {@code Collections.singletonMap(..)},
+     * {@code Collections.unmodifiableSet(..)}, {@code List.of(..)}, {@code Arrays.asList(..)} and {@code HashMap.keySet()}.
+     *
+     * <p>The readers never construct such a class when document type metadata names it; they take the fallback that
+     * they use when a constructor fails. Whether reflection can reach these constructors depends only on the JVM's
+     * module flags ({@code --add-opens java.base/java.util} makes the private no-argument constructor of
+     * {@code Collections$EmptyList} usable), and what it would create is an immutable or view container, or a second
+     * instance of a JDK singleton, which the reader could not fill. The result of a read must not depend on how the JVM
+     * was started.</p>
+     *
+     * @param containerClass the class named by type metadata
+     * @return {@code true} if the readers must not construct {@code containerClass}
+     */
+    static boolean isNonPublicJdkContainerClass(final Class<?> containerClass) {
+        return nonPublicJdkContainerClassPool.get(containerClass);
+    }
+
+    private static final ClassValue<Boolean> nonPublicJdkContainerClassPool = new ClassValue<>() {
+        @Override
+        protected Boolean computeValue(final Class<?> type) {
+            if (!(Map.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type)) || type.isInterface()
+                    || java.lang.reflect.Modifier.isAbstract(type.getModifiers())) {
+                return false;
+            }
+
+            // JDK classes are those of the boot layer's java.* and jdk.* modules (the rule of CommonUtil.isBuiltinClass).
+            // Module flags such as --add-opens change nothing for a class of the unnamed module or of an application module.
+            final Module module = type.getModule();
+
+            if (!module.isNamed() || module.getLayer() != ModuleLayer.boot()
+                    || !(module.getName().startsWith("java.") || module.getName().startsWith("jdk."))) {
+                return false;
+            }
+
+            // Unconditional exports only: --add-exports ...=ALL-UNNAMED must not turn an internal package into public API.
+            if (!module.isExported(type.getPackageName())) {
+                return true;
+            }
+
+            for (Class<?> cls = type; cls != null; cls = cls.getEnclosingClass()) {
+                if (!java.lang.reflect.Modifier.isPublic(cls.getModifiers())) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    };
 
     /**
      * Converts a collection to an array of the specified target type.

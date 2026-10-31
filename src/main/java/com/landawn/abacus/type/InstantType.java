@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -90,6 +92,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *   <li>{@link Number}: treated as milliseconds since the epoch</li>
      *   <li>{@link Timestamp}: converted with nanosecond precision</li>
      *   <li>{@link java.util.Date} and {@link java.util.Calendar}: converted from their epoch-millisecond value</li>
+     *   <li>{@link OffsetDateTime} and {@link ZonedDateTime}: converted with {@code toInstant()}</li>
      *   <li>{@code null}: returns {@code null}</li>
      *   <li>Any other type: converted to its string representation, then parsed via {@link #valueOf(String)}</li>
      * </ul>
@@ -115,6 +118,11 @@ public class InstantType extends AbstractTemporalType<Instant> {
             return Instant.ofEpochMilli(date.getTime());
         } else if (obj instanceof java.util.Calendar cal) {
             return Instant.ofEpochMilli(cal.getTimeInMillis());
+        } else if (obj instanceof OffsetDateTime odt) {
+            // The text route below fails for some values: toString() drops ":00" seconds and appends "[Region]" zone ids.
+            return odt.toInstant();
+        } else if (obj instanceof ZonedDateTime zdt) {
+            return zdt.toInstant();
         }
 
         return valueOf(N.stringOf(obj));

@@ -313,4 +313,102 @@ public class LocalTimeTypeTest extends TestBase {
             assertEquals(createType(java.time.ZonedDateTime.class).valueOf(cal).toLocalTime(), localTimeType.valueOf(cal), zoneName);
         }
     }
+
+    // ---- deep review 2026-10-27 G135 begin ----
+    // G135 (G017-01b): Instant, OffsetDateTime and ZonedDateTime used the text route, whose ISO LocalTime parser rejects every value
+    // of these types (the text starts with a date). An Instant is now read in the default zone like a Number or Date; an
+    // OffsetDateTime/ZonedDateTime keeps the time it displays in its own offset or zone, like a Calendar.
+    @Test
+    public void testValueOfObject_instantIsReadInDefaultZoneLikeNumberAndDate() {
+        final ZoneId zone = AbstractTemporalType.DEFAULT_ZONE_ID;
+
+        for (final Instant instant : new Instant[] { Instant.EPOCH, Instant.parse("2020-01-01T00:00:00Z"), Instant.parse("2021-03-28T01:00:00Z"),
+                Instant.parse("2021-10-31T00:30:00Z"), Instant.parse("2023-12-25T11:10:45.123Z"), Instant.parse("1969-12-31T23:59:59.999Z") }) {
+            final LocalTime expected = LocalTime.ofInstant(instant, zone);
+            assertEquals(expected, localTimeType.valueOf((Object) instant), instant.toString());
+            assertEquals(localTimeType.valueOf((Object) instant.toEpochMilli()), localTimeType.valueOf((Object) instant), instant.toString());
+            assertEquals(localTimeType.valueOf(java.util.Date.from(instant)), localTimeType.valueOf((Object) instant), instant.toString());
+            assertEquals(expected, com.landawn.abacus.util.N.convert(instant, LocalTime.class), instant.toString());
+        }
+
+        // Nanosecond precision is kept, as for a Timestamp.
+        final Instant nanos = Instant.parse("2023-12-25T11:10:45.123456789Z");
+        assertEquals(LocalTime.ofInstant(nanos, zone), localTimeType.valueOf((Object) nanos));
+        assertEquals(localTimeType.valueOf(java.sql.Timestamp.from(nanos)), localTimeType.valueOf((Object) nanos));
+        assertEquals(123456789, localTimeType.valueOf((Object) nanos).getNano());
+
+        // Only the time of day is taken, so even the extreme instants convert.
+        assertEquals(LocalTime.ofInstant(Instant.MAX, zone), localTimeType.valueOf((Object) Instant.MAX));
+        assertEquals(LocalTime.ofInstant(Instant.MIN, zone), localTimeType.valueOf((Object) Instant.MIN));
+    }
+
+    @Test
+    public void testValueOfObject_offsetAndZonedDateTimeKeepTheirOwnLocalTime() {
+        // Whole-minute value: toString() drops ":00", e.g. "2020-01-01T00:00+02:00".
+        final java.time.OffsetDateTime wholeMinute = java.time.OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.ofHours(2));
+        assertEquals(LocalTime.MIDNIGHT, localTimeType.valueOf((Object) wholeMinute));
+        assertEquals(LocalTime.MIDNIGHT, com.landawn.abacus.util.N.convert(wholeMinute, LocalTime.class));
+
+        // Region zone: toString() appends "[Europe/Paris]".
+        final ZoneId paris = ZoneId.of("Europe/Paris");
+        final java.time.ZonedDateTime regionZone = java.time.ZonedDateTime.of(2020, 1, 1, 0, 0, 1, 0, paris);
+        assertEquals(LocalTime.of(0, 0, 1), localTimeType.valueOf((Object) regionZone));
+        assertEquals(LocalTime.of(0, 0, 1), com.landawn.abacus.util.N.convert(regionZone, LocalTime.class));
+        assertEquals(LocalTime.of(10, 30), localTimeType.valueOf((Object) java.time.ZonedDateTime.of(2020, 7, 1, 10, 30, 0, 0, paris)));
+
+        // Nanosecond precision, negative offset and UTC.
+        final java.time.OffsetDateTime withNanos = java.time.OffsetDateTime.of(2020, 1, 1, 0, 0, 1, 123456789, java.time.ZoneOffset.ofHours(-5));
+        assertEquals(LocalTime.of(0, 0, 1, 123456789), localTimeType.valueOf((Object) withNanos));
+        final java.time.ZonedDateTime utc = java.time.ZonedDateTime.of(2021, 6, 30, 23, 59, 59, 999, java.time.ZoneOffset.UTC);
+        assertEquals(LocalTime.of(23, 59, 59, 999), localTimeType.valueOf((Object) utc));
+
+        // The same instant at +14:00 and -12:00 shows two different times (2 h apart on the clock); each value keeps its own, so at
+        // least one of them differs from the time in the default zone - the result is not the instant re-read in the default zone.
+        final Instant instant = Instant.parse("2023-12-25T11:10:45.123Z");
+        boolean differsFromDefaultZone = false;
+
+        for (final java.time.ZoneOffset offset : new java.time.ZoneOffset[] { java.time.ZoneOffset.ofHours(14), java.time.ZoneOffset.ofHours(-12) }) {
+            final java.time.OffsetDateTime odt = instant.atOffset(offset);
+            final java.time.ZonedDateTime zdt = instant.atZone(offset);
+            assertEquals(odt.toLocalTime(), localTimeType.valueOf((Object) odt), offset.toString());
+            assertEquals(zdt.toLocalTime(), localTimeType.valueOf((Object) zdt), offset.toString());
+            differsFromDefaultZone |= !odt.toLocalTime().equals(LocalTime.ofInstant(instant, AbstractTemporalType.DEFAULT_ZONE_ID));
+        }
+
+        assertEquals(LocalTime.of(1, 10, 45, 123000000), localTimeType.valueOf((Object) instant.atOffset(java.time.ZoneOffset.ofHours(14))));
+        assertEquals(LocalTime.of(23, 10, 45, 123000000), localTimeType.valueOf((Object) instant.atOffset(java.time.ZoneOffset.ofHours(-12))));
+        assertTrue(differsFromDefaultZone);
+
+        // Same rule as the Calendar branch: a Calendar and its ZonedDateTime give the same LocalTime.
+        final java.util.GregorianCalendar cal = new java.util.GregorianCalendar(java.util.TimeZone.getTimeZone("Asia/Tokyo"));
+        cal.setTimeInMillis(1703502645123L);
+        assertEquals(localTimeType.valueOf(cal), localTimeType.valueOf((Object) cal.toZonedDateTime()));
+    }
+
+    @Test
+    public void testValueOfObject_zonedDateTimeAtDstEdgesKeepsDisplayedTime() {
+        final ZoneId paris = ZoneId.of("Europe/Paris");
+
+        // Spring gap: 02:30 does not exist on 2021-03-28 and ZonedDateTime resolves it to 03:30+02:00.
+        assertEquals(LocalTime.of(3, 30), localTimeType.valueOf((Object) java.time.ZonedDateTime.of(2021, 3, 28, 2, 30, 0, 0, paris)));
+
+        // Autumn overlap: 02:30 occurs twice on 2021-10-31; both instants display (and convert to) 02:30.
+        final java.time.ZonedDateTime earlier = java.time.ZonedDateTime.of(2021, 10, 31, 2, 30, 0, 0, paris).withEarlierOffsetAtOverlap();
+        final java.time.ZonedDateTime later = earlier.withLaterOffsetAtOverlap();
+        assertEquals(3600, later.toEpochSecond() - earlier.toEpochSecond());
+        assertEquals(LocalTime.of(2, 30), localTimeType.valueOf((Object) earlier));
+        assertEquals(LocalTime.of(2, 30), localTimeType.valueOf((Object) later));
+        assertEquals(LocalTime.of(2, 30), localTimeType.valueOf((Object) later.toOffsetDateTime()));
+    }
+
+    // Other java.time values keep the text route and its result (pinned, unchanged).
+    @Test
+    public void testValueOfObject_otherTemporalValuesKeepTextRoute() {
+        assertEquals(LocalTime.of(10, 30, 45, 1), localTimeType.valueOf((Object) LocalTime.of(10, 30, 45, 1)));
+        assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf((Object) java.time.LocalDateTime.of(2021, 1, 1, 10, 30)));
+        assertThrows(DateTimeParseException.class, () -> localTimeType.valueOf((Object) java.time.LocalDate.of(2021, 1, 1)));
+        assertThrows(DateTimeParseException.class,
+                () -> localTimeType.valueOf((Object) java.time.OffsetTime.of(10, 30, 0, 0, java.time.ZoneOffset.ofHours(2))));
+    }
+    // ---- deep review 2026-10-27 G135 end ----
 }

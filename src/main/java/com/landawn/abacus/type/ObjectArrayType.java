@@ -553,7 +553,9 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Creates a string representation of the array.
-     * This method produces a shallow string representation using toString() on elements.
+     * Each element is rendered by {@link N#toString(Object)}, so a nested array element is rendered by its content
+     * ({@code [[1, 2], x]}, not {@code [[I@1b6d3586, x]}). Unlike {@link #deepToString(Object[])}, no visited set is
+     * kept: an array that contains itself, directly or indirectly, throws {@link StackOverflowError}.
      *
      * @param x the array to convert to string
      * @return string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays

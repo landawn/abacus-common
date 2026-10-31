@@ -1568,4 +1568,840 @@ public class BeansTest extends BeansTestSupport {
 
     // ---- deep review 2026-10-16 G154 end ----
 
+    // ---- deep review 2026-10-26 G023 begin ----
+
+    /** Builder-based bean for G023-01 (a registration against the builder class itself). */
+    public static class G023RegBuilderBean {
+        private final String name;
+        private final int age;
+
+        private G023RegBuilderBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G023RegBuilderBean build() {
+                return new G023RegBuilderBean(name, age);
+            }
+        }
+    }
+
+    /** Builder-based bean for G023-01 (a registration against the bean, then the builder scanned first). */
+    public static class G023ScanBuilderBean {
+        private final String name;
+        private final int age;
+
+        private G023ScanBuilderBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G023ScanBuilderBean build() {
+                return new G023ScanBuilderBean(name, age);
+            }
+        }
+    }
+
+    // G023-01: a registration against a builder class dropped the setter model its bean had published, and the bean
+    // (still introspected) never republished it - getPropSetters answered {} and mapToBean silently wrote nothing.
+    @Test
+    public void testGetPropSetters_registrationOnBuilderClassKeepsItsSetters() {
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G023RegBuilderBean.class));
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G023RegBuilderBean.Builder.class).keySet());
+
+        Beans.registerNonPropertyAccessor(G023RegBuilderBean.Builder.class, "zzzNotAProperty");
+
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G023RegBuilderBean.Builder.class).keySet());
+        assertEquals("name", Beans.getPropSetter(G023RegBuilderBean.Builder.class, "name").getName());
+
+        // The bean's BeanInfo is first built here, after the registration, and drives the builder by these setters.
+        final G023RegBuilderBean bean = Beans.mapToBean(Map.of("name", "x", "age", 3), false, G023RegBuilderBean.class);
+        assertEquals("x", bean.getName());
+        assertEquals(3, bean.getAge());
+    }
+
+    // G023-01: after a registration against the bean, a lookup that scanned the builder class before the bean was
+    // re-introspected (isBeanClass, getPropNameList, getPropGetters ...) published the builder's empty standalone model.
+    @Test
+    public void testGetPropSetters_builderScannedBeforeItsBeanAfterRegistrationKeepsItsSetters() {
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G023ScanBuilderBean.class));
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G023ScanBuilderBean.Builder.class).keySet());
+
+        Beans.registerNonPropertyAccessor(G023ScanBuilderBean.class, "zzzNotAProperty");
+        assertFalse(Beans.isBeanClass(G023ScanBuilderBean.Builder.class));
+
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G023ScanBuilderBean.Builder.class).keySet());
+        assertEquals("age", Beans.getPropSetter(G023ScanBuilderBean.Builder.class, "age").getName());
+
+        final G023ScanBuilderBean bean = Beans.mapToBean(Map.of("name", "y", "age", 4), G023ScanBuilderBean.class);
+        assertEquals("y", bean.getName());
+        assertEquals(4, bean.getAge());
+    }
+
+    // ---- deep review 2026-10-26 G023 end ----
+
+    // ---- deep review 2026-10-26 verify G122 begin ----
+
+    /** Record with a builder, for the G023-01 record path (a registration against the builder class). */
+    public record G122BuilderRecord(String name, int age) {
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G122BuilderRecord build() {
+                return new G122BuilderRecord(name, age);
+            }
+        }
+    }
+
+    /** Bean whose builder is a bean itself for "name" (getName/setName) and fluent for "age", for G023-01. */
+    public static class G122BeanLikeBuilderBean {
+        private final String name;
+        private final int age;
+
+        private G122BeanLikeBuilderBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(final String name) {
+                this.name = name;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G122BeanLikeBuilderBean build() {
+                return new G122BeanLikeBuilderBean(name, age);
+            }
+        }
+    }
+
+    // G023-01 (record): a registration against a record's builder class must keep the builder setters, so mapToBean and
+    // N.fromJson still populate the record (they produced G122BuilderRecord[name=null, age=0]).
+    @Test
+    public void testGetPropSetters_registrationOnRecordBuilderClassKeepsItsSetters() {
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G122BuilderRecord.class));
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G122BuilderRecord.Builder.class).keySet());
+
+        Beans.registerNonPropertyAccessor(G122BuilderRecord.Builder.class, "zzzNotAProperty");
+
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G122BuilderRecord.Builder.class).keySet());
+        assertEquals(new G122BuilderRecord("r", 2), Beans.mapToBean(Map.of("name", "r", "age", 2), false, G122BuilderRecord.class));
+        assertEquals(new G122BuilderRecord("j", 6), N.fromJson("{\"name\":\"j\",\"age\":6}", G122BuilderRecord.class));
+    }
+
+    // G023-01 (builder that is a bean itself): after a registration against the builder class its republished model kept
+    // only its own setter (name -> setName) and lost the fluent age(int); the scan's own entry still wins a shared name.
+    @Test
+    public void testGetPropSetters_registrationOnBeanLikeBuilderClassKeepsFluentSetters() {
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G122BeanLikeBuilderBean.class));
+
+        Beans.registerNonPropertyAccessor(G122BeanLikeBuilderBean.Builder.class, "zzzNotAProperty");
+
+        final Map<String, java.lang.reflect.Method> setters = Beans.getPropSetters(G122BeanLikeBuilderBean.Builder.class);
+        assertEquals(java.util.Set.of("name", "age"), setters.keySet());
+        assertEquals("setName", setters.get("name").getName());
+        assertEquals("age", setters.get("age").getName());
+
+        final G122BeanLikeBuilderBean bean = Beans.mapToBean(Map.of("name", "e", "age", 1), G122BeanLikeBuilderBean.class);
+        assertEquals("e", bean.getName());
+        assertEquals(1, bean.getAge());
+    }
+
+    // ---- deep review 2026-10-26 verify G122 end ----
+
+    // ---- deep review 2026-10-26 G127 begin ----
+
+    /** Builder-based bean for G127-01 (exclusion registered against the builder after the bean was introspected). */
+    public static class G127ExclAfterBean {
+        private final String name;
+        private final int age;
+
+        private G127ExclAfterBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G127ExclAfterBean build() {
+                return new G127ExclAfterBean(name, age);
+            }
+        }
+    }
+
+    /** Builder-based bean for G127-01 (exclusion registered against the builder before the bean is introspected). */
+    public static class G127ExclBeforeBean {
+        private final String name;
+        private final int age;
+
+        private G127ExclBeforeBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G127ExclBeforeBean build() {
+                return new G127ExclBeforeBean(name, age);
+            }
+        }
+    }
+
+    // G127-01: a real property excluded with registerNonPropertyAccessor against the BUILDER class after the bean was
+    // introspected. r107 lost every builder setter (age too; mapToBean built an empty bean); the first G023-01 fix re-derived
+    // all of them, the excluded one included. Only the excluded setter may be gone.
+    @Test
+    public void testGetPropSetters_builderExclusionRegisteredAfterBeanIntrospection() {
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G127ExclAfterBean.class));
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G127ExclAfterBean.Builder.class).keySet());
+
+        Beans.registerNonPropertyAccessor(G127ExclAfterBean.Builder.class, "name");
+
+        assertNull(Beans.getPropSetter(G127ExclAfterBean.Builder.class, "name"));
+        assertEquals("age", Beans.getPropSetter(G127ExclAfterBean.Builder.class, "age").getName());
+        assertEquals(java.util.Set.of("age"), Beans.getPropSetters(G127ExclAfterBean.Builder.class).keySet());
+
+        final G127ExclAfterBean bean = Beans.mapToBean(Map.of("name", "x", "age", 3), true, G127ExclAfterBean.class);
+        assertNull(bean.getName());
+        assertEquals(3, bean.getAge());
+    }
+
+    // G127-01: the same registration made BEFORE the bean is introspected. The builder setters published by the bean's
+    // introspection ignored it (r107 too), so the two orders gave different models; both now exclude the name.
+    @Test
+    public void testGetPropSetters_builderExclusionRegisteredBeforeBeanIntrospection() {
+        Beans.registerNonPropertyAccessor(G127ExclBeforeBean.Builder.class, "NAME");
+
+        assertEquals(List.of("name", "age"), Beans.getPropNameList(G127ExclBeforeBean.class));
+        assertNull(Beans.getPropSetter(G127ExclBeforeBean.Builder.class, "name"));
+        assertEquals("age", Beans.getPropSetter(G127ExclBeforeBean.Builder.class, "age").getName());
+        assertEquals(java.util.Set.of("age"), Beans.getPropSetters(G127ExclBeforeBean.Builder.class).keySet());
+
+        final G127ExclBeforeBean bean = Beans.mapToBean(Map.of("name", "y", "age", 4), true, G127ExclBeforeBean.class);
+        assertNull(bean.getName());
+        assertEquals(4, bean.getAge());
+    }
+
+    /** Builder-based bean for G127-03 (a conversion runs before the builder exclusion is registered). */
+    public static class G127ConvertFirstBean {
+        private final String name;
+        private final int age;
+
+        private G127ConvertFirstBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G127ConvertFirstBean build() {
+                return new G127ConvertFirstBean(name, age);
+            }
+        }
+    }
+
+    /** Supertype of the builder of {@link G127SuperBuilderBean}; G127-03 registers the exclusion against it. */
+    public interface G127BuilderBase {
+    }
+
+    /** Builder-based bean for G127-03 whose builder implements {@link G127BuilderBase}. */
+    public static class G127SuperBuilderBean {
+        private final String name;
+        private final int age;
+
+        private G127SuperBuilderBean(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder implements G127BuilderBase {
+            private String name;
+            private int age;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder age(final int age) {
+                this.age = age;
+                return this;
+            }
+
+            public G127SuperBuilderBean build() {
+                return new G127SuperBuilderBean(name, age);
+            }
+        }
+    }
+
+    // G127-03: a conversion before the registration cached the bean's parser model (BeanInfo), which captured the builder's
+    // setters; a registration against the builder class refreshed only the builder, so mapToBean and N.fromJson kept
+    // populating the excluded property (r107 too) while getPropSetter already answered null.
+    @Test
+    public void testMapToBeanAndFromJson_builderExclusionRegisteredAfterAConversion() {
+        final G127ConvertFirstBean before = Beans.mapToBean(Map.of("name", "a", "age", 1), true, G127ConvertFirstBean.class);
+        assertEquals("a", before.getName());
+        assertEquals("b", N.fromJson("{\"name\":\"b\",\"age\":2}", G127ConvertFirstBean.class).getName());
+
+        Beans.registerNonPropertyAccessor(G127ConvertFirstBean.Builder.class, "name");
+
+        assertNull(Beans.getPropSetter(G127ConvertFirstBean.Builder.class, "name"));
+
+        final G127ConvertFirstBean viaMap = Beans.mapToBean(Map.of("name", "c", "age", 3), true, G127ConvertFirstBean.class);
+        assertNull(viaMap.getName());
+        assertEquals(3, viaMap.getAge());
+
+        final G127ConvertFirstBean viaJson = N.fromJson("{\"name\":\"d\",\"age\":4}", G127ConvertFirstBean.class);
+        assertNull(viaJson.getName());
+        assertEquals(4, viaJson.getAge());
+    }
+
+    // G127-03: the same through a registration against a supertype of the builder class. A builder published only through
+    // its bean is not in the introspected-class index, so neither its setter pools nor the bean's parser model were dropped.
+    @Test
+    public void testMapToBeanAndFromJson_exclusionRegisteredAgainstBuilderSupertypeAfterAConversion() {
+        assertEquals("a", Beans.mapToBean(Map.of("name", "a", "age", 1), true, G127SuperBuilderBean.class).getName());
+        assertEquals("b", N.fromJson("{\"name\":\"b\",\"age\":2}", G127SuperBuilderBean.class).getName());
+        assertEquals(java.util.Set.of("name", "age"), Beans.getPropSetters(G127SuperBuilderBean.Builder.class).keySet());
+
+        Beans.registerNonPropertyAccessor(G127BuilderBase.class, "name");
+
+        assertNull(Beans.getPropSetter(G127SuperBuilderBean.Builder.class, "name"));
+        assertEquals(java.util.Set.of("age"), Beans.getPropSetters(G127SuperBuilderBean.Builder.class).keySet());
+
+        final G127SuperBuilderBean viaMap = Beans.mapToBean(Map.of("name", "c", "age", 3), true, G127SuperBuilderBean.class);
+        assertNull(viaMap.getName());
+        assertEquals(3, viaMap.getAge());
+
+        final G127SuperBuilderBean viaJson = N.fromJson("{\"name\":\"d\",\"age\":4}", G127SuperBuilderBean.class);
+        assertNull(viaJson.getName());
+        assertEquals(4, viaJson.getAge());
+    }
+
+    // ---- deep review 2026-10-26 G127 end ----
+
+    // ---- deep review 2026-10-27 G133 begin ----
+
+    // G023-03: an abstract class (or interface) registered with registerXmlBindingClass can never be constructed, so the
+    // JAXB getter probe used to demote its registration the first time it was introspected. Subclasses introspected
+    // afterwards then lost the inherited getter-only collection and mapToBean / fromJson / fromXml dropped its data,
+    // while subclasses introspected before kept it. Every test uses its own fixtures: the registration is static state.
+
+    // xjc shape: protected list, lazily created by the getter, no setter
+    public abstract static class G133BaseFirstBase {
+        protected List<String> items;
+        private String name;
+
+        public List<String> getItems() {
+            if (items == null) {
+                items = new java.util.ArrayList<>();
+            }
+
+            return items;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class G133BaseFirstSub extends G133BaseFirstBase {
+        private int size;
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(final int size) {
+            this.size = size;
+        }
+    }
+
+    // final list: a write has to go through the getter, which consults the registration of the declaring (abstract) class
+    public abstract static class G133SubFirstBase {
+        private final List<String> items = new java.util.ArrayList<>();
+        private String name;
+
+        public List<String> getItems() {
+            return items;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class G133SubFirstSub extends G133SubFirstBase {
+        private int size;
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(final int size) {
+            this.size = size;
+        }
+    }
+
+    public static class G133SubFirstSibling extends G133SubFirstBase {
+        private String tag;
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(final String tag) {
+            this.tag = tag;
+        }
+    }
+
+    // a getter-only map without a backing field of the same name (found by the method scan, not the field scan)
+    public abstract static class G133FieldlessBase {
+        private final Map<String, String> store = new java.util.LinkedHashMap<>();
+        private String name;
+
+        public Map<String, String> getAttrs() {
+            return store;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class G133FieldlessSub extends G133FieldlessBase {
+    }
+
+    public interface G133XmlIface {
+        List<String> getNotes();
+    }
+
+    // concrete and explicitly registered, but cannot be constructed: still demoted
+    public static class G133ConcreteNoCtorBean {
+        private final List<String> items = new java.util.ArrayList<>();
+
+        public G133ConcreteNoCtorBean() {
+            throw new IllegalStateException("not constructible");
+        }
+
+        public List<String> getItems() {
+            return items;
+        }
+    }
+
+    private static Map<String, Object> g133Map(final Object... keyValues) {
+        final Map<String, Object> map = new HashMap<>();
+
+        for (int i = 0; i < keyValues.length; i += 2) {
+            map.put((String) keyValues[i], keyValues[i + 1]);
+        }
+
+        return map;
+    }
+
+    @Test
+    public void testRegisterXmlBindingClass_abstractBaseIntrospectedBeforeSubclassIsNotDemoted() {
+        Beans.registerXmlBindingClass(G133BaseFirstBase.class);
+
+        // the abstract base itself cannot be probed, so its own model has no getter-only collection ...
+        assertEquals(List.of("name"), Beans.getPropNameList(G133BaseFirstBase.class));
+
+        // ... but a subclass introspected afterwards still exposes the inherited one, and mapToBean fills it
+        final G133BaseFirstSub bean = Beans.mapToBean(g133Map("items", List.of("a", "b"), "name", "n", "size", 3), G133BaseFirstSub.class);
+        assertEquals(List.of("a", "b"), bean.getItems());
+        assertEquals("n", bean.getName());
+        assertEquals(3, bean.getSize());
+        assertEquals(List.of("items", "name", "size"), Beans.getPropNameList(G133BaseFirstSub.class));
+        assertEquals(List.of("a", "b"), Beans.beanToMap(bean).get("items"));
+
+        // because the base's registration survives the failed construction and governs the subclass
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133BaseFirstBase.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133BaseFirstSub.class));
+
+        assertEquals(List.of("x"), N.fromJson("{\"items\":[\"x\"],\"name\":\"j\"}", G133BaseFirstSub.class).getItems());
+
+        final String xml = N.toXml(bean);
+        assertTrue(xml.contains("<items>"), xml);
+        final G133BaseFirstSub fromXml = N.fromXml(xml, G133BaseFirstSub.class);
+        assertEquals(List.of("a", "b"), fromXml.getItems());
+        assertEquals("n", fromXml.getName());
+    }
+
+    @Test
+    public void testRegisterXmlBindingClass_abstractBaseIntrospectedAfterSubclassIsNotDemoted() {
+        Beans.registerXmlBindingClass(G133SubFirstBase.class);
+
+        assertEquals(List.of("items", "name", "size"), Beans.getPropNameList(G133SubFirstSub.class));
+
+        // the abstract base is introspected afterwards ...
+        assertEquals(List.of("name"), Beans.getPropNameList(G133SubFirstBase.class));
+
+        // ... and a sibling introspected only now sees the same inherited collection as the earlier subclass
+        final G133SubFirstSibling sibling = Beans.mapToBean(g133Map("items", List.of("c"), "name", "m", "tag", "t"), G133SubFirstSibling.class);
+        assertEquals(List.of("c"), sibling.getItems());
+        assertEquals("t", sibling.getTag());
+        assertEquals(List.of("items", "name", "tag"), Beans.getPropNameList(G133SubFirstSibling.class));
+
+        final G133SubFirstSibling fromXml = N.fromXml(N.toXml(sibling), G133SubFirstSibling.class);
+        assertEquals(List.of("c"), fromXml.getItems());
+        assertEquals("t", fromXml.getTag());
+
+        // the earlier subclass keeps it as well
+        assertEquals(List.of("items", "name", "size"), Beans.getPropNameList(G133SubFirstSub.class));
+
+        final G133SubFirstSub sub = Beans.mapToBean(g133Map("items", List.of("a", "b"), "name", "n", "size", 3), G133SubFirstSub.class);
+        assertEquals(List.of("a", "b"), sub.getItems());
+        assertEquals(3, sub.getSize());
+        assertEquals(List.of("x"), N.fromJson("{\"items\":[\"x\"],\"size\":4}", G133SubFirstSub.class).getItems());
+
+        // introspecting the base did not withdraw the registration that governs both subclasses
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133SubFirstBase.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133SubFirstSub.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133SubFirstSibling.class));
+    }
+
+    @Test
+    public void testRegisterXmlBindingClass_abstractBaseWithFieldlessGetterOnlyMapIsNotDemoted() {
+        Beans.registerXmlBindingClass(G133FieldlessBase.class);
+
+        assertEquals(List.of("name"), Beans.getPropNameList(G133FieldlessBase.class));
+
+        final G133FieldlessSub bean = Beans.mapToBean(g133Map("attrs", Map.of("k", "v"), "name", "n"), G133FieldlessSub.class);
+        assertEquals(Map.of("k", "v"), bean.getAttrs());
+        assertEquals("n", bean.getName());
+        assertEquals(List.of("name", "attrs"), Beans.getPropNameList(G133FieldlessSub.class));
+
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133FieldlessBase.class));
+    }
+
+    @Test
+    public void testRegisterXmlBindingClass_interfaceIsNotDemotedByIntrospection() {
+        Beans.registerXmlBindingClass(G133XmlIface.class);
+
+        assertEquals(List.of(), Beans.getPropNameList(G133XmlIface.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133XmlIface.class));
+    }
+
+    // unchanged: a concrete class with an explicit registration whose construction fails is still demoted
+    @Test
+    public void testRegisterXmlBindingClass_concreteUnconstructibleClassIsStillDemoted() {
+        Beans.registerXmlBindingClass(G133ConcreteNoCtorBean.class);
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133ConcreteNoCtorBean.class));
+
+        assertFalse(Beans.getPropNameList(G133ConcreteNoCtorBean.class).contains("items"));
+        assertFalse(Beans.isRegisteredXmlBindingClass(G133ConcreteNoCtorBean.class));
+    }
+
+    // A registered abstract class with a detected builder, used directly as the conversion target, is built through
+    // that builder: an abstract class can never take the "registered XML-binding class -> no-arg constructor" path.
+
+    // with a getter-only collection without a backing field: r108 demoted it, which happened to select the builder
+    public abstract static class G133BuiltBase {
+        private final String name;
+
+        protected G133BuiltBase(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<String> getAliases() {
+            return new java.util.ArrayList<>(List.of("alias"));
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private String name;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public G133BuiltBase build() {
+                return new G133BuiltImpl(name);
+            }
+        }
+    }
+
+    public static class G133BuiltImpl extends G133BuiltBase {
+        G133BuiltImpl(final String name) {
+            super(name);
+        }
+    }
+
+    // without such a getter: never demoted, so r108 tried the no-arg constructor of the abstract class and failed
+    public abstract static class G133BuiltBase2 {
+        private final String name;
+        private final List<String> tags = new java.util.ArrayList<>();
+
+        protected G133BuiltBase2(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private String name;
+
+            public Builder name(final String name) {
+                this.name = name;
+                return this;
+            }
+
+            public G133BuiltBase2 build() {
+                return new G133BuiltImpl2(name);
+            }
+        }
+    }
+
+    public static class G133BuiltImpl2 extends G133BuiltBase2 {
+        G133BuiltImpl2(final String name) {
+            super(name);
+        }
+    }
+
+    // passes on r108 as well: keeping the registration of the abstract class must not take its builder path away
+    @Test
+    public void testRegisterXmlBindingClass_abstractClassWithBuilderAndGetterOnlyCollectionIsBuiltThroughBuilder() {
+        Beans.registerXmlBindingClass(G133BuiltBase.class);
+
+        assertEquals(List.of("name"), Beans.getPropNameList(G133BuiltBase.class));
+
+        final G133BuiltBase viaJson = N.fromJson("{\"name\":\"j\"}", G133BuiltBase.class);
+        assertEquals(G133BuiltImpl.class, viaJson.getClass());
+        assertEquals("j", viaJson.getName());
+
+        final G133BuiltBase viaXml = N.fromXml("<g133BuiltBase><name>x</name></g133BuiltBase>", G133BuiltBase.class);
+        assertEquals(G133BuiltImpl.class, viaXml.getClass());
+        assertEquals("x", viaXml.getName());
+
+        final G133BuiltBase viaMap = Beans.mapToBean(Map.of("name", "m"), G133BuiltBase.class);
+        assertEquals(G133BuiltImpl.class, viaMap.getClass());
+        assertEquals("m", viaMap.getName());
+    }
+
+    @Test
+    public void testRegisterXmlBindingClass_abstractClassWithBuilderIsBuiltThroughBuilder() {
+        Beans.registerXmlBindingClass(G133BuiltBase2.class);
+
+        assertEquals(List.of("name", "tags"), Beans.getPropNameList(G133BuiltBase2.class));
+        assertTrue(Beans.isRegisteredXmlBindingClass(G133BuiltBase2.class));
+
+        final G133BuiltBase2 viaJson = N.fromJson("{\"name\":\"j\"}", G133BuiltBase2.class);
+        assertEquals(G133BuiltImpl2.class, viaJson.getClass());
+        assertEquals("j", viaJson.getName());
+
+        final G133BuiltBase2 viaXml = N.fromXml("<g133BuiltBase2><name>x</name></g133BuiltBase2>", G133BuiltBase2.class);
+        assertEquals(G133BuiltImpl2.class, viaXml.getClass());
+        assertEquals("x", viaXml.getName());
+
+        final G133BuiltBase2 viaMap = Beans.mapToBean(Map.of("name", "m"), G133BuiltBase2.class);
+        assertEquals(G133BuiltImpl2.class, viaMap.getClass());
+        assertEquals("m", viaMap.getName());
+    }
+
+    // ---- deep review 2026-10-27 G133 end ----
+
 }

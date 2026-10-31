@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
@@ -101,12 +103,21 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
 
     /**
      * Converts an Object to a LocalDate.
-     * If the object is a Number, it is treated as milliseconds since epoch and converted to LocalDate using the default zone ID.
-     * A {@link java.util.Date} (including its SQL subclasses) is converted the same way from its
-     * epoch-millisecond value.
-     * A {@link java.util.Calendar} keeps the zone attached to it, so the returned value carries the calendar's own
-     * displayed fields (a calendar with no zone falls back to the default zone).
-     * Otherwise, the object is converted to a string and parsed.
+     * Supported conversions:
+     * <ul>
+     *   <li>{@link Number}: treated as milliseconds since the epoch and read in the default zone</li>
+     *   <li>{@link java.util.Date} (including its SQL subclasses): its epoch-millisecond value, read in the default zone</li>
+     *   <li>{@link java.util.Calendar}: read in the zone attached to the calendar, so the result carries the calendar's
+     *       own displayed date (a calendar with no zone falls back to the default zone)</li>
+     *   <li>{@link Instant}: read in the default zone, like a {@code Number} or {@code Date}</li>
+     *   <li>{@link OffsetDateTime} and {@link ZonedDateTime}: their own local date ({@code toLocalDate()}), that is the date
+     *       displayed in the value's own offset or zone, like a {@code Calendar}; the instant is not re-read in the default
+     *       zone</li>
+     *   <li>{@code null}: returns {@code null}</li>
+     *   <li>any other type: converted to its string representation with {@link N#stringOf(Object)}, then parsed via
+     *       {@link #valueOf(String)} (a {@code LocalDate} converts this way; the text of a {@code LocalDateTime} or
+     *       {@code LocalTime} is rejected)</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -114,11 +125,15 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * LocalDate date1 = type.valueOf(1609459200000L);
      * LocalDate date2 = type.valueOf(new java.util.Date());
      * LocalDate date3 = type.valueOf("2021-01-01");
+     * // From OffsetDateTime: the date it displays at its own offset
+     * LocalDate date4 = type.valueOf(OffsetDateTime.of(2021, 1, 1, 23, 30, 0, 0, ZoneOffset.ofHours(14)));   // 2021-01-01
      * }</pre>
      *
      * @param obj The object to convert to LocalDate
      * @return The LocalDate representation of the object, or {@code null} if the input is null
      * @throws IllegalArgumentException if the input is a non-lenient calendar containing invalid field values.
+     * @throws java.time.DateTimeException if the input is an {@code Instant} outside the {@code LocalDate} range
+     *         (for example {@link Instant#MAX}).
      * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid ISO-8601
      *         LocalDate.
      */
@@ -136,6 +151,14 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
             final java.util.TimeZone tz = cal.getTimeZone();
 
             return LocalDate.ofInstant(Instant.ofEpochMilli(cal.getTimeInMillis()), tz == null ? DEFAULT_ZONE_ID : tz.toZoneId());
+        } else if (obj instanceof Instant instant) {
+            return LocalDate.ofInstant(instant, DEFAULT_ZONE_ID);
+        } else if (obj instanceof OffsetDateTime offsetDateTime) {
+            // Same rule as the Calendar branch: keep the date the value displays in its own offset/zone. The text
+            // route below cannot read these values (their toString() carries a time and an offset).
+            return offsetDateTime.toLocalDate();
+        } else if (obj instanceof ZonedDateTime zonedDateTime) {
+            return zonedDateTime.toLocalDate();
         }
 
         return obj == null ? null : valueOf(N.stringOf(obj));

@@ -71,10 +71,34 @@ public class EntryStreamReview20260924bTest extends TestBase {
         expected.put("b", 1);
 
         for (final boolean parallel : new boolean[] { false, true }) {
+            // The merge-only overloads are @SequentialOnly: they group in encounter order even on a parallel stream.
             assertEquals(expected, lhm(nullValueFirst(parallel).groupBy(NULL_AWARE, LinkedHashMap::new)));
             assertEquals(expected, nullValueFirst(parallel).groupBy(NULL_AWARE).toMap());
-            assertEquals(expected, nullValueFirst(parallel).groupBy(Fn.key(), Fn.value(), NULL_AWARE).toMap());
-            assertEquals(expected, nullValueFirst(parallel).groupBy(Fn.key(), Fn.value(), NULL_AWARE, Suppliers.ofLinkedHashMap()).toMap());
+        }
+
+        // NULL_AWARE depends on the argument order (it expects the null value first). The keyMapper/valueMapper overloads
+        // are @ParallelSupported, and in parallel they merge partial results in completion order, which is unspecified
+        // (2026-10-27 G137: the parallel run saw (2, null) about 4 in 20,000 runs and failed with an NPE). So the
+        // order-sensitive merge is checked on a sequential stream only ...
+        assertEquals(expected, nullValueFirst(false).groupBy(Fn.key(), Fn.value(), NULL_AWARE).toMap());
+        assertEquals(expected, nullValueFirst(false).groupBy(Fn.key(), Fn.value(), NULL_AWARE, Suppliers.ofLinkedHashMap()).toMap());
+
+        // ... and in parallel with a merge that gives the same result in either argument order: it is still called once,
+        // with the null value (a merge that treated a null existing value as absent, like Map.merge, would leave a=2).
+        for (int run = 0; run < 20; run++) {
+            final AtomicInteger nullSeen = new AtomicInteger();
+            final BinaryOperator<Integer> symmetric = (x, y) -> {
+                if (x == null || y == null) {
+                    nullSeen.incrementAndGet();
+                    return -1;
+                }
+
+                return x + y;
+            };
+
+            assertEquals(expected, nullValueFirst(true).groupBy(Fn.key(), Fn.value(), symmetric).toMap());
+            assertEquals(expected, nullValueFirst(true).groupBy(Fn.key(), Fn.value(), symmetric, Suppliers.ofLinkedHashMap()).toMap());
+            assertEquals(2, nullSeen.get());
         }
     }
 

@@ -2614,7 +2614,7 @@ public final class Numbers {
     }
 
     // PLAIN_DECIMAL, not the DECIMAL_FIRST grammar the to*(String) parsers use: the token handed to these two
-    // was matched by RegExUtil.INTEGER_FINDER, which is an optional sign followed by ASCII digits, so it can
+    // was located by firstIntegerTokenSpan (the RegExUtil.INTEGER_FINDER grammar), an optional sign followed by ASCII digits, so it can
     // never carry a 0x/# radix prefix. DECIMAL_FIRST would work identically -- its prefix branches simply
     // cannot fire on such a token -- but it would say the extract family accepts hexadecimal, which it does
     // not: extractFirstInt("0x1F") is 0, the leading decimal run, while toInt("0x1F") is 31.

@@ -4106,7 +4106,10 @@ abstract class AbstractStream<T> extends Stream<T> {
             if (length == 0) {
                 return newStream(N.asArray(N.emptyList()), false, null);
             } else if (length == 1) {
-                return map(N::toList);
+                // Map a sequential view of the elements, as the other lengths build theirs: map(N::toList) on this
+                // stream would run in parallel on a parallel stream and emit the singleton lists in completion order.
+                //noinspection resource
+                return newStream(Stream.of(s.elements, s.fromIndex, s.toIndex).map(N::toList).iteratorEx(), false, null);
             } else if (length == count) {
                 // Copy the elements directly: the terminal toList() would close this stream (running its close
                 // handlers) during this intermediate call, before the returned stream is even traversed.
@@ -6803,7 +6806,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(b, cs.b);
         checkArgNotNull(function, cs.function);
 
-        return flatMap(t -> Stream.of(b).map(u -> function.apply(t, u)));
+        return flatMapInEncounterOrder(t -> Stream.of(b).map(u -> function.apply(t, u)));
     }
 
     @Override
@@ -6815,7 +6818,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(function, cs.function);
 
         //noinspection resource
-        return flatMap(new Function<T, Stream<R>>() {
+        return flatMapInEncounterOrder(new Function<T, Stream<R>>() {
             private volatile List<U> c = null;
 
             @Override
@@ -6831,6 +6834,24 @@ abstract class AbstractStream<T> extends Stream<T> {
                 return Stream.of(c).map(u -> function.apply(t, u));
             }
         }).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * {@code flatMap} for the sequential-only {@code crossJoin} overloads. A parallel {@code flatMap} emits the joined
+     * elements in completion order, so on a parallel stream the flattening runs on the sequential view and this
+     * stream's parallel settings are restored for the downstream stages, as {@code skipNulls} and {@code rateLimited} do.
+     *
+     * @param <R> the element type of the returned stream
+     * @param mapper the per-element mapper
+     * @return the flattened stream, in encounter order
+     */
+    private <R> Stream<R> flatMapInEncounterOrder(final Function<? super T, ? extends Stream<? extends R>> mapper) {
+        if (isParallel()) {
+            //noinspection resource
+            return sequential().<R> flatMap(mapper).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+        } else {
+            return flatMap(mapper);
+        }
     }
 
     @Override

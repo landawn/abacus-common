@@ -377,7 +377,7 @@ public abstract class AbstractParserTest extends AbstractTest {
     }
 
     @Test
-    public void reviewFixes20260907_uninstantiableContainerTypeAttributeFallsBackToTheDeclaredType() throws ReflectiveOperationException {
+    public void reviewFixes20260907_uninstantiableContainerTypeAttributeFallsBackToTheDeclaredType() {
         // No no-argument constructor at all: the reader would fail with "No default constructor found".
         assertSame(Map.class, AbstractParser.getConcreteClass(ImmutableMap.class, Map.class));
         assertSame(List.class, AbstractParser.getConcreteClass(ImmutableList.class, List.class));
@@ -385,14 +385,10 @@ public abstract class AbstractParserTest extends AbstractTest {
         assertSame(List.class, AbstractParser.getConcreteClass(List.of(1).getClass(), List.class));
         assertSame(Map.class, AbstractParser.getConcreteClass(Collections.unmodifiableMap(new HashMap<>()).getClass(), Map.class));
 
-        // These private no-argument constructors are unusable when java.util is closed. With --add-opens,
-        // the reader can instantiate them, so the more specific runtime class must be retained instead.
-        final Class<?> emptyMapClass = Collections.emptyMap().getClass();
-        final Class<?> emptyListClass = Collections.emptyList().getClass();
-        assertSame(emptyMapClass.getDeclaredConstructor().trySetAccessible() ? emptyMapClass : Map.class,
-                AbstractParser.getConcreteClass(emptyMapClass, Map.class));
-        assertSame(emptyListClass.getDeclaredConstructor().trySetAccessible() ? emptyListClass : List.class,
-                AbstractParser.getConcreteClass(emptyListClass, List.class));
+        // These private no-argument constructors are usable only with --add-opens java.base/java.util. A JDK class
+        // outside the public API is never retained, so the declared type is used with or without that flag.
+        assertSame(Map.class, AbstractParser.getConcreteClass(Collections.emptyMap().getClass(), Map.class));
+        assertSame(List.class, AbstractParser.getConcreteClass(Collections.emptyList().getClass(), List.class));
 
         // Instantiable containers keep the more specific class.
         assertSame(LinkedHashMap.class, AbstractParser.getConcreteClass(LinkedHashMap.class, Map.class));

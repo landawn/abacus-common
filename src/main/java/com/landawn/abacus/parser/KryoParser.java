@@ -180,6 +180,25 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Additional types can be registered using the {@link #register} methods or globally
  * via {@link ParserFactory#registerKryo}.</p>
  *
+ * <p><b>Registration IDs:</b> every {@code Kryo} instance of a parser registers the built-in types first, then the
+ * global registrations made through {@link ParserFactory#registerKryo}, then the parser's own registrations made
+ * through {@link #register}. Each of the two user scopes is applied in a fixed order of kinds: the registrations made
+ * with {@code register(Class)}, then those with {@code register(Class, int)}, then {@code register(Class, Serializer)},
+ * then {@code register(Class, Serializer, int)}, each kind in the order of its calls; a class registered again (through
+ * the same or another overload) takes the position of its latest call. A class registered without an explicit ID
+ * receives the next free ID when it is applied (a class already registered globally keeps its global ID, and a
+ * built-in type its built-in ID unless an explicit ID takes it; see {@link #register(Class, int)}), so that ID depends
+ * on the whole registration sequence: two parsers, in this or another JVM, are guaranteed to assign the same such IDs
+ * only when they make the same registration calls in the same order with the same library version. Only explicit IDs
+ * stay stable across different registration sequences and library versions; use them for data that is persisted or
+ * exchanged between processes. An explicit ID must not be an ID that a registration applied before it received
+ * without an explicit ID (for example {@code register(A); register(B, id)} with the ID that {@code A} received); such
+ * a conflict is reported with {@code IllegalArgumentException} when the parser next creates a {@code Kryo}
+ * instance.</p>
+ *
+ * <p>A primitive type and its wrapper (for example {@code int} and {@code Integer}) share one Kryo registration, so
+ * when both are registered in one scope, the one applied last in this order decides the serializer and the ID.</p>
+ *
  * <p>Deserialization mode is explicit: a non-null target class reads object-only data produced
  * with the default serialization configuration. A null {@code Class} target reads class-and-object
  * data produced with {@code setWriteClass(true)}, including serialized nulls. Payload bytes cannot
@@ -188,7 +207,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Object graphs:</b> serialization ({@code serialize}, {@link #encode(Object)}) does not track object
  * references, which is Kryo's default and part of the wire format: an object graph that contains a cycle
- * fails with {@code KryoException}, and an object that is referenced from several places is written once per
+ * fails - with {@code KryoException} when the cycle passes through a bean field (Kryo wraps the stack overflow),
+ * but with a raw {@code StackOverflowError} when it is formed only by collections, maps or arrays (for example a
+ * list that contains itself) - and an object that is referenced from several places is written once per
  * occurrence and comes back as that many separate copies. {@link #deepCopy(Object)} tracks references
  * to preserve cycles and shared identity in the copied graph. {@link #shallowCopy(Object)} copies only
  * the root, retaining its references to the original nested objects.
@@ -307,6 +328,15 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     private final Map<Class<?>, Serializer<?>> kryoClassSerializerMap = new ConcurrentHashMap<>();
     private final Map<Class<?>, Tuple2<Serializer<?>, Integer>> kryoClassSerializerIdMap = new ConcurrentHashMap<>();
 
+    /**
+     * Every class registered with this parser, in the order of its latest {@code register} call, whichever overload
+     * made it. The four collections above hold what each class is registered with; {@link #createKryo()} replays them
+     * by walking this order once per kind of registration, because a class without an explicit ID receives the next
+     * free ID when it is replayed, and iterating the identity-hashed collections instead would assign different IDs in
+     * two JVMs that make the same calls. Guarded by {@code kryoPool}.
+     */
+    private final Set<Class<?>> kryoRegistrationOrder = new LinkedHashSet<>();
+
     private final Map<Kryo, Kryo> xPool = new IdentityHashMap<>();
 
     private final List<Kryo> kryoPool = new ArrayList<>(POOL_SIZE);
@@ -332,8 +362,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * <p>This method converts the object to binary format using Kryo serialization,
      * then encodes the result as a Base64 string suitable for text-based transmission.
-     * Object references are not tracked: a cyclic graph fails with {@code KryoException} and shared
-     * references are duplicated (see the class documentation).</p>
+     * Object references are not tracked: a cyclic graph fails (with {@code KryoException} when the cycle passes
+     * through a bean field) and shared references are duplicated (see the class documentation).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -347,7 +377,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @return the Base64 encoded string representation of the serialized object
      * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if a configured serializer reports an I/O cause while encoding the object graph
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     @Override
     public String serialize(final Object obj, final KryoSerConfig config) throws IllegalArgumentException, UncheckedIOException, KryoException {
@@ -384,7 +414,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output} fails, including an I/O cause
      *         wrapped by Kryo
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     @Override
     public void serialize(final Object obj, final KryoSerConfig config, final File output)
@@ -428,7 +458,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @throws IllegalArgumentException if {@code output} is null,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing Kryo bytes to {@code output} or flushing it fails, including an I/O cause wrapped by Kryo
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     @Override
     public void serialize(final Object obj, final KryoSerConfig config, final OutputStream output)
@@ -456,7 +486,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @throws IllegalArgumentException if {@code output} is null,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing the Base64-encoded Kryo bytes to {@code output} or flushing it fails
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     @Override
     public void serialize(final Object obj, final KryoSerConfig config, final Writer output)
@@ -499,7 +529,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @throws IllegalArgumentException if {@code output} is null,
      *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing to or flushing {@code output} fails
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     private void write(final Object obj, final KryoSerConfig config, final OutputStream output)
             throws IllegalArgumentException, UncheckedIOException, KryoException {
@@ -550,7 +580,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the Kryo output to write to
      * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     private void write(final Object obj, final KryoSerConfig config, final Output output) throws IllegalArgumentException, KryoException {
         check(config);
@@ -1056,11 +1086,18 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      */
     public <T> T shallowCopy(final T source) throws IllegalArgumentException, KryoException {
         final Kryo kryo = createKryo();
+        boolean copied = false;
 
         try {
-            return kryo.copyShallow(source);
+            final T result = kryo.copyShallow(source);
+            copied = true;
+            return result;
         } finally {
-            recycle(kryo);
+            if (copied) {
+                recycle(kryo);
+            } else {
+                discardKryo(kryo);
+            }
         }
     }
 
@@ -1097,20 +1134,35 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      */
     public <T> T deepCopy(final T source) throws IllegalArgumentException, KryoException {
         final Kryo kryo = createKryo();
+        boolean copied = false;
 
         try {
-            return kryo.copy(source);
+            final T result = kryo.copy(source);
+            copied = true;
+            return result;
         } finally {
-            recycle(kryo);
+            if (copied) {
+                recycle(kryo);
+            } else {
+                discardKryo(kryo);
+            }
+        }
+    }
+
+    private void discardKryo(final Kryo kryo) {
+        // Kryo 5.x can retain the failed copy's source in needsCopyReference even after reset().
+        // Removing ownership as well as skipping the idle pool lets the entire failed graph be collected.
+        synchronized (kryoPool) {
+            xPool.remove(kryo);
         }
     }
 
     /**
      * Encodes an object to a byte array.
      * The byte array includes class information and can be decoded without specifying the target class.
-     * Object references are not tracked (a cyclic graph fails with {@code KryoException}, shared references
-     * are duplicated) and every class in the graph needs a no-arg constructor or a registered serializer to
-     * be decoded again; see the class documentation.
+     * Object references are not tracked (a cyclic graph fails, with {@code KryoException} when the cycle passes
+     * through a bean field; shared references are duplicated) and every class in the graph needs a no-arg
+     * constructor or a registered serializer to be decoded again; see the class documentation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1122,7 +1174,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param source the object to encode (may be {@code null})
      * @return the encoded byte array
      * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
-     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
+     * @throws KryoException if a serializer cannot encode the object graph, including a graph whose cycle passes through a bean field
      */
     public byte[] encode(final Object source) throws IllegalArgumentException, KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
@@ -1187,7 +1239,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * If the class was registered previously through another overload, this call replaces that
      * registration; the most recent call is authoritative.
      * A parser-local registration uses the default serializer even when the same class has a global
-     * custom serializer. A global or built-in registration ID is retained; otherwise Kryo assigns one automatically.
+     * custom serializer. A global or built-in registration ID is retained; otherwise the class receives the next
+     * free ID when it is applied (after the built-in types, all global registrations and this parser's earlier
+     * {@code register(Class)} calls; see the class documentation), so the ID is guaranteed to be the same in another
+     * JVM only if that JVM makes the same registration calls in the same order with the same library version. Use
+     * {@link #register(Class, int)} for an ID that stays stable across different registration sequences and library
+     * versions.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1205,6 +1262,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         synchronized (kryoPool) {
             clearKryoRegistration(type);
             kryoClassSet.add(type);
+            kryoRegistrationOrder.add(type);
 
             xPool.clear();
             kryoPool.clear();
@@ -1213,17 +1271,19 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     /**
      * Registers a class with a specific ID for this parser instance.
-     * Using fixed IDs ensures compatibility across different JVM instances.
+     * Using fixed IDs ensures compatibility across different JVM instances: unlike the ID of a class registered
+     * without one, an explicit ID does not depend on the order of the registration calls.
      * Any earlier registration of the same class through another overload is replaced.
      * The default serializer is used even when the class has a global custom serializer.
      *
      * <p>An ID that Kryo assigns to one of its built-in types may be reused; the built-in type then falls
-     * back to a name-based registration. If the ID is one of the primitive slots (0 for {@code int} and
-     * 2-8 for {@code float}, {@code boolean}, {@code byte}, {@code char}, {@code short}, {@code long} and
-     * {@code double}), the displaced primitive and its wrapper are re-registered with their original
-     * serializer at the next free implicit ID instead, so they stay serializable. That implicit ID depends on
-     * the order in which registrations are replayed (built-ins, then global, then instance registrations),
-     * so two JVMs exchanging payloads that contain the displaced type must perform the same registrations.</p>
+     * back to a name-based registration, unless a registration of the built-in type itself is applied after this one
+     * (see the class documentation), which gives it the next free ID. If the ID is one of the primitive slots (0 for
+     * {@code int} and 2-8 for {@code float}, {@code boolean}, {@code byte}, {@code char}, {@code short}, {@code long}
+     * and {@code double}), the displaced primitive and its wrapper are re-registered with their original serializer at
+     * the next free implicit ID instead, so they stay serializable. That implicit ID follows the order in which the
+     * registrations are applied (see the class documentation), so two JVMs exchanging payloads that contain the
+     * displaced type must perform the same registrations in the same order.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1246,6 +1306,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 checkKryoRegistrationIdAvailable(type, id);
                 clearKryoRegistration(type);
                 kryoClassIdMap.put(type, id);
+                kryoRegistrationOrder.add(type);
 
                 xPool.clear();
                 kryoPool.clear();
@@ -1257,6 +1318,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Registers a class with a custom serializer for this parser instance.
      * Custom serializers can handle special serialization requirements.
      * Any earlier registration of the same class through another overload is replaced.
+     * The class has no explicit ID: a global or built-in registration ID is retained, otherwise the class receives
+     * the next free ID when it is applied: after all global registrations, this parser's {@code register(Class)} and
+     * {@code register(Class, int)} registrations and its earlier {@code register(Class, Serializer)} calls (see the
+     * class documentation).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1275,6 +1340,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         synchronized (kryoPool) {
             clearKryoRegistration(type);
             kryoClassSerializerMap.put(type, serializer);
+            kryoRegistrationOrder.add(type);
 
             xPool.clear();
             kryoPool.clear();
@@ -1309,6 +1375,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 checkKryoRegistrationIdAvailable(type, id);
                 clearKryoRegistration(type);
                 kryoClassSerializerIdMap.put(type, Tuple.of(serializer, id));
+                kryoRegistrationOrder.add(type);
 
                 xPool.clear();
                 kryoPool.clear();
@@ -1363,6 +1430,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * Clears all earlier registration variants for {@code type}, making the most recent
      * {@code register(...)} call authoritative. Without this, stale entries in the maps below
      * were all replayed and the hard-coded replay order, rather than call order, chose the winner.
+     * The class also leaves the replay order, so the caller's registration is appended at the position
+     * of the latest call.
      */
     private void clearKryoRegistration(final Class<?> type) {
         mergedKryoRegistrationIdsChecked = false;
@@ -1370,6 +1439,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
         kryoClassIdMap.remove(type);
         kryoClassSerializerMap.remove(type);
         kryoClassSerializerIdMap.remove(type);
+        kryoRegistrationOrder.remove(type);
     }
 
     private static final Set<Class<?>> builtInClassesToRegister = new LinkedHashSet<>();
@@ -1585,9 +1655,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * <p>The Kryo instance includes registrations from (in order):</p>
      * <ul>
      *   <li>Built-in types (primitives, collections, common Java types, etc.)</li>
-     *   <li>Globally registered types via {@link ParserFactory}</li>
-     *   <li>Instance-specific registered types via {@link #register} methods</li>
+     *   <li>Globally registered types via {@link ParserFactory}, kind by kind, each kind in the order of the
+     *       {@code registerKryo} calls (see the class documentation)</li>
+     *   <li>Instance-specific registered types via {@link #register} methods, in the same way</li>
      * </ul>
+     * <p>A class registered without an explicit ID receives the next free ID in this order (see the class
+     * documentation).</p>
      *
      * <p><b>Note:</b> This method is package-scoped (the class is final) and not part of the public API.</p>
      *
@@ -1653,65 +1726,91 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                 // This makes creation linearizable with global register calls: a registration either
                 // precedes this instance and is replayed here, or follows this return and invalidates it
                 // before it can subsequently be obtained from the pool.
-                if (N.notEmpty(ParserFactory._kryoClassSet)) {
-                    for (final Class<?> cls : ParserFactory._kryoClassSet) {
-                        kryo.register(cls);
-                    }
-                }
-
-                if (N.notEmpty(ParserFactory._kryoClassIdMap)) {
-                    for (final Map.Entry<Class<?>, Integer> entry : ParserFactory._kryoClassIdMap.entrySet()) {
-                        registerKryo(kryo, entry.getKey(), entry.getValue());
-                    }
-                }
-
-                if (N.notEmpty(ParserFactory._kryoClassSerializerMap)) {
-                    for (final Map.Entry<Class<?>, Serializer<?>> entry : ParserFactory._kryoClassSerializerMap.entrySet()) {
-                        kryo.register(entry.getKey(), entry.getValue());
-                    }
-                }
-
-                if (N.notEmpty(ParserFactory._kryoClassSerializerIdMap)) {
-                    for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : ParserFactory._kryoClassSerializerIdMap.entrySet()) {
-                        registerKryo(kryo, entry.getKey(), entry.getValue()._1, entry.getValue()._2);
-                    }
-                }
-
-                if (N.notEmpty(kryoClassSet)) {
-                    for (final Class<?> cls : kryoClassSet) {
-                        // register(Class) leaves an existing global serializer unchanged. The serializer overload
-                        // makes this local default authoritative while retaining the registration's assigned ID.
-                        final Serializer<?> primitiveSerializer = primitiveSerializers.get(cls);
-                        kryo.register(cls, primitiveSerializer == null ? kryo.getDefaultSerializer(cls) : primitiveSerializer);
-                    }
-                }
-
-                if (N.notEmpty(kryoClassIdMap)) {
-                    for (final Map.Entry<Class<?>, Integer> entry : kryoClassIdMap.entrySet()) { //NOSONAR
-                        // A local ID-only registration requests the default serializer, just like register(Class).
-                        // The current primitive registration may already carry a global custom serializer, so use
-                        // the original captured before global registrations rather than preserving that override.
-                        final Serializer<?> primitiveSerializer = primitiveSerializers.get(entry.getKey());
-                        registerKryo(kryo, entry.getKey(), primitiveSerializer == null ? kryo.getDefaultSerializer(entry.getKey()) : primitiveSerializer,
-                                entry.getValue());
-                    }
-                }
-
-                if (N.notEmpty(kryoClassSerializerMap)) {
-                    for (final Map.Entry<Class<?>, Serializer<?>> entry : kryoClassSerializerMap.entrySet()) { //NOSONAR
-                        kryo.register(entry.getKey(), entry.getValue());
-                    }
-                }
-
-                if (N.notEmpty(kryoClassSerializerIdMap)) {
-                    for (final Map.Entry<Class<?>, Tuple2<Serializer<?>, Integer>> entry : kryoClassSerializerIdMap.entrySet()) {
-                        registerKryo(kryo, entry.getKey(), entry.getValue()._1, entry.getValue()._2);
-                    }
-                }
+                replayGlobalKryoRegistrations(kryo);
+                replayKryoRegistrations(kryo, primitiveSerializers);
 
                 xPool.put(kryo, kryo);
 
                 return kryo;
+            }
+        }
+    }
+
+    // Each scope (global, then this parser) is replayed kind by kind - class-only, ID-only, serializer-only, serializer+ID,
+    // the order of the former collection-by-collection replay - but each kind by walking the call-ordered log instead of
+    // its collection. The collections hash their Class keys by identity, so their order differs between JVMs, and a class
+    // without an explicit ID receives the next free ID when it is replayed. Keeping the kind order keeps every ID that did
+    // not depend on that hash order unchanged; only the order within a kind is now fixed, to the order of the latest calls.
+
+    private static void replayGlobalKryoRegistrations(final Kryo kryo) {
+        final Set<Class<?>> order = ParserFactory._kryoRegistrationOrder;
+
+        for (final Class<?> cls : order) {
+            if (ParserFactory._kryoClassSet.contains(cls)) {
+                kryo.register(cls);
+            }
+        }
+
+        for (final Class<?> cls : order) {
+            final Integer id = ParserFactory._kryoClassIdMap.get(cls);
+
+            if (id != null) {
+                registerKryo(kryo, cls, id);
+            }
+        }
+
+        for (final Class<?> cls : order) {
+            final Serializer<?> serializer = ParserFactory._kryoClassSerializerMap.get(cls);
+
+            if (serializer != null) {
+                kryo.register(cls, serializer);
+            }
+        }
+
+        for (final Class<?> cls : order) {
+            final Tuple2<Serializer<?>, Integer> serializerAndId = ParserFactory._kryoClassSerializerIdMap.get(cls);
+
+            if (serializerAndId != null) {
+                registerKryo(kryo, cls, serializerAndId._1, serializerAndId._2);
+            }
+        }
+    }
+
+    private void replayKryoRegistrations(final Kryo kryo, final Map<Class<?>, Serializer<?>> primitiveSerializers) {
+        for (final Class<?> cls : kryoRegistrationOrder) {
+            if (kryoClassSet.contains(cls)) {
+                // register(Class) leaves an existing global serializer unchanged. The serializer overload
+                // makes this local default authoritative while retaining the registration's assigned ID.
+                final Serializer<?> primitiveSerializer = primitiveSerializers.get(cls);
+                kryo.register(cls, primitiveSerializer == null ? kryo.getDefaultSerializer(cls) : primitiveSerializer);
+            }
+        }
+
+        for (final Class<?> cls : kryoRegistrationOrder) {
+            final Integer id = kryoClassIdMap.get(cls);
+
+            if (id != null) {
+                // A local ID-only registration requests the default serializer, just like register(Class).
+                // The current primitive registration may already carry a global custom serializer, so use
+                // the original captured before global registrations rather than preserving that override.
+                final Serializer<?> primitiveSerializer = primitiveSerializers.get(cls);
+                registerKryo(kryo, cls, primitiveSerializer == null ? kryo.getDefaultSerializer(cls) : primitiveSerializer, id);
+            }
+        }
+
+        for (final Class<?> cls : kryoRegistrationOrder) {
+            final Serializer<?> serializer = kryoClassSerializerMap.get(cls);
+
+            if (serializer != null) {
+                kryo.register(cls, serializer);
+            }
+        }
+
+        for (final Class<?> cls : kryoRegistrationOrder) {
+            final Tuple2<Serializer<?>, Integer> serializerAndId = kryoClassSerializerIdMap.get(cls);
+
+            if (serializerAndId != null) {
+                registerKryo(kryo, cls, serializerAndId._1, serializerAndId._2);
             }
         }
     }

@@ -68,7 +68,9 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * that rule: binding a <i>top-level</i> quoted string that is not a
  * number to {@code Double}, {@code double}, {@code Float} or {@code float} - for example
  * {@code fromJson("\"Infinity\"", Double.class)} - raises an
- * {@link ArrayIndexOutOfBoundsException} from inside FastJSON2 instead. This is an upstream defect, not a
+ * {@link ArrayIndexOutOfBoundsException} from inside FastJSON2 instead (the {@code Reader} overloads that
+ * take no {@code JSONReader.Context} are not affected: they bind {@code "Infinity"}/{@code "-Infinity"} and
+ * report non-numeric text with a {@code JSONException}). This is an upstream defect, not a
  * deliberate contract; the same string in a nested position ({@code {"d":"Infinity"}}) parses normally, and
  * a {@link java.math.BigDecimal} target reports the expected {@code JSONException}. It is reachable in
  * practice because {@link JsonMappers} writes a non-finite {@code Double} as exactly that top-level quoted
@@ -96,9 +98,12 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * {@link JsonMappers} writes - or set {@code setDateFormat("iso8601")} on a {@code JSONWriter.Context} to
  * get an explicit offset. Note that {@code WriterUtilDateAsMillis} covers {@code java.util.Date} only and
  * leaves {@code Timestamp} textual, and that {@code Context.setZoneId} does <i>not</i> fix this - it
- * stabilises the writer but the text still carries no offset. {@code java.time} types
- * ({@code Instant}, {@code OffsetDateTime}, {@code ZonedDateTime}) are written as ISO-8601 with their own
- * offset and are unaffected. The offsetless form is a property of the <i>format</i>, not of this class:
+ * stabilises the writer but the text still carries no offset. {@code Instant} and {@code OffsetDateTime}
+ * are written as ISO-8601 with their own offset and are unaffected. A {@code ZonedDateTime} in a region zone
+ * is written as its local date-time plus the region id and <i>no</i> offset - for example
+ * {@code "2021-01-01T09:00:00[Asia/Tokyo]"}, which {@code ZonedDateTime.parse} rejects - and is read back
+ * with the earlier offset of a daylight-saving overlap, so a value written with the later offset comes back
+ * as a different instant. The offsetless form is a property of the <i>format</i>, not of this class:
  * {@link JsonUtil}'s reader drifts on the same text.</p>
  *
  * <p><b>Non-finite values are silently lost.</b> {@code NaN}, {@code Infinity} and {@code -Infinity} are
@@ -128,8 +133,11 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * wrapped by FastJSON2 in a {@link com.alibaba.fastjson2.JSONException}.</p>
  *
  * <p><b>Byte input must be UTF-8 without a byte-order mark.</b> The {@code byte[]} overloads assume UTF-8:
- * a UTF-16 encoded document, or a UTF-8 document carrying a BOM, fails with a
- * {@link com.alibaba.fastjson2.JSONException}. {@link JsonMappers} does not share this restriction - Jackson
+ * a document carrying a BOM (UTF-8 or UTF-16) fails with a
+ * {@link com.alibaba.fastjson2.JSONException}, but a UTF-16 document <i>without</i> a BOM is not reliably
+ * rejected: FastJSON2 skips the zero bytes between tokens, so a small one such as {@code {"a":"bc"}} parses
+ * without an exception into a key and a value that contain NUL ({@code U+0000}) characters, or into a bean
+ * whose properties all keep their defaults. {@link JsonMappers} does not share this restriction - Jackson
  * auto-detects the encoding and skips a BOM - so a file that {@code JsonMappers} reads may still be rejected
  * here. Strip the BOM, or decode to a {@code String} yourself, before calling.</p>
  *

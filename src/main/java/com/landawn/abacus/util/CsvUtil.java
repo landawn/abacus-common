@@ -73,6 +73,12 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Column-selection convention:</b> a {@code null} {@code selectColumnNames}/{@code selectCsvHeaders} means &quot;not specified&quot; and selects ALL columns; an empty collection is an explicit selection of NO columns (a zero-column result). See the library null/empty selection convention.</p>
  *
+ * <p><b>Selected columns keep the CSV header's order,</b> not the order of {@code selectColumnNames}: selecting
+ * {@code ["c", "a"]} from the header {@code a,b,c} yields the columns {@code a, c} - in a loaded {@link Dataset},
+ * in stream elements (arrays, collections and maps), in {@code csvToJson} objects, and in the column-name list and
+ * row data passed to a row mapper or row extractor. {@code jsonToCsv} is different: it writes the
+ * {@code selectCsvHeaders} columns in the order given.</p>
+ *
  * <p><b>Row filters see the whole raw row:</b> the {@code String[]} passed to a {@code rowFilter} holds every
  * header column, in header order, as unconverted text - column selection and type conversion are applied only
  * to the rows the filter accepts. With the header {@code id,name,age} and the selection {@code ["name", "age"]},

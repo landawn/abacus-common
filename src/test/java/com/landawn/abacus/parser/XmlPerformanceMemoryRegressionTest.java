@@ -61,11 +61,8 @@ public class XmlPerformanceMemoryRegressionTest extends TestBase {
                 assertEquals(5, result.size());
             }
             final CopyOnWriteArrayList<String> emptyElement = parser.deserialize("<list/>", type);
-            if (backend == XmlParserType.DOM) {
-                assertNull(emptyElement);
-            } else {
-                assertTrue(emptyElement.isEmpty());
-            }
+            assertSame(CopyOnWriteArrayList.class, emptyElement.getClass());
+            assertTrue(emptyElement.isEmpty());
             assertTrue(parser.deserialize("<list>[]</list>", type).isEmpty());
 
             final CowBean result = parser.deserialize(

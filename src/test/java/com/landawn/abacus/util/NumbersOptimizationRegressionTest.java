@@ -17,8 +17,10 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 /** Numeric and resource-retention contracts for the October 2026 performance changes. */
-public class NumbersOptimizationRegressionTest {
+public class NumbersOptimizationRegressionTest extends TestBase {
 
     @Test
     public void packedRadicesPreserveMagnitudeSignAndLeadingZeros() {

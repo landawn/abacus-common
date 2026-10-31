@@ -1,10 +1,12 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +14,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -758,5 +761,90 @@ public class AbstractStreamCombinationTest extends AbstractStreamTestSupport {
         assertEquals("3z30", result.get(2));
         assertEquals("4z0", result.get(3));
     }
+
+    // ---- deep review 2026-10-27 G137 begin ----
+
+    private static Integer[] zeroTo(final int n) {
+        final Integer[] a = new Integer[n];
+
+        for (int i = 0; i < n; i++) {
+            a[i] = i;
+        }
+
+        return a;
+    }
+
+    // G114-04: combinations(1) is @SequentialOnly, but on a parallel stream it ran a parallel map and returned the
+    // singleton lists in completion order (out of order in 20 of 20 runs); every other length keeps encounter order.
+    @Test
+    public void testCombinationsOfOneOnParallelStreamKeepsEncounterOrder() {
+        final Integer[] a = zeroTo(2000);
+        final List<List<Integer>> expected = new ArrayList<>(a.length);
+
+        for (final Integer e : a) {
+            expected.add(Arrays.asList(e));
+        }
+
+        for (int run = 0; run < 5; run++) {
+            assertEquals(expected, Stream.of(a).parallel(4).combinations(1).toList());
+            assertEquals(expected, Stream.of(Arrays.asList(a).iterator()).parallel(4).combinations(1).toList());
+        }
+
+        // Unchanged: the result is parallel like the other lengths' results, sequential on a sequential stream, and
+        // closing it closes the source.
+        assertTrue(Stream.of(a).parallel(4).combinations(1).isParallel());
+        assertTrue(Stream.of(a).parallel(4).combinations(2).isParallel());
+        assertFalse(Stream.of(a).combinations(1).isParallel());
+        assertEquals(expected, Stream.of(a).combinations(1).toList());
+        assertEquals(Arrays.asList(Arrays.asList("x"), Arrays.asList((String) null), Arrays.asList("y")),
+                Stream.of("x", null, "y").parallel(2).combinations(1).toList());
+
+        final AtomicInteger closed = new AtomicInteger();
+        assertEquals(a.length, Stream.of(a).onClose(closed::incrementAndGet).parallel(4).combinations(1).count());
+        assertEquals(1, closed.get());
+    }
+
+    // Audit sibling of G114-04: the three crossJoin overloads are @SequentialOnly, but on a parallel stream they ran a
+    // parallel flatMap and returned the joined elements in completion order.
+    @Test
+    public void testCrossJoinOnParallelStreamKeepsEncounterOrder() {
+        final Integer[] a = zeroTo(2000);
+        final List<String> b = Arrays.asList("x", "y", "z");
+        final List<Pair<Integer, String>> expected = new ArrayList<>(a.length * b.size());
+
+        for (final Integer left : a) {
+            for (final String right : b) {
+                expected.add(Pair.of(left, right));
+            }
+        }
+
+        for (int run = 0; run < 5; run++) {
+            assertEquals(expected, Stream.of(a).parallel(4).crossJoin(b).toList());
+            assertEquals(expected, Stream.of(a).parallel(4).crossJoin(b, Pair::of).toList());
+            assertEquals(expected, Stream.of(a).parallel(4).crossJoin(Stream.of(b), Pair::of).toList());
+            assertEquals(expected, Stream.of(Arrays.asList(a).iterator()).parallel(4).crossJoin(b).toList());
+        }
+
+        // Unchanged: the result keeps this stream's parallel settings for the downstream stages, both sources are
+        // closed, and a sequential stream is joined as before.
+        final AtomicInteger leftClosed = new AtomicInteger();
+        final AtomicInteger rightClosed = new AtomicInteger();
+
+        try (Stream<Pair<Integer, String>> joined = Stream.of(a)
+                .onClose(leftClosed::incrementAndGet)
+                .parallel(4)
+                .crossJoin(Stream.of(b).onClose(rightClosed::incrementAndGet), Pair::of)) {
+            assertTrue(joined.isParallel());
+            assertEquals(expected.size(), joined.count());
+        }
+
+        assertEquals(1, leftClosed.get());
+        assertEquals(1, rightClosed.get());
+        assertEquals(expected, Stream.of(a).crossJoin(b).toList());
+        assertFalse(Stream.of(a).crossJoin(b).isParallel());
+        assertEquals(expected.size(), Stream.of(a).parallel(4).crossJoin(b).map(p -> p.left() + p.right()).count());
+    }
+
+    // ---- deep review 2026-10-27 G137 end ----
 
 }

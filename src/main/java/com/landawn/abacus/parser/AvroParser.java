@@ -30,6 +30,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -108,7 +111,13 @@ import com.landawn.abacus.util.cs;
  * or wrapper component such as {@code int[]} or {@code Long[]} fails with {@code NumberFormatException}).
  * Bean properties and map keys that are not fields of the record schema are
  * rejected by default, including null-valued properties and keys; {@link AvroSerConfig#setIgnoreUnknownFields(boolean) setIgnoreUnknownFields(true)}
- * explicitly enables projection that discards those fields, including in nested records.</p>
+ * explicitly enables projection that discards those fields, including in nested records. A map key names its field by
+ * its {@code toString()} text, as Avro's own map writer writes map keys, so an Avro {@code Utf8} key or an enum constant
+ * can name a field; when several keys have the same text, the value of the last one iterated is written. An enum map
+ * key is thus matched by {@code toString()} while an enum value written to an {@code enum} field is converted by
+ * {@code name()}, so the two differ for an enum that overrides {@code toString()}: the key {@code ChronoUnit.DAYS}
+ * names a field {@code Days}, not {@code DAYS}, whereas the value {@code ChronoUnit.DAYS} is written as the symbol
+ * {@code DAYS}.</p>
  *
  * <p>For serialization with a supplied schema, a collection under a record schema writes zero or
  * more record datums; an array schema writes exactly one array datum, including for an empty collection.
@@ -187,7 +196,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *         {@code obj} is {@code null}
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size.
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size,
+     *         or a bean property or map key is not a field of its record schema and unknown fields are not ignored.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
      * @throws NumberFormatException if a floating-point or decimal {@code Number} is written to an {@code int}/{@code long} field
      */
@@ -229,7 +239,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param output the output file to write to (must not be {@code null})
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size;
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size,
+     *         or a bean property or map key is not a field of its record schema and unknown fields are not ignored;
      *         or {@code output} is {@code null} or a directory.
      * @throws UncheckedIOException if creating or opening the output file, writing the Avro container, or flushing the output fails.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
@@ -298,7 +309,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param output the output stream to write to; may be {@code null} only when {@code obj} is {@code null}
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size;
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size,
+     *         or a bean property or map key is not a field of its record schema and unknown fields are not ignored;
      *         or {@code obj} is non-null and {@code output} is {@code null}.
      * @throws UncheckedIOException if writing the Avro container header or records, or flushing the output fails.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
@@ -591,17 +603,20 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
 
             return localRecord;
         } else if (type.isMap()) {
-            final Map<String, Object> m = (Map<String, Object>) obj;
+            final Map<?, ?> m = (Map<?, ?>) obj;
             final Record localRecord = new Record(schema);
 
-            for (final Map.Entry<String, Object> entry : m.entrySet()) {
-                final Field field = schema.getField(entry.getKey());
+            for (final Map.Entry<?, ?> entry : m.entrySet()) {
+                // A key names its field by its text, as Avro's own map writer names map keys: a key that is not a
+                // String (a Utf8 read back from Avro, an enum constant, an Integer) failed with a ClassCastException.
+                final String name = entry.getKey() == null ? null : entry.getKey().toString();
+                final Field field = schema.getField(name);
 
                 if (field == null && !ignoreUnknownFields) {
-                    throw new IllegalArgumentException("Unknown source field '" + entry.getKey() + "' for Avro record " + schema.getFullName());
+                    throw new IllegalArgumentException("Unknown source field '" + name + "' for Avro record " + schema.getFullName());
                 }
                 if (field != null) {
-                    localRecord.put(entry.getKey(), toAvroDatum(entry.getValue(), field.schema(), ignoreUnknownFields));
+                    localRecord.put(name, toAvroDatum(entry.getValue(), field.schema(), ignoreUnknownFields));
                 }
             }
 
@@ -899,7 +914,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 while (dataFileReader.hasNext()) {
                     c.add(dataFileReader.next());
                 }
-                return (T) c;
+                return (T) finishAvroCollection(c, targetType);
             } catch (final IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -936,7 +951,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                     // Inspect the datum before dispatching on its requested element type.
                     final boolean arraySchema = dataFileReader.getSchema().getType() == Schema.Type.ARRAY;
                     if (!dataFileReader.hasNext()) {
-                        return arraySchema ? null : (T) newAvroCollection(targetType);
+                        return arraySchema ? null : (T) finishAvroCollection(newAvroCollection(targetType), targetType);
                     }
                     final Object first = dataFileReader.next();
                     if (arraySchema || first instanceof Collection) {
@@ -948,7 +963,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                     while (dataFileReader.hasNext()) {
                         result.add(convertAvroValue(dataFileReader.next(), eleType, ignoreUnmatchedProperty));
                     }
-                    return (T) result;
+                    return (T) finishAvroCollection(result, targetType);
                 } else {
                     throw new IllegalArgumentException("Unsupported type: " + targetType.name());
                 }
@@ -968,8 +983,29 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             if (current != null && current.isTrusted(targetClass)) {
                 return;
             }
-            final ClassSecurityValidator.ClassSecurityPredicate added = ClassSecurityValidator.builder().add(targetClass).build();
-            ClassSecurityValidator.setGlobal(current == null ? added : ClassSecurityValidator.composite(current, added));
+            if (current instanceof SpecificRecordTrustPredicate trusted) {
+                trusted.classNames.add(targetClass.getName());
+            } else {
+                // Keep one flat set instead of a new recursive composite/stream pipeline for each class.
+                // Inspect the installed predicate each time so an application replacement remains authoritative.
+                ClassSecurityValidator.setGlobal(new SpecificRecordTrustPredicate(current, targetClass));
+            }
+        }
+    }
+
+    private static final class SpecificRecordTrustPredicate implements ClassSecurityValidator.ClassSecurityPredicate {
+        private final ClassSecurityValidator.ClassSecurityPredicate previous;
+        private final Set<String> classNames = ConcurrentHashMap.newKeySet();
+
+        private SpecificRecordTrustPredicate(final ClassSecurityValidator.ClassSecurityPredicate previous, final Class<?> targetClass) {
+            this.previous = previous;
+            classNames.add(targetClass.getName());
+        }
+
+        @Override
+        public boolean isTrusted(final Class<?> targetClass) {
+            // Preserve the prior predicate's evaluation order, including dynamic policy and failure behavior.
+            return previous != null && previous.isTrusted(targetClass) || classNames.contains(targetClass.getName());
         }
     }
 
@@ -1101,7 +1137,13 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static Collection<Object> newAvroCollection(final Type<?> type) {
-        return N.newCollection((Class<Collection>) type.javaType());
+        // The result is private until conversion finishes. Only the exact JDK class can bypass per-add
+        // array copies; subclasses retain registered factories, constructors and overridden insertion behavior.
+        return type.javaType() == CopyOnWriteArrayList.class ? new ArrayList<>() : N.newCollection((Class<Collection>) type.javaType());
+    }
+
+    private static Collection<Object> finishAvroCollection(final Collection<Object> values, final Type<?> targetType) {
+        return targetType.javaType() == CopyOnWriteArrayList.class ? new CopyOnWriteArrayList<>(values) : values;
     }
 
     /**
@@ -1118,7 +1160,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
         for (final Object value : source) {
             result.add(convertAvroValue(value, elementType, ignoreUnmatchedProperty));
         }
-        return result;
+        return finishAvroCollection(result, targetType);
     }
 
     // Container assignability alone is insufficient: a List<String> may still hold Avro Utf8 values.

@@ -444,7 +444,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
     public <T> Type<T> getValueType(final String keyName, final Type<T> defaultType) {
         Type<T> ret = null;
 
-        if (valueTypeMap != null) {
+        // A null key never matches a configured type, and a value-type map supplied through setValueTypes (Map.of,
+        // a TreeMap) may reject a null lookup with a NullPointerException, so it is not asked.
+        if (valueTypeMap != null && keyName != null) {
             ret = (Type<T>) valueTypeMap.get(keyName);
         }
 

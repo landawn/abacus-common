@@ -208,11 +208,11 @@ public class PropInfoAccessContractReview20261010Test extends TestBase {
         assertEquals(9_000_000_000L, bean.sequence);
         assertSame(text, bean.value);
 
-        // Select the existing VarHandle write branch directly, without manufacturing conversion failures.
+        // Select the converted VarHandle write branch directly, without manufacturing conversion failures.
         // This covers volatile-write dispatch and boxing only; it does not establish ordering between threads.
         final ParserUtil.PropInfo sequenceProperty = metadata.getPropInfo("sequence");
         sequenceProperty.failureCountForSetProp = 101;
-        sequenceProperty.setPropValue(bean, Long.valueOf(9_000_000_001L));
+        sequenceProperty.setPropValue(bean, "9000000001");
         assertEquals(9_000_000_001L, bean.sequence);
         final Object updatedSequence = sequenceProperty.getPropValue(bean);
         assertEquals(Long.valueOf(9_000_000_001L), updatedSequence);

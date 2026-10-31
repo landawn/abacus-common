@@ -5958,8 +5958,8 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than or equal to the
-         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * <p>Values are considered equal if their absolute difference, computed in {@code float} arithmetic, is less
+         * than or equal to the specified tolerance, as defined by {@link Numbers#fuzzyEquals(float, float, float)}. Two cases
          * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
          * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
          *
@@ -5972,7 +5972,7 @@ public class Builder<T> {
          * enough for TimSort to detect it. Use it for one-off comparisons, not for ordering.</p>
          *
          * <p>Values that are not fuzzily equal are ordered as by
-         * {@link Numbers#fuzzyCompare(double, double, double)}, which places every {@code NaN} above every
+         * {@link Numbers#fuzzyCompare(float, float, float)}, which places every {@code NaN} above every
          * other value, {@code +Infinity} included.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -6393,8 +6393,8 @@ public class Builder<T> {
          * This method is useful for comparing floating-point numbers that may have
          * small differences due to rounding errors or precision limitations.
          *
-         * <p>Values are considered equal if their absolute difference is less than or equal to the
-         * specified tolerance, as defined by {@link Numbers#fuzzyEquals(double, double, double)}. Two cases
+         * <p>Values are considered equal if their absolute difference, computed in {@code float} arithmetic, is less
+         * than or equal to the specified tolerance, as defined by {@link Numbers#fuzzyEquals(float, float, float)}. Two cases
          * do not follow from that difference: two {@code NaN}s are equal at any tolerance, and two
          * infinities of the same sign are equal at any tolerance (their difference is {@code NaN}).</p>
          *

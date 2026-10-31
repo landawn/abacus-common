@@ -41,19 +41,6 @@ class UtilityPerformanceReview20261004Test extends TestBase {
         return field.get(owner);
     }
 
-    private static void assertCleared(final Object owner, final String name) throws Exception {
-        final Object tuple = field(owner, name);
-        if (tuple instanceof Pair<?, ?> pair) {
-            assertNull(pair.left());
-            assertNull(pair.right());
-        } else {
-            final Triple<?, ?, ?> triple = (Triple<?, ?, ?>) tuple;
-            assertNull(triple.left());
-            assertNull(triple.middle());
-            assertNull(triple.right());
-        }
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     void recyclingListBoundsItsBackingCapacity() throws Exception {
@@ -253,28 +240,77 @@ class UtilityPerformanceReview20261004Test extends TestBase {
     }
 
     @Test
-    void biAndTriAdaptersClearConsumedRejectedAndExceptionalInputs() throws Exception {
+    void biAdaptersPreserveConsumptionAndExceptionRecovery() {
+        // BiIterator intentionally keeps its reusable holder between calls under the owner-approved
+        // no-per-element-GC-clearing policy. Verify observable consumption instead of private holder clearing.
         final var bi = BiIterator.of(Map.of(new byte[1024], 1)).filter((a, b) -> true);
         final var biMap = bi.map((a, b) -> a.length);
         assertEquals(1024, biMap.next());
-        assertCleared(bi, "next");
-        assertCleared(biMap, "tmp");
+        assertFalse(biMap.hasNext());
         final var rejectedBi = BiIterator.of(Map.of(new byte[1024], 1)).filter((a, b) -> false);
         assertFalse(rejectedBi.hasNext());
-        assertCleared(rejectedBi, "next");
-        final var failedBi = BiIterator.of(Map.of(new byte[1024], 1)).filter((a, b) -> {
-            throw new IllegalStateException();
+        assertFalse(rejectedBi.hasNext());
+        final var failedBi = BiIterator.zip(List.of("first", "second"), List.of(1, 2)).filter((a, b) -> {
+            if (b == 1) {
+                throw new IllegalStateException();
+            }
+            return true;
         });
         assertThrows(IllegalStateException.class, failedBi::hasNext);
-        assertCleared(failedBi, "next");
+        assertEquals(Pair.of("second", 2), failedBi.next());
+        assertFalse(failedBi.hasNext());
+        final var failedMap = BiIterator.zip(List.of("first", "second"), List.of(1, 2)).filter((a, b) -> true).map((a, b) -> {
+            if (b == 1) {
+                throw new IllegalStateException();
+            }
+            return a;
+        });
+        assertThrows(IllegalStateException.class, failedMap::next);
+        assertEquals("second", failedMap.next());
+        assertFalse(failedMap.hasNext());
+    }
+
+    @Test
+    void triAdaptersPreserveConsumptionAndExceptionRecovery() {
+        // TriIterator follows the same no-per-element-GC-clearing policy as BiIterator (it used to clear its holders
+        // after every element). Verify observable consumption and recovery instead of private holder state.
         final var tri = TriIterator.zip(List.of(new byte[1024]), List.of(1), List.of(2)).filter((a, b, c) -> true);
         final var triMap = tri.map((a, b, c) -> a.length);
         assertEquals(1024, triMap.next());
-        assertCleared(tri, "next");
-        assertCleared(triMap, "tmp");
+        assertFalse(triMap.hasNext());
+        assertThrows(java.util.NoSuchElementException.class, triMap::next);
         final var rejectedTri = TriIterator.zip(List.of(new byte[1024]), List.of(1), List.of(2)).filter((a, b, c) -> false);
         assertFalse(rejectedTri.hasNext());
-        assertCleared(rejectedTri, "next");
+        assertFalse(rejectedTri.hasNext());
+        assertThrows(java.util.NoSuchElementException.class, rejectedTri::next);
+
+        final var failedTri = TriIterator.zip(List.of("first", "second"), List.of(1, 2), List.of(true, false)).filter((a, b, c) -> {
+            if (b == 1) {
+                throw new IllegalStateException();
+            }
+            return true;
+        });
+        assertThrows(IllegalStateException.class, failedTri::hasNext);
+        assertEquals(Triple.of("second", 2, false), failedTri.next());
+        assertFalse(failedTri.hasNext());
+
+        final var failedMap = TriIterator.zip(List.of("first", "second"), List.of(1, 2), List.of(true, false)).filter((a, b, c) -> true).map((a, b, c) -> {
+            if (b == 1) {
+                throw new IllegalStateException();
+            }
+            return a;
+        });
+        assertThrows(IllegalStateException.class, failedMap::next);
+        assertEquals("second", failedMap.next());
+        assertFalse(failedMap.hasNext());
+
+        // Every remaining triple reaches forEachRemaining/foreachRemaining exactly once, after a look-ahead too.
+        final var all = TriIterator.zip(List.of(1, 2, 3), List.of("a", "b", "c"), List.of(true, false, true)).filter((a, b, c) -> a != 2);
+        assertTrue(all.hasNext());
+        final List<Triple<Integer, String, Boolean>> seen = new ArrayList<>();
+        all.forEachRemaining((a, b, c) -> seen.add(Triple.of(a, b, c)));
+        assertEquals(List.of(Triple.of(1, "a", true), Triple.of(3, "c", true)), seen);
+        assertFalse(all.hasNext());
     }
 
     @Test

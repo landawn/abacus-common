@@ -43,7 +43,7 @@ import com.landawn.abacus.annotation.Beta;
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted map</li>
- * <li>{@link #of(Object, Object)} - creates maps with specific key-value pairs</li>
+ * <li>{@link #of(Comparable, Object)} - creates maps with specific key-value pairs</li>
  * <li>{@link #copyOf(Map)} - creates a defensive copy from another map</li>
  * <li>{@link #wrap(SortedMap)} - wraps an existing sorted map (changes to the underlying map will be reflected)</li>
  * </ul>

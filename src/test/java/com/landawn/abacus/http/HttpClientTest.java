@@ -1494,4 +1494,200 @@ public class HttpClientTest extends TestBase {
 
         assertEquals("abc", connection.getRequestProperty("X-Trace"));
     }
+
+    // ---- deep review 2026-10-26 G003 begin ----
+    // G003-01: with streamRequestBody(true) a body source failing mid-transfer must abort the request. Closing the chunked
+    // stream used to send the final chunk, so the server processed the truncated body as a complete request.
+    @Test
+    public void testExecute_streamedBodySourceFailureAbortsRequest() throws Exception {
+        final java.util.concurrent.BlockingQueue<String> outcomes = new java.util.concurrent.LinkedBlockingQueue<>();
+        final com.sun.net.httpserver.HttpServer httpServer = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        httpServer.createContext("/upload", exchange -> {
+            try (exchange) {
+                try {
+                    outcomes.add("complete:" + exchange.getRequestBody().readAllBytes().length);
+                } catch (final IOException e) {
+                    outcomes.add("aborted");
+                    return;
+                }
+
+                exchange.sendResponseHeaders(204, -1);
+            }
+        });
+        httpServer.start();
+
+        try {
+            final HttpClient client = HttpClient.create("http://127.0.0.1:" + httpServer.getAddress().getPort() + "/upload");
+
+            for (final ContentFormat format : new ContentFormat[] { null, ContentFormat.GZIP }) {
+                final HttpSettings settings = HttpSettings.create().streamRequestBody(true).setReadTimeout(5_000).setContentFormat(format);
+                final InputStream failingSource = new InputStream() {
+                    private int count = 0;
+
+                    @Override
+                    public int read() throws IOException {
+                        final byte[] one = new byte[1];
+                        return read(one, 0, 1) < 0 ? -1 : one[0];
+                    }
+
+                    @Override
+                    public int read(final byte[] b, final int off, final int len) throws IOException {
+                        if (count >= 20_000) {
+                            throw new IOException("source failed");
+                        }
+
+                        final int n = Math.min(len, 20_000 - count);
+                        Arrays.fill(b, off, off + n, (byte) 'a');
+                        count += n;
+                        return n;
+                    }
+                };
+
+                final com.landawn.abacus.exception.UncheckedIOException e = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                        () -> client.post(failingSource, settings, Void.class));
+                assertEquals("source failed", e.getCause().getMessage());
+                assertEquals("aborted", outcomes.poll(10, java.util.concurrent.TimeUnit.SECONDS), String.valueOf(format));
+            }
+        } finally {
+            httpServer.stop(0);
+        }
+    }
+
+    // G003-01: with streamRequestBody(true) a missing File body was announced as Content-Length 0 (File.length()), so the empty
+    // request was already complete on the wire when opening the file failed. Nothing may reach the server.
+    @Test
+    public void testExecute_streamedMissingFileBodySendsNothing(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path directory) {
+        final File missing = directory.resolve("missing.bin").toFile();
+        final HttpClient client = HttpClient.create(baseUrl, 2, 5_000, 5_000);
+        final HttpSettings settings = HttpSettings.create().streamRequestBody(true);
+
+        server.enqueue(new MockResponse().setBody("first"));
+        server.enqueue(new MockResponse().setBody("second"));
+
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> client.post(missing, settings, Void.class));
+
+        // The mock server handles connections one at a time in arrival order, so once this request has completed every
+        // earlier request is recorded.
+        assertNotNull(client.get(String.class));
+        assertEquals("GET", server.takeRequest().getMethod());
+        assertNull(server.takeRequest());
+    }
+    // ---- deep review 2026-10-26 G003 end ----
+
+    // ---- deep review 2026-10-26 verify G120 begin ----
+    // G003-01/G004-02: a streamed body failing in a Reader, in the serializer (RuntimeException) or in the encoder (Brotli: HttpUtil and
+    // HttpClient both disconnect) is aborted on the wire; successful streamed bodies, the in-flight slot and the next request are unaffected.
+    @Test
+    public void testExecute_streamedBodyFailuresAbortAndClientStaysUsable() throws Exception {
+        final java.util.concurrent.BlockingQueue<String> uploads = new java.util.concurrent.LinkedBlockingQueue<>();
+        final java.util.concurrent.BlockingQueue<String> pings = new java.util.concurrent.LinkedBlockingQueue<>();
+        final com.sun.net.httpserver.HttpServer httpServer = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        httpServer.createContext("/", exchange -> {
+            try (exchange) {
+                final java.util.concurrent.BlockingQueue<String> outcomes = exchange.getRequestURI().getPath().equals("/ping") ? pings : uploads;
+
+                try {
+                    outcomes.add("complete:" + exchange.getRequestBody().readAllBytes().length);
+                } catch (final IOException e) {
+                    outcomes.add("aborted");
+                    return;
+                }
+
+                final byte[] response = "pong".getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, response.length);
+                exchange.getResponseBody().write(response);
+            }
+        });
+        httpServer.start();
+
+        try {
+            final String url = "http://127.0.0.1:" + httpServer.getAddress().getPort();
+            final AtomicInteger counter = new AtomicInteger();
+            final HttpClient client = HttpClient.create(url + "/upload", 4, 5_000, 5_000, HttpSettings.create(), counter, executor);
+            final HttpClient ping = HttpClient.create(url + "/ping", 4, 5_000, 5_000, HttpSettings.create(), counter, executor);
+            final HttpSettings streamed = HttpSettings.create().streamRequestBody(true);
+
+            // Leaves a keep-alive connection in the JDK cache for the next request to pick up.
+            assertEquals("pong", ping.get(String.class));
+            assertEquals("complete:0", pings.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+
+            final java.io.Reader failingReader = new java.io.Reader() {
+                private int count = 0;
+
+                @Override
+                public int read(final char[] buffer, final int off, final int len) throws IOException {
+                    if (count >= 20_000) {
+                        throw new IOException("reader failed");
+                    }
+
+                    final int n = Math.min(len, 20_000 - count);
+                    Arrays.fill(buffer, off, off + n, 'r');
+                    count += n;
+                    return n;
+                }
+
+                @Override
+                public void close() {
+                }
+            };
+
+            final com.landawn.abacus.exception.UncheckedIOException readerFailure = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                    () -> client.post(failingReader, streamed, String.class));
+            assertEquals("reader failed", readerFailure.getCause().getMessage());
+            assertEquals("aborted", uploads.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+            assertEquals(0, counter.get());
+            assertEquals("pong", ping.get(String.class));
+            assertEquals("complete:0", pings.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+
+            final Map<String, Object> unserializable = new java.util.LinkedHashMap<>();
+            unserializable.put("a", "x".repeat(20_000));
+            unserializable.put("b", new Object() {
+            });
+
+            assertThrows(RuntimeException.class, () -> client.post(unserializable, streamed, String.class));
+            assertEquals("aborted", uploads.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+            assertEquals(0, counter.get());
+            assertEquals("pong", ping.get(String.class));
+            assertEquals("complete:0", pings.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+
+            final UnsupportedOperationException brotli = assertThrows(UnsupportedOperationException.class,
+                    () -> client.post(Map.of("a", 1), streamed.copy().setContentFormat(ContentFormat.JSON_BR), String.class));
+            assertEquals("Unsupported content encoding: Brotli for HTTP request", brotli.getMessage());
+            assertEquals(0, brotli.getSuppressed().length);
+            assertEquals("aborted", uploads.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+            assertEquals(0, counter.get());
+            assertEquals("pong", ping.get(String.class));
+            assertEquals("complete:0", pings.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+
+            // Successful streamed Reader / serialized bodies arrive complete, exactly as in the default buffered mode.
+            for (final HttpSettings settings : new HttpSettings[] { HttpSettings.create(), streamed }) {
+                assertEquals("pong", client.post(new java.io.StringReader("r".repeat(20_000)), settings, String.class));
+                assertEquals("complete:20000", uploads.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+                assertEquals("pong", client.post(Map.of("a", "x".repeat(20_000)), settings, String.class));
+                assertEquals("complete:" + com.landawn.abacus.util.N.toJson(Map.of("a", "x".repeat(20_000))).length(),
+                        uploads.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+            }
+
+            // The default buffered mode is unchanged: a failing body sends nothing at all.
+            final IllegalStateException bufferedFailure = assertThrows(IllegalStateException.class, () -> client.post(new java.io.Reader() {
+                @Override
+                public int read(final char[] buffer, final int off, final int len) {
+                    throw new IllegalStateException("buffered reader failed");
+                }
+
+                @Override
+                public void close() {
+                }
+            }, String.class));
+            assertEquals("buffered reader failed", bufferedFailure.getMessage());
+            assertEquals(0, counter.get());
+            assertEquals("pong", ping.get(String.class));
+            assertEquals("complete:0", pings.poll(10, java.util.concurrent.TimeUnit.SECONDS));
+            assertNull(uploads.poll(200, java.util.concurrent.TimeUnit.MILLISECONDS));
+            assertEquals(0, counter.get());
+        } finally {
+            httpServer.stop(0);
+        }
+    }
+    // ---- deep review 2026-10-26 verify G120 end ----
 }

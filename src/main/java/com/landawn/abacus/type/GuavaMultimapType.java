@@ -204,8 +204,8 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the JSON string to parse; may be {@code null} or empty
-     * @return a new multimap instance containing the parsed data, or {@code null} if {@code str} is {@code null} or empty
-     * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @return a new multimap instance containing the parsed data, or {@code null} if {@code str} is {@code null}, empty or blank
+     * @throws ParsingException if {@code str} is not blank and is not a well-formed JSON object text
      * @throws IllegalArgumentException if the target is a custom multimap class with no no-arg or {@code (int, int)} constructor
      *         and no public static {@code create()} or {@code create(int, int)} factory returning it
      * @throws NullPointerException if a JSON array contains {@code null} and the target multimap rejects {@code null}
@@ -287,7 +287,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      *        declaring name; {@code false} to build the registered name using each type parameter's
      *        full name. In both cases the multimap class itself is rendered with its canonical class name.
      * @return the formatted type name
-     *         (e.g., {@code "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"})
+     *         (e.g., {@code "com.google.common.collect.Multimap<String, Integer>"})
      * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName)

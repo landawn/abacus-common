@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -65,6 +66,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.DTDHandler;
+import org.xml.sax.DocumentHandler;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.HandlerBase;
@@ -802,7 +806,13 @@ public final class XmlUtil {
      * <p>The returned object may be an internal wrapper around the provider's builder. Use it through the
      * {@code DocumentBuilder} interface; callers must not cast it to a provider-specific implementation class.</p>
      *
-     * <p>Important: Call {@link #recycleContentParser(DocumentBuilder)} when done to return the parser to the pool.</p>
+     * <p>Call {@link #recycleContentParser(DocumentBuilder)} when done, including from a {@code finally} block.
+     * A builder on which any parse failed is discarded instead of being returned to the pool. A {@code null} source,
+     * which JAXP rejects with an {@link IllegalArgumentException} before parsing starts, is not a failed parse.</p>
+     *
+     * <p>The returned builder is owned by the caller until it is recycled. It must be used by one thread at a
+     * time; see {@link #recycleContentParser(DocumentBuilder)} for the handoff required when another thread
+     * recycles it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -870,9 +880,18 @@ public final class XmlUtil {
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
      * Idle parsers are held weakly. Cleared references are discarded during checkout and when needed
      * to make space. A parser is discarded when the live pool is at capacity, or when the
-     * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
-     * cannot tell whether the instance was pooled, so it must not use the parser again after calling
-     * this method.
+     * provider's {@code reset()} throws, or any parse on the builder failed (a {@code null} source rejected by JAXP
+     * before parsing is not a failure); this method still returns normally in those cases. A reset or subsequent
+     * successful parse does not erase a recorded failure. A caller cannot tell whether the instance was pooled, so it
+     * must not use the parser again after calling this method.
+     *
+     * <p><b>Ownership and handoff.</b> A builder must be used by one thread at a time; do not parse and
+     * recycle it concurrently. Recycle it only after the parse call, including handler callbacks, has returned.
+     * If another thread recycles it, publish the parse's completion to that thread with a happens-before edge
+     * (for example {@link Thread#join()}, {@link java.util.concurrent.Future#get()}, or a {@code synchronized}
+     * block or blocking-queue handoff). The pool lock protects the pool, not the parser's parse state. The failure
+     * record checked here is an ordinary field and relies on this ownership and handoff; {@code volatile}
+     * would not make concurrent parsing and recycling safe.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -887,7 +906,7 @@ public final class XmlUtil {
      * @param docBuilder The DocumentBuilder instance to be recycled (can be null)
      */
     public static void recycleContentParser(final DocumentBuilder docBuilder) {
-        if (docBuilder == null || !(docBuilder instanceof CachedDocumentBuilder)) {
+        if (!(docBuilder instanceof CachedDocumentBuilder cached) || cached.parseFailed) {
             return;
         }
 
@@ -928,7 +947,18 @@ public final class XmlUtil {
      * <p>The returned object may be an internal wrapper around the provider's parser. Use it through the
      * {@code SAXParser} interface; callers must not cast it to a provider-specific implementation class.</p>
      *
-     * <p>Important: Call {@link #recycleSAXParser(SAXParser)} when done to return the parser to the pool.</p>
+     * <p>Call {@link #recycleSAXParser(SAXParser)} when done, including from a {@code finally} block. A failed parse
+     * automatically prevents pooling, whether it ran through the returned SAXParser's parse methods or through the
+     * {@code XMLReader} or SAX1 {@code Parser} it exposes: {@link SAXParser#getXMLReader()} and
+     * {@link SAXParser#getParser()} return views of the provider's objects that record their failed parses (use them
+     * through their interfaces only). An exception thrown by the caller's handler is a failed parse too, including one
+     * thrown on purpose to stop parsing early, so stopping that way costs the next caller a new parser. A {@code null}
+     * source, which JAXP rejects with an {@link IllegalArgumentException} before parsing starts, is not a failed parse
+     * of the SAXParser's own parse methods. In contrast, a failed parse through either exposed reader view retires the
+     * parser even for a {@code null} source, because those interfaces do not guarantee rejection before parsing starts.</p>
+     *
+     * <p>The returned parser is owned by the caller until it is recycled. It must be used by one thread at a
+     * time; see {@link #recycleSAXParser(SAXParser)} for the handoff required when another thread recycles it.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -984,9 +1014,19 @@ public final class XmlUtil {
      * instances are ignored so they cannot weaken or corrupt the security-hardened shared pool.
      * Idle parsers are held weakly. Cleared references are discarded during checkout and when needed
      * to make space. A parser is discarded when the live pool is at capacity, or when the
-     * provider's {@code reset()} throws; this method still returns normally in those cases. A caller
+     * provider's {@code reset()} throws, or a parse failed through the parser, its {@link SAXParser#getXMLReader() XMLReader}
+     * or its SAX1 {@link SAXParser#getParser() Parser} (see {@link #createSAXParser()}); this method still
+     * returns normally in those cases. A reset or subsequent successful parse does not erase a recorded failure. A caller
      * cannot tell whether the instance was pooled, so it must not use the parser again after calling
      * this method.
+     *
+     * <p><b>Ownership and handoff.</b> A parser must be used by one thread at a time; do not parse and
+     * recycle it concurrently. Recycle it only after the parse call, including handler callbacks, has returned.
+     * If another thread recycles it, publish the parse's completion to that thread with a happens-before edge
+     * (for example {@link Thread#join()}, {@link java.util.concurrent.Future#get()}, or a {@code synchronized}
+     * block or blocking-queue handoff). The pool lock protects the pool, not the parser's parse state. The failure
+     * record checked here is an ordinary field and relies on this ownership and handoff; {@code volatile}
+     * would not make concurrent parsing and recycling safe.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1001,7 +1041,7 @@ public final class XmlUtil {
      * @param saxParser The SAXParser instance to be recycled (can be null)
      */
     public static void recycleSAXParser(final SAXParser saxParser) {
-        if (saxParser == null || !(saxParser instanceof CachedSAXParser)) {
+        if (!(saxParser instanceof CachedSAXParser cached) || cached.parseFailed) {
             return;
         }
 
@@ -2809,12 +2849,71 @@ public final class XmlUtil {
         VALUE
     }
 
+    /** One parse call of a pooled parser; the checked exceptions are those every JAXP and SAX parse method declares. */
+    @FunctionalInterface
+    private interface ParseCall<T> {
+        T call() throws SAXException, IOException;
+    }
+
+    /** A pooled parser wrapper that records a failed parse, so that recycling never publishes the parser again. */
+    private interface ParseFailureRecorder {
+        void recordParseFailure();
+    }
+
+    /**
+     * Runs one parse call of a pooled parser whose source JAXP requires to be non-{@code null}. JAXP specifies an
+     * {@link IllegalArgumentException} for a {@code null} source, raised before any parse state exists, so that argument
+     * error is passed on without retiring the parser; every other call is tracked by {@link #trackParse(ParseFailureRecorder, ParseCall)}.
+     *
+     * @param <T> the call's result type
+     * @param owner the pooled parser to retire if the call fails
+     * @param input the source passed to the parse method
+     * @param call the delegated parse call
+     * @return the call's result
+     * @throws SAXException if the delegated call throws it
+     * @throws IOException if the delegated call throws it
+     */
+    private static <T> T trackParse(final ParseFailureRecorder owner, final Object input, final ParseCall<T> call) throws SAXException, IOException {
+        return input == null ? call.call() : trackParse(owner, call);
+    }
+
+    /**
+     * Runs one parse call of a pooled parser, recording any failure - a parse error, an I/O error, an exception thrown by
+     * the caller's handler (also one thrown on purpose to stop parsing early) or an {@link Error} - before rethrowing it
+     * unchanged. A provider need not be reusable after a failed parse, and {@code reset()} need not restore it.
+     *
+     * @param <T> the call's result type
+     * @param owner the pooled parser to retire if the call fails
+     * @param call the delegated parse call
+     * @return the call's result
+     * @throws SAXException if the delegated call throws it
+     * @throws IOException if the delegated call throws it
+     */
+    private static <T> T trackParse(final ParseFailureRecorder owner, final ParseCall<T> call) throws SAXException, IOException {
+        try {
+            return call.call();
+        } catch (final SAXException | IOException | RuntimeException | Error e) {
+            owner.recordParseFailure();
+            throw e;
+        }
+    }
+
     /** Forwards all builder operations, including optional provider capabilities, to the wrapped builder. */
-    private static final class CachedDocumentBuilder extends DocumentBuilder {
+    private static final class CachedDocumentBuilder extends DocumentBuilder implements ParseFailureRecorder {
         private final DocumentBuilder delegate;
+        // reset() need not recover provider state after a failed parse. Never publish that builder to another caller,
+        // even if its owner resets it or successfully parses another document before recycling it.
+        // Ordinary field: visibility relies on the single-owner handoff documented at recycleContentParser; it is not a
+        // concurrency guard, and volatile would not make concurrent parsing and recycling safe.
+        private boolean parseFailed;
 
         CachedDocumentBuilder(final DocumentBuilder documentBuilder) {
             this.delegate = documentBuilder;
+        }
+
+        @Override
+        public void recordParseFailure() {
+            parseFailed = true;
         }
 
         @Override
@@ -2824,27 +2923,27 @@ public final class XmlUtil {
 
         @Override
         public Document parse(final InputStream is) throws SAXException, IOException {
-            return delegate.parse(is);
+            return trackParse(this, is, () -> delegate.parse(is));
         }
 
         @Override
         public Document parse(final InputStream is, final String systemId) throws SAXException, IOException {
-            return delegate.parse(is, systemId);
+            return trackParse(this, is, () -> delegate.parse(is, systemId));
         }
 
         @Override
         public Document parse(final String uri) throws SAXException, IOException {
-            return delegate.parse(uri);
+            return trackParse(this, uri, () -> delegate.parse(uri));
         }
 
         @Override
         public Document parse(final File file) throws SAXException, IOException {
-            return delegate.parse(file);
+            return trackParse(this, file, () -> delegate.parse(file));
         }
 
         @Override
         public Document parse(final InputSource is) throws SAXException, IOException {
-            return delegate.parse(is);
+            return trackParse(this, is, () -> delegate.parse(is));
         }
 
         @Override
@@ -2889,11 +2988,23 @@ public final class XmlUtil {
     }
 
     /** Preserves the provider's parsing behavior and optional capabilities when identifying owned parsers. */
-    private static final class CachedSAXParser extends SAXParser {
+    private static final class CachedSAXParser extends SAXParser implements ParseFailureRecorder {
         private final SAXParser delegate;
+        // As for content builders, reset alone cannot establish recovery after a failed parse.
+        // Ordinary field: visibility relies on the single-owner handoff documented at recycleSAXParser; it is not a
+        // concurrency guard, and volatile would not make concurrent parsing and recycling safe.
+        private boolean parseFailed;
+        // Views of the provider's own reader objects that record their failed parses here (see getXMLReader/getParser).
+        private TrackingXMLReader xmlReaderView;
+        private TrackingParser parserView;
 
         CachedSAXParser(final SAXParser saxParser) {
             this.delegate = saxParser;
+        }
+
+        @Override
+        public void recordParseFailure() {
+            parseFailed = true;
         }
 
         @Override
@@ -2904,67 +3015,128 @@ public final class XmlUtil {
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputStream is, final HandlerBase handler) throws SAXException, IOException {
-            delegate.parse(is, handler);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler);
+                return null;
+            });
         }
 
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputStream is, final HandlerBase handler, final String systemId) throws SAXException, IOException {
-            delegate.parse(is, handler, systemId);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler, systemId);
+                return null;
+            });
         }
 
         @Override
         public void parse(final InputStream is, final DefaultHandler handler) throws SAXException, IOException {
-            delegate.parse(is, handler);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler);
+                return null;
+            });
         }
 
         @Override
         public void parse(final InputStream is, final DefaultHandler handler, final String systemId) throws SAXException, IOException {
-            delegate.parse(is, handler, systemId);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler, systemId);
+                return null;
+            });
         }
 
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final String uri, final HandlerBase handler) throws SAXException, IOException {
-            delegate.parse(uri, handler);
+            trackParse(this, uri, () -> {
+                delegate.parse(uri, handler);
+                return null;
+            });
         }
 
         @Override
         public void parse(final String uri, final DefaultHandler handler) throws SAXException, IOException {
-            delegate.parse(uri, handler);
+            trackParse(this, uri, () -> {
+                delegate.parse(uri, handler);
+                return null;
+            });
         }
 
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final File file, final HandlerBase handler) throws SAXException, IOException {
-            delegate.parse(file, handler);
+            trackParse(this, file, () -> {
+                delegate.parse(file, handler);
+                return null;
+            });
         }
 
         @Override
         public void parse(final File file, final DefaultHandler handler) throws SAXException, IOException {
-            delegate.parse(file, handler);
+            trackParse(this, file, () -> {
+                delegate.parse(file, handler);
+                return null;
+            });
         }
 
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputSource is, final HandlerBase handler) throws SAXException, IOException {
-            delegate.parse(is, handler);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler);
+                return null;
+            });
         }
 
         @Override
         public void parse(final InputSource is, final DefaultHandler handler) throws SAXException, IOException {
-            delegate.parse(is, handler);
+            trackParse(this, is, () -> {
+                delegate.parse(is, handler);
+                return null;
+            });
         }
 
+        /**
+         * Returns a view of the provider's SAX1 parser whose parse calls record a failure on this parser, like the parse
+         * methods of this class. Its other methods are forwarded unchanged.
+         */
         @SuppressWarnings("deprecation")
         @Override
         public Parser getParser() throws SAXException {
-            return delegate.getParser();
+            final Parser parser = delegate.getParser();
+
+            if (parser == null) {
+                return null;
+            }
+
+            // Providers hand out the same parser on every call; so does this view, as long as they do.
+            if (parserView == null || parserView.delegate != parser) {
+                parserView = new TrackingParser(parser, this);
+            }
+
+            return parserView;
         }
 
+        /**
+         * Returns a view of the provider's reader whose parse calls record a failure on this parser, like the parse
+         * methods of this class, so a caller (JAXB, a {@code SAXSource}) parsing through the reader is tracked too. Its
+         * other methods are forwarded unchanged.
+         */
         @Override
         public XMLReader getXMLReader() throws SAXException {
-            return delegate.getXMLReader();
+            final XMLReader reader = delegate.getXMLReader();
+
+            if (reader == null) {
+                return null;
+            }
+
+            // Providers hand out the same reader on every call; so does this view, as long as they do.
+            if (xmlReaderView == null || xmlReaderView.delegate != reader) {
+                xmlReaderView = new TrackingXMLReader(reader, this);
+            }
+
+            return xmlReaderView;
         }
 
         @Override
@@ -2995,6 +3167,150 @@ public final class XmlUtil {
         @Override
         public boolean isXIncludeAware() {
             return delegate.isXIncludeAware();
+        }
+    }
+
+    /**
+     * The provider's {@link XMLReader} as exposed by a pooled {@link SAXParser}: parse calls record a failure on that
+     * parser, every other method is forwarded unchanged. A {@code null} source is not special here: SAX does not specify
+     * how a reader rejects it, so that failure retires the parser too.
+     */
+    private static final class TrackingXMLReader implements XMLReader {
+        private final XMLReader delegate;
+        private final ParseFailureRecorder owner;
+
+        TrackingXMLReader(final XMLReader delegate, final ParseFailureRecorder owner) {
+            this.delegate = delegate;
+            this.owner = owner;
+        }
+
+        @Override
+        public boolean getFeature(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
+            return delegate.getFeature(name);
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
+            delegate.setFeature(name, value);
+        }
+
+        @Override
+        public Object getProperty(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
+            return delegate.getProperty(name);
+        }
+
+        @Override
+        public void setProperty(final String name, final Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
+            delegate.setProperty(name, value);
+        }
+
+        @Override
+        public void setEntityResolver(final EntityResolver resolver) {
+            delegate.setEntityResolver(resolver);
+        }
+
+        @Override
+        public EntityResolver getEntityResolver() {
+            return delegate.getEntityResolver();
+        }
+
+        @Override
+        public void setDTDHandler(final DTDHandler handler) {
+            delegate.setDTDHandler(handler);
+        }
+
+        @Override
+        public DTDHandler getDTDHandler() {
+            return delegate.getDTDHandler();
+        }
+
+        @Override
+        public void setContentHandler(final ContentHandler handler) {
+            delegate.setContentHandler(handler);
+        }
+
+        @Override
+        public ContentHandler getContentHandler() {
+            return delegate.getContentHandler();
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler handler) {
+            delegate.setErrorHandler(handler);
+        }
+
+        @Override
+        public ErrorHandler getErrorHandler() {
+            return delegate.getErrorHandler();
+        }
+
+        @Override
+        public void parse(final InputSource input) throws IOException, SAXException {
+            trackParse(owner, () -> {
+                delegate.parse(input);
+                return null;
+            });
+        }
+
+        @Override
+        public void parse(final String systemId) throws IOException, SAXException {
+            trackParse(owner, () -> {
+                delegate.parse(systemId);
+                return null;
+            });
+        }
+    }
+
+    /** The SAX1 counterpart of {@link TrackingXMLReader}, for {@link SAXParser#getParser()}. */
+    @SuppressWarnings("deprecation")
+    private static final class TrackingParser implements Parser {
+        private final Parser delegate;
+        private final ParseFailureRecorder owner;
+
+        TrackingParser(final Parser delegate, final ParseFailureRecorder owner) {
+            this.delegate = delegate;
+            this.owner = owner;
+        }
+
+        @Override
+        public void setLocale(final Locale locale) throws SAXException {
+            delegate.setLocale(locale);
+        }
+
+        @Override
+        public void setEntityResolver(final EntityResolver resolver) {
+            delegate.setEntityResolver(resolver);
+        }
+
+        @Override
+        public void setDTDHandler(final DTDHandler handler) {
+            delegate.setDTDHandler(handler);
+        }
+
+        @Override
+        public void setDocumentHandler(final DocumentHandler handler) {
+            delegate.setDocumentHandler(handler);
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler handler) {
+            delegate.setErrorHandler(handler);
+        }
+
+        @Override
+        public void parse(final InputSource source) throws SAXException, IOException {
+            trackParse(owner, () -> {
+                delegate.parse(source);
+                return null;
+            });
+        }
+
+        @Override
+        public void parse(final String systemId) throws SAXException, IOException {
+            trackParse(owner, () -> {
+                delegate.parse(systemId);
+                return null;
+            });
         }
     }
 

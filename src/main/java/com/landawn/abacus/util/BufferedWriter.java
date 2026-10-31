@@ -1130,7 +1130,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     }
 
     /**
-     * A dummy Writer implementation used as a placeholder for internal buffer mode.
+     * A dummy Writer implementation passed to the superclass constructor as a placeholder in every mode
+     * (internal buffer, {@code Writer} and {@code OutputStream}); see {@link BufferedWriter#DUMMY_WRITER}.
      */
     static final class DummyWriter extends Writer {
         /**

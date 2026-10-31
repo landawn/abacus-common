@@ -667,7 +667,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed();
-     * // Produces: IndexedLong(index=0, value=10), IndexedLong(index=1, value=20), IndexedLong(index=2, value=30)
+     * // Produces: [0]=10, [1]=20, [2]=30
      * }</pre>
      *
      * @return an {@link ObjIterator} of {@link IndexedLong} objects with indices starting at 0
@@ -684,7 +684,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<IndexedLong> iter = LongIterator.of(10L, 20L, 30L).indexed(5);
-     * // Produces: IndexedLong(index=5, value=10), IndexedLong(index=6, value=20), IndexedLong(index=7, value=30)
+     * // Produces: [5]=10, [6]=20, [7]=30
      * }</pre>
      *
      * <p>The returned iterator throws ArithmeticException when traversal would assign an index greater than Long.MAX_VALUE.</p>

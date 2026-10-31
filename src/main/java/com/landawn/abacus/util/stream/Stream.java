@@ -8247,7 +8247,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The keys are produced by applying a provided key mapping function to each input element.
      * The values are Lists containing all values (produced by provided value mapping function) that map to the respective key.
      * The function can potentially map an element to multiple keys (hence <i>flat</i> in the method name).
-     * Additionally, a value mapping function is applied to each element and its corresponding key to produce the values in the resulting Map.
+     * Additionally, a value mapping function is applied to each extracted key and its element, in that order, to produce the values in the resulting Map.
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -8275,7 +8275,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
      * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
-     * @param valueMapper a function that maps an input element and its corresponding key to a value.
+     * @param valueMapper a function that maps a key and an input element, in that order, to a value.
      * @return a Map where each key is associated with a List of values that were mapped to it
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper} is {@code null}
@@ -8295,7 +8295,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The keys are produced by applying a provided key mapping function to each input element.
      * The values are Lists containing all values (produced by provided value mapping function) that map to the respective key.
      * The function can potentially map an element to multiple keys (hence <i>flat</i> in the method name).
-     * Additionally, a value mapping function is applied to each element and its corresponding key to produce the values in the resulting Map.
+     * Additionally, a value mapping function is applied to each extracted key and its element, in that order, to produce the values in the resulting Map.
      * The resulting Map is created by a provided supplier function.
      * This is a terminal operation.
      *
@@ -8326,7 +8326,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
      * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
-     * @param valueMapper a function that maps an input element and its corresponding key to a value.
+     * @param valueMapper a function that maps a key and an input element, in that order, to a value.
      * @param mapFactory a supplier to create the resulting map.
      * @return a Map where each key is associated with a List of values that were mapped to it
      * @throws IllegalStateException if the stream is already closed
@@ -20841,10 +20841,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a Stream that is lazily populated by an input supplier.
      * This is a static factory method that defers stream creation until the returned stream is first traversed or closed.
      *
-     * <p>The supplier's first successful result is memoized. If it throws, a later traversal rethrows that failure
-     * without retrying the supplier; closing the returned stream (as a terminal operation does, even when it fails) may
-     * invoke the supplier once more so that a stream it then supplies can be closed.
-     * Closing the returned stream before traversal may invoke the supplier so the supplied stream can be closed.
+     * <p>The supplier is invoked at most once, and its outcome is memoized: a successful result is reused, and a failure
+     * is final - a later traversal rethrows it, and closing the returned stream (as a terminal operation does, even when
+     * it fails) does not invoke the supplier again. Closing the returned stream closes the stream the supplier returned,
+     * if any. Closing the returned stream before any traversal invokes the supplier once so that the stream it supplies
+     * can be closed; a failure of that call propagates from {@code close()}.
      *
      * <p><b>Implementation Note:</b> the traversal is deferred via {@code ObjIteratorEx.defer}; a {@code null}
      * supplier result yields an empty stream, and recursive initialization - including a supplier that returns the
@@ -20867,7 +20868,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public static <T> Stream<T> defer(final Supplier<? extends Stream<? extends T>> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Supplier<? extends Stream<? extends T>> s = Fn.memoize(supplier);
+        final Supplier<? extends Stream<? extends T>> s = deferredSupplier(supplier);
         // The returned stream: a supplier returning it would make the traversal delegate to itself forever.
         final Holder<Stream<T>> deferred = new Holder<>();
 

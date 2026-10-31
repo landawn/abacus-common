@@ -313,7 +313,10 @@ public final class KahanSummation { // NOSONAR
      * depend on the order in which the values were added. For example,
      * {@code KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE).sum()} returns
      * {@code Infinity}, whereas the same values added in the order {@code (MAX, -MAX, MAX)} give
-     * {@code Double.MAX_VALUE}.</p>
+     * {@code Double.MAX_VALUE}. If only the compensated total overflows while the plain running sum stays
+     * finite, the result is {@code NaN} even though every value is finite:
+     * {@code KahanSummation.of(Double.MAX_VALUE, 0x1p969, 0x1p969).sum()} returns {@code NaN}, as
+     * {@link java.util.DoubleSummaryStatistics#getSum()} does for the same values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -166,7 +166,7 @@ public final class BrotliInputStream extends InputStream {
     }
 
     /**
-     * Reads up to len bytes of decompressed data into an array of bytes.
+     * Reads up to {@code length} bytes of decompressed data into an array of bytes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -179,7 +179,7 @@ public final class BrotliInputStream extends InputStream {
      * @param length the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IndexOutOfBoundsException if off is negative, len is negative, or len is greater than b.length - off
+     * @throws IndexOutOfBoundsException if off is negative, length is negative, or length is greater than b.length - off
      * @throws IllegalStateException if this stream has been closed and no buffered byte remains to satisfy the
      *         request; when some remain, they are transferred and the (possibly short) count is returned instead
      * @throws IOException if compressed input cannot be read or contains invalid Brotli data
@@ -189,7 +189,7 @@ public final class BrotliInputStream extends InputStream {
             throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
         // Checked before the range: InputStream.read(byte[], int, int) (and this method's own Javadoc)
         // require NullPointerException to win over IndexOutOfBoundsException, but the range check below
-        // dereferences b.length last, so a null buffer combined with a negative off/len reported the
+        // dereferences b.length last, so a null buffer combined with a negative off/length reported the
         // wrong exception type.
         if (b == null) {
             throw new NullPointerException("b");

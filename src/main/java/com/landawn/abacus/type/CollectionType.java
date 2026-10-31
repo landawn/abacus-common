@@ -532,7 +532,7 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param isDeclaringName   {@code true} to produce a simple (declaring) name using
      *                          {@link com.landawn.abacus.util.ClassUtil#getSimpleClassName(Class)}
      *                          (e.g., {@code "List<String>"}); {@code false} for the fully qualified
-     *                          form (e.g., {@code "java.util.List<java.lang.String>"})
+     *                          form (e.g., {@code "java.util.List<String>"})
      * @return the formatted type name
      * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */

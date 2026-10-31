@@ -628,7 +628,10 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * that order.</p>
      *
      * <p><b>The result's own iteration order is best-effort, not guaranteed.</b> An {@code ImmutableBiMap}
-     * source is reproduced exactly, through its own backing-map suppliers. Any other source is copied by
+     * source is copied through its own backing-map suppliers, which reproduce it exactly only when they build the
+     * same kind of map that backs it. They do not for {@code N.enumNameMap(DayOfWeek.class)}: its
+     * {@link java.util.EnumMap} key map has a {@code HashMap} supplier, so the copy iterates in hash order, not in
+     * the enum's declaration order. Any other source is copied by
      * {@link BiMap#copyOf(Map)}, which mirrors the source's runtime map class where it can - so a
      * {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source does keep its order - and copies a
      * source whose class cannot be instantiated reflectively, such as

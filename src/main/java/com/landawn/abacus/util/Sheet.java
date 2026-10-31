@@ -1203,10 +1203,10 @@ public final class Sheet<R, C, V> implements Cloneable {
             return;
         }
 
-        // Resolve each axis once and write through the unchecked getValue/setValue - as merge(Sheet,
-        // BiFunction) already does. Both key sets were validated above and every coordinate below comes
-        // from a key map, so the public set(int, int, V) would re-run checkFrozen, two bounds checks and
-        // init() for every single cell, and tmp.get(r, c) would repeat two key lookups already done here.
+        // Resolve each axis once and copy between the column lists directly, without the per-cell checks of the
+        // public accessors. Both key sets were validated above and every coordinate below comes from a key map,
+        // so the public set(int, int, V) would re-run checkFrozen, two bounds checks and init() for every single
+        // cell, and tmp.get(r, c) would repeat two key lookups already done here.
         init();
 
         final int[] sourceColumnIndexes = new int[tmp.columnCount()];
@@ -1216,16 +1216,24 @@ public final class Sheet<R, C, V> implements Cloneable {
             sourceColumnIndexes[idx++] = getColumnIndex(c);
         }
 
-        int sourceRowIndex = 0;
+        final int sourceRowCount = tmp.rowCount();
+        final int[] rowIndexes = new int[sourceRowCount];
+        idx = 0;
 
         for (final R r : tmp.rowKeySet()) {
-            final int rowIndex = getRowIndex(r);
+            rowIndexes[idx++] = getRowIndex(r);
+        }
 
-            for (int i = 0, len = sourceColumnIndexes.length; i < len; i++) {
-                setValue(rowIndex, sourceColumnIndexes[i], tmp.getValue(sourceRowIndex, i));
+        // No callback runs here, so copy column by column: storage is column-wise, and a row-by-row walk
+        // touched a different column list for every cell. Each source column is looked up once as well; read after
+        // init(), so a self-copy of a sheet that had no storage yet reads its newly allocated (all-null) columns.
+        for (int i = 0, len = sourceColumnIndexes.length; i < len; i++) {
+            final List<V> column = _columnList.get(sourceColumnIndexes[i]);
+            final List<? extends V> sourceColumn = tmp._isInitialized ? tmp._columnList.get(i) : null;
+
+            for (int sourceRowIndex = 0; sourceRowIndex < sourceRowCount; sourceRowIndex++) {
+                column.set(rowIndexes[sourceRowIndex], sourceColumn == null ? null : sourceColumn.get(sourceRowIndex));
             }
-
-            sourceRowIndex++;
         }
     }
 

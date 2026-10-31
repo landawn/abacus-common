@@ -135,6 +135,19 @@ import com.landawn.abacus.util.u.Optional;
  * turned off, is refused with an {@link IllegalArgumentException} - by the constructors, and again on
  * each write, because the configuration is mutable and is retained by reference.</p>
  *
+ * <p><b>Nonfinite numbers are rejected wherever they occur.</b> JSON has no representation for
+ * {@code NaN}, {@code Infinity} or {@code -Infinity}, so a nonfinite {@code double} or {@code float} -
+ * the root itself, or a value nested in a bean, map, collection, array ({@code Object[]},
+ * {@code double[]}, {@code float[]}, {@code Double[]}, {@code Float[]}), {@code Optional}/{@code Nullable}
+ * wrapper, pair, tuple or other structured value - makes the write fail with a {@link ParsingException}
+ * instead of producing a bare {@code NaN}, {@code Infinity} or {@code -Infinity} token that no JSON parser
+ * accepts. A nonfinite number that the serializer writes as a JSON string (a map key, or a property with a
+ * {@code numberFormat}) is valid JSON and still written. A scalar root, and a pair, triple, tuple, entry,
+ * indexed or timed value, primitive list, multiset or multimap root, fail before anything is written. Any
+ * other root (bean, map, collection, array, ...) is checked while its JSON text is produced: a small
+ * response also fails with nothing written to the {@link Writer}, but for a large one the text before the
+ * offending value may already have been written to it.</p>
+ *
  * <p><b>Supported media types:</b> by default the converter handles the media types inherited from
  * {@link AbstractJsonHttpMessageConverter} (typically {@code application/json} and
  * {@code application/*+json}). Constructors accepting {@link MediaType} values replace those defaults
@@ -622,7 +635,8 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * @throws IllegalArgumentException if the serialization configuration can no longer produce valid JSON (it is retained by reference and may
      *         have been mutated since construction)
      * @throws ParsingException if unwrapping the root value encounters a circular reference, or its value cannot be
-     *         serialized as JSON
+     *         serialized as JSON - for example a nonfinite {@code double} or {@code float} anywhere in it, root or nested
+     *         (see the class documentation for when part of the response may already have been written)
      * @throws RuntimeException if JSON serialization fails due to unsupported types or serialization errors
      * @throws UncheckedIOException if writing the JSON message body to {@code writer}, or reading a resource-backed value during its
      *         serialization, fails
@@ -660,7 +674,7 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         }
         final com.landawn.abacus.type.Type<Object> valueType = value == null ? null : TypeFactory.getType(value.getClass());
         if (value != null && !usesDirectValueConversion(valueType)) {
-            N.toJson(value, jsc, writer);
+            N.toJson(value, jsc, new NonfiniteNumberGuard(N.checkArgNotNull(writer, cs.output)));
             return;
         }
         if (value != null && isStructuredValueType(valueType)) {
@@ -748,10 +762,214 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         N.toJson(value, jsc, buffer);
         final String json = buffer.toString();
         STRUCTURE_VALIDATOR.validate(json);
+        // The validator accepts bare NaN/Infinity tokens.
+        new NonfiniteNumberGuard(null).scan(json, 0, json.length());
         try {
             writer.write(json);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Passes serialized JSON text on to a target writer and fails on a bare {@code NaN}, {@code Infinity} or
+     * {@code -Infinity} token, which is how the JSON writer prints a nonfinite {@code double} or {@code float} wherever
+     * it occurs (bean property, map value, collection or array element, wrapper content, ...).
+     *
+     * <p>The writer has no setting or hook for nonfinite numbers. A pre-pass over the value would have to repeat its
+     * selection rules to stay exact - ignored, excluded and transient properties are not written, map keys are always
+     * quoted, a number-formatted property can be written as a string - or it would refuse output that is valid JSON
+     * today, and it would walk the value a second time. Checking the produced text sees exactly what is written, in the
+     * same pass. It relies on {@code checkJsonCapable}: with every string, property name and map key in
+     * double quotes, a run of letters outside a string is {@code true}, {@code false}, {@code null}, an exponent
+     * marker, or one of the nonfinite tokens.</p>
+     *
+     * <p>Each chunk is checked before it is passed on, so the target never receives the chunk that holds the token; the
+     * serializer hands over its buffer in large chunks, so a small response fails with nothing written. After a failure
+     * further writes and flushes are dropped (the serializer flushes its remaining buffer while it unwinds). Once the
+     * target itself has failed to take a chunk, everything is passed on unchecked, as without this guard: the serializer
+     * re-sends that chunk while it unwinds, and scanning it a second time would misread its strings and could report a
+     * nonfinite number instead of the target's failure. The target is never closed: it belongs to the caller.</p>
+     */
+    private static final class NonfiniteNumberGuard extends Writer {
+        private static final String NAN = "NaN";
+        private static final String INFINITY = "Infinity";
+
+        private final Writer target;
+        private boolean inString;
+        private boolean escaped;
+        private char previous;
+        // The number of leading characters of candidate that the current run of letters has matched; 0 if it matches none.
+        private int matched;
+        // The nonfinite token a run of letters starting with 'N' or 'I' may spell.
+        private String candidate;
+        private boolean negative;
+        private boolean failed;
+        // Set while a chunk is handed to the target and left set if the target throws.
+        private boolean targetFailed;
+        // Copy buffer for String and single-char writes, so that one loop over a char[] does all the scanning.
+        private char[] chars;
+
+        private NonfiniteNumberGuard(final Writer target) {
+            this.target = target;
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            if (!failed) {
+                if (!targetFailed) {
+                    final char[] buffer = chars();
+                    buffer[0] = (char) c;
+                    scan(buffer, 0, 1);
+                }
+
+                targetFailed = true;
+                target.write(c);
+                targetFailed = false;
+            }
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            if (!failed) {
+                if (!targetFailed) {
+                    scan(cbuf, off, off + len);
+                }
+
+                targetFailed = true;
+                target.write(cbuf, off, len);
+                targetFailed = false;
+            }
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            if (!failed) {
+                if (!targetFailed) {
+                    scan(str, off, len);
+                }
+
+                targetFailed = true;
+                target.write(str, off, len);
+                targetFailed = false;
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            if (!failed) {
+                target.flush();
+            }
+        }
+
+        @Override
+        public void close() throws IOException {
+            flush();
+        }
+
+        private char[] chars() {
+            if (chars == null) {
+                chars = new char[1024];
+            }
+
+            return chars;
+        }
+
+        private void scan(final String str, final int off, final int len) {
+            final char[] buffer = chars();
+
+            for (int from = off, end = off + len; from < end;) {
+                final int to = Math.min(end, from + buffer.length);
+                str.getChars(from, to, buffer, 0);
+                scan(buffer, 0, to - from);
+                from = to;
+            }
+        }
+
+        // Runs over every character of every response: string content is skipped by a tight loop, and outside strings only
+        // a quote, an 'N' or 'I' that starts a run of letters, and the letters of a started token need work. The state is
+        // kept in locals in the loop and in the fields between chunks, so a token or an escape split across two writes is
+        // still read correctly. A letter outside a string follows a character outside a string or a closing quote, so the
+        // character before it (previous, at a chunk start) tells whether it starts a run of letters and follows a '-'.
+        private void scan(final char[] cbuf, final int off, final int end) {
+            boolean inString = this.inString;
+            boolean escaped = this.escaped;
+            int matched = this.matched;
+            int i = off;
+
+            while (i < end) {
+                if (inString) {
+                    if (escaped) {
+                        escaped = false;
+                        i++;
+                    }
+
+                    while (i < end && cbuf[i] != '"' && cbuf[i] != '\\') {
+                        i++;
+                    }
+
+                    if (i < end) {
+                        if (cbuf[i] == '\\') {
+                            escaped = true;
+                        } else {
+                            inString = false;
+                        }
+
+                        i++;
+                    }
+
+                    continue;
+                }
+
+                if (matched == 0) {
+                    char next;
+
+                    while (i < end && (next = cbuf[i]) != '"' && next != 'N' && next != 'I') {
+                        i++;
+                    }
+
+                    if (i == end) {
+                        break;
+                    }
+                }
+
+                final char ch = cbuf[i];
+
+                if (ch == '"') {
+                    inString = true;
+                    matched = 0;
+                } else if (matched > 0) {
+                    if (ch != candidate.charAt(matched)) {
+                        matched = 0;
+                    } else if (++matched == candidate.length()) {
+                        failed = true;
+                        throw new ParsingException("Serialization did not produce a valid JSON value: the nonfinite number " + (negative ? "-" : "") + candidate
+                                + " has no JSON representation");
+                    }
+                } else if (ch == 'N' || ch == 'I') {
+                    final char before = i > off ? cbuf[i - 1] : previous;
+
+                    if (!isLetter(before)) {
+                        candidate = ch == 'N' ? NAN : INFINITY;
+                        negative = before == '-';
+                        matched = 1;
+                    }
+                }
+
+                i++;
+            }
+
+            if (end > off) {
+                previous = cbuf[end - 1];
+            }
+
+            this.inString = inString;
+            this.escaped = escaped;
+            this.matched = matched;
+        }
+
+        private static boolean isLetter(final char ch) {
+            return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
         }
     }
 }

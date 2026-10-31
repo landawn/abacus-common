@@ -5687,4 +5687,566 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-10-16 G157 end ----
+
+    // ---- deep review 2026-10-26 G007 begin ----
+
+    // G007-01: an unknown (ignoreUnmatchedProperty) or ignored bean property whose content mixes text with a child element is
+    // skipped whole on every backend. StAX stepped into the child element and ended the bean at its end, silently dropping
+    // every following property (r107: name=null, age=0). A known property with such content is the mixed-content
+    // ParsingException of the StAX item/key/value wrappers (r107: the text became the value and the bean also ended early).
+    @Test
+    public void testDeserialize_mixedContentInSkippedPropertyKeepsFollowingProperties() {
+        final XmlDeserConfig ignoreUnmatched = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
+        final XmlDeserConfig ignoreName = new XmlDeserConfig().setIgnoredPropNames(Person.class, Set.of("name"));
+        final String unknown = "<person><desc>Some <i>bold</i> text</desc><name>n</name><age>3</age></person>";
+        final String unknownByNameAttribute = "<bean name=\"person\"><property name=\"desc\">Some <i>bold</i> text</property>"
+                + "<property name=\"name\">n</property><property name=\"age\">3</property></bean>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+            final String name = type.name();
+
+            assertEquals(new Person("n", 3), parser.deserialize(unknown, ignoreUnmatched, Person.class), name);
+            assertEquals(new Person("n", 3), parser.deserialize(new StringReader(unknown), ignoreUnmatched, Person.class), name);
+            assertEquals(new Person("n", 3), parser.deserialize(unknownByNameAttribute, ignoreUnmatched, Person.class), name);
+            assertEquals(new Person(null, 3), parser.deserialize("<person><name>Some <i>x</i> text</name><age>3</age></person>", ignoreName, Person.class),
+                    name);
+
+            // Unchanged neighbours: indentation before a nested value, and text-only properties.
+            assertEquals(new Person(" n", 3),
+                    parser.deserialize("<person><desc>\n  <i>bold</i>\n</desc><name> n</name><age>3</age></person>", ignoreUnmatched, Person.class), name);
+        }
+
+        final XmlParser stax = parserOf(XmlParserType.StAX);
+        final ParsingException e = assertThrows(ParsingException.class,
+                () -> stax.deserialize("<person><name>ab<zqx>1</zqx></name><age>3</age></person>", null, Person.class));
+        assertEquals("Mixed scalar and nested XML values are not supported", e.getMessage());
+
+        for (final XmlParserType type : ALL_TYPES) {
+            assertThrows(ParsingException.class,
+                    () -> parserOf(type).deserialize(new StringReader("<person><age>3</age><name>ab<zqx/></name></person>"), null, Person.class), type.name());
+        }
+    }
+
+    @Data
+    public static class E {
+        private String name;
+    }
+
+    @Data
+    public static class Key {
+        private String name;
+    }
+
+    @Data
+    public static class Value {
+        private String name;
+    }
+
+    @Data
+    public static class G007WrapperNamedBeans {
+        private Value value;
+        private Map<String, Value> values;
+        private List<E> items;
+        private Map<Key, String> keyed;
+        private Value[] array;
+        private String after;
+    }
+
+    // G007-02: the writer names a bean element after its class, so a bean class named E, Entry, Key or Value is written as
+    // <e>, <entry>, <key> or <value>. In a declared bean slot (the root, a bean property, a typed item, key or value) every
+    // backend now reads it as that bean; r107 classified it as the wrapper of that name and could not read the parser's own
+    // output back (StAX/DOM "Unsupported class type", SAX "only allowed inside a map element"; SAX read the name-attribute form).
+    @Test
+    public void testDeserialize_beanClassNamedLikeWrapperElementReadsBack() {
+        final Value value = new Value();
+        value.setName("va");
+        final E item = new E();
+        item.setName("it");
+        final Key key = new Key();
+        key.setName("ke");
+
+        final G007WrapperNamedBeans beans = new G007WrapperNamedBeans();
+        beans.setValue(value);
+        beans.setValues(new LinkedHashMap<>(Map.of("v", value)));
+        beans.setItems(Arrays.asList(item, null));
+        beans.setKeyed(new LinkedHashMap<>(Map.of(key, "k")));
+        beans.setArray(new Value[] { value });
+        beans.setAfter("z");
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            for (final boolean tagByPropertyName : new boolean[] { true, false }) {
+                final XmlSerConfig config = new XmlSerConfig().setTagByPropertyName(tagByPropertyName);
+                final String name = type.name() + " tagByPropertyName=" + tagByPropertyName;
+
+                assertEquals(beans, parser.deserialize(parser.serialize(beans, config), G007WrapperNamedBeans.class), name);
+                assertEquals(item, parser.deserialize(parser.serialize(item, config), E.class), name);
+                assertEquals(key, parser.deserialize(parser.serialize(key, config), Key.class), name);
+                assertEquals(value, parser.deserialize(parser.serialize(value, config), Value.class), name);
+            }
+
+            // Unchanged neighbours: the wrappers keep their structural meaning in a map and an untyped list.
+            assertEquals(Map.of("k", "v"), parser.deserialize("<map><entry><key>k</key><value>v</value></entry></map>", Map.class), type.name());
+            assertEquals(List.of("x"), parser.deserialize("<list><e>x</e></list>", List.class), type.name());
+        }
+    }
+
+    // ---- deep review 2026-10-26 G007 end ----
+
+    // ---- deep review 2026-10-26 verify G118 begin ----
+
+    // G007-01 in a nested bean: an unknown property with mixed content is skipped whole and both beans keep their following
+    // properties on every backend (r107 StAX: "Unexpected element <keep> after the value of property 'inner'"); an indented
+    // known bean property still reads its nested value.
+    @Test
+    public void testDeserialize_mixedContentInNestedBeanPropertyIsSkippedOnEveryBackend() {
+        final XmlDeserConfig ignoreUnmatched = new XmlDeserConfig().setIgnoreUnmatchedProperty(true);
+        final String nested = "<ignOuter><name>n</name><inner><ignInner><desc>a<i>b</i>c</desc><keep>k</keep></ignInner></inner><tail>t</tail></ignOuter>";
+        final String indented = "<ignOuter><inner>\n  <ignInner><keep>k</keep></ignInner>\n</inner><tail>t</tail></ignOuter>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            for (final String xml : new String[] { nested, indented }) {
+                final IgnOuter outer = parser.deserialize(new StringReader(xml), ignoreUnmatched, IgnOuter.class);
+                assertEquals(nested.equals(xml) ? "n" : null, outer.getName(), type.name());
+                assertEquals("k", outer.getInner().getKeep(), type.name());
+                assertEquals("t", outer.getTail(), type.name());
+            }
+        }
+    }
+
+    // G007-01 for a known property: StAX rejects text in a CDATA fragment before an empty child element as mixed content (r107
+    // StAX kept "ab", took the child's end for the property end and ended the bean there: age lost), and the same content in an
+    // ignored property is skipped and the following property is read on every backend. DOM and SAX reject THIS input only
+    // because zqx names no class; with a resolvable child they ignore the text (see the G129 test below and package-info L17).
+    @Test
+    public void testDeserialize_knownPropertyMixedContentIsRejectedByStAX() {
+        final String xml = "<person><name><![CDATA[ab]]><zqx/></name><age>3</age></person>";
+        final XmlDeserConfig ignoreName = new XmlDeserConfig().setIgnoredPropNames(Person.class, Set.of("name"));
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            assertThrows(ParsingException.class, () -> parser.deserialize(xml, Person.class), type.name());
+            assertEquals(new Person(null, 3), parser.deserialize(xml, ignoreName, Person.class), type.name());
+        }
+
+        final ParsingException e = assertThrows(ParsingException.class, () -> parserOf(XmlParserType.StAX).deserialize(xml, Person.class));
+        assertEquals("Mixed scalar and nested XML values are not supported", e.getMessage());
+    }
+
+    // G007-02 with writeTypeInfo and a null marker: the typed output of bean classes named Value, E and Key reads back on every
+    // backend (r107: StAX/DOM "Unsupported class type", SAX "only allowed inside a map element"), a null-marked element named
+    // like the wrapper in a declared bean slot is null, and the wrappers keep their structural meaning in an Object root.
+    @Test
+    public void testDeserialize_beanClassNamedLikeWrapperElementWithTypeInfoAndNullMarker() {
+        final Value value = new Value();
+        value.setName("va");
+        final E item = new E();
+        item.setName("it");
+        final Key key = new Key();
+        key.setName("ke");
+
+        final G007WrapperNamedBeans beans = new G007WrapperNamedBeans();
+        beans.setValue(value);
+        beans.setValues(new LinkedHashMap<>(Map.of("v", value)));
+        beans.setItems(Arrays.asList(item, null));
+        beans.setKeyed(new LinkedHashMap<>(Map.of(key, "k")));
+        beans.setArray(new Value[] { value });
+        beans.setAfter("z");
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            for (final boolean tagByPropertyName : new boolean[] { true, false }) {
+                final XmlSerConfig config = new XmlSerConfig().setWriteTypeInfo(true).setTagByPropertyName(tagByPropertyName);
+                final String name = type.name() + " tagByPropertyName=" + tagByPropertyName;
+
+                assertEquals(beans, parser.deserialize(parser.serialize(beans, config), G007WrapperNamedBeans.class), name);
+                assertEquals(value, parser.deserialize(parser.serialize(value, config), Value.class), name);
+            }
+
+            final G007WrapperNamedBeans nullValue = parser.deserialize(
+                    "<g007WrapperNamedBeans><value><value isNull=\"true\"/></value><after>z</after></g007WrapperNamedBeans>", G007WrapperNamedBeans.class);
+            assertNull(nullValue.getValue(), type.name());
+            assertEquals("z", nullValue.getAfter(), type.name());
+
+            // Unchanged neighbours: real wrappers in an open (Object) root.
+            assertEquals(Map.of("k", "v"), parser.deserialize("<map><entry><key>k</key><value>v</value></entry></map>", Object.class), type.name());
+            assertEquals(List.of("x"), parser.deserialize("<list><e>x</e></list>", Object.class), type.name());
+        }
+    }
+
+    @Data
+    public static class G118ObjectHolder {
+        private String name;
+        private Object obj;
+        private Person friend;
+        private String after;
+    }
+
+    // G118-03: name-attribute form, a bean element without a name attribute in an Object property is looked up by its local name
+    // (here one no class has, so it is read as a bean-shaped map) on every backend (r107 SAX: NullPointerException from the node-name
+    // cache; StAX/DOM read the map). Not <bean>: discovery would find a test class named Bean.
+    @Test
+    public void testDeserialize_nameAttributeFormAnonymousBeanInObjectProperty() {
+        final String xml = "<bean name=\"g118ObjectHolder\"><property name=\"obj\"><zqxNoName><property name=\"y\">1</property></zqxNoName></property>"
+                + "<property name=\"after\">z</property></bean>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final G118ObjectHolder holder = parserOf(type).deserialize(xml, G118ObjectHolder.class);
+
+            assertEquals(Map.of("y", "1"), holder.getObj(), type.name());
+            assertEquals("z", holder.getAfter(), type.name());
+        }
+    }
+
+    // G118-03: name-attribute form, a nameless child element of a String property is the ParsingException StAX and DOM give
+    // ("No bean class found for node name: ..."); r107 SAX threw a NullPointerException.
+    @Test
+    public void testDeserialize_nameAttributeFormNamelessChildOfScalarProperty() {
+        final String xml = "<bean name=\"g118ObjectHolder\"><property name=\"name\"><zqx/></property><property name=\"after\">z</property></bean>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final ParsingException e = assertThrows(ParsingException.class, () -> parserOf(type).deserialize(xml, G118ObjectHolder.class), type.name());
+            assertTrue(e.getMessage().startsWith("No bean class found for node name: zqx"), type.name() + ": " + e.getMessage());
+        }
+    }
+
+    // G118-03 neighbours (unchanged on every backend): a child WITH a name attribute in an Object property, and a nameless bean
+    // element in a declared bean slot.
+    @Test
+    public void testDeserialize_nameAttributeFormNamedChildAndDeclaredBeanSlotUnchanged() {
+        final String named = "<bean name=\"g118ObjectHolder\"><property name=\"obj\"><bean name=\"zqxBean\"><property name=\"y\">1</property></bean></property>"
+                + "<property name=\"after\">z</property></bean>";
+        final String declared = "<bean name=\"g118ObjectHolder\"><property name=\"friend\"><bean><property name=\"name\">p</property>"
+                + "<property name=\"age\">3</property></bean></property><property name=\"after\">z</property></bean>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            final G118ObjectHolder namedHolder = parser.deserialize(named, G118ObjectHolder.class);
+            assertEquals(Map.of("y", "1"), namedHolder.getObj(), type.name());
+            assertEquals("z", namedHolder.getAfter(), type.name());
+
+            final G118ObjectHolder declaredHolder = parser.deserialize(declared, G118ObjectHolder.class);
+            assertEquals(new Person("p", 3), declaredHolder.getFriend(), type.name());
+            assertEquals("z", declaredHolder.getAfter(), type.name());
+        }
+    }
+
+    // ---- deep review 2026-10-26 verify G118 end ----
+
+    // ---- deep review 2026-10-27 G129 begin ----
+
+    public static class G129AChild {
+        private String v;
+
+        public String getV() {
+            return v;
+        }
+
+        public void setV(final String v) {
+            this.v = v;
+        }
+    }
+
+    public static class G129AHolder {
+        private String name;
+        private G129AChild friend;
+        private String after;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G129AChild getFriend() {
+            return friend;
+        }
+
+        public void setFriend(final G129AChild friend) {
+            this.friend = friend;
+        }
+
+        public String getAfter() {
+            return after;
+        }
+
+        public void setAfter(final String after) {
+            this.after = after;
+        }
+    }
+
+    // G129-02 (package-info L17): a known property whose non-blank text precedes a nested element that resolves is rejected by
+    // StAX as mixed content, while DOM and SAX ignore the text and read the nested element (a bean slot gets the child bean).
+    @Test
+    public void testDeserialize_knownPropertyMixedContentWithResolvableChildDiffersPerBackend() {
+        final String beanSlot = "<g129AHolder><friend>ab<g129AChild><v>x</v></g129AChild></friend><after>z</after></g129AHolder>";
+        final String stringSlot = "<g129AHolder><name>ab<g129AChild><v>x</v></g129AChild></name><after>z</after></g129AHolder>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            if (type == XmlParserType.StAX) {
+                for (final String xml : new String[] { beanSlot, stringSlot }) {
+                    final ParsingException e = assertThrows(ParsingException.class, () -> parser.deserialize(xml, G129AHolder.class), xml);
+                    assertEquals("Mixed scalar and nested XML values are not supported", e.getMessage(), xml);
+                }
+            } else {
+                final G129AHolder holder = parser.deserialize(beanSlot, G129AHolder.class);
+                assertEquals("x", holder.getFriend().getV(), type.name());
+                assertEquals("z", holder.getAfter(), type.name());
+
+                assertEquals("z", parser.deserialize(stringSlot, G129AHolder.class).getAfter(), type.name());
+            }
+        }
+    }
+
+    // ---- deep review 2026-10-27 G129 end ----
+
+    // ---- deep review 2026-10-27 G131 begin ----
+
+    public static class G131AChild {
+        private String v;
+
+        public String getV() {
+            return v;
+        }
+
+        public void setV(final String v) {
+            this.v = v;
+        }
+    }
+
+    public static class G131AHolder {
+        private String name;
+        @JsonXmlField(direction = JsonXmlField.Direction.SERIALIZE_ONLY)
+        private String computed;
+        @JsonXmlField(direction = JsonXmlField.Direction.SERIALIZE_ONLY)
+        private int count;
+        private String after;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getComputed() {
+            return computed;
+        }
+
+        public void setComputed(final String computed) {
+            this.computed = computed;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void setCount(final int count) {
+            this.count = count;
+        }
+
+        public String getAfter() {
+            return after;
+        }
+
+        public void setAfter(final String after) {
+            this.after = after;
+        }
+    }
+
+    // G131: a SERIALIZE_ONLY property is ignored when reading, so StAX skips its mixed content whole as for an ignored property
+    // (r107 lost the following property, r108 rejected it as mixed content). DOM and SAX read the resolvable child and drop it.
+    @Test
+    public void testDeserialize_serializeOnlyPropertyMixedContentIsSkipped() {
+        final String resolvable = "<g131AHolder><computed>ab<g131AChild><v>x</v></g131AChild></computed><after>z</after></g131AHolder>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final G131AHolder holder = parserOf(type).deserialize(resolvable, G131AHolder.class);
+            assertNull(holder.getComputed(), type.name());
+            assertEquals("z", holder.getAfter(), type.name());
+        }
+
+        final XmlParser stax = parserOf(XmlParserType.StAX);
+
+        for (final String xml : new String[] { "<g131AHolder><computed>ab<zqx/></computed><after>z</after></g131AHolder>",
+                "<g131AHolder><computed>ab<i>b</i>c</computed><after>z</after></g131AHolder>",
+                "<g131AHolder><after>z</after><computed>ab<zqx><q>1</q></zqx></computed></g131AHolder>" }) {
+            final G131AHolder holder = stax.deserialize(xml, G131AHolder.class);
+            assertNull(holder.getComputed(), xml);
+            assertEquals("z", holder.getAfter(), xml);
+        }
+    }
+
+    // G131 neighbours on StAX: plain text of a SERIALIZE_ONLY property is still decoded (and discarded), and an ordinary
+    // property with mixed content is still rejected.
+    @Test
+    public void testDeserialize_serializeOnlyNeighboursUnchangedOnStAX() {
+        final XmlParser stax = parserOf(XmlParserType.StAX);
+
+        final G131AHolder plain = stax.deserialize("<g131AHolder><computed>ab</computed><count>7</count><after>z</after></g131AHolder>", G131AHolder.class);
+        assertNull(plain.getComputed());
+        assertEquals(0, plain.getCount());
+        assertEquals("z", plain.getAfter());
+
+        assertThrows(NumberFormatException.class, () -> stax.deserialize("<g131AHolder><count>abc</count><after>z</after></g131AHolder>", G131AHolder.class));
+
+        final ParsingException e = assertThrows(ParsingException.class,
+                () -> stax.deserialize("<g131AHolder><name>ab<zqx/></name><after>z</after></g131AHolder>", G131AHolder.class));
+        assertEquals("Mixed scalar and nested XML values are not supported", e.getMessage());
+    }
+
+    // ---- deep review 2026-10-27 G131 end ----
+
+    // ---- deep review 2026-10-27 G136 begin ----
+
+    public static class G136EntryBean {
+        private java.util.AbstractMap.SimpleEntry<String, Integer> entry;
+        private List<java.util.AbstractMap.SimpleEntry<String, Integer>> entries;
+        private Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> entryMap;
+        private java.util.AbstractMap.SimpleImmutableEntry<String, Integer> immutableEntry;
+        private List<Map.Entry<String, Integer>> mapEntries;
+        private Map<String, Integer> map;
+        private List<Map<String, Integer>> maps;
+
+        public java.util.AbstractMap.SimpleEntry<String, Integer> getEntry() {
+            return entry;
+        }
+
+        public void setEntry(final java.util.AbstractMap.SimpleEntry<String, Integer> entry) {
+            this.entry = entry;
+        }
+
+        public List<java.util.AbstractMap.SimpleEntry<String, Integer>> getEntries() {
+            return entries;
+        }
+
+        public void setEntries(final List<java.util.AbstractMap.SimpleEntry<String, Integer>> entries) {
+            this.entries = entries;
+        }
+
+        public Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> getEntryMap() {
+            return entryMap;
+        }
+
+        public void setEntryMap(final Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> entryMap) {
+            this.entryMap = entryMap;
+        }
+
+        public java.util.AbstractMap.SimpleImmutableEntry<String, Integer> getImmutableEntry() {
+            return immutableEntry;
+        }
+
+        public void setImmutableEntry(final java.util.AbstractMap.SimpleImmutableEntry<String, Integer> immutableEntry) {
+            this.immutableEntry = immutableEntry;
+        }
+
+        public List<Map.Entry<String, Integer>> getMapEntries() {
+            return mapEntries;
+        }
+
+        public void setMapEntries(final List<Map.Entry<String, Integer>> mapEntries) {
+            this.mapEntries = mapEntries;
+        }
+
+        public Map<String, Integer> getMap() {
+            return map;
+        }
+
+        public void setMap(final Map<String, Integer> map) {
+            this.map = map;
+        }
+
+        public List<Map<String, Integer>> getMaps() {
+            return maps;
+        }
+
+        public void setMaps(final List<Map<String, Integer>> maps) {
+            this.maps = maps;
+        }
+    }
+
+    // G009-06: an AbstractMap.SimpleEntry bean property, list element and map value read back as AbstractMap.SimpleEntry on the
+    // SAX, StAX and DOM backends. The direct property used to receive a java.util.HashMap$Node (IllegalArgumentException "Can not
+    // set java.util.AbstractMap$SimpleEntry field ..."), and list elements were HashMap$Node instances in a SimpleEntry list.
+    @Test
+    public void testDeserialize_simpleEntryPropertyElementAndMapValueRoundTripG136() {
+        final G136EntryBean bean = new G136EntryBean();
+        bean.setEntry(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+        bean.setEntries(new java.util.ArrayList<>(List.of(new java.util.AbstractMap.SimpleEntry<>("b", 2))));
+        bean.setEntryMap(new LinkedHashMap<>(Map.of("k", new java.util.AbstractMap.SimpleEntry<>("c", 3))));
+        bean.setImmutableEntry(new java.util.AbstractMap.SimpleImmutableEntry<>("d", 4));
+        bean.setMapEntries(new java.util.ArrayList<>(List.of(new java.util.AbstractMap.SimpleEntry<>("e", 5))));
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser xmlParser = parserOf(parserType);
+            final G136EntryBean back = xmlParser.deserialize(xmlParser.serialize(bean), G136EntryBean.class);
+
+            assertEquals(bean.getEntry(), back.getEntry(), parserType.toString());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, back.getEntry().getClass(), parserType.toString());
+            assertEquals(bean.getEntries(), back.getEntries(), parserType.toString());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, ((Object) back.getEntries().get(0)).getClass(), parserType.toString());
+            assertEquals(bean.getEntryMap(), back.getEntryMap(), parserType.toString());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, ((Object) back.getEntryMap().get("k")).getClass(), parserType.toString());
+            assertEquals(bean.getImmutableEntry(), back.getImmutableEntry(), parserType.toString());
+            assertEquals(bean.getMapEntries(), back.getMapEntries(), parserType.toString());
+        }
+    }
+
+    // G009-05: a Map.Entry list element is compact JSON read by the JSON reader; an object with two entries there now fails like
+    // the direct Map.Entry property always did, instead of silently keeping the first entry.
+    @Test
+    public void testDeserialize_multiEntryObjectInMapEntryListElementFailsLikePropertyG136() {
+        final G136EntryBean bean = new G136EntryBean();
+        bean.setMapEntries(new java.util.ArrayList<>(List.of(new java.util.AbstractMap.SimpleEntry<>("m", 1))));
+        final G136EntryBean property = new G136EntryBean();
+        property.setEntry(new java.util.AbstractMap.SimpleEntry<>("m", 1));
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser xmlParser = parserOf(parserType);
+
+            for (final G136EntryBean source : new G136EntryBean[] { bean, property }) {
+                final String xml = xmlParser.serialize(source);
+                final String twoEntries = xml.contains("m&quot;:1}") ? xml.replace("m&quot;:1}", "m&quot;:1, &quot;n&quot;:2}")
+                        : xml.replace("m\":1}", "m\":1, \"n\":2}");
+                assertTrue(!xml.equals(twoEntries), parserType.toString());
+
+                final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> xmlParser.deserialize(twoEntries, G136EntryBean.class),
+                        parserType.toString());
+                assertEquals("Map.Entry JSON must contain exactly one entry, but got: 2", e.getMessage(), parserType.toString());
+            }
+        }
+    }
+
+    // G009-04: compact text whose element is a JSON array in a List<Map> property fails like the same array in the Map property
+    // itself (the compact text is read by the JSON reader). The list used to hold the ArrayList.
+    @Test
+    public void testDeserialize_jsonArrayInCompactMapListElementFailsLikeMapPropertyG136() {
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParser xmlParser = parserOf(parserType);
+            final String root = xmlParser.serialize(new G136EntryBean()).replaceAll("^<([A-Za-z0-9_]+).*$", "$1");
+            final ParsingException expected = assertThrows(ParsingException.class,
+                    () -> xmlParser.deserialize("<" + root + "><map>[1, 2]</map></" + root + ">", G136EntryBean.class), parserType.toString());
+
+            final ParsingException e = assertThrows(ParsingException.class,
+                    () -> xmlParser.deserialize("<" + root + "><maps>[[1, 2]]</maps></" + root + ">", G136EntryBean.class), parserType.toString());
+            assertEquals(expected.getMessage(), e.getMessage(), parserType.toString());
+
+            final G136EntryBean bean = xmlParser.deserialize("<" + root + "><maps>[{&quot;a&quot;: 1}]</maps></" + root + ">", G136EntryBean.class);
+            assertEquals(List.of(Map.of("a", 1)), bean.getMaps(), parserType.toString());
+        }
+    }
+
+    // ---- deep review 2026-10-27 G136 end ----
 }

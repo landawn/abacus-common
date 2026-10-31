@@ -462,8 +462,8 @@ public class JsonParserImplTest extends TestBase {
 
     @Test
     public void testDeserialize_SimpleEntry() {
-        // SimpleEntry is not special-cased by the if/else chain in readBracedValueBody; it falls
-        // through Map.Entry.isAssignableFrom and yields a generic Map.Entry (not a SimpleEntry).
+        // A Map.Entry target is read by MapEntryType.valueOf, which returns an AbstractMap.SimpleEntry
+        // (so AbstractMap.SimpleEntry targets, which share that handler, are satisfied too).
         Type<Map.Entry<String, Integer>> type = Type.of(new TypeReference<Map.Entry<String, Integer>>() {
         }.javaType());
 
@@ -4850,4 +4850,574 @@ public class JsonParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-10-16 G157 end ----
+
+    // ---- deep review 2026-10-26 G009 begin ----
+
+    // G009-01: a JSON object read into a Pair slot nested in a collection, a map value, a tuple slot or a wrapper is rejected by Pair's
+    // own handler, like the root and bean-property reads. Pair implements Map.Entry, so the slot received a HashMap$Node instead
+    // (ClassCastException only when the caller later read the "Pair").
+    @Test
+    public void testDeserialize_jsonObjectInNestedPairSlotIsRejectedLikeRoot() {
+        final Type<List<com.landawn.abacus.util.Pair<String, Integer>>> listType = Type.of("List<Pair<String, Integer>>");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("{\"a\": 1}", Type.of("Pair<String, Integer>")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("[{\"a\": 1}]", listType));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("{\"x\": {\"a\": 1}}", Type.of("Map<String, Pair<String, Integer>>")));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> parser.deserialize("[{\"a\": 1}, \"x\"]", Type.of("Pair<Pair<String, Integer>, String>")));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("[{\"a\": 1}]", Type.of("List<Optional<Pair<String, Integer>>>")));
+
+        // The array form of a Pair, and a Map.Entry slot read from an object, are unchanged.
+        final List<com.landawn.abacus.util.Pair<String, Integer>> pairs = parser.deserialize("[[\"a\", 1]]", listType);
+        assertEquals(com.landawn.abacus.util.Pair.of("a", 1), pairs.get(0));
+
+        final List<Map.Entry<String, Integer>> entries = parser.deserialize("[{\"a\": 1}]", Type.of("List<Map.Entry<String, Integer>>"));
+        assertEquals("a", entries.get(0).getKey());
+        assertEquals(Integer.valueOf(1), entries.get(0).getValue());
+    }
+
+    public static class G009ImmutableEntryBean {
+        private com.landawn.abacus.util.ImmutableEntry<String, Integer> entry;
+        private List<com.landawn.abacus.util.ImmutableEntry<String, Integer>> entries;
+
+        public com.landawn.abacus.util.ImmutableEntry<String, Integer> getEntry() {
+            return entry;
+        }
+
+        public void setEntry(final com.landawn.abacus.util.ImmutableEntry<String, Integer> entry) {
+            this.entry = entry;
+        }
+
+        public List<com.landawn.abacus.util.ImmutableEntry<String, Integer>> getEntries() {
+            return entries;
+        }
+
+        public void setEntries(final List<com.landawn.abacus.util.ImmutableEntry<String, Integer>> entries) {
+            this.entries = entries;
+        }
+    }
+
+    // G009-02: an ImmutableEntry bean property or List<ImmutableEntry> element read from {"k": v} is an ImmutableEntry, as
+    // ImmutableMapEntryType.valueOf returns at the root. It was a plain SimpleImmutableEntry, so the bean could not be read back
+    // (IllegalArgumentException "Can not set ... ImmutableEntry field ... to java.util.AbstractMap$SimpleImmutableEntry").
+    @Test
+    public void testDeserialize_immutableEntryPropertyAndElementRoundTrip() {
+        final G009ImmutableEntryBean bean = new G009ImmutableEntryBean();
+        bean.setEntry(com.landawn.abacus.util.ImmutableEntry.of("x", 1));
+        bean.setEntries(new ArrayList<>(List.of(com.landawn.abacus.util.ImmutableEntry.of("y", 2))));
+
+        final String json = parser.serialize(bean);
+        final G009ImmutableEntryBean back = parser.deserialize(json, G009ImmutableEntryBean.class);
+
+        assertEquals(bean.getEntry(), back.getEntry());
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, back.getEntry().getClass());
+        assertEquals(bean.getEntries(), back.getEntries());
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, ((Object) back.getEntries().get(0)).getClass());
+
+        // A SimpleImmutableEntry slot still receives an equal SimpleImmutableEntry (ImmutableEntry is one).
+        final List<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>> list = parser.deserialize("[{\"k\": 7}]",
+                Type.of(new TypeReference<List<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>>>() {
+                }));
+        assertEquals(new java.util.AbstractMap.SimpleImmutableEntry<>("k", 7), list.get(0));
+    }
+
+    // ---- deep review 2026-10-26 G009 end ----
+
+    // ---- deep review 2026-10-26 verify G119 begin ----
+
+    // G009-01: a Reader source, an empty object and a Pair map key are rejected like the String source; the array form (and a null
+    // element), a Triple slot fed an object and a Map.Entry slot fed {} keep their former results.
+    @Test
+    public void testDeserialize_jsonObjectInNestedPairSlotFromReaderEmptyObjectAndMapKey() {
+        final Type<List<com.landawn.abacus.util.Pair<String, Integer>>> listType = Type.of("List<Pair<String, Integer>>");
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(new StringReader("[{\"a\": 1}]"), listType));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("[{}]", listType));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(new StringReader("[{}]"), listType));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("{{\"a\": 1}: \"x\"}", Type.of("Map<Pair<String, Integer>, String>")));
+
+        final List<com.landawn.abacus.util.Pair<String, Integer>> pairs = parser.deserialize(new StringReader("[[\"a\", 1], null]"), listType);
+        assertEquals(com.landawn.abacus.util.Pair.of("a", 1), pairs.get(0));
+        assertNull(pairs.get(1));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("[{\"a\": 1}]", Type.of("List<Triple<String, Integer, Long>>")));
+
+        final List<Map.Entry<String, Integer>> entries = parser.deserialize("[{}]", Type.of("List<Map.Entry<String, Integer>>"));
+        assertNull(entries.get(0));
+    }
+
+    // G009-02: an ImmutableEntry map value read from a Reader, and a List<ImmutableEntry> element read by the XML parser (its list
+    // elements are compact JSON read by this parser), are ImmutableEntry instances, as the bean property already was in XML.
+    @Test
+    public void testDeserialize_immutableEntryMapValueFromReaderAndXmlListElement() {
+        final Map<String, com.landawn.abacus.util.ImmutableEntry<String, Integer>> map = parser.deserialize(new StringReader("{\"x\": {\"k\": 7}}"),
+                Type.of(new TypeReference<Map<String, com.landawn.abacus.util.ImmutableEntry<String, Integer>>>() {
+                }));
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, ((Object) map.get("x")).getClass());
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.of("k", 7), map.get("x"));
+
+        final G009ImmutableEntryBean bean = new G009ImmutableEntryBean();
+        bean.setEntry(com.landawn.abacus.util.ImmutableEntry.of("x", 1));
+        bean.setEntries(new ArrayList<>(List.of(com.landawn.abacus.util.ImmutableEntry.of("y", 2))));
+        final XmlParser xmlParser = ParserFactory.createXmlParser();
+        final G009ImmutableEntryBean back = xmlParser.deserialize(xmlParser.serialize(bean), G009ImmutableEntryBean.class);
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, ((Object) back.getEntry()).getClass());
+        assertEquals(bean.getEntries(), back.getEntries());
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, ((Object) back.getEntries().get(0)).getClass());
+    }
+
+    // ---- deep review 2026-10-26 verify G119 end ----
+
+    // ---- deep review 2026-10-27 G136 begin ----
+
+    public static class G136Inner {
+        private int a;
+
+        public int getA() {
+            return a;
+        }
+
+        public void setA(final int a) {
+            this.a = a;
+        }
+    }
+
+    public static class G136SlotBean {
+        private Map<String, Integer> m;
+        private List<Map<String, Integer>> lm;
+        private G136Inner in;
+        private List<G136Inner> lin;
+        private Map.Entry<String, Integer> e;
+        private List<Map.Entry<String, Integer>> le;
+
+        public Map<String, Integer> getM() {
+            return m;
+        }
+
+        public void setM(final Map<String, Integer> m) {
+            this.m = m;
+        }
+
+        public List<Map<String, Integer>> getLm() {
+            return lm;
+        }
+
+        public void setLm(final List<Map<String, Integer>> lm) {
+            this.lm = lm;
+        }
+
+        public G136Inner getIn() {
+            return in;
+        }
+
+        public void setIn(final G136Inner in) {
+            this.in = in;
+        }
+
+        public List<G136Inner> getLin() {
+            return lin;
+        }
+
+        public void setLin(final List<G136Inner> lin) {
+            this.lin = lin;
+        }
+
+        public Map.Entry<String, Integer> getE() {
+            return e;
+        }
+
+        public void setE(final Map.Entry<String, Integer> e) {
+            this.e = e;
+        }
+
+        public List<Map.Entry<String, Integer>> getLe() {
+            return le;
+        }
+
+        public void setLe(final List<Map.Entry<String, Integer>> le) {
+            this.le = le;
+        }
+    }
+
+    private static void assertSameFailureG136(final Throwable expected, final org.junit.jupiter.api.function.Executable read) {
+        final Throwable actual = Assertions.assertThrows(Throwable.class, read);
+        assertEquals(expected.getClass(), actual.getClass());
+        assertEquals(expected.getMessage(), actual.getMessage());
+    }
+
+    // G009-04: a map, bean or Sheet slot nested in a list, a map value, an array, a tuple slot or two levels deep that is fed a JSON
+    // array fails with the exception and message of the same text read at the top level (and in a bean property). It used to keep
+    // the ArrayList the generic fallback built, so a List<Map<String, Integer>> held a List.
+    @Test
+    public void testDeserialize_jsonArrayInNestedMapOrBeanSlotFailsLikeRoot() {
+        final Throwable mapRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1, 2]", Type.of("Map<String, Integer>")));
+        final String mapType = "Map<String, Integer>";
+
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[1, 2]]", Type.of("List<" + mapType + ">")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize(new StringReader("[[1, 2]]"), Type.of("List<" + mapType + ">")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("{\"x\": [1, 2]}", Type.of("Map<String, " + mapType + ">")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize(new StringReader("{\"x\": [1, 2]}"), Type.of("Map<String, " + mapType + ">")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[1, 2]]", Type.of(mapType + "[]")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[[1, 2]]]", Type.of("List<List<" + mapType + ">>")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("{\"x\": [[1, 2]]}", Type.of("Map<String, List<" + mapType + ">>")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[1, 2], \"s\"]", Type.of("Pair<" + mapType + ", String>")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("{\"m\": [1, 2]}", G136SlotBean.class));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("{\"lm\": [[1, 2]]}", G136SlotBean.class));
+        assertSameFailureG136(mapRoot,
+                () -> parser.deserialize(new StringReader("[{\"lm\": [[1, 2]]}]"), Type.of("List<" + G136SlotBean.class.getName() + ">")));
+
+        final String innerType = G136Inner.class.getName();
+        final Throwable beanRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", G136Inner.class));
+        assertSameFailureG136(beanRoot, () -> parser.deserialize("[[1]]", Type.of("List<" + innerType + ">")));
+        assertSameFailureG136(beanRoot, () -> parser.deserialize("{\"x\": [1]}", Type.of("Map<String, " + innerType + ">")));
+        assertSameFailureG136(beanRoot, () -> parser.deserialize("[[[1]]]", Type.of("List<List<" + innerType + ">>")));
+        assertSameFailureG136(beanRoot, () -> parser.deserialize("{\"in\": [1]}", G136SlotBean.class));
+        assertSameFailureG136(beanRoot, () -> parser.deserialize("{\"lin\": [[1]]}", G136SlotBean.class));
+
+        final String sheetType = "Sheet<String, String, Integer>";
+        final Throwable sheetRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", Type.of(sheetType)));
+        assertSameFailureG136(sheetRoot, () -> parser.deserialize("[[1]]", Type.of("List<" + sheetType + ">")));
+
+        // Well-formed documents and the slots that do accept a JSON array keep their results.
+        final List<Map<String, Integer>> maps = parser.deserialize("[{\"a\": 1}, {}, null]", Type.of("List<" + mapType + ">"));
+        assertEquals(Arrays.asList(Map.of("a", 1), Map.of(), null), maps);
+        assertEquals(List.of(List.of(1, 2)), parser.deserialize("[[1, 2]]", Type.of("List<List<Integer>>")));
+        assertEquals(List.of(List.of(1, 2)), parser.deserialize("[[1, 2]]", Type.of("List<Object>")));
+        assertEquals(Map.of("x", List.of(1)), parser.deserialize("{\"x\": [1]}", Type.of("Map<String, Object>")));
+        final List<Dataset> datasets = parser.deserialize("[[{\"c\": 1}]]", Type.of("List<Dataset>"));
+        assertEquals(List.of("c"), datasets.get(0).columnNames());
+        final G136SlotBean bean = parser.deserialize("{\"lm\": [{\"a\": 1}], \"lin\": [{\"a\": 2}]}", G136SlotBean.class);
+        assertEquals(List.of(Map.of("a", 1)), bean.getLm());
+        assertEquals(2, bean.getLin().get(0).getA());
+    }
+
+    // G009-05: a Map.Entry slot nested in a list, a map value, an array, a bean property or two levels deep that is fed an object
+    // with more than one entry fails like the top-level read (IllegalArgumentException "... must contain exactly one entry ...").
+    // It silently kept the first entry.
+    @Test
+    public void testDeserialize_multiEntryObjectInNestedMapEntrySlotFailsLikeRoot() {
+        final String entryType = "Map.Entry<String, Integer>";
+        final String twoEntries = "{\"a\": 1, \"b\": 2}";
+        final Throwable entryRoot = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(twoEntries, Type.of(entryType)));
+        assertEquals("Map.Entry JSON must contain exactly one entry, but got: 2", entryRoot.getMessage());
+
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("[" + twoEntries + "]", Type.of("List<" + entryType + ">")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize(new StringReader("[" + twoEntries + "]"), Type.of("List<" + entryType + ">")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("{\"x\": " + twoEntries + "}", Type.of("Map<String, " + entryType + ">")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("[" + twoEntries + "]", Type.of(entryType + "[]")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("[[" + twoEntries + "]]", Type.of("List<List<" + entryType + ">>")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("{\"e\": " + twoEntries + "}", G136SlotBean.class));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize(new StringReader("{\"le\": [" + twoEntries + "]}"), G136SlotBean.class));
+
+        final Type<com.landawn.abacus.util.ImmutableEntry<String, Integer>> immutableType = Type
+                .of(new TypeReference<com.landawn.abacus.util.ImmutableEntry<String, Integer>>() {
+                });
+        final Throwable immutableRoot = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(twoEntries, immutableType));
+        assertSameFailureG136(immutableRoot, () -> parser.deserialize("[" + twoEntries + "]", Type.of("List<" + immutableType.name() + ">")));
+
+        // One entry, an empty object and a repeated key keep the root's results (the last value of a repeated key wins).
+        final List<Map.Entry<String, Integer>> entries = parser.deserialize("[{\"a\": 1}, {}, {\"k\": 1, \"k\": 2}]", Type.of("List<" + entryType + ">"));
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("a", 1), entries.get(0));
+        assertNull(entries.get(1));
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("k", 2), entries.get(2));
+        assertEquals(parser.deserialize("{\"k\": 1, \"k\": 2}", Type.of(entryType)), entries.get(2));
+    }
+
+    public static class G136SimpleEntryBean {
+        private java.util.AbstractMap.SimpleEntry<String, Integer> entry;
+        private List<java.util.AbstractMap.SimpleEntry<String, Integer>> entries;
+        private Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> entryMap;
+        @SuppressWarnings("rawtypes")
+        private java.util.AbstractMap.SimpleEntry[] rawEntries;
+        private java.util.AbstractMap.SimpleImmutableEntry<String, Integer> immutableEntry;
+
+        public java.util.AbstractMap.SimpleEntry<String, Integer> getEntry() {
+            return entry;
+        }
+
+        public void setEntry(final java.util.AbstractMap.SimpleEntry<String, Integer> entry) {
+            this.entry = entry;
+        }
+
+        public List<java.util.AbstractMap.SimpleEntry<String, Integer>> getEntries() {
+            return entries;
+        }
+
+        public void setEntries(final List<java.util.AbstractMap.SimpleEntry<String, Integer>> entries) {
+            this.entries = entries;
+        }
+
+        public Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> getEntryMap() {
+            return entryMap;
+        }
+
+        public void setEntryMap(final Map<String, java.util.AbstractMap.SimpleEntry<String, Integer>> entryMap) {
+            this.entryMap = entryMap;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public java.util.AbstractMap.SimpleEntry[] getRawEntries() {
+            return rawEntries;
+        }
+
+        @SuppressWarnings("rawtypes")
+        public void setRawEntries(final java.util.AbstractMap.SimpleEntry[] rawEntries) {
+            this.rawEntries = rawEntries;
+        }
+
+        public java.util.AbstractMap.SimpleImmutableEntry<String, Integer> getImmutableEntry() {
+            return immutableEntry;
+        }
+
+        public void setImmutableEntry(final java.util.AbstractMap.SimpleImmutableEntry<String, Integer> immutableEntry) {
+            this.immutableEntry = immutableEntry;
+        }
+    }
+
+    // G009-06: AbstractMap.SimpleEntry slots (a bean property, a list element, a map value, a raw SimpleEntry[] element and the root)
+    // receive an AbstractMap.SimpleEntry. They received the parsed HashMap's own node, so such a bean could not be read back
+    // (IllegalArgumentException "Can not set java.util.AbstractMap$SimpleEntry field ... to java.util.HashMap$Node").
+    @Test
+    public void testDeserialize_simpleEntryPropertyElementMapValueAndRootRoundTrip() {
+        final G136SimpleEntryBean bean = new G136SimpleEntryBean();
+        bean.setEntry(new java.util.AbstractMap.SimpleEntry<>("a", 1));
+        bean.setEntries(new ArrayList<>(List.of(new java.util.AbstractMap.SimpleEntry<>("b", 2))));
+        bean.setEntryMap(new LinkedHashMap<>(Map.of("k", new java.util.AbstractMap.SimpleEntry<>("c", 3))));
+        bean.setRawEntries(new java.util.AbstractMap.SimpleEntry[] { new java.util.AbstractMap.SimpleEntry<>("d", 4) });
+        bean.setImmutableEntry(new java.util.AbstractMap.SimpleImmutableEntry<>("e", 5));
+
+        final String json = parser.serialize(bean);
+
+        for (final G136SimpleEntryBean back : List.of(parser.deserialize(json, G136SimpleEntryBean.class),
+                parser.deserialize(new StringReader(json), G136SimpleEntryBean.class))) {
+            assertEquals(bean.getEntry(), back.getEntry());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, back.getEntry().getClass());
+            assertEquals(bean.getEntries(), back.getEntries());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, ((Object) back.getEntries().get(0)).getClass());
+            assertEquals(bean.getEntryMap(), back.getEntryMap());
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, ((Object) back.getEntryMap().get("k")).getClass());
+            assertArrayEquals(bean.getRawEntries(), back.getRawEntries());
+            assertEquals(bean.getImmutableEntry(), back.getImmutableEntry());
+        }
+
+        final java.util.AbstractMap.SimpleEntry<?, ?> root = parser.deserialize("{\"a\": 1}", java.util.AbstractMap.SimpleEntry.class);
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("a", 1), root);
+        assertEquals(java.util.AbstractMap.SimpleEntry.class, root.getClass());
+        assertEquals(java.util.AbstractMap.SimpleEntry.class,
+                parser.deserialize(new StringReader("{\"a\": 1}"), java.util.AbstractMap.SimpleEntry.class).getClass());
+
+        // A Map.Entry slot receives an equal (mutable) entry, as before.
+        final Map.Entry<String, Integer> entry = parser.deserialize("{\"a\": 1}", Type.of("Map.Entry<String, Integer>"));
+        assertEquals(Map.entry("a", 1), entry);
+        entry.setValue(2);
+        assertEquals(Integer.valueOf(2), entry.getValue());
+    }
+
+    // ---- deep review 2026-10-27 G136 end ----
+
+    // ---- deep review 2026-10-27 verify G142 begin ----
+
+    // G009-04 slots G136 did not pin: MapEntity, EntityId, ImmutableMap and Map<Integer, String> slots, an EMPTY array, Nullable,
+    // Triple and Indexed slots and a map-key slot fail with the exception and message of the same text read at the top level.
+    @Test
+    public void testDeserialize_jsonArrayInNestedMapEntityEntityIdWrapperTupleAndKeySlotsFailsLikeRootG142() {
+        final Throwable mapEntityRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", MapEntity.class));
+        assertSameFailureG136(mapEntityRoot, () -> parser.deserialize("[[1]]", Type.of("List<MapEntity>")));
+        assertSameFailureG136(mapEntityRoot, () -> parser.deserialize(new StringReader("{\"k\": [1]}"), Type.of("Map<String, MapEntity>")));
+
+        final Throwable entityIdRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", Type.of("EntityId")));
+        assertSameFailureG136(entityIdRoot, () -> parser.deserialize("[[1]]", Type.of("List<EntityId>")));
+        assertSameFailureG136(entityIdRoot, () -> parser.deserialize("{\"k\": [1]}", Type.of("Map<String, EntityId>")));
+
+        final Throwable immutableMapRoot = Assertions.assertThrows(ParsingException.class,
+                () -> parser.deserialize("[1]", Type.of("ImmutableMap<String, Integer>")));
+        assertSameFailureG136(immutableMapRoot, () -> parser.deserialize("[[1]]", Type.of("List<ImmutableMap<String, Integer>>")));
+
+        // A non-String key type reports the key conversion, as the top-level read does.
+        final Throwable intKeyRoot = Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[1]", Type.of("Map<Integer, String>")));
+        assertEquals("[1] is not a valid Integer.", intKeyRoot.getMessage());
+        assertSameFailureG136(intKeyRoot, () -> parser.deserialize("[[1]]", Type.of("List<Map<Integer, String>>")));
+        assertSameFailureG136(intKeyRoot, () -> parser.deserialize(new StringReader("{\"k\": [1]}"), Type.of("Map<String, Map<Integer, String>>")));
+
+        final String mapType = "Map<String, Integer>";
+        final Throwable emptyRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[]", Type.of(mapType)));
+        assertSameFailureG136(emptyRoot, () -> parser.deserialize("[[]]", Type.of("List<" + mapType + ">")));
+        assertSameFailureG136(emptyRoot,
+                () -> parser.deserialize("{\"k\": []}", JsonDeserConfig.create().setIgnoreNullOrEmpty(true), Type.of("Map<String, " + mapType + ">")));
+
+        final Throwable mapRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", Type.of(mapType)));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[1]]", Type.of("List<Nullable<" + mapType + ">>")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[[1], \"s\", 1]", Type.of("Triple<" + mapType + ", String, Integer>")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("[3, [1]]", Type.of("Indexed<" + mapType + ">")));
+        assertSameFailureG136(mapRoot, () -> parser.deserialize("{[1]: \"a\"}", Type.of("Map<" + mapType + ", String>")));
+
+        // The same slots read their well-formed values as before.
+        final List<MapEntity> entities = parser.deserialize("[{\"Acct\": {\"id\": 7}}]", Type.of("List<MapEntity>"));
+        assertEquals("Acct", entities.get(0).entityName());
+        assertEquals(Integer.valueOf(7), entities.get(0).get("id"));
+        final com.landawn.abacus.util.Triple<Map<String, Integer>, String, Integer> triple = parser.deserialize("[{\"a\": 1}, \"s\", 1]",
+                Type.of("Triple<" + mapType + ", String, Integer>"));
+        assertEquals(Map.of("a", 1), triple.left());
+        final com.landawn.abacus.util.Indexed<Map<String, Integer>> indexed = parser.deserialize("[3, {\"a\": 1}]", Type.of("Indexed<" + mapType + ">"));
+        assertEquals(3, indexed.index());
+        assertEquals(Map.of("a", 1), indexed.value());
+        final List<com.landawn.abacus.util.u.Nullable<Map<String, Integer>>> nullables = parser.deserialize("[{\"a\": 1}]",
+                Type.of("List<Nullable<" + mapType + ">>"));
+        assertEquals(Map.of("a", 1), nullables.get(0).get());
+        assertEquals(Map.of(Map.of("k", 1), "a"), parser.deserialize("{{\"k\": 1}: \"a\"}", Type.of("Map<" + mapType + ", String>")));
+    }
+
+    // G009-04 for slot types that come from the configuration (elementType, mapValueType, a per-key value type, a Dataset
+    // cell's value type) and for a slot nested in a stream() element: a JSON array there fails like the top-level read.
+    // The same configurations keep reading JSON objects into those slots, and untyped cells keep their lists.
+    @Test
+    public void testDeserialize_jsonArrayInConfigTypedOrStreamedMapSlotFailsLikeRootG142() {
+        final Throwable rawMapRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", Map.class));
+        assertSameFailureG136(rawMapRoot, () -> parser.deserialize("[{\"a\": 1}, [1]]", JsonDeserConfig.create().setElementType(Map.class), List.class));
+        assertSameFailureG136(rawMapRoot, () -> parser.deserialize("{\"a\": [1]}", JsonDeserConfig.create().setMapValueType(Map.class), Map.class));
+        assertSameFailureG136(rawMapRoot,
+                () -> parser.deserialize(new StringReader("{\"a\": [1]}"), JsonDeserConfig.create().setValueType("a", Map.class), Map.class));
+        assertSameFailureG136(rawMapRoot, () -> parser.deserialize("[{\"c\": [1]}]", JsonDeserConfig.create().setValueType("c", Map.class), Dataset.class));
+
+        final Throwable mapRoot = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]", Type.of("Map<String, Integer>")));
+        assertSameFailureG136(mapRoot,
+                () -> parser.stream("[{\"k\": {\"a\": 1}}, {\"k\": [1]}]", JsonDeserConfig.create(), Type.of("Map<String, Map<String, Integer>>")).toList());
+        assertSameFailureG136(mapRoot,
+                () -> parser.stream(new StringReader("[[{\"a\": 1}], [[1]]]"), true, JsonDeserConfig.create(), Type.of("List<Map<String, Integer>>")).toList());
+
+        assertEquals(List.of(Map.of("a", 1), Map.of("b", List.of(1))),
+                parser.deserialize("[{\"a\": 1}, {\"b\": [1]}]", JsonDeserConfig.create().setElementType(Map.class), List.class));
+        assertEquals(Map.of("a", Map.of("x", 1), "b", List.of(2)),
+                parser.deserialize("{\"a\": {\"x\": 1}, \"b\": [2]}", JsonDeserConfig.create().setValueType("a", Map.class), Map.class));
+        final Dataset typedCells = parser.deserialize("[{\"c\": {\"x\": 1}}]", JsonDeserConfig.create().setValueType("c", Map.class), Dataset.class);
+        assertEquals(Map.of("x", 1), typedCells.getColumn("c").get(0));
+        final Dataset untypedCells = parser.deserialize("[{\"c\": [1]}]", Dataset.class);
+        assertEquals(List.of(1), untypedCells.getColumn("c").get(0));
+        assertEquals(List.of(List.of(Map.of("a", 1)), List.of()),
+                parser.stream("[[{\"a\": 1}], []]", JsonDeserConfig.create(), Type.of("List<Map<String, Integer>>")).toList());
+    }
+
+    // Neighbours of G009-04 that must stay unchanged: untyped (Object, raw, Map<String, Object>, Object[]) slots keep JSON arrays
+    // as lists, a Dataset slot reads its row form, a multimap of maps, a Holder of a map and a Sheet of maps read as before, and a
+    // serializable Map.Entry or ListMultimap slot fed an array still fails through its own valueOf.
+    @Test
+    public void testDeserialize_untypedAndArrayFormNestedSlotsUnchangedG142() {
+        assertEquals(List.of(List.of(1, List.of(2)), Map.of("a", List.of(3))), parser.deserialize("[[1, [2]], {\"a\": [3]}]", Type.of("List<Object>")));
+        assertEquals(List.of(List.of(1), Map.of("a", 1)), parser.deserialize(new StringReader("[[1], {\"a\": 1}]"), List.class));
+        assertEquals(Map.of("a", List.of(List.of(1)), "b", List.of()), parser.deserialize("{\"a\": [[1]], \"b\": []}", Type.of("Map<String, Object>")));
+        assertArrayEquals(new Object[] { List.of(1), Map.of("a", List.of(2)) }, parser.deserialize("[[1], {\"a\": [2]}]", Object[].class));
+        assertEquals(List.of(List.of(1)), parser.deserialize("[[1]]", Object.class));
+
+        final List<Dataset> datasets = parser.deserialize("[[{\"c\": [1]}]]", Type.of("List<Dataset>"));
+        assertEquals(List.of(1), datasets.get(0).getColumn("c").get(0));
+        final com.landawn.abacus.util.ListMultimap<String, Map<String, Integer>> multimap = parser.deserialize("{\"k\": [{\"a\": 1}, {\"b\": 2}]}",
+                Type.of("ListMultimap<String, Map<String, Integer>>"));
+        assertEquals(List.of(Map.of("a", 1), Map.of("b", 2)), multimap.get("k"));
+        final List<com.landawn.abacus.util.Holder<Map<String, Integer>>> holders = parser.deserialize("[{\"a\": 1}]",
+                Type.of("List<Holder<Map<String, Integer>>>"));
+        assertEquals(Map.of("a", 1), holders.get(0).value());
+        final Sheet<String, String, Map<String, Integer>> sheet = parser.deserialize(
+                "{\"rowKeySet\": [\"r1\"], \"columnKeySet\": [\"c1\"], \"columns\": {\"c1\": [{\"a\": 1}]}}",
+                Type.of("Sheet<String, String, Map<String, Integer>>"));
+        assertEquals(Map.of("a", 1), sheet.get("r1", "c1"));
+
+        assertEquals("Unknown error on event : EOF with ",
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[[1]]", Type.of("List<Map.Entry<String, Integer>>"))).getMessage());
+        assertEquals("Unknown error on event : EOF with ",
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[[1]]", Type.of("List<ListMultimap<String, Integer>>")))
+                        .getMessage());
+    }
+
+    // G009-05 for the slots G136 did not pin: SimpleImmutableEntry (map value, Pair slot), Optional and Pair slots of a Map.Entry,
+    // an AbstractMap.SimpleEntry list, a stream() element and three entries all fail with the top-level message; one entry and an
+    // empty object keep their results (the immutable types read an ImmutableEntry, the others an AbstractMap.SimpleEntry).
+    @Test
+    public void testDeserialize_multiEntryObjectInImmutableSimpleOptionalPairAndStreamedEntrySlotsFailsLikeRootG142() {
+        final String twoEntries = "{\"a\": 1, \"b\": 2}";
+        final Type<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>> immutableType = Type
+                .of(new TypeReference<java.util.AbstractMap.SimpleImmutableEntry<String, Integer>>() {
+                });
+        final Throwable immutableRoot = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(twoEntries, immutableType));
+        assertEquals("Map.ImmutableEntry JSON must contain exactly one entry, but got: 2", immutableRoot.getMessage());
+        assertSameFailureG136(immutableRoot, () -> parser.deserialize("{\"k\": " + twoEntries + "}", Type.of("Map<String, " + immutableType.name() + ">")));
+        assertSameFailureG136(immutableRoot,
+                () -> parser.deserialize(new StringReader("[" + twoEntries + ", 1]"), Type.of("Pair<" + immutableType.name() + ", Integer>")));
+
+        final String entryType = "Map.Entry<String, Integer>";
+        final Throwable entryRoot = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(twoEntries, Type.of(entryType)));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("[" + twoEntries + "]", Type.of("List<Optional<" + entryType + ">>")));
+        assertSameFailureG136(entryRoot, () -> parser.deserialize("[" + twoEntries + ", 1]", Type.of("Pair<" + entryType + ", Integer>")));
+        assertSameFailureG136(entryRoot,
+                () -> parser.deserialize("[" + twoEntries + "]", Type.of(new TypeReference<List<java.util.AbstractMap.SimpleEntry<String, Integer>>>() {
+                })));
+        assertSameFailureG136(entryRoot, () -> parser.stream("[[" + twoEntries + "]]", JsonDeserConfig.create(), Type.of("List<" + entryType + ">")).toList());
+
+        final String threeEntries = "{\"a\": 1, \"b\": 2, \"c\": 3}";
+        final Throwable threeRoot = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(threeEntries, Type.of(entryType)));
+        assertEquals("Map.Entry JSON must contain exactly one entry, but got: 3", threeRoot.getMessage());
+        assertSameFailureG136(threeRoot, () -> parser.deserialize("[" + threeEntries + "]", Type.of("List<" + entryType + ">")));
+
+        final Map<String, java.util.AbstractMap.SimpleImmutableEntry<String, Integer>> immutables = parser.deserialize("{\"k\": {\"a\": 1}, \"e\": {}}",
+                Type.of("Map<String, " + immutableType.name() + ">"));
+        assertEquals(com.landawn.abacus.util.ImmutableEntry.class, immutables.get("k").getClass());
+        assertEquals(new java.util.AbstractMap.SimpleImmutableEntry<>("a", 1), immutables.get("k"));
+        assertNull(immutables.get("e"));
+        final com.landawn.abacus.util.Pair<Map.Entry<String, Integer>, Integer> pair = parser.deserialize("[{\"a\": 1}, 1]",
+                Type.of("Pair<" + entryType + ", Integer>"));
+        assertEquals(java.util.AbstractMap.SimpleEntry.class, pair.left().getClass());
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("a", 1), pair.left());
+        final com.landawn.abacus.util.Pair<Map.Entry<String, Integer>, Integer> emptyPair = parser.deserialize("[{}, 1]",
+                Type.of("Pair<" + entryType + ", Integer>"));
+        assertNull(emptyPair.left());
+        final List<com.landawn.abacus.util.u.Optional<Map.Entry<String, Integer>>> optionals = parser.deserialize("[{\"a\": 1}, {}]",
+                Type.of("List<Optional<" + entryType + ">>"));
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("a", 1), optionals.get(0).get());
+        assertFalse(optionals.get(1).isPresent());
+
+        // Documented residual: the caller's ignoreNullOrEmpty filters a nested entry object before the single-entry check.
+        assertEquals(List.of(new java.util.AbstractMap.SimpleEntry<>("b", 2)),
+                parser.deserialize("[{\"a\": null, \"b\": 2}]", JsonDeserConfig.create().setIgnoreNullOrEmpty(true), Type.of("List<" + entryType + ">")));
+    }
+
+    // G009-06: a Map.Entry read from JSON is an AbstractMap.SimpleEntry at the root, in a list, a map value, an Optional and a
+    // stream() element's list; equals, hashCode, toString, setValue, a null value and the JSON written back are those of the former
+    // HashMap node, and the entry is now java.io.Serializable (the node was not).
+    @Test
+    public void testDeserialize_mapEntryValueIsSerializableSimpleEntryWithUnchangedSemanticsG142() throws Exception {
+        final String entryType = "Map.Entry<String, Integer>";
+        final List<Map.Entry<String, Integer>> entries = parser.deserialize("[{\"a\": 1}, {\"b\": null}]", Type.of("List<" + entryType + ">"));
+        final List<Object> read = new ArrayList<>(entries);
+        read.add(parser.deserialize("{\"a\": 1}", Type.of(entryType)));
+        read.add(parser.deserialize(new StringReader("{\"a\": 1}"), Type.of(entryType)));
+        read.add(((Map<?, ?>) parser.deserialize("{\"k\": {\"a\": 1}}", Type.of("Map<String, " + entryType + ">"))).get("k"));
+        read.add(((com.landawn.abacus.util.u.Optional<?>) parser.deserialize("{\"a\": 1}", Type.of("Optional<" + entryType + ">"))).get());
+        read.addAll(parser.<List<Object>> stream("[[{\"a\": 1}]]", JsonDeserConfig.create(), Type.of("List<" + entryType + ">")).toList().get(0));
+
+        for (final Object value : read) {
+            assertEquals(java.util.AbstractMap.SimpleEntry.class, value.getClass());
+        }
+
+        final Map.Entry<String, Integer> entry = entries.get(0);
+        assertEquals(Map.entry("a", 1), entry);
+        assertEquals(entry, Map.entry("a", 1));
+        assertEquals(new java.util.AbstractMap.SimpleImmutableEntry<>("a", 1), entry);
+        assertEquals(Map.entry("a", 1).hashCode(), entry.hashCode());
+        assertEquals("a=1", entry.toString());
+        assertEquals(new java.util.AbstractMap.SimpleEntry<>("b", null), entries.get(1));
+        assertEquals("b=null", entries.get(1).toString());
+        assertEquals(Integer.valueOf(1), entry.setValue(5));
+        assertEquals(Integer.valueOf(5), entry.getValue());
+        assertEquals("[{\"a\":5}, {\"b\":null}]", parser.serialize(entries));
+        assertEquals("{\"a\": 5}", parser.serialize(entry));
+
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (java.io.ObjectOutputStream os = new java.io.ObjectOutputStream(bytes)) {
+            os.writeObject(entry);
+        }
+        try (java.io.ObjectInputStream is = new java.io.ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+            assertEquals(entry, is.readObject());
+        }
+    }
+
+    // ---- deep review 2026-10-27 verify G142 end ----
 }

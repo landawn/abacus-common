@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Struct;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.N;
 
@@ -37,7 +38,8 @@ import com.landawn.abacus.util.N;
  * transfer the supplied or retrieved instances unchanged.</p>
  *
  * <p>{@link #stringOf(Struct)} reads the attributes with {@link Struct#getAttributes()} and formats them
- * with {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}.
+ * with {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}; an attribute that is itself
+ * a JDBC value such as a nested {@code Struct} is rejected with {@link ParsingException} (see {@link #stringOf(Struct)}).
  * {@link #isSerializable()} returns {@code false}; the formatted attributes do not recreate the SQL structured value.
  * {@link #valueOf(String)} always throws {@link UnsupportedOperationException}, including for {@code null} arguments.
  * {@link #valueOf(Object)} preserves existing {@code Struct} values, maps {@code null} to {@code null},
@@ -100,21 +102,30 @@ public class StructType extends AbstractType<Struct> {
 
     /**
      * Reads the attributes with {@link Struct#getAttributes()} and formats them with {@link N#stringOf(Object)}.
-     * The attribute array is formatted in its existing order, using the corresponding type handlers for
-     * its elements. The SQL type name is not included, and {@link #valueOf(String)} cannot reconstruct the Struct.
+     * The attribute array is formatted in its existing order by the JSON serializer: an attribute with a serializable
+     * type handler (a string, number, date, {@code Clob} and the like) is written by that handler, and a Java array,
+     * collection, map or bean attribute is written element by element in the same way. Nested JDBC values are not
+     * formatted: an attribute, or a value inside one, that is a {@code Struct}, {@link java.sql.Array}, {@link java.sql.Ref},
+     * {@link java.sql.SQLXML} or {@link java.sql.RowId} makes this method throw {@link ParsingException}, although the
+     * handler of such a value formats it when it is passed directly; a {@link java.sql.Blob} or any other value the JSON
+     * serializer does not support is rejected the same way. The SQL type name is not included, and
+     * {@link #valueOf(String)} cannot reconstruct the Struct.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Struct> type = TypeFactory.getType(Struct.class);
      * String attributes = type.stringOf(address);   // For attributes {"Main St", 123}: "[\"Main St\", 123]"
+     * type.stringOf(person);   // attributes {"Alice", address}: throws ParsingException (nested Struct)
      * }</pre>
      *
      * @param x the Struct whose attributes are to be read; may be {@code null}
      * @return the formatted attributes, or {@code null} if {@code x} or the attribute array is null
      * @throws UncheckedSQLException if reading the attributes fails; the original SQLException is retained as the cause
+     * @throws ParsingException if a nested value cannot be formatted: an attribute, or a value inside one, that is a
+     *         Struct, Array, Ref, SQLXML, RowId or Blob, or any other value the JSON serializer does not support
      */
     @Override
-    public String stringOf(final Struct x) throws UncheckedSQLException {
+    public String stringOf(final Struct x) throws UncheckedSQLException, ParsingException {
         if (x == null) {
             return null;
         }

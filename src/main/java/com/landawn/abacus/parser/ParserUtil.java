@@ -230,6 +230,11 @@ public final class ParserUtil {
      *         name is not a valid regular expression
      */
     static boolean isJsonXmlSerializable(final String propName, final Field field, final JsonXmlConfig jsonXmlConfig) throws PatternSyntaxException {
+        return isJsonXmlSerializable(propName, field, jsonXmlConfig, null);
+    }
+
+    private static boolean isJsonXmlSerializable(final String propName, final Field field, final JsonXmlConfig jsonXmlConfig,
+            final Map<String, Pattern> ignoredFieldPatterns) throws PatternSyntaxException {
         if (field != null) {
             if (Modifier.isStatic(field.getModifiers())
                     || (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).ignore())) {
@@ -261,7 +266,7 @@ public final class ParserUtil {
             final String fieldName = field == null || field.getName().equals(propName) ? null : field.getName();
 
             for (final String ignoreFieldName : jsonXmlConfig.ignoredFields()) {
-                if (isIgnoredName(propName, ignoreFieldName) || isIgnoredName(fieldName, ignoreFieldName)) {
+                if (isIgnoredName(propName, ignoreFieldName, ignoredFieldPatterns) || isIgnoredName(fieldName, ignoreFieldName, ignoredFieldPatterns)) {
                     return false;
                 }
             }
@@ -270,8 +275,10 @@ public final class ParserUtil {
         return true;
     }
 
-    private static boolean isIgnoredName(final String name, final String ignoreFieldName) {
-        return name != null && (name.equals(ignoreFieldName) || name.matches(ignoreFieldName));
+    private static boolean isIgnoredName(final String name, final String ignoreFieldName, final Map<String, Pattern> ignoredFieldPatterns) {
+        // Compile only after literal equality fails: an exact name can legally contain regex metacharacters.
+        return name != null && (name.equals(ignoreFieldName) || (ignoredFieldPatterns == null ? name.matches(ignoreFieldName)
+                : ignoredFieldPatterns.computeIfAbsent(ignoreFieldName, Pattern::compile).matcher(name).matches()));
     }
 
     /**
@@ -1204,7 +1211,10 @@ public final class ParserUtil {
         /** Immutable list of sub-entity property information */
         public final ImmutableList<PropInfo> subEntityPropInfoList;
 
-        /** All annotations present on this class and its superclasses */
+        /**
+         * All annotations present on this class, its superclasses and the interfaces they implement; see
+         * {@link #getAnnotation(Class)} for which declaration wins when several of them declare the same annotation.
+         */
         public final ImmutableMap<Class<? extends Annotation>, Annotation> annotations;
 
         /** Naming policy applied to property names during JSON/XML processing; {@code CAMEL_CASE} when unconfigured. */
@@ -1358,7 +1368,12 @@ public final class ParserUtil {
             if (Beans.isRecordClass(beanClass)) {
                 //noinspection DataFlowIssue
                 localIsImmutable = true;
-            } else if (Beans.isRegisteredXmlBindingClass(beanClass)) {
+            } else if (Beans.isRegisteredXmlBindingClass(beanClass) && (Modifier.isAbstract(beanClass.getModifiers()) ? Beans.getBuilderInfo(beanClass) == null
+                    : ClassUtil.getDeclaredConstructor(beanClass) != null)) {
+                // "Mutable" means created through the no-arg constructor. An abstract class with a builder, and a
+                // concrete class without a no-arg constructor (e.g. an immutable subclass of a registered base), can
+                // never be created that way, so they go through the probe below instead, which makes them immutable
+                // and created through their builder or all-arguments constructor, as without the registration.
                 localIsImmutable = false;
             } else {
                 try {
@@ -1394,6 +1409,8 @@ public final class ParserUtil {
             isByBuilder = localIsImmutable && builderInfo != null;
 
             final JsonXmlConfig jsonXmlConfig = (JsonXmlConfig) annotations.get(JsonXmlConfig.class);
+            // Shared only while building this metadata; avoid recompiling each ignored expression per property.
+            final Map<String, Pattern> ignoredFieldPatterns = jsonXmlConfig == null ? null : new HashMap<>();
             jsonXmlNamingPolicy = jsonXmlConfig == null || jsonXmlConfig.namingPolicy() == null ? NamingPolicy.CAMEL_CASE : jsonXmlConfig.namingPolicy();
             jsonXmlSeriExclusion = jsonXmlConfig == null || jsonXmlConfig.exclusion() == null ? Exclusion.NULL : jsonXmlConfig.exclusion();
 
@@ -1460,7 +1477,7 @@ public final class ParserUtil {
                 final boolean implicitReadOnlyDirection = propInfo.isReadOnlyProperty && (field == null || !field.isAnnotationPresent(JsonXmlField.class)
                         || field.getAnnotation(JsonXmlField.class).direction() == JsonXmlField.Direction.BOTH);
 
-                if (!isJsonXmlSerializable(propInfo.name, propInfo.field, jsonXmlConfig)) {
+                if (!isJsonXmlSerializable(propInfo.name, propInfo.field, jsonXmlConfig, ignoredFieldPatterns)) {
                     if (propInfo.jsonXmlExpose != JsonXmlField.Direction.BOTH && !implicitReadOnlyDirection) {
                         throw new IllegalArgumentException(
                                 "JsonXmlField.Expose cannot be: " + propInfo.jsonXmlExpose + " for non-serializable field: " + propInfo.field);
@@ -2259,7 +2276,7 @@ public final class ParserUtil {
                     headProp = entry.getValue().orElseThrow();
                 }
 
-                final int rank = aliasRank(clazz, input, inputWithoutUnderscores, entry.getKey());
+                final int rank = aliasRank(simpleClassName, input, inputWithoutUnderscores, entry.getKey());
 
                 if (rank != 0 && rank < bestRank) {
                     best = entry.getValue();
@@ -2285,35 +2302,35 @@ public final class ParserUtil {
          * {@code SimpleClassName.prop}, {@code 4} equal once a get/set/is/has prefix is removed; {@code 0} no match.
          * A copy of {@code Beans.aliasRank} - keep the two in sync.
          *
-         * @param targetClass the class containing the property
+         * @param simpleClassName the simple name of the class containing the property
          * @param input the trimmed caller-supplied spelling
          * @param inputWithoutUnderscores {@code input} with every underscore removed, or {@code null} when it has
          *        none; computed once per lookup by {@link #resolveAlias(String)}, not once per candidate
          * @param propNameByMethod the bound property name
          * @return the rank, {@code 0} for no match
          */
-        private static int aliasRank(final Class<?> targetClass, final String input, final String inputWithoutUnderscores, final String propNameByMethod) {
+        private static int aliasRank(final String simpleClassName, final String input, final String inputWithoutUnderscores, final String propNameByMethod) {
             if (input.equalsIgnoreCase(propNameByMethod)) {
                 return 1;
             }
 
-            // the underscore-stripped spelling is computed once per lookup by resolveAlias,
-            // and the class-qualified form is only built when the lengths can match - exactly as Beans.aliasRank.
+            // The underscore-stripped spelling is computed once per lookup by resolveAlias. Qualified and
+            // accessor-prefixed forms are compared in place, without a temporary String per candidate.
             if (inputWithoutUnderscores != null && inputWithoutUnderscores.equalsIgnoreCase(propNameByMethod)) {
                 return 2;
             }
 
-            final String simpleClassName = ClassUtil.getSimpleClassName(targetClass);
-
-            if (input.length() == (simpleClassName.length() + 1 + propNameByMethod.length())
-                    && input.equalsIgnoreCase(simpleClassName + SK._PERIOD + propNameByMethod)) {
+            if (input.length() == (simpleClassName.length() + 1 + propNameByMethod.length()) && input.charAt(simpleClassName.length()) == SK._PERIOD
+                    && input.regionMatches(true, 0, simpleClassName, 0, simpleClassName.length())
+                    && input.regionMatches(true, simpleClassName.length() + 1, propNameByMethod, 0, propNameByMethod.length())) {
                 return 3;
             }
 
-            if ((input.startsWith(GET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (input.startsWith(SET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (input.startsWith(IS) && input.length() > 2 && input.substring(2).equalsIgnoreCase(propNameByMethod))
-                    || (input.startsWith(HAS) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))) {
+            if ((input.length() == propNameByMethod.length() + 3 && input.length() > 3
+                    && (input.startsWith(GET) || input.startsWith(SET) || input.startsWith(HAS))
+                    && input.regionMatches(true, 3, propNameByMethod, 0, propNameByMethod.length()))
+                    || (input.length() == propNameByMethod.length() + 2 && input.length() > 2 && input.startsWith(IS)
+                            && input.regionMatches(true, 2, propNameByMethod, 0, propNameByMethod.length()))) {
                 return 4;
             }
 
@@ -2400,10 +2417,16 @@ public final class ParserUtil {
          * found by an allocation-free binary search. A key that matches neither shortcut (an alias, a column name,
          * another naming-policy spelling or an unknown key) is then looked up by its text.</p>
          *
-         * <p>The answer is the same one {@link #getPropInfo(String)} gives for the exact text: when two
+         * <p>For a bound spelling (a property name, alias, column name or naming-policy spelling) the answer is the
+         * same one {@link #getPropInfo(String)} gives for the exact text: when two
          * properties share a naming-policy spelling or column name (for example {@code userName} and
          * {@code user_name} both spell {@code USER_NAME}), the explicit binding - {@code @Column}, alias, then
          * declaration order - wins, whichever property the length shortcut proposed.</p>
+         *
+         * <p>Unlike {@link #getPropInfo(String)}, this method does not resolve tolerant spellings such as
+         * {@code firstname} or {@code getFirstName} for {@code firstName}: it returns {@code null} for them unless
+         * {@code getPropInfo} has already resolved (and memoized) that spelling. A caller that needs tolerant matching
+         * falls back to {@code getPropInfo} on {@code null}, as the JSON parser does.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2526,7 +2549,7 @@ public final class ParserUtil {
         /**
          * Checks if this class has the specified annotation.
          *
-         * <p>This method checks for annotations on the class and all its superclasses.</p>
+         * <p>This method checks for annotations on the class, all its superclasses and the interfaces they implement.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2545,7 +2568,13 @@ public final class ParserUtil {
         /**
          * Gets the specified annotation from this class.
          *
-         * <p>This method returns annotations from the class or any of its superclasses.</p>
+         * <p>This method returns annotations from the class, any of its superclasses or any interface they implement.
+         * When several of them declare the annotation, the class's own declaration wins, then one on an interface the
+         * class implements (directly or through another interface), then one on its superclass, then on the
+         * superclass's interfaces, and so on up the hierarchy. An annotation type meta-annotated with
+         * {@link java.lang.annotation.Inherited @Inherited} is the exception: {@link Class#getAnnotations()} of the class
+         * already reports the declaration of its nearest annotated superclass, so a declaration on the class or on any
+         * superclass wins over one on an interface.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2567,7 +2596,10 @@ public final class ParserUtil {
          * Collects all annotations from the class hierarchy.
          *
          * <p>This method traverses the class hierarchy from superclasses to the target class,
-         * collecting all annotations. Annotations on subclasses override those on superclasses.</p>
+         * collecting all annotations. Annotations on subclasses override those on superclasses, and the interfaces
+         * a class implements override its superclass - except for {@code @Inherited} annotation types, whose
+         * superclass declaration {@link Class#getAnnotations()} reports on the subclass itself (see
+         * {@link #getAnnotation(Class)}).</p>
          *
          * @param targetClass the class to collect annotations from
          * @return a map of annotation types to annotation instances
@@ -3448,7 +3480,7 @@ public final class ParserUtil {
 
             propValue = propValue == null ? type.defaultValue() : propValue;
 
-            if (failureCountForSetProp > 100 && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
+            if (failureCountForSetProp > 100 && propValue != null && !clazz.isInstance(propValue) && !acceptsPrimitiveArgument(clazz, propValue.getClass())) {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 try {
@@ -3469,9 +3501,9 @@ public final class ParserUtil {
                         field.set(obj, propValue);
                     }
 
-                    if (failureCountForSetProp > 0) {
-                        failureCountForSetProp--;
-                    }
+                    // A converted success is not evidence that the original value is assignable. Decrementing here
+                    // made repeated conversions alternate between counts 100/101 and throw on every other write.
+                    // Only a successful unconverted assignment below reduces the counter.
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
@@ -4985,7 +5017,10 @@ public final class ParserUtil {
 
             propValue = propValue == null ? type.defaultValue() : propValue;
 
-            if (failureCountForSetProp > 100 && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
+            // Generated primitive accessors cast to the exact wrapper; unlike reflective Field/Method access,
+            // they do not accept widening from another wrapper. Exact boxed values can still try the raw path.
+            if (failureCountForSetProp > 100 && propValue != null && !clazz.isInstance(propValue)
+                    && (!clazz.isPrimitive() || ClassUtil.wrap(clazz) != propValue.getClass())) {
                 propValue = N.convert(propValue, jsonXmlType);
 
                 if (isFieldSettable && fieldAccessIndex > -1) {
@@ -5002,10 +5037,7 @@ public final class ParserUtil {
                     }
                 }
 
-                if (failureCountForSetProp > 0) {
-                    //noinspection NonAtomicOperationOnVolatileField
-                    failureCountForSetProp--; // NOSONAR
-                }
+                // Keep conversion mode until an unconverted assignment succeeds, as in PropInfo above.
             } else {
                 try {
                     if (isFieldSettable && fieldAccessIndex > -1) {

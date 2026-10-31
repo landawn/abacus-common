@@ -173,7 +173,10 @@ import lombok.Data;
  * {@link org.apache.poi.ss.usermodel.DataFormatter} under {@link java.util.Locale#ROOT}, i.e. exactly as the
  * sheet displays them ({@code 1001}, {@code 2023-11-14}), because a CSV export is expected to reproduce the
  * spreadsheet rather than its internal representation. Use {@link org.apache.poi.ss.usermodel.DateUtil} on the
- * {@link Cell} directly if a reader path needs the date rather than the serial number.
+ * {@link Cell} directly if a reader path needs the date rather than the serial number. The General format - which
+ * this class's writers leave on every number - shows a long value the way Excel does, rounded to the width it can
+ * display or in scientific notation, so the CSV can lose digits: {@code 12345678901234} is exported as
+ * {@code 1.23457E+13} and {@code 3.14159265358979} as {@code 3.141592654}. Use a reader when full precision is needed.
  *
  * <p>I/O errors are rethrown as {@link UncheckedException} or
  * {@link com.landawn.abacus.exception.UncheckedIOException}. A missing sheet name causes
@@ -183,6 +186,19 @@ import lombok.Data;
  * read by the original name would fail), contains any of {@code : \ / ? * [ ]}, or starts or ends with an
  * apostrophe. Methods keep no shared workbook state. Callers must coordinate
  * access to shared destinations, mutable options, callbacks, and POI objects.
+ *
+ * <p><b>Unreadable sources.</b> POI rejects some sources that hold no workbook it can open with an
+ * {@code IllegalArgumentException} subclass, which the readers and {@code exportSheetToCsv} pass through unchanged
+ * (it is not wrapped as {@link UncheckedException}): an empty (zero-byte) source ({@code EmptyFileException}), an
+ * OLE2 document that is not a workbook (such as a Word file), an Excel 5.0/95 workbook ({@code OldExcelFormatException}),
+ * and data that starts like a ZIP entry but holds no readable one, such as an XLSX file cut off within its first
+ * entry header ({@code NotOfficeXmlFileException}). A password-protected workbook fails with POI's
+ * {@code EncryptedDocumentException}, an {@code IllegalStateException}, which is passed through unchanged as well.
+ * Other content that is not a readable workbook - plain text, CSV or HTML, an empty ZIP archive or one that is not an
+ * OOXML package, and often a truncated workbook - fails with an {@code IOException} from POI, which is rethrown as
+ * {@link UncheckedException}. A truncated or damaged workbook can also fail with another unchecked exception raised by
+ * POI itself: a truncated XLS file, for example, with an {@code IndexOutOfBoundsException}, a truncated XLSX file with a
+ * {@code POIXMLException}, or with the {@code IllegalArgumentException} for a missing sheet if the cut removed its sheets.
  *
  * <p><b>Usage Examples:</b>
  * <pre>{@code
@@ -334,7 +350,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the sheet data with the first row as column names, or an empty Dataset if the sheet is empty.
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
      *         or the workbook has no sheet at index 0,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -369,7 +388,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelFile} or {@code rowExtractor} is {@code null},
      *         or the sheet index is out of bounds,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -399,7 +421,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowExtractor} is {@code null},
      *         or the sheet index is out of bounds,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final int sheetIndex,
@@ -426,7 +451,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelPath} or {@code rowExtractor} is {@code null},
      *         or the sheet index is out of bounds,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -463,7 +491,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code rowExtractor} is {@code null},
      *         or the sheet name is not found in the workbook,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -494,7 +525,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelInputStream}, {@code sheetName} or {@code rowExtractor} is {@code null},
      *         or the sheet name is not found in the workbook,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static Dataset readDatasetFromSheet(final InputStream excelInputStream, final String sheetName,
@@ -522,7 +556,10 @@ public final class ExcelUtil {
      * @return a Dataset containing the extracted sheet data with the first row as column names.
      * @throws IllegalArgumentException if {@code excelPath}, {@code sheetName} or {@code rowExtractor} is {@code null},
      *         or the sheet name is not found in the workbook,
-     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
+     *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty),
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -649,7 +686,10 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a list of rows, where each row is a list of cell values with preserved types.
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
-     *         or the workbook has no sheet at index 0.
+     *         or the workbook has no sheet at index 0,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -690,7 +730,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelFile} or {@code rowMapper} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -723,7 +766,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelInputStream} or {@code rowMapper} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow,
@@ -749,7 +795,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelPath} or {@code rowMapper} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -791,7 +840,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code rowMapper} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -825,7 +877,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelInputStream}, {@code sheetName} or {@code rowMapper} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook, or closing the workbook, fails with an {@code IOException}
      */
     public static <T> List<T> readRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow,
@@ -853,7 +908,10 @@ public final class ExcelUtil {
      * @param rowMapper function to convert each Row to an object of type T.
      * @return a list of mapped objects, one per row (excluding skipped rows).
      * @throws IllegalArgumentException if {@code excelPath}, {@code sheetName} or {@code rowMapper} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath}, creating its workbook, or closing the
      *         workbook fails with an {@code IOException}
      */
@@ -908,9 +966,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile} to create the workbook fails with an {@code IOException},
-     *         including unreadable or unsupported workbook content
+     *         including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final File excelFile, final int sheetIndex, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -940,9 +1001,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelInputStream} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook fails with an {@code
-     *         IOException}, including unreadable or unsupported workbook content
+     *         IOException}, including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final int sheetIndex, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -961,9 +1025,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelPath} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath} to create the workbook fails with an
-     *         {@code IOException}, including unreadable or unsupported workbook content
+     *         {@code IOException}, including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final Path excelPath, final int sheetIndex, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -1000,9 +1067,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelFile} or {@code sheetName} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile} to create the workbook fails with an {@code IOException},
-     *         including unreadable or unsupported workbook content
+     *         including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final File excelFile, final String sheetName, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -1029,9 +1099,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelInputStream} or {@code sheetName} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or the content of {@code excelInputStream} is empty (zero bytes), an OLE2 document that is not a workbook
+     *         (such as a Word file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one
+     *         (see the class-level note on unreadable sources).
      * @throws UncheckedException if reading {@code excelInputStream} to create the workbook fails with an {@code
-     *         IOException}, including unreadable or unsupported workbook content
+     *         IOException}, including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final InputStream excelInputStream, final String sheetName, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -1051,9 +1124,12 @@ public final class ExcelUtil {
      * @param skipFirstRow {@code true} to skip the first row (typically headers), {@code false} to process all rows
      * @return a Stream of Row objects from the specified sheet that must be closed after use
      * @throws IllegalArgumentException if {@code excelPath} or {@code sheetName} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or the file at {@code excelPath} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word
+     *         file), an Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the
+     *         class-level note on unreadable sources).
      * @throws UncheckedException if opening or reading the file identified by {@code excelPath} to create the workbook fails with an
-     *         {@code IOException}, including unreadable or unsupported workbook content
+     *         {@code IOException}, including other unreadable or unsupported content
      */
     public static Stream<Row> streamRowsFromSheet(final Path excelPath, final String sheetName, final boolean skipFirstRow)
             throws IllegalArgumentException, UncheckedException {
@@ -1905,7 +1981,9 @@ public final class ExcelUtil {
      * the underlying value of an integer cell is {@code 1001.0} and that of a date cell is a serial number
      * such as {@code 45244.59259259259}. Numeric cells are therefore rendered through POI's
      * {@link org.apache.poi.ss.usermodel.DataFormatter} using the cell's own number format under
-     * {@link java.util.Locale#ROOT}, which yields {@code 1001} and {@code 2023-11-14} respectively. Because a
+     * {@link java.util.Locale#ROOT}, which yields {@code 1001} and {@code 2023-11-14} respectively. Under the
+     * General format a value too long to display is rounded or written in scientific notation, as Excel shows it
+     * ({@code 12345678901234} becomes {@code 1.23457E+13}), so such values lose digits. Because a
      * formatted number can legitimately contain a comma (a thousands-separator format yields {@code 1,001}),
      * numeric fields are written as quoted strings.</p>
      *
@@ -1923,7 +2001,10 @@ public final class ExcelUtil {
      * @param outputCsvFile the CSV file to write to; an existing file is replaced only after the write
      *        succeeds (see the class-level note on file destinations), never truncated up front
      * @throws IllegalArgumentException if {@code excelFile} or {@code outputCsvFile} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedIOException if creating or closing the temporary CSV output, closing its writer, or replacing {@code
      *         outputCsvFile} fails; failures while writing CSV rows are wrapped as {@code UncheckedException}
      * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
@@ -1971,7 +2052,10 @@ public final class ExcelUtil {
      * @param outputCsvFile the CSV file to write to; an existing file is replaced only after the write
      *        succeeds (see the class-level note on file destinations), never truncated up front
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code outputCsvFile} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedIOException if creating or closing the temporary CSV output, closing its writer, or replacing {@code
      *         outputCsvFile} fails; failures while writing CSV rows are wrapped as {@code UncheckedException}
      * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
@@ -2028,7 +2112,10 @@ public final class ExcelUtil {
      *        A {@code null} label is written as the unquoted token {@code null}, an empty label as {@code ""}.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
      * @throws IllegalArgumentException if {@code excelFile} or {@code outputWriter} is {@code null},
-     *         or the sheet index is out of bounds.
+     *         or the sheet index is out of bounds,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
      *         rows fails with an {@code IOException}
      * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter
@@ -2080,7 +2167,10 @@ public final class ExcelUtil {
      *        A {@code null} label is written as the unquoted token {@code null}, an empty label as {@code ""}.
      * @param outputWriter the Writer to write the CSV content to; it is flushed but not closed.
      * @throws IllegalArgumentException if {@code excelFile}, {@code sheetName} or {@code outputWriter} is {@code null},
-     *         or the sheet name is not found in the workbook.
+     *         or the sheet name is not found in the workbook,
+     *         or {@code excelFile} is empty (zero bytes), an OLE2 document that is not a workbook (such as a Word file), an
+     *         Excel 5.0/95 workbook or data that starts like a ZIP entry but holds no readable one (see the class-level note on
+     *         unreadable sources).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating or closing its workbook, or writing CSV headers or
      *         rows fails with an {@code IOException}
      * @throws IllegalStateException if a cell has a type that cannot be represented by this CSV exporter

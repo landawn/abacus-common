@@ -177,4 +177,35 @@ public class RefTypeTest extends TestBase {
         // the String overload is unchanged
         assertThrows(UnsupportedOperationException.class, () -> refType.valueOf("x"));
     }
+
+    // ---- deep review 2026-10-27 G135 begin ----
+    // G135 (G019-02, doc fix): a referenced Struct/Array/Ref/SQLXML/RowId is formatted by its own handler, but the same value
+    // nested inside the referenced object (a Struct attribute, an array/collection element) is rejected by the JSON serializer
+    // with ParsingException "Unsupported class ...". Pinned as documented.
+    @Test
+    public void testStringOf_referencedJdbcValueIsFormattedButNestedOneThrowsParsingException() throws SQLException {
+        for (final java.util.Map.Entry<String, Object> e : StructTypeTest.nestedJdbcValues().entrySet()) {
+            final Object nested = e.getValue();
+
+            final Ref direct = mock(Ref.class);
+            when(direct.getObject()).thenReturn(nested);
+            assertEquals(N.stringOf(nested), refType.stringOf(direct), e.getKey());
+
+            final java.sql.Struct referencedStruct = mock(java.sql.Struct.class);
+            when(referencedStruct.getAttributes()).thenReturn(new Object[] { "Alice", nested });
+
+            for (final Object referent : new Object[] { referencedStruct, new Object[] { nested }, java.util.List.of(nested) }) {
+                final Ref value = mock(Ref.class);
+                when(value.getObject()).thenReturn(referent);
+                final Type<Ref> implementationType = TypeFactory.getType(value.getClass());
+
+                final com.landawn.abacus.exception.ParsingException thrown = assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                        () -> refType.stringOf(value), e.getKey());
+                org.junit.jupiter.api.Assertions.assertTrue(thrown.getMessage().startsWith("Unsupported class: "), thrown.getMessage());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> implementationType.stringOf(value), e.getKey());
+                assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> N.stringOf(value), e.getKey());
+            }
+        }
+    }
+    // ---- deep review 2026-10-27 G135 end ----
 }

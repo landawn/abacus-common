@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.landawn.abacus.annotation.MayReturnNull;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.util.N;
 
@@ -28,7 +29,8 @@ import com.landawn.abacus.util.N;
  * Type handler for {@link java.sql.Array} objects, used primarily for JDBC operations that read
  * SQL ARRAY values from a {@link ResultSet} and bind them to {@link PreparedStatement}/{@link CallableStatement}
  * parameters. {@link #stringOf(Array)} reads the Java array through {@link Array#getArray()} and formats
- * it with {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}.
+ * it with {@link N#stringOf(Object)}, wrapping SQL failures in {@link UncheckedSQLException}; an element that is itself
+ * a JDBC value such as a {@code Struct} is rejected with {@link ParsingException} (see {@link #stringOf(Array)}).
  * {@link #valueOf(String)} remains unsupported and {@link #isSerializable()} returns {@code false}:
  * the formatted contents do not recreate a database-specific SQL Array. {@link #valueOf(Object)} returns an object that already is an
  * {@link Array} unchanged, maps {@code null} to {@code null}, and rejects everything else without touching it.
@@ -107,22 +109,31 @@ public class SQLArrayType extends AbstractType<Array> {
 
     /**
      * Reads the Java array with {@link Array#getArray()} and formats it with {@link N#stringOf(Object)}.
-     * Primitive and object arrays use their corresponding type handlers; nested values are formatted by
-     * those handlers as well. The result contains the array contents, not the SQL type metadata, and cannot
-     * be converted back through {@link #valueOf(String)}. This method does not free the SQL Array.
+     * Primitive and object arrays use their corresponding type handlers: an element with a serializable type handler
+     * (a string, number, date, {@code Clob} and the like) is written by that handler, and a nested Java array, collection,
+     * map or bean element is written element by element in the same way by the JSON serializer. Nested JDBC values are
+     * not formatted: an element, or a value inside one, that is a {@link java.sql.Struct}, {@code Array}, {@link java.sql.Ref},
+     * {@link java.sql.SQLXML} or {@link java.sql.RowId} makes this method throw {@link ParsingException} (also for a typed
+     * payload such as {@code Struct[]}), although the handler of such a value formats it when it is passed directly; a
+     * {@link java.sql.Blob} or any other value the JSON serializer does not support is rejected the same way. The result
+     * contains the array contents, not the SQL type metadata, and cannot be converted back through
+     * {@link #valueOf(String)}. This method does not free the SQL Array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
      * String contents = type.stringOf(sqlArray);   // For an int[] payload {1, 2}: "[1, 2]"
+     * type.stringOf(structArray);   // For a Struct[] payload: throws ParsingException (nested Struct)
      * }</pre>
      *
      * @param x the SQL Array to read; may be {@code null}
      * @return the formatted Java array, or {@code null} if {@code x} or the retrieved array is null
      * @throws UncheckedSQLException if reading the array fails; the original SQLException is retained as the cause
+     * @throws ParsingException if a nested value cannot be formatted: an element, or a value inside one, that is a
+     *         Struct, Array, Ref, SQLXML, RowId or Blob, or any other value the JSON serializer does not support
      */
     @Override
-    public String stringOf(final Array x) throws UncheckedSQLException {
+    public String stringOf(final Array x) throws UncheckedSQLException, ParsingException {
         if (x == null) {
             return null;
         }

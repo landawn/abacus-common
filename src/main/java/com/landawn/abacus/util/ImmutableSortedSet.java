@@ -40,7 +40,7 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <p>This class provides several static factory methods for creating instances:</p>
  * <ul>
  * <li>{@link #empty()} - returns an empty immutable sorted set</li>
- * <li>{@link #of(Object)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
+ * <li>{@link #of(Comparable)} (and arity-overloads up to ten elements) - creates sets with specific elements</li>
  * <li>{@link #copyOf(Collection)} - creates a defensive copy from another collection</li>
  * <li>{@link #wrap(SortedSet)} - wraps an existing sorted set (changes to the underlying set will be reflected)</li>
  * </ul>
@@ -135,7 +135,7 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * @throws NullPointerException if {@code e1} is {@code null}, since {@link java.util.TreeSet} does not allow {@code null} elements when using
      *         natural ordering
      * @throws ClassCastException if {@code e1} cannot be compared with itself in natural order
-     * @see #of(Object, Object)
+     * @see #of(Comparable, Comparable)
      */
     public static <E extends Comparable<? super E>> ImmutableSortedSet<E> of(final E e1) throws NullPointerException, ClassCastException {
         return new ImmutableSortedSet<>(new TreeSet<>(Collections.singletonList(e1)), true);

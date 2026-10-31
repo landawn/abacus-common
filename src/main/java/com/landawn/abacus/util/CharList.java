@@ -2970,8 +2970,8 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             return new CharList(N.copyOfRange(elementData, 0, 0, step));
         }
 
-        // Clamp a descending start against the logical size (like forEach): N.copyOfRange clamps
-        // against the backing array's length, which may exceed size and expose phantom elements.
+        // Clamp a descending start against the logical size (like forEach): fromIndex == size is accepted here, but
+        // N.copyOfRange would read it as a phantom slot of a longer backing array, or reject it when the array is full.
         return new CharList(N.copyOfRange(elementData, fromIndex > toIndex ? N.min(size - 1, fromIndex) : fromIndex, toIndex, step));
     }
 

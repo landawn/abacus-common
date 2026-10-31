@@ -1848,4 +1848,100 @@ public class AvroParserTest extends TestBase {
     }
 
     // ---- deep review 2026-10-16 G159 end ----
+
+    // ---- deep review 2026-10-26 G008 begin ----
+    // G008-01: a Map key that is not a String (Avro Utf8, enum constant, Integer) failed the record write with a ClassCastException
+    // instead of naming its field by its text (as Avro's own map writer does) or being rejected/discarded as an unknown field.
+    @Test
+    public void testSerialize_mapWithNonStringKeysForRecordSchema() {
+        final Map<Object, Object> source = new java.util.LinkedHashMap<>();
+        source.put(new org.apache.avro.util.Utf8("name"), "John");
+        source.put(java.time.temporal.ChronoUnit.DAYS, null);
+        source.put("age", 30);
+        source.put(7, "x");
+
+        final IllegalArgumentException unknown = assertThrows(IllegalArgumentException.class,
+                () -> parser.serialize(source, AvroSerConfig.create().setSchema(testSchema)));
+        assertTrue(unknown.getMessage().contains("'Days'"), unknown.getMessage());
+
+        final String projected = parser.serialize(source, AvroSerConfig.create().setSchema(testSchema).setIgnoreUnknownFields(true));
+        final Map<String, Object> read = parser.deserialize(projected, AvroDeserConfig.create().setSchema(testSchema), Map.class);
+        assertEquals(2, read.size());
+        assertEquals("John", read.get("name").toString());
+        assertEquals(30, read.get("age"));
+
+        // An enum constant naming a field writes that field.
+        final Map<java.time.DayOfWeek, Object> byEnum = new java.util.EnumMap<>(java.time.DayOfWeek.class);
+        byEnum.put(java.time.DayOfWeek.MONDAY, "x");
+        final Schema enumKeyed = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"EnumKeyed\",\"fields\":[{\"name\":\"MONDAY\",\"type\":\"string\"}]}");
+        final Map<String, Object> enumRead = parser.deserialize(parser.serialize(byEnum, AvroSerConfig.create().setSchema(enumKeyed)),
+                AvroDeserConfig.create().setSchema(enumKeyed), Map.class);
+        assertEquals("x", enumRead.get("MONDAY").toString());
+    }
+    // ---- deep review 2026-10-26 G008 end ----
+
+    // ---- deep review 2026-10-26 verify G119 begin ----
+
+    // G008-01: a map datum read back from Avro has Utf8 keys; written again under a record schema, directly or as a nested record
+    // value, those keys name the fields (it failed with a ClassCastException).
+    @Test
+    public void testSerialize_recordFromMapDatumReadBackWithUtf8Keys() {
+        final Schema mapSchema = new Schema.Parser().parse("{\"type\":\"map\",\"values\":\"string\"}");
+        final Map<String, Object> source = new java.util.LinkedHashMap<>();
+        source.put("name", "John");
+        final Map<Object, Object> readBack = parser.deserialize(parser.serialize(source, AvroSerConfig.create().setSchema(mapSchema)),
+                AvroDeserConfig.create().setSchema(mapSchema), Map.class);
+        assertEquals(org.apache.avro.util.Utf8.class, readBack.keySet().iterator().next().getClass());
+        readBack.put("age", 30);
+
+        final Map<String, Object> record = parser.deserialize(parser.serialize(readBack, AvroSerConfig.create().setSchema(testSchema)),
+                AvroDeserConfig.create().setSchema(testSchema), Map.class);
+        assertEquals("John", record.get("name").toString());
+        assertEquals(30, record.get("age"));
+
+        final Schema outer = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Outer\",\"fields\":[{\"name\":\"inner\",\"type\":"
+                + "{\"type\":\"record\",\"name\":\"Inner\",\"fields\":[{\"name\":\"x\",\"type\":\"int\"}]}}]}");
+        final Map<Object, Object> inner = new java.util.LinkedHashMap<>();
+        inner.put(new org.apache.avro.util.Utf8("x"), 3);
+        final Map<String, Object> nested = parser.deserialize(parser.serialize(Map.of("inner", inner), AvroSerConfig.create().setSchema(outer)),
+                AvroDeserConfig.create().setSchema(outer), Map.class);
+        assertEquals(3, ((GenericRecord) nested.get("inner")).get("x"));
+    }
+
+    // G008-01: keys with the same text write the field once with the value of the last key iterated (as documented); a null key
+    // is still rejected as an unknown field by default and discarded under projection.
+    @Test
+    public void testSerialize_mapKeysWithSameTextAndNullKeyForRecordSchema() {
+        final Map<Object, Object> source = new java.util.LinkedHashMap<>();
+        source.put("name", "A");
+        source.put(new org.apache.avro.util.Utf8("name"), "B");
+        source.put("age", 1);
+        Map<String, Object> read = parser.deserialize(parser.serialize(source, AvroSerConfig.create().setSchema(testSchema)),
+                AvroDeserConfig.create().setSchema(testSchema), Map.class);
+        assertEquals("B", read.get("name").toString());
+
+        source.clear();
+        source.put(new org.apache.avro.util.Utf8("name"), "B");
+        source.put("name", "A");
+        source.put("age", 1);
+        read = parser.deserialize(parser.serialize(source, AvroSerConfig.create().setSchema(testSchema)), AvroDeserConfig.create().setSchema(testSchema),
+                Map.class);
+        assertEquals("A", read.get("name").toString());
+
+        final Map<String, Object> withNullKey = new java.util.LinkedHashMap<>();
+        withNullKey.put("name", "n");
+        withNullKey.put("age", 2);
+        withNullKey.put(null, "x");
+        final IllegalArgumentException unknown = assertThrows(IllegalArgumentException.class,
+                () -> parser.serialize(withNullKey, AvroSerConfig.create().setSchema(testSchema)));
+        assertTrue(unknown.getMessage().contains("'null'"), unknown.getMessage());
+
+        read = parser.deserialize(parser.serialize(withNullKey, AvroSerConfig.create().setSchema(testSchema).setIgnoreUnknownFields(true)),
+                AvroDeserConfig.create().setSchema(testSchema), Map.class);
+        assertEquals(2, read.size());
+        assertEquals("n", read.get("name").toString());
+    }
+
+    // ---- deep review 2026-10-26 verify G119 end ----
 }

@@ -2401,4 +2401,161 @@ public class TypeFactoryTest extends TestBase {
         assertEquals(text, narrower.stringOf(new G130ArrayListNestedBox<>(new java.util.ArrayList<>(payload))));
     }
     // ---- bug review 2026-09-27 verify G130 end ----
+
+    // ---- deep review 2026-10-26 G020 begin ----
+    public static class G020BeanLikeClob extends javax.sql.rowset.serial.SerialClob {
+        private static final long serialVersionUID = 1L;
+        private String label;
+
+        public G020BeanLikeClob(final String content) throws java.sql.SQLException {
+            super(content.toCharArray());
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(final String label) {
+            this.label = label;
+        }
+    }
+
+    public static class G020BeanLikeNClob extends javax.sql.rowset.serial.SerialClob implements java.sql.NClob {
+        private static final long serialVersionUID = 1L;
+        private String label;
+
+        public G020BeanLikeNClob(final String content) throws java.sql.SQLException {
+            super(content.toCharArray());
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(final String label) {
+            this.label = label;
+        }
+    }
+
+    public static class G020BeanLikeBlob extends javax.sql.rowset.serial.SerialBlob {
+        private static final long serialVersionUID = 1L;
+        private String label;
+
+        public G020BeanLikeBlob(final byte[] content) throws java.sql.SQLException {
+            super(content);
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(final String label) {
+            this.label = label;
+        }
+    }
+
+    public static class G020ClobHolder {
+        private G020BeanLikeClob doc;
+
+        public G020BeanLikeClob getDoc() {
+            return doc;
+        }
+
+        public void setDoc(final G020BeanLikeClob doc) {
+            this.doc = doc;
+        }
+    }
+
+    // G020-01: a Clob/NClob/Blob implementation with a getter/setter pair was typed as a bean (content serialized as "{}")
+    @Test
+    public void testGetType_beanLikeLobClassesUseLobHandlers() throws Exception {
+        final Type<G020BeanLikeClob> clobType = TypeFactory.getType(G020BeanLikeClob.class);
+        assertTrue(ClobType.class.isInstance(clobType), clobType.getClass().getName());
+        assertFalse(clobType.isBean());
+        assertEquals(G020BeanLikeClob.class, clobType.javaType());
+        assertEquals("abc", clobType.stringOf(new G020BeanLikeClob("abc")));
+
+        final Type<G020BeanLikeNClob> nClobType = TypeFactory.getType(G020BeanLikeNClob.class);
+        assertTrue(NClobType.class.isInstance(nClobType), nClobType.getClass().getName());
+        assertEquals("xyz", nClobType.stringOf(new G020BeanLikeNClob("xyz")));
+
+        final Type<G020BeanLikeBlob> blobType = TypeFactory.getType(G020BeanLikeBlob.class);
+        assertTrue(BlobType.class.isInstance(blobType), blobType.getClass().getName());
+        assertFalse(blobType.isBean());
+        assertEquals(G020BeanLikeBlob.class, blobType.javaType());
+    }
+
+    // G020-01: a bean property holding such a Clob keeps its content in JSON
+    @Test
+    public void testGetType_beanLikeClobPropertyKeepsContentInJson() throws Exception {
+        final G020ClobHolder holder = new G020ClobHolder();
+        holder.setDoc(new G020BeanLikeClob("hello"));
+
+        final String json = N.toJson(holder);
+        assertTrue(json.contains("hello"), json);
+    }
+    // ---- deep review 2026-10-26 G020 end ----
+
+    // ---- deep review 2026-10-26 verify G122 begin ----
+    public static class G122RegisteredBeanLikeClob extends javax.sql.rowset.serial.SerialClob {
+        private static final long serialVersionUID = 1L;
+        private String label;
+
+        public G122RegisteredBeanLikeClob(final String content) throws java.sql.SQLException {
+            super(content.toCharArray());
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(final String label) {
+            this.label = label;
+        }
+    }
+
+    // G020-01: Mockito mocks of Clob/NClob/Blob are bean-classified (get/setMockitoInterceptor) and were typed as beans
+    // (serializing one failed with "Unsupported class: ...MockMethodInterceptor"); they get the LOB handlers now
+    @Test
+    public void testGetType_mockedLobClassesUseLobHandlers() throws Exception {
+        final java.sql.Clob clob = org.mockito.Mockito.mock(java.sql.Clob.class);
+        org.mockito.Mockito.when(clob.length()).thenReturn(3L);
+        org.mockito.Mockito.when(clob.getSubString(1, 3)).thenReturn("abc");
+        final Type<Object> clobType = TypeFactory.getType(clob.getClass());
+        assertTrue(ClobType.class.isInstance(clobType), clobType.getClass().getName());
+        assertFalse(clobType.isBean());
+        assertEquals("abc", clobType.stringOf(clob));
+
+        final java.sql.NClob nClob = org.mockito.Mockito.mock(java.sql.NClob.class);
+        org.mockito.Mockito.when(nClob.length()).thenReturn(2L);
+        org.mockito.Mockito.when(nClob.getSubString(1, 2)).thenReturn("nc");
+        final Type<Object> nClobType = TypeFactory.getType(nClob.getClass());
+        assertTrue(NClobType.class.isInstance(nClobType), nClobType.getClass().getName());
+        assertEquals("nc", nClobType.stringOf(nClob));
+
+        final java.sql.Blob blob = org.mockito.Mockito.mock(java.sql.Blob.class);
+        final Type<Object> blobType = TypeFactory.getType(blob.getClass());
+        assertTrue(BlobType.class.isInstance(blobType), blobType.getClass().getName());
+        assertFalse(blobType.isBean());
+    }
+
+    // G020-01 neighbours (unchanged): LOB classes without bean accessors - SerialClob, SerialBlob, a dynamic proxy - keep
+    // their LOB handlers, and a bean-like LOB class still cannot be registered by class (hasBuiltInType lists the LOBs)
+    @Test
+    public void testGetType_nonBeanLobClassesKeepLobHandlersAndBeanLikeLobRegistrationRefused() throws Exception {
+        final Type<Object> serialClobType = TypeFactory.getType(javax.sql.rowset.serial.SerialClob.class);
+        assertTrue(ClobType.class.isInstance(serialClobType), serialClobType.getClass().getName());
+        assertEquals("hello", serialClobType.stringOf(new javax.sql.rowset.serial.SerialClob("hello".toCharArray())));
+        assertTrue(BlobType.class.isInstance(TypeFactory.getType(javax.sql.rowset.serial.SerialBlob.class)));
+
+        final Object proxy = java.lang.reflect.Proxy.newProxyInstance(TypeFactoryTest.class.getClassLoader(), new Class<?>[] { java.sql.NClob.class },
+                (instance, method, arguments) -> "length".equals(method.getName()) ? (Object) 2L : "getSubString".equals(method.getName()) ? "px" : null);
+        final Type<Object> proxyType = TypeFactory.getType(proxy.getClass());
+        assertTrue(NClobType.class.isInstance(proxyType), proxyType.getClass().getName());
+        assertEquals("px", proxyType.stringOf(proxy));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType(G122RegisteredBeanLikeClob.class, clob -> "x", text -> (G122RegisteredBeanLikeClob) null));
+    }
+    // ---- deep review 2026-10-26 verify G122 end ----
 }

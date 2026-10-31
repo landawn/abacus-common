@@ -143,7 +143,9 @@ import com.landawn.abacus.util.u;
  *       open {@code Object} property or map value on both backends (a {@code null} is written with the
  *       {@code isNull="true"} marker); for most other types it yields the type's default value ({@code null} for an
  *       {@code Integer}, {@code 0} for an {@code int}). The backends still differ for a property with a number
- *       format and for an {@code Optional<Object>} property (L16 in the package documentation), and for an
+ *       format and for an {@code Optional}/{@code Nullable} property or map value whose element type is {@code String}
+ *       or {@code Object}, which StAX reads as the empty wrapper, so {@code Optional.of("")} does not round-trip there
+ *       (L16 in the package documentation), and for an
  *       {@code Object} property whose element carries a scalar {@code type} attribute while the root has none (L11).
  *       Scalar {@code <e>} wrappers inside arrays and collections are converted from
  *       the empty string on both backends, so an empty String element remains empty. Enum properties and map values
@@ -2372,9 +2374,10 @@ final class XmlParserImpl extends AbstractXmlParser {
             }
         }
 
-        if (propType != null && isNullElement(xmlReader)) {
-            // A property's nested value can carry the marker instead of its outer property wrapper.
-            // The root call has no propType and retains its existing document-level semantics.
+        if (xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT && isNullElement(xmlReader)) {
+            // An explicit null - a nested value or the root of any type (bean, map, array, collection or scalar) - is null, not an
+            // empty value, as on the Abacus readers. Type metadata was validated above before the payload is consumed, so
+            // a null marker cannot bypass the configured type allowlist.
             consumeNullElement(xmlReader);
             return (T) targetType.defaultValue();
         }
@@ -2591,7 +2594,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                             sb.append(text);
                                         }
 
-                                        sb.append(xmlReader.getText());
+                                        sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                     } while (isTextEvent(event = xmlReader.next()));
 
                                     // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
@@ -2604,9 +2607,25 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                                 // Indentation before a nested value is structural. Replay its START_ELEMENT;
                                 // whitespace ending at the property end is scalar content and must be kept.
-                                if (event == XMLStreamConstants.START_ELEMENT && text.isBlank()) {
-                                    advanceEvent = false;
-                                    break;
+                                if (event == XMLStreamConstants.START_ELEMENT) {
+                                    if (text.isBlank()) {
+                                        advanceEvent = false;
+                                        break;
+                                    }
+
+                                    // A SERIALIZE_ONLY property is ignored when reading, so its mixed content is not rejected: with
+                                    // propInfo cleared, the replayed START_ELEMENT skips the rest of the element as for an ignored
+                                    // property. Its plain text is still decoded below, as before.
+                                    if (propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY) {
+                                        propInfo = null;
+                                        advanceEvent = false;
+                                        break;
+                                    }
+
+                                    // Non-blank text followed by a nested element is mixed content. Reading on stepped past that element's start,
+                                    // took its end for this element's end and closed the enclosing bean or map early, silently dropping every
+                                    // following property or entry. Rejected as the Abacus StAX reader rejects it.
+                                    throw new ParsingException("Mixed scalar and nested XML values are not supported");
                                 }
 
                                 propValue = isNullValue ? null
@@ -2865,7 +2884,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         sb.append(text);
                                     }
 
-                                    sb.append(xmlReader.getText());
+                                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                 } while (isTextEvent(event = xmlReader.next()));
 
                                 // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
@@ -2895,9 +2914,16 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                             // Indentation before a nested value is structural. Replay its START_ELEMENT;
                             // whitespace ending at the property end is scalar content and must be kept.
-                            if (event == XMLStreamConstants.START_ELEMENT && text.isBlank()) {
-                                advanceEvent = false;
-                                break;
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                if (text.isBlank()) {
+                                    advanceEvent = false;
+                                    break;
+                                }
+
+                                // Non-blank text followed by a nested element is mixed content. Reading on stepped past that element's start,
+                                // took its end for this element's end and closed the enclosing bean or map early, silently dropping every
+                                // following property or entry. Rejected as the Abacus StAX reader rejects it.
+                                throw new ParsingException("Mixed scalar and nested XML values are not supported");
                             }
 
                             propValue = isNullValue ? null : readWrappedText(declaredSlotType, refinedPropType, propAttributeType, text, configToUse);
@@ -3123,7 +3149,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         sb.append(text);
                                     }
 
-                                    sb.append(xmlReader.getText());
+                                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                 } while (isTextEvent(event = xmlReader.next()));
 
                                 // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
@@ -3136,9 +3162,16 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                             // Indentation before a nested value is structural. Replay its START_ELEMENT;
                             // whitespace ending at the property end is scalar content and must be kept.
-                            if (event == XMLStreamConstants.START_ELEMENT && text.isBlank()) {
-                                advanceEvent = false;
-                                break;
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                if (text.isBlank()) {
+                                    advanceEvent = false;
+                                    break;
+                                }
+
+                                // Non-blank text followed by a nested element is mixed content. Reading on stepped past that element's start,
+                                // took its end for this element's end and closed the enclosing bean or map early, silently dropping every
+                                // following property or entry. Rejected as the Abacus StAX reader rejects it.
+                                throw new ParsingException("Mixed scalar and nested XML values are not supported");
                             }
 
                             propValue = isNullValue ? null : readWrappedText(declaredSlotType, refinedPropType, propAttributeType, text, configToUse);
@@ -3203,7 +3236,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final List<Object> list = Objectory.createList();
 
                 try {
-                    for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                    for (int event = xmlReader.next(); xmlReader
+                            .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
                         switch (event) {
                             case XMLStreamConstants.START_ELEMENT: {
                                 if (isNullElement(xmlReader)) {
@@ -3246,7 +3280,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                             sb.append(text);
                                         }
 
-                                        sb.append(xmlReader.getText());
+                                        sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                     } while (isTextEvent(event = xmlReader.next()));
 
                                     // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
@@ -3257,10 +3291,21 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
                                 }
 
-                                // The declared array keeps its class under metadata and configuration, as a property's does;
-                                // the refined or configured component types the items (see readArrayText).
-                                propValue = readArrayText(text, openArrayDestination(declaredTargetType, targetType, configToUse.getElementType()),
-                                        arrayComponentOverride(declaredTargetType, targetType, configToUse.getElementType()), configToUse);
+                                // The text is the compact form only when it is the whole content. Text next to child elements
+                                // is ignored, as by the DOM reader: replay the child the text ran into (stepping past its start
+                                // ended the array at that child's end and lost the following items), and keep the items read
+                                // before trailing text.
+                                if (event == XMLStreamConstants.START_ELEMENT) {
+                                    advanceEvent = false;
+                                    break;
+                                }
+
+                                if (list.isEmpty()) {
+                                    // The declared array keeps its class under metadata and configuration, as a property's does;
+                                    // the refined or configured component types the items (see readArrayText).
+                                    propValue = readArrayText(text, openArrayDestination(declaredTargetType, targetType, configToUse.getElementType()),
+                                            arrayComponentOverride(declaredTargetType, targetType, configToUse.getElementType()), configToUse);
+                                }
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
                                     if (propValue != null) {
@@ -3318,7 +3363,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
                         : newReaderCollection(targetClass);
 
-                for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
+                for (int event = xmlReader.next(); xmlReader
+                        .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
                     switch (event) {
                         case XMLStreamConstants.START_ELEMENT: {
                             if (isNullElement(xmlReader)) {
@@ -3360,7 +3406,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         sb.append(text);
                                     }
 
-                                    sb.append(xmlReader.getText());
+                                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                                 } while (isTextEvent(event = xmlReader.next()));
 
                                 // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
@@ -3371,21 +3417,33 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 }
                             }
 
-                            // Text must use the same implementation as child-element parsing, with the full element schema.
-                            // Root configuration overrides the target collection's component, matching direct children.
-                            // A nested declared slot still constrains its elements.
-                            final Type<?> textElementType = collectionTextElementType(propType == null ? null : declaredTargetType, targetType, eleType);
-                            if (targetClass != targetType.javaType() || !textElementType.equals(targetType.elementType())) {
-                                // Root configuration can override the target component; nested slots keep explicit constraints. The
-                                // shared reader types the open components nested in the element (List<Object[]> with a configured Long).
-                                propValue = readCollectionText(text, targetType, targetClass, textElementType, configToUse);
-                            } else if (textElementType.javaType() == Object.class) {
-                                // Open elements: the compact JSON reader, so the per-key value types reach the maps inside.
-                                propValue = readCompactJson(Strings.strip(text), configToUse, targetType);
-                            } else if (textElementType.javaType() == String.class) {
-                                propValue = targetType.valueOf(text);
-                            } else {
-                                propValue = readCollectionText(text, targetType, targetClass, textElementType, configToUse);
+                            // The text is the compact form only when it is the whole content: text next to child elements is
+                            // ignored, as in the ARRAY branch above.
+                            if (event == XMLStreamConstants.START_ELEMENT) {
+                                advanceEvent = false;
+                                break;
+                            }
+
+                            if (result.isEmpty()) {
+                                // Text must use the same implementation as child-element parsing, with the full element schema.
+                                // Root configuration overrides the target collection's component, matching direct children.
+                                // A nested declared slot still constrains its elements.
+                                final Type<?> textElementType = collectionTextElementType(propType == null ? null : declaredTargetType, targetType, eleType);
+                                final boolean isBlankRoot = propType == null && Strings.isBlank(text);
+                                if (isBlankRoot || targetClass != targetType.javaType() || !textElementType.equals(targetType.elementType())) {
+                                    // Root configuration can override the target component; nested slots keep explicit constraints. The
+                                    // shared reader types the open components nested in the element (List<Object[]> with a configured Long).
+                                    // Bug fix: XML blank detection includes Unicode whitespace that the compact JSON reader treats as content;
+                                    // normalize a blank root to empty text.
+                                    propValue = readCollectionText(isBlankRoot ? "" : text, targetType, targetClass, textElementType, configToUse);
+                                } else if (textElementType.javaType() == Object.class) {
+                                    // Open elements: the compact JSON reader, so the per-key value types reach the maps inside.
+                                    propValue = readCompactJson(Strings.strip(text), configToUse, targetType);
+                                } else if (textElementType.javaType() == String.class) {
+                                    propValue = targetType.valueOf(text);
+                                } else {
+                                    propValue = readCollectionText(text, targetType, targetClass, textElementType, configToUse);
+                                }
                             }
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
@@ -3510,7 +3568,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                         sb = new StringBuilder(text);
                     }
 
-                    sb.append(xmlReader.getText());
+                    sb.append(xmlReader.getTextCharacters(), xmlReader.getTextStart(), xmlReader.getTextLength());
                 }
             }
         }
@@ -4014,8 +4072,9 @@ final class XmlParserImpl extends AbstractXmlParser {
             targetClass = getConcreteClass(containerClass, targetClass);
         }
         final Type<?> nodeMetadata = resolvePresentTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
-        if (!isFirstCall && Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL))) {
-            // checkOneNode may have selected a null-marked child inside an unmarked property wrapper.
+        if (Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL))) {
+            // An explicit null root of any type (bean, map, array, collection or scalar) is null, as on the StAX and Abacus readers,
+            // and so is a null-marked child selected inside an unmarked wrapper. Its type metadata was validated above.
             return (T) targetType.defaultValue();
         }
         if (!(checkedAttr && ignoreTypeInfo)) {
@@ -4460,11 +4519,17 @@ final class XmlParserImpl extends AbstractXmlParser {
                 if (XmlUtil.isTextElement(node)) {
                     final String text = XmlUtil.getTextContent(node);
                     final Type<?> textElementType = collectionTextElementType(isFirstCall ? null : declaredTargetType, targetType, eleType);
-                    if (targetClass != targetType.javaType() || !textElementType.equals(targetType.elementType())) {
+                    final boolean isBlank = Strings.isBlank(text);
+                    if (isBlank || targetClass != targetType.javaType() || !textElementType.equals(targetType.elementType())) {
+                        // Only a collection element that is not a property value or a container item gets here - in practice
+                        // the root. A blank one is an empty collection, as on every other reader, not the null that
+                        // CollectionType.valueOf("") returns; explicit isNull markers have already been handled. Blank
+                        // nested container items are read by getPropValue and remain reader-specific (see XmlParser).
                         // Construct the resolved class during parsing; a temporary default Set could already lose entries.
                         // Configuration refines open Object slots without replacing explicit element constraints. The shared
                         // reader types the open components nested in the element (List<Object[]> with a configured Long).
-                        return (T) readCollectionText(text, targetType, targetClass, textElementType, configToUse);
+                        // Bug fix: the compact JSON reader treats some Unicode whitespace as content, so normalize blank text.
+                        return (T) readCollectionText(isBlank ? "" : text, targetType, targetClass, textElementType, configToUse);
                     } else if (textElementType.javaType() == Object.class && Strings.isNotBlank(text)) {
                         // Open elements: the compact JSON reader, so the per-key value types reach the maps inside.
                         return (T) readCompactJson(Strings.strip(text), configToUse, targetType);
@@ -4652,7 +4717,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     /**
      * Reads a DOM property, optionally using a wrapper's resolved container class independently of its generic schema.
-     * An explicit null marker bypasses both scalar and structured payload conversion after metadata approval.
+     * An explicit null marker bypasses both scalar and structured payload conversion after metadata approval. A blank
+     * map, bean or {@code MapEntity} <i>item</i> ({@code isProp == false}) is the empty structured value the writer emitted; a
+     * blank property wrapper is converted from its empty text.
      *
      * @param propNode the property element
      * @param config the effective deserialization configuration
@@ -4706,6 +4773,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                 // An open array slot converts only the elements; the array keeps its declared runtime class.
                 propValue = readArrayText(XmlUtil.getTextContent(propNode), propType,
                         arrayComponentOverride(declaredPropType, refinedPropType, config.getElementType()), config);
+            } else if (!isProp && (propType.isMap() || propType.isBean() || propType.isMapEntity()) && Strings.isBlank(XmlUtil.getTextContent(propNode))) {
+                // Bug fix: the writer emits an empty map, bean or MapEntity as an array/collection item without content.
+                // This reader returned null (valueOf("")); MapEntity has its own type category and must retain its entity name too.
+                // Such an item element is the value element itself, so read it as one; a blank property wrapper (isProp, as
+                // <props/>) keeps the valueOf("") rule that every reader applies to properties.
+                propValue = readStructuredNode(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, inputType, containerClass);
             } else if ((containerClass != null || propType.isMap() || propType.isCollection()) && (propInfo == null || !propInfo.hasFormat)) {
                 propValue = readContainerText(XmlUtil.getTextContent(propNode), propType, containerClass == null ? propType.javaType() : containerClass,
                         config);
@@ -4739,18 +4812,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 propType = propType.isObject() ? (inputType.isMapEntity() ? inputType : mapType) : propType;
 
-                if (containerClass != null && propType.isMap()) {
-                    // Apply the property's implementation before inserting keys, including identity-map keys.
-                    enterXmlNesting();
-                    try {
-                        propValue = readByDOMParserBody(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType,
-                                containerClass);
-                    } finally {
-                        exitXmlNesting();
-                    }
-                } else {
-                    propValue = readByDOMParser(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType);
-                }
+                propValue = readStructuredNode(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, inputType, containerClass);
             } else {
                 final Type<?> constructionType = containerClass != null && propType.isCollection() ? Type.of(containerClass) : propType;
                 final Collection<Object> coll = newPropCollection(constructionType);
@@ -4807,6 +4869,37 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         return propValue;
+    }
+
+    /**
+     * Reads a map, bean or map-entity element as that structured value. A map takes {@code containerClass}, when one was
+     * resolved from the enclosing property, before any key is inserted (identity maps included); an element without
+     * children is the empty value of that structured type.
+     *
+     * @param node the map, bean or map-entity element
+     * @param config the effective deserialization configuration
+     * @param type the resolved map, bean or map-entity type
+     * @param checkedAttr whether enclosing attribute handling has been determined
+     * @param isTagByPropertyName whether tags represent property names
+     * @param ignoreTypeInfo whether ordinary child type metadata is ignored
+     * @param inputType the enclosing input type
+     * @param containerClass the validated map implementation, or {@code null} to use the type's own class
+     * @return the decoded map, bean or map entity
+     * @throws ParsingException if the XML nesting depth exceeds the allowed maximum or the element cannot be read as {@code type}
+     */
+    private Object readStructuredNode(final Node node, final XmlDeserConfig config, final Type<?> type, final boolean checkedAttr,
+            final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final Type<?> inputType, final Class<?> containerClass) throws ParsingException {
+        if (containerClass != null && type.isMap()) {
+            // Apply the property's implementation before inserting keys, including identity-map keys.
+            enterXmlNesting();
+            try {
+                return readByDOMParserBody(node, config, type, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType, containerClass);
+            } finally {
+                exitXmlNesting();
+            }
+        }
+
+        return readByDOMParser(node, config, type, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType);
     }
 
     /**
@@ -4893,10 +4986,12 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         // A nested object array or collection element type is kept as well: falling back to mapType read each inner
         // <list>/<array> element of a List<List<Bean>> or Bean[][] value as a map and silently lost its beans.
-        if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap() || isContainerType(propType.elementType()))) {
+        // MapEntity is a distinct structured type: falling back to Map loses the entity name and cannot fill MapEntity[].
+        if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap() || propType.elementType().isMapEntity()
+                || isContainerType(propType.elementType()))) {
             propEleType = propType.elementType();
         } else if (propType.parameterTypes().size() == 1 && (propType.parameterTypes().get(0).isBean() || propType.parameterTypes().get(0).isMap()
-                || isContainerType(propType.parameterTypes().get(0)))) {
+                || propType.parameterTypes().get(0).isMapEntity() || isContainerType(propType.parameterTypes().get(0)))) {
             propEleType = propType.parameterTypes().get(0);
         } else {
             propEleType = mapType;
@@ -4908,7 +5003,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * Whether a collection or array property leaves its structured children untyped: no configured structured
      * component, and a declared element type that is {@code Object}, raw, scalar or an interface rather than a bean,
-     * a map or a container.
+     * a map, a MapEntity or a container.
      *
      * @param propType the property's collection or array type
      * @param slotComponent the configured component of an open slot, or {@code null}

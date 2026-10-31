@@ -1,8 +1,10 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -17,15 +19,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.parser.XmlParser;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.TypeReference;
 
 public class AbstractTypeTest extends TestBase {
 
@@ -454,4 +466,158 @@ public class AbstractTypeTest extends TestBase {
     }
 
     // ---- bug review 2026-09-27 verify G123 end ----
+
+    // ---- deep review 2026-10-27 G134 begin ----
+
+    // Every public class in java.lang.* / java.util.* / java.time.* / com.landawn.abacus.* (all compiled main classes and
+    // all JDK modules enumerated) whose simple name ClassUtil resolves to a DIFFERENT class, and whose Type name is built
+    // from its canonical name. name() is written as type information, so it must name the class itself.
+    private static final Class<?>[] G134_SIMPLE_NAME_IS_ANOTHER_CLASS = { //
+            com.landawn.abacus.annotation.Record.class, // "Record" is java.lang.Record
+            com.landawn.abacus.annotation.Type.class, // "Type" is com.landawn.abacus.type.Type
+            com.landawn.abacus.util.Multiset.Entry.class, // "Entry" is java.util.Map.Entry
+            com.landawn.abacus.util.Throwables.Iterator.class, // "Iterator" is java.util.Iterator
+            com.landawn.abacus.util.Throwables.Runnable.class, // "Runnable" is java.lang.Runnable (also the next three)
+            com.landawn.abacus.util.Throwables.EE.Runnable.class, //
+            com.landawn.abacus.util.Throwables.EEE.Runnable.class, //
+            com.landawn.abacus.util.function.Runnable.class, //
+            java.lang.reflect.Type.class }; // "Type" is com.landawn.abacus.type.Type
+
+    @Test
+    public void g134_nameOfClassWhoseSimpleNameIsAnotherClassRoundTrips() {
+        for (final Class<?> cls : G134_SIMPLE_NAME_IS_ANOTHER_CLASS) {
+            final Type<?> type = Type.of(cls);
+            assertEquals(cls.getCanonicalName(), type.name(), cls.getName());
+            assertEquals(cls.getCanonicalName(), type.xmlName(), cls.getName());
+            assertEquals(cls, Type.of(type.name()).javaType(), cls.getName());
+            // the pool entry under name() is the very handler of the class
+            assertSame(type, Type.of(type.name()), cls.getName());
+
+            final Class<?> arrayClass = java.lang.reflect.Array.newInstance(cls, 0).getClass();
+            final Class<?> array2Class = java.lang.reflect.Array.newInstance(arrayClass, 0).getClass();
+            assertEquals(cls.getCanonicalName() + "[]", Type.of(arrayClass).name(), cls.getName());
+            assertEquals(arrayClass, Type.of(Type.of(arrayClass).name()).javaType(), cls.getName());
+            assertEquals(cls.getCanonicalName() + "[][]", Type.of(array2Class).name(), cls.getName());
+            assertEquals(array2Class, Type.of(Type.of(array2Class).name()).javaType(), cls.getName());
+        }
+    }
+
+    @Test
+    public void g134_arrayOfJdkClassWhoseSimpleNameIsAnotherClassRoundTrips() {
+        // The element handlers have names of their own ("JUDate", "JdkDuration", "JdkOptional<...>"), but the array names
+        // are built from the canonical names: "Date[]" is java.sql.Date[], "Duration[]" com.landawn.abacus.util.Duration[],
+        // "Optional[]" com.landawn.abacus.util.u.Optional[], "Type[]" com.landawn.abacus.type.Type[].
+        final Class<?>[] arrayClasses = { java.util.Date[].class, java.util.Date[][].class, java.time.Duration[].class, java.util.Optional[].class,
+                java.util.OptionalInt[].class, java.util.OptionalLong[].class, java.util.OptionalDouble[].class, ProcessBuilder.Redirect.Type[].class };
+
+        for (final Class<?> arrayClass : arrayClasses) {
+            final Type<?> type = Type.of(arrayClass);
+            assertEquals(arrayClass.getCanonicalName(), type.name(), arrayClass.getName());
+            assertEquals(arrayClass, Type.of(type.name()).javaType(), arrayClass.getName());
+            assertSame(type, Type.of(type.name()), arrayClass.getName());
+        }
+
+        final java.util.Date date = new java.util.Date(86_400_123L);
+        final Type<java.util.Date[]> dateArrayType = Type.of(java.util.Date[].class);
+        final java.util.Date[] dates = Type.<java.util.Date[]> of(dateArrayType.name()).valueOf(dateArrayType.stringOf(new java.util.Date[] { date }));
+        assertEquals(java.util.Date[].class, dates.getClass());
+        assertEquals(java.util.Date.class, dates[0].getClass());
+        assertEquals(date.getTime(), dates[0].getTime());
+
+        final java.time.Duration[] durations = { java.time.Duration.ofSeconds(5) };
+        final Type<java.time.Duration[]> durationArrayType = Type.of(java.time.Duration[].class);
+        assertArrayEquals(durations, Type.<java.time.Duration[]> of(durationArrayType.name()).valueOf(durationArrayType.stringOf(durations)));
+    }
+
+    @Test
+    public void g134_genericTypeWithSuchArgumentRoundTrips() {
+        final String listName = "List<com.landawn.abacus.util.function.Runnable>";
+        final Type<?> list = Type.of(listName);
+        assertEquals(listName, list.name());
+        assertEquals(com.landawn.abacus.util.function.Runnable.class, Type.of(list.name()).elementType().javaType());
+        assertSame(list, Type.of(list.name()));
+
+        final Type<?> reflected = Type.of(new TypeReference<List<com.landawn.abacus.util.function.Runnable>>() {
+        });
+        assertEquals(listName, reflected.name());
+        assertEquals(com.landawn.abacus.util.function.Runnable.class, Type.of(reflected.name()).elementType().javaType());
+
+        final Type<?> map = Type.ofMap(String.class, Multiset.Entry.class);
+        assertEquals("Map<String, com.landawn.abacus.util.Multiset.Entry>", map.name());
+        assertEquals(Multiset.Entry.class, Type.of(map.name()).parameterTypes().get(1).javaType());
+
+        final Type<?> dateArrays = Type.ofList(java.util.Date[].class);
+        assertEquals("List<java.util.Date[]>", dateArrays.name());
+        assertEquals(java.util.Date[].class, Type.of(dateArrays.name()).elementType().javaType());
+    }
+
+    @Test
+    public void g134_typedXmlAndDatasetJsonReadSuchArraysBackAsTheirOwnClass() {
+        final java.util.Date date = new java.util.Date(86_400_123L);
+        final java.time.Duration duration = java.time.Duration.ofSeconds(5);
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("dates", new java.util.Date[] { date });
+        map.put("durations", new java.time.Duration[] { duration });
+        final XmlSerConfig xsc = XmlSerConfig.create().setWriteTypeInfo(true);
+
+        for (final XmlParser parser : new XmlParser[] { ParserFactory.createAbacusXmlParser(), ParserFactory.createXmlParser() }) {
+            final String xml = parser.serialize(map, xsc);
+            final Map<?, ?> back = parser.deserialize(xml, Map.class);
+            // r108 wrote type="Date[]" / "Duration[]" and read java.sql.Date[] / failed on "PT5S"
+            assertEquals(java.util.Date[].class, back.get("dates").getClass(), xml);
+            assertEquals(java.util.Date.class, ((java.util.Date[]) back.get("dates"))[0].getClass(), xml);
+            assertEquals(date.getTime(), ((java.util.Date[]) back.get("dates"))[0].getTime(), xml);
+            assertArrayEquals(new java.time.Duration[] { duration }, (java.time.Duration[]) back.get("durations"), xml);
+        }
+
+        final JsonSerConfig jsc = JsonSerConfig.create().setWriteColumnType(true);
+        final Dataset dataset = N.newDataset(List.of("dates", "durations"),
+                List.<List<?>> of(List.of(new java.util.Date[] { date }, new java.time.Duration[] { duration })));
+        final String json = ParserFactory.createJsonParser().serialize(dataset, jsc);
+        final Dataset back = ParserFactory.createJsonParser().deserialize(json, Dataset.class);
+        assertEquals(java.util.Date[].class, back.getColumn("dates").get(0).getClass(), json);
+        assertArrayEquals(new java.time.Duration[] { duration }, (java.time.Duration[]) back.getColumn("durations").get(0), json);
+    }
+
+    @Test
+    public void g134_nameKeepsTheShortFormWhenItResolvesBackToTheSameClass() {
+        assertEquals("String", Type.of(String.class).name());
+        assertEquals("Integer", Type.of(Integer.class).name());
+        assertEquals("int[]", Type.of(int[].class).name());
+        assertEquals("String[]", Type.of(String[].class).name());
+        assertEquals("Integer[][]", Type.of(Integer[][].class).name());
+        assertEquals("List<String>", Type.ofList(String.class).name());
+        assertEquals("List<String>", Type.of("java.util.List<java.lang.String>").name());
+        assertEquals("Map<String, Integer>", Type.ofMap(String.class, Integer.class).name());
+        assertEquals("Map<String, Integer>", Type.of("Map<String, Integer>").name());
+        assertEquals("LocalDate", Type.of(java.time.LocalDate.class).name());
+        assertEquals("LocalDate", Type.of("java.time.LocalDate").name());
+        assertEquals("LocalDate[]", Type.of(java.time.LocalDate[].class).name());
+        assertEquals("UUID", Type.of(java.util.UUID.class).name());
+        assertEquals("java.util.BitSet", Type.of(java.util.BitSet.class).name());
+        assertEquals("Multiset<Object>", Type.of(Multiset.class).name());
+        assertEquals("Multiset[]", Type.of(Multiset[].class).name());
+        assertEquals("Dataset", Type.of(Dataset.class).name());
+        assertEquals("Runnable", Type.of(Runnable.class).name());
+        assertEquals("List<Runnable>", Type.of("List<Runnable>").name());
+        assertEquals("Iterator", Type.of(java.util.Iterator.class).name());
+        assertEquals("Type", Type.of(Type.class).name());
+        assertEquals("JUDate", Type.of(java.util.Date.class).name());
+        assertEquals("List<JUDate>", Type.ofList(java.util.Date.class).name());
+        assertEquals("java.sql.Date[]", Type.of(java.sql.Date[].class).name());
+        assertEquals("Map.Entry<Object, Object>", Type.of(java.util.Map.Entry.class).name());
+
+        // A non-public implementation class keeps the short form a reader can construct: Arrays.asList reads back as an ArrayList.
+        final Type<?> asListType = Type.of(Arrays.asList(1, 2).getClass());
+        assertEquals("ArrayList<Object>", asListType.name());
+        assertEquals(ArrayList.class, Type.of(asListType.name()).javaType());
+
+        // Old data written with a short name still reads as the class that name has always resolved to.
+        assertEquals(Runnable.class, Type.of("Runnable").javaType());
+        assertEquals(java.util.Map.Entry.class, Type.of("Entry").javaType());
+        assertEquals(java.sql.Date[].class, Type.of("Date[]").javaType());
+        assertEquals(Type.class, Type.of("Type").javaType());
+    }
+
+    // ---- deep review 2026-10-27 G134 end ----
 }

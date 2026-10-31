@@ -241,6 +241,13 @@ public final class WebUtil {
                     if (value.isEmpty()) {
                         continue;
                     }
+                } else if (value.isEmpty() && !headers.containsHeader(HttpHeaders.Names.USER_AGENT)) {
+                    // An empty -A makes curl send no User-Agent at all (a blank one needs -A ' '), exactly like
+                    // -H 'User-Agent:', so it is recorded as that suppression instead of an empty header. With a
+                    // User-Agent already captured it stays the rejected repeat below: curl would drop an earlier -A
+                    // value but keep an -H one, and the captured headers no longer tell the two apart.
+                    removedHeaderNames.putIfAbsent(HttpHeaders.Names.USER_AGENT.toLowerCase(Locale.ROOT), HttpHeaders.Names.USER_AGENT);
+                    continue;
                 }
 
                 addCapturedHeader(headers, referer ? HttpHeaders.Names.REFERER : HttpHeaders.Names.USER_AGENT, value);
@@ -523,13 +530,23 @@ public final class WebUtil {
      *       file/stdin references beginning with {@code @} require {@code --data-raw} to be treated literally and are otherwise rejected</li>
      *   <li>{@code -I, --head}: HEAD request (inferred method)</li>
      *   <li>{@code -A, --user-agent} and {@code -e, --referer}: emitted as {@code User-Agent} / {@code Referer}
-     *       headers (a {@code ;auto} suffix on the referer is dropped; a bare {@code ;auto} sends no Referer)</li>
+     *       headers (a {@code ;auto} suffix on the referer is dropped; a bare {@code ;auto} sends no Referer).
+     *       An empty {@code -A ''} is curl's way to send no User-Agent at all and is handled like {@code -H 'User-Agent:'}</li>
      *   <li>{@code --url}: the request URL, as an alternative to a positional {@code http(s)://} argument</li>
      * </ul>
      *
      * <p>Short options may be clustered as in curl ({@code -sSL}, {@code -sX POST}, {@code -sXPOST},
      * {@code -sd 'a=1'}, {@code -Lu user:pw}): leading argument-less flags are peeled off and the first
      * argument-taking letter is dispatched with the rest of the token or the next token as its argument.</p>
+     *
+     * <p>The command is split into words as a POSIX shell would: single quotes, double quotes, backslash
+     * escapes and line continuations. Nothing is expanded: {@code $HOME}, {@code 'a$b'} and {@code "a$b"}
+     * keep their {@code $} literally. Bash's ANSI-C quoting {@code $'...'} (which the "Copy as cURL (bash)"
+     * of web browsers uses for values containing a quote, a line break or a tab) and its {@code $"..."}
+     * quoting are rejected with an {@link IllegalArgumentException} wherever they occur (URL, data, header,
+     * {@code -A}, {@code -u}, {@code -b}, ...) instead of being read as a literal {@code $} followed by an
+     * ordinary quoted string; pass the decoded value in plain single or double quotes. An escaped
+     * {@code \$'...'} is still a literal {@code $} followed by a quoted string, as in the shell.</p>
      *
      * <p>Options that would change the request in a way the generated code cannot reproduce
      * ({@code --data-binary}, {@code --data-urlencode}, {@code -F/--form}, {@code -u/--user},
@@ -593,7 +610,8 @@ public final class WebUtil {
      * @return Java code string for creating an equivalent HttpRequest, formatted
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't start with "curl",
-     *         contains an unclosed quote, contains no URL or more than one URL, uses an unsupported option, a
+     *         contains an unclosed quote, uses bash {@code $'...'} or {@code $"..."} quoting in any argument,
+     *         contains no URL or more than one URL, uses an unsupported option, a
      *         request/data/header option has a missing or unsupported argument, a header references a file
      *         ({@code -H @file}) or has an empty name, repeated headers cannot be combined, or a body carries
      *         an explicitly empty Content-Type that HttpRequest cannot reproduce (use {@link #curlToOkHttpRequestCode(String)}).
@@ -694,7 +712,8 @@ public final class WebUtil {
      *   <li>A try-with-resources block that closes the returned OkHttp {@code Response}</li>
      * </ul>
      *
-     * <p>HTTP Method Detection and unsupported-option handling follow the same rules as
+     * <p>Word splitting and quoting (including the rejection of bash {@code $'...'} and {@code $"..."} quoting),
+     * HTTP Method Detection and unsupported-option handling follow the same rules as
      * {@link #curlToHttpRequestCode(String)}, including rejection of {@code -G/--get} even without data.
      * Unlike that generator, {@code PATCH} needs no warning comment here: OkHttpRequest issues it natively.</p>
      *
@@ -712,7 +731,8 @@ public final class WebUtil {
      * @return Java code string for creating an equivalent OkHttpRequest, formatted
      *         with proper indentation and line separators
      * @throws IllegalArgumentException if the curl parameter is {@code null}, empty, doesn't start with "curl",
-     *         contains an unclosed quote, contains no URL or more than one URL, uses an unsupported option, a
+     *         contains an unclosed quote, uses bash {@code $'...'} or {@code $"..."} quoting in any argument,
+     *         contains no URL or more than one URL, uses an unsupported option, a
      *         request/data/header option has a missing or unsupported argument, a header references a file
      *         ({@code -H @file}) or has an empty name, or repeated headers cannot be combined.
      * @see #curlToHttpRequestCode(String)
@@ -878,7 +898,8 @@ public final class WebUtil {
     }
 
     /**
-     * @throws IllegalArgumentException if the command is null or empty, does not begin with curl, ends with an escape character, or contains an unclosed quote
+     * @throws IllegalArgumentException if the command is null or empty, does not begin with curl, ends with an escape character, contains an
+     *         unclosed quote, or uses bash {@code $'...'} (ANSI-C) or {@code $"..."} quoting
      */
     private static List<String> parseCurl(final String curl) throws IllegalArgumentException {
         N.checkArgNotEmpty(curl, cs.curl);
@@ -893,6 +914,8 @@ public final class WebUtil {
         boolean tokenStarted = false;
         char quote = 0;
         int quoteStart = -1;
+        // Position of an unquoted, unescaped '$' that a following quote would turn into bash's $'...' or $"..." quoting; -1 otherwise.
+        int pendingDollar = -1;
 
         for (int i = 0; i < len; i++) {
             final char ch = str.charAt(i);
@@ -943,7 +966,17 @@ public final class WebUtil {
                     token.setLength(0);
                     tokenStarted = false;
                 }
+
+                pendingDollar = -1;
             } else if (ch == '\'' || ch == '"') {
+                if (pendingDollar >= 0) {
+                    // bash decodes $'...' itself (\n, \t, \', \xHH, ...) - browsers' "Copy as cURL (bash)" writes a value
+                    // with a quote, line break or tab that way - and $"..." is its locale-translated string. Read as plain
+                    // quotes, either would leave a stray '$' (and the undecoded escapes) in the body, header or URL.
+                    throw new IllegalArgumentException((ch == '\'' ? "ANSI-C/bash $'...'" : "Bash $\"...\"") + " quoting (at position " + pendingDollar
+                            + ") is not supported; pass the decoded value in plain single or double quotes");
+                }
+
                 quote = ch;
                 quoteStart = i;
                 tokenStarted = true;
@@ -959,15 +992,20 @@ public final class WebUtil {
                     // started: doing so made the following whitespace flush an empty token, which the
                     // option handling then consumed as the value of the preceding -d/-H/-X. A
                     // continuation inside an already-open token (a\<NL>b) still joins, because
-                    // tokenStarted is left as it was rather than reset.
+                    // tokenStarted is left as it was rather than reset. pendingDollar is left alone
+                    // too: the shell drops the continuation before it reads $\<NL>'..' as $'..'.
                     if (next == '\r' && i + 1 < len && str.charAt(i + 1) == '\n') {
                         i++;
                     }
                 } else {
+                    // An escaped \$ is a literal '$' in the shell as well, so \$'..' stays '$' plus a quoted string.
                     token.append(next);
                     tokenStarted = true;
+                    pendingDollar = -1;
                 }
             } else {
+                // "$$" is the shell's process-ID parameter, so the quote after it is an ordinary one.
+                pendingDollar = ch == '$' && pendingDollar < 0 ? i : -1;
                 token.append(ch);
                 tokenStarted = true;
             }

@@ -260,9 +260,10 @@ import com.landawn.abacus.util.function.LongObjFunction;
  *       numeric text everywhere) and times without a seconds field ({@code 2025-01-15T10:30}). The
  *       {@code java.time} and civil-field targets have no such fallback and reject that text with
  *       "Cannot detect a date/time format"; pass an explicit pattern there. That general reader resolves a
- *       zone-less text through {@code java.time}, so on these two shapes a fallback zone whose daylight-saving
- *       rules no {@code ZoneId} can express (a hand-built {@code SimpleTimeZone}) is rejected, although the
- *       predefined fixed-width shapes accept it through {@code Calendar}. A {@code Z} or {@code GMT}
+ *       zone-less text through {@code java.time}, so on these two shapes a fallback zone whose rules cannot be
+ *       verified against a {@code ZoneId} (a hand-built {@code SimpleTimeZone} with daylight-saving rules, any
+ *       other custom {@code TimeZone} subclass even with a fixed offset, or a registered zone whose rules were
+ *       modified) is rejected, although the predefined fixed-width shapes accept it through {@code Calendar}. A {@code Z} or {@code GMT}
  *       designator in auto-detected text names the zone and wins over a supplied fallback zone; only an
  *       explicitly supplied fixed-zone constant treats a non-UTC-equivalent zone as a conflict.</li>
  *   <li><b>Legacy instant targets</b> ({@code parseToDate/Time/Timestamp/JUDate/Calendar/

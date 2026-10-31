@@ -5,15 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.XMLConstants;
@@ -28,6 +32,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.w3c.dom.Document;
+import org.w3c.dom.DOMImplementation;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -51,6 +58,176 @@ public class XmlUtilCachedDocumentBuilderTest {
         assertEquals("urn:test", document.getDocumentElement().getNamespaceURI());
         assertEquals("root", document.getDocumentElement().getLocalName());
         assertEquals("value", document.getDocumentElement().getTextContent());
+    }
+
+    // A provider need not be reusable after a failed parse. Check every forwarding overload and failure kind,
+    // including errors, without relying on the JDK provider's recovery or on garbage collection.
+    @ParameterizedTest
+    @ValueSource(ints = { 0, 1, 2, 3, 4 })
+    public void discardsFailedParsersWithoutResettingThem(final int overload) throws Exception {
+        final var poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
+        poolField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final Queue<WeakReference<DocumentBuilder>> pool = (Queue<WeakReference<DocumentBuilder>>) poolField.get(null);
+        synchronized (pool) {
+            final var saved = new ArrayList<>(pool);
+            pool.clear();
+            try {
+                for (final Throwable failure : new Throwable[] { new SAXException("parse failed"), new IOException("read failed"),
+                        new IllegalStateException("provider failed"), new AssertionError("provider error") }) {
+                    final FailingBuilder delegate = new FailingBuilder(failure);
+                    final DocumentBuilder builder = wrap(delegate);
+                    assertSame(failure, assertThrows(Throwable.class, () -> {
+                        switch (overload) {
+                            case 0 -> builder.parse(InputStream.nullInputStream());
+                            case 1 -> builder.parse(InputStream.nullInputStream(), "urn:test");
+                            case 2 -> builder.parse("urn:test");
+                            case 3 -> builder.parse(directory.resolve("document.xml").toFile());
+                            default -> builder.parse(new InputSource(new StringReader("<root/>")));
+                        }
+                    }));
+                    XmlUtil.recycleContentParser(builder);
+                    XmlUtil.recycleContentParser(builder);
+                    assertEquals(overload, delegate.calledOverload);
+                    assertEquals(0, delegate.resets);
+                    assertTrue(pool.isEmpty());
+                }
+            } finally {
+                pool.clear();
+                pool.addAll(saved);
+            }
+        }
+    }
+
+    private static final class FailingBuilder extends DocumentBuilder {
+        private final Throwable failure;
+        private int calledOverload = -1;
+        private int resets;
+
+        FailingBuilder(final Throwable failure) {
+            this.failure = failure;
+        }
+
+        private Document fail(final int overload) throws SAXException, IOException {
+            calledOverload = overload;
+            if (failure instanceof SAXException e) {
+                throw e;
+            } else if (failure instanceof IOException e) {
+                throw e;
+            } else if (failure instanceof RuntimeException e) {
+                throw e;
+            } else {
+                throw (Error) failure;
+            }
+        }
+
+        @Override
+        public Document parse(final InputStream input) throws SAXException, IOException {
+            return fail(0);
+        }
+
+        @Override
+        public Document parse(final InputStream input, final String systemId) throws SAXException, IOException {
+            return fail(1);
+        }
+
+        @Override
+        public Document parse(final String uri) throws SAXException, IOException {
+            return fail(2);
+        }
+
+        @Override
+        public Document parse(final File file) throws SAXException, IOException {
+            return fail(3);
+        }
+
+        @Override
+        public Document parse(final InputSource input) throws SAXException, IOException {
+            return fail(4);
+        }
+
+        @Override
+        public void reset() {
+            resets++;
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return false;
+        }
+
+        @Override
+        public boolean isValidating() {
+            return false;
+        }
+
+        @Override
+        public void setEntityResolver(final EntityResolver resolver) {
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler handler) {
+        }
+
+        @Override
+        public Document newDocument() {
+            throw new AssertionError("Unexpected document creation");
+        }
+
+        @Override
+        public DOMImplementation getDOMImplementation() {
+            throw new AssertionError("Unexpected DOM lookup");
+        }
+    }
+
+    @Test
+    public void successfulParseAfterFailureDoesNotMakeBuilderPoolableAgain() throws Exception {
+        final DocumentBuilder builder = wrap(DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
+        builder.setErrorHandler(new DefaultHandler());
+        assertThrows(SAXException.class, () -> builder.parse(new InputSource(new StringReader("<root>"))));
+        builder.reset();
+        assertEquals("root", builder.parse(new InputSource(new StringReader("<root/>"))).getDocumentElement().getNodeName());
+        XmlUtil.recycleContentParser(builder);
+        final var poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
+        poolField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final Queue<WeakReference<DocumentBuilder>> pool = (Queue<WeakReference<DocumentBuilder>>) poolField.get(null);
+        synchronized (pool) {
+            assertTrue(pool.stream().noneMatch(reference -> reference.get() == builder));
+        }
+    }
+
+    // Bug fix: JAXP rejects a null source with IllegalArgumentException before any parse state exists; that argument
+    // error no longer retires a pooled builder. A real failure afterwards still does.
+    @Test
+    public void nullSourcesAreRejectedWithoutRetiringTheBuilder() throws Exception {
+        final var poolField = XmlUtil.class.getDeclaredField("contentDocBuilderPool");
+        poolField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final Queue<WeakReference<DocumentBuilder>> pool = (Queue<WeakReference<DocumentBuilder>>) poolField.get(null);
+        synchronized (pool) {
+            final var saved = new ArrayList<>(pool);
+            pool.clear();
+            try {
+                final DocumentBuilder builder = XmlUtil.createContentParser();
+                builder.setErrorHandler(new DefaultHandler());
+                assertThrows(IllegalArgumentException.class, () -> builder.parse((InputStream) null));
+                assertThrows(IllegalArgumentException.class, () -> builder.parse(null, "urn:test"));
+                assertThrows(IllegalArgumentException.class, () -> builder.parse((String) null));
+                assertThrows(IllegalArgumentException.class, () -> builder.parse((File) null));
+                assertThrows(IllegalArgumentException.class, () -> builder.parse((InputSource) null));
+
+                XmlUtil.recycleContentParser(builder);
+                assertSame(builder, XmlUtil.createContentParser());
+
+                assertThrows(SAXException.class, () -> builder.parse(new InputSource(new StringReader("<root>"))));
+                XmlUtil.recycleContentParser(builder);
+                assertTrue(pool.isEmpty());
+            } finally {
+                pool.clear();
+                pool.addAll(saved);
+            }
+        }
     }
 
     @ParameterizedTest

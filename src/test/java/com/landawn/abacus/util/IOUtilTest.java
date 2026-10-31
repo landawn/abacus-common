@@ -3011,6 +3011,14 @@ public class IOUtilTest extends IOUtilTestSupport {
         }
         process.getInputStream().readAllBytes();
         assumeTrue(process.waitFor() == 0, "fsutil setCaseSensitiveInfo is not available");
+
+        // fsutil also exits 0 when it could not set the flag ("Access is denied", "The directory is not empty"), so check the
+        // effect itself: in a case-sensitive directory a file is not found under its other-case spelling.
+        final File probe = new File(directory, "case-probe");
+        assertTrue(probe.createNewFile());
+        final boolean caseSensitive = !new File(directory, "CASE-PROBE").exists();
+        assertTrue(probe.delete());
+        assumeTrue(caseSensitive, "the directory could not be made case-sensitive");
         return directory;
     }
 
@@ -3249,4 +3257,258 @@ public class IOUtilTest extends IOUtilTestSupport {
     }
 
     // ---- deep review 2026-10-16 G155 end ----
+
+    // ---- deep review 2026-10-26 G048 begin ----
+
+    private static boolean createJunctionG048(final File link, final File target) throws Exception {
+        final Process process;
+        try {
+            process = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath()).redirectErrorStream(true).start();
+        } catch (final IOException e) {
+            return false;
+        }
+        process.getInputStream().readAllBytes();
+        return process.waitFor() == 0 && link.isDirectory();
+    }
+
+    // G048-01: unzip's traversal guard compared with Path.startsWith, which folds case on Windows, so in a case-sensitive
+    // directory an entry "../OUT/evil.txt" extracted into the target "out" was written into its sibling "OUT"
+    @Test
+    public void testUnzip_entryEscapingIntoACaseSensitiveSiblingOfTheTargetIsRejected() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g048-unzip-slip");
+        final File target = new File(directory, "out");
+        final File sibling = new File(directory, "OUT");
+        assumeTrue(target.mkdir(), "the target directory cannot be created");
+        assumeTrue(sibling.mkdir(), "the directory is not case-sensitive");
+        assumeTrue(directory.list().length == 2, "the directory is not case-sensitive");
+
+        for (final String entryName : new String[] { "../OUT/evil.txt", "../OUT/d/", "x/../../OUT/evil.txt" }) {
+            final File archive = new File(directory, "evil.zip");
+            try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(archive))) {
+                zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                zos.closeEntry();
+            }
+
+            assertThrows(IOException.class, () -> IOUtil.unzip(archive, target), entryName);
+            assertEquals(0, sibling.list().length, entryName);
+        }
+
+        // an in-target junction leading to the sibling is refused too; one leading inside the target is not
+        final File inside = new File(target, "inside");
+        assertTrue(inside.mkdir());
+        final File toSibling = new File(target, "toSibling");
+        final File toInside = new File(target, "toInside");
+        try {
+            if (createJunctionG048(toSibling, sibling) && createJunctionG048(toInside, inside)) {
+                final File archive = new File(directory, "links.zip");
+                try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(archive))) {
+                    zos.putNextEntry(new java.util.zip.ZipEntry("toSibling/evil.txt"));
+                    zos.closeEntry();
+                }
+                assertThrows(IOException.class, () -> IOUtil.unzip(archive, target));
+                assertEquals(0, sibling.list().length);
+
+                final File archive2 = new File(directory, "links2.zip");
+                try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(archive2))) {
+                    zos.putNextEntry(new java.util.zip.ZipEntry("toInside/ok.txt"));
+                    zos.write("ok".getBytes(StandardCharsets.UTF_8));
+                    zos.closeEntry();
+                }
+                IOUtil.unzip(archive2, target);
+                assertEquals("ok", new String(Files.readAllBytes(new File(inside, "ok.txt").toPath()), StandardCharsets.UTF_8));
+            }
+        } finally {
+            Files.deleteIfExists(toSibling.toPath());
+            Files.deleteIfExists(toInside.toPath());
+        }
+
+        // an entry naming the target itself in the parent's spelling still lands in the target
+        final File archive = new File(directory, "ok.zip");
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(archive))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("../out/a/b.txt"));
+            zos.write("b".getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+        IOUtil.unzip(archive, target);
+        assertEquals("b", new String(Files.readAllBytes(new File(target, "a/b.txt").toPath()), StandardCharsets.UTF_8));
+        assertEquals(0, sibling.list().length);
+    }
+
+    // G048-02: a junction "J" leading to its case-sensitive sibling "j" was not recognised as a junction (Path.equals folds
+    // case on Windows), so deleting the junction emptied the sibling through it and the size/list walks descended into it
+    @Test
+    public void testIsSymbolicLinkOrJunction_junctionToACaseSensitiveSiblingIsALink() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g048-junction");
+        final File lower = new File(directory, "j");
+        assertTrue(lower.mkdir());
+        final File kept = new File(lower, "keep.txt");
+        Files.write(kept.toPath(), "keep".getBytes(StandardCharsets.UTF_8));
+        final File junction = new File(directory, "J");
+        boolean junctionCreated = false;
+
+        try {
+            junctionCreated = createJunctionG048(junction, lower);
+            assumeTrue(junctionCreated, "a junction cannot be created here");
+            assumeTrue(directory.list().length == 2, "the directory is not case-sensitive");
+
+            assertTrue(IOUtil.isSymbolicLinkOrJunction(junction));
+            assertFalse(IOUtil.isSymbolicLinkOrJunction(lower));
+            assertEquals(4L, IOUtil.sizeOfDirectory(directory));
+            assertEquals(Arrays.asList("J", "j", "keep.txt"), IOUtil.listFiles(directory, true, false).stream().map(File::getName).sorted().toList());
+
+            assertTrue(IOUtil.deleteRecursivelyIfExists(junction));
+            assertFalse(junction.exists());
+            assertEquals("keep", new String(Files.readAllBytes(kept.toPath()), StandardCharsets.UTF_8));
+        } finally {
+            // Only a junction this test created: without one, "J" may name the existing directory "j" itself.
+            if (junctionCreated) {
+                Files.deleteIfExists(junction.toPath());
+            }
+        }
+    }
+
+    // ---- deep review 2026-10-26 G048 end ----
+
+    // ---- deep review 2026-10-26 verify G121 begin ----
+
+    private static void zipEntriesG121(final File archive, final String... entryNames) throws IOException {
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new FileOutputStream(archive))) {
+            for (final String entryName : entryNames) {
+                zos.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                if (!entryName.endsWith("/")) {
+                    zos.write(entryName.getBytes(StandardCharsets.UTF_8));
+                }
+                zos.closeEntry();
+            }
+        }
+    }
+
+    // G048-01, second guard alone: an entry written through an in-target junction to a case-sensitive sibling of the target
+    // ("out/toSibling" -> "OUT") passed the real-path check, which compared with the case-folding Path.startsWith only
+    @Test
+    public void testUnzip_entryThroughAJunctionToACaseSensitiveSiblingIsRejected() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g121-unzip-junction");
+        final File target = new File(directory, "out");
+        final File sibling = new File(directory, "OUT");
+        assertTrue(target.mkdir());
+        assumeTrue(sibling.mkdir() && directory.list().length == 2, "the directory is not case-sensitive");
+        final File junction = new File(target, "toSibling");
+
+        try {
+            assumeTrue(createJunctionG048(junction, sibling), "a junction cannot be created here");
+            final File archive = tempFolder.resolve("g121-junction.zip").toFile();
+            zipEntriesG121(archive, "toSibling/evil.txt");
+
+            assertThrows(IOException.class, () -> IOUtil.unzip(archive, target));
+            assertEquals(0, sibling.list().length);
+        } finally {
+            Files.deleteIfExists(junction.toPath());
+        }
+    }
+
+    // G121-01: a UNC target whose server and share are spelled in another case than the redirector reports them, holding a
+    // junction to one of its own subdirectories: an entry under the junction resolves to a real path that spells the root
+    // the redirector's way and is still inside the target (on JDK 21 it was refused once the real-path check compared the
+    // root as spelled too; only the names below the root may be compared that way)
+    @Test
+    public void testUnzip_uncTargetSpelledInAnotherCaseKeepsEntriesUnderAnInTargetJunction() throws Exception {
+        assumeTrue(IOUtil.IS_OS_WINDOWS, "administrative shares and junctions are Windows-only");
+        final File directory = tempFolder.resolve("g121-unc").toFile();
+        assertTrue(directory.mkdirs());
+        final File inside = new File(directory, "inside");
+        assertTrue(inside.mkdir());
+        final File junction = new File(directory, "toInside");
+        final String absolute = directory.getAbsolutePath();
+        assumeTrue(absolute.length() > 2 && absolute.charAt(1) == ':', "the temp dir is not on a drive letter: " + absolute);
+        final File uncDirectory = new File("\\\\localhost\\" + absolute.charAt(0) + "$" + absolute.substring(2));
+
+        try {
+            assumeTrue(createJunctionG048(junction, inside), "a junction cannot be created here");
+            assumeTrue(uncDirectory.isDirectory(), "administrative share not reachable: " + uncDirectory);
+            // the redirector keeps the spelling its connection was opened with; the target is spelled the other way round
+            final String reportedRoot = new File(uncDirectory, "toInside").toPath().toRealPath().getRoot().toString();
+            final String upperRoot = reportedRoot.toUpperCase(java.util.Locale.ROOT);
+            final String otherRoot = upperRoot.equals(reportedRoot) ? reportedRoot.toLowerCase(java.util.Locale.ROOT) : upperRoot;
+            assumeTrue(!otherRoot.equals(reportedRoot), "no other spelling of " + reportedRoot);
+            final File uncTarget = new File(otherRoot + absolute.substring(3));
+            assumeTrue(uncTarget.isDirectory(), "administrative share not reachable: " + uncTarget);
+            final File archive = tempFolder.resolve("g121-unc.zip").toFile();
+            zipEntriesG121(archive, "toInside/a.txt", "b.txt");
+
+            IOUtil.unzip(archive, uncTarget);
+
+            assertEquals("toInside/a.txt", new String(Files.readAllBytes(new File(inside, "a.txt").toPath()), StandardCharsets.UTF_8));
+            assertEquals("b.txt", new String(Files.readAllBytes(new File(directory, "b.txt").toPath()), StandardCharsets.UTF_8));
+        } finally {
+            Files.deleteIfExists(junction.toPath());
+        }
+    }
+
+    // G048-02: a junction "dir/K" to the same name under a case-sensitive sibling directory ("DIR/K") differs from its
+    // unredirected path only in a parent's case: it is still a junction, so the walks and the delete do not go through it
+    @Test
+    public void testIsSymbolicLinkOrJunction_junctionToTheSameNameUnderACaseSensitiveSiblingIsALink() throws Exception {
+        final File directory = newCaseSensitiveDirectoryOrSkip("g121-junction");
+        final File lower = new File(directory, "dir");
+        final File upper = new File(directory, "DIR");
+        assertTrue(lower.mkdir());
+        assumeTrue(upper.mkdir() && directory.list().length == 2, "the directory is not case-sensitive");
+        final File target = new File(upper, "K");
+        assertTrue(target.mkdir());
+        final File kept = new File(target, "keep.txt");
+        Files.write(kept.toPath(), "keep".getBytes(StandardCharsets.UTF_8));
+        final File junction = new File(lower, "K");
+
+        try {
+            assumeTrue(createJunctionG048(junction, target), "a junction cannot be created here");
+
+            assertTrue(IOUtil.isSymbolicLinkOrJunction(junction));
+            assertFalse(IOUtil.isSymbolicLinkOrJunction(target));
+            assertEquals(4L, IOUtil.sizeOfDirectory(directory));
+            final java.util.List<String> expected = Arrays.asList("DIR", "K", "K", "dir", "keep.txt");
+            assertEquals(expected, com.landawn.abacus.util.stream.Stream.listFiles(directory, true).map(File::getName).sorted().toList());
+            assertEquals(expected, Seq.listFiles(directory, true).map(File::getName).sorted().toList());
+
+            assertTrue(IOUtil.deleteRecursivelyIfExists(junction));
+            assertFalse(junction.exists());
+            assertEquals("keep", new String(Files.readAllBytes(kept.toPath()), StandardCharsets.UTF_8));
+        } finally {
+            Files.deleteIfExists(junction.toPath());
+        }
+    }
+
+    // G048-02 neighbours: outside case-sensitive directories the answers are unchanged - a junction is a link in every
+    // spelling (other case, lower-case drive letter, 8.3 short name), its target and a plain directory are not
+    @Test
+    public void testIsSymbolicLinkOrJunction_spellingsOutsideCaseSensitiveDirectoriesUnchanged() throws Exception {
+        assumeTrue(IOUtil.IS_OS_WINDOWS, "junctions are Windows-only");
+        final File directory = tempFolder.resolve("g121-spellings").toFile();
+        assertTrue(directory.mkdirs());
+        final File target = new File(directory, "Target");
+        assertTrue(target.mkdir());
+        final File junction = new File(directory, "LongJunctionName");
+
+        try {
+            assumeTrue(createJunctionG048(junction, target), "a junction cannot be created here");
+
+            for (final String spelling : new String[] { "LongJunctionName", "longjunctionname", "LONGJUNCTIONNAME" }) {
+                assertTrue(IOUtil.isSymbolicLinkOrJunction(new File(directory, spelling)), spelling);
+            }
+            final String absolute = junction.getAbsolutePath();
+            assertTrue(IOUtil.isSymbolicLinkOrJunction(new File(Character.toLowerCase(absolute.charAt(0)) + absolute.substring(1))));
+
+            for (final String spelling : new String[] { "Target", "target", "TARGET" }) {
+                assertFalse(IOUtil.isSymbolicLinkOrJunction(new File(directory, spelling)), spelling);
+            }
+
+            final File shortName = new File(directory, "LONGJU~1");
+            if (shortName.isDirectory()) { // 8.3 names can be disabled on the volume
+                assertTrue(IOUtil.isSymbolicLinkOrJunction(shortName));
+            }
+        } finally {
+            Files.deleteIfExists(junction.toPath());
+        }
+    }
+
+    // ---- deep review 2026-10-26 verify G121 end ----
 }

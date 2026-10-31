@@ -237,8 +237,9 @@ import com.landawn.abacus.util.function.TriFunction;
  * <ul>
  *   <li><b>Bidirectional Lookup:</b> Efficient key-to-value and value-to-key operations</li>
  *   <li><b>Uniqueness Enforcement:</b> Ensures bijective relationship between keys and values</li>
- *   <li><b>Merge Functions:</b> Handle duplicate keys or values with custom merge logic</li>
- *   <li><b>Force Operations:</b> Override uniqueness constraints when necessary</li>
+ *   <li><b>Merge Functions:</b> Handle duplicate keys with custom merge logic</li>
+ *   <li><b>No Forced Re-binding:</b> A value already bound to a different key is rejected with an
+ *       {@code IllegalArgumentException}; it is never moved to the new key</li>
  * </ul>
  *
  * <p><b>Multimap Collector Options:</b></p>
@@ -6429,7 +6430,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * and returned as a double-precision floating-point value.</p>
      *
      * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingDouble(ToDoubleFunction)}
-     * implementation for compatibility with the Java Stream API.</p>
+     * implementation for compatibility with the Java Stream API. Like that implementation, it can return an
+     * infinite result when the running sum of finite values overflows, even if the true mean is finite: averaging
+     * {@code Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE} gives {@code Infinity}, not
+     * {@code 0.0}. {@link #averagingDoubleOrEmpty(ToDoubleFunction)} and
+     * {@link #averagingDoubleOrElseThrow(ToDoubleFunction)} return the finite mean for such input.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

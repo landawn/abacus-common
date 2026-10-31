@@ -1253,7 +1253,22 @@ public final class HttpUtil {
      * Gets an output stream from an HttpURLConnection with appropriate headers and wrapping.
      * Sets Content-Type and Content-Encoding headers based on the content format,
      * and wraps the stream with compression if needed.
-     * If compression initialization fails, the opened stream is closed before the exception is propagated.
+     *
+     * <p><b>If the compression stream cannot be constructed</b> - always for a Brotli {@code contentFormat}
+     * ({@link UnsupportedOperationException}), and also when writing the GZIP header to the connection fails
+     * ({@link UncheckedIOException}) or a compression library is missing (an {@link Error}) - the connection is
+     * disconnected and the opened stream is closed before the exception is propagated, in buffered and streaming mode
+     * alike. In chunked streaming mode the request headers have already been sent, and this aborts the request rather than
+     * completing it with an empty body. (With {@code setFixedLengthStreamingMode(0)} the headers alone already form a
+     * complete empty request, which the server receives.)</p>
+     *
+     * <p><b>Do not use the connection after such a failure; discard it</b>, as {@link HttpClient} does (also with
+     * {@link HttpSettings#streamRequestBody(boolean)}). A later {@code getResponseCode()} or {@code getInputStream()} on
+     * it never yields the response to the intended request: in chunked streaming mode, and in fixed-length streaming
+     * mode of length 0, it blocks until the connection's read timeout expires and then throws
+     * {@link java.net.SocketTimeoutException} (without a read timeout it can block indefinitely); in fixed-length
+     * streaming mode with a positive length it fails at once with an {@link IOException}; and in the default buffered
+     * mode it reconnects, sends the request with an empty body and returns the response to that.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1273,8 +1288,10 @@ public final class HttpUtil {
      * @throws IllegalArgumentException if {@code connection} is {@code null}
      * @throws IllegalStateException if a request header must be set after the connection has already been established
      * @throws IOException if opening the connection output stream fails
-     * @throws UnsupportedOperationException if {@code contentFormat} requests Brotli compression, which has no bundled encoder
-     * @throws UncheckedIOException if constructing the compression stream fails while writing its header
+     * @throws UnsupportedOperationException if {@code contentFormat} requests Brotli compression, which has no bundled encoder (the
+     *         connection has then been disconnected and must not be used again)
+     * @throws UncheckedIOException if constructing the compression stream fails while writing its header (the connection has then
+     *         been disconnected and must not be used again)
      */
     public static OutputStream getOutputStream(final HttpURLConnection connection, final ContentFormat contentFormat, String contentType, // NOSONAR
             String contentEncoding) throws IllegalArgumentException, IllegalStateException, IOException, UnsupportedOperationException, UncheckedIOException {
@@ -1303,9 +1320,15 @@ public final class HttpUtil {
             return wrapOutputStream(rawStream, contentFormat);
         } catch (final RuntimeException | Error e) {
             // Review 2026-10-17: A failed encoder construction never transfers the opened stream to the caller.
+            // Disconnect BEFORE closing: in streaming mode the request headers are already sent, and closing the raw
+            // stream would complete the request (final empty chunk), so the server would process an empty request
+            // although this call failed. Disconnecting aborts it; in buffered mode nothing has been sent yet.
             try {
+                connection.disconnect();
                 rawStream.close();
-            } catch (final IOException | RuntimeException | Error closeFailure) {
+            } catch (final RuntimeException closeFailure) {
+                // Expected after the disconnect: the JDK chunked stream fails (NPE) trying to finish a request it no longer owns.
+            } catch (final IOException | Error closeFailure) {
                 if (closeFailure != e) {
                     e.addSuppressed(closeFailure);
                 }

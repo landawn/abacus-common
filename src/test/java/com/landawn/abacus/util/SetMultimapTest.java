@@ -1514,4 +1514,96 @@ public class SetMultimapTest extends TestBase {
 
     // ---- bug review 2026-09-27 verify G123 end ----
 
+    // ---- deep review 2026-10-26 verify G123 begin ----
+    /** An LRU-style map whose {@code int} constructor is its eviction cap, not a capacity. */
+    public static class G123LruMap<K, V> extends LinkedHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        private final int maxEntries;
+
+        public G123LruMap(final int maxEntries) {
+            super(16, 0.75f, false);
+            this.maxEntries = maxEntries;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
+            return size() > maxEntries;
+        }
+    }
+
+    // G123-01 (sibling of G055-01): merge(..) mirrored an LRU-style first map sized for that map's keys only, so the later maps' keys evicted them
+    @Test
+    public void testMerge_lruStyleFirstMapKeepsAllKeys() {
+        final G123LruMap<String, Integer> a = new G123LruMap<>(100);
+        a.put("a", 1);
+
+        final SetMultimap<String, Integer> merged2 = SetMultimap.merge(a, Map.of("b", 2));
+        assertEquals(G123LruMap.class, merged2.backingMap.getClass());
+        assertEquals(2, merged2.keyCount());
+        assertEquals(Set.of(1), merged2.get("a"));
+        assertEquals(Set.of(2), merged2.get("b"));
+
+        final SetMultimap<String, Integer> merged3 = SetMultimap.merge(a, Map.of("b", 2), Map.of("c", 3, "a", 4));
+        assertEquals(3, merged3.keyCount());
+        assertEquals(Set.of(1, 4), merged3.get("a"));
+        assertEquals(Set.of(3), merged3.get("c"));
+
+        final SetMultimap<String, Integer> mergedNullFirst = SetMultimap.merge(null, a, Map.of("c", 3));
+        assertEquals(2, mergedNullFirst.keyCount());
+        assertEquals(Set.of(1), mergedNullFirst.get("a"));
+
+        final SetMultimap<String, Integer> mergedList = SetMultimap.merge(Arrays.asList(a, Map.of("b", 2), Map.of("c", 3)));
+        assertEquals(3, mergedList.keyCount());
+        assertEquals(Set.of(1), mergedList.get("a"));
+
+        // an empty LRU-style first map was mirrored with a cap of 0, which dropped every merged key
+        final SetMultimap<String, Integer> mergedEmptyFirst = SetMultimap.merge(new G123LruMap<String, Integer>(10), Map.of("b", 2));
+        assertEquals(1, mergedEmptyFirst.keyCount());
+        assertEquals(Set.of(2), mergedEmptyFirst.get("b"));
+    }
+
+    // G123-01 neighbours: insertion-ordered, sorted, identity and enum first maps are mirrored and filled as before; fromMap is unchanged
+    @Test
+    public void testMerge_standardFirstMapsUnchangedByMergeSizing() {
+        final Map<String, Integer> linked = new LinkedHashMap<>();
+        linked.put("z", 1);
+        linked.put("y", 2);
+        final SetMultimap<String, Integer> fromLinked = SetMultimap.merge(linked, Map.of("x", 3), Map.of("z", 4));
+        assertEquals(LinkedHashMap.class, fromLinked.backingMap.getClass());
+        assertEquals(Arrays.asList("z", "y", "x"), new ArrayList<>(fromLinked.keySet()));
+        assertEquals(Set.of(1, 4), fromLinked.get("z"));
+
+        final TreeMap<String, Integer> sorted = new TreeMap<>(Comparator.reverseOrder());
+        sorted.put("a", 1);
+        final SetMultimap<String, Integer> fromSorted = SetMultimap.merge(Arrays.asList(sorted, Map.of("c", 3), Map.of("b", 2)));
+        assertEquals(TreeMap.class, fromSorted.backingMap.getClass());
+        assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(fromSorted.keySet()));
+
+        final String key1 = new String("k");
+        final String key2 = new String("k");
+        final IdentityHashMap<String, Integer> identity = new IdentityHashMap<>();
+        identity.put(key1, 1);
+        final Map<String, Integer> second = new HashMap<>();
+        second.put(key2, 2);
+        final SetMultimap<String, Integer> fromIdentity = SetMultimap.merge(identity, second);
+        assertEquals(IdentityHashMap.class, fromIdentity.backingMap.getClass());
+        assertEquals(2, fromIdentity.keyCount());
+
+        final java.util.EnumMap<java.util.concurrent.TimeUnit, Integer> enums = new java.util.EnumMap<>(java.util.concurrent.TimeUnit.class);
+        enums.put(java.util.concurrent.TimeUnit.SECONDS, 1);
+        final SetMultimap<java.util.concurrent.TimeUnit, Integer> fromEnum = SetMultimap.merge(enums,
+                Map.of(java.util.concurrent.TimeUnit.DAYS, 2, java.util.concurrent.TimeUnit.NANOSECONDS, 3));
+        assertEquals(java.util.EnumMap.class, fromEnum.backingMap.getClass());
+        assertEquals(Arrays.asList(java.util.concurrent.TimeUnit.NANOSECONDS, java.util.concurrent.TimeUnit.SECONDS, java.util.concurrent.TimeUnit.DAYS),
+                new ArrayList<>(fromEnum.keySet()));
+
+        final G123LruMap<String, Integer> lru = new G123LruMap<>(100);
+        lru.put("a", 1);
+        final SetMultimap<String, Integer> copied = SetMultimap.fromMap(lru);
+        assertEquals(G123LruMap.class, copied.backingMap.getClass());
+        assertEquals(Set.of(1), copied.get("a"));
+    }
+    // ---- deep review 2026-10-26 verify G123 end ----
+
 }

@@ -402,4 +402,30 @@ public class InstantTypeTest extends TestBase {
         assertThrows(DateTimeParseException.class, () -> instantType.valueOf("1234"));
         assertThrows(DateTimeParseException.class, () -> instantType.valueOf("0"));
     }
+
+    // ---- deep review 2026-10-26 G125 begin ----
+    // G125-01 (G017-01): OffsetDateTime/ZonedDateTime used the text route, which failed for a whole-minute value (toString drops ":00")
+    // and for a region zone id ("[Europe/Paris]") while other values of the same type converted.
+    @Test
+    public void testValueOfObject_offsetAndZonedDateTimeConvertForEveryValue() {
+        final java.time.OffsetDateTime wholeMinute = java.time.OffsetDateTime.of(2020, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.ofHours(2));
+        assertEquals(Instant.parse("2019-12-31T22:00:00Z"), instantType.valueOf((Object) wholeMinute));
+
+        final java.time.ZonedDateTime regionZone = java.time.ZonedDateTime.of(2020, 1, 1, 0, 0, 1, 0, java.time.ZoneId.of("Europe/Paris"));
+        assertEquals(Instant.parse("2019-12-31T23:00:01Z"), instantType.valueOf((Object) regionZone));
+
+        assertEquals(Instant.parse("2019-12-31T22:00:00Z"), com.landawn.abacus.util.N.convert(wholeMinute, Instant.class));
+        assertEquals(Instant.parse("2019-12-31T23:00:01Z"), com.landawn.abacus.util.N.convert(regionZone, Instant.class));
+    }
+
+    // G125-01: values that already converted through the text route keep the same result (including nanoseconds).
+    @Test
+    public void testValueOfObject_offsetAndZonedDateTimeResultsUnchangedForTextRouteValues() {
+        final java.time.OffsetDateTime withSeconds = java.time.OffsetDateTime.of(2020, 1, 1, 0, 0, 1, 123456789, java.time.ZoneOffset.ofHours(-5));
+        assertEquals(Instant.parse(withSeconds.toString()), instantType.valueOf((Object) withSeconds));
+
+        final java.time.ZonedDateTime utc = java.time.ZonedDateTime.of(2021, 6, 30, 23, 59, 59, 999, java.time.ZoneOffset.UTC);
+        assertEquals(Instant.parse(utc.toString()), instantType.valueOf((Object) utc));
+    }
+    // ---- deep review 2026-10-26 G125 end ----
 }

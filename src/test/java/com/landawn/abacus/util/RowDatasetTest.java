@@ -3415,4 +3415,70 @@ public class RowDatasetTest extends RowDatasetTestSupport {
     }
 
     // ---- bug review 2026-10-02 final G130 end ----
+
+    // ---- deep review 2026-10-26 G071 begin ----
+
+    public static class G071OnlyId {
+        private int id;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+    }
+
+    // G071-01: stream(.., beanClass).toArray() on an empty remainder must not fail where toList()/count() return no rows
+    @Test
+    public void testStreamBeanToArray_emptyRemainderUnderErrorPolicy() {
+        final Dataset strict = Dataset.rows(Arrays.asList("id", "extra"), new Object[][] { { 1, "x" }, { 2, "y" } })
+                .withMissingPropertyPolicy(Dataset.MissingPropertyPolicy.ERROR);
+
+        assertEquals(0, strict.stream(1, 1, G071OnlyId.class).toList().size());
+        assertEquals(0, strict.stream(1, 1, G071OnlyId.class).toArray().length);
+        assertEquals(0, strict.stream(2, 2, G071OnlyId.class).toArray(G071OnlyId[]::new).length);
+        // A remainder that has rows to convert still reports the unmapped column.
+        assertThrows(IllegalArgumentException.class, () -> strict.stream(1, 2, G071OnlyId.class).toArray());
+    }
+
+    // ---- deep review 2026-10-26 G071 end ----
+
+    // ---- deep review 2026-10-26 verify G124 begin ----
+
+    // G071-01 (verify): the other paths that reach the same bulk shortcut on an empty remainder - intermediate ops that buffer
+    // through it (sorted/reversed), skip past the end, the rowSupplier overload with a bean row and a slice - report no rows.
+    @Test
+    public void testStreamBeanToArray_emptyRemainderThroughBufferingOpsSupplierAndSlice() {
+        final Dataset strict = Dataset.rows(Arrays.asList("id", "extra"), new Object[][] { { 1, "x" }, { 2, "y" } })
+                .withMissingPropertyPolicy(Dataset.MissingPropertyPolicy.ERROR);
+
+        assertEquals(0, strict.stream(1, 1, G071OnlyId.class).sorted(Comparator.comparingInt(G071OnlyId::getId)).toList().size());
+        assertEquals(0, strict.stream(2, 2, G071OnlyId.class).reversed().toList().size());
+        assertEquals(0, strict.stream(1, 1, G071OnlyId.class).skip(1).toArray().length);
+        assertEquals(0, strict.stream(0, 0, columnCount -> new G071OnlyId()).toArray().length);
+        assertEquals(0, strict.slice(1, 2).stream(1, 1, G071OnlyId.class).toArray().length);
+    }
+
+    // G071-01 (verify): unchanged neighbours - rows to convert still fail under ERROR (also through sorted), the default policy
+    // still converts, and an empty remainder of non-bean rows is still empty.
+    @Test
+    public void testStreamBeanToArray_nonEmptyRemainderAndDefaultPolicyUnchanged() {
+        final Dataset plain = Dataset.rows(Arrays.asList("id", "extra"), new Object[][] { { 1, "x" }, { 2, "y" } });
+        final Dataset strict = plain.withMissingPropertyPolicy(Dataset.MissingPropertyPolicy.ERROR);
+
+        assertThrows(IllegalArgumentException.class, () -> strict.stream(0, 1, G071OnlyId.class).sorted(Comparator.comparingInt(G071OnlyId::getId)).toList());
+        assertThrows(IllegalArgumentException.class, () -> strict.stream(0, 2, G071OnlyId.class).toArray(G071OnlyId[]::new));
+
+        final G071OnlyId[] converted = plain.stream(0, 2, G071OnlyId.class).toArray(G071OnlyId[]::new);
+        assertEquals(2, converted.length);
+        assertEquals(1, converted[0].getId());
+        assertEquals(2, converted[1].getId());
+        assertEquals(0, plain.stream(1, 1, G071OnlyId.class).toArray().length);
+        assertEquals(0, strict.stream(2, 2, Object[].class).toArray().length);
+        assertEquals(0, strict.stream(0, 2, G071OnlyId.class).limit(0).toArray().length);
+    }
+
+    // ---- deep review 2026-10-26 verify G124 end ----
 }

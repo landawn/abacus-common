@@ -850,8 +850,9 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     }
 
     /**
-     * A dummy {@link Reader} implementation used as a placeholder when constructing a
-     * {@link BufferedReader} that reads from a {@link String} directly.
+     * A dummy {@link Reader} implementation passed to the superclass constructor as a placeholder by every
+     * {@link BufferedReader} constructor (string, {@link Reader} and {@link InputStream} sources);
+     * see {@link BufferedReader#DUMMY_READER}.
      * All operations throw {@link UnsupportedOperationException}.
      */
     static final class DummyReader extends Reader {

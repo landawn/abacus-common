@@ -30,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -710,6 +711,9 @@ public final class Beans {
      * {@link #MAX_CACHED_NAMES} cap.
      */
     private static final ClassCache<Map<Method, String>> methodPropNamePool = new ClassCache<>();
+
+    // Only real, one-argument members are admitted; the declaring class owns their lifetime.
+    private static final ClassCache<Map<Method, Class<?>>> methodParameterTypePool = new ClassCache<>();
 
     // Java keywords mapped to legal property identifiers.
     private static final Map<String, String> keyWordMapper = new HashMap<>(16);
@@ -1419,9 +1423,10 @@ public final class Beans {
     }
 
     /**
-     * Records a registration and drops every property model it could have changed - {@code targetClass}'s own, and
-     * that of every already-introspected subtype of {@code targetClass}, because a registration against a base type
-     * also governs the accessors its subtypes inherit.
+     * Records a registration and drops every property model it could have changed - {@code targetClass}'s own, that
+     * of every already-introspected subtype of {@code targetClass}, because a registration against a base type
+     * also governs the accessors its subtypes inherit, and that of every already-introspected bean whose builder class
+     * is {@code targetClass} or one of its subtypes, because the bean's cached parser model holds the builder's setters.
      *
      * <p>All four registration APIs route through here. Two of them used to skip the subtype sweep entirely,
      * which made their effect depend on introspection order: registering a base type before any subtype was
@@ -1448,6 +1453,15 @@ public final class Beans {
             for (final Class<?> cachedClass : new ArrayList<>(introspectedClasses.keySet())) {
                 if (targetClass.isAssignableFrom(cachedClass)) {
                     classesToRefresh.add(cachedClass);
+                } else {
+                    // A bean is affected too when the registration covers its builder class: its setter pools and the
+                    // parser's cached BeanInfo (which captured the builder's setters) would keep the old model. A builder
+                    // published only through its bean is not in this index, so it is reached through the bean.
+                    final BuilderInfo builderInfo = builderMap.get(cachedClass);
+
+                    if (builderInfo != null && builderInfo.builderClass != null && targetClass.isAssignableFrom(builderInfo.builderClass)) {
+                        classesToRefresh.add(cachedClass);
+                    }
                 }
             }
 
@@ -1738,10 +1752,18 @@ public final class Beans {
      * fails, the registration is demoted: {@link #isRegisteredXmlBindingClass(Class)} returns {@code false}
      * afterwards and the getter-only properties are not exposed. Calling this method again restores the
      * registration and discards the cached property model, so the class is introspected again (and demoted
-     * again if construction still fails). Only a class with an explicit registration of its own is demoted: a
-     * subclass governed through inheritance whose own construction fails is not - it simply exposes no
-     * getter-only properties while {@link #isRegisteredXmlBindingClass(Class)} keeps answering {@code true}
-     * for it.</p>
+     * again if construction still fails). Only a concrete class with an explicit registration of its own is
+     * demoted: a subclass governed through inheritance whose own construction fails is not - it simply exposes
+     * no getter-only properties while {@link #isRegisteredXmlBindingClass(Class)} keeps answering {@code true}
+     * for it. An abstract class or an interface is not demoted either, because it can never be constructed: its
+     * registration is kept, so an abstract class still governs its subclasses, and each subclass that can be
+     * constructed exposes the getter-only properties it inherits regardless of whether the abstract class itself
+     * was introspected first. The abstract class's own property list leaves out the getter-only properties that only
+     * that instance probe can confirm (for example a getter without a backing field), because no instance of it can be
+     * probed; a getter-only property that needs no probe is still listed (with a detected builder, one backed by a
+     * field). When the abstract class itself is the target of a conversion ({@code mapToBean},
+     * JSON/XML deserialization), it is created through its builder if {@link #getBuilderInfo(Class)} detects one,
+     * and cannot be created otherwise.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1782,9 +1804,11 @@ public final class Beans {
      * <p>A registration can be withdrawn automatically: if the class cannot be instantiated (its no-arg
      * constructor is missing or throws) when its getter-only collection/map getters are probed during
      * introspection, the registration is demoted and this method returns {@code false} from then on, until
-     * {@link #registerXmlBindingClass(Class)} is called again. Only a class with an explicit registration of its
-     * own is demoted this way; a subclass governed through inheritance that cannot be constructed is not, so
-     * this method keeps answering {@code true} for it although its getter-only properties are not exposed.</p>
+     * {@link #registerXmlBindingClass(Class)} is called again. Only a concrete class with an explicit registration
+     * of its own is demoted this way; a subclass governed through inheritance that cannot be constructed is not, so
+     * this method keeps answering {@code true} for it although its getter-only properties are not exposed. An
+     * abstract class or an interface is never demoted either: introspecting it leaves this method answering
+     * {@code true} for it and, for an abstract class, for the subclasses it governs.</p>
      *
      * <p>A registration governs subclasses too: this method returns {@code true} for a subclass of a registered
      * class unless a nearer class in the superclass chain has an explicit entry of its own (for example one
@@ -2284,8 +2308,10 @@ public final class Beans {
                 || (JAKARTA_ENTITY_ANNOTATION != null && targetClass.getAnnotation(JAKARTA_ENTITY_ANNOTATION) != null);
     }
 
-    private static boolean isFieldGetMethod(final Method method, final Field field) {
-        if (!isGetMethod(method) || Object.class.equals(method.getDeclaringClass()) || !method.getReturnType().isAssignableFrom(field.getType())) {
+    private static boolean isFieldGetMethod(final AccessorCandidate candidate, final Field field) {
+        final Method method = candidate.method();
+
+        if (!method.getReturnType().isAssignableFrom(field.getType())) {
             return false;
         }
 
@@ -2296,26 +2322,26 @@ public final class Beans {
             return true;
         }
 
-        final String propName = accessorSuffix(methodName);
+        final String propName = candidate.suffix();
 
         return propName.equalsIgnoreCase(fieldName)
                 || (!fieldName.isEmpty() && fieldName.charAt(0) == '_' && propName.equalsIgnoreCase(fieldName.substring(1)));
     }
 
     /**
-     * Whether {@code method}, already accepted by {@link #isFieldGetMethod(Method, Field)}, names {@code field} with its exact
+     * Whether the getter, already accepted by {@link #isFieldGetMethod(AccessorCandidate, Field)}, names {@code field} with its exact
      * case: {@code getUserName()} for {@code userName}, but not {@code getUsername()}. Both {@code getXxx} for {@code xxx}
      * and the JavaBeans spelling {@code getxXX} for {@code xXX} count, as does the leading-underscore form.
      */
-    private static boolean isExactFieldGetMethod(final Method method, final Field field) {
+    private static boolean isExactFieldGetMethod(final AccessorCandidate candidate, final Field field) {
         final String fieldName = field.getName();
-        final String methodName = method.getName();
+        final String methodName = candidate.method().getName();
 
         if (fieldName.equals(methodName)) {
             return true;
         }
 
-        final String propName = accessorSuffix(methodName);
+        final String propName = candidate.suffix();
         final String name = !fieldName.isEmpty() && fieldName.charAt(0) == '_' && !propName.equalsIgnoreCase(fieldName) ? fieldName.substring(1) : fieldName;
 
         return propName.equals(Strings.capitalize(name)) || propName.equals(name);
@@ -2354,7 +2380,7 @@ public final class Beans {
         final String mn = method.getName();
 
         return (mn.startsWith(GET) || mn.startsWith(IS) || mn.startsWith(HAS) || getDeclaredField(method.getDeclaringClass(), mn) != null)
-                && (N.isEmpty(method.getParameterTypes())) && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
+                && method.getParameterCount() == 0 && !void.class.equals(method.getReturnType()) && !nonGetSetMethodName.contains(mn);
     }
 
     private static boolean isJAXBGetMethod(final Class<?> targetClass, final LazyInstance instance, final Method method, final Field field) {
@@ -2430,14 +2456,14 @@ public final class Beans {
      * {@code 3} the class-qualified form {@code SimpleClassName.prop}, {@code 4} equal once a
      * {@code get}/{@code set}/{@code is}/{@code has} prefix is removed; {@code 0} no match. Lower is better.
      *
-     * @param targetClass the class the property is being looked up on
+     * @param simpleClassName the simple name of the class the property is being looked up on
      * @param input the trimmed caller-supplied spelling
      * @param inputWithoutUnderscores {@code input} with every underscore removed, or {@code null} when it has none;
      *        computed once per lookup by {@link #resolveAlias(Class, String, Map)}, not once per candidate
      * @param propNameByMethod the bean's canonical property name
      * @return the match rank, {@code 0} for no match
      */
-    private static int aliasRank(final Class<?> targetClass, final String input, final String inputWithoutUnderscores, final String propNameByMethod) {
+    private static int aliasRank(final String simpleClassName, final String input, final String inputWithoutUnderscores, final String propNameByMethod) {
         if (input.equalsIgnoreCase(propNameByMethod)) {
             return 1;
         }
@@ -2448,17 +2474,16 @@ public final class Beans {
             return 2;
         }
 
-        final String simpleClassName = ClassUtil.getSimpleClassName(targetClass);
-
         if (input.length() == (simpleClassName.length() + 1 + propNameByMethod.length())
-                && input.equalsIgnoreCase(simpleClassName + SK._PERIOD + propNameByMethod)) {
+                && input.regionMatches(true, 0, simpleClassName, 0, simpleClassName.length()) && input.charAt(simpleClassName.length()) == SK._PERIOD
+                && input.regionMatches(true, simpleClassName.length() + 1, propNameByMethod, 0, propNameByMethod.length())) {
             return 3;
         }
 
-        if ((input.startsWith(GET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (input.startsWith(SET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
-                || (input.startsWith(IS) && input.length() > 2 && input.substring(2).equalsIgnoreCase(propNameByMethod))
-                || (input.startsWith(HAS) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))) {
+        final int prefixLength = input.startsWith(IS) ? 2 : input.startsWith(GET) || input.startsWith(SET) || input.startsWith(HAS) ? 3 : 0;
+
+        if (prefixLength != 0 && input.length() > prefixLength && input.length() - prefixLength == propNameByMethod.length()
+                && input.regionMatches(true, prefixLength, propNameByMethod, 0, propNameByMethod.length())) {
             return 4;
         }
 
@@ -2502,11 +2527,12 @@ public final class Beans {
 
         // computed once per lookup rather than once per candidate inside aliasRank.
         final String inputWithoutUnderscores = input.indexOf(SK._UNDERSCORE) >= 0 ? input.replace(SK.UNDERSCORE, Strings.EMPTY) : null;
+        final String simpleClassName = ClassUtil.getSimpleClassName(targetClass);
         V best = null;
         int bestRank = Integer.MAX_VALUE;
 
         for (final Map.Entry<String, V> entry : candidates.entrySet()) {
-            final int rank = aliasRank(targetClass, input, inputWithoutUnderscores, entry.getKey());
+            final int rank = aliasRank(simpleClassName, input, inputWithoutUnderscores, entry.getKey());
 
             if (rank != 0 && rank < bestRank) {
                 best = entry.getValue();
@@ -2595,7 +2621,7 @@ public final class Beans {
         final String mn = method.getName();
 
         return !Modifier.isStatic(method.getModifiers()) && (mn.startsWith(SET) || getDeclaredField(method.getDeclaringClass(), mn) != null)
-                && N.len(method.getParameterTypes()) == 1
+                && method.getParameterCount() == 1
                 && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(method.getDeclaringClass()))
                 && !nonGetSetMethodName.contains(mn);
     }
@@ -2689,20 +2715,96 @@ public final class Beans {
      * @param targetClass the hierarchy level being scanned
      * @return the accessor candidates for {@code targetClass}
      */
-    private static List<Method> accessorCandidates(final Class<?> targetClass) {
+    private static AccessorCandidates accessorCandidates(final Class<?> targetClass) {
         final Method[] declared = targetClass.getMethods();
         final List<Method> methods = new ArrayList<>(declared.length);
 
         // getMethods() returns inherited public methods too, so skipping a registered level in the caller is
         // not enough to honour registerNonBeanClass - the filter has to be by DECLARING class. Applied once
-        // here rather than inside the O(fields x methods) pairing loop.
+        // here before building the scan-local name indexes.
         for (final Method method : declared) {
             if (!isDeclaredByNonBeanClass(method)) {
                 methods.add(method);
             }
         }
 
-        return methods;
+        return new AccessorCandidates(methods);
+    }
+
+    private record AccessorCandidate(Method method, int order, String suffix, Class<?> parameterType) {
+    }
+
+    /** Local to one scan: case-insensitive buckets retain getMethods() order and its exact-match tie rules. */
+    private static final class AccessorCandidates {
+        final List<Method> methods;
+        final Map<String, List<AccessorCandidate>> gettersByFieldName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        final Map<String, List<AccessorCandidate>> settersByName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        final Map<String, List<Method>> gettersByExactSuffix = new HashMap<>();
+
+        AccessorCandidates(final List<Method> methods) {
+            this.methods = methods;
+
+            for (int i = 0, size = methods.size(); i < size; i++) {
+                final Method method = methods.get(i);
+
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+
+                final String name = method.getName();
+                final int parameterCount = method.getParameterCount();
+
+                if (parameterCount == 0) {
+                    final String suffix = accessorSuffix(name);
+
+                    // Ownership checks also consider zero-argument prefixed methods returning void.
+                    if (name.startsWith(GET) || name.startsWith(IS) || name.startsWith(HAS)) {
+                        gettersByExactSuffix.computeIfAbsent(suffix, k -> new ArrayList<>()).add(method);
+                    }
+
+                    if (isGetMethod(method)) {
+                        final AccessorCandidate candidate = new AccessorCandidate(method, i, suffix, null);
+                        gettersByFieldName.computeIfAbsent(suffix, k -> new ArrayList<>()).add(candidate);
+
+                        // A field named literally "getName" can own getName(), independently of its suffix "Name".
+                        if (!suffix.equalsIgnoreCase(name) && getDeclaredField(method.getDeclaringClass(), name) != null) {
+                            gettersByFieldName.computeIfAbsent(name, k -> new ArrayList<>()).add(candidate);
+                        }
+                    }
+                } else if (parameterCount == 1) {
+                    settersByName.computeIfAbsent(name, k -> new ArrayList<>()).add(new AccessorCandidate(method, i, null, method.getParameterTypes()[0]));
+                }
+            }
+        }
+
+        List<AccessorCandidate> gettersForField(final String fieldName) {
+            final List<AccessorCandidate> direct = gettersByFieldName.get(fieldName);
+            final List<AccessorCandidate> withoutUnderscore = !fieldName.isEmpty() && fieldName.charAt(0) == '_'
+                    ? gettersByFieldName.get(fieldName.substring(1))
+                    : null;
+
+            if (direct == null) {
+                return withoutUnderscore == null ? List.of() : withoutUnderscore;
+            } else if (withoutUnderscore == null) {
+                return direct;
+            }
+
+            final List<AccessorCandidate> merged = new ArrayList<>(direct.size() + withoutUnderscore.size());
+            int i = 0;
+            int j = 0;
+
+            while (i < direct.size() && j < withoutUnderscore.size()) {
+                if (direct.get(i).order() < withoutUnderscore.get(j).order()) {
+                    merged.add(direct.get(i++));
+                } else {
+                    merged.add(withoutUnderscore.get(j++));
+                }
+            }
+
+            merged.addAll(direct.subList(i, direct.size()));
+            merged.addAll(withoutUnderscore.subList(j, withoutUnderscore.size()));
+            return merged;
+        }
     }
 
     /**
@@ -2721,9 +2823,10 @@ public final class Beans {
      *        non-bean class
      * @return {@code (field, getter-or-null)} pairs in declaration order
      */
-    private static List<Tuple2<Field, Method>> pairFieldsWithGetters(final Class<?> targetClass, final List<Method> methods) {
+    private static List<Tuple2<Field, Method>> pairFieldsWithGetters(final Class<?> targetClass, final AccessorCandidates methods) {
         final Field[] declaredFields = targetClass.getDeclaredFields();
         final List<Tuple2<Field, Method>> fieldGetMethodList = new ArrayList<>(declaredFields.length);
+        final List<List<AccessorCandidate>> candidatesByField = new ArrayList<>(declaredFields.length);
 
         // Fields differing only in case used to pair with whichever case-insensitive getter getMethods() listed last,
         // an order that varies between JVM runs: one property then read and wrote its sibling's field. Record the
@@ -2731,24 +2834,28 @@ public final class Beans {
         Set<Method> exactlyOwnedGetters = null;
 
         for (final Field field : declaredFields) {
+            final List<AccessorCandidate> candidates = Modifier.isStatic(field.getModifiers()) ? List.of() : methods.gettersForField(field.getName());
+            candidatesByField.add(candidates);
+
             // A static field is class state, never a property's backing field (see the pairing loop below).
             if (Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
 
-            for (final Method method : methods) {
-                if (isFieldGetMethod(method, field) && isExactFieldGetMethod(method, field)) {
+            for (final AccessorCandidate candidate : candidates) {
+                if (isFieldGetMethod(candidate, field) && isExactFieldGetMethod(candidate, field)) {
                     if (exactlyOwnedGetters == null) {
                         exactlyOwnedGetters = new HashSet<>();
                     }
 
-                    exactlyOwnedGetters.add(method);
+                    exactlyOwnedGetters.add(candidate.method());
                 }
             }
         }
 
         // sort the methods by the order of declared fields
-        for (final Field field : declaredFields) {
+        for (int fieldIndex = 0; fieldIndex < declaredFields.length; fieldIndex++) {
+            final Field field = declaredFields[fieldIndex];
             // A static field must not back a property: a getter matching it by name (`static String NAME` with a
             // getName() over another field) became a property read through the static field - a
             // WrongMethodTypeException on every read, and writes that changed the class's static state.
@@ -2759,12 +2866,13 @@ public final class Beans {
             Method fieldGetMethod = null;
             boolean fieldGetMethodIsExact = false;
 
-            for (final Method method : methods) {
-                if (!isFieldGetMethod(method, field)) {
+            for (final AccessorCandidate candidate : candidatesByField.get(fieldIndex)) {
+                if (!isFieldGetMethod(candidate, field)) {
                     continue;
                 }
 
-                final boolean exact = isExactFieldGetMethod(method, field);
+                final Method method = candidate.method();
+                final boolean exact = isExactFieldGetMethod(candidate, field);
 
                 if (!exact && exactlyOwnedGetters != null && exactlyOwnedGetters.contains(method)) {
                     continue; // another field's own getter
@@ -2826,8 +2934,8 @@ public final class Beans {
      * @param fieldGetMethodsByLevel per-level pairing cache, populated here and reused by the main scan
      * @return {@code true} if {@code targetClass} is an immutable bean
      */
-    private static boolean isImmutableBeanClass(final Class<?> targetClass, final List<Class<?>> allClasses, final Map<Class<?>, List<Method>> methodsByLevel,
-            final Map<Class<?>, List<Tuple2<Field, Method>>> fieldGetMethodsByLevel) {
+    private static boolean isImmutableBeanClass(final Class<?> targetClass, final List<Class<?>> allClasses,
+            final Map<Class<?>, AccessorCandidates> methodsByLevel, final Map<Class<?>, List<Tuple2<Field, Method>>> fieldGetMethodsByLevel) {
         if (registeredNonBeanClass.containsKey(targetClass)) {
             // The main scan skips cls's own level entirely, so cls contributes no properties and the question
             // does not arise. Answering it from the superclass levels alone could flip a registered non-bean
@@ -2849,7 +2957,7 @@ public final class Beans {
                 continue;
             }
 
-            final List<Method> methods = methodsByLevel.computeIfAbsent(clazz, Beans::accessorCandidates);
+            final AccessorCandidates methods = methodsByLevel.computeIfAbsent(clazz, Beans::accessorCandidates);
 
             for (final Tuple2<Field, Method> tp : fieldGetMethodsByLevel.computeIfAbsent(clazz, k -> pairFieldsWithGetters(k, methods))) {
                 if (tp._2 != null) {
@@ -2933,7 +3041,7 @@ public final class Beans {
 
         // Per-level scan state, computed once and shared between the immutability pre-scan and the main loop
         // below. Both are plain HashMaps: they are local to this call and never escape it.
-        final Map<Class<?>, List<Method>> methodsByLevel = new HashMap<>();
+        final Map<Class<?>, AccessorCandidates> methodsByLevel = new HashMap<>();
         final Map<Class<?>, List<Tuple2<Field, Method>>> fieldGetMethodsByLevel = new HashMap<>();
 
         // Immutability is a property of the WHOLE hierarchy, so it has to be settled before the first level
@@ -2947,7 +3055,7 @@ public final class Beans {
         // The accessor candidates of the class being introspected, i.e. its whole public API including
         // inherited methods. Setter pairing is done against these rather than against the level currently
         // being walked, so a getter and its setter may be declared by different classes - see getSetMethod.
-        final List<Method> beanCandidates = methodsByLevel.computeIfAbsent(targetClass, Beans::accessorCandidates);
+        final AccessorCandidates beanCandidates = methodsByLevel.computeIfAbsent(targetClass, Beans::accessorCandidates);
 
         for (int i = allClasses.size() - 1; i >= 0; i--) {
             clazz = allClasses.get(i);
@@ -2964,8 +3072,8 @@ public final class Beans {
             final boolean isEntityLevel = isEntityClass || annotatedWithEntity(clazz);
 
             // Memoized: when the immutability pre-scan ran it already built both of these for this level,
-            // and each is expensive (getMethods() copies its array; the pairing is O(fields x methods)).
-            final List<Method> methods = methodsByLevel.computeIfAbsent(clazz, Beans::accessorCandidates);
+            // and each is expensive (getMethods() copies its array and the name indexes must be built).
+            final AccessorCandidates methods = methodsByLevel.computeIfAbsent(clazz, Beans::accessorCandidates);
             final List<Tuple2<Field, Method>> fieldGetMethodList = fieldGetMethodsByLevel.computeIfAbsent(clazz, k -> pairFieldsWithGetters(k, methods));
 
             String propName = null;
@@ -3039,7 +3147,7 @@ public final class Beans {
                 }
             }
 
-            for (final Method method : methods) {
+            for (final Method method : methods.methods) {
                 if (isGetMethod(method)) {
                     propName = getPropNameByMethod(method);
                     propName = (staticFinalFields.get(propName) != null) ? staticFinalFields.get(propName) : propName;
@@ -3098,26 +3206,21 @@ public final class Beans {
         applyRegisteredPropertyAccessors(targetClass, propGetMethodMap, registeredPropGetMethodPool);
         applyRegisteredPropertyAccessors(targetClass, propSetMethodMap, registeredPropSetMethodPool);
 
-        synchronized (registeredNonPropGetSetMethodPool) {
-            for (final Map.Entry<Class<?>, Set<String>> entry : registeredNonPropGetSetMethodPool.entrySet()) { //NOSONAR
-                if (entry.getKey().isAssignableFrom(targetClass)) {
-                    final Set<String> set = entry.getValue();
-                    final Set<String> propertyNames = new LinkedHashSet<>(propFieldMap.keySet());
-                    propertyNames.addAll(propGetMethodMap.keySet());
-                    propertyNames.addAll(propSetMethodMap.keySet());
+        // A known builder (see builderOwnerMap) re-derives its fluent setters too. When its pools had been dropped and this
+        // standalone scan ran before its bean republished them (a registration against the builder itself never does), the
+        // scan - empty for a canonical builder - replaced them: getPropSetters answered {}, mapToBean wrote nothing through it.
+        // Merged before the non-property exclusions below, so a name registered against the builder stays excluded.
+        final Class<?> ownerBeanClass = builderOwnerMap.get(targetClass);
 
-                    for (final String nonPropName : set) {
-                        for (final String propName : propertyNames) {
-                            if (propName.equalsIgnoreCase(nonPropName)) {
-                                propFieldMap.remove(propName);
-                                propGetMethodMap.remove(propName);
-                                propSetMethodMap.remove(propName);
-                            }
-                        }
-                    }
-                }
+        if (ownerBeanClass != null && !ownerBeanClass.equals(targetClass)) {
+            for (final Map.Entry<String, Method> entry : builderSetMethods(targetClass).entrySet()) {
+                propSetMethodMap.putIfAbsent(entry.getKey(), entry.getValue());
             }
         }
+
+        removeRegisteredNonPropAccessors(targetClass, propFieldMap);
+        removeRegisteredNonPropAccessors(targetClass, propGetMethodMap);
+        removeRegisteredNonPropAccessors(targetClass, propSetMethodMap);
 
         // for Double-Checked Locking is Broke initialize it before
         final ImmutableMap<String, Field> unmodifiableFieldMap = ImmutableMap.wrap(propFieldMap);
@@ -3169,24 +3272,7 @@ public final class Beans {
         beanDeclaredPropNameListPool.put(targetClass, ImmutableList.wrap(propNameList));
 
         if (builderClass != null) {
-            String propName = null;
-
-            final Map<String, Method> builderPropSetMethodMap = new LinkedHashMap<>();
-            final Method[] builderMethods = builderClass.getMethods();
-
-            for (final Method method : builderMethods) {
-                // !isStatic: a builder setter is invoked on the builder instance, so a static factory such
-                // as `public static Builder of(String)` is not one - it would be called with the builder
-                // discarded.
-                if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass())
-                        && method.getParameterCount() == 1
-                        && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
-                    propName = getPropNameByMethod(method);
-                    // See getBuilderInfo: a builder setter of a non-public builder class is otherwise unusable.
-                    ClassUtil.setAccessibleQuietly(method, true);
-                    builderPropSetMethodMap.put(propName, method);
-                }
-            }
+            final Map<String, Method> builderPropSetMethodMap = builderSetMethods(builderClass);
 
             // Mirror of the union above, for the other introspection order: if the builder class has already
             // been introspected in its own right, its own setter model is still valid and must not be
@@ -3200,6 +3286,10 @@ public final class Beans {
                     builderPropSetMethodMap.putIfAbsent(entry.getKey(), entry.getValue());
                 }
             }
+
+            // Names registered against the builder class are excluded here as well, so the answer does not depend on
+            // whether the builder's setters were last published from this bean or re-derived for the builder itself.
+            removeRegisteredNonPropAccessors(builderClass, builderPropSetMethodMap);
 
             final ImmutableMap<String, Method> unmodifiableBuilderPropSetMethodMap = ImmutableMap.wrap(builderPropSetMethodMap);
             //noinspection ResultOfMethodCallIgnored
@@ -3225,6 +3315,54 @@ public final class Beans {
         // pool this method had not filled in yet. Writing it last also gives the reader the
         // happens-before edge for all of the writes above (the volatile write inside ClassCache.put).
         beanDeclaredPropGetMethodPool.put(targetClass, unmodifiableGetMethodMap);
+    }
+
+    /**
+     * Removes from {@code accessorMap} every property name (compared ignoring case) that
+     * {@link #registerNonPropertyAccessor(Class, String)} registered for {@code targetClass} or one of its supertypes.
+     *
+     * <p>Callers must hold the {@link #METADATA_LOCK} monitor.</p>
+     *
+     * @param targetClass the class whose registered non-property names apply
+     * @param accessorMap the property-name keyed map to filter in place
+     */
+    private static void removeRegisteredNonPropAccessors(final Class<?> targetClass, final Map<String, ?> accessorMap) {
+        synchronized (registeredNonPropGetSetMethodPool) {
+            for (final Map.Entry<Class<?>, Set<String>> entry : registeredNonPropGetSetMethodPool.entrySet()) { //NOSONAR
+                if (entry.getKey().isAssignableFrom(targetClass)) {
+                    for (final String nonPropName : entry.getValue()) {
+                        accessorMap.keySet().removeIf(propName -> propName.equalsIgnoreCase(nonPropName));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * The fluent one-argument setters of {@code builderClass}, keyed by property name - the setter model
+     * {@link #publishPropAccessors} gives a bean's builder class. Derived from the builder's own public methods only.
+     *
+     * @param builderClass the builder class
+     * @return a new mutable map of property name to builder setter, in {@link Class#getMethods()} order
+     */
+    private static Map<String, Method> builderSetMethods(final Class<?> builderClass) {
+        final Map<String, Method> builderPropSetMethodMap = new LinkedHashMap<>();
+
+        for (final Method method : builderClass.getMethods()) {
+            // !isStatic: a builder setter is invoked on the builder instance, so a static factory such
+            // as `public static Builder of(String)` is not one - it would be called with the builder
+            // discarded.
+            if (Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()) && !Object.class.equals(method.getDeclaringClass())
+                    && method.getParameterCount() == 1
+                    && (void.class.equals(method.getReturnType()) || method.getReturnType().isAssignableFrom(builderClass))) {
+                final String propName = getPropNameByMethod(method);
+                // See getBuilderInfo: a builder setter of a non-public builder class is otherwise unusable.
+                ClassUtil.setAccessibleQuietly(method, true);
+                builderPropSetMethodMap.put(propName, method);
+            }
+        }
+
+        return builderPropSetMethodMap;
     }
 
     /**
@@ -3270,7 +3408,12 @@ public final class Beans {
                     logger.debug(e, "Unable to instantiate {} while discovering property accessors; getter-based setter checks will be skipped", cls.getName());
                 }
 
-                if (registeredXmlBindingClassList.containsKey(cls)) {
+                // An abstract class or interface can never be constructed, so this failure says nothing about its
+                // registration: such a base is instantiated through its concrete subclasses, and each of their
+                // scans probes an instance of its own. Demoting it here would strip the base's getter-only
+                // collections from every subclass introspected afterwards (but not from those introspected
+                // before), so mapToBean and the parsers would drop their data depending on introspection order.
+                if (registeredXmlBindingClassList.containsKey(cls) && !(cls.isInterface() || Modifier.isAbstract(cls.getModifiers()))) {
                     registeredXmlBindingClassList.put(cls, false);
                 }
             }
@@ -3386,7 +3529,7 @@ public final class Beans {
      * @param getMethod the getter to pair
      * @return the matching setter, or {@code null} if there is none
      */
-    private static Method getSetMethod(final Class<?> beanClass, final List<Method> candidates, final Method getMethod) {
+    private static Method getSetMethod(final Class<?> beanClass, final AccessorCandidates candidates, final Method getMethod) {
         final Class<?> declaringClass = getMethod.getDeclaringClass();
         final String getMethodName = getMethod.getName();
         final Class<?> propType = getMethod.getReturnType();
@@ -3417,14 +3560,15 @@ public final class Beans {
      * Whether a case-insensitively matched {@code setMethod} is the exact-case setter of a different getter among
      * {@code candidates} (for example {@code setUsername} when pairing {@code getUserName}).
      */
-    private static boolean isSetterOfAnotherGetter(final List<Method> candidates, final Method getMethod, final Method setMethod) {
+    private static boolean isSetterOfAnotherGetter(final AccessorCandidates candidates, final Method getMethod, final Method setMethod) {
         final String suffix = accessorSuffix(setMethod.getName());
+        final List<Method> getters = candidates.gettersByExactSuffix.get(suffix);
 
-        for (final Method method : candidates) {
-            if (method != getMethod && !method.getName().equals(getMethod.getName()) && method.getParameterCount() == 0
-                    && !Modifier.isStatic(method.getModifiers()) && suffix.equals(accessorSuffix(method.getName()))
-                    && (method.getName().startsWith(GET) || method.getName().startsWith(IS) || method.getName().startsWith(HAS))) {
-                return true;
+        if (getters != null) {
+            for (final Method method : getters) {
+                if (method != getMethod && !method.getName().equals(getMethod.getName())) {
+                    return true;
+                }
             }
         }
 
@@ -3446,8 +3590,8 @@ public final class Beans {
      * <p>The case-insensitive sweep runs <b>after</b> the declared lookups on purpose: running it with the
      * exact sweep would let an inherited {@code setname} shadow a declared {@code setName}.</p>
      */
-    private static Method resolveSetter(final Class<?> beanClass, final Class<?> declaringClass, final List<Method> candidates, final String setMethodName,
-            final Class<?> propType) {
+    private static Method resolveSetter(final Class<?> beanClass, final Class<?> declaringClass, final AccessorCandidates candidates,
+            final String setMethodName, final Class<?> propType) {
         Method setMethod = findAccessibleSetter(candidates, setMethodName, propType, true);
 
         if (setMethod == null) {
@@ -3475,14 +3619,15 @@ public final class Beans {
      *
      * @param exactName {@code true} to require an exact name match, {@code false} to match ignoring case
      */
-    private static Method findAccessibleSetter(final List<Method> candidates, final String setMethodName, final Class<?> propType, final boolean exactName) {
-        for (final Method method : candidates) {
-            if (Modifier.isStatic(method.getModifiers()) || method.getParameterCount() != 1 || !propType.equals(method.getParameterTypes()[0])) {
-                continue;
-            }
+    private static Method findAccessibleSetter(final AccessorCandidates candidates, final String setMethodName, final Class<?> propType,
+            final boolean exactName) {
+        final List<AccessorCandidate> setters = candidates.settersByName.get(setMethodName);
 
-            if (exactName ? method.getName().equals(setMethodName) : method.getName().equalsIgnoreCase(setMethodName)) {
-                return method;
+        if (setters != null) {
+            for (final AccessorCandidate candidate : setters) {
+                if (propType.equals(candidate.parameterType()) && (!exactName || candidate.method().getName().equals(setMethodName))) {
+                    return candidate.method();
+                }
             }
         }
 
@@ -4332,56 +4477,103 @@ public final class Beans {
                 propValue = N.defaultValueOf(propSetMethod.getParameterTypes()[0]);
             }
 
-            try {
-                propSetMethod.invoke(bean, propValue);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
-            }
-        } else {
-            try {
-                propSetMethod.invoke(bean, propValue);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw ExceptionUtil.toRuntimeException(e, true);
-            } catch (final Exception e) {
-                if (logger.isDebugEnabled()) {
-                    // Recoverable: falls through to a type-converting retry below, so this is a routine
-                    // fallback, not a failure worth a WARN.
-                    logger.debug("Failed to set value for field by method: {} in class: {} with value type {}; will retry after type conversion",
-                            propSetMethod.getName(), propSetMethod.getDeclaringClass().getName(), propValue.getClass().getName());
-                }
-
-                if (propSetMethod.getParameterCount() != 1) {
-                    throw ExceptionUtil.toRuntimeException(e, true);
-                }
-
-                // Convert to the type THIS setter takes. The bean's PropInfo is only a refinement (it can carry
-                // a declared json/xml type) and only when this very method is that property's setter: looking
-                // the type up through the PropInfo alone left a setter-only method (no paired getter) without any
-                // conversion, failed on a builder instance (not a bean class) with "No property getter/setter
-                // method ... found", and would have converted an overload taking a different type to the
-                // property's type instead of its own parameter's.
-                final PropInfo propInfo = bean != null && isBeanClass(bean.getClass())
-                        ? ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(getPropNameByMethod(propSetMethod))
-                        : null;
-
-                final Type<?> targetType = propInfo != null && propSetMethod.equals(propInfo.setMethod) ? propInfo.jsonXmlType
-                        : Type.of(propSetMethod.getGenericParameterTypes()[0]);
-
-                propValue = N.convert(propValue, targetType);
-
-                try {
-                    propSetMethod.invoke(bean, propValue);
-                } catch (IllegalAccessException | InvocationTargetException e2) {
-                    // The conversion succeeded, so this is the setter's own failure (or an access failure):
-                    // report that, exactly as PropInfo.setPropValue does for the same retry. Re-throwing the
-                    // first attempt's "argument type mismatch" hid a setter's validation exception behind a
-                    // type error the conversion had already resolved.
-                    throw ExceptionUtil.toRuntimeException(e2, true);
-                }
-            }
+            return invokeConvertedMethodArgument(bean, propSetMethod, propValue);
         }
 
-        return propValue;
+        if (requiresArgumentConversion(bean, propSetMethod, propValue)) {
+            // A provably incompatible argument cannot enter the setter. Convert it before reflection allocates an
+            // argument-mismatch exception, while leaving invalid receivers, access failures and static initialization
+            // on their original invocation path.
+            return invokeConvertedMethodArgument(bean, propSetMethod, convertMethodArgument(bean, propSetMethod, propValue));
+        }
+
+        return invokeOriginalMethodArgument(bean, propSetMethod, propValue);
+    }
+
+    private static Object invokeOriginalMethodArgument(final Object bean, final Method method, final Object value) {
+        try {
+            method.invoke(bean, value);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        } catch (final RuntimeException e) {
+            return retryConvertedSetter(bean, method, value, e);
+        }
+
+        return value;
+    }
+
+    private static Object invokeConvertedMethodArgument(final Object bean, final Method method, final Object value) {
+        try {
+            method.invoke(bean, value);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw ExceptionUtil.toRuntimeException(e, true);
+        }
+
+        return value;
+    }
+
+    private static Object retryConvertedSetter(final Object bean, final Method method, final Object value, final RuntimeException failure) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Failed to set value for field by method: {} in class: {} with value type {}; will retry after type conversion", method.getName(),
+                    method.getDeclaringClass().getName(), value.getClass().getName());
+        }
+
+        if (method.getParameterCount() != 1) {
+            throw ExceptionUtil.toRuntimeException(failure, true);
+        }
+
+        // Report the setter's own failure after conversion, not the original argument mismatch.
+        return invokeConvertedMethodArgument(bean, method, convertMethodArgument(bean, method, value));
+    }
+
+    private static Object convertMethodArgument(final Object bean, final Method method, final Object value) {
+        // Refine the setter's own parameter type only when this very method is the property's setter.
+        // Setter-only methods, builder instances and alternate overloads keep their declared conversion type.
+        final PropInfo propInfo = bean != null && isBeanClass(bean.getClass())
+                ? ParserUtil.getBeanInfo(bean.getClass()).getPropInfo(getPropNameByMethod(method))
+                : null;
+        final Type<?> targetType = propInfo != null && method.equals(propInfo.setMethod) ? propInfo.jsonXmlType : Type.of(method.getGenericParameterTypes()[0]);
+
+        return N.convert(value, targetType);
+    }
+
+    private static boolean requiresArgumentConversion(final Object bean, final Method method, final Object value) {
+        if (method.getParameterCount() != 1 || Modifier.isStatic(method.getModifiers()) || bean == null || !method.getDeclaringClass().isInstance(bean)) {
+            return false;
+        }
+
+        final Map<Method, Class<?>> parameterTypes = methodParameterTypePool.computeIfAbsent(method.getDeclaringClass(), k -> new ConcurrentCacheMap<>(16));
+        final Class<?> parameterType = parameterTypes.computeIfAbsent(method, k -> k.getParameterTypes()[0]);
+
+        return isIncompatibleMethodArgument(parameterType, value) && method.canAccess(bean);
+    }
+
+    private static boolean isIncompatibleMethodArgument(final Class<?> parameterType, final Object value) {
+        if (!parameterType.isPrimitive()) {
+            return !parameterType.isInstance(value);
+        }
+
+        // Method.invoke permits unboxing followed by widening. Such inputs must retain their original value and
+        // must not visit custom conversion code (Character is not a Number, but widens to int/long/float/double).
+        if (parameterType == boolean.class) {
+            return !(value instanceof Boolean);
+        } else if (parameterType == char.class) {
+            return !(value instanceof Character);
+        } else if (parameterType == byte.class) {
+            return !(value instanceof Byte);
+        } else if (parameterType == short.class) {
+            return !(value instanceof Byte || value instanceof Short);
+        } else if (parameterType == int.class) {
+            return !(value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer);
+        } else if (parameterType == long.class) {
+            return !(value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer || value instanceof Long);
+        } else if (parameterType == float.class) {
+            return !(value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer || value instanceof Long
+                    || value instanceof Float);
+        } else {
+            return !(value instanceof Byte || value instanceof Short || value instanceof Character || value instanceof Integer || value instanceof Long
+                    || value instanceof Float || value instanceof Double);
+        }
     }
 
     /**
@@ -7715,6 +7907,12 @@ public final class Beans {
      */
     private static void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final String parentPropName, final Map<String, Object> output) throws IllegalArgumentException {
+        flattenBean(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, parentPropName == null ? null : new StringBuilder(parentPropName),
+                parentPropName != null, output);
+    }
+
+    private static void flattenBean(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
+            final NamingPolicy keyNamingPolicy, final StringBuilder path, final boolean hasParent, final Map<String, Object> output) {
         if (bean == null) {
             return;
         }
@@ -7724,17 +7922,16 @@ public final class Beans {
             throw new IllegalArgumentException("Cyclic bean reference cannot be flattened: " + ClassUtil.getCanonicalClassName(bean.getClass()));
         }
         try {
-            beanToFlatMapBody(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, parentPropName, output);
+            beanToFlatMapBody(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, path, hasParent, output);
         } finally {
             exitDeepBean(bean);
         }
     }
 
     private static void beanToFlatMapBody(final Object bean, final boolean ignoreNullProperty, final Collection<String> ignoredPropNames,
-            final NamingPolicy keyNamingPolicy, final String parentPropName, final Map<String, Object> output) {
+            final NamingPolicy keyNamingPolicy, StringBuilder path, final boolean hasParent, final Map<String, Object> output) {
         final boolean isCamelCaseOrNoChange = isVerbatimKeyPolicy(keyNamingPolicy);
 
-        final boolean isNullParentPropName = (parentPropName == null);
         final Class<?> beanClass = bean.getClass();
         final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
         final Set<String> canonicalIgnoredPropNames = canonicalPropNames(beanInfo, ignoredPropNames);
@@ -7756,27 +7953,34 @@ public final class Beans {
                 continue;
             }
 
-            if ((propValue == null) || !isNestedBeanProp(propInfo)) {
-                if (isNullParentPropName) {
-                    if (isCamelCaseOrNoChange) {
-                        output.put(propName, propValue);
-                    } else {
-                        output.put(convertPropName(propName, keyNamingPolicy), propValue);
-                    }
-                } else {
-                    if (isCamelCaseOrNoChange) {
-                        output.put(parentPropName + SK.PERIOD + propName, propValue);
-                    } else {
-                        output.put(parentPropName + SK.PERIOD + convertPropName(propName, keyNamingPolicy), propValue);
-                    }
-                }
+            final boolean nested = propValue != null && isNestedBeanProp(propInfo);
+            final String key = isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy);
+
+            if (!hasParent && !nested) {
+                output.put(key, propValue);
             } else {
-                if (isNullParentPropName) {
-                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy), output);
-                } else {
-                    beanToFlatMap(propValue, ignoreNullProperty, null, keyNamingPolicy,
-                            parentPropName + SK.PERIOD + (isCamelCaseOrNoChange ? propName : convertPropName(propName, keyNamingPolicy)), output);
+                // Allocate no prefix buffer for a shallow bean, and share one buffer across the whole nested walk.
+                // Only emitted keys become Strings; ancestor prefixes no longer copy all earlier segments.
+                if (path == null) {
+                    path = new StringBuilder();
+                }
+
+                final int parentLength = path.length();
+
+                try {
+                    if (hasParent) {
+                        path.append(SK._PERIOD);
+                    }
+
+                    path.append(key);
+
+                    if (nested) {
+                        flattenBean(propValue, ignoreNullProperty, null, keyNamingPolicy, path, true, output);
+                    } else {
+                        output.put(path.toString(), propValue);
+                    }
+                } finally {
+                    path.setLength(parentLength);
                 }
             }
         }
@@ -8301,7 +8505,7 @@ public final class Beans {
      * @return a deep clone of the object, or {@code null} if {@code obj} is {@code null}.
      * @throws RuntimeException if the object cannot be copied by either mechanism. Kryo failures are absorbed
      *         (the XML round trip is tried next), but a failure of the XML round trip itself propagates as
-     *         whatever the parser raises - typically a {@code ParseException}, or an
+     *         whatever the parser raises - typically a {@link com.landawn.abacus.exception.ParsingException}, or an
      *         {@link Error} such as {@code NoClassDefFoundError} when the XML binding API is absent.
      * @see #deepCopyAs(Object, Class)
      */

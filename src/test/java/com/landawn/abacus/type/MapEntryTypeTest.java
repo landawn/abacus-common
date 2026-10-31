@@ -620,4 +620,65 @@ public class MapEntryTypeTest extends TestBase {
     }
 
     // ---- bug review 2026-10-02 final G128 end ----
+
+    // ---- deep review 2026-10-27 G136 begin ----
+
+    // G009-06: valueOf returns an AbstractMap.SimpleEntry, so the value fits a slot declared as AbstractMap.SimpleEntry, which
+    // TypeFactory maps to this handler too. It returned the parsed HashMap's own node (java.util.HashMap$Node).
+    @Test
+    public void testValueOf_returnsSimpleEntryForMapEntryAndSimpleEntryTypes() {
+        final Map.Entry<String, Integer> entry = mapEntryType.valueOf("{\"key\":123}");
+        assertEquals(AbstractMap.SimpleEntry.class, entry.getClass());
+        assertEquals(new AbstractMap.SimpleEntry<>("key", 123), entry);
+        entry.setValue(124);
+        assertEquals(124, entry.getValue());
+
+        final Type<AbstractMap.SimpleEntry<String, Integer>> simpleEntryType = Type
+                .of(new com.landawn.abacus.util.TypeReference<AbstractMap.SimpleEntry<String, Integer>>() {
+                });
+        final AbstractMap.SimpleEntry<String, Integer> simpleEntry = simpleEntryType.valueOf("{\"k\":1}");
+        assertEquals(new AbstractMap.SimpleEntry<>("k", 1), simpleEntry);
+        assertEquals(AbstractMap.SimpleEntry.class, simpleEntry.getClass());
+        assertEquals(simpleEntry, simpleEntryType.valueOf(simpleEntryType.stringOf(simpleEntry)));
+
+        // Unchanged: an empty object is null, more than one entry is rejected, a repeated key keeps its last value.
+        Assertions.assertNull(simpleEntryType.valueOf("{}"));
+        assertEquals("Map.Entry JSON must contain exactly one entry, but got: 2",
+                assertThrows(IllegalArgumentException.class, () -> simpleEntryType.valueOf("{\"a\":1,\"b\":2}")).getMessage());
+        assertEquals(new AbstractMap.SimpleEntry<>("a", 2), mapEntryType.valueOf("{\"a\":1,\"a\":2}"));
+    }
+
+    // ---- deep review 2026-10-27 G136 end ----
+
+    // ---- deep review 2026-10-27 verify G142 begin ----
+
+    // G009-06 neighbours: valueOf(Object) and a null value also give an AbstractMap.SimpleEntry, equal (and of equal hash) to the
+    // JDK entries and java.io.Serializable (the former HashMap node was not); null, blank and "{}" still give null.
+    @Test
+    public void testValueOf_simpleEntryForObjectAndNullValueIsSerializableG142() throws Exception {
+        final Map.Entry<String, Integer> nullValue = mapEntryType.valueOf("{\"a\":null}");
+        assertEquals(AbstractMap.SimpleEntry.class, nullValue.getClass());
+        assertEquals(new AbstractMap.SimpleEntry<>("a", null), nullValue);
+        assertEquals("a=null", nullValue.toString());
+
+        final Map.Entry<String, Integer> converted = mapEntryType.valueOf((Object) Map.entry("k", 2));
+        assertEquals(AbstractMap.SimpleEntry.class, converted.getClass());
+        assertEquals(Map.entry("k", 2), converted);
+        assertEquals(Map.entry("k", 2).hashCode(), converted.hashCode());
+        assertEquals(new AbstractMap.SimpleImmutableEntry<>("k", 2), converted);
+
+        final java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+        try (java.io.ObjectOutputStream os = new java.io.ObjectOutputStream(bytes)) {
+            os.writeObject(converted);
+        }
+        try (java.io.ObjectInputStream is = new java.io.ObjectInputStream(new java.io.ByteArrayInputStream(bytes.toByteArray()))) {
+            assertEquals(converted, is.readObject());
+        }
+
+        Assertions.assertNull(mapEntryType.valueOf((String) null));
+        Assertions.assertNull(mapEntryType.valueOf(" "));
+        Assertions.assertNull(mapEntryType.valueOf("{}"));
+    }
+
+    // ---- deep review 2026-10-27 verify G142 end ----
 }

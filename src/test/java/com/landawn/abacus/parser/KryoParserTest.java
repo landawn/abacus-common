@@ -1464,4 +1464,621 @@ public class KryoParserTest extends TestBase {
     }
 
     // ---- perf review 2026-10-07 round 2 R2C end ----
+
+    // ---- deep review 2026-10-27 G132 begin ----
+
+    public static class OrderedGlobal01 {
+    }
+
+    public static class OrderedGlobal02 {
+    }
+
+    public static class OrderedGlobal03 {
+    }
+
+    public static class OrderedGlobal04 {
+    }
+
+    public static class OrderedGlobal05 {
+    }
+
+    public static class OrderedGlobal06 {
+    }
+
+    public static class OrderedGlobal07 {
+    }
+
+    public static class OrderedGlobal08 {
+    }
+
+    public static class OrderedGlobal09 {
+    }
+
+    public static class OrderedGlobal10 {
+    }
+
+    public static class OrderedGlobal11 {
+    }
+
+    public static class OrderedGlobal12 {
+    }
+
+    public static class OrderedGlobal13 {
+    }
+
+    public static class OrderedGlobal14 {
+    }
+
+    public static class OrderedLocal01 {
+    }
+
+    public static class OrderedLocal02 {
+    }
+
+    public static class OrderedLocal03 {
+    }
+
+    public static class OrderedLocal04 {
+    }
+
+    public static class OrderedLocal05 {
+    }
+
+    public static class OrderedLocal06 {
+    }
+
+    public static class OrderedLocal07 {
+    }
+
+    public static class OrderedLocal08 {
+    }
+
+    public static class OrderedLocal09 {
+    }
+
+    public static class OrderedLocal10 {
+    }
+
+    public static class OrderedLocal11 {
+    }
+
+    public static class OrderedLocal12 {
+    }
+
+    public static class OrderedLocal13 {
+    }
+
+    public static class OrderedLocal14 {
+    }
+
+    public static class ReRegisteredA {
+    }
+
+    public static class ReRegisteredB {
+    }
+
+    public static class ReRegisteredC {
+    }
+
+    public static class ReRegisteredD {
+    }
+
+    public static class ReRegisteredE {
+    }
+
+    public static class MixedSerializerFirstTarget {
+    }
+
+    public static class MixedPlainSecondTarget {
+    }
+
+    public static class GlobalMixedSerializerFirstTarget {
+    }
+
+    public static class GlobalMixedPlainSecondTarget {
+    }
+
+    public static class PlainBeforeDisplacementTarget {
+    }
+
+    public static class IntSlotDisplacingTarget {
+    }
+
+    public static class BooleanSlotSerializerIdTarget {
+    }
+
+    public static class CharSlotIdTarget {
+    }
+
+    public static class ExplicitFirstTarget {
+    }
+
+    public static class ImplicitSecondTarget {
+    }
+
+    public static class ImplicitFirstTarget {
+    }
+
+    public static class ExplicitSecondTarget {
+    }
+
+    public static class SerializerFirstTarget {
+    }
+
+    public static class ExplicitAfterSerializerTarget {
+    }
+
+    public static class GlobalImplicitConflictTarget {
+    }
+
+    public static class LocalExplicitConflictTarget {
+    }
+
+    /** Writes only the class name, so an element registered with it can only come back through this serializer. */
+    private static final class OrderMarkerSerializer extends Serializer<Object> {
+        private int reads;
+
+        @Override
+        public void write(final Kryo kryo, final Output output, final Object object) {
+            output.writeString(object.getClass().getName());
+        }
+
+        @Override
+        public Object read(final Kryo kryo, final Input input, final Class<?> type) {
+            assertEquals(type.getName(), input.readString());
+            reads++;
+            return kryo.newInstance(type);
+        }
+    }
+
+    private static String registrationIdsOf(final Kryo kryo, final List<Class<?>> types) {
+        final StringBuilder sb = new StringBuilder();
+
+        for (final Class<?> type : types) {
+            sb.append(type.getSimpleName()).append('=').append(kryo.getRegistration(type).getId()).append(' ');
+        }
+
+        return sb.toString();
+    }
+
+    private static void assertRegistrationIdsIncrease(final Kryo kryo, final List<Class<?>> typesInOrder, final String what) {
+        for (int i = 1; i < typesInOrder.size(); i++) {
+            assertTrue(kryo.getRegistration(typesInOrder.get(i - 1)).getId() < kryo.getRegistration(typesInOrder.get(i)).getId(),
+                    what + ": " + registrationIdsOf(kryo, typesInOrder));
+        }
+    }
+
+    // G132/G147 (G010-01): each scope is applied kind by kind (register(Class), register(Class, int),
+    // register(Class, Serializer), register(Class, Serializer, int)) and each kind in the order of its calls, global before
+    // the parser's own, so the classes of one kind registered in a known order get increasing IDs and every class-only ID
+    // of a scope is below its serializer-only IDs. r108 applied each kind in identity-hash order, so these IDs came out in
+    // another order here, and in yet another order in a second JVM making the same calls.
+    @Test
+    public void testRegister_idsWithoutExplicitIdFollowCallOrderWithinEachKindAndScope() {
+        final OrderMarkerSerializer serializer = new OrderMarkerSerializer();
+        final List<Class<?>> globalTypes = List.of(OrderedGlobal01.class, OrderedGlobal02.class, OrderedGlobal03.class, OrderedGlobal04.class,
+                OrderedGlobal05.class, OrderedGlobal06.class, OrderedGlobal07.class, OrderedGlobal08.class, OrderedGlobal09.class, OrderedGlobal10.class,
+                OrderedGlobal11.class, OrderedGlobal12.class, OrderedGlobal13.class, OrderedGlobal14.class);
+        final List<Class<?>> localTypes = List.of(OrderedLocal01.class, OrderedLocal02.class, OrderedLocal03.class, OrderedLocal04.class, OrderedLocal05.class,
+                OrderedLocal06.class, OrderedLocal07.class, OrderedLocal08.class, OrderedLocal09.class, OrderedLocal10.class, OrderedLocal11.class,
+                OrderedLocal12.class, OrderedLocal13.class, OrderedLocal14.class);
+        // the classes registered without an explicit ID, in the order they are applied: class-only in call order, then
+        // serializer-only in call order (global: 5 + 6, parser: 6 + 5)
+        final List<Class<?>> globalImplicit = List.of(OrderedGlobal01.class, OrderedGlobal04.class, OrderedGlobal08.class, OrderedGlobal11.class,
+                OrderedGlobal13.class, OrderedGlobal02.class, OrderedGlobal05.class, OrderedGlobal07.class, OrderedGlobal09.class, OrderedGlobal12.class,
+                OrderedGlobal14.class);
+        final List<Class<?>> localImplicit = List.of(OrderedLocal02.class, OrderedLocal05.class, OrderedLocal07.class, OrderedLocal09.class,
+                OrderedLocal12.class, OrderedLocal14.class, OrderedLocal01.class, OrderedLocal04.class, OrderedLocal08.class, OrderedLocal11.class,
+                OrderedLocal13.class);
+
+        // Hold the global registry lock so that no concurrently running test can register globally in between.
+        synchronized (ParserFactory._kryoRegistrationLock) {
+            try {
+                ParserFactory.registerKryo(OrderedGlobal01.class);
+                ParserFactory.registerKryo(OrderedGlobal02.class, serializer);
+                ParserFactory.registerKryo(OrderedGlobal03.class, 1_132_001);
+                ParserFactory.registerKryo(OrderedGlobal04.class);
+                ParserFactory.registerKryo(OrderedGlobal05.class, serializer);
+                ParserFactory.registerKryo(OrderedGlobal06.class, serializer, 1_132_002);
+                ParserFactory.registerKryo(OrderedGlobal07.class, serializer);
+                ParserFactory.registerKryo(OrderedGlobal08.class);
+                ParserFactory.registerKryo(OrderedGlobal09.class, serializer);
+                ParserFactory.registerKryo(OrderedGlobal10.class, 1_132_003);
+                ParserFactory.registerKryo(OrderedGlobal11.class);
+                ParserFactory.registerKryo(OrderedGlobal12.class, serializer);
+                ParserFactory.registerKryo(OrderedGlobal13.class);
+                ParserFactory.registerKryo(OrderedGlobal14.class, serializer);
+
+                parser.register(OrderedLocal01.class, serializer);
+                parser.register(OrderedLocal02.class);
+                parser.register(OrderedLocal03.class, serializer, 1_132_101);
+                parser.register(OrderedLocal04.class, serializer);
+                parser.register(OrderedLocal05.class);
+                parser.register(OrderedLocal06.class, 1_132_102);
+                parser.register(OrderedLocal07.class);
+                parser.register(OrderedLocal08.class, serializer);
+                parser.register(OrderedLocal09.class);
+                parser.register(OrderedLocal10.class, serializer, 1_132_103);
+                parser.register(OrderedLocal11.class, serializer);
+                parser.register(OrderedLocal12.class);
+                parser.register(OrderedLocal13.class, serializer);
+                parser.register(OrderedLocal14.class);
+
+                final Kryo kryo = parser.createKryo();
+                final List<Object> values = new ArrayList<>();
+
+                try {
+                    assertRegistrationIdsIncrease(kryo, globalImplicit, "global: class-only then serializer-only, each in call order");
+                    assertRegistrationIdsIncrease(kryo, localImplicit, "parser: class-only then serializer-only, each in call order");
+                    assertTrue(kryo.getRegistration(OrderedGlobal14.class).getId() < kryo.getRegistration(OrderedLocal02.class).getId(),
+                            "global registrations come first: " + registrationIdsOf(kryo, globalImplicit) + registrationIdsOf(kryo, localImplicit));
+
+                    // explicit IDs are pinned
+                    assertEquals(1_132_001, kryo.getRegistration(OrderedGlobal03.class).getId());
+                    assertEquals(1_132_002, kryo.getRegistration(OrderedGlobal06.class).getId());
+                    assertEquals(1_132_003, kryo.getRegistration(OrderedGlobal10.class).getId());
+                    assertEquals(1_132_101, kryo.getRegistration(OrderedLocal03.class).getId());
+                    assertEquals(1_132_102, kryo.getRegistration(OrderedLocal06.class).getId());
+                    assertEquals(1_132_103, kryo.getRegistration(OrderedLocal10.class).getId());
+
+                    assertSame(serializer, kryo.getRegistration(OrderedGlobal02.class).getSerializer());
+                    assertSame(serializer, kryo.getRegistration(OrderedGlobal06.class).getSerializer());
+                    assertSame(serializer, kryo.getRegistration(OrderedLocal01.class).getSerializer());
+                    assertSame(serializer, kryo.getRegistration(OrderedLocal10.class).getSerializer());
+                    assertNotSame(serializer, kryo.getRegistration(OrderedLocal02.class).getSerializer());
+
+                    // the payload carries the registration ID (Kryo writes ID + 2 for a registered class)
+                    final Input input = new Input(parser.encode(new OrderedLocal14()));
+                    assertEquals(kryo.getRegistration(OrderedLocal14.class).getId() + 2, input.readVarInt(true));
+
+                    for (final Class<?> type : globalTypes) {
+                        values.add(kryo.newInstance(type));
+                    }
+
+                    for (final Class<?> type : localTypes) {
+                        values.add(kryo.newInstance(type));
+                    }
+                } finally {
+                    parser.recycle(kryo);
+                }
+
+                // round trips: every element comes back as its own class
+                final List<Object> decoded = parser.decode(parser.encode(values));
+                final List<?> deserialized = parser.deserialize(parser.serialize(values), ArrayList.class);
+                assertEquals(values.size(), decoded.size());
+                assertEquals(values.size(), deserialized.size());
+
+                for (int i = 0; i < values.size(); i++) {
+                    assertSame(values.get(i).getClass(), decoded.get(i).getClass());
+                    assertSame(values.get(i).getClass(), deserialized.get(i).getClass());
+                }
+
+                // 7 global + 7 local classes are registered with the marker serializer; two decodes
+                assertEquals(28, serializer.reads);
+            } finally {
+                for (final Class<?> type : globalTypes) {
+                    unregisterKryoForTest(type);
+                }
+            }
+        }
+    }
+
+    // G132/G147 (G010-01): registering a class again replaces its registration and moves it to the position of its latest
+    // call within the kind of that call: through the same overload (B, to the end of the class-only kind) or through another
+    // overload (A, into the serializer-only kind, applied after every class-only registration). r108 applied the class-only
+    // kind in identity-hash order.
+    @Test
+    public void testRegister_reRegisteredClassTakesPositionOfLatestCall() {
+        final OrderMarkerSerializer serializer = new OrderMarkerSerializer();
+        parser.register(ReRegisteredA.class);
+        parser.register(ReRegisteredB.class);
+        parser.register(ReRegisteredC.class);
+        parser.register(ReRegisteredD.class);
+        parser.register(ReRegisteredE.class);
+        parser.register(ReRegisteredA.class, serializer);
+        parser.register(ReRegisteredB.class);
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertRegistrationIdsIncrease(kryo,
+                    List.of(ReRegisteredC.class, ReRegisteredD.class, ReRegisteredE.class, ReRegisteredB.class, ReRegisteredA.class),
+                    "class-only in the order of the latest calls, then serializer-only");
+            assertSame(serializer, kryo.getRegistration(ReRegisteredA.class).getSerializer());
+            assertNotSame(serializer, kryo.getRegistration(ReRegisteredB.class).getSerializer());
+        } finally {
+            parser.recycle(kryo);
+        }
+    }
+
+    private int firstFreeRegistrationId() {
+        final Kryo baseline = parser.createKryo();
+
+        try {
+            return baseline.getNextRegistrationId();
+        } finally {
+            parser.recycle(baseline);
+        }
+    }
+
+    // G132/G147 (G010-01): register(Class) registrations are applied before register(Class, int) ones whatever the call
+    // order, so an explicit ID equal to the ID that a class-only registration of the same scope receives is a conflict,
+    // reported when the parser creates a Kryo instance (as on r108; passes on r108).
+    @Test
+    public void testCreateKryoRejectsExplicitIdTakenByClassOnlyRegistrationInEitherCallOrder() {
+        final int firstFreeId = firstFreeRegistrationId();
+        final KryoParser explicitFirst = new KryoParser();
+        explicitFirst.register(ExplicitFirstTarget.class, firstFreeId);
+        explicitFirst.register(ImplicitSecondTarget.class);
+        assertThrows(IllegalArgumentException.class, explicitFirst::createKryo);
+
+        final KryoParser plainFirst = new KryoParser();
+        plainFirst.register(ImplicitFirstTarget.class);
+        plainFirst.register(ExplicitSecondTarget.class, firstFreeId);
+        assertThrows(IllegalArgumentException.class, plainFirst::createKryo);
+    }
+
+    // G132/G147 (G010-01): register(A, serializer); register(B, N) with N the first free ID works as on r108: ID-only
+    // registrations are applied before serializer-only ones, so B keeps N and A takes the next free ID with its serializer.
+    @Test
+    public void testRegister_serializerRegistrationThenExplicitIdAtFirstFreeIdStillWorks() {
+        final OrderMarkerSerializer serializer = new OrderMarkerSerializer();
+        final int firstFreeId = firstFreeRegistrationId();
+        parser.register(SerializerFirstTarget.class, serializer);
+        parser.register(ExplicitAfterSerializerTarget.class, firstFreeId);
+
+        final Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(firstFreeId, kryo.getRegistration(ExplicitAfterSerializerTarget.class).getId());
+            assertEquals(firstFreeId + 1, kryo.getRegistration(SerializerFirstTarget.class).getId());
+            assertSame(serializer, kryo.getRegistration(SerializerFirstTarget.class).getSerializer());
+        } finally {
+            parser.recycle(kryo);
+        }
+
+        assertSame(SerializerFirstTarget.class, parser.decode(parser.encode(new SerializerFirstTarget())).getClass());
+        assertEquals(1, serializer.reads);
+    }
+
+    // G147 (G010-01): IDs that r108 assigned the same way in every JVM stay exactly as on r108 (these pass on r108):
+    // register(A, serializer); register(B) gives B the lower ID in both scopes (class-only before serializer-only), and
+    // register(A); register(B, 0) gives A the first free ID and the displaced int the next one, in either call order;
+    // register(C, serializer, 3); register(D, 5) relocates the displaced char before the displaced boolean.
+    @Test
+    public void testRegister_mixedOverloadSequencesKeepTheirR108Ids() {
+        final int firstFreeId = firstFreeRegistrationId();
+        final OrderMarkerSerializer serializer = new OrderMarkerSerializer();
+
+        parser.register(MixedSerializerFirstTarget.class, serializer);
+        parser.register(MixedPlainSecondTarget.class);
+        Kryo kryo = parser.createKryo();
+
+        try {
+            assertEquals(firstFreeId, kryo.getRegistration(MixedPlainSecondTarget.class).getId());
+            assertEquals(firstFreeId + 1, kryo.getRegistration(MixedSerializerFirstTarget.class).getId());
+        } finally {
+            parser.recycle(kryo);
+        }
+
+        // the bytes of the element carry that ID (ID + 2 as a positive varint)
+        final Input input = new Input(parser.encode(new MixedPlainSecondTarget()));
+        assertEquals(firstFreeId + 2, input.readVarInt(true));
+
+        for (final boolean plainFirst : new boolean[] { true, false }) {
+            final KryoParser displacing = new KryoParser();
+
+            if (plainFirst) {
+                displacing.register(PlainBeforeDisplacementTarget.class);
+                displacing.register(IntSlotDisplacingTarget.class, 0);
+            } else {
+                displacing.register(IntSlotDisplacingTarget.class, 0);
+                displacing.register(PlainBeforeDisplacementTarget.class);
+            }
+
+            kryo = displacing.createKryo();
+
+            try {
+                assertEquals(0, kryo.getRegistration(IntSlotDisplacingTarget.class).getId());
+                assertEquals(firstFreeId, kryo.getRegistration(PlainBeforeDisplacementTarget.class).getId());
+                assertEquals(firstFreeId + 1, kryo.getRegistration(int.class).getId());
+            } finally {
+                displacing.recycle(kryo);
+            }
+
+            assertEquals(42, (int) displacing.decode(displacing.encode(42)));
+        }
+
+        final KryoParser relocating = new KryoParser();
+        relocating.register(BooleanSlotSerializerIdTarget.class, serializer, 3);
+        relocating.register(CharSlotIdTarget.class, 5);
+        kryo = relocating.createKryo();
+
+        try {
+            assertEquals(firstFreeId, kryo.getRegistration(char.class).getId());
+            assertEquals(firstFreeId + 1, kryo.getRegistration(boolean.class).getId());
+        } finally {
+            relocating.recycle(kryo);
+        }
+
+        // the same kind order at the global scope
+        synchronized (ParserFactory._kryoRegistrationLock) {
+            try {
+                ParserFactory.registerKryo(GlobalMixedSerializerFirstTarget.class, serializer);
+                ParserFactory.registerKryo(GlobalMixedPlainSecondTarget.class);
+                final KryoParser globalOnly = new KryoParser();
+                kryo = globalOnly.createKryo();
+
+                try {
+                    assertEquals(firstFreeId, kryo.getRegistration(GlobalMixedPlainSecondTarget.class).getId());
+                    assertEquals(firstFreeId + 1, kryo.getRegistration(GlobalMixedSerializerFirstTarget.class).getId());
+                } finally {
+                    globalOnly.recycle(kryo);
+                }
+            } finally {
+                unregisterKryoForTest(GlobalMixedSerializerFirstTarget.class);
+                unregisterKryoForTest(GlobalMixedPlainSecondTarget.class);
+            }
+        }
+    }
+
+    // G132 (G010-01): a parser's explicit ID equal to the ID that a global registration without one received is a conflict,
+    // reported when the parser next creates a Kryo instance (same as r108).
+    @Test
+    public void testCreateKryoRejectsInstanceExplicitIdTakenByGlobalImplicitRegistration() {
+        try {
+            ParserFactory.registerKryo(GlobalImplicitConflictTarget.class);
+            final Kryo initialKryo = parser.createKryo();
+            final int globalImplicitId;
+            try {
+                globalImplicitId = initialKryo.getRegistration(GlobalImplicitConflictTarget.class).getId();
+            } finally {
+                parser.recycle(initialKryo);
+            }
+            parser.register(LocalExplicitConflictTarget.class, globalImplicitId);
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+        } finally {
+            unregisterKryoForTest(GlobalImplicitConflictTarget.class);
+        }
+    }
+
+    /** Writes value + 1000, so a value that comes back as 1042 went through this serializer. */
+    private static final class PlusThousandIntegerSerializer extends Serializer<Integer> {
+        @Override
+        public void write(final Kryo kryo, final Output output, final Integer value) {
+            output.writeInt(value + 1000);
+        }
+
+        @Override
+        public Integer read(final Kryo kryo, final Input input, final Class<? extends Integer> type) {
+            return input.readInt();
+        }
+    }
+
+    private static void assertSharedIntRegistration(final KryoParser target, final int expectedId, final Serializer<?> expectedSerializer) {
+        final Kryo kryo = target.createKryo();
+
+        try {
+            assertSame(kryo.getRegistration(int.class), kryo.getRegistration(Integer.class));
+            assertEquals(expectedId, kryo.getRegistration(int.class).getId());
+
+            if (expectedSerializer == null) {
+                assertFalse(kryo.getRegistration(int.class).getSerializer() instanceof PlusThousandIntegerSerializer);
+            } else {
+                assertSame(expectedSerializer, kryo.getRegistration(int.class).getSerializer());
+            }
+        } finally {
+            target.recycle(kryo);
+        }
+    }
+
+    /** Runs {@code action} with no global registration of int/Integer, restoring the previous ones afterwards. */
+    @SuppressWarnings("unchecked")
+    private static void withoutGlobalIntRegistrations(final Runnable action) {
+        final Class<?>[] types = { int.class, Integer.class };
+        final boolean[] plain = new boolean[2];
+        final Integer[] ids = new Integer[2];
+        final Serializer<?>[] serializers = new Serializer<?>[2];
+        final Object[] serializerIds = new Object[2];
+
+        synchronized (ParserFactory._kryoRegistrationLock) {
+            for (int i = 0; i < 2; i++) {
+                plain[i] = ParserFactory._kryoClassSet.remove(types[i]);
+                ids[i] = ParserFactory._kryoClassIdMap.remove(types[i]);
+                serializers[i] = ParserFactory._kryoClassSerializerMap.remove(types[i]);
+                serializerIds[i] = ParserFactory._kryoClassSerializerIdMap.remove(types[i]);
+            }
+
+            ParserFactory._kryoRegistrationVersion.incrementAndGet();
+
+            try {
+                action.run();
+            } finally {
+                for (int i = 0; i < 2; i++) {
+                    unregisterKryoForTest(types[i]);
+
+                    if (plain[i]) {
+                        ParserFactory._kryoClassSet.add(types[i]);
+                    }
+                    if (ids[i] != null) {
+                        ParserFactory._kryoClassIdMap.put(types[i], ids[i]);
+                    }
+                    if (serializers[i] != null) {
+                        ParserFactory._kryoClassSerializerMap.put(types[i], serializers[i]);
+                    }
+                    if (serializerIds[i] != null) {
+                        ParserFactory._kryoClassSerializerIdMap.put(types[i], (com.landawn.abacus.util.Tuple.Tuple2<Serializer<?>, Integer>) serializerIds[i]);
+                    }
+                }
+
+                ParserFactory._kryoRegistrationVersion.incrementAndGet();
+            }
+        }
+    }
+
+    // G132/G147 (G010-01): int and Integer share one Kryo registration. Registered in one scope through different
+    // overloads, they are applied in the kind order class-only, ID-only, serializer-only, serializer+ID whatever the call
+    // order, so the serializer and ID are those of r108 (these four pass on r108 too).
+    @Test
+    public void testRegister_primitiveAndWrapperThroughDifferentOverloadsKeepFixedOverloadOrder() {
+        final Serializer<Integer> serializer = new PlusThousandIntegerSerializer();
+
+        // register(Integer); register(int, s, 6): the serializer+ID registration is applied last
+        final KryoParser plainThenSerializerId = new KryoParser();
+        plainThenSerializerId.register(Integer.class);
+        plainThenSerializerId.register(int.class, serializer, 6);
+        assertSharedIntRegistration(plainThenSerializerId, 6, serializer);
+        assertEquals(1042, (int) plainThenSerializerId.decode(plainThenSerializerId.encode(42)));
+
+        // register(Integer, s); register(int): the serializer-only registration is applied after the class-only one
+        final KryoParser serializerThenPlain = new KryoParser();
+        final int builtInIntId;
+        final Kryo baseline = serializerThenPlain.createKryo();
+        try {
+            builtInIntId = baseline.getRegistration(int.class).getId();
+        } finally {
+            serializerThenPlain.recycle(baseline);
+        }
+        serializerThenPlain.register(Integer.class, serializer);
+        serializerThenPlain.register(int.class);
+        assertSharedIntRegistration(serializerThenPlain, builtInIntId, serializer);
+
+        // register(Integer, s, 7); register(int, 5): the serializer+ID registration is applied after the ID-only one
+        final KryoParser serializerIdThenId = new KryoParser();
+        serializerIdThenId.register(Integer.class, serializer, 7);
+        serializerIdThenId.register(int.class, 5);
+        assertSharedIntRegistration(serializerIdThenId, 7, serializer);
+        assertEquals(1042, (int) serializerIdThenId.decode(serializerIdThenId.encode(42)));
+
+        // global registerKryo(Integer, s, 7); registerKryo(int, 5): the same at the global scope
+        withoutGlobalIntRegistrations(() -> {
+            ParserFactory.registerKryo(Integer.class, serializer, 7);
+            ParserFactory.registerKryo(int.class, 5);
+            assertSharedIntRegistration(new KryoParser(), 7, serializer);
+        });
+    }
+
+    // G132/G147 (G010-01): int and Integer registered through the SAME overload are applied in call order, so the later
+    // call decides. r108 applied them in identity-hash order: registerKryo(int, 5); registerKryo(Integer, 7) gave ID 5 with
+    // the JDK's default class-data sharing and ID 7 with -Xshare:off, for both call orders.
+    @Test
+    public void testRegister_primitiveAndWrapperThroughSameOverloadFollowCallOrder() {
+        withoutGlobalIntRegistrations(() -> {
+            ParserFactory.registerKryo(int.class, 5);
+            ParserFactory.registerKryo(Integer.class, 7);
+            assertSharedIntRegistration(new KryoParser(), 7, null);
+
+            ParserFactory.registerKryo(int.class, 5);
+            assertSharedIntRegistration(new KryoParser(), 5, null);
+        });
+
+        final KryoParser local = new KryoParser();
+        local.register(Integer.class, 7);
+        local.register(int.class, 5);
+        assertSharedIntRegistration(local, 5, null);
+        local.register(Integer.class, 7);
+        assertSharedIntRegistration(local, 7, null);
+    }
+
+    // ---- deep review 2026-10-27 G132 end ----
 }

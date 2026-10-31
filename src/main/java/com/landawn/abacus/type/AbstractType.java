@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.CallableStatement;
@@ -155,9 +156,12 @@ public abstract class AbstractType<T> implements Type<T> {
      * The constructor normalizes the type name by stripping the package qualifier and
      * keeping only the simple class name for types that live in well-known packages
      * ({@code java.lang}, {@code java.util}, {@code java.time}, {@code com.landawn.abacus}),
-     * but only when the class can be resolved by that simple name ({@code "java.util.UUID"} becomes
-     * {@code "UUID"}, while {@code "java.util.BitSet"} is kept as is); every other name is kept as given.
-     * Generic type parameters (the {@code <...>} suffix) are preserved. The XML-safe form
+     * but only when that simple name resolves back to the same class ({@code "java.util.UUID"} becomes
+     * {@code "UUID"}, while {@code "java.util.BitSet"} is kept as is, and so is
+     * {@code "com.landawn.abacus.util.Multiset.Entry"}, whose simple name {@code "Entry"} resolves to
+     * {@code java.util.Map.Entry}). A non-public class in those packages, such as the list class of {@code Arrays.asList},
+     * is shortened whenever its simple name resolves to some class ({@code "ArrayList<...>"}). Every other name
+     * is kept as given. Generic type parameters (the {@code <...>} suffix) are preserved. The XML-safe form
      * is derived from the normalized name with {@code <} and {@code >} escaped to
      * {@code &lt;} and {@code &gt;}.
      * </p>
@@ -177,15 +181,22 @@ public abstract class AbstractType<T> implements Type<T> {
             final String tmpTypeName = index > 0 ? typeName.substring(0, index) : typeName;
 
             try {
-                Class<?> cls = ClassUtil.forName(tmpTypeName);
+                final Class<?> cls = ClassUtil.forName(tmpTypeName);
 
                 //noinspection ConstantValue
                 if (cls != null) {
-                    cls = ClassUtil.forName(ClassUtil.getSimpleClassName(cls));
+                    final String simpleClassName = ClassUtil.getSimpleClassName(cls);
+                    final Class<?> simpleNameClass = ClassUtil.forName(simpleClassName);
 
-                    //noinspection ConstantValue
-                    if (cls != null) {
-                        simpleName = ClassUtil.getSimpleClassName(cls) + (index > 0 ? typeName.substring(index) : Strings.EMPTY);
+                    // name() is written as type information and read back by name, so a public class is shortened only
+                    // when the short form resolves to this very class: "Entry" is java.util.Map.Entry, not
+                    // com.landawn.abacus.util.Multiset.Entry, and "Runnable" is java.lang.Runnable, not
+                    // com.landawn.abacus.util.function.Runnable. A non-public class (an implementation class met only
+                    // as a runtime class) keeps the short form a reader can construct: the java.util.Arrays.ArrayList
+                    // of Arrays.asList is named "ArrayList<...>" and read back as a java.util.ArrayList, while its own
+                    // name has no constructor a reader could use.
+                    if (simpleNameClass == cls || !Modifier.isPublic(cls.getModifiers())) {
+                        simpleName = simpleClassName + (index > 0 ? typeName.substring(index) : Strings.EMPTY);
                     }
                 }
             } catch (final Exception e) {

@@ -131,7 +131,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @return an ImmutableNavigableSet containing only the specified element
      * @throws NullPointerException if {@code e1} is {@code null}
      * @throws ClassCastException if {@code e1} cannot be compared with itself in natural order
-     * @see #of(Object, Object)
+     * @see #of(Comparable, Comparable)
      */
     public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e1)), true);

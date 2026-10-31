@@ -395,8 +395,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  *       input size. A hint is never a promise about the result size, and is an over-estimate whenever
  *       distinct inputs collapse onto one key: {@code zip} with duplicate keys, {@code invert} and
  *       {@code flatInvert} with duplicate values, and {@code replaceKeys} with a many-to-one converter
- *       all produce fewer entries than the hint. It is an upper bound for the filtering operations
- *       ({@code filter}, {@code filterByKey}, {@code filterByValue}), and only a heuristic for the
+ *       all produce fewer entries than the hint. For the filtering operations ({@code filter},
+ *       {@code filterByKey}, {@code filterByValue}) a mirrored map class receives the input size, an upper
+ *       bound, but the JDK hash maps and {@link BiMap} start from a hint of at most 16 entries and grow as
+ *       matches are added. The hint is only a heuristic for the
  *       comparison operations ({@code difference}, {@code intersection}, {@code symmetricDifference}),
  *       whose result size is not known in advance. {@code zip} derives its hint from
  *       {@link Collection#size()}, so an {@link Iterable} that is not a {@code Collection} contributes a
@@ -1863,31 +1865,27 @@ public final class Maps {
                 for (int j = 0, idxLen = indexes.length; j < idxLen; j++) {
                     // No `indexes[j] < 0` test: parseIndexes accepts ASCII digits only, so an index is
                     // always non-negative by construction.
-                    if (N.isEmpty(intermediateColl) || intermediateColl.size() <= indexes[j]) {
+                    final Object element = getIndexedElement(intermediateColl, indexes[j]);
+
+                    if (element == NONE) {
                         return NONE;
                     } else {
                         if (j == idxLen - 1) {
                             if (i == len - 1) {
-                                final Object ret = N.getElement(intermediateColl, indexes[j]);
-
-                                return convertIfNecessary(ret, targetType);
+                                return convertIfNecessary(element, targetType);
                             } else {
-                                final Object nextMap = N.getElement(intermediateColl, indexes[j]);
-
-                                if (!(nextMap instanceof Map)) {
+                                if (!(element instanceof Map)) {
                                     return NONE;
                                 }
 
-                                intermediateMap = (Map) nextMap;
+                                intermediateMap = (Map) element;
                             }
                         } else {
-                            final Object nextColl = N.getElement(intermediateColl, indexes[j]);
-
-                            if (!(nextColl instanceof Collection)) {
+                            if (!(element instanceof Collection)) {
                                 return NONE;
                             }
 
-                            intermediateColl = (Collection) nextColl;
+                            intermediateColl = (Collection) element;
                         }
                     }
                 }
@@ -1909,6 +1907,31 @@ public final class Maps {
         }
 
         return NONE;
+    }
+
+    private static Object getIndexedElement(final Collection<?> collection, final int index) {
+        if (collection instanceof List) {
+            return N.isEmpty(collection) || collection.size() <= index ? NONE : N.getElement(collection, index);
+        }
+
+        // The first element needs no size computation, which can require a full traversal for some collections.
+        // For later indices, retain a single bounds check: a miss on a cheaply sized collection (including a
+        // sparse HashSet) must not walk its iterator or backing table just to discover that it is out of range.
+        if (index > 0 && collection.size() <= index) {
+            return NONE;
+        }
+
+        final Iterator<?> iter = collection.iterator();
+
+        for (int remaining = index; remaining > 0; remaining--) {
+            if (!iter.hasNext()) {
+                return NONE;
+            }
+
+            iter.next();
+        }
+
+        return iter.hasNext() ? iter.next() : NONE;
     }
 
     /**
@@ -3981,7 +4004,9 @@ public final class Maps {
             return new ArrayList<>();
         }
 
-        final List<V> result = new ArrayList<>(keys.size());
+        // ArrayList's default backing array is lazy: missing keys need no payload storage, and sparse
+        // matches grow with the result instead of retaining a slot for every requested key.
+        final List<V> result = new ArrayList<>();
         V val = null;
 
         for (final Object key : keys) {
@@ -4113,8 +4138,9 @@ public final class Maps {
             return newTargetMap(map, 0, N.size(map));
         }
 
-        // size/2 is only an estimate; size(map) is the true upper bound - see newTargetMap(Map, int, int).
-        final Map<K, V> result = Maps.newTargetMap(map, N.size(map) / 2, N.size(map));
+        // The smaller input is useful as a capacity hint, but differing key-equivalence rules can let
+        // one map2 key match several map keys. size(map) remains the true upper bound for custom maps.
+        final Map<K, V> result = Maps.newTargetMap(map, Math.min(N.size(map) / 2, N.size(map2)), N.size(map));
         Object val = null;
 
         for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -4177,9 +4203,11 @@ public final class Maps {
             return new HashMap<>();
         }
 
-        // An empty map2 means every entry of map is a difference, so that branch knows its result size
-        // exactly; only the comparing branch has to guess (the same /2 heuristic intersection uses).
-        final Map<K, Pair<V, Nullable<V>>> result = newTargetMap(map, N.isEmpty(map2) ? N.size(map) : N.size(map) / 2, N.size(map));
+        // An empty map2 means every entry differs. Otherwise keep standard maps' speculative storage
+        // small, as filter does; a custom constructor must still receive the original maximum size.
+        final int mapSize = N.size(map);
+        final int expectedSize = N.isEmpty(map2) ? mapSize : CAPACITY_SIZED_MAP_CLASSES.contains(map.getClass()) ? Math.min(mapSize / 2, 16) : mapSize / 2;
+        final Map<K, Pair<V, Nullable<V>>> result = newTargetMap(map, expectedSize, mapSize);
 
         if (N.isEmpty(map2)) {
             for (final Map.Entry<K, V> entry : map.entrySet()) {
@@ -4270,11 +4298,17 @@ public final class Maps {
         // symmetricDifference(emptyMap, m2) disagree on the result's type and key semantics, although the doc
         // treats a null map as empty. When map2 is null as well, keep map's own type (there are no keys).
         final Map<?, ?> template = N.isEmpty(map) && map2 != null ? map2 : map;
-        final int expectedSize = Math.max(N.size(map), N.size(map2));
+        final int mapSize = N.size(map);
+        final int map2Size = N.size(map2);
+        // With one empty input the output size is known. Otherwise use filter's modest initial hint
+        // for standard capacity-based maps; preserve custom constructors' maximum-size contract below.
+        final int expectedSize = mapSize > 0 && map2Size > 0 && CAPACITY_SIZED_MAP_CLASSES.contains(template.getClass())
+                ? Math.min(Math.max(mapSize, map2Size), 16)
+                : Math.max(mapSize, map2Size);
         // newTargetMapForNewValues: a BiMap template would reject two map2-only keys with equal values,
         // whose result Pairs are equal.
         // The upper bound is the SUM of the sizes (every key of both maps can differ), not the max.
-        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = newTargetMapForNewValues(template, expectedSize, N.size(map) + N.size(map2), false);
+        final Map<K, Pair<Nullable<V>, Nullable<V>>> result = newTargetMapForNewValues(template, expectedSize, mapSize + map2Size, false);
 
         if (N.notEmpty(map)) {
             if (N.isEmpty(map2)) {

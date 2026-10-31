@@ -943,9 +943,12 @@ public interface Type<T> {
      * Returns the canonical name of this type.
      * <p>
      * The package prefixes {@code java.lang}, {@code java.util}, {@code java.time} and
-     * {@code com.landawn.abacus} are omitted when the class can be resolved by its simple name
-     * ({@code "String"}, {@code "UUID"}, {@code "Year"}, but {@code "java.util.BitSet"}); every other class keeps
-     * its canonical (fully qualified) name. Type parameters are normalized the same way through the parameter
+     * {@code com.landawn.abacus} are omitted when the simple name resolves back to the same class
+     * ({@code "String"}, {@code "UUID"}, {@code "Year"}, but {@code "java.util.BitSet"}, and
+     * {@code "com.landawn.abacus.util.function.Runnable"} because {@code "Runnable"} is {@code java.lang.Runnable});
+     * every other class keeps its canonical (fully qualified) name, except that a non-public implementation class in
+     * those packages is shortened whenever its simple name resolves to some class (the list class of {@code Arrays.asList} is
+     * {@code "ArrayList<Object>"}). Type parameters are normalized the same way through the parameter
      * types' own names, e.g. {@code "List<String>"}, {@code "Map<String, com.example.Person>"},
      * {@code "ArrayList<String>"}. This is the name serializers write as type information and the
      * identity used by {@link Object#equals(Object) equals}. Note that {@link TypeFactory} caches by the

@@ -488,18 +488,32 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @param map The map containing the key-value pairs to be added to the new SetMultimap, may be {@code null} or empty
      * @return a new instance of SetMultimap with the key-value pairs from the specified map
      */
-    @SuppressWarnings("unchecked")
     public static <K, E> SetMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map) {
+        return fromMap(map, N.size(map));
+    }
+
+    // fromMap(map) for a caller that puts the keys of further maps into the result afterwards (the merge methods).
+    // maxKeyCount must bound ALL the keys the result receives: a mirrored map class whose int constructor is not a
+    // known capacity gets it as that argument (see Maps.newTargetMap(Map, int, int)), and an LRU-style class reads it
+    // as its eviction cap - sized for the first map only, it evicted that map's keys while the later maps were merged.
+    @SuppressWarnings("unchecked")
+    private static <K, E> SetMultimap<K, E> fromMap(final Map<? extends K, ? extends E> map, final int maxKeyCount) {
         // A BiMap template is not mirrored: this multimap's backing-map values are the value sets, and a BiMap
         // requires its values to be unique, so a second key receiving an equal set (e.g. [1]) would be rejected.
         //noinspection rawtypes
-        final SetMultimap<K, E> multimap = new SetMultimap<>(map instanceof BiMap ? N.newLinkedHashMap(map.size()) : Maps.newTargetMap(map), HashSet.class);
+        final SetMultimap<K, E> multimap = new SetMultimap<>(
+                map instanceof BiMap ? N.newLinkedHashMap(map.size()) : Maps.newTargetMap(map, N.size(map), maxKeyCount), HashSet.class);
 
         if (N.notEmpty(map)) {
             multimap.putAll(map);
         }
 
         return multimap;
+    }
+
+    // The number of entries of all the maps, saturated at Integer.MAX_VALUE: an upper bound of a merge result's keys.
+    private static int totalSize(final Map<?, ?> a, final Map<?, ?> b, final Map<?, ?> c) {
+        return (int) Math.min((long) N.size(a) + N.size(b) + N.size(c), Integer.MAX_VALUE);
     }
 
     /**
@@ -626,7 +640,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
         if (a == null) {
             return b == null ? N.newSetMultimap() : fromMap(b);
         } else {
-            final SetMultimap<K, E> res = fromMap(a);
+            final SetMultimap<K, E> res = fromMap(a, totalSize(a, b, null));
             res.putAll(b);
             return res;
         }
@@ -673,12 +687,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             if (b == null) {
                 return c == null ? N.newSetMultimap() : fromMap(c);
             } else {
-                final SetMultimap<K, E> res = fromMap(b);
+                final SetMultimap<K, E> res = fromMap(b, totalSize(b, c, null));
                 res.putAll(c);
                 return res;
             }
         } else {
-            final SetMultimap<K, E> res = fromMap(a);
+            final SetMultimap<K, E> res = fromMap(a, totalSize(a, b, c));
             res.putAll(b);
             res.putAll(c);
             return res;
@@ -718,8 +732,14 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
             return N.newSetMultimap();
         }
 
+        long total = 0;
+
+        for (final Map<? extends K, ? extends E> m : c) {
+            total += N.size(m);
+        }
+
         final Iterator<? extends Map<? extends K, ? extends E>> iter = c.iterator();
-        final SetMultimap<K, E> res = fromMap(iter.next());
+        final SetMultimap<K, E> res = fromMap(iter.next(), (int) Math.min(total, Integer.MAX_VALUE));
 
         while (iter.hasNext()) {
             res.putAll(iter.next());

@@ -1140,14 +1140,21 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
         // A removal collection may be a live bucket or subList shared by several keys. Stage every
         // membership decision before changing a bucket, retaining each collection's contains semantics.
         final List<Object> keys = new ArrayList<>(m.size());
-        final List<Set<E>> removals = new ArrayList<>(m.size());
+        // Holds each entry's removal collection until the loop below replaces it with that key's matching values.
+        final List<Object> removals = new ArrayList<>(m.size());
 
+        // Copy m's entries out before the first backingMap.get: m may be the backing map itself or a view of it,
+        // and get() on an access-ordered LinkedHashMap is a structural modification that breaks iterating m.
         for (final Map.Entry<?, ? extends Collection<?>> e : m.entrySet()) {
             keys.add(e.getKey());
+            removals.add(e.getValue());
+        }
+
+        for (int i = 0, size = keys.size(); i < size; i++) {
             // Allocated on the first match only: a key with nothing to remove stages null instead of an empty set.
             Set<E> matchingValues = null;
-            final Collection<?> elements = e.getValue();
-            final V values = backingMap.get(e.getKey());
+            final Collection<?> elements = (Collection<?>) removals.get(i);
+            final V values = backingMap.get(keys.get(i));
 
             if (N.notEmpty(values) && N.notEmpty(elements)) {
                 for (final E value : values) {
@@ -1162,7 +1169,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
                 }
             }
 
-            removals.add(matchingValues);
+            removals.set(i, matchingValues);
         }
 
         boolean wasModified = false;
@@ -1171,7 +1178,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
         for (int i = 0, size = keys.size(); i < size; i++) {
             key = keys.get(i);
-            final Set<E> matchingValues = removals.get(i);
+            @SuppressWarnings("unchecked")
+            final Set<E> matchingValues = (Set<E>) removals.get(i);
             //noinspection SuspiciousMethodCalls
             val = backingMap.get(key);
 

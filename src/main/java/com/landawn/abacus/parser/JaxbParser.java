@@ -747,8 +747,9 @@ final class JaxbParser extends AbstractXmlParser {
      * Unmarshals the given input with an XMLReader obtained from the
      * already-hardened {@code SAXParserFactory} held by {@link XmlUtil} (FEATURE_SECURE_PROCESSING,
      * disallow-doctype-decl, external-general/parameter-entities=false, no-load-external-dtd).
-     * The parser is returned to {@link XmlUtil}'s pool after the synchronous JAXB call, including
-     * when unmarshalling fails.
+     * The parser is handed back to {@link XmlUtil} after the synchronous JAXB call, also when it fails: JAXB parses
+     * through the pooled parser's {@link SAXParser#getXMLReader() XMLReader} view, which records a failed parse, so a
+     * parser that failed is discarded rather than pooled (see {@link XmlUtil#recycleSAXParser(SAXParser)}).
      *
      * @param <T> the target type
      * @param unmarshaller the JAXB unmarshaller
@@ -773,6 +774,7 @@ final class JaxbParser extends AbstractXmlParser {
             // contracts promise UncheckedIOException for that, exactly as the marshal side does.
             throw toParsingOrIoException(e);
         } finally {
+            // A failed parse was recorded by the reader view; recycling then discards the parser instead of pooling it.
             XmlUtil.recycleSAXParser(sp);
         }
     }
