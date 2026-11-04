@@ -340,8 +340,10 @@ public final class Indexed<T> extends AbstractIndexed {
      * making it useful for debugging and logging purposes.</p>
      *
      * <p>The value is converted to a string using {@link N#toString(Object)}, which properly
-     * handles {@code null} values by converting them to the string {@code "null"}. Complex
-     * objects will use their {@code toString()} implementation.</p>
+     * handles {@code null} values by converting them to the string {@code "null"}. An array value is
+     * rendered by content (an {@code int[] {1, 2}} prints as {@code [1, 2]}, not {@code [I@...}) and a
+     * {@code Collection} element by element, without calling the collection's own {@code toString()};
+     * other objects use their {@code toString()} implementation.</p>
      *
      * <p><b>Format:</b> {@code [index]=value}</p>
      *

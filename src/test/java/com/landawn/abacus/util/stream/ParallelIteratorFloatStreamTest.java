@@ -1150,5 +1150,70 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
             assertTrue(Float.isNaN(g103Parallel(values).findLast(v -> Float.isNaN(v)).get()));
         }
     }
+
     // ---- perf review 2026-09-26 G103 end ----
+    // ---- deep review 2026-11-02 G120 begin ----
+    // G120-01 (pin): the parallel flatMapArray workers index the mapped array directly; null and empty arrays contribute
+    // nothing, every element of every non-empty array is emitted once, and a mapper exception propagates.
+    @Test
+    public void testFlatMapArray_parallelNullEmptyAndMultiElementArrays() {
+        final float[] source = new float[37];
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (i % 26 + 3) * 1.5f;
+        }
+
+        final com.landawn.abacus.util.function.FloatFunction<float[]> mapper = v -> {
+            switch (((int) v) % 4) {
+                case 0:
+                    return null;
+                case 1:
+                    return new float[0];
+                case 2:
+                    return new float[] { v };
+                default:
+                    return new float[] { v, (v + 100), -1 };
+            }
+        };
+
+        for (final int from : new int[] { 0, 3 }) {
+            final int to = source.length - from;
+            final float[] expected = FloatStream.of(source, from, to).flatMapArray(mapper).toArray();
+            Arrays.sort(expected);
+            assertEquals(from == 0 ? 37 : 29, expected.length);
+
+            for (final SplitStrategy strategy : SplitStrategy.values()) {
+                for (int threads = 2; threads <= 5; threads++) {
+                    final float[] actual = new ParallelIteratorFloatStream(com.landawn.abacus.util.FloatIterator.of(source, from, to), false, threads, strategy,
+                            null, false, null).flatMapArray(mapper).toArray();
+                    Arrays.sort(actual);
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(expected, actual, strategy + "/" + threads + "/" + from);
+                }
+            }
+        }
+
+        // Only null / empty arrays -> empty result; one source element per worker.
+        final float[] four = { source[0], source[1], source[2], source[3] };
+        assertEquals(0,
+                new ParallelIteratorFloatStream(com.landawn.abacus.util.FloatIterator.of(four), false, 4, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> ((int) v) % 2 == 0 ? null : new float[0])
+                        .count());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 7, 7, 7, 7 },
+                new ParallelIteratorFloatStream(com.landawn.abacus.util.FloatIterator.of(four), false, 4, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> new float[] { 7 })
+                        .toArray());
+
+        final RuntimeException failure = new IllegalStateException("G120 boom");
+        final RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> new ParallelIteratorFloatStream(com.landawn.abacus.util.FloatIterator.of(source), false, 3, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> {
+                            if (v == source[10]) {
+                                throw failure;
+                            }
+
+                            return new float[] { v };
+                        })
+                        .toArray());
+        assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
+    }
+    // ---- deep review 2026-11-02 G120 end ----
 }

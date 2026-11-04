@@ -1308,8 +1308,22 @@ class ArrayByteStream extends AbstractByteStream {
             // Repeated input values cannot exceed the primitive type's finite distinct-value domain.
             final Set<Byte> result = N.newHashSet(Math.min(toIndex - fromIndex, 256));
 
-            for (int i = fromIndex; i < toIndex; i++) {
-                result.add(elements[i]);
+            if (toIndex - fromIndex > 512) {
+                // Skip repeated values before the boxed hash lookup: adding a value that is already present
+                // leaves a HashSet unchanged, so the result (content, capacity, iteration order) is identical.
+                // Above 512 elements at least half of them are repeats (only 256 distinct bytes), so this always pays off.
+                final boolean[] seen = new boolean[256];
+
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (!seen[elements[i] & 0xFF]) {
+                        seen[elements[i] & 0xFF] = true;
+                        result.add(elements[i]);
+                    }
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    result.add(elements[i]);
+                }
             }
 
             return result;
@@ -1369,8 +1383,28 @@ class ArrayByteStream extends AbstractByteStream {
         try {
             final Multiset<Byte> result = N.newMultiset(N.min(64, (toIndex - fromIndex) / 2));
 
-            for (int i = fromIndex; i < toIndex; i++) {
-                result.add(elements[i]);
+            if (toIndex - fromIndex > 1024) {
+                // Count in a 256-entry table first, then add each distinct value once with its count, in first-occurrence
+                // order: the backing HashMap receives the same new keys in the same order as with one add per element, so
+                // counts, capacity and iteration order are identical. Above 1024 elements at least 3/4 of them are repeats
+                // (only 256 distinct bytes), which is where the extra 1.3 KB of tables reliably pays off.
+                final int[] counts = new int[256];
+                final byte[] firstOccurrenceOrder = new byte[256];
+                int distinctCount = 0;
+
+                for (int i = fromIndex; i < toIndex; i++) {
+                    if (counts[elements[i] & 0xFF]++ == 0) {
+                        firstOccurrenceOrder[distinctCount++] = elements[i];
+                    }
+                }
+
+                for (int i = 0; i < distinctCount; i++) {
+                    result.add(firstOccurrenceOrder[i], counts[firstOccurrenceOrder[i] & 0xFF]);
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    result.add(elements[i]);
+                }
             }
 
             return result;

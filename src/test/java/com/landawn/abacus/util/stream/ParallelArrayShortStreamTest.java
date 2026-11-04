@@ -1423,5 +1423,71 @@ public class ParallelArrayShortStreamTest extends TestBase {
                     })));
         }
     }
+
     // ---- perf review 2026-09-26 G102 end ----
+    // ---- deep review 2026-11-02 G120 begin ----
+    // G120-01 (pin): the parallel flatMapArray workers index the mapped array directly; null and empty arrays contribute
+    // nothing, every element of every non-empty array is emitted once, and a mapper exception propagates.
+    @Test
+    public void testFlatMapArray_parallelNullEmptyAndMultiElementArrays() {
+        final short[] source = new short[37];
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (short) (i % 26 + 3);
+        }
+
+        final com.landawn.abacus.util.function.ShortFunction<short[]> mapper = v -> {
+            switch (((int) v) % 4) {
+                case 0:
+                    return null;
+                case 1:
+                    return new short[0];
+                case 2:
+                    return new short[] { v };
+                default:
+                    return new short[] { v, (short) (v + 100), (short) -1 };
+            }
+        };
+
+        for (final int from : new int[] { 0, 3 }) {
+            final int to = source.length - from;
+            final short[] expected = ShortStream.of(source, from, to).flatMapArray(mapper).toArray();
+            Arrays.sort(expected);
+            assertEquals(from == 0 ? 38 : 32, expected.length);
+
+            for (final SplitStrategy strategy : SplitStrategy.values()) {
+                for (int threads = 2; threads <= 5; threads++) {
+                    final short[] actual = new ParallelArrayShortStream(source, from, to, false, threads, strategy, null, false, new ArrayList<>())
+                            .flatMapArray(mapper)
+                            .toArray();
+                    Arrays.sort(actual);
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(expected, actual, strategy + "/" + threads + "/" + from);
+                }
+            }
+        }
+
+        // Only null / empty arrays -> empty result; one source element per worker.
+        final short[] four = { source[0], source[1], source[2], source[3] };
+        assertEquals(0,
+                new ParallelArrayShortStream(four, 0, 4, false, 4, SplitStrategy.ITERATOR, null, false, new ArrayList<>())
+                        .flatMapArray(v -> ((int) v) % 2 == 0 ? null : new short[0])
+                        .count());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new short[] { (short) 7, (short) 7, (short) 7, (short) 7 },
+                new ParallelArrayShortStream(four, 0, 4, false, 4, SplitStrategy.ITERATOR, null, false, new ArrayList<>())
+                        .flatMapArray(v -> new short[] { (short) 7 })
+                        .toArray());
+
+        final RuntimeException failure = new IllegalStateException("G120 boom");
+        final RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> new ParallelArrayShortStream(source, 0, source.length, false, 3, SplitStrategy.ITERATOR, null, false, new ArrayList<>())
+                        .flatMapArray(v -> {
+                            if (v == source[10]) {
+                                throw failure;
+                            }
+
+                            return new short[] { v };
+                        })
+                        .toArray());
+        assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
+    }
+    // ---- deep review 2026-11-02 G120 end ----
 }

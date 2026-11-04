@@ -57,7 +57,8 @@ import com.landawn.abacus.util.cs;
  * <p>Features:
  * <ul>
  *   <li>Thread-safe operations using ReentrantLock</li>
- *   <li>Automatic eviction of expired objects based on configurable policies</li>
+ *   <li>Automatic eviction of expired entries by a periodic task when {@code evictDelayInMillis} is positive
+ *       (independent of the eviction policy, which only orders balancing victims)</li>
  *   <li>Memory-based capacity constraints when configured with MemoryMeasure</li>
  *   <li>Auto-balancing to maintain optimal pool size</li>
  *   <li>Per-key storage and retrieval of poolable objects</li>

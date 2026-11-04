@@ -583,8 +583,10 @@ public final class Nulls {
      *
      * <p>Unlike {@link #lastNonNull(Iterable)}, this method does <em>not</em> skip trailing
      * {@code null} elements. An iterable that exposes a public {@code descendingIterator()} (a
-     * {@code Deque} or a {@code NavigableSet}, for example) is read from its tail; any other
-     * non-random-access iterable is traversed once to its end.</p>
+     * {@code Deque} or a {@code NavigableSet}, for example), or any other non-{@code List}
+     * {@code SequencedCollection} (a {@code LinkedHashSet} or a {@code LinkedHashMap} view, read through
+     * {@code reversed()}), is read from its tail; any other non-random-access iterable is traversed once
+     * to its end.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

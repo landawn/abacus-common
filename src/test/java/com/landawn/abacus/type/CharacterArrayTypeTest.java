@@ -390,4 +390,29 @@ public class CharacterArrayTypeTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("['\\u00zz']"));
     }
     // ---- perf review 2026-09-26 G013 end ----
+
+    // ---- deep review 2026-11-02b G015 begin ----
+    // G015-01: pin for the direct escape of chars above U+007F in Character[] stringOf: hex-digit boundaries, surrogate halves
+    // on their own, U+007F kept verbatim, null elements between escaped ones.
+    @Test
+    public void testStringOf_charsAboveAsciiUseUpperCaseUnicodeEscape_r116() {
+        final Character[] chars = { (char) 0x80, (char) 0xFF, (char) 0x100, (char) 0x7FF, null, (char) 0x800, (char) 0x9999, (char) 0xABCD, (char) 0xD83D,
+                (char) 0xDE00, (char) 0xDBFF, (char) 0xDC00, (char) 0xFFFE, (char) 0xFFFF, null, (char) 0x7F, 'a', '/' };
+        final String bs = "\\";
+        final String expected = "['" + bs + "u0080', '" + bs + "u00FF', '" + bs + "u0100', '" + bs + "u07FF', null, '" + bs + "u0800', '" + bs + "u9999', '"
+                + bs + "uABCD', '" + bs + "uD83D', '" + bs + "uDE00', '" + bs + "uDBFF', '" + bs + "uDC00', '" + bs + "uFFFE', '" + bs + "uFFFF', null, '"
+                + (char) 0x7F + "', 'a', '" + bs + "/']";
+
+        final String str = type.stringOf(chars);
+        assertEquals(expected, str);
+        assertArrayEquals(chars, type.valueOf(str));
+        assertEquals("['" + bs + "uFFFF']", type.stringOf(new Character[] { (char) 0xFFFF }));
+
+        for (final Character ch : chars) {
+            if (ch != null && ch > 0x7F) {
+                assertEquals(com.landawn.abacus.util.EscapeUtil.escapeEcmaScript(String.valueOf(ch)), bs + "u" + String.format("%04X", (int) ch));
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G015 end ----
 }

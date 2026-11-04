@@ -3445,7 +3445,7 @@ sealed class CommonUtil permits N {
             // If we run out of placeholders, append the extra args in square braces. The separator is " [",
             // NOT the ": [" the fixed-arity format(..) helpers use: this overload keeps Guava lenientFormat
             // parity. Both shapes are pinned side by side in
-            // CommonUtilNReviewFixes20260831Test.checkArgument_placeholderStylesAreNotMixed - do not "align" them.
+            // CommonUtilNRegressionTest.checkArgument_placeholderStylesAreNotMixed - do not "align" them.
             if (i < arguments.length) {
                 sb.append(" [");
                 sb.append(toString(arguments[i++]));
@@ -12287,8 +12287,18 @@ sealed class CommonUtil permits N {
             final Class<?> componentType = target.javaType().getComponentType();
             final Object output = java.lang.reflect.Array.newInstance(componentType, length);
             final Object[] objectOutput = componentType.isPrimitive() ? null : (Object[]) output;
+            // An element that is already the (final) wrapper of a primitive component converts to itself under the built-in
+            // element type - the identity number conversion, a Boolean returned as is, a Character re-read from its one-char
+            // text - and wrappers can have no registered converter, so it is stored directly instead of taking the scalar path.
+            final Class<?> exactWrapper = objectOutput == null && elementType == typeOf(componentType) ? ClassUtil.wrap(componentType) : null;
             for (int i = 0; i < length; i++) {
                 final Object value = values != null ? values.next() : objectSource != null ? objectSource[i] : getPrimitiveArrayElement(source, i);
+
+                if (exactWrapper != null && exactWrapper.isInstance(value)) {
+                    setPrimitiveArrayElement(output, i, value);
+                    continue;
+                }
+
                 final Object converted = convertStructured(value, elementType, checkedGraphs);
 
                 if (objectOutput != null && (converted == null || componentType.isInstance(converted))) {

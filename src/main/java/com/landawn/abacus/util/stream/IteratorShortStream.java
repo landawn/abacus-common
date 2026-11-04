@@ -1023,18 +1023,24 @@ class IteratorShortStream extends AbstractShortStream {
                             heap = new PriorityQueue<>(Math.min(n, 16), cmp);
                         }
 
-                        Short next = null;
-                        while (elements.hasNext()) {
-                            next = elements.nextShort();
+                        if (cmp == SHORT_COMPARATOR) {
+                            // Natural order (top(n)): test a candidate against the heap head with a primitive compare
+                            // (== Short.compare(..) > 0), so only accepted values are boxed, not every element.
+                            short value = 0;
+                            while (elements.hasNext()) {
+                                value = elements.nextShort();
 
-                            if (heap.size() >= n) {
-                                if (cmp.compare(next, heap.peek()) > 0) {
-                                    heap.poll();
-                                    heap.offer(next);
+                                if (heap.size() >= n) {
+                                    if (value > heap.peek()) {
+                                        heap.poll();
+                                        heap.offer(value);
+                                    }
+                                } else {
+                                    heap.offer(value);
                                 }
-                            } else {
-                                heap.offer(next);
                             }
+                        } else {
+                            offerTopByComparator(elements, heap, n, cmp);
                         }
 
                         aar = Array.unbox(heap.toArray(N.EMPTY_SHORT_OBJ_ARRAY));
@@ -1047,6 +1053,25 @@ class IteratorShortStream extends AbstractShortStream {
                 }
             }
         }, false);
+    }
+
+    // The unchanged comparator loop of top(n, Comparator)'s heap path. It is kept out of init() on purpose: next to the
+    // natural-order loop in the same method, it ran ~1.5-3x slower on large sources once the natural loop had been
+    // JIT-compiled first (uncommon-trap/OSR profile of the shared method).
+    private static void offerTopByComparator(final ShortIteratorEx iterator, final Queue<Short> heap, final int n, final Comparator<? super Short> comparator) {
+        Short next = null;
+        while (iterator.hasNext()) {
+            next = iterator.nextShort();
+
+            if (heap.size() >= n) {
+                if (comparator.compare(next, heap.peek()) > 0) {
+                    heap.poll();
+                    heap.offer(next);
+                }
+            } else {
+                heap.offer(next);
+            }
+        }
     }
 
     @Override

@@ -2381,4 +2381,55 @@ public class CharListTest extends CharListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G111 end ----
+
+    // ---- deep review 2026-11-02 G027 begin ----
+
+    // G027-01 (pin): removeDuplicates small unsorted path (size <= 64) keeps the first occurrence of each value in order,
+    // reports changes correctly and zeroes the vacated tail; also the size-64/65 boundary and (char) 0 values.
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testRemoveDuplicates_smallUnsortedPathPin() {
+        CharList list = CharList.of('b', 'a', 'b');
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new char[] { 'b', 'a' }, list.toArray());
+        assertEquals(0, list.internalArray()[2]);
+
+        list = CharList.of('b', 'a');
+        assertFalse(list.removeDuplicates());
+        assertArrayEquals(new char[] { 'b', 'a' }, list.toArray());
+
+        list = CharList.of((char) 0, 'a', (char) 0, 'a', 'c');
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new char[] { (char) 0, 'a', 'c' }, list.toArray());
+        assertEquals(0, list.internalArray()[3]);
+        assertEquals(0, list.internalArray()[4]);
+
+        for (final int size : new int[] { 63, 64, 65 }) {
+            final char[] distinct = new char[size];
+
+            for (int i = 0; i < size; i++) {
+                distinct[i] = (char) (0x4E00 + (i * 37) % size);
+            }
+
+            list = CharList.of(distinct.clone());
+            assertFalse(list.removeDuplicates());
+            assertArrayEquals(distinct, list.toArray());
+
+            final char[] lastDuplicated = distinct.clone();
+            lastDuplicated[size - 1] = lastDuplicated[0];
+            list = CharList.of(lastDuplicated.clone());
+            assertTrue(list.removeDuplicates());
+            assertArrayEquals(Arrays.copyOf(lastDuplicated, size - 1), list.toArray());
+            assertEquals(0, list.internalArray()[size - 1]);
+
+            final char[] allSame = new char[size];
+            Arrays.fill(allSame, 'x');
+            allSame[0] = 'y';
+            list = CharList.of(allSame);
+            assertTrue(list.removeDuplicates());
+            assertArrayEquals(new char[] { 'y', 'x' }, list.toArray());
+        }
+    }
+
+    // ---- deep review 2026-11-02 G027 end ----
 }

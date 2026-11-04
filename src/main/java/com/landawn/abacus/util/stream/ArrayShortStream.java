@@ -1200,8 +1200,27 @@ class ArrayShortStream extends AbstractShortStream {
             // Repeated input values cannot exceed the primitive type's finite distinct-value domain.
             final Set<Short> result = N.newHashSet(Math.min(toIndex - fromIndex, 65536));
 
-            for (int i = fromIndex; i < toIndex; i++) {
-                result.add(elements[i]);
+            if (toIndex - fromIndex > 131072) {
+                // Skip repeated values before the boxed hash lookup: re-adding a value that is already present leaves a
+                // HashSet unchanged, so the result (content, capacity, iteration order) is identical. Above 2 * 65536
+                // elements at least half of them are repeats, so the 8 KB presence table always pays off; below that,
+                // input with (almost) no repeats measured slower with the table.
+                final long[] seen = new long[1024];
+
+                for (int i = fromIndex; i < toIndex; i++) {
+                    final int bit = elements[i] & 0xFFFF;
+                    final long mask = 1L << bit;
+                    final int word = bit >>> 6;
+
+                    if ((seen[word] & mask) == 0) {
+                        seen[word] |= mask;
+                        result.add(elements[i]);
+                    }
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    result.add(elements[i]);
+                }
             }
 
             return result;

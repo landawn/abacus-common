@@ -427,5 +427,57 @@ public class InstantTypeTest extends TestBase {
         final java.time.ZonedDateTime utc = java.time.ZonedDateTime.of(2021, 6, 30, 23, 59, 59, 999, java.time.ZoneOffset.UTC);
         assertEquals(Instant.parse(utc.toString()), instantType.valueOf((Object) utc));
     }
+
     // ---- deep review 2026-10-26 G125 end ----
+    // ---- deep review 2026-11-02b G017 begin ----
+    // G017-01 (pin): the yyyy-MM-dd'T'HH:mm:ss[.fraction]Z text stringOf writes is read without the java.time grammar;
+    // valueOf(String) and valueOf(char[], int, int) must still answer exactly what Instant.parse answers.
+    @Test
+    public void testValueOfString_canonicalUtcTextSameAsJdkParser_r116() {
+        final String[] texts = { "2023-12-25T10:30:45Z", "2023-12-25T10:30:00Z", "2023-12-25T10:30:45.1Z", "2023-12-25T10:30:45.123Z",
+                "2023-12-25T10:30:45.123456Z", "2023-12-25T10:30:45.123456789Z", "1970-01-01T00:00:00Z", "1969-12-31T23:59:59.999Z", "0000-01-01T00:00:00Z",
+                "9999-12-31T23:59:59.999999999Z", "2020-02-29T23:59:59Z", "2023-12-25T10:30:45.000Z" };
+
+        for (final String text : texts) {
+            assertEquals(Instant.parse(text), instantType.valueOf(text), text);
+
+            final char[] cbuf = ("x" + text + "y").toCharArray();
+            assertEquals(Instant.parse(text), instantType.valueOf(cbuf, 1, text.length()), text);
+        }
+
+        final Instant value = Instant.ofEpochSecond(1_703_500_245L, 120_000_000);
+        assertEquals(value, instantType.valueOf(instantType.stringOf(value)));
+    }
+
+    // G017-01 (pin): text the direct read leaves to the java.time parsers (24:00 and a leap second, which ISO_INSTANT
+    // adjusts, lower-case 't'/'z', a signed year, impossible dates, missing seconds, an empty or ten-digit fraction,
+    // offsets, non-ASCII digits) keeps the answer or exception Instant.parse gives.
+    @Test
+    public void testValueOfString_nonCanonicalUtcTextSameAsJdkParser_r116() {
+        final String[] texts = { "2023-12-25T24:00:00Z", "2023-12-31T23:59:60Z", "2023-12-25T10:30:45.123z", "2023-12-25t10:30:45Z", "+10000-01-01T00:00:00Z",
+                "2023-02-29T10:30:45Z", "2023-02-30T10:30:45.123Z", "2023-12-25T10:30Z", "2023-12-25T10:30:45.Z", "2023-12-25T10:30:45.1234567890Z",
+                "2023-12-25T10:30:45+01:00", "2023-12-25T10:30:45.123-05:00", "2023-12-25T1\u0661:30:45Z", "2023-12-25T10:60:45Z", "2023-13-25T10:30:45Z",
+                "2023-12-25 10:30:45Z", "2023-12-25T10:30:45.12aZ", " 2023-12-25T10:30:45Z" };
+
+        for (final String text : texts) {
+            Object expected;
+
+            try {
+                expected = Instant.parse(text);
+            } catch (final RuntimeException e) {
+                expected = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            Object actual;
+
+            try {
+                actual = instantType.valueOf(text);
+            } catch (final RuntimeException e) {
+                actual = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            assertEquals(expected, actual, text);
+        }
+    }
+    // ---- deep review 2026-11-02b G017 end ----
 }

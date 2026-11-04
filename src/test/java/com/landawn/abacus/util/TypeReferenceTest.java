@@ -321,4 +321,86 @@ public class TypeReferenceTest extends TestBase {
         assertEquals(List.class, ref.type().reflectType());
         assertEquals(List.class, ref.type().javaType());
     }
+
+    // ---- deep review 2026-11-02b G083 begin ----
+    private static class G083DirectGenericReference<Z> extends TypeReference<Map<String, Z[]>> {
+    }
+
+    private static class G083DirectGenericToken<Z> extends TypeReference.TypeToken<List<Z>> {
+    }
+
+    private static <M> void g083CreateLocalUnresolvedReference() {
+        class LocalReference extends TypeReference<List<? extends M>> {
+        }
+
+        new LocalReference();
+    }
+
+    private static void g083AssertCapturesDirectTypeArgument(final TypeReference<?> ref) {
+        final java.lang.reflect.Type typeArgument = ((ParameterizedType) ref.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        assertSame(typeArgument, ref.javaType(), ref.getClass().getName());
+        assertSame(ref.javaType(), ref.reflectType());
+        assertEquals(typeArgument.getTypeName(), ref.toString());
+    }
+
+    // G083-07: pins capture for a direct TypeReference/TypeToken subclass (the construction fast path): the result is the
+    // JDK's own type-argument object, and unresolved/raw declarations keep their exception type and message.
+    @Test
+    public void testDirectSubclassCapture_r116() {
+        g083AssertCapturesDirectTypeArgument(new TypeReference<String>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<int[]>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<String[][]>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<List<String>>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<List<String>[]>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<Map<? extends Number, ? super Integer>>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference<Map.Entry<String, List<? extends CharSequence>>>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference.TypeToken<String>() {
+        });
+        g083AssertCapturesDirectTypeArgument(new TypeReference.TypeToken<Map<String, int[]>[]>() {
+        });
+
+        assertEquals(String[][].class, new TypeReference<String[][]>() {
+        }.javaType());
+        assertTrue(new TypeReference<List<String>[]>() {
+        }.javaType() instanceof java.lang.reflect.GenericArrayType);
+        assertEquals(new TypeReference<List<String>>() {
+        }, new TypeReference.TypeToken<List<String>>() {
+        });
+        assertEquals(new SecondTypeReference<String, List<Integer>>() {
+        }, new TypeReference<List<Integer>>() {
+        });
+        assertEquals(new SecondTypeReference<String, List<Integer>>() {
+        }.hashCode(), new TypeReference<List<Integer>>() {
+        }.hashCode());
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new G083DirectGenericReference<String>());
+        assertEquals("TypeReference constructed without concrete type information: java.util.Map<java.lang.String, Z[]>", e.getMessage());
+        e = assertThrows(IllegalArgumentException.class, () -> new G083DirectGenericToken<String>());
+        assertEquals("TypeReference constructed without concrete type information: java.util.List<Z>", e.getMessage());
+        e = assertThrows(IllegalArgumentException.class, TypeReferenceTest::g083CreateLocalUnresolvedReference);
+        assertEquals("TypeReference constructed without concrete type information: java.util.List<? extends M>", e.getMessage());
+        e = assertThrows(IllegalArgumentException.class, TypeReferenceTest::createUnresolvedTypeReference);
+        assertEquals("TypeReference constructed without concrete type information: T", e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings("rawtypes")
+            TypeReference rawRef = new TypeReference() {
+            };
+        });
+        assertEquals("TypeReference constructed without actual type information", e.getMessage());
+        e = assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings("rawtypes")
+            TypeReference.TypeToken rawToken = new TypeReference.TypeToken() {
+            };
+        });
+        assertEquals("TypeReference constructed without concrete type information: T", e.getMessage());
+    }
+    // ---- deep review 2026-11-02b G083 end ----
 }

@@ -1635,8 +1635,8 @@ public final class Beans {
 
         // Warm the accessor pools before taking the metadata monitor: the conflict check below needs the
         // discovered accessors, and deriving them runs application code, which must not happen under the
-        // global lock. The null fallback inside the registration is only for the case where a concurrent
-        // registration invalidates this warm-up in between.
+        // global lock. Only if a concurrent registration invalidates this warm-up in between does the
+        // getPropGetters/getPropSetters call inside the registration re-derive the model, then under the lock.
         loadPropGetSetMethodList(cls);
 
         applyRegistration(cls, () -> {
@@ -5022,6 +5022,9 @@ public final class Beans {
      * @return a new bean of the specified type with properties populated from the map,
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class.
+     * @throws UnsupportedOperationException if {@code map} is not {@code null} and {@code targetType} is treated as an immutable bean
+     *         (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, boolean, Class)
      * @see #mapToBean(Map, Collection, Class)
      * @see #beanToFlatMap(Object)
@@ -5069,6 +5072,9 @@ public final class Beans {
      *         or {@code null} if {@code map} is {@code null}.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if
      *         {@code ignoreUnmatchedProperty} is {@code false} and an unmatched or {@code null} key is encountered.
+     * @throws UnsupportedOperationException if {@code map} is not {@code null} and {@code targetType} is treated as an immutable bean
+     *         (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, Class)
      * @see #mapToBean(Map, Collection, Class)
      */
@@ -5183,6 +5189,9 @@ public final class Beans {
      *         no property for does not throw - it is ignored; see above.
      *         A read-only property (one with no permitted write path), or a dot-separated path ending in one,
      *         is rejected with this exception as well, before anything is written.
+     * @throws UnsupportedOperationException if {@code map} is not {@code null} and {@code targetType} is treated as an immutable bean
+     *         (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, boolean, Class)
      */
     @MayReturnNull
@@ -5278,6 +5287,9 @@ public final class Beans {
      * @param targetType the class of the bean to create for each map; must be a valid bean class.
      * @return a list of new bean instances with properties populated from the corresponding map entries.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class.
+     * @throws UnsupportedOperationException if {@code mapList} contains a non-{@code null} map and {@code targetType} is treated as an
+     *         immutable bean (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, Class)
      * @see #mapsToBeans(Collection, Collection, Class)
      */
@@ -5322,6 +5334,9 @@ public final class Beans {
      * @return a list of new bean instances with properties populated from the corresponding map entries.
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if
      *         {@code ignoreUnmatchedProperty} is {@code false} and a map contains an unmatched key.
+     * @throws UnsupportedOperationException if {@code mapList} contains a non-{@code null} map and {@code targetType} is treated as an
+     *         immutable bean (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, Class)
      */
     public static <T> List<T> mapsToBeans(final Collection<? extends Map<String, Object>> mapList, final boolean ignoreUnmatchedProperty,
@@ -5375,6 +5390,9 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or is not a valid bean class, or if a selected property
      *         does not exist in the target bean class or has no permitted write path. For a dot-separated path,
      *         the last property must be writable.
+     * @throws UnsupportedOperationException if {@code mapList} contains a non-{@code null} map and {@code targetType} is treated as an
+     *         immutable bean (for example it is abstract, or has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see #mapToBean(Map, Class)
      */
     public static <T> List<T> mapsToBeans(final Collection<? extends Map<String, Object>> mapList, final Collection<String> selectPropNames,
@@ -8549,6 +8567,9 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if {@code obj} is {@code null} and
      *         {@code targetType} cannot be instantiated: a non-bean class that is abstract or has no accessible no-arg
      *         constructor, or an abstract bean class with no detected builder.
+     * @throws UnsupportedOperationException if {@code obj} is {@code null} and {@code targetType} is a bean class that is not abstract
+     *         but is treated as an immutable bean (for example it has no accessible no-arg constructor) and has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @throws RuntimeException if the object cannot be copied by either mechanism - see {@link #deepCopy(Object)}.
      *         A Kryo {@link RuntimeException} is absorbed and the XML round trip is used <em>for that call only</em>:
      *         the next copy of the same class tries Kryo again, so one instance Kryo cannot copy does not change
@@ -8627,6 +8648,9 @@ public final class Beans {
      *         or {@code null} if {@code sourceBean} is {@code null}.
      * @throws IllegalArgumentException if the copy is made property by property (not by the optimized whole-object copy) and the class of
      *         {@code sourceBean} is not a bean class.
+     * @throws UnsupportedOperationException if the copy is made property by property and the class of {@code sourceBean} is treated as
+     *         an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
@@ -8666,6 +8690,9 @@ public final class Beans {
      *         or if the copy is made property by property (not by the optimized whole-object copy) and the class of a
      *         non-{@code null} {@code sourceBean} is not a bean class.
      *         A selected read-only target property is rejected with this exception as well.
+     * @throws UnsupportedOperationException if the copy is made property by property and the class of {@code sourceBean} is treated as
+     *         an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      */
     @MayReturnNull
     public static <T> T copy(final T sourceBean, final Collection<String> selectPropNames) throws IllegalArgumentException {
@@ -8702,6 +8729,9 @@ public final class Beans {
      * @throws IllegalArgumentException if {@code propFilter} is {@code null},
      *         or if the copy is made property by property (not by the optimized whole-object copy) and the class of a
      *         non-{@code null} {@code sourceBean} is not a bean class.
+     * @throws UnsupportedOperationException if the copy is made property by property and the class of {@code sourceBean} is treated as
+     *         an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a constructor taking
+     *         all its properties, so no instance of it can be created.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -8756,6 +8786,9 @@ public final class Beans {
      *         non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      */
     public static <T> T copyAs(final Object sourceBean, final Class<? extends T> targetType) throws IllegalArgumentException {
         return copyAs(sourceBean, (Collection<String>) null, targetType);
@@ -8791,6 +8824,9 @@ public final class Beans {
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
      *         A selected read-only target property is rejected with this exception as well.
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      */
     public static <T> T copyAs(final Object sourceBean, final Collection<String> selectPropNames, @NotNull final Class<? extends T> targetType)
             throws IllegalArgumentException {
@@ -8836,6 +8872,9 @@ public final class Beans {
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
      *         A selected read-only target property is rejected with this exception as well.
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -8915,6 +8954,9 @@ public final class Beans {
      *         non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -8965,6 +9007,9 @@ public final class Beans {
      *         non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      * @see Fn#identity()
      * @see Fn#selectFirst()
      */
@@ -9054,6 +9099,9 @@ public final class Beans {
      *         or if {@code targetType}, or the class of a non-{@code null} {@code sourceBean}, is not a bean class.
      *         An abstract {@code targetType} with no detected builder is rejected with this exception as well
      *         (it cannot be instantiated).
+     * @throws UnsupportedOperationException if the copy is made property by property and {@code targetType} is not abstract but is
+     *         treated as an immutable bean (for example it has no accessible no-arg constructor) that has neither a builder nor a
+     *         constructor taking all its properties, so no instance of it can be created.
      */
     @SuppressWarnings("unchecked")
     public static <T> T copyAs(final Object sourceBean, final boolean ignoreUnmatchedProperty, final Set<String> ignoredPropNames,

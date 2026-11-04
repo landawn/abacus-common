@@ -1281,8 +1281,27 @@ class ArrayCharStream extends AbstractCharStream {
             // Repeated input values cannot exceed the primitive type's finite distinct-value domain.
             final Set<Character> result = N.newHashSet(Math.min(toIndex - fromIndex, 65536));
 
-            for (int i = fromIndex; i < toIndex; i++) {
-                result.add(elements[i]);
+            if (toIndex - fromIndex > 131072) {
+                // Skip repeated values before the boxed hash lookup: re-adding a value that is already present leaves a
+                // HashSet unchanged, so the result (content, capacity, iteration order) is identical. Above 2 * 65536
+                // elements at least half of them are repeats, so the 8 KB presence table always pays off; below that,
+                // input with (almost) no repeats measured slower with the table.
+                final long[] seen = new long[1024];
+
+                for (int i = fromIndex; i < toIndex; i++) {
+                    final char value = elements[i];
+                    final long mask = 1L << value;
+                    final int word = value >>> 6;
+
+                    if ((seen[word] & mask) == 0) {
+                        seen[word] |= mask;
+                        result.add(value);
+                    }
+                }
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    result.add(elements[i]);
+                }
             }
 
             return result;

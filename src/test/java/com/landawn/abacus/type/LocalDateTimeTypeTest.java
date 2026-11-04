@@ -416,5 +416,57 @@ public class LocalDateTimeTypeTest extends TestBase {
         assertThrows(DateTimeParseException.class,
                 () -> localDateTimeType.valueOf((Object) java.time.OffsetTime.of(10, 30, 0, 0, java.time.ZoneOffset.ofHours(2))));
     }
+
     // ---- deep review 2026-10-27 G135 end ----
+    // ---- deep review 2026-11-02b G017 begin ----
+    // G017-01 (pin): the yyyy-MM-dd'T'HH:mm[:ss[.fraction]] text stringOf writes is read without the java.time grammar;
+    // valueOf(String) and valueOf(char[], int, int) must still answer exactly what LocalDateTime.parse answers.
+    @Test
+    public void testValueOfString_canonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "2021-01-01T10:30", "2021-01-01T10:30:45", "2021-01-01T10:30:45.1", "2021-01-01T10:30:45.123", "2021-01-01T10:30:45.123456",
+                "2021-01-01T10:30:45.123456789", "2021-01-01T00:00", "2021-01-01T23:59:59", "0000-01-01T00:00", "9999-12-31T23:59:59.999999999",
+                "2020-02-29T12:00", "2000-02-29T12:00", "1969-12-31T23:59:59.999", "2021-01-01T10:30:45.000" };
+
+        for (final String text : texts) {
+            assertEquals(LocalDateTime.parse(text), localDateTimeType.valueOf(text), text);
+
+            final char[] cbuf = ("x" + text + "y").toCharArray();
+            assertEquals(LocalDateTime.parse(text), localDateTimeType.valueOf(cbuf, 1, text.length()), text);
+        }
+
+        final LocalDateTime value = LocalDateTime.of(2021, 6, 30, 23, 59, 58, 120_000_000);
+        assertEquals(value, localDateTimeType.valueOf(localDateTimeType.stringOf(value)));
+    }
+
+    // G017-01 (pin): text the direct read leaves to LocalDateTime.parse (lower-case 't', a signed or five-digit year, 24:00,
+    // a leap second, impossible dates, an empty or ten-digit fraction, non-ASCII digits, padding, a zone) keeps its answer.
+    @Test
+    public void testValueOfString_nonCanonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "2021-01-01t10:30:45", "+10000-01-01T10:30", "-0001-01-01T10:30", "2021-01-01T24:00", "2021-12-31T23:59:60",
+                "2021-02-29T10:30", "2021-04-31T10:30", "2021-13-01T10:30", "2021-00-01T10:30", "2021-01-00T10:30", "2021-01-01T10:60", "2021-01-01T10:30:45.",
+                "2021-01-01T10:30:45.1234567890", "2021-01-01T10:30:", "2021-01-01T10:3", "2021-01-01 10:30", "2021-01-01T10:30:45Z", "2021-01-01T1\u0661:30",
+                "\u0662021-01-01T10:30", " 2021-01-01T10:30", "2021-01-01T10:30 ", "2021-1-01T10:30:45", "2021-01-01T10:30:45.12a", "2021-01-01T10:30:45.-1",
+                "2021-01-01T-1:30" };
+
+        for (final String text : texts) {
+            Object expected;
+
+            try {
+                expected = LocalDateTime.parse(text);
+            } catch (final RuntimeException e) {
+                expected = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            Object actual;
+
+            try {
+                actual = localDateTimeType.valueOf(text);
+            } catch (final RuntimeException e) {
+                actual = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            assertEquals(expected, actual, text);
+        }
+    }
+    // ---- deep review 2026-11-02b G017 end ----
 }

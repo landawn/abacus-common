@@ -29,12 +29,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.text.Normalizer;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -502,7 +500,8 @@ import com.landawn.abacus.util.stream.IntStream;
  *     <tr>
  *       <td>{@code abbreviate(str, "", [offset,] maxLength)} (empty marker) with a non-empty {@code str} and {@code maxLength <= 0} &mdash; {@code Strings} throws {@code IllegalArgumentException}</td>
  *       <td>&mdash;</td>
- *       <td>&#9888;&#65039; {@code StringUtils.abbreviate(str, "", [offset,] maxWidth)} returns {@code str} unchanged for {@code maxWidth <= 0}</td>
+ *       <td>&#9888;&#65039; up to 3.20.0, {@code StringUtils.abbreviate(str, "", [offset,] maxWidth)} returns {@code str} unchanged for
+ *           {@code maxWidth <= 0}; since 3.21.0 it throws {@code IllegalArgumentException} as well</td>
  *       <td>&mdash;</td>
  *     </tr>
  *     <tr>
@@ -2824,7 +2823,8 @@ public final class Strings {
      *   <tr><td>{@code str} is {@code null} or empty</td><td>Return {@code str}</td><td>None</td></tr>
      *   <tr><td>Non-empty {@code str}, {@code abbreviationMarker == null}</td><td>Return {@code str}</td><td>None</td></tr>
      *   <tr><td>Non-empty {@code str}, empty marker</td><td>Truncate from the right; {@code offset} is ignored</td><td>{@code maxLength >= 1}
-     *       (&#9888;&#65039; Apache Commons Lang returns {@code str} unchanged for {@code maxWidth <= 0} instead of throwing)</td></tr>
+     *       (&#9888;&#65039; Apache Commons Lang up to 3.20.0 returns {@code str} unchanged for {@code maxWidth <= 0} instead of
+     *       throwing; 3.21.0 throws {@code IllegalArgumentException} as well)</td></tr>
      *   <tr><td>Both are non-empty</td><td>Apply marker-based abbreviation</td><td>{@code maxLength >= marker.length() + 1};
      *       if abbreviation is needed and the effective offset is greater than {@code marker.length() + 1},
      *       {@code maxLength >= 2 * marker.length() + 1}</td></tr>
@@ -2991,7 +2991,8 @@ public final class Strings {
      *   <tr><td>{@code str} is {@code null} or empty</td><td>Return {@code str}</td><td>None</td></tr>
      *   <tr><td>Non-empty {@code str}, {@code abbreviationMarker == null}</td><td>Return {@code str}</td><td>None</td></tr>
      *   <tr><td>Non-empty {@code str}, empty marker</td><td>Truncate from the right</td><td>{@code maxLength >= 1}
-     *       (&#9888;&#65039; Apache Commons Lang returns {@code str} unchanged for {@code maxWidth <= 0} instead of throwing)</td></tr>
+     *       (&#9888;&#65039; Apache Commons Lang up to 3.20.0 returns {@code str} unchanged for {@code maxWidth <= 0} instead of
+     *       throwing; 3.21.0 throws {@code IllegalArgumentException} as well)</td></tr>
      *   <tr><td>Both are non-empty</td><td>Return {@code str} if it fits; otherwise append the marker after
      *       truncation</td><td>{@code maxLength >= abbreviationMarker.length() + 1}</td></tr>
      * </table>
@@ -9395,9 +9396,10 @@ public final class Strings {
      * different pair (stripping U+1F600 from a string that starts or ends with U+1F601 leaves it unchanged, although
      * the two share their high surrogate). A lone surrogate in {@code str} is still a code unit of its own; it is
      * stripped only when {@code stripChars} contains the same unpaired surrogate.
-     * &#9888;&#65039; Apache Commons Lang's {@code StringUtils.strip}/{@code stripStart}/{@code stripEnd} match per code unit
-     * whatever {@code stripChars} holds, so they split such a pair: {@code StringUtils.strip(U+1F601, U+1F600)} returns
-     * the lone low surrogate U+DE01 where this method returns the input unchanged.</p>
+     * &#9888;&#65039; Apache Commons Lang up to 3.20.0: {@code StringUtils.strip}/{@code stripStart}/{@code stripEnd} match
+     * per code unit whatever {@code stripChars} holds, so they split such a pair: {@code StringUtils.strip(U+1F601, U+1F600)}
+     * returns the lone low surrogate U+DE01 where this method returns the input unchanged. Since 3.21.0 they return the
+     * input unchanged as well.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10183,9 +10185,9 @@ public final class Strings {
      * empty, consists of a single code point (a supplementary character such as an emoji counts as one, although it
      * is two UTF-16 code units), or is exactly {@code "\r\n"}.</p>
      *
-     * <p>&#9888;&#65039; Apache Commons Lang's {@code StringUtils.chop} removes the last UTF-16 code unit, so it
-     * leaves a lone high surrogate behind when the string ends with a supplementary character; this method removes
-     * the whole code point.</p>
+     * <p>&#9888;&#65039; Apache Commons Lang's {@code StringUtils.chop} up to 3.20.0 removes the last UTF-16 code unit, so
+     * it leaves a lone high surrogate behind when the string ends with a supplementary character; this method removes
+     * the whole code point, as {@code chop} does since 3.21.0.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19412,7 +19414,8 @@ public final class Strings {
      */
     public static List<String> substringsBetween(final String str, final char delimiterOfExclusiveBeginIndex, final char delimiterOfExclusiveEndIndex,
             final DelimiterMatchMode delimiterMatchMode) throws IllegalArgumentException {
-        return substringsBetween(str, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex), delimiterMatchMode);
+        // N.stringOf hands out the shared cached String for an ASCII char instead of allocating one per call.
+        return substringsBetween(str, N.stringOf(delimiterOfExclusiveBeginIndex), N.stringOf(delimiterOfExclusiveEndIndex), delimiterMatchMode);
     }
 
     /**
@@ -19450,7 +19453,8 @@ public final class Strings {
      */
     public static List<String> substringsBetween(final String str, final int fromIndex, final int toIndex, final char delimiterOfExclusiveBeginIndex,
             final char delimiterOfExclusiveEndIndex) throws IndexOutOfBoundsException {
-        return substringsBetween(str, fromIndex, toIndex, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+        // N.stringOf hands out the shared cached String for an ASCII char instead of allocating one per call.
+        return substringsBetween(str, fromIndex, toIndex, N.stringOf(delimiterOfExclusiveBeginIndex), N.stringOf(delimiterOfExclusiveEndIndex),
                 DelimiterMatchMode.SEQUENTIAL, Integer.MAX_VALUE);
     }
 
@@ -19749,7 +19753,8 @@ public final class Strings {
             return new ArrayList<>();
         }
 
-        return substringIndicesBetween(str, 0, str.length(), String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+        // N.stringOf hands out the shared cached String for an ASCII char instead of allocating one per call.
+        return substringIndicesBetween(str, 0, str.length(), N.stringOf(delimiterOfExclusiveBeginIndex), N.stringOf(delimiterOfExclusiveEndIndex),
                 delimiterMatchMode, Integer.MAX_VALUE);
     }
 
@@ -19799,7 +19804,8 @@ public final class Strings {
             return new ArrayList<>();
         }
 
-        return substringIndicesBetween(str, fromIndex, toIndex, String.valueOf(delimiterOfExclusiveBeginIndex), String.valueOf(delimiterOfExclusiveEndIndex),
+        // N.stringOf hands out the shared cached String for an ASCII char instead of allocating one per call.
+        return substringIndicesBetween(str, fromIndex, toIndex, N.stringOf(delimiterOfExclusiveBeginIndex), N.stringOf(delimiterOfExclusiveEndIndex),
                 DelimiterMatchMode.SEQUENTIAL, Integer.MAX_VALUE);
     }
 
@@ -20043,9 +20049,13 @@ public final class Strings {
 
         idx += lengthOfDelimiterOfExclusiveBeginIndex;
 
-        final Deque<Integer> queue = new ArrayDeque<>();
+        // Stack of pending content starts as a growable int[] (bottom = the oldest open begin at index 0, top at
+        // stackSize - 1) rather than a Deque<Integer>, so no begin index is boxed. Pushed values are distinct
+        // content starts <= toIndex, so the stack never needs more than toIndex slots.
+        int[] stack = new int[8];
+        int stackSize = 0;
 
-        queue.add(idx);
+        stack[stackSize++] = idx;
         int next = -1;
         // An earlier scan that started at noBeginFrom found no begin delimiter at all, so none starts at or after
         // it. Together with next (the first begin delimiter found at or after the last scan's end) this keeps a
@@ -20055,14 +20065,14 @@ public final class Strings {
         int lastEnd = -1;
 
         for (int i = idx; i < toIndex;) {
-            if (queue.isEmpty()) {
+            if (stackSize == 0) {
                 idx = next >= i ? next : (i >= noBeginFrom ? -1 : str.indexOf(delimiterOfExclusiveBeginIndex, i, toIndex));
 
                 if (idx < 0) {
                     break;
                 } else {
                     idx += lengthOfDelimiterOfExclusiveBeginIndex;
-                    queue.add(idx);
+                    stack[stackSize++] = idx;
                     i = idx;
                 }
             }
@@ -20073,7 +20083,7 @@ public final class Strings {
                 break;
             } else {
                 final int endIndex = idx;
-                idx = lastEnd >= 0 ? Math.max(lastEnd + lengthOfDelimiterOfExclusiveEndIndex, queue.peekLast()) : queue.peekLast();
+                idx = lastEnd >= 0 ? Math.max(lastEnd + lengthOfDelimiterOfExclusiveEndIndex, stack[0]) : stack[0];
 
                 // A begin delimiter counts as nested only when its entire span ends at or before the
                 // current end delimiter's start. With multi-character delimiters the two occurrences may
@@ -20096,7 +20106,12 @@ public final class Strings {
                     }
 
                     idx += lengthOfDelimiterOfExclusiveBeginIndex;
-                    queue.push(idx);
+
+                    if (stackSize == stack.length) {
+                        stack = java.util.Arrays.copyOf(stack, (int) Math.min(2L * stackSize, toIndex));
+                    }
+
+                    stack[stackSize++] = idx;
                     scanFrom = idx;
                     idx = str.indexOf(delimiterOfExclusiveBeginIndex, scanFrom, toIndex);
                 }
@@ -20109,7 +20124,7 @@ public final class Strings {
                     next = idx;
                 }
 
-                final int startIndex = queue.pop();
+                final int startIndex = stack[--stackSize];
 
                 if (delimiterMatchMode == DelimiterMatchMode.OUTERMOST_ONLY && res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
                     while (res.size() > 0 && startIndex < res.get(res.size() - 1).start()) {
@@ -20129,7 +20144,7 @@ public final class Strings {
                 // For OUTERMOST_ONLY, an entry already collected may still be replaced by an enclosing match whose
                 // end delimiter has not been reached yet (every pending begin delimiter on the stack opened before
                 // the current match and would enclose it), so only stop once no enclosing match can absorb it.
-                if (res.size() >= maxCount && (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || queue.isEmpty())) {
+                if (res.size() >= maxCount && (delimiterMatchMode != DelimiterMatchMode.OUTERMOST_ONLY || stackSize == 0)) {
                     break;
                 }
 

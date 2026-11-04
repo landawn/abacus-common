@@ -400,5 +400,54 @@ public class LocalDateTypeTest extends TestBase {
         assertThrows(DateTimeParseException.class, () -> localDateType.valueOf((Object) java.time.LocalTime.of(10, 30)));
         assertThrows(DateTimeParseException.class, () -> localDateType.valueOf((Object) java.time.YearMonth.of(2021, 1)));
     }
+
     // ---- deep review 2026-10-27 G135 end ----
+    // ---- deep review 2026-11-02b G017 begin ----
+    // G017-01 (pin): the yyyy-MM-dd text stringOf writes is read without the java.time grammar; valueOf(String) and
+    // valueOf(char[], int, int) must still answer exactly what LocalDate.parse answers.
+    @Test
+    public void testValueOfString_canonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "2021-01-01", "2021-12-31", "0000-01-01", "0001-01-01", "9999-12-31", "2020-02-29", "2000-02-29", "2400-02-29", "2021-02-28",
+                "1969-12-31", "2021-04-30" };
+
+        for (final String text : texts) {
+            assertEquals(LocalDate.parse(text), localDateType.valueOf(text), text);
+
+            final char[] cbuf = ("x" + text + "y").toCharArray();
+            assertEquals(LocalDate.parse(text), localDateType.valueOf(cbuf, 1, text.length()), text);
+        }
+
+        final LocalDate value = LocalDate.of(5, 3, 7);
+        assertEquals(value, localDateType.valueOf(localDateType.stringOf(value)));
+    }
+
+    // G017-01 (pin): text the direct read leaves to LocalDate.parse (a signed or five-digit year, impossible dates,
+    // non-ASCII digits, other separators, padding, a time part) keeps its answer or its exception.
+    @Test
+    public void testValueOfString_nonCanonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "+10000-01-01", "-0001-01-01", "2021-02-29", "1900-02-29", "2100-02-29", "2021-04-31", "2021-13-01", "2021-00-01",
+                "2021-01-00", "2021-01-32", "2021-1-01", "2021-01-1", "202-01-01", "2021/01/01", "2021-01-01T", "2021-01-01T10:30", " 2021-01-01",
+                "2021-01-01 ", "2021-01-\u0661\u0662", "\u0662021-01-01", "2021-0a-01", "2021--1-01", "-021-01-01" };
+
+        for (final String text : texts) {
+            Object expected;
+
+            try {
+                expected = LocalDate.parse(text);
+            } catch (final RuntimeException e) {
+                expected = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            Object actual;
+
+            try {
+                actual = localDateType.valueOf(text);
+            } catch (final RuntimeException e) {
+                actual = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            assertEquals(expected, actual, text);
+        }
+    }
+    // ---- deep review 2026-11-02b G017 end ----
 }

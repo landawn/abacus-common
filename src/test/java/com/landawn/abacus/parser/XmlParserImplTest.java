@@ -3823,4 +3823,244 @@ public class XmlParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 G136 end ----
+
+    // ---- deep review 2026-11-02 G118 begin ----
+
+    // G118-01: a malformed XML declaration fails while the StAX reader is created (AbstractXmlParser.createXMLStreamReader);
+    // it escaped as an UncheckedException instead of the documented ParsingException (DOM and every later StAX failure).
+    @Test
+    public void testDeserialize_malformedXmlDeclarationIsParsingExceptionG118() {
+        final String[] docs = { "<?xml version=\"2.5\"?><map/>", "<?xml version='1.0' standalone='maybe'?><map/>", "<?xml ver" };
+
+        for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM }) {
+            final XmlParserImpl parser = new XmlParserImpl(parserType);
+
+            for (final String doc : docs) {
+                final String label = parserType + " " + doc;
+
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(doc, null, Map.class), label + " (String)");
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader(doc), null, Map.class), label + " (Reader)");
+                Assertions.assertThrows(ParsingException.class,
+                        () -> parser.deserialize(new ByteArrayInputStream(doc.getBytes(java.nio.charset.StandardCharsets.UTF_8)), null, Map.class),
+                        label + " (InputStream)");
+            }
+        }
+
+        // Unchanged: a well-formed declaration parses, and an I/O failure while the reader is created stays an UncheckedIOException.
+        Assertions.assertEquals(Map.of("a", "1"),
+                new XmlParserImpl(XmlParserType.StAX).deserialize("<?xml version=\"1.0\"?><map><a>1</a></map>", null, Map.class));
+
+        final java.io.Reader failing = new java.io.Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) throws IOException {
+                throw new IOException("boom");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        final com.landawn.abacus.exception.UncheckedIOException e = Assertions.assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
+                () -> new XmlParserImpl(XmlParserType.StAX).deserialize(failing, null, Map.class));
+        Assertions.assertEquals("boom", e.getCause().getMessage());
+    }
+
+    // ---- deep review 2026-11-02 G118 end ----
+    // ---- deep review 2026-11-02 G122 begin ----
+
+    @Data
+    @NoArgsConstructor
+    public static class G122Bean {
+        private String name;
+        private int age;
+        private List<String> tags;
+        private Map<String, String> attrs;
+        private G122Bean nested;
+        private Object any;
+    }
+
+    private static G122Bean g122Bean() {
+        final G122Bean inner = new G122Bean();
+        inner.setName("inner");
+        inner.setAge(2);
+
+        final Map<String, String> attrs = new LinkedHashMap<>();
+        attrs.put("k1", "v1");
+        attrs.put("k2", "v2");
+
+        final G122Bean bean = new G122Bean();
+        bean.setName("outer");
+        bean.setAge(1);
+        bean.setTags(List.of("t1", "t2", "t3"));
+        bean.setAttrs(attrs);
+        bean.setNested(inner);
+        return bean;
+    }
+
+    // G122-01 (pin): the DOM readers walk child elements through sibling links. A caller's Document read twice (pretty and
+    // compact), with comments / processing instructions / whitespace between the children, reads the same values in the same
+    // order on every rewritten loop (bean properties, map, map entity, array, collection, list property, Object slot).
+    @Test
+    public void testDeserializeNode_siblingWalkReadsEveryChildShapeG122() throws Exception {
+        final XmlParserImpl parser = domParser;
+        final G122Bean bean = g122Bean();
+
+        for (final boolean pretty : new boolean[] { false, true }) {
+            final String xml = parser.serialize(bean, XmlSerConfig.create().setPrettyFormat(pretty));
+            final Node root = document(xml).getDocumentElement();
+
+            Assertions.assertEquals(bean, parser.deserialize(root, G122Bean.class));
+            // read again from the same caller-owned element: same result
+            Assertions.assertEquals(bean, parser.deserialize(root, G122Bean.class));
+        }
+
+        // bean properties with comments / PIs between them; element-form list property; Object slot items
+        final String beanXml = "<g122Bean>\n  <!-- c --><name>n1</name><?pi x?>\n  <age>7</age>\n"
+                + "  <tags><!-- c --><e>t1</e> <e>t2</e><?pi y?><e>t3</e></tags>\n"
+                + "  <attrs>\n    <!-- c -->\n    <map><k1>v1</k1><!-- c --><k2>v2</k2></map>\n  </attrs>\n"
+                + "  <any><e>a</e><!-- c --><e>b</e>\n<e>c</e></any>\n</g122Bean>";
+        final Node beanNode = document(beanXml).getDocumentElement();
+
+        for (int i = 0; i < 2; i++) {
+            final G122Bean read = parser.deserialize(beanNode, G122Bean.class);
+            Assertions.assertEquals("n1", read.getName());
+            Assertions.assertEquals(7, read.getAge());
+            Assertions.assertEquals(List.of("t1", "t2", "t3"), read.getTags());
+            Assertions.assertEquals(List.of("k1", "k2"), new ArrayList<>(read.getAttrs().keySet()));
+            Assertions.assertEquals(List.of("v1", "v2"), new ArrayList<>(read.getAttrs().values()));
+            Assertions.assertEquals(List.of("a", "b", "c"), read.getAny());
+            Assertions.assertNull(read.getNested());
+        }
+
+        // root map and map entity: comments / PIs / whitespace between the entries, insertion order kept
+        final Node mapNode = document("<map>\n<!-- c -->\n<k1>v1</k1><?pi z?>\n<k2>v2</k2><k3/>\n</map>").getDocumentElement();
+        final Map<String, Object> map = parser.deserialize(mapNode, Map.class);
+        Assertions.assertEquals(List.of("k1", "k2", "k3"), new ArrayList<>(map.keySet()));
+        Assertions.assertEquals("v1", map.get("k1"));
+        Assertions.assertEquals("v2", map.get("k2"));
+        Assertions.assertEquals(map, parser.deserialize(mapNode, Map.class));
+
+        final MapEntity mapEntity = parser.deserialize(mapNode, MapEntity.class);
+        Assertions.assertEquals(List.of("k1", "k2", "k3"), new ArrayList<>(mapEntity.keySet()));
+        Assertions.assertEquals("v2", mapEntity.get("k2"));
+
+        // root array / collection in element form, with non-element children between the items
+        final Node listNode = document("<list>\n<!-- c --><e>a</e>\n<?pi w?><e>b</e><e>c</e>\n</list>").getDocumentElement();
+        Assertions.assertEquals(List.of("a", "b", "c"), parser.deserialize(listNode, List.class));
+        Assertions.assertArrayEquals(new String[] { "a", "b", "c" }, parser.deserialize(listNode, String[].class));
+        Assertions.assertEquals(List.of("a", "b", "c"), parser.deserialize(listNode, List.class));
+
+        // the single-child check of a structured property wrapper still rejects a second child element
+        final Node twoMaps = document("<g122Bean><attrs>\n<map><k1>v1</k1></map>\n<!-- c -->\n<map><k2>v2</k2></map>\n</attrs></g122Bean>")
+                .getDocumentElement();
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(twoMaps, G122Bean.class));
+    }
+
+    // ---- deep review 2026-11-02 G122 end ----
+
+    // ---- deep review 2026-11-02b G008 begin ----
+
+    // G008-02: a type attribute that names an allowed class with arguments its type cannot take (Map<String>, String(1),
+    // List<String, Integer>) is a document error: every backend reports a ParsingException, as for any other rejected
+    // type attribute, instead of letting Type.of's IllegalArgumentException escape.
+    @Test
+    public void testDeserialize_typeAttributeWithUnusableArgumentsIsParsingException_r116() throws Exception {
+        for (final String typeName : new String[] { "Map&lt;String&gt;", "String(1)", "List&lt;String, Integer&gt;" }) {
+            final String xml = "<map><k type=\"" + typeName + "\">x</k></map>";
+
+            for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.DOM, XmlParserType.StAX }) {
+                final XmlParserImpl xmlParser = new XmlParserImpl(parserType);
+                Assertions.assertThrows(ParsingException.class, () -> xmlParser.deserialize(xml, Map.class), parserType + " " + typeName);
+            }
+
+            final Node node = document(xml).getDocumentElement();
+            Assertions.assertThrows(ParsingException.class, () -> new XmlParserImpl(XmlParserType.DOM).deserialize(node, Map.class), typeName);
+
+            final String abacusXml = "<map><entry><key>k</key><value type=\"" + typeName + "\">x</value></entry></map>";
+
+            for (final XmlParserType parserType : XmlParserType.values()) {
+                final AbacusXmlParserImpl abacusParser = new AbacusXmlParserImpl(parserType);
+                Assertions.assertThrows(ParsingException.class, () -> abacusParser.deserialize(abacusXml, Map.class), parserType + " " + typeName);
+            }
+        }
+
+        // Arguments the type can take still resolve.
+        Assertions.assertEquals(Map.of("k", List.of("x")),
+                new XmlParserImpl(XmlParserType.StAX).deserialize("<map><k type=\"List&lt;String&gt;\">x</k></map>", Map.class));
+    }
+
+    // ---- deep review 2026-11-02b G008 end ----
+    // ---- deep review 2026-11-02b G012 begin ----
+
+    @Data
+    @NoArgsConstructor
+    public static class G012ObjectSlotBean {
+        private Object any;
+        private String after;
+    }
+
+    // G012-01: an EMPTY Optional/Nullable held by a property declared Object was written as the JSON literal null
+    // (<any>null</any>, the same bytes as the String "null") and read back as the String "null" on both backends.
+    // Owner decision 2026-11-03 (G012-N, replacing the empty element that read back as ""): it is written exactly like a
+    // null property - the isNull form, dropped by Exclusion.NULL - and reads back as null, as the same wrapper does as a
+    // map value or in a property declared Optional.
+    @Test
+    public void testSerialize_emptyOptionalInObjectPropertyIsWrittenAsNull_r116() {
+        final Object[] emptyWrappers = { Optional.empty(), Nullable.empty(), OptionalInt.empty(), java.util.Optional.empty(), java.util.OptionalLong.empty() };
+        final XmlSerConfig[] configs = { XmlSerConfig.create(), XmlSerConfig.create().setPrettyFormat(true), XmlSerConfig.create().setWriteTypeInfo(true),
+                XmlSerConfig.create().setTagByPropertyName(false), XmlSerConfig.create().setExclusion(Exclusion.NONE) };
+
+        for (final Object wrapper : emptyWrappers) {
+            for (final XmlSerConfig config : configs) {
+                final G012ObjectSlotBean bean = new G012ObjectSlotBean();
+                bean.setAny(wrapper);
+                bean.setAfter("z");
+
+                final String xml = staxParser.serialize(bean, config);
+                final String label = wrapper + " " + config + " -> " + xml;
+                Assertions.assertFalse(xml.contains(">null<"), label);
+
+                // the same bytes as a null property under the same configuration
+                final G012ObjectSlotBean nullBean = new G012ObjectSlotBean();
+                nullBean.setAfter("z");
+                Assertions.assertEquals(staxParser.serialize(nullBean, config), xml, label);
+
+                for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                    final G012ObjectSlotBean back = parser.deserialize(xml, null, G012ObjectSlotBean.class);
+                    Assertions.assertNull(back.getAny(), label);
+                    Assertions.assertEquals("z", back.getAfter(), label);
+                }
+            }
+        }
+
+        final G012ObjectSlotBean bean = new G012ObjectSlotBean();
+        bean.setAny(java.util.Optional.empty());
+        final String noneXml = staxParser.serialize(bean, XmlSerConfig.create().setExclusion(Exclusion.NONE));
+        Assertions.assertTrue(noneXml.contains("<any isNull=\"true\""), noneXml);
+        Assertions.assertFalse(staxParser.serialize(bean, XmlSerConfig.create().setExclusion(Exclusion.NULL)).contains("<any"),
+                staxParser.serialize(bean, XmlSerConfig.create().setExclusion(Exclusion.NULL)));
+
+        // As a map value the same empty wrapper reads back as null too.
+        final Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("any", Optional.empty());
+        map.put("after", "z");
+        final Map<?, ?> mapBack = domParser.deserialize(staxParser.serialize(map), null, Map.class);
+        Assertions.assertTrue(mapBack.containsKey("any"), String.valueOf(mapBack));
+        Assertions.assertNull(mapBack.get("any"), String.valueOf(mapBack));
+
+        // Unchanged: a present wrapper is written as its value, a genuine "null" String stays "null", and a present-null
+        // Nullable is still rejected.
+        bean.setAny(Optional.of("x"));
+        Assertions.assertTrue(staxParser.serialize(bean).contains("<any>x</any>"), staxParser.serialize(bean));
+        bean.setAny(java.util.Optional.of(5));
+        Assertions.assertTrue(staxParser.serialize(bean).contains("<any>5</any>"), staxParser.serialize(bean));
+        bean.setAny("null");
+        Assertions.assertTrue(staxParser.serialize(bean).contains("<any>null</any>"), staxParser.serialize(bean));
+        Assertions.assertEquals("null", domParser.deserialize(staxParser.serialize(bean), null, G012ObjectSlotBean.class).getAny());
+        bean.setAny(Nullable.of(null));
+        Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(bean));
+    }
+
+    // ---- deep review 2026-11-02b G012 end ----
 }

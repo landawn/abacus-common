@@ -767,11 +767,15 @@ final class ParallelArrayByteStream extends ArrayByteStream {
             iters.add(new ByteIterator() {
                 private byte next;
                 private boolean exhausted;
-                private ByteIterator cur = null;
+                // Index the mapped array directly (as the sequential flatMapArray does) instead of wrapping each
+                // one in a ByteIterator: that wrapper was the only per-source-element allocation of this worker.
+                private byte[] cur = null;
+                private int len = 0;
+                private int idx = 0;
 
                 @Override
                 public boolean hasNext() {
-                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                    while (idx >= len && !exhausted) {
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextByte();
@@ -782,19 +786,21 @@ final class ParallelArrayByteStream extends ArrayByteStream {
                             }
                         }
 
-                        cur = ByteIterator.of(mapper.apply(next));
+                        cur = mapper.apply(next);
+                        len = N.len(cur);
+                        idx = 0;
                     }
 
-                    return cur != null && cur.hasNext();
+                    return idx < len;
                 }
 
                 @Override
                 public byte nextByte() throws NoSuchElementException {
-                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    if (idx >= len && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return cur.nextByte();
+                    return cur[idx++];
                 }
             });
         }

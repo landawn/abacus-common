@@ -175,6 +175,13 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                             && it.getParameterTypes()[0] != typeClass //
                             && it.getParameterTypes()[0] != Number.class //
                             && (valueType.isAssignableFrom(it.getParameterTypes()[0])))
+                            // Primitive/wrapper equivalence, as in step 2: a Double field with (float) and (double)
+                            // constructors must pick (double) whatever the declaration order, not the first numeric one.
+                            .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
+                                    && it.getParameterCount() == 1 //
+                                    && it.getParameterTypes()[0] != typeClass //
+                                    && it.getParameterTypes()[0] != Number.class //
+                                    && ClassUtil.wrap(valueType) == ClassUtil.wrap(it.getParameterTypes()[0])))
                             .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                                     && it.getParameterCount() == 1 //
                                     && it.getParameterTypes()[0] != typeClass //

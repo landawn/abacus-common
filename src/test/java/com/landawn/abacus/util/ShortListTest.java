@@ -2515,4 +2515,82 @@ public class ShortListTest extends ShortListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G071 end ----
+
+    // ---- deep review 2026-11-02 G119 begin ----
+
+    // G119-01: pin for the allocation-free small unsorted removeDuplicates path (2 < size <= 64, prefix scan instead
+    // of a boxed hash set): first occurrences kept in order, return value, size, zeroed tail, spare capacity untouched.
+    @Test
+    public void testRemoveDuplicates_smallUnsortedPrefixScanPin() {
+        // duplicate only at the very end, extreme values, size 3
+        short[] backing = { Short.MAX_VALUE, Short.MIN_VALUE, Short.MAX_VALUE, 9 };
+        ShortList list = new ShortList(backing, 3);
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new short[] { Short.MAX_VALUE, Short.MIN_VALUE }, list.toArray());
+        assertArrayEquals(new short[] { Short.MAX_VALUE, Short.MIN_VALUE, 0, 9 }, backing);
+
+        // 0 and -1 interleaved, unsorted
+        list = ShortList.of((short) 0, (short) -1, (short) 0, (short) -1, (short) 5, (short) 0);
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new short[] { 0, -1, 5 }, list.toArray());
+
+        // 64 distinct values in descending order (worst case: every element scans the whole kept prefix) -> unchanged
+        final short[] distinct = new short[64];
+        for (int i = 0; i < 64; i++) {
+            distinct[i] = (short) (30000 - i * 900);
+        }
+        list = ShortList.of(distinct.clone());
+        assertFalse(list.removeDuplicates());
+        assertArrayEquals(distinct, list.toArray());
+
+        // 64 elements whose only duplicate is the last one (repeats the first) -> exactly that one removed
+        final short[] lastDup = distinct.clone();
+        lastDup[63] = lastDup[0];
+        backing = java.util.Arrays.copyOf(lastDup, 66);
+        backing[64] = 77;
+        backing[65] = 78;
+        list = new ShortList(backing, 64);
+        assertTrue(list.removeDuplicates());
+        assertEquals(63, list.size());
+        assertArrayEquals(java.util.Arrays.copyOf(distinct, 63), list.toArray());
+        assertEquals((short) 0, backing[63]);
+        assertEquals((short) 77, backing[64]);
+        assertEquals((short) 78, backing[65]);
+
+        // all equal except one smaller value at the end (unsorted)
+        final short[] same = new short[40];
+        java.util.Arrays.fill(same, (short) 1000);
+        same[39] = -1000;
+        list = ShortList.of(same);
+        assertTrue(list.removeDuplicates());
+        assertArrayEquals(new short[] { 1000, -1000 }, list.toArray());
+        for (int i = 2; i < 40; i++) {
+            assertEquals((short) 0, same[i], "tail not zeroed at " + i);
+        }
+
+        // randomized, sizes 3..64 only, against the boxed LinkedHashSet reference
+        final Random random = new Random(119);
+        for (int round = 0; round < 3000; round++) {
+            final int length = 3 + random.nextInt(62);
+            final int range = 1 + random.nextInt(round % 2 == 0 ? 2 * length : 65536);
+            final short[] source = new short[length];
+            for (int i = 0; i < length; i++) {
+                source[i] = (short) (Short.MIN_VALUE + random.nextInt(range));
+            }
+            final java.util.LinkedHashSet<Short> expected = new java.util.LinkedHashSet<>();
+            for (final short e : source) {
+                expected.add(e);
+            }
+            final short[] work = source.clone();
+            list = new ShortList(work, length);
+            final boolean changed = list.removeDuplicates();
+            assertEquals(expected.size() < length, changed);
+            assertEquals(new ArrayList<>(expected), list.boxed());
+            for (int i = list.size(); i < length; i++) {
+                assertEquals((short) 0, work[i], "tail not zeroed at " + i);
+            }
+        }
+    }
+
+    // ---- deep review 2026-11-02 G119 end ----
 }

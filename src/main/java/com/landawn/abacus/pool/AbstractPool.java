@@ -43,7 +43,8 @@ import com.landawn.abacus.util.cs;
  * <p>Key features:
  * <ul>
  *   <li>Thread-safe operations with {@link ReentrantLock}</li>
- *   <li>Configuration and scheduling support for eviction of expired objects based on configurable policies</li>
+ *   <li>Configuration and scheduling support for periodic eviction of expired objects (independent of the
+ *       configurable eviction policy, which only orders balancing victims)</li>
  *   <li>Support for memory-based capacity constraints</li>
  *   <li>Statistical tracking of pool operations</li>
  *   <li>Automatic shutdown hook for cleanup</li>

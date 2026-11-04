@@ -9806,7 +9806,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>If several elements are equivalent to the k-th largest under {@code comparator}, which of them is returned
      * is unspecified (it can differ between array-backed and iterator-backed streams, and after a {@code sorted()}).
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements,
+     * except that an array-backed stream that contains a {@code null} element may sort a copy of all its elements.
      *
      * @param k the rank of the element to find. k=1 would mean the largest element, k=2 the second largest, and so on. Must be positive.
      * @param comparator a comparator to determine the order of the elements.
@@ -12447,7 +12448,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *         .filter(x -> x > 0));
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(op::apply).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(op::apply).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12495,7 +12497,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Temporarily switches the stream to a parallel stream for the operation {@code filter} and then switches it back to a sequential stream.
      * This method is useful for performing filtering in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The filtering operation will be executed in parallel using the default parallelism level,
+     * <p>The filtering operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12505,7 +12508,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The expensiveCheck is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().filter(predicate).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel().filter(predicate).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12535,7 +12538,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Temporarily switches the stream to a parallel stream for the operation {@code map} and then switches it back to a sequential stream.
      * This method is useful for performing mapping in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12545,7 +12549,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The expensiveTransformation is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().map(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel().map(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12576,7 +12580,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Temporarily switches the stream to a parallel stream for the operation {@code flatMap} and then switches it back to a sequential stream.
      * This method is useful for performing flat mapping in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The flat mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The flat mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12586,7 +12591,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Contains 2, 4, 6 and 8 - mapped in parallel, in unspecified order (e.g. [4, 2, 6, 8])
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().flatMap(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel().flatMap(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12617,7 +12622,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Temporarily switches the stream to a parallel stream for the operation {@code flatmap} and then switches it back to a sequential stream.
      * This method is useful for performing flat mapping with collections in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The flat mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The flat mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12627,7 +12633,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Contains those four strings - mapped in parallel, in unspecified order
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().flatmap(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel().flatmap(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12669,7 +12675,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The expensiveCheck is performed in parallel using up to 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).filter(predicate).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel(maxThreadNum).filter(predicate).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12711,7 +12718,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The expensiveTransformation is performed in parallel using up to 2 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).map(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel(maxThreadNum).map(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12754,7 +12762,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Contains 2, 4, 6 and 8 - mapped in parallel using up to 3 threads, in unspecified order
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).flatMap(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel(maxThreadNum).flatMap(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12798,7 +12807,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Results in parallel processing with up to 2 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).flatmap(mapper).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code parallel(maxThreadNum).flatmap(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12842,7 +12852,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Processes chunks of 100 elements in parallel using 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).filter(predicate)).sequential()}
+     * <p><b>Implementation Note:</b> on a sequential stream it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).filter(predicate)).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12888,7 +12899,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Processes chunks of 50 elements in parallel using 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).map(mapper)).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).map(mapper)).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12935,7 +12947,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Processes chunks of 50 elements in parallel using 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatMap(mapper)).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatMap(mapper)).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -12982,7 +12995,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Processes chunks of 100 elements in parallel using 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatmap(mapper)).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatmap(mapper)).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13019,7 +13033,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * and then switches it back to a sequential stream.
      * This method is useful for performing filtering with exception handling in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The filtering operation will be executed in parallel using the default parallelism level,
+     * <p>The filtering operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      * The predicate can throw checked exceptions which will be wrapped and propagated.
      *
@@ -13030,7 +13045,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The checkWithException is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().filterE(predicate).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel().filterE(predicate).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13061,7 +13076,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * and then switches it back to a sequential stream.
      * This method is useful for performing mapping with exception handling in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      * The mapper can throw checked exceptions which will be wrapped and propagated.
      *
@@ -13072,7 +13088,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The readFileContent is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().mapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel().mapE(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13105,7 +13121,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * and then switches it back to a sequential stream.
      * This method is useful for performing flat mapping with exception handling in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The flat mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The flat mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      * The mapper can throw checked exceptions which will be wrapped and propagated.
      *
@@ -13116,7 +13133,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The listFilesAsStream is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().flatMapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel().flatMapE(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13149,7 +13166,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * and then switches it back to a sequential stream.
      * This method is useful for performing flat mapping with collections and exception handling in parallel while keeping the rest of the stream operations sequential.
      *
-     * <p>The flat mapping operation will be executed in parallel using the default parallelism level,
+     * <p>The flat mapping operation will be executed in parallel using the default parallelism level
+     * (a stream that is already parallel keeps its own thread count, split strategy and executor),
      * then the stream is switched back to sequential mode for subsequent operations.
      * The mapper can throw checked exceptions which will be wrapped and propagated.
      *
@@ -13160,7 +13178,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The executeQueryReturnList is performed in parallel
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().flatmapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel().flatmapE(mapper).sequential()}
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13204,7 +13222,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The checkWithException is performed in parallel using up to 4 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).filterE(predicate).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel(maxThreadNum).filterE(predicate).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13249,7 +13268,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The fetchContent is performed in parallel using up to 2 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).mapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel(maxThreadNum).mapE(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13295,7 +13315,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The listFilesAsStream is performed in parallel using up to 3 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).flatMapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel(maxThreadNum).flatMapE(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -13341,7 +13362,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // The executeQueryReturnList is performed in parallel using up to 2 threads
      * }</pre>
      *
-     * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).flatmapE(mapper).sequential()}
+     * <p><b>Implementation Note:</b> On a sequential stream it's equivalent to: {@code parallel(maxThreadNum).flatmapE(mapper).sequential()};
+     * a stream that is already parallel keeps its own split strategy and executor.
      *
      * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
@@ -23841,7 +23863,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The file is read lazily - lines are read as the stream is consumed, decoded as UTF-8.
      * The underlying file resources are automatically closed when the stream is closed.
      * The file is opened on first traversal, not by this method, so a missing or unreadable file is reported only then,
-     * as a {@link com.landawn.abacus.exception.UncheckedIOException}.
+     * as a {@link com.landawn.abacus.exception.UncheckedIOException}. A directory is rejected there too, but with an
+     * {@link IllegalArgumentException}, not an {@code UncheckedIOException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23865,7 +23888,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The file is read lazily - lines are read as the stream is consumed.
      * The underlying file resources are automatically closed when the stream is closed.
      * The file is opened on first traversal, not by this method, so a missing or unreadable file is reported only then,
-     * as a {@link com.landawn.abacus.exception.UncheckedIOException}.
+     * as a {@link com.landawn.abacus.exception.UncheckedIOException}. A directory is rejected there too, but with an
+     * {@link IllegalArgumentException}, not an {@code UncheckedIOException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23895,7 +23919,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The file is read lazily - lines are read as the stream is consumed, decoded as UTF-8.
      * The underlying file resources are automatically closed when the stream is closed.
      * The file is opened on first traversal, not by this method, so a missing or unreadable file is reported only then,
-     * as a {@link com.landawn.abacus.exception.UncheckedIOException}.
+     * as a {@link com.landawn.abacus.exception.UncheckedIOException}. A directory is rejected there too, but with an
+     * {@link IllegalArgumentException}, not an {@code UncheckedIOException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -23920,7 +23945,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The file is read lazily - lines are read as the stream is consumed.
      * The underlying file resources are automatically closed when the stream is closed.
      * The file is opened on first traversal, not by this method, so a missing or unreadable file is reported only then,
-     * as a {@link com.landawn.abacus.exception.UncheckedIOException}.
+     * as a {@link com.landawn.abacus.exception.UncheckedIOException}. A directory is rejected there too, but with an
+     * {@link IllegalArgumentException}, not an {@code UncheckedIOException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

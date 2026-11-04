@@ -107,6 +107,16 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                     if (isVerbatimEcmaScriptChar(ch)) {
                         // Same output as the escaping path below, without its per-element String/StringWriter allocations.
                         sb.append(ch);
+                    } else if (ch > 0x7F) {
+                        // escapeEcmaScript writes a lone char above U+007F (a surrogate half included, as each char is escaped
+                        // on its own) as a backslash, 'u' and four upper-case hex digits: build that text without the
+                        // per-char String, StringWriter and translator chain.
+                        sb.append('\\').append('u');
+
+                        for (int shift = 12; shift >= 0; shift -= 4) {
+                            final int digit = (ch >> shift) & 0xF;
+                            sb.append((char) (digit < 10 ? '0' + digit : 'A' + digit - 10));
+                        }
                     } else {
                         sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(ch)));
                     }

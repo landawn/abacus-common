@@ -45,7 +45,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -3947,8 +3946,6 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             return null;
         }
 
-        final NodeList propNodes = node.getChildNodes();
-        final int propNodeLength = getNodeLength(propNodes);
         PropInfo propInfo = null;
         Node propNode = null;
         String propName = null;
@@ -4023,9 +4020,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
                 final Object result = beanInfo.createBeanResult();
 
-                for (int i = 0; i < propNodeLength; i++) {
-                    propNode = propNodes.item(i);
-
+                // Sibling links rather than getChildNodes().item(i): on the JDK DOM an item(i) pass over a child list that the
+                // caller (or a second read) also passes releases its NodeList cache twice, leaving the caller's document with a
+                // cyclic cache pool on which every later interleaved child-list traversal is quadratic (see XmlUtil.isTextElement).
+                for (propNode = node.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
                     if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4155,9 +4153,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     mResult = newDomMap(creatorAndConverter, targetClass, keyType, node);
                 }
 
-                final NodeList entryNodes = node.getChildNodes();
                 Node entryNode = null;
-                NodeList subEntryNodes = null;
                 Node propKeyNode = null;
                 Node propValueNode = null;
                 Class<?> propKeyClass = null;
@@ -4166,9 +4162,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 Type<?> propValueType = null;
                 Object propKey = null;
 
-                for (int k = 0; k < entryNodes.getLength(); k++) {
-                    entryNode = entryNodes.item(k);
-
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                for (entryNode = node.getFirstChild(); entryNode != null; entryNode = entryNode.getNextSibling()) {
                     if (entryNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4181,14 +4176,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     // Match SAX/StAX: an entry's type does not select its value type, but still requires approval.
                     resolvePresentTypeAttribute(XmlUtil.getAttribute(entryNode, XmlConstants.TYPE));
 
-                    subEntryNodes = entryNode.getChildNodes();
-
                     propKeyNode = null;
                     propValueNode = null;
 
-                    for (int index = 0; index < subEntryNodes.getLength(); index++) {
-                        final Node childNode = subEntryNodes.item(index);
-
+                    for (Node childNode = entryNode.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
                         if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                             continue;
                         }
@@ -4422,12 +4413,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     final List<Object> c = Objectory.createList();
 
                     try {
-                        final NodeList eleNodes = node.getChildNodes();
                         Node eleNode = null;
 
-                        for (int k = 0; k < eleNodes.getLength(); k++) {
-                            eleNode = eleNodes.item(k);
-
+                        // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                        for (eleNode = node.getFirstChild(); eleNode != null; eleNode = eleNode.getNextSibling()) {
                             if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                                 continue;
                             }
@@ -4527,12 +4516,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     result = newDomCollection(creatorAndConverter, targetClass, node);
                 }
 
-                final NodeList eleNodes = node.getChildNodes();
                 Node eleNode = null;
 
-                for (int k = 0; k < eleNodes.getLength(); k++) {
-                    eleNode = eleNodes.item(k);
-
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                for (eleNode = node.getFirstChild(); eleNode != null; eleNode = eleNode.getNextSibling()) {
                     if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4774,11 +4761,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
         final boolean hasPropTypes = config.hasValueTypes();
         final Map<String, Object> map = new LinkedHashMap<>();
-        final NodeList propNodes = node.getChildNodes();
 
-        for (int i = 0; i < propNodes.getLength(); i++) {
-            final Node propNode = propNodes.item(i);
-
+        // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in readByDOMParserBody.
+        for (Node propNode = node.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
             if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }

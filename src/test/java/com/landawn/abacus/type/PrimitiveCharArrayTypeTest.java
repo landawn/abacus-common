@@ -520,4 +520,40 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertArrayEquals(new char[] { '\0', '\0' }, type.valueOf("[null,null]"));
         assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
     }
+
+    // ---- deep review 2026-11-02b G018 begin ----
+    // G018-01: pins stringOf for chars above U+007F (each char escaped alone, four upper-case hex digits) next to the
+    // verbatim/escaped ASCII branches, and the round trip of the same arrays.
+    @Test
+    public void testStringOf_charsAboveAsciiUseUpperCaseUnicodeEscape_r116() {
+        assertEquals("['\\u0080']", type.stringOf(new char[] { (char) 0x80 }));
+        assertEquals("['\\u00E9', '\\u00FF', '\\u0100', '\\u0ABC', '\\u4E2D']",
+                type.stringOf(new char[] { (char) 0xE9, (char) 0xFF, (char) 0x100, (char) 0xABC, (char) 0x4E2D }));
+        // a surrogate pair is written as two separately escaped elements; lone halves and U+FFFF likewise
+        assertEquals("['\\uD83D', '\\uDE00', '\\uDBFF', '\\uDC00', '\\uFFFF']",
+                type.stringOf(new char[] { (char) 0xD83D, (char) 0xDE00, (char) 0xDBFF, (char) 0xDC00, (char) 0xFFFF }));
+
+        final char del = (char) 0x7F;
+        final char[] mixed = { del, 'a', '\'', '/', '\n', (char) 0x1F, (char) 0xE9, (char) 0x7FF, (char) 0x800, '"', '\\' };
+        assertEquals("['" + del + "', 'a', '\\'', '\\/', '\\n', '\\u001F', '\\u00E9', '\\u07FF', '\\u0800', '\\\"', '\\\\']", type.stringOf(mixed));
+
+        final StringBuilder reference = new StringBuilder("[");
+
+        for (int i = 0; i < mixed.length; i++) {
+            reference.append(i == 0 ? "'" : ", '").append(com.landawn.abacus.util.EscapeUtil.escapeEcmaScript(String.valueOf(mixed[i]))).append('\'');
+        }
+
+        assertEquals(reference.append(']').toString(), type.stringOf(mixed));
+        assertArrayEquals(mixed, type.valueOf(type.stringOf(mixed)));
+
+        final char[] cjk = new char[300];
+
+        for (int i = 0; i < cjk.length; i++) {
+            cjk[i] = (char) (0x4E00 + i * 97);
+        }
+
+        assertArrayEquals(cjk, type.valueOf(type.stringOf(cjk)));
+        assertEquals(cjk.length * 10, type.stringOf(cjk).length());
+    }
+    // ---- deep review 2026-11-02b G018 end ----
 }

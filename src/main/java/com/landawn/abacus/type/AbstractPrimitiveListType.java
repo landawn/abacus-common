@@ -114,6 +114,16 @@ public abstract class AbstractPrimitiveListType<T extends PrimitiveList<?, ?, ?>
                  */
                 if (ch >= ' ' && ch <= 0x7f && ch != '\'' && ch != '"' && ch != '\\' && ch != '/') {
                     sb.append(ch);
+                } else if (ch > 0x7f) {
+                    // escapeEcmaScript writes a lone char above U+007F (a surrogate half included, as each char is escaped on
+                    // its own) as a backslash, 'u' and four upper-case hex digits: build that text without the per-char
+                    // String, StringWriter and translator chain.
+                    sb.append('\\').append('u');
+
+                    for (int shift = 12; shift >= 0; shift -= 4) {
+                        final int digit = (ch >> shift) & 0xF;
+                        sb.append((char) (digit < 10 ? '0' + digit : 'A' + digit - 10));
+                    }
                 } else {
                     sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(ch)));
                 }

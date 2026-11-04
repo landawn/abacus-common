@@ -972,4 +972,226 @@ public class AbstractLongStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G085 end ----
+
+    // ---- deep review 2026-11-02b G091 begin ----
+    private static LongList drainG091(final LongIterator iter) {
+        final LongList result = new LongList();
+
+        while (iter.hasNext()) {
+            result.add(iter.nextLong());
+        }
+
+        return result;
+    }
+
+    private static String outcomeG091(final java.util.function.Supplier<LongList> action) {
+        try {
+            return "OK " + action.get();
+        } catch (final RuntimeException e) {
+            return "EX " + e.getClass().getName();
+        }
+    }
+
+    private static LongIterator brokenSourceOpG091(final int op) {
+        final LongIterator failingSource = new LongIterator() {
+            private int cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= 2) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return true;
+            }
+
+            @Override
+            public long nextLong() {
+                return cnt++;
+            }
+        };
+
+        final LongStream stream = LongStream.of(failingSource);
+
+        return (op == 0 ? stream.reversed() : op == 1 ? stream.reverseSorted() : stream.rotated(1)).iteratorEx();
+    }
+
+    // G091-03: reversed()/rotated()/reverseSorted() iterators build toList() (used by toLongList()) from an exactly sized
+    // copy; pin it against the element-by-element walk for empty/single/partially consumed/sub-range/iterator/parallel sources.
+    @Test
+    public void testReversedRotatedReverseSorted_toLongList_r116() {
+        assertEquals(LongList.of(5, 4, 3, 2, 1), LongStream.of(1, 2, 3, 4, 5).reversed().toLongList());
+        assertEquals(LongList.of(4, 5, 1, 2, 3), LongStream.of(1, 2, 3, 4, 5).rotated(2).toLongList());
+        assertEquals(LongList.of(2, 3, 4, 5, 1), LongStream.of(1, 2, 3, 4, 5).rotated(-1).toLongList());
+        assertEquals(LongList.of(3, 2, 1), LongStream.of(3, 1, 2).reverseSorted().toLongList());
+        assertTrue(LongStream.empty().reversed().toLongList().isEmpty());
+        assertTrue(LongStream.empty().rotated(3).toLongList().isEmpty());
+        assertTrue(LongStream.empty().reverseSorted().toLongList().isEmpty());
+
+        final long[] source = { 3, 1, 2 };
+        final LongList reversed = LongStream.of(source).reversed().toLongList();
+        reversed.set(0, 100);
+        reversed.add(7);
+        final LongList rotated = LongStream.of(source).rotated(1).toLongList();
+        rotated.set(0, 100);
+        final LongList reverseSorted = LongStream.of(source).reverseSorted().toLongList();
+        reverseSorted.set(0, 100);
+        assertArrayEquals(new long[] { 3, 1, 2 }, source);
+        assertEquals(LongList.of(100, 1, 3, 7), reversed);
+
+        final int[] distances = { Integer.MIN_VALUE, -7, -1, 0, 1, 2, 6, Integer.MAX_VALUE };
+        final List<java.util.function.UnaryOperator<LongStream>> ops = new ArrayList<>();
+        ops.add(LongStream::reversed);
+        ops.add(LongStream::reverseSorted);
+
+        for (final int distance : distances) {
+            ops.add(s -> s.rotated(distance));
+        }
+
+        for (int len = 0; len <= 6; len++) {
+            final int n = len;
+            final long[] padded = new long[n + 2];
+
+            for (int i = 0; i < padded.length; i++) {
+                padded[i] = (i * 5L) % 7 - 3;
+            }
+
+            final long[] a = Arrays.copyOfRange(padded, 1, 1 + n);
+            final List<java.util.function.Supplier<LongStream>> sources = List.of(() -> LongStream.of(a.clone()), () -> LongStream.of(padded, 1, 1 + n),
+                    () -> LongStream.of(LongList.of(a.clone()).iterator()), () -> LongStream.of(a.clone()).parallel(2));
+
+            for (final java.util.function.Supplier<LongStream> src : sources) {
+                for (final java.util.function.UnaryOperator<LongStream> op : ops) {
+                    assertEquals(drainG091(op.apply(src.get()).iteratorEx()), op.apply(src.get()).toLongList());
+
+                    for (int consumed = 0; consumed <= n + 1; consumed++) {
+                        final LongIterator expectedIter = op.apply(src.get()).iteratorEx();
+                        final LongIterator iter = op.apply(src.get()).iteratorEx();
+
+                        for (int i = 0; i < consumed && iter.hasNext(); i++) {
+                            assertEquals(expectedIter.nextLong(), iter.nextLong());
+                        }
+
+                        final LongList rest = iter.toList();
+                        assertEquals(drainG091(expectedIter), rest);
+                        assertFalse(iter.hasNext());
+                        assertTrue(iter.toList().isEmpty());
+                        rest.add(42);
+                        assertEquals(42, rest.get(rest.size() - 1));
+                    }
+                }
+            }
+        }
+    }
+
+    // G091-03: after a failed materialization, toList() must keep behaving like the element-by-element walk on every retry.
+    @Test
+    public void testReversedRotatedReverseSorted_toListRetryAfterFailure_r116() {
+        for (int op = 0; op < 3; op++) {
+            final LongIterator viaToList = brokenSourceOpG091(op);
+            final LongIterator viaWalk = brokenSourceOpG091(op);
+
+            assertEquals("EX java.lang.IllegalStateException", outcomeG091(viaToList::toList));
+            assertEquals("EX java.lang.IllegalStateException", outcomeG091(() -> drainG091(viaWalk)));
+
+            for (int retry = 0; retry < 3; retry++) {
+                assertEquals(outcomeG091(() -> drainG091(viaWalk)), outcomeG091(viaToList::toList), "op=" + op + ", retry=" + retry);
+            }
+        }
+    }
+
+    // G091-04 (perf pin, port of G090-01): sorted()/shuffled(Random) results read through toArray() - empty, single and
+    // several elements; array, iterator, mapped and parallel sources; and the reversed()/skip()/limit() stages after them.
+    @Test
+    public void testSortedShuffledToArray_sourcesAndSizes_g091b() {
+        final long[][] inputs = { {}, { 7 }, { 3, -1, 2, -1, 9, 0 }, { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, 12, Long.MIN_VALUE, Long.MAX_VALUE } };
+
+        for (final long[] a : inputs) {
+            final long[] expected = a.clone();
+            Arrays.sort(expected);
+            final long[] descending = new long[expected.length];
+
+            for (int i = 0; i < expected.length; i++) {
+                descending[i] = expected[expected.length - 1 - i];
+            }
+
+            final int k = Math.min(2, a.length);
+            final long[] original = a.clone();
+
+            assertArrayEquals(expected, LongStream.of(a).sorted().toArray());
+            assertArrayEquals(original, a);
+            assertArrayEquals(expected, LongStream.of(LongIterator.of(a.clone())).sorted().toArray());
+            assertArrayEquals(expected, LongStream.of(a.clone()).map(x -> x).sorted().toArray());
+            assertArrayEquals(expected, LongStream.of(a.clone()).parallel(2).sorted().toArray());
+            assertArrayEquals(descending, LongStream.of(a.clone()).map(x -> x).sorted().reversed().toArray());
+            assertEquals(LongList.of(descending), LongStream.of(a.clone()).map(x -> x).sorted().reversed().toLongList());
+            assertArrayEquals(Arrays.copyOfRange(expected, k, expected.length), LongStream.of(a.clone()).sorted().skip(2).toArray());
+            assertArrayEquals(Arrays.copyOf(expected, k), LongStream.of(a.clone()).sorted().limit(2).toArray());
+
+            final long[] shuffledExpected = a.clone();
+            com.landawn.abacus.util.N.shuffle(shuffledExpected, new Random(42));
+            assertArrayEquals(shuffledExpected, LongStream.of(a.clone()).shuffled(new Random(42)).toArray());
+            assertArrayEquals(shuffledExpected, LongStream.of(LongIterator.of(a.clone())).shuffled(new Random(42)).toArray());
+        }
+    }
+
+    // G091-04 (perf pin): toArray() on a partially consumed sorted() iterator returns exactly the remaining elements and
+    // exhausts the iterator; an exhausted or empty one returns an empty array.
+    @Test
+    public void testSortedIterator_toArrayAfterPartialConsumption_g091b() {
+        final LongIterator iter = LongStream.of(5, 3, 9, 1, 7).map(x -> x).sorted().iteratorEx();
+        assertEquals(1L, iter.nextLong());
+        assertTrue(iter.hasNext());
+        assertEquals(3L, iter.nextLong());
+        assertArrayEquals(new long[] { 5, 7, 9 }, iter.toArray());
+        assertFalse(iter.hasNext());
+        assertEquals(0, iter.toArray().length);
+        assertThrows(java.util.NoSuchElementException.class, iter::nextLong);
+
+        final LongIterator emptyIter = LongStream.of(LongIterator.of(new long[0])).sorted().iteratorEx();
+        assertEquals(0, emptyIter.toArray().length);
+        assertFalse(emptyIter.hasNext());
+    }
+
+    // G091-04 (perf pin): sorted() stays lazy, and a failure while loading its snapshot is rethrown as the same instance by
+    // every later access (toArray() included) without reading the source again.
+    @Test
+    public void testSortedIterator_loadFailureRethrownByEveryAccess_g091b() {
+        final int[] calls = { 0 };
+        final LongIterator iter = LongStream.of(1, 2, 3).map(x -> {
+            calls[0]++;
+
+            if (x == 2) {
+                throw new IllegalStateException("load failed");
+            }
+
+            return x;
+        }).sorted().iteratorEx();
+
+        assertEquals(0, calls[0]);
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, iter::toArray);
+        assertEquals("load failed", first.getMessage());
+        org.junit.jupiter.api.Assertions.assertSame(first, assertThrows(IllegalStateException.class, iter::toArray));
+        org.junit.jupiter.api.Assertions.assertSame(first, assertThrows(IllegalStateException.class, iter::hasNext));
+        org.junit.jupiter.api.Assertions.assertSame(first, assertThrows(IllegalStateException.class, iter::nextLong));
+        assertEquals(2, calls[0]);
+    }
+
+    // G091-04 (perf pin): the snapshot is loaded once on the terminal toArray() and the source's close handler runs once.
+    @Test
+    public void testSortedToArray_loadsOnceAndClosesSourceOnce_g091b() {
+        final int[] closed = { 0 };
+        final int[] calls = { 0 };
+        final LongStream sorted = LongStream.of(3, 1, 2).map(x -> {
+            calls[0]++;
+            return x;
+        }).onClose(() -> closed[0]++).sorted();
+
+        assertEquals(0, calls[0]);
+        assertArrayEquals(new long[] { 1, 2, 3 }, sorted.toArray());
+        assertEquals(3, calls[0]);
+        assertEquals(1, closed[0]);
+    }
+    // ---- deep review 2026-11-02b G091 end ----
 }

@@ -569,4 +569,70 @@ public class IteratorLongStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G099 end ----
+
+    // ---- deep review 2026-11-02 G105 begin ----
+
+    // G105-01 (pin): top(n) with the natural comparator rejects candidates by a primitive compare; the result (incl. its
+    // element order) must equal the generic comparator path, for edge values, duplicates and every n around the size.
+    @Test
+    public void testTop_naturalOrderMatchesComparatorPath() {
+        final long[][] inputs = { {}, { 7L }, { 3L, 3L, 3L }, { Long.MIN_VALUE, Long.MAX_VALUE, 0L, -1L, 1L, 128L, -129L, Long.MAX_VALUE },
+                { 5L, 1L, 9L, -3L, 1000L, 7L, 9L, -1000L, 2L, 8L, 6L, 4L, 1000L, 3L, -7L, 11L, 12L, 13L, 0L, 14L },
+                { 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L },
+                { 19L, 18L, 17L, 16L, 15L, 14L, 13L, 12L, 11L, 10L, 9L, 8L, 7L, 6L, 5L, 4L, 3L, 2L, 1L } };
+
+        for (final long[] input : inputs) {
+            for (int n = 1; n <= input.length + 2; n++) {
+                final long[] expected = iter(input).top(n, (a, b) -> Long.compare(a, b)).toArray();
+                final long[] actual = iter(input).top(n).toArray();
+                assertArrayEquals(expected, actual, "n=" + n + ", input=" + java.util.Arrays.toString(input));
+
+                final long[] sortedInput = input.clone();
+                java.util.Arrays.sort(sortedInput);
+                final long[] sortedActual = actual.clone();
+                java.util.Arrays.sort(sortedActual);
+                assertArrayEquals(java.util.Arrays.copyOfRange(sortedInput, Math.max(0, input.length - n), input.length), sortedActual);
+
+                assertEquals(Math.max(0, Math.min(n, input.length) - 1), iter(input).top(n).skip(1).count());
+            }
+        }
+    }
+
+    // G105-01 (pin): the natural-order heap survives a failed source read, so a retry resumes with the accepted values.
+    @Test
+    public void testTop_naturalOrderRetryAfterSourceFailure() {
+        final long[] values = { 4L, 9L, 1L, 7L, 300L, -2L };
+        final int[] calls = { 0 };
+        final LongIterator failingOnce = new LongIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < values.length;
+            }
+
+            @Override
+            public long nextLong() {
+                if (cursor == 3 && calls[0]++ == 0) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return values[cursor++];
+            }
+        };
+
+        try (LongStream stream = LongStream.of(failingOnce).top(2)) {
+            final LongIterator top = stream.iterator();
+            assertThrows(IllegalStateException.class, top::hasNext);
+
+            final List<Long> result = new java.util.ArrayList<>();
+            while (top.hasNext()) {
+                result.add(top.nextLong());
+            }
+            result.sort(null);
+            assertEquals(java.util.Arrays.asList(9L, 300L), result);
+        }
+    }
+
+    // ---- deep review 2026-11-02 G105 end ----
 }

@@ -274,4 +274,42 @@ public class ShortStreamCollectionTest extends ShortStreamTestSupport {
         assertEquals(0, result.size());
     }
 
+    // ---- deep review 2026-11-02b G094 begin ----
+    // G094-01: (pin) ArrayShortStream.toSet() above 2 * 65536 elements skips repeated values before the hash lookup; the
+    // set must equal a HashSet filled with every element (same presize): content, iteration order, type, mutability.
+    @Test
+    public void testToSet_largeRangeRepeatSkipMatchesPlainHashSet() {
+        final java.util.Random rnd = new java.util.Random(20261102L);
+        final int[] sizes = { 0, 1, 255, 256, 65536, 131071, 131072, 131073, 140000, 300000 };
+
+        for (final int size : sizes) {
+            for (int dist = 0; dist < 4; dist++) {
+                final short[] a = new short[size + 5];
+
+                for (int i = 0; i < a.length; i++) {
+                    // 0: i * 7919 walks all 65536 values before repeating; 1: few values; 2: random; 3: extremes and -1/0
+                    a[i] = (short) (dist == 0 ? i * 7919
+                            : dist == 1 ? rnd.nextInt(50) - 25
+                                    : dist == 2 ? rnd.nextInt() : new int[] { Short.MIN_VALUE, Short.MAX_VALUE, -1, 0 }[rnd.nextInt(4)]);
+                }
+
+                final java.util.Set<Short> expected = com.landawn.abacus.util.N.newHashSet(Math.min(size, 65536));
+
+                for (int i = 2; i < size + 2; i++) {
+                    expected.add(a[i]);
+                }
+
+                final int[] closeCount = new int[1];
+                final java.util.Set<Short> actual = ShortStream.of(a, 2, size + 2).onClose(() -> closeCount[0]++).toSet();
+
+                assertEquals(expected.getClass(), actual.getClass(), "size=" + size + " dist=" + dist);
+                assertEquals(expected, actual, "size=" + size + " dist=" + dist);
+                assertArrayEquals(expected.toArray(), actual.toArray(), "iteration order, size=" + size + " dist=" + dist);
+                assertEquals(1, closeCount[0], "close count, size=" + size + " dist=" + dist);
+                assertEquals(!expected.contains((short) 12345), actual.add((short) 12345), "mutable, size=" + size + " dist=" + dist);
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G094 end ----
+
 }

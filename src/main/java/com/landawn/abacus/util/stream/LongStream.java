@@ -2460,7 +2460,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * LongStream.of(1L, 2L, 3L).kthLargest(5);   // returns OptionalLong.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements,
+     * except that an unsorted array-backed stream may select the result in a copy of all its elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalLong} containing the k-th largest element, or an empty {@code OptionalLong} if the stream is empty or the count of elements is less than k
@@ -3655,8 +3656,84 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final LongBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return IntStream.range(view.position(), view.limit()).mapToLong(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return IntStream.range(view.position(), view.limit()).mapToLong(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as IntStream.range(position, limit).mapToLong(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // IntStream.range(..).mapToLong(view::get) gave its stream exactly one close handler: the run-once link to its
+        // internal range stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not
+        // EMPTY_CLOSE_HANDLER, which counts as none) so that iterator()'s close warning, toJdkStream()'s close link and
+        // the onClose()/close() behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorLongStream(new LongIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public long nextLong() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public long[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_LONG_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final long[] result = new long[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public LongList toList() {
+                return LongList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -3924,6 +4001,25 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextLong() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
+            }
         };
 
         return of(iter);
@@ -3986,6 +4082,25 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextLong() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
             }
         };
     }
@@ -4093,6 +4208,25 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextLong() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public LongList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final long[] result = new long[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextLong();
+                    }
+
+                    return LongList.of(result);
+                }
             };
 
         } else {
@@ -4123,6 +4257,25 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                     } else {
                         return a[rowNum][colNum++];
                     }
+                }
+
+                // The remaining size is known: fill an exactly sized list with the same nextLong() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public LongList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final long[] result = new long[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextLong();
+                    }
+
+                    return LongList.of(result);
                 }
             };
         }
@@ -4455,6 +4608,20 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 extra = false;
 
                 return result;
+            }
+
+            // The remaining size is known: wrap the exactly sized array of toArray() (same elements, same end state)
+            // instead of growing a list one element by element. An empty or oversized remainder keeps the inherited loop.
+            @Override
+            public LongList toList() {
+                // remaining = cnt (unsigned) + (extra ? 1 : 0); a cnt outside [0, Integer.MAX_VALUE] is too large anyway
+                final long remaining = cnt < 0 || cnt > Integer.MAX_VALUE ? Long.MAX_VALUE : cnt + (extra ? 1 : 0);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return LongList.of(toArray());
             }
         }, by > 0, null);
     }
@@ -5715,6 +5882,30 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 final int idx = cursor++;
                 return zipFunction.applyAsLong(a[idx], b[idx]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextLong() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return LongList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
+            }
         });
     }
 
@@ -5765,6 +5956,30 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
 
                 final int idx = cursor++;
                 return zipFunction.applyAsLong(a[idx], b[idx], c[idx]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextLong() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return LongList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
             }
         });
     }
@@ -6004,6 +6219,30 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextLong() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return LongList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
+            }
         });
     }
 
@@ -6061,6 +6300,30 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextLong() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return LongList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
             }
         });
     }
@@ -6347,6 +6610,30 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextLong() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public LongList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final long[] result = new long[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return LongList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextLong();
+                }
+
+                return LongList.of(result);
             }
         });
     }

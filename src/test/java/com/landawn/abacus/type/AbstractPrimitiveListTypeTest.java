@@ -62,4 +62,35 @@ public class AbstractPrimitiveListTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(list, charListType.valueOf(charListType.stringOf(list)));
     }
     // ---- perf review 2026-09-26 G012 end ----
+
+    // ---- deep review 2026-11-02b G015 begin ----
+    // G015-01: pin for the direct escape of chars above U+007F in the CharList stringOf path: hex-digit boundaries, surrogate
+    // halves on their own, U+007F kept verbatim, and a backing array longer than the list's logical size.
+    @Test
+    public void testStringOfCharList_charsAboveAsciiUseUpperCaseUnicodeEscape_r116() {
+        final char[] chars = { (char) 0x80, (char) 0xFF, (char) 0x100, (char) 0x7FF, (char) 0x800, (char) 0x9999, (char) 0xABCD, (char) 0xD83D, (char) 0xDE00,
+                (char) 0xDBFF, (char) 0xDC00, (char) 0xFFFE, (char) 0xFFFF, (char) 0x7F, 'a', '/' };
+        final String bs = "\\";
+        final String expected = "['" + bs + "u0080', '" + bs + "u00FF', '" + bs + "u0100', '" + bs + "u07FF', '" + bs + "u0800', '" + bs + "u9999', '" + bs
+                + "uABCD', '" + bs + "uD83D', '" + bs + "uDE00', '" + bs + "uDBFF', '" + bs + "uDC00', '" + bs + "uFFFE', '" + bs + "uFFFF', '" + (char) 0x7F
+                + "', 'a', '" + bs + "/']";
+
+        org.junit.jupiter.api.Assertions.assertEquals(expected, AbstractPrimitiveListType.stringOf(chars, chars.length));
+        org.junit.jupiter.api.Assertions.assertEquals("['" + bs + "u0080']", AbstractPrimitiveListType.stringOf(new char[] { (char) 0x80, (char) 0xFFFF }, 1));
+
+        for (final char ch : chars) {
+            if (ch > 0x7F) {
+                org.junit.jupiter.api.Assertions.assertEquals(com.landawn.abacus.util.EscapeUtil.escapeEcmaScript(String.valueOf(ch)),
+                        bs + "u" + String.format("%04X", (int) ch));
+            }
+        }
+
+        final Type<com.landawn.abacus.util.CharList> charListType = createType("CharList");
+        final com.landawn.abacus.util.CharList list = new com.landawn.abacus.util.CharList(64);
+        list.addAll(chars);
+
+        org.junit.jupiter.api.Assertions.assertEquals(expected, charListType.stringOf(list));
+        org.junit.jupiter.api.Assertions.assertEquals(list, charListType.valueOf(charListType.stringOf(list)));
+    }
+    // ---- deep review 2026-11-02b G015 end ----
 }

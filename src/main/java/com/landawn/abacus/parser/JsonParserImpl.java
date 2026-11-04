@@ -204,6 +204,19 @@ class JsonParserImpl extends AbstractJsonParser {
 
     private static final JsonDeserConfig jdcForPropertiesElement = JsonDeserConfig.create().setElementType(String.class).setMapKeyType(String.class);
 
+    // A short String source starts with an empty token buffer instead of a pooled one: JsonStringReader copies a token into
+    // it only for an escape or trailing whitespace and then replaces it with a buffer of the needed size (it never writes
+    // into the empty array, and Objectory.recycle ignores it). The pooled buffer's full wipe on recycle was most of a small
+    // document's parse time; above this length that fixed cost is minor, while growing from empty for one long escaped
+    // token would allocate and copy more than the pooled buffer.
+    private static final int MAX_SOURCE_LENGTH_FOR_EMPTY_TOKEN_BUFFER = 256;
+
+    private static final char[] EMPTY_TOKEN_BUFFER = {};
+
+    private static char[] createTokenBuffer(final int sourceLength) {
+        return sourceLength <= MAX_SOURCE_LENGTH_FOR_EMPTY_TOKEN_BUFFER ? EMPTY_TOKEN_BUFFER : Objectory.createCharArrayBuffer();
+    }
+
     /**
      * Constructs a new {@code JsonParserImpl} with default configuration.
      */
@@ -274,7 +287,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return readRootScalar(source, configToUse, targetType);
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
@@ -364,7 +377,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return;
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
@@ -414,7 +427,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return;
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
@@ -462,7 +475,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return;
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
@@ -2781,7 +2794,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return readRootScalar(source, configToUse, targetType);
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
@@ -2886,7 +2899,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return readRootScalar(fromIndex == 0 && toIndex == source.length() ? source : source.substring(fromIndex, toIndex), configToUse, targetType);
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(toIndex - fromIndex);
 
         try {
             final JsonReader jr = JsonStringReader.parse(source, fromIndex, toIndex, cbuf);
@@ -3314,7 +3327,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return;
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
         try {
             final JsonReader jr = JsonStringReader.parse(source, cbuf);
             final int token = jr.nextToken();
@@ -6890,7 +6903,7 @@ class JsonParserImpl extends AbstractJsonParser {
             return Stream.empty();
         }
 
-        final char[] cbuf = Objectory.createCharArrayBuffer();
+        final char[] cbuf = createTokenBuffer(source.length());
         Stream<T> result = null;
 
         try {

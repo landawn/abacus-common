@@ -2431,8 +2431,8 @@ public final class HttpClient implements AutoCloseable {
             URL netURL = _netURL;
 
             if (queryParameters != null) {
-                // Explicit UTF-8 (like the form-body path): the 2-arg overload uses the
-                // PLATFORM default charset, mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                // Explicit UTF-8 (HttpUtil.DEFAULT_CHARSET, like the form-body path). The 2-arg overload uses the
+                // library default, which is UTF-8 as well, not the JVM platform charset.
                 netURL = URI.create(URLEncodedUtil.encode(_url, queryParameters, HttpUtil.DEFAULT_CHARSET)).toURL();
             }
 

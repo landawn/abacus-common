@@ -3799,7 +3799,8 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset, or
-         *         {@code newColumnName} is {@code null} or empty, or already is one
+         *         {@code newColumnName} is {@code null} or empty, or already is one (renaming a column to its own
+         *         name is a no-op)
          */
         public DatasetBuilder renameColumn(final String columnName, final String newColumnName) throws IllegalStateException, IllegalArgumentException {
             val.renameColumn(columnName, newColumnName);
@@ -4192,7 +4193,8 @@ public class Builder<T> {
          * @param columnName the name of the column to remove
          * @return this builder instance for method chaining
          * @throws IllegalStateException if the wrapped Dataset is frozen
-         * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset
+         * @throws IllegalArgumentException if {@code columnName} is not a column of the wrapped Dataset, or if it is
+         *         the last column while the wrapped Dataset still has rows
          */
         public DatasetBuilder removeColumn(final String columnName) throws IllegalStateException, IllegalArgumentException {
             val.removeColumn(columnName);
@@ -4212,7 +4214,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws IllegalArgumentException if {@code columnNames} is {@code null} or names a column the wrapped
-         *         Dataset does not have
+         *         Dataset does not have, or if it would remove every column while the wrapped Dataset still has rows
          */
         public DatasetBuilder removeColumns(final Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException {
             val.removeColumns(columnNames);
@@ -4230,7 +4232,8 @@ public class Builder<T> {
          *
          * @param filter the predicate to test column names; columns returning {@code true} are removed
          * @return this builder instance for method chaining
-         * @throws IllegalArgumentException if {@code filter} is {@code null}.
+         * @throws IllegalArgumentException if {@code filter} is {@code null}, or if it selects every column while the
+         *         wrapped Dataset still has rows
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws RuntimeException if {@code filter} throws while testing a column name
          */
@@ -4501,8 +4504,10 @@ public class Builder<T> {
          * @param divideFunction the function that splits a value into multiple values
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code divideFunction} is {@code null}, if {@code columnName} is not a
-         *         column of the wrapped Dataset, or if {@code newColumnNames} is {@code null} or empty or holds a
-         *         duplicate or a name that is already a column of the wrapped Dataset
+         *         column of the wrapped Dataset, if {@code newColumnNames} is {@code null} or empty or holds a
+         *         duplicate, a {@code null} or empty name, or a name that is already a column of the wrapped Dataset,
+         *         or if {@code divideFunction} returns a list whose size differs from the size of {@code newColumnNames}
+         * @throws NullPointerException if {@code divideFunction} returns {@code null}
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws RuntimeException if {@code divideFunction} throws while processing selected cell values
          */
@@ -4536,7 +4541,7 @@ public class Builder<T> {
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code output} is {@code null}, if {@code columnName} is not a
          *         column of the wrapped Dataset, or if {@code newColumnNames} is {@code null} or empty or holds a
-         *         duplicate or a name that is already a column of the wrapped Dataset
+         *         duplicate, a {@code null} or empty name, or a name that is already a column of the wrapped Dataset
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws RuntimeException if {@code output} throws while processing selected cell values
          */
@@ -4567,8 +4572,8 @@ public class Builder<T> {
          * @param output the consumer that populates the output pair
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code newColumnNames} or {@code output} is {@code null}, if {@code columnName} is not a
-         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate or a name that is
-         *         already a column of the wrapped Dataset
+         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate, a {@code null} or
+         *         empty name, or a name that is already a column of the wrapped Dataset
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws RuntimeException if {@code output} throws while processing selected cell values
          */
@@ -4600,8 +4605,8 @@ public class Builder<T> {
          * @param output the consumer that populates the output triple
          * @return this builder instance for method chaining
          * @throws IllegalArgumentException if {@code newColumnNames} or {@code output} is {@code null}, if {@code columnName} is not a
-         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate or a name that is
-         *         already a column of the wrapped Dataset
+         *         column of the wrapped Dataset, or if {@code newColumnNames} holds a duplicate, a {@code null} or
+         *         empty name, or a name that is already a column of the wrapped Dataset
          * @throws IllegalStateException if the wrapped Dataset is frozen
          * @throws RuntimeException if {@code output} throws while processing selected cell values
          */

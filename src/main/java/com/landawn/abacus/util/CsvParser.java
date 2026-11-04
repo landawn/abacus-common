@@ -584,7 +584,7 @@ public class CsvParser {
             // Skip leading whitespace of the first field (mirrors the post-separator skip below), but
             // never skip the separator itself (a whitespace separator marks an empty first field). Without
             // this, leading whitespace before a quoted first field lands in sb and makes the opening quote
-            // be mis-classified as embedded (see the isEmbedded check), corrupting or failing the parse.
+            // be mis-classified as embedded (see the unquoted-field quote check below), corrupting or failing the parse.
             while (ignoreLeadingWhitespace && i < len && nextLine.charAt(i) != separator && (ignoreQuotations || nextLine.charAt(i) != quoteChar)
                     && Character.isWhitespace(nextLine.charAt(i))) {
                 i++;

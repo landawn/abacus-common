@@ -17,6 +17,7 @@
 package com.landawn.abacus.http;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -145,6 +146,12 @@ public final class WebUtil {
         // Keyed by lower-case name so a repeated suppression is reported once; the value keeps the
         // spelling the command used.
         final Map<String, String> removedHeaderNames = new LinkedHashMap<>();
+        // Lower-case names given by any -H ('Name: value', 'Name;' or the 'Name:' suppression), and names whose captured
+        // value came from -A/-e. curl sends its -A/-e value only when no -H names that header, in either order, so any
+        // -H for User-Agent (Referer) wins over -A (-e) instead of being rejected as a repeat or losing to it; a repeated
+        // -A (-e) replaces the value an earlier one captured, as curl keeps only the last.
+        final Set<String> headerOptionNames = new HashSet<>();
+        final Set<String> agentOptionHeaderNames = new HashSet<>();
         final List<String> bodyParts = new ArrayList<>();
         boolean hasDataOption = false;
         boolean hasHeadOption = false;
@@ -232,6 +239,20 @@ public final class WebUtil {
                 }
 
                 String value = inlineValue == null ? tokens.get(++i) : inlineValue;
+                final String headerName = referer ? HttpHeaders.Names.REFERER : HttpHeaders.Names.USER_AGENT;
+
+                final String normalizedName = headerName.toLowerCase(Locale.ROOT);
+
+                if (headerOptionNames.contains(normalizedName)) {
+                    // An earlier -H already set or suppressed this header, and curl lets it win over -A/-e.
+                    continue;
+                }
+
+                // curl keeps only the last -A (-e): a repeated one, also an empty one, replaces the value an earlier
+                // one captured instead of being rejected as a repeated header.
+                if (agentOptionHeaderNames.remove(normalizedName)) {
+                    headers.remove(headerName);
+                }
 
                 if (referer) {
                     // "url;auto" also asks curl to update Referer across redirects; the first request
@@ -241,16 +262,16 @@ public final class WebUtil {
                     if (value.isEmpty()) {
                         continue;
                     }
-                } else if (value.isEmpty() && !headers.containsHeader(HttpHeaders.Names.USER_AGENT)) {
+                } else if (value.isEmpty()) {
                     // An empty -A makes curl send no User-Agent at all (a blank one needs -A ' '), exactly like
-                    // -H 'User-Agent:', so it is recorded as that suppression instead of an empty header. With a
-                    // User-Agent already captured it stays the rejected repeat below: curl would drop an earlier -A
-                    // value but keep an -H one, and the captured headers no longer tell the two apart.
-                    removedHeaderNames.putIfAbsent(HttpHeaders.Names.USER_AGENT.toLowerCase(Locale.ROOT), HttpHeaders.Names.USER_AGENT);
+                    // -H 'User-Agent:', so it is recorded as that suppression instead of an empty header. No
+                    // User-Agent is captured at this point: an -H for it returned above, an earlier -A was dropped.
+                    removedHeaderNames.putIfAbsent(normalizedName, HttpHeaders.Names.USER_AGENT);
                     continue;
                 }
 
-                addCapturedHeader(headers, referer ? HttpHeaders.Names.REFERER : HttpHeaders.Names.USER_AGENT, value);
+                addCapturedHeader(headers, headerName, value);
+                agentOptionHeaderNames.add(normalizedName);
             } else if (Strings.equals(token, "--header") || Strings.equals(token, "-H") || extractInlineHeaderValue(token) != null) {
                 final String inlineHeader = extractInlineHeaderValue(token);
 
@@ -280,7 +301,9 @@ public final class WebUtil {
                         // it adds no header and suppresses the one cURL would have generated itself. The
                         // "Name;" form below is the opposite instruction - send it with an empty value.
                         removedHeaderNames.putIfAbsent(headerName.toLowerCase(Locale.ROOT), headerName);
+                        claimHeaderForHeaderOption(headers, headerName, headerOptionNames, agentOptionHeaderNames);
                     } else {
+                        claimHeaderForHeaderOption(headers, headerName, headerOptionNames, agentOptionHeaderNames);
                         addCapturedHeader(headers, headerName, headerValue);
 
                         if (HttpHeaders.Names.CONTENT_TYPE.equalsIgnoreCase(headerName)) {
@@ -296,6 +319,7 @@ public final class WebUtil {
                         throw new IllegalArgumentException("Header name is empty after " + token + ": " + header);
                     }
 
+                    claimHeaderForHeaderOption(headers, headerName, headerOptionNames, agentOptionHeaderNames);
                     addCapturedHeader(headers, headerName, Strings.EMPTY);
 
                     if (HttpHeaders.Names.CONTENT_TYPE.equalsIgnoreCase(headerName)) {
@@ -479,6 +503,20 @@ public final class WebUtil {
                 + " such as the Content-Type of an attached body - may still send one." + IOUtil.LINE_SEPARATOR_UNIX + IOUtil.LINE_SEPARATOR_UNIX;
     }
 
+    // Records that an -H names headerName and drops the value an earlier -A/-e captured for it: curl sends its
+    // -A/-e value only when no custom header of that name exists (its Curl_checkheaders test accepts "Name:" and
+    // "Name;"), so the -H, not the -A/-e value, decides what is sent - and it is no repeated header.
+    private static void claimHeaderForHeaderOption(final HttpHeaders headers, final String headerName, final Set<String> headerOptionNames,
+            final Set<String> agentOptionHeaderNames) {
+        final String normalizedName = headerName.toLowerCase(Locale.ROOT);
+
+        headerOptionNames.add(normalizedName);
+
+        if (agentOptionHeaderNames.remove(normalizedName)) {
+            headers.remove(headerName);
+        }
+    }
+
     // Shared by HAR replay and both cURL converters. Their replacing header APIs require one
     // effective value per name; unknown grammars and coding stacks cannot safely be guessed.
     /**
@@ -531,7 +569,10 @@ public final class WebUtil {
      *   <li>{@code -I, --head}: HEAD request (inferred method)</li>
      *   <li>{@code -A, --user-agent} and {@code -e, --referer}: emitted as {@code User-Agent} / {@code Referer}
      *       headers (a {@code ;auto} suffix on the referer is dropped; a bare {@code ;auto} sends no Referer).
-     *       An empty {@code -A ''} is curl's way to send no User-Agent at all and is handled like {@code -H 'User-Agent:'}</li>
+     *       An empty {@code -A ''} is curl's way to send no User-Agent at all and is handled like {@code -H 'User-Agent:'}.
+     *       As in curl, any {@code -H} for {@code User-Agent} / {@code Referer} (a value, {@code 'Name;'} or the
+     *       {@code 'Name:'} suppression) wins over {@code -A} / {@code -e} in either order, and of repeated {@code -A}
+     *       or {@code -e} options only the last one counts (an empty last one sends none)</li>
      *   <li>{@code --url}: the request URL, as an alternative to a positional {@code http(s)://} argument</li>
      * </ul>
      *
@@ -1390,7 +1431,8 @@ public final class WebUtil {
      * {@link HttpHeaders} object. The header is only set if:</p>
      * <ul>
      *   <li>The {@code requestBodyType} parameter is not {@code null} or empty</li>
-     *   <li>The {@code httpHeaders} does not already have a Content-Type header</li>
+     *   <li>The {@code httpHeaders} does not already have a Content-Type header, or has one mapped to
+     *       {@code null}, which is treated as absent and replaced (as by {@link HttpHeaders#setIfAbsent(String, Object)})</li>
      * </ul>
      *
      * <p>This method is particularly useful when:</p>
@@ -1401,7 +1443,7 @@ public final class WebUtil {
      *   <li>Ensuring a default Content-Type without overriding existing values</li>
      * </ul>
      *
-     * <p>If the Content-Type header is already present in {@code httpHeaders}, this method
+     * <p>If the Content-Type header is already present in {@code httpHeaders} with a non-{@code null} value, this method
      * does nothing, preserving the existing header value. This ensures that explicitly set
      * Content-Type headers are never overwritten.</p>
      *

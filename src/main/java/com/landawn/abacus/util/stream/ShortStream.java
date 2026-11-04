@@ -2187,7 +2187,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * ShortStream.of((short) 1, (short) 2).kthLargest(0);   // throws IllegalArgumentException
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements,
+     * except that an unsorted array-backed stream may sort a copy of all its elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalShort} containing the k-th largest element, or an empty {@code OptionalShort} if the stream is empty or contains fewer than {@code k} elements
@@ -2923,8 +2924,84 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final ShortBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return IntStream.range(view.position(), view.limit()).mapToShort(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return IntStream.range(view.position(), view.limit()).mapToShort(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as IntStream.range(position, limit).mapToShort(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // IntStream.range(..).mapToShort(view::get) gave its stream exactly one close handler: the run-once link to its
+        // internal range stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not
+        // EMPTY_CLOSE_HANDLER, which counts as none) so that iterator()'s close warning and the onClose()/close()
+        // behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorShortStream(new ShortIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public short nextShort() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public short[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_SHORT_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final short[] result = new short[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public ShortList toList() {
+                return ShortList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     private static final Function<short[], ShortStream> flatMapper = ShortStream::of;
@@ -3055,6 +3132,25 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextShort() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
+            }
         };
 
         return of(iter);
@@ -3117,6 +3213,25 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextShort() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
             }
         };
     }
@@ -3203,6 +3318,25 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextShort() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public ShortList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final short[] result = new short[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextShort();
+                    }
+
+                    return ShortList.of(result);
+                }
             };
 
         } else {
@@ -3233,6 +3367,25 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                     } else {
                         return a[rowNum][colNum++];
                     }
+                }
+
+                // The remaining size is known: fill an exactly sized list with the same nextShort() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public ShortList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final short[] result = new short[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextShort();
+                    }
+
+                    return ShortList.of(result);
                 }
             };
         }
@@ -3356,6 +3509,17 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
                 return result;
             }
+
+            // toShortList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public ShortList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return ShortList.of(toArray());
+            }
         }, true, null);
     }
 
@@ -3460,6 +3624,17 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
                 return result;
             }
+
+            // toShortList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public ShortList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return ShortList.of(toArray());
+            }
         }, by > 0, null);
     }
 
@@ -3554,6 +3729,17 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 cnt = 0;
 
                 return result;
+            }
+
+            // toShortList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public ShortList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return ShortList.of(toArray());
             }
         }, true, null);
     }
@@ -3661,6 +3847,17 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 cnt = 0;
 
                 return result;
+            }
+
+            // toShortList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public ShortList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return ShortList.of(toArray());
             }
         }, by > 0, null);
     }
@@ -4488,6 +4685,30 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
                 return zipFunction.applyAsShort(a[cursor], b[cursor++]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextShort() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ShortList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
+            }
         });
     }
 
@@ -4536,6 +4757,30 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 }
 
                 return zipFunction.applyAsShort(a[cursor], b[cursor], c[cursor++]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextShort() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ShortList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
             }
         });
     }
@@ -4765,6 +5010,30 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextShort() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ShortList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
+            }
         });
     }
 
@@ -4822,6 +5091,30 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextShort() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ShortList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
             }
         });
     }
@@ -5089,6 +5382,30 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextShort() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ShortList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final short[] result = new short[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return ShortList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextShort();
+                }
+
+                return ShortList.of(result);
             }
         });
     }

@@ -1209,18 +1209,25 @@ class IteratorFloatStream extends AbstractFloatStream {
                             heap = new PriorityQueue<>(Math.min(n, 16), cmp);
                         }
 
-                        Float next = null;
-                        while (elements.hasNext()) {
-                            next = elements.nextFloat();
+                        if (cmp == FLOAT_COMPARATOR) {
+                            // Natural order (top(n)): test a candidate against the heap head with a primitive compare
+                            // (Float.compare: the same total order as FLOAT_COMPARATOR incl. NaN and -0.0, never a plain '>'),
+                            // so only accepted values are boxed, not every element.
+                            float value = 0;
+                            while (elements.hasNext()) {
+                                value = elements.nextFloat();
 
-                            if (heap.size() >= n) {
-                                if (cmp.compare(next, heap.peek()) > 0) {
-                                    heap.poll();
-                                    heap.offer(next);
+                                if (heap.size() >= n) {
+                                    if (Float.compare(value, heap.peek()) > 0) {
+                                        heap.poll();
+                                        heap.offer(value);
+                                    }
+                                } else {
+                                    heap.offer(value);
                                 }
-                            } else {
-                                heap.offer(next);
                             }
+                        } else {
+                            offerTopByComparator(elements, heap, n, cmp);
                         }
 
                         aar = Array.unbox(heap.toArray(N.EMPTY_FLOAT_OBJ_ARRAY));
@@ -1233,6 +1240,25 @@ class IteratorFloatStream extends AbstractFloatStream {
                 }
             }
         }, false);
+    }
+
+    // The unchanged comparator loop of top(n, Comparator)'s heap path. It is kept out of init() on purpose: next to the
+    // natural-order loop in the same method, it ran ~1.5-3x slower on large sources once the natural loop had been
+    // JIT-compiled first (uncommon-trap/OSR profile of the shared method).
+    private static void offerTopByComparator(final FloatIteratorEx iterator, final Queue<Float> heap, final int n, final Comparator<? super Float> comparator) {
+        Float next = null;
+        while (iterator.hasNext()) {
+            next = iterator.nextFloat();
+
+            if (heap.size() >= n) {
+                if (comparator.compare(next, heap.peek()) > 0) {
+                    heap.poll();
+                    heap.offer(next);
+                }
+            } else {
+                heap.offer(next);
+            }
+        }
     }
 
     @Override

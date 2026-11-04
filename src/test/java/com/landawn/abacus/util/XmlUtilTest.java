@@ -1345,4 +1345,201 @@ public class XmlUtilTest extends TestBase {
         assertThrows(NullPointerException.class, () -> XmlUtil.writeCharacters((char[]) null, 0, 0, (Writer) null));
         assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", -1, 1, (OutputStream) null));
     }
+
+    // ---- deep review 2026-11-02 G085 begin ----
+    private static List<Element> g085ReferenceElements(final Element parent, final String tagName) {
+        final List<Element> result = new ArrayList<>();
+        final NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i) instanceof Element element && ("*".equals(tagName) || element.getTagName().equals(tagName))) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
+    private static void g085ReferenceAll(final Node node, final String nodeName, final List<Node> output) {
+        if (node.getNodeName().equals(nodeName)) {
+            output.add(node);
+        }
+        final NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            g085ReferenceAll(children.item(i), nodeName, output);
+        }
+    }
+
+    private static Node g085ReferenceNext(final Node node, final String nodeName) {
+        final java.util.ArrayDeque<Node> pending = new java.util.ArrayDeque<>();
+        pending.push(node);
+        while (!pending.isEmpty()) {
+            final Node current = pending.pop();
+            if (current.getNodeName().equals(nodeName)) {
+                return current;
+            }
+            final NodeList children = current.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                if (children.item(i).getNodeName().equals(nodeName)) {
+                    return children.item(i);
+                }
+            }
+            for (int i = children.getLength() - 1; i >= 0; i--) {
+                pending.push(children.item(i));
+            }
+        }
+        return null;
+    }
+
+    private static void g085AssertSameNodes(final List<? extends Node> expected, final List<? extends Node> actual) {
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertSame(expected.get(i), actual.get(i), "index " + i);
+        }
+    }
+
+    // G085-01 (pin): getElementsByTagName / getNodesByName / getNextNodeByName walk sibling links instead of NodeList.item(i);
+    // results (identity and order) must equal the NodeList-based definitions for every start node and name.
+    @Test
+    public void testDomTraversalHelpers_siblingWalkMatchesNodeListOrder() throws Exception {
+        final String xml = "<?xml version=\"1.0\"?>\n<root a=\"1\">\n  <!-- c -->\n  <item id=\"1\">x<item>nested</item><b/></item>\n"
+                + "  <?pi data?>\n  <b><item>deep<c/></item></b>\n  <item/>\n  <c><![CDATA[<cdata>]]></c>\n  text\n  <d><e><item/></e><item/></d>\n</root>";
+        final Element root = parse(xml);
+        final Document parsed = root.getOwnerDocument();
+
+        // a programmatically built (non-deferred) DOM as well
+        final Document built = XmlUtil.createDOMParser().newDocument();
+        final Element builtRoot = built.createElement("root");
+        built.appendChild(builtRoot);
+        for (int i = 0; i < 5; i++) {
+            final Element child = built.createElement(i % 2 == 0 ? "item" : "b");
+            child.appendChild(built.createTextNode("t" + i));
+            if (i == 3) {
+                child.appendChild(built.createElement("item"));
+            }
+            builtRoot.appendChild(child);
+            builtRoot.appendChild(built.createComment("k" + i));
+        }
+
+        final String[] names = { "item", "b", "c", "e", "root", "#text", "#comment", "pi", "#cdata-section", "#document", "zzz", "*", "" };
+        for (final Document document : new Document[] { parsed, built }) {
+            final List<Node> starts = new ArrayList<>();
+            g085ReferenceAll(document, "#document", starts); // the document itself
+            for (final String any : new String[] { "root", "item", "b", "d", "e", "#text", "#comment", "pi" }) {
+                g085ReferenceAll(document, any, starts);
+            }
+            assertFalse(starts.isEmpty());
+
+            for (final Node start : starts) {
+                for (final String name : names) {
+                    final List<Node> expectedAll = new ArrayList<>();
+                    g085ReferenceAll(start, name, expectedAll);
+                    g085AssertSameNodes(expectedAll, XmlUtil.getNodesByName(start, name));
+                    assertSame(g085ReferenceNext(start, name), XmlUtil.getNextNodeByName(start, name), start.getNodeName() + "/" + name);
+                    if (start instanceof Element element) {
+                        g085AssertSameNodes(g085ReferenceElements(element, name), XmlUtil.getElementsByTagName(element, name));
+                    }
+                }
+                assertTrue(XmlUtil.getNodesByName(start, null).isEmpty());
+                assertNull(XmlUtil.getNextNodeByName(start, null));
+                if (start instanceof Element element) {
+                    assertTrue(XmlUtil.getElementsByTagName(element, null).isEmpty());
+                }
+            }
+        }
+
+        // direct children precede descendants of an earlier child in getNextNodeByName
+        final Node firstDirectItem = XmlUtil.getNextNodeByName(root, "item");
+        assertSame(root, firstDirectItem.getParentNode());
+        assertEquals("1", ((Element) firstDirectItem).getAttribute("id"));
+        final Node firstE = XmlUtil.getNextNodeByName(XmlUtil.getElementsByTagName(root, "d").get(0), "item");
+        assertSame(XmlUtil.getElementsByTagName(root, "d").get(0), firstE.getParentNode());
+        assertEquals(1, XmlUtil.getElementsByTagName(root, "c").size());
+        assertEquals(6, XmlUtil.getNodesByName(parsed, "item").size());
+        assertEquals(0, XmlUtil.getElementsByTagName((Element) XmlUtil.getNextNodeByName(root, "c"), "*").size());
+    }
+    // ---- deep review 2026-11-02 G085 end ----
+
+    // ---- deep review 2026-11-02b G085 begin ----
+    @SuppressWarnings("deprecation")
+    private static org.xml.sax.HandlerBase g085bRecordingLegacyHandler(final List<String> events) {
+        return new org.xml.sax.HandlerBase() {
+            @Override
+            public void startElement(final String name, final org.xml.sax.AttributeList attributes) {
+                events.add(name);
+            }
+
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                events.add(new String(ch, start, length));
+            }
+        };
+    }
+
+    // G085-01: JDK SAXParserImpl.reset() leaves a SAX1 DocumentHandler installed, so a recycled pooled parser fed the next
+    // owner's document (parsed through the exposed XMLReader, as JAXB / a SAXSource does) to the previous owner's handler.
+    @Test
+    public void testRecycleSAXParser_clearsPreviousOwnersLegacyHandler_r116() throws Exception {
+        try (ParserPoolState<SAXParser> state = new ParserPoolState<>("saxParserPool")) {
+            synchronized (state.pool) {
+                final List<String> firstOwnerEvents = new ArrayList<>();
+                final SAXParser first = state.keep(XmlUtil.createSAXParser());
+                first.parse(new ByteArrayInputStream("<first/>".getBytes(Charsets.UTF_8)), g085bRecordingLegacyHandler(firstOwnerEvents));
+                XmlUtil.recycleSAXParser(first);
+
+                final SAXParser second = XmlUtil.createSAXParser();
+                assertSame(first, second, "the recycled parser is reused");
+                final List<String> secondOwnerEvents = new ArrayList<>();
+                final org.xml.sax.XMLReader reader = second.getXMLReader();
+                reader.setContentHandler(new DefaultHandler() {
+                    @Override
+                    public void startElement(final String uri, final String localName, final String qName, final org.xml.sax.Attributes attributes) {
+                        secondOwnerEvents.add(qName);
+                    }
+                });
+                reader.parse(new org.xml.sax.InputSource(new StringReader("<secret>s3cr3t</secret>")));
+                XmlUtil.recycleSAXParser(second);
+
+                assertEquals(List.of("secret"), secondOwnerEvents);
+                assertEquals(List.of("first"), firstOwnerEvents, "the previous owner's handler must not see the next owner's document");
+                assertSame(first, XmlUtil.createSAXParser(), "clearing the handler keeps the parser poolable");
+            }
+        }
+    }
+
+    // G085-01: the same leak when the previous owner installed the handler through the exposed SAX1 Parser, and when
+    // the next owner parses with a null DefaultHandler; a direct reset() must clear it too (original configuration).
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testSAXParserReset_clearsLegacyHandlerInstalledThroughGetParser_r116() throws Exception {
+        try (ParserPoolState<SAXParser> state = new ParserPoolState<>("saxParserPool")) {
+            synchronized (state.pool) {
+                final List<String> firstOwnerEvents = new ArrayList<>();
+                final SAXParser first = state.keep(XmlUtil.createSAXParser());
+                final org.xml.sax.Parser sax1 = first.getParser();
+                sax1.setDocumentHandler(g085bRecordingLegacyHandler(firstOwnerEvents));
+                sax1.parse(new org.xml.sax.InputSource(new StringReader("<a>x</a>")));
+                XmlUtil.recycleSAXParser(first);
+
+                final SAXParser second = XmlUtil.createSAXParser();
+                assertSame(first, second);
+                second.parse(new ByteArrayInputStream("<b>y</b>".getBytes(Charsets.UTF_8)), (DefaultHandler) null);
+                assertEquals(List.of("a", "x"), firstOwnerEvents);
+
+                // A SAX1 parse followed by a direct reset(): the parser returns to its original configuration.
+                final List<String> legacyEvents = new ArrayList<>();
+                second.parse(new ByteArrayInputStream("<c/>".getBytes(Charsets.UTF_8)), g085bRecordingLegacyHandler(legacyEvents));
+                second.reset();
+                second.getXMLReader().setContentHandler(new DefaultHandler());
+                second.getXMLReader().parse(new org.xml.sax.InputSource(new StringReader("<d/>")));
+                assertEquals(List.of("c"), legacyEvents);
+
+                // SAX1 parsing still works after the clear.
+                final List<String> againEvents = new ArrayList<>();
+                second.parse(new org.xml.sax.InputSource(new StringReader("<e>z</e>")), g085bRecordingLegacyHandler(againEvents));
+                assertEquals(List.of("e", "z"), againEvents);
+                XmlUtil.recycleSAXParser(second);
+                assertSame(first, XmlUtil.createSAXParser());
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G085 end ----
 }

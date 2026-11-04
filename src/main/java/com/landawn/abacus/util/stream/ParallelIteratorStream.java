@@ -1345,9 +1345,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
     /**
      * Returns a parallel stream produced by replacing each element of this stream with the contents
-     * of a mapped array. This is a convenience wrapper around {@link #flatmap(Function)} that
-     * converts the result of the mapper to a {@link java.util.List} before expanding. Elements are
-     * processed concurrently via a shared synchronized cursor.
+     * of a mapped array, like {@link #flatmap(Function)} with each array viewed as a {@link java.util.List}:
+     * a {@code null} or empty array contributes nothing, and the elements of a mapped array are read from
+     * the array itself (it is not copied). Elements are processed concurrently via a shared synchronized
+     * cursor.
      *
      * @param <R> the type of elements in the mapped arrays and the returned stream
      * @param mapper a non-interfering, stateless function that maps each element to an array
@@ -1362,7 +1363,56 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return flatmap(t -> Array.asList(mapper.apply(t)));
+        if (canBeSequential(maxThreadNum)) {
+            return flatmap(t -> Array.asList(mapper.apply(t)));
+        }
+
+        final List<ObjIteratorEx<R>> iters = new ArrayList<>(maxThreadNum);
+
+        for (int i = 0; i < maxThreadNum; i++) {
+            iters.add(new ObjIteratorEx<>() {
+                private boolean exhausted;
+                // Index the mapped array directly (as the sequential flatMapArray does) instead of going through
+                // flatmap(Array.asList(..)): the list view and its iterator were two allocations per source element.
+                private R[] cur = null;
+                private int len = 0;
+                private int idx = 0;
+
+                @Override
+                public boolean hasNext() {
+                    while (idx >= len && !exhausted) {
+                        final T next;
+
+                        synchronized (elements) {
+                            if (elements.hasNext()) {
+                                next = elements.next();
+                            } else {
+                                exhausted = true;
+                                cur = null;
+                                break;
+                            }
+                        }
+
+                        cur = mapper.apply(next);
+                        len = N.len(cur);
+                        idx = 0;
+                    }
+
+                    return idx < len;
+                }
+
+                @Override
+                public R next() throws NoSuchElementException {
+                    if (idx >= len && !hasNext()) {
+                        throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                    }
+
+                    return cur[idx++];
+                }
+            });
+        }
+
+        return newStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null);
     }
 
     /**

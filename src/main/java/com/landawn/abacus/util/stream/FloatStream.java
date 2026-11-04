@@ -2239,7 +2239,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * FloatStream.empty().kthLargest(1);   // returns OptionalFloat.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; may buffer up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; may buffer up to {@code k} elements,
+     * except that an unsorted array-backed stream may select the result in a copy of all its elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalFloat} containing the k-th largest element, or an empty {@code OptionalFloat} if the stream is empty or contains fewer than {@code k} elements
@@ -2897,8 +2898,84 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final FloatBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return IntStream.range(view.position(), view.limit()).mapToFloat(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return IntStream.range(view.position(), view.limit()).mapToFloat(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as IntStream.range(position, limit).mapToFloat(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // IntStream.range(..).mapToFloat(view::get) gave its stream exactly one close handler: the run-once link to its
+        // internal range stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not
+        // EMPTY_CLOSE_HANDLER, which counts as none) so that iterator()'s close warning and the onClose()/close()
+        // behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorFloatStream(new FloatIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public float nextFloat() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public float[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_FLOAT_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final float[] result = new float[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public FloatList toList() {
+                return FloatList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     private static final Function<float[], FloatStream> flatMapper = FloatStream::of;
@@ -3010,6 +3087,25 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextFloat() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
+            }
         };
 
         return of(iter);
@@ -3072,6 +3168,25 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextFloat() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
             }
         };
     }
@@ -3150,6 +3265,25 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextFloat() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public FloatList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final float[] result = new float[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextFloat();
+                    }
+
+                    return FloatList.of(result);
+                }
             };
 
         } else {
@@ -3180,6 +3314,25 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                     } else {
                         return a[rowNum][colNum++];
                     }
+                }
+
+                // The remaining size is known: fill an exactly sized list with the same nextFloat() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public FloatList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final float[] result = new float[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextFloat();
+                    }
+
+                    return FloatList.of(result);
                 }
             };
         }
@@ -4001,6 +4154,30 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
                 return zipFunction.applyAsFloat(a[cursor], b[cursor++]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextFloat() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return FloatList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
+            }
         });
     }
 
@@ -4049,6 +4226,30 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                 }
 
                 return zipFunction.applyAsFloat(a[cursor], b[cursor], c[cursor++]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextFloat() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return FloatList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
             }
         });
     }
@@ -4275,6 +4476,30 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextFloat() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return FloatList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
+            }
         });
     }
 
@@ -4332,6 +4557,30 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextFloat() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return FloatList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
             }
         });
     }
@@ -4594,6 +4843,30 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextFloat() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public FloatList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final float[] result = new float[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return FloatList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextFloat();
+                }
+
+                return FloatList.of(result);
             }
         });
     }

@@ -103,7 +103,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * loses them, and {@link JsonUtil} rejects them outright.</p>
  *
  * <p><b>Byte output escapes characters outside the BMP.</b> Jackson's UTF-8 generator writes a non-BMP
- * character such as an emoji as a {@code &#92;uXXXX&#92;uXXXX} surrogate escape, while the {@code String}- and
+ * character such as an emoji as a <code>&#92;uXXXX&#92;uXXXX</code> surrogate escape, while the {@code String}- and
  * {@code Writer}-based paths emit unescaped UTF-16 characters. When that character output is encoded as UTF-8,
  * {@code toJson(obj)} and {@code toJson(obj, outputStream)}
  * can produce <i>different bytes</i> for the same object. Both are valid JSON and both parse back to the same

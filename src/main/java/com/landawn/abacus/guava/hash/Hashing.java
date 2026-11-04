@@ -158,7 +158,9 @@ public final class Hashing {
         // MAX_VALUE - 40 -> NegativeArraySizeException), silently breaking the "minimumBits or greater" contract.
         N.checkArgument(minimumBits > 0 && minimumBits <= Integer.MAX_VALUE - 127, "minimumBits must be in [1, %s]: %s", Integer.MAX_VALUE - 127, minimumBits);
 
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));
+        // goodFastHash(<= 32) is a Murmur3_32 function: route it like murmur3_32() (performance only, same results)
+        return minimumBits <= 32 ? GuavaHashFunction.wrapPerCharHashFunction(com.google.common.hash.Hashing.goodFastHash(minimumBits))
+                : GuavaHashFunction.wrap(com.google.common.hash.Hashing.goodFastHash(minimumBits));
     }
 
     /**
@@ -183,7 +185,7 @@ public final class Hashing {
      * @return a Murmur3 32-bit hash function initialized with the given seed
      */
     public static HashFunction murmur3_32(final int seed) { //NOSONAR
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
+        return GuavaHashFunction.wrapPerCharHashFunction(com.google.common.hash.Hashing.murmur3_32_fixed(seed));
     }
 
     /**
@@ -411,7 +413,7 @@ public final class Hashing {
      *         accepted by this method and yields the same MAC as {@link #hmacMd5(byte[])} over its raw bytes.
      */
     public static HashFunction hmacMd5(final Key key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
     /**
@@ -432,7 +434,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      */
     public static HashFunction hmacMd5(final byte[] key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
     /**
@@ -453,7 +455,7 @@ public final class Hashing {
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      */
     public static HashFunction hmacSha1(final Key key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
     /**
@@ -472,7 +474,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      */
     public static HashFunction hmacSha1(final byte[] key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
     /**
@@ -494,7 +496,7 @@ public final class Hashing {
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      */
     public static HashFunction hmacSha256(final Key key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
     /**
@@ -514,7 +516,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      */
     public static HashFunction hmacSha256(final byte[] key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
     /**
@@ -536,7 +538,7 @@ public final class Hashing {
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
      */
     public static HashFunction hmacSha512(final Key key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
     /**
@@ -557,7 +559,7 @@ public final class Hashing {
      * @throws IllegalArgumentException if {@code key} is empty.
      */
     public static HashFunction hmacSha512(final byte[] key) throws NullPointerException, IllegalArgumentException {
-        return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
+        return GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
     /**
@@ -980,24 +982,24 @@ public final class Hashing {
     }
 
     private static final class Hash_Holder { //NOSONAR
-        static final HashFunction MURMUR3_32_FIXED = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_32_fixed());
+        static final HashFunction MURMUR3_32_FIXED = GuavaHashFunction.wrapPerCharHashFunction(com.google.common.hash.Hashing.murmur3_32_fixed());
         static final HashFunction MURMUR3_128 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.murmur3_128());
 
         static final HashFunction SIP_HASH_24 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sipHash24());
 
         @SuppressWarnings("deprecation")
-        static final HashFunction MD5 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.md5());
+        static final HashFunction MD5 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.md5());
 
         @SuppressWarnings("deprecation")
-        static final HashFunction SHA_1 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha1());
-        static final HashFunction SHA_256 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha256());
-        static final HashFunction SHA_384 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha384());
-        static final HashFunction SHA_512 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.sha512());
+        static final HashFunction SHA_1 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.sha1());
+        static final HashFunction SHA_256 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.sha256());
+        static final HashFunction SHA_384 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.sha384());
+        static final HashFunction SHA_512 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.sha512());
 
-        static final HashFunction CRC_32_C = GuavaHashFunction.wrap(com.google.common.hash.Hashing.crc32c());
-        static final HashFunction CRC_32 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.crc32());
+        static final HashFunction CRC_32_C = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.crc32c());
+        static final HashFunction CRC_32 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.crc32());
 
-        static final HashFunction ADLER_32 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.adler32());
+        static final HashFunction ADLER_32 = GuavaHashFunction.wrapByteHashFunction(com.google.common.hash.Hashing.adler32());
 
         static final HashFunction FARM_HASH_FINGERPRINT_64 = GuavaHashFunction.wrap(com.google.common.hash.Hashing.farmHashFingerprint64());
 

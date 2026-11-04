@@ -2715,7 +2715,8 @@ public abstract class DoubleStream
      * DoubleStream.of(1.0, Double.NaN, 5.0, 3.0).kthLargest(1);   // returns OptionalDouble[NaN]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; may buffer up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; may buffer up to {@code k} elements,
+     * except that an unsorted array-backed stream may select the result in a copy of all its elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an {@code OptionalDouble} containing the k-th largest element, or an empty {@code OptionalDouble} if the stream is empty or contains fewer than {@code k} elements
@@ -3680,8 +3681,84 @@ public abstract class DoubleStream
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final DoubleBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return IntStream.range(view.position(), view.limit()).mapToDouble(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return IntStream.range(view.position(), view.limit()).mapToDouble(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as IntStream.range(position, limit).mapToDouble(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // IntStream.range(..).mapToDouble(view::get) gave its stream exactly one close handler: the run-once link to
+        // its internal range stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not
+        // EMPTY_CLOSE_HANDLER, which counts as none) so that iterator()'s close warning, toJdkStream()'s close link and
+        // the onClose()/close() behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorDoubleStream(new DoubleIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public double nextDouble() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public double[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_DOUBLE_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final double[] result = new double[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public DoubleList toList() {
+                return DoubleList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     /**

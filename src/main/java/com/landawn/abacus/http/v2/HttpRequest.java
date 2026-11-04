@@ -1725,8 +1725,8 @@ public final class HttpRequest {
             }
         } else {
             if (uri == null) {
-                // Explicit UTF-8: the 2-arg overload uses the PLATFORM default charset,
-                // mis-encoding non-ASCII query values on non-UTF-8 JVMs.
+                // Explicit UTF-8 (HttpUtil.DEFAULT_CHARSET). The 2-arg overload uses the library default,
+                // which is UTF-8 as well, not the JVM platform charset.
                 requestBuilder.uri(URI.create(URLEncodedUtil.encode(url, query, HttpUtil.DEFAULT_CHARSET)));
             } else {
                 requestBuilder.uri(URI.create(URLEncodedUtil.encode(uri.toString(), query, HttpUtil.DEFAULT_CHARSET)));

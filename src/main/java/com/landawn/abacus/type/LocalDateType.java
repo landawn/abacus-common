@@ -21,7 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
+import java.time.Year;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -222,7 +224,62 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
             }
         }
 
+        // The yyyy-MM-dd text stringOf writes is read directly (same value, a fraction of the cost); any other text,
+        // and every failure, is left to LocalDate.parse.
+        if (str.length() == 10) {
+            final LocalDate date = parseIsoLocalDate(str);
+
+            if (date != null) {
+                return date;
+            }
+        }
+
         return LocalDate.parse(str);
+    }
+
+    /**
+     * Reads the date that the first ten characters of {@code text} spell as {@code yyyy-MM-dd} (ASCII digits, a
+     * four-digit year), or returns {@code null} when that shape does not hold or the fields are not a valid date; the
+     * caller checks what follows. For text of this shape {@link LocalDate#parse(CharSequence)} (ISO_LOCAL_DATE,
+     * {@code STRICT}) accepts exactly the valid proleptic dates and returns the same value, so a caller that falls back
+     * to the {@code java.time} parser for {@code null} keeps its results and its failures.
+     *
+     * @param text the text to read, at least ten characters
+     * @return the date, or {@code null} if the text is not a valid date of this exact shape
+     */
+    @MayReturnNull
+    static LocalDate parseIsoLocalDate(final String text) {
+        if (text.charAt(4) != '-' || text.charAt(7) != '-') {
+            return null;
+        }
+
+        int year = 0;
+
+        for (int i = 0; i < 4; i++) {
+            final int digit = text.charAt(i) - '0';
+
+            if (digit < 0 || digit > 9) {
+                return null;
+            }
+
+            year = year * 10 + digit;
+        }
+
+        final int month = parseTwoDigits(text, 5);
+        final int day = parseTwoDigits(text, 8);
+
+        if (month < 1 || month > 12 || day < 1 || day > Month.of(month).length(Year.isLeap(year))) {
+            return null;
+        }
+
+        return LocalDate.of(year, month, day);
+    }
+
+    private static int parseTwoDigits(final String text, final int index) {
+        final int high = text.charAt(index) - '0';
+        final int low = text.charAt(index + 1) - '0';
+
+        return high < 0 || high > 9 || low < 0 || low > 9 ? -1 : high * 10 + low;
     }
 
     /**

@@ -41,13 +41,13 @@ import com.landawn.abacus.util.cs;
  * @see HashFunction
  */
 @SuppressWarnings("ClassCanBeRecord")
-final class GuavaHasher implements Hasher {
+class GuavaHasher implements Hasher {
 
     /**
      * Character ranges shorter than this are fed to the Guava hasher one {@code putChar} call at a time; longer ranges
      * are encoded into a temporary little-endian byte buffer and fed with bulk {@code putBytes} calls.
      */
-    private static final int BULK_CHARS_THRESHOLD = 16;
+    static final int BULK_CHARS_THRESHOLD = 16;
 
     /**
      * The maximum number of characters encoded into the temporary byte buffer per bulk {@code putBytes} call.
@@ -333,7 +333,7 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      *
      * <p>Adds a character sequence without encoding by delegating to the wrapped Guava
-     * hasher's {@code putUnencodedChars()} method.
+     * hasher's {@code putUnencodedChars()} method ({@link ByteHasher} overrides this for long sequences).
      *
      * @param charSequence the character sequence to add
      * @return this hasher instance
@@ -394,5 +394,109 @@ final class GuavaHasher implements Hasher {
     @Override
     public HashCode hash() {
         return gHasher.hash();
+    }
+
+    /**
+     * A {@code GuavaHasher} for byte-oriented Guava hashers (backed by a {@code MessageDigest}, {@code Mac} or
+     * {@code Checksum}), whose inherited {@code putUnencodedChars} costs one engine update per character. A separate
+     * class rather than a flag so that the other hashers keep their size and their {@code put(CharSequence)} path.
+     */
+    static final class ByteHasher extends GuavaHasher {
+
+        /**
+         * Constructs a new ByteHasher wrapping the specified byte-oriented Guava hasher.
+         *
+         * @param guavaHasher the Guava hasher to wrap, must not be {@code null}
+         * @throws NullPointerException if {@code guavaHasher} is {@code null}
+         */
+        ByteHasher(final com.google.common.hash.Hasher guavaHasher) throws NullPointerException {
+            super(guavaHasher);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Sequences of {@value #BULK_CHARS_THRESHOLD} or more characters are fed as the same little-endian byte
+         * stream in chunks, like {@link #put(char[], int, int)}, producing the identical hash code; shorter ones are
+         * delegated to the wrapped Guava hasher's {@code putUnencodedChars()} method.
+         *
+         * @param charSequence the character sequence to add
+         * @return this hasher instance
+         * @throws NullPointerException if {@code charSequence} is {@code null}.
+         */
+        @Override
+        public Hasher put(final CharSequence charSequence) throws NullPointerException {
+            final int length = charSequence.length();
+
+            if (length < BULK_CHARS_THRESHOLD) {
+                gHasher.putUnencodedChars(charSequence);
+                return this;
+            }
+
+            return putInBulk(charSequence, length);
+        }
+
+        private Hasher putInBulk(final CharSequence charSequence, final int length) {
+            // Guava's putUnencodedChars calls putChar per char, i.e. one MessageDigest/Mac/Checksum update per char.
+            // putChar(c) is the two little-endian bytes of c and puts are not delimited, so chunked putBytes is equivalent.
+            final byte[] buffer = new byte[Math.min(length, BULK_CHARS_CHUNK_SIZE) * 2];
+
+            for (int i = 0; i < length;) {
+                final int count = Math.min(length - i, BULK_CHARS_CHUNK_SIZE);
+
+                for (int k = 0, j = 0; k < count; k++) {
+                    final char c = charSequence.charAt(i + k);
+                    buffer[j++] = (byte) c;
+                    buffer[j++] = (byte) (c >>> 8);
+                }
+
+                gHasher.putBytes(buffer, 0, count * 2);
+                i += count;
+            }
+
+            return this;
+        }
+    }
+
+    /**
+     * A {@code GuavaHasher} for Guava's Murmur3_32 hashers, whose {@code putChar} is a cheap register update while
+     * {@code putBytes} re-reads a byte buffer as ints: for them the bulk char-array path of
+     * {@link GuavaHasher#put(char[], int, int)} is slower than one {@code putChar} per character, and it allocates.
+     */
+    static final class PerCharHasher extends GuavaHasher {
+
+        /**
+         * Constructs a new PerCharHasher wrapping the specified Guava hasher.
+         *
+         * @param guavaHasher the Guava hasher to wrap, must not be {@code null}
+         * @throws NullPointerException if {@code guavaHasher} is {@code null}
+         */
+        PerCharHasher(final com.google.common.hash.Hasher guavaHasher) throws NullPointerException {
+            super(guavaHasher);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Adds every character with its own {@code putChar} call, whatever the length of the range; the hash code
+         * is identical to the one of the bulk path.
+         *
+         * @param chars the source character array
+         * @param off the start offset in the array
+         * @param length the number of characters to add
+         * @return this hasher instance
+         * @throws IllegalArgumentException if {@code length} is negative.
+         * @throws IndexOutOfBoundsException if {@code off} is negative or the requested range exceeds the array length, treating a {@code null} array as empty.
+         */
+        @Override
+        public Hasher put(final char[] chars, final int off, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
+            N.checkFromIndexSize(off, length, N.len(chars));
+
+            for (int i = off, to = off + length; i < to; i++) {
+                gHasher.putChar(chars[i]);
+            }
+
+            return this;
+        }
     }
 }

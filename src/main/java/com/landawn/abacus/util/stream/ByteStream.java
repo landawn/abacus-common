@@ -1821,7 +1821,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * (ascending) and take the tail, or {@code boxed().top(n)} on the resulting {@code Stream<Byte>}.
      * This is by design.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements in memory,
+     * except that an unsorted array-backed stream may sort a copy of all its elements.
      *
      * @param k the position of the element to find (1-based, so k=1 returns the largest element,
      *          k=2 returns the second-largest, etc.)
@@ -2396,8 +2397,84 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final ByteBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return IntStream.range(view.position(), view.limit()).mapToByte(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return IntStream.range(view.position(), view.limit()).mapToByte(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as IntStream.range(position, limit).mapToByte(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // IntStream.range(..).mapToByte(view::get) gave its stream exactly one close handler: the run-once link to its
+        // internal range stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not
+        // EMPTY_CLOSE_HANDLER, which counts as none) so that iterator()'s close warning and the onClose()/close()
+        // behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorByteStream(new ByteIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public byte nextByte() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public byte[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_BYTE_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final byte[] result = new byte[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public ByteList toList() {
+                return ByteList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -2688,6 +2765,25 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextByte() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
+            }
         };
 
         return of(iter);
@@ -2750,6 +2846,25 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextByte() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
             }
         };
     }
@@ -2824,6 +2939,25 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextByte() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public ByteList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final byte[] result = new byte[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextByte();
+                    }
+
+                    return ByteList.of(result);
+                }
             };
 
         } else {
@@ -2854,6 +2988,25 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                     } else {
                         return a[rowNum][colNum++];
                     }
+                }
+
+                // The remaining size is known: fill an exactly sized list with the same nextByte() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public ByteList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final byte[] result = new byte[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextByte();
+                    }
+
+                    return ByteList.of(result);
                 }
             };
         }
@@ -2956,6 +3109,17 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
+
+            // toByteList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty remainder keeps the inherited path (cnt is at most 256 here, so there is no size-limit case).
+            @Override
+            public ByteList toList() {
+                if (cnt <= 0) {
+                    return super.toList();
+                }
+
+                return ByteList.of(toArray());
+            }
         }, true, null);
     }
 
@@ -3051,6 +3215,17 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
+
+            // toByteList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty remainder keeps the inherited path (cnt is at most 256 here, so there is no size-limit case).
+            @Override
+            public ByteList toList() {
+                if (cnt <= 0) {
+                    return super.toList();
+                }
+
+                return ByteList.of(toArray());
+            }
         }, by > 0, null);
     }
 
@@ -3134,6 +3309,17 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 cnt = 0;
 
                 return result;
+            }
+
+            // toByteList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty remainder keeps the inherited path (cnt is at most 256 here, so there is no size-limit case).
+            @Override
+            public ByteList toList() {
+                if (cnt <= 0) {
+                    return super.toList();
+                }
+
+                return ByteList.of(toArray());
             }
         }, true, null);
     }
@@ -3230,6 +3416,17 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 cnt = 0;
 
                 return result;
+            }
+
+            // toByteList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty remainder keeps the inherited path (cnt is at most 256 here, so there is no size-limit case).
+            @Override
+            public ByteList toList() {
+                if (cnt <= 0) {
+                    return super.toList();
+                }
+
+                return ByteList.of(toArray());
             }
         }, by > 0, null);
     }
@@ -3918,6 +4115,30 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return zipFunction.applyAsByte(a[cursor], b[cursor++]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextByte() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ByteList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
+            }
         });
     }
 
@@ -3970,6 +4191,30 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 }
 
                 return zipFunction.applyAsByte(a[cursor], b[cursor], c[cursor++]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextByte() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ByteList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
             }
         });
     }
@@ -4215,6 +4460,30 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextByte() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ByteList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
+            }
         });
     }
 
@@ -4274,6 +4543,30 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextByte() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return ByteList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
             }
         });
     }
@@ -4543,6 +4836,30 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextByte() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public ByteList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final byte[] result = new byte[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return ByteList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextByte();
+                }
+
+                return ByteList.of(result);
             }
         });
     }

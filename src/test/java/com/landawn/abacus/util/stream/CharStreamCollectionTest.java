@@ -227,4 +227,59 @@ public class CharStreamCollectionTest extends CharStreamTestSupport {
         assertThat(set).containsExactlyInAnyOrder('a', 'b', 'c');
     }
 
+    // ---- deep review 2026-11-02b G093 begin ----
+    // G093-04 (pin): ArrayCharStream.toSet skips repeated values with a presence bitset above 131072 elements; the result
+    // must equal - in content, iteration order and type - a HashSet filled with every element, for sizes around the
+    // threshold, sequential and parallel.
+    @Test
+    public void testToSet_largeRangeRepeatSkipMatchesPlainHashSet_r116() {
+        final java.util.Random rnd = new java.util.Random(202611023);
+        final int[] sizes = { 0, 1, 2, 1000, 65536, 131071, 131072, 131073, 131074, 140000, 300_000 };
+
+        for (final int size : sizes) {
+            for (int variant = 0; variant < 4; variant++) {
+                final char[] a = new char[size + 3];
+
+                for (int i = 0; i < a.length; i++) {
+                    if (variant == 0) {
+                        a[i] = (char) rnd.nextInt(65536);
+                    } else if (variant == 1) {
+                        a[i] = (char) (32 + i % 95); // ASCII text
+                    } else if (variant == 2) {
+                        a[i] = (char) (65535 - i % 65536); // every char value once before any repeat
+                    } else {
+                        a[i] = (char) (0x4E00 + rnd.nextInt(20992)); // CJK range
+                    }
+                }
+
+                final Set<Character> expected = com.landawn.abacus.util.N.newHashSet(Math.min(size, 65536));
+
+                for (int i = 2; i < size + 2; i++) {
+                    expected.add(a[i]);
+                }
+
+                for (final boolean parallel : new boolean[] { false, true }) {
+                    final String msg = "size=" + size + " variant=" + variant + " parallel=" + parallel;
+                    final int[] closeCount = { 0 };
+                    CharStream stream = CharStream.of(a, 2, size + 2).onClose(() -> closeCount[0]++);
+
+                    if (parallel) {
+                        stream = stream.parallel();
+                    }
+
+                    final Set<Character> actual = stream.toSet();
+
+                    assertEquals(java.util.HashSet.class, actual.getClass(), msg);
+                    assertEquals(expected, actual, msg);
+                    assertEquals(new java.util.ArrayList<>(expected), new java.util.ArrayList<>(actual), "iteration order, " + msg);
+                    assertEquals(1, closeCount[0], "close handler, " + msg);
+
+                    actual.add('\u0000'); // still a mutable set
+                    assertTrue(actual.contains('\u0000'), msg);
+                }
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G093 end ----
+
 }

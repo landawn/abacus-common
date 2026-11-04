@@ -547,8 +547,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      *
      * @param element the double value to be repeated
      * @param length the number of times to repeat the element. Must be non-negative.
-     * @return a new DoubleList containing <i>len</i> copies of the specified element
-     * @throws IllegalArgumentException if len is negative.
+     * @return a new DoubleList containing {@code length} copies of the specified element
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
     public static DoubleList repeat(final double element, final int length) throws IllegalArgumentException {
         return of(Array.repeat(element, length));
@@ -572,8 +572,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * example, fill an array from it and wrap the array with {@code of(..)}).</p>
      *
      * @param length the number of random double values to generate. Must be non-negative.
-     * @return a new DoubleList containing <i>len</i> random double values
-     * @throws NegativeArraySizeException if len is negative
+     * @return a new DoubleList containing {@code length} random double values
+     * @throws NegativeArraySizeException if {@code length} is negative
      */
     public static DoubleList random(final int length) throws NegativeArraySizeException {
         final double[] a = new double[length];

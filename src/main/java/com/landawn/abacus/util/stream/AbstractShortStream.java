@@ -864,6 +864,17 @@ abstract class AbstractShortStream extends ShortStream {
                 return a;
             }
 
+            @Override
+            public ShortList toList() {
+                if (!initialized) {
+                    init();
+                }
+
+                // Exactly sized copy (used by toShortList()) instead of the inherited element-by-element growth.
+                // elements is null only after a failed init(): keep the inherited behaviour for such a retry.
+                return elements == null ? super.toList() : ShortList.of(toArray());
+            }
+
             private void init() {
                 if (!initialized) {
                     initialized = true;
@@ -963,6 +974,12 @@ abstract class AbstractShortStream extends ShortStream {
                 cnt = len;
 
                 return a;
+            }
+
+            @Override
+            public ShortList toList() {
+                // Exactly sized copy (used by toShortList()) instead of the inherited element-by-element growth.
+                return ShortList.of(toArray());
             }
 
             private void init() {
@@ -1094,6 +1111,12 @@ abstract class AbstractShortStream extends ShortStream {
                 return a;
             }
 
+            @Override
+            public ShortList toList() {
+                // Exactly sized copy (used by toShortList()) instead of the inherited element-by-element growth.
+                return ShortList.of(toArray());
+            }
+
             private void init() {
                 if (!initialized) {
                     initialized = true;
@@ -1121,11 +1144,51 @@ abstract class AbstractShortStream extends ShortStream {
      * @return a new ShortStream backed by the transformed array
      */
     private ShortStream lazyLoad(final UnaryOperator<short[]> operator, final boolean sorted) {
-        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
-        return newStream(ShortIterator.defer(() -> { //NOSONAR
+        // The deferred iterator keeps the load-once and cached-failure semantics of every access. Once it has
+        // loaded, toArray() copies the remaining range of the loaded array in one step instead of re-reading it
+        // element by element into a growing list (e.g. sorted().toArray(), sorted().reversed()).
+        final ShortIterator[] loaded = new ShortIterator[1];
+
+        final ShortIterator deferred = ShortIterator.defer(() -> {
             final short[] a = operator.apply(toArrayForIntermediateOp());
-            return a == null || a.length == 0 ? ShortIterator.empty() : ShortIterator.of(a);
-        }), sorted);
+            loaded[0] = a == null || a.length == 0 ? ShortIterator.empty() : ShortIterator.of(a);
+            return loaded[0];
+        });
+
+        // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
+        return newStream(loadedArrayIterator(deferred, loaded), sorted);
+    }
+
+    /**
+     * Wraps the deferred iterator built by {@code lazyLoad} so that, once it has loaded, {@code toArray()} copies the
+     * remaining range of the loaded array in one step.
+     *
+     * <p>Static on purpose: an anonymous class created in an instance method keeps a reference to the enclosing stream
+     * under ECJ even when it does not use it. Built here, the wrapper holds only {@code deferred} and {@code loaded},
+     * so, as with the deferred iterator alone, a held iterator retains neither this stream nor the operator (nor the
+     * upstream source) once it has loaded.</p>
+     *
+     * @param deferred the deferred iterator, whose supplier sets {@code loaded[0]} on first access
+     * @param loaded the holder of the loaded iterator
+     * @return the wrapping iterator
+     */
+    private static ShortIteratorEx loadedArrayIterator(final ShortIterator deferred, final ShortIterator[] loaded) {
+        return new ShortIteratorEx() { //NOSONAR
+            @Override
+            public boolean hasNext() {
+                return deferred.hasNext();
+            }
+
+            @Override
+            public short nextShort() throws NoSuchElementException {
+                return deferred.nextShort();
+            }
+
+            @Override
+            public short[] toArray() {
+                return deferred.hasNext() ? loaded[0].toArray() : super.toArray();
+            }
+        };
     }
 
     // Avoid wrappers or checks on each read solely to release a cycle's cache when it closes.

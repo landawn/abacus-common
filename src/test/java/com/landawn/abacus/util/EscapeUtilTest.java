@@ -1787,4 +1787,152 @@ public class EscapeUtilTest extends TestBase {
         assertEquals("\\uD83D\\uDE00", EscapeUtil.escapeJava("\ud83d\ude00"));
     }
     // ---- perf review 2026-09-26 G037 end ----
+
+    // ---- deep review 2026-11-02 G041 begin ----
+    // G041-01: escapeJson/escapeEcmaScript skip the translator chain for input it would copy unchanged; pin that every
+    // input still gives the translator's result, as a fresh String, for each single char and for mixed strings.
+    @Test
+    public void testEscapeJsonAndEcmaScript_matchTranslatorForEveryChar() {
+        for (int c = 0; c <= Character.MAX_VALUE; c++) {
+            final String single = String.valueOf((char) c);
+            assertEquals(EscapeUtil.ESCAPE_JSON.translate(single), EscapeUtil.escapeJson(single), "json char " + c);
+            assertEquals(EscapeUtil.ESCAPE_ECMASCRIPT.translate(single), EscapeUtil.escapeEcmaScript(single), "ecma char " + c);
+
+            final String framed = "a" + single + "z";
+            assertEquals(EscapeUtil.ESCAPE_JSON.translate(framed), EscapeUtil.escapeJson(framed), "json framed " + c);
+            assertEquals(EscapeUtil.ESCAPE_ECMASCRIPT.translate(framed), EscapeUtil.escapeEcmaScript(framed), "ecma framed " + c);
+        }
+    }
+
+    // G041-01: boundary chars of the pass-through range, special chars first/middle/last, surrogates, null and empty.
+    @Test
+    public void testEscapeJsonAndEcmaScript_passThroughEdgesAndFreshResult() {
+        assertNull(EscapeUtil.escapeJson(null));
+        assertNull(EscapeUtil.escapeEcmaScript(null));
+        assertEquals("", EscapeUtil.escapeJson(""));
+        assertEquals("", EscapeUtil.escapeEcmaScript(""));
+
+        final char del = (char) 0x7F;
+        final char unit1F = (char) 0x1F;
+        final char unit80 = (char) 0x80;
+        final char high = (char) 0xD83D;
+        final char low = (char) 0xDE00;
+
+        final String plain = " ~" + del + " plain ASCII 0123456789 {}[]:,.;!?#$%&*()+-=<>@^_`|";
+        assertEquals(plain, EscapeUtil.escapeJson(plain));
+        assertEquals(plain, EscapeUtil.escapeEcmaScript(plain));
+        // the translator path always produced a new String for a non-empty input
+        Assertions.assertNotSame(plain, EscapeUtil.escapeJson(plain));
+        Assertions.assertNotSame(plain, EscapeUtil.escapeEcmaScript(plain));
+
+        assertEquals("it's", EscapeUtil.escapeJson("it's"));
+        assertEquals("it\\'s", EscapeUtil.escapeEcmaScript("it's"));
+        assertEquals("\\/a", EscapeUtil.escapeJson("/a"));
+        assertEquals("a\\\"b", EscapeUtil.escapeJson("a\"b"));
+        assertEquals("ab\\\\", EscapeUtil.escapeJson("ab\\"));
+        assertEquals("\\u001Fa", EscapeUtil.escapeJson(unit1F + "a"));
+        assertEquals("a\\u0080", EscapeUtil.escapeEcmaScript("a" + unit80));
+        assertEquals("x\\uD83D\\uDE00y", EscapeUtil.escapeJson("x" + high + low + "y"));
+        assertEquals("x\\uD83Dy", EscapeUtil.escapeEcmaScript("x" + high + "y"));
+        assertEquals("tab\\there", EscapeUtil.escapeJson("tab\there"));
+
+        final java.util.Random random = new java.util.Random(20261102L);
+        final char[] alphabet = { 'a', 'Z', '0', ' ', '~', del, unit80, unit1F, '"', '\'', '\\', '/', '\n', (char) 0xE9, (char) 0x4E2D, high, low };
+
+        for (int trial = 0; trial < 5000; trial++) {
+            final char[] chars = new char[random.nextInt(12)];
+
+            for (int i = 0; i < chars.length; i++) {
+                // mostly pass-through chars, so that many trials take the shortcut
+                chars[i] = random.nextInt(4) == 0 ? alphabet[random.nextInt(alphabet.length)] : alphabet[random.nextInt(5)];
+            }
+
+            final String s = new String(chars);
+            assertEquals(EscapeUtil.ESCAPE_JSON.translate(s), EscapeUtil.escapeJson(s), s);
+            assertEquals(EscapeUtil.ESCAPE_ECMASCRIPT.translate(s), EscapeUtil.escapeEcmaScript(s), s);
+        }
+    }
+    // ---- deep review 2026-11-02 G041 end ----
+
+    // ---- deep review 2026-11-02b G041 begin ----
+    // G041-01: unescapeJava/unescapeEcmaScript/unescapeJson skip the translator chain for input without a backslash;
+    // pin that every single char, alone and framed, still gives the translator's result.
+    @Test
+    public void testUnescapeJavaStyle_matchTranslatorForEveryChar_r116() {
+        for (int c = 0; c <= Character.MAX_VALUE; c++) {
+            final String single = String.valueOf((char) c);
+            final String framed = "a" + single + "z";
+
+            for (final String s : new String[] { single, framed }) {
+                final String expected = EscapeUtil.UNESCAPE_JAVA.translate(s);
+                assertEquals(expected, EscapeUtil.unescapeJava(s), "java char " + c);
+                assertEquals(expected, EscapeUtil.unescapeEcmaScript(s), "ecma char " + c);
+                assertEquals(expected, EscapeUtil.unescapeJson(s), "json char " + c);
+            }
+        }
+    }
+
+    // G041-01: null, empty, fresh result, surrogates, escapes at the start/middle/end, malformed escapes still throwing,
+    // and random strings mixing escape-forming chars with plain ones, all against the translator path.
+    @Test
+    public void testUnescapeJavaStyle_passThroughEdgesAndFreshResult_r116() {
+        assertNull(EscapeUtil.unescapeJava(null));
+        assertNull(EscapeUtil.unescapeEcmaScript(null));
+        assertNull(EscapeUtil.unescapeJson(null));
+        assertEquals("", EscapeUtil.unescapeJava(""));
+        assertEquals("", EscapeUtil.unescapeEcmaScript(""));
+        assertEquals("", EscapeUtil.unescapeJson(""));
+
+        final char high = (char) 0xD83D;
+        final char low = (char) 0xDE00;
+        final String plain = "plain 'text' \"quoted\" / u0041 n t 0123 " + high + low + " lone " + low + high + " " + (char) 0x4E2D + (char) 0;
+        assertEquals(plain, EscapeUtil.unescapeJava(plain));
+        assertEquals(plain, EscapeUtil.unescapeEcmaScript(plain));
+        assertEquals(plain, EscapeUtil.unescapeJson(plain));
+        // the translator path always produced a new String for a non-empty input
+        Assertions.assertNotSame(plain, EscapeUtil.unescapeJava(plain));
+        Assertions.assertNotSame(plain, EscapeUtil.unescapeEcmaScript(plain));
+        Assertions.assertNotSame(plain, EscapeUtil.unescapeJson(plain));
+
+        assertEquals("\nabc", EscapeUtil.unescapeJava("\\nabc"));
+        assertEquals("a\"b", EscapeUtil.unescapeJson("a\\\"b"));
+        assertEquals("abc'", EscapeUtil.unescapeEcmaScript("abc\\'"));
+        assertEquals("abc", EscapeUtil.unescapeJava("abc\\"));
+        assertEquals("A%", EscapeUtil.unescapeJson("\\u0041\\45"));
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava("abc\\u12"));
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeEcmaScript("\\uXYZW"));
+        assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJson("x\\u"));
+
+        final java.util.Random random = new java.util.Random(202611022L);
+        final char[] alphabet = { 'a', 'Z', ' ', '"', '\'', '/', 'u', 'n', '0', '3', '7', '4', 'A', 'f', '+', (char) 0xE9, high, low, '\\' };
+
+        for (int trial = 0; trial < 5000; trial++) {
+            final char[] chars = new char[random.nextInt(12)];
+
+            for (int i = 0; i < chars.length; i++) {
+                // backslash-free in most trials, so that many trials take the shortcut
+                chars[i] = alphabet[random.nextInt(trial % 2 == 0 ? alphabet.length - 1 : alphabet.length)];
+            }
+
+            final String s = new String(chars);
+            String expected;
+
+            try {
+                expected = EscapeUtil.UNESCAPE_JAVA.translate(s);
+            } catch (final IllegalArgumentException e) {
+                expected = null;
+            }
+
+            if (expected == null) {
+                assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJava(s), s);
+                assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeEcmaScript(s), s);
+                assertThrows(IllegalArgumentException.class, () -> EscapeUtil.unescapeJson(s), s);
+            } else {
+                assertEquals(expected, EscapeUtil.unescapeJava(s), s);
+                assertEquals(expected, EscapeUtil.unescapeEcmaScript(s), s);
+                assertEquals(expected, EscapeUtil.unescapeJson(s), s);
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G041 end ----
 }

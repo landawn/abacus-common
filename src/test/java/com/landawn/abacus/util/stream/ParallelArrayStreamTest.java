@@ -3248,4 +3248,69 @@ public class ParallelArrayStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G102 end ----
+
+    // ---- deep review 2026-11-02b G109 begin ----
+    // G109-01: pin for the parallel flatMapArray workers (both split strategies): null, empty, single-element, multi-element
+    // and shared arrays, sub-ranges, more threads than elements, one mapper call per element, iterator drain, mapper failure.
+    @Test
+    public void testFlatMapArray_parallelWorkersMatchSequential_r116() {
+        final Integer[] shared = { 100, 101 };
+        final java.util.function.Function<Integer, Integer[]> mapper = x -> x == null ? null
+                : (x % 4 == 0 ? new Integer[0] : (x % 4 == 1 ? new Integer[] { x } : (x % 4 == 2 ? new Integer[] { x, null, x * 10 } : shared)));
+        final Comparator<Integer> nullsFirst = Comparator.nullsFirst(Comparator.naturalOrder());
+        final Integer[] source = new Integer[23];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = i % 7 == 6 ? null : i - 3;
+        }
+
+        for (final SplitStrategy splitStrategy : SplitStrategy.values()) {
+            for (final int threadNum : new int[] { 2, 3, 8 }) {
+                for (final int[] range : new int[][] { { 0, 23 }, { 2, 4 }, { 5, 6 }, { 7, 7 }, { 1, 20 }, { 4, 8 } }) {
+                    final List<Integer> expected = new ArrayList<>();
+
+                    for (int i = range[0]; i < range[1]; i++) {
+                        final Integer[] mapped = mapper.apply(source[i]);
+
+                        if (mapped != null) {
+                            expected.addAll(Arrays.asList(mapped));
+                        }
+                    }
+
+                    final AtomicInteger calls = new AtomicInteger();
+                    final Stream<Integer> stream = new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false,
+                            new ArrayList<>()).flatMapArray(x -> {
+                                calls.incrementAndGet();
+                                return mapper.apply(x);
+                            });
+                    final java.util.Iterator<Integer> iter = stream.iterator();
+                    final List<Integer> actual = new ArrayList<>();
+
+                    while (iter.hasNext()) {
+                        actual.add(iter.next());
+                    }
+
+                    assertFalse(iter.hasNext());
+                    assertThrows(java.util.NoSuchElementException.class, iter::next);
+                    stream.close();
+
+                    expected.sort(nullsFirst);
+                    actual.sort(nullsFirst);
+                    assertEquals(expected, actual, splitStrategy + " threads=" + threadNum + " range=" + Arrays.toString(range));
+                    assertEquals(range[1] - range[0], calls.get());
+                }
+            }
+
+            final IllegalStateException e = assertThrows(IllegalStateException.class,
+                    () -> new ParallelArrayStream<>(source, 0, source.length, false, null, 4, splitStrategy, null, false, new ArrayList<>()).flatMapArray(x -> {
+                        if (x != null && x == 9) {
+                            throw new IllegalStateException("boom");
+                        }
+
+                        return mapper.apply(x);
+                    }).toList());
+            assertEquals("boom", e.getMessage());
+        }
+    }
+    // ---- deep review 2026-11-02b G109 end ----
 }

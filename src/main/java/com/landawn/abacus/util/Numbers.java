@@ -5882,7 +5882,7 @@ public final class Numbers {
      * is followed by an ellipsis marker and the original total length.
      * The cut never splits a surrogate pair, and ISO control characters (C0/C1), U+2028, U+2029, Unicode
      * format characters (a byte order mark, zero-width space, soft hyphen or bidirectional control) and
-     * unpaired surrogates are escaped (a newline becomes the six characters {@code &#92;u000A}), so a hostile
+     * unpaired surrogates are escaped (a newline becomes the six characters <code>&#92;u000A</code>), so a hostile
      * multi-megabyte token cannot produce a multi-megabyte, encoding-broken, line-break-injecting or
      * display-order-reversing exception message.
      *
@@ -5926,7 +5926,7 @@ public final class Numbers {
      * Escapes ISO control characters (C0 and C1, including U+0085), the Unicode line/paragraph
      * separators (U+2028, U+2029), Unicode format characters ({@link Character#FORMAT}: the byte order mark
      * U+FEFF, zero-width space U+200B, soft hyphen U+00AD, the bidirectional controls U+202A-U+202E and
-     * U+2066-U+2069, ...) and unpaired surrogates as {@code \\uXXXX} sequences so the result cannot inject
+     * U+2066-U+2069, ...) and unpaired surrogates as <code>&#92;uXXXX</code> sequences so the result cannot inject
      * line breaks, invisible characters, display-order changes or invalid encodings into a log line.
      * Well-formed surrogate pairs (e.g. emoji) and all other printable input are returned unchanged, except
      * that a supplementary format character (a tag character, U+E0001 for instance) is escaped as its two
@@ -5985,7 +5985,7 @@ public final class Numbers {
      * attached via {@link Throwable#initCause}; a cause whose own message is oversized (for example a JDK
      * parse exception embedding the whole token), or that needed escaping however short it is (a control or
      * format character in the token, so {@code parseDouble("1\n2")} carries the cause
-     * {@code For input string: "1&#92;u000A2"}), is replaced by a bounded {@link NumberFormatException}
+     * <code>For input string: "1&#92;u000A2"</code>), is replaced by a bounded {@link NumberFormatException}
      * carrying a preview of that message, cut at {@link #MAX_ERROR_MESSAGE_CAUSE_LENGTH}, so the retained
      * exception chain stays small and log-safe. A cause this class built itself is attached through
      * {@link #notAValidNumberWithBoundedCause(String, String, NumberFormatException)} instead.

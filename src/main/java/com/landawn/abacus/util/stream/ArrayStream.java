@@ -416,7 +416,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
             @Override
             public <A> A[] toArray(A[] a) {
-                // Don't use count() here — it now drains the iterator (sets cursor=toIndex)
+                // Don't use count() here - it now drains the iterator (sets cursor=toIndex)
                 // to honour the IteratorEx.count() contract. Compute the size directly.
                 final long rem = toIndex - cursor;
                 final int len = (int) ((rem % stepToUse == 0) ? rem / stepToUse : rem / stepToUse + 1);

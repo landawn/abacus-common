@@ -451,6 +451,19 @@ public final class CsvUtil {
     }
 
     /**
+     * Returns the per-column mask for {@link CsvRecordReader#parseRecordInto(BiConsumer, String[], boolean[])}: the selected
+     * columns when {@code rowFilter} is the always-true filter, since then nothing reads an unselected field and it need not
+     * be built; otherwise {@code null} (build every field: a row filter sees the whole raw row).
+     *
+     * @param rowFilter the caller's row filter
+     * @param isColumnSelected the selected columns, or {@code null} if every column is used
+     * @return {@code isColumnSelected} or {@code null}
+     */
+    private static boolean[] neededColumns(final Predicate<? super String[]> rowFilter, final boolean[] isColumnSelected) {
+        return isColumnSelected != null && (N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue())) ? isColumnSelected : null;
+    }
+
+    /**
      * Builds the exception for a column selection that names columns the CSV header does not contain.
      *
      * @param missingColumnNames the names that were NOT matched against the header - not the whole selection
@@ -1040,6 +1053,17 @@ public final class CsvUtil {
          * @throws RuntimeException if a custom parser fails, except that an {@code IndexOutOfBoundsException} is wrapped in {@code ParsingException}
          */
         public void parseRecordInto(final BiConsumer<String, String[]> lineParser, final String[] output) throws ParsingException, RuntimeException {
+            parseRecordInto(lineParser, output, null);
+        }
+
+        /**
+         * {@link #parseRecordInto(BiConsumer, String[])} for the engines in {@code CsvUtil}. With {@link #CSV_LINE_PARSER}, a field
+         * whose {@code neededColumns} slot is {@code false} is framed and validated exactly as usual but its value is not built,
+         * so its slot of {@code output} stays {@code null}. Pass a mask only when nothing reads the unselected fields of
+         * {@code output} (no row filter); {@code null} builds every field.
+         */
+        private void parseRecordInto(final BiConsumer<String, String[]> lineParser, final String[] output, final boolean[] neededColumns)
+                throws ParsingException, RuntimeException {
             N.checkArgNotNull(lineParser, cs.lineParser);
             N.checkArgNotNull(output, cs.output);
 
@@ -1050,7 +1074,7 @@ public final class CsvUtil {
             N.fill(output, null);
 
             if (lineParser == CSV_LINE_PARSER) {
-                parseDefaultCsvRecord(output);
+                parseDefaultCsvRecord(output, neededColumns);
             } else {
                 parseRow(lineParser, this.currentRecordText(), output);
             }
@@ -1078,9 +1102,12 @@ public final class CsvUtil {
          * doubled quote reduced to one, followed by any text between the closing quote and the next separator,
          * unless that text is only whitespace. A quote inside an unquoted field, or after a closing quote, is text.
          *
+         * <p>A field whose {@code neededColumns} slot is {@code false} is scanned and validated the same way, but its
+         * value is not built (its slot stays {@code null}); a {@code null} mask builds every field.</p>
+         *
          * @throws ParsingException if a quoted field is not closed, or the record has more fields than {@code row} has slots.
          */
-        private void parseDefaultCsvRecord(final String[] row) throws ParsingException {
+        private void parseDefaultCsvRecord(final String[] row, final boolean[] neededColumns) throws ParsingException {
             final char[] chars = this.recordChars;
             final int to = this.recordTo;
             int i = this.recordFrom;
@@ -1092,6 +1119,9 @@ public final class CsvUtil {
                     i++;
                 }
 
+                // An unneeded field is still scanned to its end (an unclosed quote or an extra field must fail exactly as
+                // before); only the String is not built. Past the mask's end the overflow check below throws anyway.
+                final boolean skipValue = neededColumns != null && index < neededColumns.length && !neededColumns[index];
                 final String value;
 
                 if (i < to && chars[i] == '"') {
@@ -1105,8 +1135,12 @@ public final class CsvUtil {
 
                         if (chars[i] == '"') {
                             if (i + 1 < to && chars[i + 1] == '"') {
-                                // A doubled quote is one quote of content.
-                                builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, i + 1 - runStart);
+                                // A doubled quote is one quote of content. An unneeded field is not copied: its builder
+                                // stays null and its value null, while the scan and its failures are unchanged.
+                                if (!skipValue) {
+                                    builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, i + 1 - runStart);
+                                }
+
                                 i += 2;
                                 runStart = i;
                                 continue;
@@ -1138,19 +1172,21 @@ public final class CsvUtil {
                             i++;
                         }
 
-                        builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, closingQuote - runStart);
-                        builder.append(chars, suffixStart, i - suffixStart);
-                        runStart = closingQuote; // content already appended
+                        if (!skipValue) {
+                            builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, closingQuote - runStart);
+                            builder.append(chars, suffixStart, i - suffixStart);
+                            runStart = closingQuote; // content already appended
+                        }
                     }
 
                     if (builder == null) {
-                        value = new String(chars, runStart, closingQuote - runStart);
+                        value = skipValue ? null : new String(chars, runStart, closingQuote - runStart);
                     } else {
                         if (runStart < closingQuote) {
                             builder.append(chars, runStart, closingQuote - runStart);
                         }
 
-                        value = builder.toString();
+                        value = skipValue ? null : builder.toString();
                         this.releaseOversizedField();
                     }
                 } else {
@@ -1160,13 +1196,17 @@ public final class CsvUtil {
                         i++;
                     }
 
-                    int fieldEnd = i;
+                    if (skipValue) {
+                        value = null;
+                    } else {
+                        int fieldEnd = i;
 
-                    while (fieldEnd > fieldStart && Character.isWhitespace(chars[fieldEnd - 1])) {
-                        fieldEnd--;
+                        while (fieldEnd > fieldStart && Character.isWhitespace(chars[fieldEnd - 1])) {
+                            fieldEnd--;
+                        }
+
+                        value = new String(chars, fieldStart, fieldEnd - fieldStart);
                     }
-
-                    value = new String(chars, fieldStart, fieldEnd - fieldStart);
                 }
 
                 if (index >= row.length) {
@@ -1204,6 +1244,15 @@ public final class CsvUtil {
          * @throws IllegalArgumentException if the parser or destination is null, or the offset is negative
          */
         public Stream<String[]> stream(final BiConsumer<String, String[]> lineParser, final long offset, final String[] output) {
+            return stream(lineParser, offset, output, null);
+        }
+
+        /**
+         * {@link #stream(BiConsumer, long, String[])} parsing each record with
+         * {@link #parseRecordInto(BiConsumer, String[], boolean[])}: unneeded fields stay {@code null}.
+         */
+        private Stream<String[]> stream(final BiConsumer<String, String[]> lineParser, final long offset, final String[] output,
+                final boolean[] neededColumns) {
             N.checkArgNotNull(lineParser, cs.lineParser);
             N.checkArgNotNull(output, cs.output);
             N.checkArgNotNegative(offset, cs.offset);
@@ -1221,7 +1270,7 @@ public final class CsvUtil {
                         return null;
                     }
 
-                    parseRecordInto(lineParser, output);
+                    parseRecordInto(lineParser, output, neededColumns);
                     return output;
                 } catch (final IOException e) {
                     throw new UncheckedIOException(e);
@@ -1564,9 +1613,10 @@ public final class CsvUtil {
             if (count > 0) {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
+                final boolean[] neededColumns = neededColumns(rowFilter, isColumnSelected);
 
                 while (records.nextRecord(lineParser)) {
-                    records.parseRecordInto(lineParser, row);
+                    records.parseRecordInto(lineParser, row, neededColumns);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -2005,9 +2055,10 @@ public final class CsvUtil {
             if (count > 0) {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
+                final boolean[] neededColumns = neededColumns(rowFilter, isColumnSelected);
 
                 while (records.nextRecord(lineParser)) {
-                    records.parseRecordInto(lineParser, row);
+                    records.parseRecordInto(lineParser, row, neededColumns);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -2334,7 +2385,7 @@ public final class CsvUtil {
 
             final List<String> columnNameList = new ArrayList<>(selectColumnCount);
             final List<List<Object>> columnList = new ArrayList<>(selectColumnCount);
-            // final boolean[] isColumnSelected = noSelectColumnNamesSpecified ? null : new boolean[columnCount];
+            final boolean[] isColumnSelected = noSelectColumnNamesSpecified ? null : new boolean[columnCount];
             final Type<?>[] columnTypes = new Type<?>[columnCount];
             final Map<String, Type<?>> columnTypeMapToUse = (Map<String, Type<?>>) columnTypeMap; // non-null: checked at the top of the method
 
@@ -2352,7 +2403,7 @@ public final class CsvUtil {
                         columnNameList.add(titles[i]);
                         final Type<?> columnType = columnTypeMapToUse.get(titles[i]);
                         columnTypes[i] = columnType == null ? strType : columnType;
-                        // isColumnSelected[i] = true;
+                        isColumnSelected[i] = true;
                         columnList.add(new ArrayList<>());
                     }
                 }
@@ -2369,9 +2420,10 @@ public final class CsvUtil {
             if (count > 0) {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
+                final boolean[] neededColumns = neededColumns(rowFilter, isColumnSelected);
 
                 while (records.nextRecord(lineParser)) {
-                    records.parseRecordInto(lineParser, row);
+                    records.parseRecordInto(lineParser, row, neededColumns);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -2822,9 +2874,10 @@ public final class CsvUtil {
 
             if (count > 0) {
                 long resultCount = 0;
+                final boolean[] neededColumns = neededColumns(rowFilter, isColumnSelected);
 
                 while (records.nextRecord(lineParser)) {
-                    records.parseRecordInto(lineParser, rowData);
+                    records.parseRecordInto(lineParser, rowData, neededColumns);
 
                     if (!rowFilter.test(rowData)) {
                         continue;
@@ -3319,7 +3372,8 @@ public final class CsvUtil {
 
                 final boolean acceptsEveryRow = rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue());
 
-                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData);
+                // Without a row filter the mapper reads only the selected columns, so the other fields are not built.
+                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData, acceptsEveryRow ? isColumnSelected : null);
 
                 if (!acceptsEveryRow) {
                     parsedRows = parsedRows.filter(Fn.from(rowFilter));
@@ -3748,7 +3802,8 @@ public final class CsvUtil {
 
                 final boolean acceptsEveryRow = rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue());
 
-                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData);
+                // Without a row filter the mapper copies only the selected columns, so the other fields are not built.
+                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData, acceptsEveryRow ? isColumnSelected : null);
 
                 if (!acceptsEveryRow) {
                     parsedRows = parsedRows.filter(Fn.from(rowFilter));
@@ -4118,6 +4173,8 @@ public final class CsvUtil {
 
             long cnt = 0;
             final String[] rowData = new String[columnCount];
+            // Only the selected fields are written, so the others are not built.
+            final boolean[] neededColumns = noSelectColumnNamesSpecified ? null : isColumnSelected;
 
             boolean firstRow = true;
             bw.write("[\n");
@@ -4129,7 +4186,7 @@ public final class CsvUtil {
                     firstRow = false;
                 }
 
-                records.parseRecordInto(lineParser, rowData);
+                records.parseRecordInto(lineParser, rowData, neededColumns);
 
                 bw.write("{");
                 boolean firstColumn = true;

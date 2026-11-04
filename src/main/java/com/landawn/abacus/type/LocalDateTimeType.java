@@ -20,7 +20,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
@@ -244,6 +246,19 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
                 return LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(str)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
+            }
+        }
+
+        // The yyyy-MM-dd'T'HH:mm[:ss[.fraction]] text stringOf writes is read directly (same value, a fraction of the
+        // cost); any other text (a lower-case 't', a year beyond 9999, ...), and every failure, is left to LocalDateTime.parse.
+        final int len = str.length();
+
+        if (len >= 16 && str.charAt(10) == 'T') {
+            final LocalDate date = LocalDateType.parseIsoLocalDate(str);
+            final LocalTime time = date == null ? null : LocalTimeType.parseIsoLocalTime(str, 11, len, false);
+
+            if (time != null) {
+                return LocalDateTime.of(date, time);
             }
         }
 

@@ -158,7 +158,7 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
     /**
      * Serializes a multimap to its JSON string representation.
      * The multimap is serialized as a JSON object where each key maps to a collection of values,
-     * using the multimap's {@code asMap()} view (e.g., {@code {"colors":[1,2],"sizes":[10]}}).
+     * using the multimap's {@code asMap()} view (e.g., {@code {"colors": [1, 2], "sizes": [10]}}).
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is

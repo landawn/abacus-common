@@ -45,7 +45,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -1411,18 +1410,16 @@ public final class PropertiesUtil {
 
         final T properties = (T) (output == null ? N.newInstance(targetClass) : output);
 
-        final NodeList propNodes = source.getChildNodes();
-        @SuppressWarnings("ConstantValue")
-        final int propNodeLength = (propNodes == null) ? 0 : propNodes.getLength();
         final Set<String> newKeySet = N.newHashSet();
         Node propNode = null;
         String typeAttr = null;
         String propName = null;
         Object propValue = null;
 
-        for (int i = 0; i < propNodeLength; i++) {
-            propNode = propNodes.item(i);
-
+        // Sibling links rather than getChildNodes().item(i): on the JDK DOM an item(i) pass over a child list that a nested
+        // call (the recursion below, or a second read) also passes releases its NodeList cache twice, leaving the document
+        // with a cyclic cache pool on which every later interleaved child-list traversal is quadratic (see XmlUtil.isTextElement).
+        for (propNode = source.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
             if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
@@ -2409,11 +2406,8 @@ public final class PropertiesUtil {
         }
 
         try {
-            final NodeList childNodes = node.getChildNodes();
-
-            for (int i = 0, len = childNodes.getLength(); i < len; i++) {
-                final Node childNode = childNodes.item(i);
-
+            // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in loadFromXml.
+            for (Node childNode = node.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
                 if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
@@ -2449,21 +2443,16 @@ public final class PropertiesUtil {
                     + "<java.lang.String, java.lang.Object> {" + IOUtil.LINE_SEPARATOR_UNIX);
         }
 
-        final NodeList childNodes = xmlNode.getChildNodes();
-
-        //noinspection ConstantValue
-        if ((childNodes != null) && (childNodes.getLength() > 0)) {
+        // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in loadFromXml.
+        if (xmlNode.getFirstChild() != null) {
             final Set<String> propNameSet = N.newHashSet();
 
-            Node childNode = null;
             String propName = null;
 
             final String methodSpace = spaces + "    ";
             String typeName = null;
 
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                childNode = childNodes.item(i);
-
+            for (Node childNode = xmlNode.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
                 if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
@@ -2523,9 +2512,7 @@ public final class PropertiesUtil {
 
             propNameSet.clear();
 
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                childNode = childNodes.item(i);
-
+            for (Node childNode = xmlNode.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
                 if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                     continue;
                 }
@@ -2602,21 +2589,16 @@ public final class PropertiesUtil {
     }
 
     private static boolean hasDuplicatedPropName(final Node node) {
-        final NodeList childNodes = node.getChildNodes();
-
-        //noinspection ConstantValue
-        if ((childNodes == null) || (childNodes.getLength() == 0)) {
+        if (node.getFirstChild() == null) {
             return false;
         }
 
         String propName = null;
-        Node childNode = null;
 
         final Set<String> propNameSet = N.newHashSet();
 
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            childNode = childNodes.item(i);
-
+        // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in loadFromXml.
+        for (Node childNode = node.getFirstChild(); childNode != null; childNode = childNode.getNextSibling()) {
             if (childNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }

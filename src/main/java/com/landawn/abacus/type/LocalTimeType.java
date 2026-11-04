@@ -227,7 +227,82 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
             }
         }
 
-        return LocalTime.parse(str);
+        // The HH:mm[:ss[.fraction]] text stringOf writes is read directly (same value, a fraction of the cost); any
+        // other text, and every failure, is left to LocalTime.parse.
+        final LocalTime time = parseIsoLocalTime(str, 0, str.length(), false);
+
+        return time != null ? time : LocalTime.parse(str);
+    }
+
+    /**
+     * Reads the time that {@code text} spells between {@code from} and {@code end} (exclusive) as {@code HH:mm} (only
+     * when {@code secondsRequired} is {@code false}), {@code HH:mm:ss}, or {@code HH:mm:ss} followed by {@code '.'} and
+     * 1 to 9 digits (ASCII digits only), or returns {@code null} when that shape does not hold or a field is out of
+     * range. For text of these shapes the {@code java.time} ISO parsers ({@code ISO_LOCAL_TIME}, {@code STRICT}, and
+     * the time part of {@code ISO_LOCAL_DATE_TIME} and {@code ISO_INSTANT}) accept exactly hours 0-23, minutes 0-59
+     * and seconds 0-59 and read the fraction as a fraction of a second, so a caller that falls back to them for
+     * {@code null} keeps their results and their failures (including the {@code 24:00} and leap-second forms that
+     * {@code ISO_INSTANT} adjusts).
+     *
+     * @param text the text to read
+     * @param from the index of the first hour digit
+     * @param end the index after the last character of the time
+     * @param secondsRequired whether the {@code HH:mm} form is rejected
+     * @return the time, or {@code null} if the text is not a valid time of these exact shapes
+     */
+    @MayReturnNull
+    static LocalTime parseIsoLocalTime(final String text, final int from, final int end, final boolean secondsRequired) {
+        final int length = end - from;
+
+        if (!((length == 5 && !secondsRequired) || length == 8 || (length >= 10 && length <= 18)) || text.charAt(from + 2) != ':') {
+            return null;
+        }
+
+        final int hour = parseTwoDigits(text, from);
+        final int minute = parseTwoDigits(text, from + 3);
+        int second = 0;
+        int nano = 0;
+
+        if (length > 5) {
+            if (text.charAt(from + 5) != ':') {
+                return null;
+            }
+
+            second = parseTwoDigits(text, from + 6);
+
+            if (length > 8) {
+                if (text.charAt(from + 8) != '.') {
+                    return null;
+                }
+
+                for (int i = from + 9; i < end; i++) {
+                    final int digit = text.charAt(i) - '0';
+
+                    if (digit < 0 || digit > 9) {
+                        return null;
+                    }
+
+                    nano = nano * 10 + digit;
+                }
+
+                for (int digits = length - 9; digits < 9; digits++) {
+                    nano *= 10;
+                }
+            }
+        }
+
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+            return null;
+        }
+
+        return LocalTime.of(hour, minute, second, nano);
+    }
+
+    private static int parseTwoDigits(final String text, final int index) {
+        final int high = text.charAt(index) - '0';
+        final int low = text.charAt(index + 1) - '0';
+
+        return high < 0 || high > 9 || low < 0 || low > 9 ? -1 : high * 10 + low;
     }
 
     /**

@@ -2570,4 +2570,73 @@ public class PropertiesUtilTest extends TestBase {
             PropertiesUtil.stopAutoRefresh(cfg);
         }
     }
+
+    // ---- deep review 2026-11-02 G122b begin ----
+    // G122b-01 (pin): loadFromXml, the duplicate-name check and xmlToJava walk child elements through sibling links instead of
+    // NodeList.item(i). Comments, processing instructions and whitespace between the children are skipped; values, nesting,
+    // order and the generated accessors are unchanged, also when the same nested shape is read again.
+    @Test
+    public void testLoadFromXmlAndXmlToJava_siblingWalkSkipsNonElementChildren() throws IOException {
+        final String nl = "\n";
+        final String xml = "<?xml version=\"1.0\"?>" + nl + "<config>" + nl + "  <!-- c --><name>n1</name><?pi a?>" + nl + "  <port type=\"int\">8080</port>"
+                + nl + "  <db><!-- c -->" + nl + "    <url>u</url><?pi b?><user>x</user>" + nl + "    <pool><size type=\"int\">4</size><!-- c --></pool>" + nl
+                + "  </db>" + nl + "  <empty/><!-- trailing --></config>";
+
+        for (int i = 0; i < 2; i++) {
+            final Properties<String, Object> props = PropertiesUtil.loadFromXml(new StringReader(xml));
+            assertEquals(java.util.List.of("name", "port", "db", "empty"), new java.util.ArrayList<>(props.keySet()));
+            assertEquals("n1", props.get("name"));
+            assertEquals(8080, props.get("port"));
+            assertEquals("", props.get("empty"));
+
+            final Properties<String, Object> db = (Properties<String, Object>) props.get("db");
+            assertEquals(java.util.List.of("url", "user", "pool"), new java.util.ArrayList<>(db.keySet()));
+            assertEquals("u", db.get("url"));
+            assertEquals("x", db.get("user"));
+            assertEquals(4, ((Properties<String, Object>) db.get("pool")).get("size"));
+        }
+
+        // A duplicate below a comment-separated nested element is still found, before any value is read.
+        assertThrows(RuntimeException.class,
+                () -> PropertiesUtil.loadFromXml(new StringReader("<config><db><!-- c --><url>a</url>\n<?pi x?><url>b</url></db></config>")));
+
+        final String srcPath = tempDir.resolve("srcG122b").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+        PropertiesUtil.xmlToJava(xml, srcPath, "com.g122b", "G122bConfig", false);
+
+        final String content = new String(
+                Files.readAllBytes(new File(srcPath + File.separator + "com" + File.separator + "g122b", "G122bConfig.java").toPath()), StandardCharsets.UTF_8);
+        final int name = content.indexOf("getName()");
+        final int port = content.indexOf("getPort()");
+        final int db = content.indexOf("getDb()");
+        final int empty = content.indexOf("getEmpty()");
+        assertTrue(name > 0 && name < port && port < db && db < empty, content);
+        assertTrue(content.contains("public static class Db extends") && content.contains("public static class Pool extends"), content);
+        assertTrue(content.contains("getUrl()") && content.contains("getUser()") && content.contains("getPool()") && content.contains("getSize()"), content);
+        assertEquals(3, Strings.countMatches(content, "public java.lang.Object put(java.lang.String propName"), content);
+
+        assertThrows(RuntimeException.class, () -> PropertiesUtil.xmlToJava("<root><a>1</a><!-- c --><a>2</a></root>", srcPath, "com.g122b", "Dup", false));
+    }
+
+    // G122b-01 (pin): xmlToJava writes the deprecated set/put/putAll/remove overrides only for an element that has child
+    // nodes: none for <config/> or a comment-only body (the DOM builder drops comments), but a whitespace-only body gets them.
+    @Test
+    public void testXmlToJava_mutationOverridesOnlyForElementWithChildNodes() throws IOException {
+        final String srcPath = tempDir.resolve("srcG122c").toFile().getAbsolutePath();
+        new File(srcPath).mkdirs();
+        final String[][] cases = { { "<config/>", "0" }, { "<config></config>", "0" }, { "<config> </config>", "1" }, { "<config><!-- c --></config>", "0" },
+                { "<config><a>1</a></config>", "1" } };
+
+        for (int i = 0; i < cases.length; i++) {
+            final String className = "G122cConfig" + i;
+            PropertiesUtil.xmlToJava(cases[i][0], srcPath, "com.g122c", className, false);
+
+            final String content = new String(
+                    Files.readAllBytes(new File(srcPath + File.separator + "com" + File.separator + "g122c", className + ".java").toPath()),
+                    StandardCharsets.UTF_8);
+            assertEquals(Integer.parseInt(cases[i][1]), Strings.countMatches(content, "public java.lang.Object put(java.lang.String propName"),
+                    cases[i][0] + " -> " + content);
+        }
+    }
+    // ---- deep review 2026-11-02 G122b end ----
 }

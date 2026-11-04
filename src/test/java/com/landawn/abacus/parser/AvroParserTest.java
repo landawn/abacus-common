@@ -1944,4 +1944,138 @@ public class AvroParserTest extends TestBase {
     }
 
     // ---- deep review 2026-10-26 verify G119 end ----
+
+    // ---- deep review 2026-11-02b G008 begin ----
+
+    /** An entity whose computed {@code getFullName()} is a read-only property that serialization writes. */
+    @jakarta.persistence.Entity
+    public static class ReadOnlyFullNameEntity {
+        private String firstName;
+        private String lastName;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(final String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(final String lastName) {
+            this.lastName = lastName;
+        }
+
+        public String getFullName() {
+            return firstName + " " + lastName;
+        }
+    }
+
+    // G008-01: the parser's own output of a bean with a read-only property is readable: the property's field is skipped
+    // (as the JSON/XML readers skip it) instead of failing with IllegalArgumentException "No setter method found" in
+    // both ignoreUnmatchedProperty modes.
+    @Test
+    public void testDeserialize_readOnlyPropertyValueIsSkipped_r116() {
+        final Schema schema = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ReadOnlyFullNameEntity\",\"fields\":["
+                + "{\"name\":\"firstName\",\"type\":\"string\"},{\"name\":\"lastName\",\"type\":\"string\"},{\"name\":\"fullName\",\"type\":\"string\"}]}");
+        final ReadOnlyFullNameEntity source = new ReadOnlyFullNameEntity();
+        source.setFirstName("Ada");
+        source.setLastName("Lovelace");
+        final String encoded = parser.serialize(source, AvroSerConfig.create().setSchema(schema));
+
+        for (final boolean ignoreUnmatched : new boolean[] { true, false }) {
+            final ReadOnlyFullNameEntity read = parser.deserialize(encoded,
+                    AvroDeserConfig.create().setSchema(schema).setIgnoreUnmatchedProperty(ignoreUnmatched), ReadOnlyFullNameEntity.class);
+            assertEquals("Ada", read.getFirstName());
+            assertEquals("Lovelace", read.getLastName());
+            assertEquals("Ada Lovelace", read.getFullName());
+        }
+
+        // Record datums read as collection elements go through the same record conversion.
+        final List<ReadOnlyFullNameEntity> list = parser.deserialize(parser.serialize(List.of(source, source), AvroSerConfig.create().setSchema(schema)),
+                AvroDeserConfig.create().setSchema(schema).setElementType(ReadOnlyFullNameEntity.class).setIgnoreUnmatchedProperty(false), List.class);
+        assertEquals(2, list.size());
+        assertEquals("Ada Lovelace", list.get(1).getFullName());
+    }
+
+    /**
+     * A mutable bean whose {@code code} field is read through its getter only and has no setter: a read-only,
+     * serialize-only property.
+     */
+    public static class AccessorOnlyCodeBean {
+        private String name;
+        @com.landawn.abacus.annotation.AccessFieldByMethod
+        public String code = "initial"; // an accessible field: a private one with only a getter is no property at all
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
+
+    /**
+     * The same read-only property, but its field declares {@code DESERIALIZE_ONLY}: it is not serialize-only, so
+     * deserialization does not skip it.
+     */
+    public static class DeserializeOnlyCodeBean {
+        private String name;
+        @com.landawn.abacus.annotation.AccessFieldByMethod
+        @com.landawn.abacus.annotation.JsonXmlField(direction = com.landawn.abacus.annotation.JsonXmlField.Direction.DESERIALIZE_ONLY)
+        public String code = "initial";
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
+
+    // G008-01 (re-review follow-up): the other read-only shape named in the fix comment - an @AccessFieldByMethod field
+    // without a setter - is skipped too, and the documented exception: a read-only property whose field declares
+    // DESERIALIZE_ONLY is rejected with IllegalArgumentException in both ignoreUnmatchedProperty modes.
+    @Test
+    public void testDeserialize_readOnlyAccessorOnlyAndDeserializeOnlyProperties_r116() {
+        final Schema schema = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CodeRecord\",\"fields\":["
+                + "{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"code\",\"type\":\"string\"}]}");
+        final Map<String, Object> source = new HashMap<>();
+        source.put("name", "n1");
+        source.put("code", "fromRecord");
+        final String encoded = parser.serialize(source, AvroSerConfig.create().setSchema(schema));
+
+        for (final boolean ignoreUnmatched : new boolean[] { true, false }) {
+            final AvroDeserConfig config = AvroDeserConfig.create().setSchema(schema).setIgnoreUnmatchedProperty(ignoreUnmatched);
+
+            final AccessorOnlyCodeBean read = parser.deserialize(encoded, config, AccessorOnlyCodeBean.class);
+            assertEquals("n1", read.getName());
+            assertEquals("initial", read.getCode()); // the record's value is skipped, not written to the field
+
+            assertThrows(IllegalArgumentException.class, () -> parser.deserialize(encoded, config, DeserializeOnlyCodeBean.class));
+        }
+
+        // The parser's own output of the accessor-only bean reads back as well.
+        final AccessorOnlyCodeBean bean = new AccessorOnlyCodeBean();
+        bean.setName("n2");
+        final AccessorOnlyCodeBean back = parser.deserialize(parser.serialize(bean, AvroSerConfig.create().setSchema(schema)),
+                AvroDeserConfig.create().setSchema(schema).setIgnoreUnmatchedProperty(false), AccessorOnlyCodeBean.class);
+        assertEquals("n2", back.getName());
+        assertEquals("initial", back.getCode());
+    }
+
+    // ---- deep review 2026-11-02b G008 end ----
 }

@@ -6249,4 +6249,136 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 G136 end ----
+    // ---- deep review 2026-11-02 G007 begin ----
+
+    // G007-01: a malformed XML declaration fails while the StAX reader is created; it escaped as an UncheckedException
+    // (the documented ParsingException on the SAX and DOM backends and for every later StAX failure).
+    @Test
+    public void testDeserialize_malformedXmlDeclarationIsParsingExceptionOnEveryBackend() {
+        final String[] docs = { "<?xml version=\"2.5\"?><map/>", "<?xml version='1.0' standalone='maybe'?><map/>", "<?xml ver" };
+
+        for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.SAX, XmlParserType.DOM }) {
+            final AbacusXmlParserImpl parser = new AbacusXmlParserImpl(parserType);
+
+            for (final String doc : docs) {
+                final String label = parserType + " " + doc;
+
+                assertThrows(ParsingException.class, () -> parser.deserialize(doc, null, Map.class), label + " (String)");
+                assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader(doc), null, Map.class), label + " (Reader)");
+                assertThrows(ParsingException.class, () -> parser.deserialize(new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8)), null, Map.class),
+                        label + " (InputStream)");
+            }
+        }
+
+        // A well-formed declaration is unaffected.
+        assertEquals(Map.of("a", "1"), new AbacusXmlParserImpl(XmlParserType.StAX)
+                .deserialize("<?xml version=\"1.0\"?><map><entry><key>a</key><value>1</value></entry></map>", null, Map.class));
+    }
+
+    // ---- deep review 2026-11-02 G007 end ----
+
+    // ---- deep review 2026-11-02 G122 begin ----
+
+    @Data
+    @NoArgsConstructor
+    public static class G122Bean {
+        private String name;
+        private int age;
+        private List<String> tags;
+        private Map<String, String> attrs;
+        private G122Bean nested;
+        private Object any;
+    }
+
+    private static Node g122Element(final String xml) throws Exception {
+        return DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)))
+                .getDocumentElement();
+    }
+
+    // G122-01 (pin): the DOM readers walk child elements through sibling links. A caller's Document read twice (pretty and
+    // compact), with comments / processing instructions / whitespace between the children, reads the same values in the same
+    // order on every rewritten loop (bean properties, map entries and their key/value children, array, collection, structured
+    // property wrapper, bean-shaped open slot).
+    @Test
+    public void testDeserializeNode_siblingWalkReadsEveryChildShapeG122() throws Exception {
+        final XmlParser parser = domParser;
+
+        final G122Bean inner = new G122Bean();
+        inner.setName("inner");
+        inner.setAge(2);
+        final Map<String, String> attrs = new LinkedHashMap<>();
+        attrs.put("k1", "v1");
+        attrs.put("k2", "v2");
+        final G122Bean bean = new G122Bean();
+        bean.setName("outer");
+        bean.setAge(1);
+        bean.setTags(List.of("t1", "t2", "t3"));
+        bean.setAttrs(attrs);
+        bean.setNested(inner);
+
+        for (final boolean pretty : new boolean[] { false, true }) {
+            final String xml = parser.serialize(bean, XmlSerConfig.create().setPrettyFormat(pretty));
+            final Node root = g122Element(xml);
+
+            assertEquals(bean, parser.deserialize(root, G122Bean.class));
+            // read again from the same caller-owned element: same result
+            assertEquals(bean, parser.deserialize(root, G122Bean.class));
+        }
+
+        // bean properties with comments / PIs between them; structured property wrapper; map entries with comments
+        final Node beanNode = g122Element("<g122Bean>\n  <!-- c --><name>n1</name><?pi x?>\n  <age>7</age>\n"
+                + "  <attrs>\n    <!-- c -->\n    <map><entry><!-- c --><key>k1</key>\n<value>v1</value></entry><!-- c --><entry><key>k2</key><value>v2</value></entry></map>\n  </attrs>\n"
+                + "</g122Bean>");
+
+        for (int i = 0; i < 2; i++) {
+            final G122Bean read = parser.deserialize(beanNode, G122Bean.class);
+            assertEquals("n1", read.getName());
+            assertEquals(7, read.getAge());
+            assertNull(read.getTags());
+            assertEquals(List.of("k1", "k2"), List.copyOf(read.getAttrs().keySet()));
+            assertEquals(List.of("v1", "v2"), List.copyOf(read.getAttrs().values()));
+            assertNull(read.getNested());
+        }
+
+        // root map: comments / PIs / whitespace between the entries and inside an entry, insertion order kept
+        final Node mapNode = g122Element("<map>\n<!-- c -->\n<entry>\n<key>k1</key><?pi z?>\n<value>v1</value>\n</entry>"
+                + "<entry><key>k2</key><!-- c --><value>v2</value></entry>\n</map>");
+        final Map<String, Object> map = parser.deserialize(mapNode, Map.class);
+        assertEquals(List.of("k1", "k2"), List.copyOf(map.keySet()));
+        assertEquals("v1", map.get("k1"));
+        assertEquals("v2", map.get("k2"));
+        assertEquals(map, parser.deserialize(mapNode, Map.class));
+
+        // a map entry still needs exactly one key and one value element
+        assertThrows(ParsingException.class,
+                () -> parser.deserialize(g122Element("<map><entry><key>k</key><value>v</value><!-- c --><value>w</value></entry></map>"), Map.class));
+        assertThrows(ParsingException.class, () -> parser.deserialize(g122Element("<map><entry><key>k</key><!-- c --></entry></map>"), Map.class));
+
+        // root array / collection in element form, with non-element children between the items
+        final Node arrayNode = g122Element("<array>\n<!-- c --><e>a</e>\n<?pi w?><e>b</e><e>c</e>\n</array>");
+        assertArrayEquals(new String[] { "a", "b", "c" }, parser.deserialize(arrayNode, String[].class));
+        assertArrayEquals(new String[] { "a", "b", "c" }, parser.deserialize(arrayNode, String[].class));
+        final Node listNode = g122Element("<list>\n<!-- c --><e>a</e>\n<?pi w?><e>b</e><e>c</e>\n</list>");
+        assertEquals(List.of("a", "b", "c"), parser.deserialize(listNode, List.class));
+        assertEquals(List.of("a", "b", "c"), parser.deserialize(listNode, List.class));
+
+        // a bean-shaped element of no known class in an open slot is read as a map of its properties
+        final Node anyNode = g122Element("<g122Bean><any>\n<zzzG122Unknown><p>1</p><!-- c --><q>2</q>\n</zzzG122Unknown>\n</any></g122Bean>");
+        for (int i = 0; i < 2; i++) {
+            final G122Bean read = parser.deserialize(anyNode, G122Bean.class);
+            assertInstanceOf(Map.class, read.getAny());
+            assertEquals(List.of("p", "q"), List.copyOf(((Map<?, ?>) read.getAny()).keySet()));
+            assertEquals("2", ((Map<?, ?>) read.getAny()).get("q"));
+        }
+
+        // the single-child check of a structured property wrapper still rejects a second child element
+        assertThrows(ParsingException.class,
+                () -> parser.deserialize(g122Element(
+                        "<g122Bean><nested>\n<g122Bean><name>a</name></g122Bean>\n<!-- c -->\n<g122Bean><name>b</name></g122Bean>\n</nested></g122Bean>"),
+                        G122Bean.class));
+    }
+
+    // ---- deep review 2026-11-02 G122 end ----
 }

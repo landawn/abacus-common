@@ -48,7 +48,9 @@ import com.landawn.abacus.type.Type;
  *
  * <p>A collection root with no items or only blank text, such as {@code <list/>}, is an empty collection
  * of the requested type on every reader. A root element of any type marked {@code isNull="true"} - a bean, map,
- * array, collection or scalar - is {@code null} on every reader, whatever payload it carries; a collection root marked so is
+ * array, collection or scalar - is {@code null} on every reader, whatever payload it carries (except for a primitive target
+ * class such as {@code int.class}: the readers of {@link ParserFactory#createXmlParser()} return its default value, {@code 0}
+ * or {@code false}, those of {@link ParserFactory#createAbacusXmlParser()} {@code null}); a collection root marked so is
  * not an empty collection or a collection containing one null item. The marker's {@code type} attribute is still
  * checked against the configured type allowlist.</p>
  *
@@ -61,7 +63,8 @@ import com.landawn.abacus.type.Type;
  *
  * <p>The DOM and StAX readers convert an empty scalar {@code <e/>} wrapper in an array or collection through the
  * selected type's {@code valueOf("")}. This preserves an empty String and produces the type's default
- * for built-in numeric, boolean and character primitives and their boxed types. Types such as
+ * for built-in numeric, boolean and character primitives and their boxed types ({@code 0}, {@code false} or
+ * {@code '\0'} for a primitive, {@code null} for a boxed type). Types such as
  * {@code BigDecimal}, {@code Instant} and unannotated enums return {@code null}. A custom type may reject the empty
  * string; its conversion exception is propagated.
  * An explicit {@code isNull="true"} marker bypasses scalar conversion.</p>

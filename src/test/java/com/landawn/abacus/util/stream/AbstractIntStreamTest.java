@@ -884,4 +884,230 @@ public class AbstractIntStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G085 end ----
+
+    // ---- deep review 2026-11-02b G090 begin ----
+    // G090-01 (perf pin): sorted()/shuffled(Random) results read through toArray() - empty, single and several elements;
+    // array, iterator, mapped and parallel sources; and the reversed()/skip()/limit() stages that read the snapshot again.
+    @Test
+    public void testSortedShuffledToArray_sourcesAndSizes_g090b() {
+        final int[][] inputs = { {}, { 7 }, { 3, -1, 2, -1, 9, 0 }, { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, 12 } };
+
+        for (final int[] a : inputs) {
+            final int[] expected = a.clone();
+            java.util.Arrays.sort(expected);
+            final int[] descending = new int[expected.length];
+
+            for (int i = 0; i < expected.length; i++) {
+                descending[i] = expected[expected.length - 1 - i];
+            }
+
+            final int k = Math.min(2, a.length);
+            final int[] original = a.clone();
+
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, IntStream.of(a).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(original, a);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, IntStream.of(com.landawn.abacus.util.IntIterator.of(a.clone())).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, IntStream.of(a.clone()).map(x -> x).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, IntStream.of(a.clone()).parallel(2).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(descending, IntStream.of(a.clone()).map(x -> x).sorted().reversed().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOfRange(expected, k, expected.length),
+                    IntStream.of(a.clone()).sorted().skip(2).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(expected, k), IntStream.of(a.clone()).sorted().limit(2).toArray());
+
+            final int[] shuffledExpected = a.clone();
+            com.landawn.abacus.util.N.shuffle(shuffledExpected, new Random(42));
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected, IntStream.of(a.clone()).shuffled(new Random(42)).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected,
+                    IntStream.of(com.landawn.abacus.util.IntIterator.of(a.clone())).shuffled(new Random(42)).toArray());
+        }
+    }
+
+    // G090-01 (perf pin): toArray() on a partially consumed sorted() iterator returns exactly the remaining elements and
+    // exhausts the iterator; an exhausted or empty one returns an empty array.
+    @Test
+    public void testSortedIterator_toArrayAfterPartialConsumption_g090b() {
+        final com.landawn.abacus.util.IntIterator iter = IntStream.of(5, 3, 9, 1, 7).map(x -> x).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(1, iter.nextInt());
+        org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(3, iter.nextInt());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 5, 7, 9 }, iter.toArray());
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(0, iter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextInt);
+
+        final com.landawn.abacus.util.IntIterator emptyIter = IntStream.of(com.landawn.abacus.util.IntIterator.of(new int[0])).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(0, emptyIter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertFalse(emptyIter.hasNext());
+    }
+
+    // G090-01 (perf pin): sorted() stays lazy, and a failure while loading its snapshot is rethrown as the same instance by
+    // every later access (toArray() included) without reading the source again.
+    @Test
+    public void testSortedIterator_loadFailureRethrownByEveryAccess_g090b() {
+        final int[] calls = { 0 };
+        final com.landawn.abacus.util.IntIterator iter = IntStream.of(1, 2, 3).map(x -> {
+            calls[0]++;
+
+            if (x == 2) {
+                throw new IllegalStateException("load failed");
+            }
+
+            return x;
+        }).sorted().iterator();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+
+        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray);
+        org.junit.jupiter.api.Assertions.assertEquals("load failed", first.getMessage());
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextInt));
+        org.junit.jupiter.api.Assertions.assertEquals(2, calls[0]);
+    }
+
+    // G090-01 (perf pin): the snapshot is loaded once on the terminal toArray() and the source's close handler runs once.
+    @Test
+    public void testSortedToArray_loadsOnceAndClosesSourceOnce_g090b() {
+        final int[] closed = { 0 };
+        final int[] calls = { 0 };
+        final IntStream sorted = IntStream.of(3, 1, 2).map(x -> {
+            calls[0]++;
+            return x;
+        }).onClose(() -> closed[0]++).sorted();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { 1, 2, 3 }, sorted.toArray());
+        org.junit.jupiter.api.Assertions.assertEquals(3, calls[0]);
+        org.junit.jupiter.api.Assertions.assertEquals(1, closed[0]);
+    }
+
+    // ---- deep review 2026-11-02b G090 end ----
+    // ---- deep review 2026-11-02b G123 begin ----
+    private static IntList drainG123(final IntIterator iter) {
+        final IntList result = new IntList();
+
+        while (iter.hasNext()) {
+            result.add(iter.nextInt());
+        }
+
+        return result;
+    }
+
+    private static String outcomeG123(final java.util.function.Supplier<IntList> action) {
+        try {
+            return "OK " + Arrays.toString(action.get().toArray());
+        } catch (final RuntimeException e) {
+            return "EX " + e.getClass().getName();
+        }
+    }
+
+    private static IntIterator brokenSourceOpG123(final int op) {
+        final IntIterator failingSource = new IntIterator() {
+            private int cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= 2) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return true;
+            }
+
+            @Override
+            public int nextInt() {
+                return (int) cnt++;
+            }
+        };
+
+        final IntStream stream = IntStream.of(failingSource);
+
+        return (op == 0 ? stream.reversed() : op == 1 ? stream.reverseSorted() : stream.rotated(1)).iteratorEx();
+    }
+
+    // G123-01 (perf pin, port of G091-03): reversed()/rotated()/reverseSorted() iterators build toList() (used by toIntList())
+    // from an exactly sized copy; pin it against the element-by-element walk for empty/single/partially consumed/sub-range/
+    // iterator/parallel sources and rotate distances beyond the size.
+    @Test
+    public void testReversedRotatedReverseSorted_toIntList_g123() {
+        assertArrayEquals(new int[] { 5, 4, 3, 2, 1 }, IntStream.of(1, 2, 3, 4, 5).reversed().toIntList().toArray());
+        assertArrayEquals(new int[] { 4, 5, 1, 2, 3 }, IntStream.of(1, 2, 3, 4, 5).rotated(2).toIntList().toArray());
+        assertArrayEquals(new int[] { 2, 3, 4, 5, 1 }, IntStream.of(1, 2, 3, 4, 5).rotated(-1).toIntList().toArray());
+        assertArrayEquals(new int[] { 3, 2, 1 }, IntStream.of(3, 1, 2).reverseSorted().toIntList().toArray());
+        assertTrue(IntStream.empty().reversed().toIntList().isEmpty());
+        assertTrue(IntStream.empty().rotated(3).toIntList().isEmpty());
+        assertTrue(IntStream.empty().reverseSorted().toIntList().isEmpty());
+        final int[] source = { 3, 1, 2 };
+        final IntList reversed = IntStream.of(source).reversed().toIntList();
+        reversed.set(0, 100);
+        reversed.add(7);
+        final IntList rotated = IntStream.of(source).rotated(1).toIntList();
+        rotated.set(0, 100);
+        final IntList reverseSorted = IntStream.of(source).reverseSorted().toIntList();
+        reverseSorted.set(0, 100);
+        assertArrayEquals(new int[] { 3, 1, 2 }, source);
+        assertArrayEquals(new int[] { 100, 1, 3, 7 }, reversed.toArray());
+
+        final int[] distances = { Integer.MIN_VALUE, -7, -1, 0, 1, 2, 6, Integer.MAX_VALUE };
+        final List<java.util.function.UnaryOperator<IntStream>> ops = new ArrayList<>();
+        ops.add(IntStream::reversed);
+        ops.add(IntStream::reverseSorted);
+
+        for (final int distance : distances) {
+            ops.add(s -> s.rotated(distance));
+        }
+
+        for (int len = 0; len <= 6; len++) {
+            final int n = len;
+            final int[] padded = new int[n + 2];
+
+            for (int i = 0; i < padded.length; i++) {
+                padded[i] = (i * 5) % 7 - 3;
+            }
+
+            final int[] a = Arrays.copyOfRange(padded, 1, 1 + n);
+            final List<java.util.function.Supplier<IntStream>> sources = List.of(() -> IntStream.of(a.clone()), () -> IntStream.of(padded, 1, 1 + n),
+                    () -> IntStream.of(IntList.of(a.clone()).iterator()), () -> IntStream.of(a.clone()).parallel(2));
+
+            for (final java.util.function.Supplier<IntStream> src : sources) {
+                for (final java.util.function.UnaryOperator<IntStream> op : ops) {
+                    assertArrayEquals(drainG123(op.apply(src.get()).iteratorEx()).toArray(), op.apply(src.get()).toIntList().toArray());
+
+                    for (int consumed = 0; consumed <= n + 1; consumed++) {
+                        final IntIterator expectedIter = op.apply(src.get()).iteratorEx();
+                        final IntIterator iter = op.apply(src.get()).iteratorEx();
+
+                        for (int i = 0; i < consumed && iter.hasNext(); i++) {
+                            assertEquals(expectedIter.nextInt(), iter.nextInt());
+                        }
+
+                        final IntList rest = iter.toList();
+                        assertArrayEquals(drainG123(expectedIter).toArray(), rest.toArray());
+                        Assertions.assertFalse(iter.hasNext());
+                        assertTrue(iter.toList().isEmpty());
+                        rest.add(7);
+                        assertEquals(7, rest.get(rest.size() - 1));
+                    }
+                }
+            }
+        }
+    }
+
+    // G123-01 (perf pin): after a failed materialization, toList() must keep behaving like the element-by-element walk on every
+    // retry (reversed() keeps the inherited walk while its backing array is still null).
+    @Test
+    public void testReversedRotatedReverseSorted_toListRetryAfterFailure_g123() {
+        for (int op = 0; op < 3; op++) {
+            final IntIterator viaToList = brokenSourceOpG123(op);
+            final IntIterator viaWalk = brokenSourceOpG123(op);
+
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(viaToList::toList));
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(() -> drainG123(viaWalk)));
+
+            for (int retry = 0; retry < 3; retry++) {
+                assertEquals(outcomeG123(() -> drainG123(viaWalk)), outcomeG123(viaToList::toList), "op=" + op + ", retry=" + retry);
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G123 end ----
 }

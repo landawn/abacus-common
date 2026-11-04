@@ -65,7 +65,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
 import org.xml.sax.DocumentHandler;
@@ -1653,12 +1652,12 @@ public final class XmlUtil {
         N.checkArgNotNull(node, cs.node);
 
         final List<Element> result = new ArrayList<>();
-        final NodeList nodeList = node.getChildNodes();
         final boolean matchAll = "*".equals(tagName);
 
-        for (int i = 0; i < nodeList.getLength(); i++) {
-            final Node child = nodeList.item(i);
-
+        // Sibling links rather than getChildNodes().item(i): a full item(i) pass over a child list whose JDK DOM NodeList
+        // cache was already positioned releases that cache twice, leaving the document's cache pool cyclic and every
+        // later interleaved child-list traversal of the caller's document quadratic (see readElement).
+        for (Node child = node.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child instanceof Element element && (matchAll || element.getTagName().equals(tagName))) {
                 result.add(element);
             }
@@ -1709,9 +1708,9 @@ public final class XmlUtil {
             if (current.getNodeName().equals(nodeName)) {
                 output.add(current);
             }
-            final NodeList children = current.getChildNodes();
-            for (int i = children.getLength() - 1; i >= 0; i--) {
-                pending.push(children.item(i));
+            // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in getElementsByTagName.
+            for (Node child = current.getLastChild(); child != null; child = child.getPreviousSibling()) {
+                pending.push(child);
             }
         }
     }
@@ -1748,16 +1747,17 @@ public final class XmlUtil {
             if (current.getNodeName().equals(nodeName)) {
                 return current;
             }
-            final NodeList children = current.getChildNodes();
             // Retain this method's special order: direct children precede descendants of any child.
-            for (int i = 0; i < children.getLength(); i++) {
-                final Node child = children.item(i);
+            // Sibling links, not NodeList.item(i): a forward then a backward item(i) pass over the same JDK DOM child
+            // list releases its NodeList cache twice, leaving the caller's document with a cyclic cache pool on which
+            // every later interleaved child-list traversal is quadratic (see getElementsByTagName and readElement).
+            for (Node child = current.getFirstChild(); child != null; child = child.getNextSibling()) {
                 if (child.getNodeName().equals(nodeName)) {
                     return child;
                 }
             }
-            for (int i = children.getLength() - 1; i >= 0; i--) {
-                pending.push(children.item(i));
+            for (Node child = current.getLastChild(); child != null; child = child.getPreviousSibling()) {
+                pending.push(child);
             }
         }
 
@@ -2994,6 +2994,9 @@ public final class XmlUtil {
         // Ordinary field: visibility relies on the single-owner handoff documented at recycleSAXParser; it is not a
         // concurrency guard, and volatile would not make concurrent parsing and recycling safe.
         private boolean parseFailed;
+        // Set (and never cleared) once a SAX1 DocumentHandler may have been installed: by a HandlerBase parse or through
+        // the getParser() view. Plain SAX2 use never pays for the extra provider call in reset().
+        private boolean legacyHandlerMayBeSet;
         // Views of the provider's own reader objects that record their failed parses here (see getXMLReader/getParser).
         private TrackingXMLReader xmlReaderView;
         private TrackingParser parserView;
@@ -3010,11 +3013,34 @@ public final class XmlUtil {
         @Override
         public void reset() {
             delegate.reset();
+
+            // reset() must restore the original configuration, but the JDK provider clears only the SAX2 handlers: a SAX1
+            // DocumentHandler survives it, so a pooled parser fed the next owner's document to the previous owner's handler.
+            if (legacyHandlerMayBeSet) {
+                clearLegacyDocumentHandler();
+            }
+        }
+
+        @SuppressWarnings("deprecation")
+        private void clearLegacyDocumentHandler() {
+            final Parser parser;
+
+            try {
+                parser = delegate.getParser();
+            } catch (final SAXException e) {
+                // A RuntimeException from reset() makes recycleSAXParser discard the parser instead of pooling it.
+                throw new IllegalStateException("Cannot clear the SAX1 DocumentHandler", e);
+            }
+
+            if (parser != null) {
+                parser.setDocumentHandler(null);
+            }
         }
 
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputStream is, final HandlerBase handler) throws SAXException, IOException {
+            legacyHandlerMayBeSet = true;
             trackParse(this, is, () -> {
                 delegate.parse(is, handler);
                 return null;
@@ -3024,6 +3050,7 @@ public final class XmlUtil {
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputStream is, final HandlerBase handler, final String systemId) throws SAXException, IOException {
+            legacyHandlerMayBeSet = true;
             trackParse(this, is, () -> {
                 delegate.parse(is, handler, systemId);
                 return null;
@@ -3049,6 +3076,7 @@ public final class XmlUtil {
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final String uri, final HandlerBase handler) throws SAXException, IOException {
+            legacyHandlerMayBeSet = true;
             trackParse(this, uri, () -> {
                 delegate.parse(uri, handler);
                 return null;
@@ -3066,6 +3094,7 @@ public final class XmlUtil {
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final File file, final HandlerBase handler) throws SAXException, IOException {
+            legacyHandlerMayBeSet = true;
             trackParse(this, file, () -> {
                 delegate.parse(file, handler);
                 return null;
@@ -3083,6 +3112,7 @@ public final class XmlUtil {
         @SuppressWarnings("deprecation")
         @Override
         public void parse(final InputSource is, final HandlerBase handler) throws SAXException, IOException {
+            legacyHandlerMayBeSet = true;
             trackParse(this, is, () -> {
                 delegate.parse(is, handler);
                 return null;
@@ -3109,6 +3139,8 @@ public final class XmlUtil {
             if (parser == null) {
                 return null;
             }
+
+            legacyHandlerMayBeSet = true;
 
             // Providers hand out the same parser on every call; so does this view, as long as they do.
             if (parserView == null || parserView.delegate != parser) {

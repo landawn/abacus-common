@@ -767,4 +767,241 @@ public class AbstractFloatStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G085 end ----
+
+    // ---- deep review 2026-11-02b G090 begin ----
+    // G090-01 (perf pin): sorted()/shuffled(Random) results read through toArray() - empty, single and several elements;
+    // array, iterator, mapped and parallel sources; and the reversed()/skip()/limit() stages that read the snapshot again.
+    @Test
+    public void testSortedShuffledToArray_sourcesAndSizes_g090b() {
+        final float[][] inputs = { {}, { 7.0f }, { 3.0f, Float.NaN, -0.0f, 0.0f, 9.0f, -1.0f },
+                { 5.0f, 4.0f, Float.NaN, 2.0f, 1.0f, 0.0f, -0.0f, -2.0f, Float.NEGATIVE_INFINITY, -4.0f, Float.POSITIVE_INFINITY, 12.0f } };
+
+        for (final float[] a : inputs) {
+            final float[] expected = a.clone();
+            java.util.Arrays.sort(expected);
+            final float[] descending = new float[expected.length];
+
+            for (int i = 0; i < expected.length; i++) {
+                descending[i] = expected[expected.length - 1 - i];
+            }
+
+            final int k = Math.min(2, a.length);
+            final float[] original = a.clone();
+
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, FloatStream.of(a).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(original, a);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected,
+                    FloatStream.of(com.landawn.abacus.util.FloatIterator.of(a.clone())).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, FloatStream.of(a.clone()).map(x -> x).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, FloatStream.of(a.clone()).parallel(2).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(descending, FloatStream.of(a.clone()).map(x -> x).sorted().reversed().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOfRange(expected, k, expected.length),
+                    FloatStream.of(a.clone()).sorted().skip(2).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(expected, k), FloatStream.of(a.clone()).sorted().limit(2).toArray());
+
+            final float[] shuffledExpected = a.clone();
+            com.landawn.abacus.util.N.shuffle(shuffledExpected, new Random(42));
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected, FloatStream.of(a.clone()).shuffled(new Random(42)).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected,
+                    FloatStream.of(com.landawn.abacus.util.FloatIterator.of(a.clone())).shuffled(new Random(42)).toArray());
+        }
+    }
+
+    // G090-01 (perf pin): toArray() on a partially consumed sorted() iterator returns exactly the remaining elements and
+    // exhausts the iterator; an exhausted or empty one returns an empty array.
+    @Test
+    public void testSortedIterator_toArrayAfterPartialConsumption_g090b() {
+        final com.landawn.abacus.util.FloatIterator iter = FloatStream.of(5.0f, 3.0f, 9.0f, 1.0f, 7.0f).map(x -> x).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(1.0f, iter.nextFloat());
+        org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(3.0f, iter.nextFloat());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 5.0f, 7.0f, 9.0f }, iter.toArray());
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(0, iter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextFloat);
+
+        final com.landawn.abacus.util.FloatIterator emptyIter = FloatStream.of(com.landawn.abacus.util.FloatIterator.of(new float[0])).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(0, emptyIter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertFalse(emptyIter.hasNext());
+    }
+
+    // G090-01 (perf pin): sorted() stays lazy, and a failure while loading its snapshot is rethrown as the same instance by
+    // every later access (toArray() included) without reading the source again.
+    @Test
+    public void testSortedIterator_loadFailureRethrownByEveryAccess_g090b() {
+        final int[] calls = { 0 };
+        final com.landawn.abacus.util.FloatIterator iter = FloatStream.of(1.0f, 2.0f, 3.0f).map(x -> {
+            calls[0]++;
+
+            if (x == 2.0f) {
+                throw new IllegalStateException("load failed");
+            }
+
+            return x;
+        }).sorted().iterator();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+
+        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray);
+        org.junit.jupiter.api.Assertions.assertEquals("load failed", first.getMessage());
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextFloat));
+        org.junit.jupiter.api.Assertions.assertEquals(2, calls[0]);
+    }
+
+    // G090-01 (perf pin): the snapshot is loaded once on the terminal toArray() and the source's close handler runs once.
+    @Test
+    public void testSortedToArray_loadsOnceAndClosesSourceOnce_g090b() {
+        final int[] closed = { 0 };
+        final int[] calls = { 0 };
+        final FloatStream sorted = FloatStream.of(3.0f, 1.0f, 2.0f).map(x -> {
+            calls[0]++;
+            return x;
+        }).onClose(() -> closed[0]++).sorted();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { 1.0f, 2.0f, 3.0f }, sorted.toArray());
+        org.junit.jupiter.api.Assertions.assertEquals(3, calls[0]);
+        org.junit.jupiter.api.Assertions.assertEquals(1, closed[0]);
+    }
+
+    // ---- deep review 2026-11-02b G090 end ----
+    // ---- deep review 2026-11-02b G123 begin ----
+    private static FloatList drainG123(final FloatIterator iter) {
+        final FloatList result = new FloatList();
+
+        while (iter.hasNext()) {
+            result.add(iter.nextFloat());
+        }
+
+        return result;
+    }
+
+    private static String outcomeG123(final java.util.function.Supplier<FloatList> action) {
+        try {
+            return "OK " + Arrays.toString(action.get().toArray());
+        } catch (final RuntimeException e) {
+            return "EX " + e.getClass().getName();
+        }
+    }
+
+    private static FloatIterator brokenSourceOpG123(final int op) {
+        final FloatIterator failingSource = new FloatIterator() {
+            private int cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= 2) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return true;
+            }
+
+            @Override
+            public float nextFloat() {
+                return (float) cnt++;
+            }
+        };
+
+        final FloatStream stream = FloatStream.of(failingSource);
+
+        return (op == 0 ? stream.reversed() : op == 1 ? stream.reverseSorted() : stream.rotated(1)).iteratorEx();
+    }
+
+    // G123-01 (perf pin, port of G091-03): reversed()/rotated()/reverseSorted() iterators build toList() (used by toFloatList())
+    // from an exactly sized copy; pin it against the element-by-element walk for empty/single/partially consumed/sub-range/
+    // iterator/parallel sources and rotate distances beyond the size.
+    @Test
+    public void testReversedRotatedReverseSorted_toFloatList_g123() {
+        assertArrayEquals(new float[] { 5f, 4f, 3f, 2f, 1f }, FloatStream.of(1f, 2f, 3f, 4f, 5f).reversed().toFloatList().toArray());
+        assertArrayEquals(new float[] { 4f, 5f, 1f, 2f, 3f }, FloatStream.of(1f, 2f, 3f, 4f, 5f).rotated(2).toFloatList().toArray());
+        assertArrayEquals(new float[] { 2f, 3f, 4f, 5f, 1f }, FloatStream.of(1f, 2f, 3f, 4f, 5f).rotated(-1).toFloatList().toArray());
+        assertArrayEquals(new float[] { 3f, 2f, 1f }, FloatStream.of(3f, 1f, 2f).reverseSorted().toFloatList().toArray());
+        assertTrue(FloatStream.empty().reversed().toFloatList().isEmpty());
+        assertTrue(FloatStream.empty().rotated(3).toFloatList().isEmpty());
+        assertTrue(FloatStream.empty().reverseSorted().toFloatList().isEmpty());
+
+        // NaN and signed zeros keep their exact bits and order.
+        final float[] specials = { -1f, -0f, 0f, Float.NaN };
+        assertArrayEquals(new float[] { Float.NaN, 0f, -0f, -1f }, FloatStream.of(specials).reversed().toFloatList().toArray());
+        assertArrayEquals(new float[] { Float.NaN, 0f, -0f, -1f }, FloatStream.of(-1f, Float.NaN, 0f, -0f).reverseSorted().toFloatList().toArray());
+        assertArrayEquals(new float[] { 0f, Float.NaN, -1f, -0f }, FloatStream.of(specials).rotated(-2).toFloatList().toArray());
+
+        final float[] source = { 3f, 1f, 2f };
+        final FloatList reversed = FloatStream.of(source).reversed().toFloatList();
+        reversed.set(0, 100f);
+        reversed.add(7f);
+        final FloatList rotated = FloatStream.of(source).rotated(1).toFloatList();
+        rotated.set(0, 100f);
+        final FloatList reverseSorted = FloatStream.of(source).reverseSorted().toFloatList();
+        reverseSorted.set(0, 100f);
+        assertArrayEquals(new float[] { 3f, 1f, 2f }, source);
+        assertArrayEquals(new float[] { 100f, 1f, 3f, 7f }, reversed.toArray());
+
+        final int[] distances = { Integer.MIN_VALUE, -7, -1, 0, 1, 2, 6, Integer.MAX_VALUE };
+        final List<java.util.function.UnaryOperator<FloatStream>> ops = new ArrayList<>();
+        ops.add(FloatStream::reversed);
+        ops.add(FloatStream::reverseSorted);
+
+        for (final int distance : distances) {
+            ops.add(s -> s.rotated(distance));
+        }
+
+        final float[] pool = { Float.NaN, -0.0f, 0.0f, 1.5f, -2.5f, Float.NEGATIVE_INFINITY, 3.0f };
+
+        for (int len = 0; len <= 6; len++) {
+            final int n = len;
+            final float[] padded = new float[n + 2];
+
+            for (int i = 0; i < padded.length; i++) {
+                padded[i] = pool[(i * 5) % 7];
+            }
+
+            final float[] a = Arrays.copyOfRange(padded, 1, 1 + n);
+            final List<java.util.function.Supplier<FloatStream>> sources = List.of(() -> FloatStream.of(a.clone()), () -> FloatStream.of(padded, 1, 1 + n),
+                    () -> FloatStream.of(FloatList.of(a.clone()).iterator()), () -> FloatStream.of(a.clone()).parallel(2));
+
+            for (final java.util.function.Supplier<FloatStream> src : sources) {
+                for (final java.util.function.UnaryOperator<FloatStream> op : ops) {
+                    assertArrayEquals(drainG123(op.apply(src.get()).iteratorEx()).toArray(), op.apply(src.get()).toFloatList().toArray());
+
+                    for (int consumed = 0; consumed <= n + 1; consumed++) {
+                        final FloatIterator expectedIter = op.apply(src.get()).iteratorEx();
+                        final FloatIterator iter = op.apply(src.get()).iteratorEx();
+
+                        for (int i = 0; i < consumed && iter.hasNext(); i++) {
+                            assertEquals(expectedIter.nextFloat(), iter.nextFloat());
+                        }
+
+                        final FloatList rest = iter.toList();
+                        assertArrayEquals(drainG123(expectedIter).toArray(), rest.toArray());
+                        assertFalse(iter.hasNext());
+                        assertTrue(iter.toList().isEmpty());
+                        rest.add(7f);
+                        assertEquals(7f, rest.get(rest.size() - 1));
+                    }
+                }
+            }
+        }
+    }
+
+    // G123-01 (perf pin): after a failed materialization, toList() must keep behaving like the element-by-element walk on every
+    // retry (reversed() keeps the inherited walk while its backing array is still null).
+    @Test
+    public void testReversedRotatedReverseSorted_toListRetryAfterFailure_g123() {
+        for (int op = 0; op < 3; op++) {
+            final FloatIterator viaToList = brokenSourceOpG123(op);
+            final FloatIterator viaWalk = brokenSourceOpG123(op);
+
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(viaToList::toList));
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(() -> drainG123(viaWalk)));
+
+            for (int retry = 0; retry < 3; retry++) {
+                assertEquals(outcomeG123(() -> drainG123(viaWalk)), outcomeG123(viaToList::toList), "op=" + op + ", retry=" + retry);
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G123 end ----
 }

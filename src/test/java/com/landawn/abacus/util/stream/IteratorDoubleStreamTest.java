@@ -421,4 +421,78 @@ public class IteratorDoubleStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G098 end ----
+
+    // ---- deep review 2026-11-02 G124 begin ----
+
+    // G124-01 (pin): top(n) with the natural comparator rejects candidates by a primitive Double.compare (the same total order
+    // as the comparator, NaN largest, -0.0 below 0.0); the result (incl. its element order and the sign of zeros) must equal
+    // the generic comparator path, for NaN/-0.0/infinity mixes, duplicates and every n around the size.
+    @Test
+    public void testTop_naturalOrderMatchesComparatorPath() {
+        final double[][] inputs = { {}, { 7d }, { -0.0d }, { 0.0d, -0.0d }, { -0.0d, 0.0d, -0.0d, 0.0d }, { Double.NaN, Double.NaN, 1d },
+                { 3d, Double.NaN, -0.0d, Double.NEGATIVE_INFINITY, 0.0d, Double.POSITIVE_INFINITY, Double.NaN, -1d, Double.MAX_VALUE, -0.0d, Double.MIN_VALUE,
+                        0.0d, -Double.MAX_VALUE, 2.5d, 3d, -Double.MIN_VALUE },
+                { 5d, 1d, 9d, -3d, 1000d, 7d, 9d, -1000d, 2d, 8d, 6d, 4d, 1000d, 3d, -7d, 11d, 12d, 13d, 0d, 14d },
+                { 1d, 2d, 3d, 4d, 5d, 6d, 7d, 8d, 9d, 10d, 11d, 12d, 13d, 14d, 15d, 16d, 17d, 18d, 19d },
+                { 19d, 18d, 17d, 16d, 15d, 14d, 13d, 12d, 11d, 10d, 9d, 8d, 7d, 6d, 5d, 4d, 3d, 2d, 1d } };
+
+        for (final double[] input : inputs) {
+            for (int n = 1; n <= input.length + 2; n++) {
+                final double[] expected = iter(input).top(n, (a, b) -> Double.compare(a, b)).toArray();
+                final double[] actual = iter(input).top(n).toArray();
+                // assertArrayEquals(double[], double[]) compares bit patterns: -0.0 != 0.0, NaN == NaN
+                assertArrayEquals(expected, actual, "n=" + n + ", input=" + java.util.Arrays.toString(input));
+
+                final double[] sortedInput = input.clone();
+                java.util.Arrays.sort(sortedInput);
+                final double[] sortedActual = actual.clone();
+                java.util.Arrays.sort(sortedActual);
+                assertArrayEquals(java.util.Arrays.copyOfRange(sortedInput, Math.max(0, input.length - n), input.length), sortedActual);
+
+                assertEquals(Math.max(0, Math.min(n, input.length) - 1), iter(input).top(n).skip(1).count());
+            }
+        }
+
+        // -0.0 ranks below 0.0, NaN above +infinity
+        assertArrayEquals(new double[] { 0.0d }, iter(-0.0d, 0.0d, -0.0d).top(1).toArray());
+        assertArrayEquals(new double[] { Double.NaN }, iter(1d, Double.NaN, Double.POSITIVE_INFINITY).top(1).toArray());
+    }
+
+    // G124-01 (pin): the natural-order heap survives a failed source read, so a retry resumes with the accepted values.
+    @Test
+    public void testTop_naturalOrderRetryAfterSourceFailure() {
+        final double[] values = { 4d, Double.NaN, 1d, -0.0d, 300d, 0.0d };
+        final int[] calls = { 0 };
+        final DoubleIterator failingOnce = new DoubleIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < values.length;
+            }
+
+            @Override
+            public double nextDouble() {
+                if (cursor == 3 && calls[0]++ == 0) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return values[cursor++];
+            }
+        };
+
+        try (DoubleStream stream = DoubleStream.of(failingOnce).top(2)) {
+            final DoubleIterator top = stream.iterator();
+            assertThrows(IllegalStateException.class, top::hasNext);
+
+            final List<Double> result = new java.util.ArrayList<>();
+            while (top.hasNext()) {
+                result.add(top.nextDouble());
+            }
+            result.sort(null);
+            assertEquals(java.util.Arrays.asList(300d, Double.NaN), result);
+        }
+    }
+
+    // ---- deep review 2026-11-02 G124 end ----
 }

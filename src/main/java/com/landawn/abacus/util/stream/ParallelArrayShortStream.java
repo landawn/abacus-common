@@ -765,11 +765,15 @@ final class ParallelArrayShortStream extends ArrayShortStream {
             iters.add(new ShortIterator() {
                 private short next;
                 private boolean exhausted;
-                private ShortIterator cur = null;
+                // Index the mapped array directly (as the sequential flatMapArray does) instead of wrapping each
+                // one in a ShortIterator: that wrapper was the only per-source-element allocation of this worker.
+                private short[] cur = null;
+                private int len = 0;
+                private int idx = 0;
 
                 @Override
                 public boolean hasNext() {
-                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                    while (idx >= len && !exhausted) {
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextShort();
@@ -780,19 +784,21 @@ final class ParallelArrayShortStream extends ArrayShortStream {
                             }
                         }
 
-                        cur = ShortIterator.of(mapper.apply(next));
+                        cur = mapper.apply(next);
+                        len = N.len(cur);
+                        idx = 0;
                     }
 
-                    return cur != null && cur.hasNext();
+                    return idx < len;
                 }
 
                 @Override
                 public short nextShort() throws NoSuchElementException {
-                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    if (idx >= len && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return cur.nextShort();
+                    return cur[idx++];
                 }
             });
         }

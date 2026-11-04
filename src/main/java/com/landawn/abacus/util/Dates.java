@@ -10634,6 +10634,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     //-----------------------------------------------------------------------
 
+    // LocalDate.of(-280_000_000, 1, 1) and LocalDate.of(280_000_001, 1, 1) at 00:00Z, in epoch milliseconds.
+    private static final long MIN_MODIFIABLE_EPOCH_MILLIS = -8_836_008_727_219_200_000L;
+    private static final long MAX_MODIFIABLE_EPOCH_MILLIS_EXCLUSIVE = 8_835_884_424_403_200_000L;
+
     /**
      * The epoch millisecond {@code value} moves to, without touching {@code value}: the {@code Calendar}
      * overloads build their result through {@link #createCalendar(Calendar, long)} from it, so a
@@ -10690,8 +10694,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         // The guard used to read a year-of-era from a Calendar; the UTC proleptic year differs from it
         // by at most one, which cannot matter at a 280-million threshold, and the magnitude rejects
-        // both extremes of the long range exactly as before.
-        if (Math.abs((long) LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC).getYear()) > 280_000_000L) {
+        // both extremes of the long range exactly as before. The UTC year grows monotonically with the
+        // instant, so |year| > 280,000,000 is tested against the epoch millis of the first instants of the
+        // years -280,000,000 and 280,000,001 instead of building a date-time on every call.
+        if (millis < MIN_MODIFIABLE_EPOCH_MILLIS || millis >= MAX_MODIFIABLE_EPOCH_MILLIS_EXCLUSIVE) {
             throw new ArithmeticException("Calendar value too large for accurate calculations");
         }
 
@@ -12735,7 +12741,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     private static LocalDate localDateAt(final long epochMillis, final ZoneId zone) {
-        return Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate();
+        // Exactly what Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate() computes (the offset the
+        // zone's rules give the instant, then LocalDateTime.ofEpochSecond's floor division of the local
+        // second), without building the ZonedDateTime, LocalDateTime and LocalTime on the way.
+        final int offsetSeconds = zone.getRules().getOffset(Instant.ofEpochMilli(epochMillis)).getTotalSeconds();
+        return LocalDate.ofEpochDay(Math.floorDiv(Math.floorDiv(epochMillis, 1000L) + offsetSeconds, 86_400L));
     }
 
     /**
@@ -14380,7 +14390,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
         // instant resolution, where silently substituting different rules would move the instant. A
         // default zone whose ID java.time does not know at all is still rejected - as an
         // IllegalArgumentException, which is what defaultZoneId() adds over ZoneId.systemDefault().
-        final LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(defaultZoneId()).toLocalDate();
+        final LocalDate localDate = localDateAt(date.getTime(), defaultZoneId());
         return localDate.getDayOfMonth() == localDate.lengthOfMonth();
     }
 
@@ -14408,7 +14418,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static boolean isLastDayOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        final LocalDate localDate = Instant.ofEpochMilli(date.getTime()).atZone(defaultZoneId()).toLocalDate();
+        final LocalDate localDate = localDateAt(date.getTime(), defaultZoneId());
         return localDate.getDayOfYear() == localDate.lengthOfYear();
     }
 
@@ -14437,7 +14447,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static int lengthOfMonth(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return Instant.ofEpochMilli(date.getTime()).atZone(defaultZoneId()).toLocalDate().lengthOfMonth();
+        return localDateAt(date.getTime(), defaultZoneId()).lengthOfMonth();
     }
 
     /**
@@ -14465,7 +14475,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     public static int lengthOfYear(final java.util.Date date) throws IllegalArgumentException {
         N.checkArgNotNull(date, cs.date);
 
-        return Instant.ofEpochMilli(date.getTime()).atZone(defaultZoneId()).toLocalDate().lengthOfYear();
+        return localDateAt(date.getTime(), defaultZoneId()).lengthOfYear();
     }
 
     /**
@@ -14730,8 +14740,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *       {@code VV} or an offset letter when the zone matters</li>
      * </ul>
      *
-     * <p><b>Year patterns:</b> Date-bearing predefined formatters use {@code uuuu}, the signed
-     * proleptic ISO year, and therefore round-trip year zero and BCE years. The enclosing class's
+     * <p><b>Year patterns:</b> Date-bearing predefined formatters other than {@link #HTTP_DATE} use {@code uuuu}, the
+     * signed proleptic ISO year, and therefore round-trip year zero and BCE years; {@code HTTP_DATE} keeps the
+     * {@code yyyy} year-of-era of the HTTP grammar and rejects years outside 0001 through 9999. The enclosing class's
      * {@code Dates.*_FORMAT} strings target legacy {@link SimpleDateFormat} and retain {@code yyyy};
      * passing one to {@link #of(String)} preserves that year-of-era pattern exactly.</p>
      *

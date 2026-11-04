@@ -41988,7 +41988,9 @@ public final class N extends CommonUtil {
      *
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array input stream
-     * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream
+     * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream; the input stream is then
+     *        also closed, exactly once, if this call throws (for example for a {@code null} or unsupported element type, or a
+     *        rejected root), since no stream is returned to close it
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if the stream contains an empty JSON array)
      * @throws IllegalArgumentException if {@code elementType} or {@code jsonArray} is {@code null}, or the element type is unsupported for streaming
@@ -42019,7 +42021,9 @@ public final class N extends CommonUtil {
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array input stream
      * @param config the deserialization configuration
-     * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream
+     * @param closeInputStreamWhenStreamIsClosed {@code true} to close input stream with the stream; the input stream is then
+     *        also closed, exactly once, if this call throws (for example for a {@code null} or unsupported element type, or a
+     *        rejected root), since no stream is returned to close it
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if the stream contains an empty JSON array)
      * @throws IllegalArgumentException if {@code elementType} or {@code jsonArray} is {@code null}, or the element type is unsupported for streaming
@@ -42030,7 +42034,19 @@ public final class N extends CommonUtil {
      */
     public static <T> Stream<T> streamJson(final InputStream jsonArray, final JsonDeserConfig config, final boolean closeInputStreamWhenStreamIsClosed,
             final Type<? extends T> elementType) throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
-        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, setElementType(config, elementType), elementType);
+        JsonDeserConfig configToUse = null;
+
+        try {
+            configToUse = setElementType(config, elementType);
+        } finally {
+            if (configToUse == null && closeInputStreamWhenStreamIsClosed) {
+                // Rejected before the parser saw the stream (a null elementType): close the handed-over stream here. A failure
+                // inside the parser is left to it - it closes the source itself, and closing it here too would close it twice.
+                IOUtil.closeQuietly(jsonArray);
+            }
+        }
+
+        return Utils.jsonParser.stream(jsonArray, closeInputStreamWhenStreamIsClosed, configToUse, elementType);
     }
 
     /**
@@ -42079,7 +42095,9 @@ public final class N extends CommonUtil {
      *
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array reader
-     * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream
+     * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream; the reader is then also closed,
+     *        exactly once, if this call throws (for example for a {@code null} or unsupported element type, or a rejected
+     *        root), since no stream is returned to close it
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if the reader contains an empty JSON array)
      * @throws IllegalArgumentException if {@code elementType} or {@code jsonArray} is {@code null}, or the element type is unsupported for streaming
@@ -42110,7 +42128,9 @@ public final class N extends CommonUtil {
      * @param <T> the type of stream elements
      * @param jsonArray the JSON array reader
      * @param config the deserialization configuration
-     * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream
+     * @param closeReaderWhenStreamIsClosed {@code true} to close reader with the stream; the reader is then also closed,
+     *        exactly once, if this call throws (for example for a {@code null} or unsupported element type, or a rejected
+     *        root), since no stream is returned to close it
      * @param elementType the target element Type
      * @return a stream of deserialized elements (empty if the reader contains an empty JSON array)
      * @throws IllegalArgumentException if {@code elementType} or {@code jsonArray} is {@code null}, or the element type is unsupported for streaming
@@ -42121,7 +42141,19 @@ public final class N extends CommonUtil {
      */
     public static <T> Stream<T> streamJson(final Reader jsonArray, final JsonDeserConfig config, final boolean closeReaderWhenStreamIsClosed,
             final Type<? extends T> elementType) throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
-        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, setElementType(config, elementType), elementType);
+        JsonDeserConfig configToUse = null;
+
+        try {
+            configToUse = setElementType(config, elementType);
+        } finally {
+            if (configToUse == null && closeReaderWhenStreamIsClosed) {
+                // Rejected before the parser saw the reader (a null elementType): close the handed-over reader here. A failure
+                // inside the parser is left to it - it closes the source itself, and closing it here too would close it twice.
+                IOUtil.closeQuietly(jsonArray);
+            }
+        }
+
+        return Utils.jsonParser.stream(jsonArray, closeReaderWhenStreamIsClosed, configToUse, elementType);
     }
 
     /**
@@ -42180,8 +42212,8 @@ public final class N extends CommonUtil {
      * ({@code "abc"}, {@code 42}, {@code true}, {@code null}) is validated and returned as written, and a blank input
      * returns an empty string. The abacus parser is lenient: an unquoted word such as {@code abc} is accepted as a string.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
+     * <p>Non-integer numbers inside an array or object are parsed as {@code double}, so a value with more significant
+     * digits than a {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
      * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -42208,9 +42240,10 @@ public final class N extends CommonUtil {
      *
      * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
-     * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
+     * <p>Non-integer numbers that {@code transferType} leaves untyped (for example the values of a raw {@code Map.class}) are
+     * parsed as {@code double}, so a value with more significant digits than a {@code double} holds is <i>changed</i>, not just
+     * re-spelled: {@code 0.12345678901234567890123} becomes {@code 0.12345678901234568}; a number typed as {@code BigDecimal}
+     * is kept exactly. Untyped integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -42239,9 +42272,10 @@ public final class N extends CommonUtil {
      *
      * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
-     * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
+     * <p>Non-integer numbers that {@code transferType} leaves untyped (for example the values of a raw {@code Map.class}) are
+     * parsed as {@code double}, so a value with more significant digits than a {@code double} holds is <i>changed</i>, not just
+     * re-spelled: {@code 0.12345678901234567890123} becomes {@code 0.12345678901234568}; a number typed as {@code BigDecimal}
+     * is kept exactly. Untyped integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -42274,8 +42308,8 @@ public final class N extends CommonUtil {
      * ({@code "abc"}, {@code 42}, {@code true}, {@code null}) is validated and returned as written, and a blank input
      * returns an empty string. The abacus parser is lenient: an unquoted word such as {@code abc} is accepted as a string.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
+     * <p>Non-integer numbers inside an array or object are parsed as {@code double}, so a value with more significant
+     * digits than a {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
      * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -42332,9 +42366,10 @@ public final class N extends CommonUtil {
      *
      * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
-     * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
+     * <p>Non-integer numbers that {@code transferType} leaves untyped (for example the values of a raw {@code Map.class}) are
+     * parsed as {@code double}, so a value with more significant digits than a {@code double} holds is <i>changed</i>, not just
+     * re-spelled: {@code 0.12345678901234567890123} becomes {@code 0.12345678901234568}; a number typed as {@code BigDecimal}
+     * is kept exactly. Untyped integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -42368,9 +42403,10 @@ public final class N extends CommonUtil {
      *
      * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
-     * <p>Non-integer numbers are parsed as {@code double}, so a value with more significant digits than a
-     * {@code double} holds is <i>changed</i>, not just re-spelled: {@code 0.12345678901234567890123} becomes
-     * {@code 0.12345678901234568}. Integers of any size are kept exactly.</p>
+     * <p>Non-integer numbers that {@code transferType} leaves untyped (for example the values of a raw {@code Map.class})
+     * are parsed as {@code double}, so a value with more significant digits than a {@code double} holds is <i>changed</i>,
+     * not just re-spelled: {@code 0.12345678901234567890123} becomes {@code 0.12345678901234568}; a number typed as
+     * {@code BigDecimal} is kept exactly. Untyped integers of any size are kept exactly.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -43331,16 +43367,14 @@ public final class N extends CommonUtil {
 
         final String indentation = (config == null ? Utils.xscPrettyFormat : config).getIndentation();
         final StringBuilder sb = new StringBuilder(xml.length() * 2);
-        final org.w3c.dom.NodeList topLevel = doc.getChildNodes();
 
         // XML 1.1 requires its declaration; without it even escaped low controls are invalid XML 1.0.
         if ("1.1".equals(doc.getXmlVersion())) {
             sb.append("<?xml version=\"1.1\"?>");
         }
 
-        for (int i = 0, len = topLevel.getLength(); i < len; i++) {
-            final org.w3c.dom.Node node = topLevel.item(i);
-
+        // Sibling links, not NodeList.item(i), for the same JDK DOM cache reason as in writeXmlNode.
+        for (org.w3c.dom.Node node = doc.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node.getNodeType() == org.w3c.dom.Node.DOCUMENT_TYPE_NODE) {
                 continue;
             }
@@ -48245,7 +48279,9 @@ public final class N extends CommonUtil {
      * @throws RejectedExecutionException if {@code executor} refuses to accept a command; commands already
      *         submitted may still run to completion
      * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
-     *         while waiting for a command to complete; the interrupt status is restored
+     *         while waiting for a command to complete; the interrupt status is restored. It is also restored when
+     *         {@code executor} ran a command on the calling thread (a direct or caller-runs executor) and that command failed
+     *         with an {@code InterruptedException}, which consumed the status
      * @throws Error if a command throws an {@code Error}: it propagates unchanged, whichever thread the command ran on
      * @see #runInParallel(Collection)
      * @see #asyncExecute(List, Executor)
@@ -48260,6 +48296,11 @@ public final class N extends CommonUtil {
 
         final int cmdSize = commands.size();
         final List<ContinuableFuture<Void>> futures = new ArrayList<>(cmdSize - 1);
+        // Set (only ever on this thread) when a direct or caller-runs executor ran a submitted command on THIS thread
+        // and it failed with an InterruptedException: that consumed this thread's interrupt status, and f.get() reports
+        // the failure under an ExecutionException, for which toRuntimeException never restores it (another thread).
+        final Thread callingThread = Thread.currentThread();
+        final MutableBoolean interruptedOnCallingThread = MutableBoolean.of(false);
         boolean hasException = true;
 
         try {
@@ -48280,7 +48321,19 @@ public final class N extends CommonUtil {
             }
 
             while (iter.hasNext()) {
-                futures.add(asyncExecute(iter.next(), executor));
+                final Throwables.Runnable<? extends Exception> cmd = iter.next();
+
+                futures.add(asyncExecute(() -> {
+                    try {
+                        cmd.run();
+                    } catch (final Exception e) {
+                        if (e instanceof InterruptedException && Thread.currentThread() == callingThread) {
+                            interruptedOnCallingThread.setTrue();
+                        }
+
+                        throw e;
+                    }
+                }, executor));
             }
 
             firstCommand.run();
@@ -48296,6 +48349,10 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e, true, true);
         } finally {
             if (hasException) {
+                if (interruptedOnCallingThread.isTrue()) {
+                    Thread.currentThread().interrupt();
+                }
+
                 for (final ContinuableFuture<Void> f : futures) {
                     if (!f.isDone()) {
                         f.cancel(false);
@@ -48764,7 +48821,9 @@ public final class N extends CommonUtil {
      * @throws RejectedExecutionException if {@code executor} refuses to accept a command; commands already
      *         submitted may still run to completion
      * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
-     *         while waiting for a command to complete; the interrupt status is restored
+     *         while waiting for a command to complete; the interrupt status is restored. It is also restored when
+     *         {@code executor} ran a command on the calling thread (a direct or caller-runs executor) and that command failed
+     *         with an {@code InterruptedException}, which consumed the status
      * @throws Error if a command throws an {@code Error}: it propagates unchanged, whichever thread the command ran on
      * @see #callInParallel(Collection)
      * @see #runInParallel(Collection, Executor)
@@ -48779,6 +48838,11 @@ public final class N extends CommonUtil {
 
         final int cmdSize = commands.size();
         final List<ContinuableFuture<? extends R>> futures = new ArrayList<>(cmdSize - 1);
+        // Set (only ever on this thread) when a direct or caller-runs executor ran a submitted command on THIS thread
+        // and it failed with an InterruptedException: that consumed this thread's interrupt status, and f.get() reports
+        // the failure under an ExecutionException, for which toRuntimeException never restores it (another thread).
+        final Thread callingThread = Thread.currentThread();
+        final MutableBoolean interruptedOnCallingThread = MutableBoolean.of(false);
         boolean hasException = true;
 
         try {
@@ -48799,7 +48863,20 @@ public final class N extends CommonUtil {
             }
 
             while (iter.hasNext()) {
-                futures.add(asyncExecute(iter.next(), executor));
+                final Callable<? extends R> cmd = iter.next();
+                final Callable<R> wrapped = () -> {
+                    try {
+                        return cmd.call();
+                    } catch (final Exception e) {
+                        if (e instanceof InterruptedException && Thread.currentThread() == callingThread) {
+                            interruptedOnCallingThread.setTrue();
+                        }
+
+                        throw e;
+                    }
+                };
+
+                futures.add(asyncExecute(wrapped, executor));
             }
 
             final List<R> result = new ArrayList<>(cmdSize);
@@ -48818,6 +48895,10 @@ public final class N extends CommonUtil {
             throw ExceptionUtil.toRuntimeException(e, true, true);
         } finally {
             if (hasException) {
+                if (interruptedOnCallingThread.isTrue()) {
+                    Thread.currentThread().interrupt();
+                }
+
                 for (final ContinuableFuture<? extends R> f : futures) {
                     if (!f.isDone()) {
                         f.cancel(false);

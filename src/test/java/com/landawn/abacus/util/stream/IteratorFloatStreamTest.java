@@ -411,4 +411,78 @@ public class IteratorFloatStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G098 end ----
+
+    // ---- deep review 2026-11-02 G124 begin ----
+
+    // G124-01 (pin): top(n) with the natural comparator rejects candidates by a primitive Float.compare (the same total order
+    // as the comparator, NaN largest, -0.0 below 0.0); the result (incl. its element order and the sign of zeros) must equal
+    // the generic comparator path, for NaN/-0.0/infinity mixes, duplicates and every n around the size.
+    @Test
+    public void testTop_naturalOrderMatchesComparatorPath() {
+        final float[][] inputs = { {}, { 7f }, { -0.0f }, { 0.0f, -0.0f }, { -0.0f, 0.0f, -0.0f, 0.0f }, { Float.NaN, Float.NaN, 1f },
+                { 3f, Float.NaN, -0.0f, Float.NEGATIVE_INFINITY, 0.0f, Float.POSITIVE_INFINITY, Float.NaN, -1f, Float.MAX_VALUE, -0.0f, Float.MIN_VALUE, 0.0f,
+                        -Float.MAX_VALUE, 2.5f, 3f, -Float.MIN_VALUE },
+                { 5f, 1f, 9f, -3f, 1000f, 7f, 9f, -1000f, 2f, 8f, 6f, 4f, 1000f, 3f, -7f, 11f, 12f, 13f, 0f, 14f },
+                { 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f, 10f, 11f, 12f, 13f, 14f, 15f, 16f, 17f, 18f, 19f },
+                { 19f, 18f, 17f, 16f, 15f, 14f, 13f, 12f, 11f, 10f, 9f, 8f, 7f, 6f, 5f, 4f, 3f, 2f, 1f } };
+
+        for (final float[] input : inputs) {
+            for (int n = 1; n <= input.length + 2; n++) {
+                final float[] expected = iter(input).top(n, (a, b) -> Float.compare(a, b)).toArray();
+                final float[] actual = iter(input).top(n).toArray();
+                // assertArrayEquals(float[], float[]) compares bit patterns: -0.0 != 0.0, NaN == NaN
+                assertArrayEquals(expected, actual, "n=" + n + ", input=" + java.util.Arrays.toString(input));
+
+                final float[] sortedInput = input.clone();
+                java.util.Arrays.sort(sortedInput);
+                final float[] sortedActual = actual.clone();
+                java.util.Arrays.sort(sortedActual);
+                assertArrayEquals(java.util.Arrays.copyOfRange(sortedInput, Math.max(0, input.length - n), input.length), sortedActual);
+
+                assertEquals(Math.max(0, Math.min(n, input.length) - 1), iter(input).top(n).skip(1).count());
+            }
+        }
+
+        // -0.0 ranks below 0.0, NaN above +infinity
+        assertArrayEquals(new float[] { 0.0f }, iter(-0.0f, 0.0f, -0.0f).top(1).toArray());
+        assertArrayEquals(new float[] { Float.NaN }, iter(1f, Float.NaN, Float.POSITIVE_INFINITY).top(1).toArray());
+    }
+
+    // G124-01 (pin): the natural-order heap survives a failed source read, so a retry resumes with the accepted values.
+    @Test
+    public void testTop_naturalOrderRetryAfterSourceFailure() {
+        final float[] values = { 4f, Float.NaN, 1f, -0.0f, 300f, 0.0f };
+        final int[] calls = { 0 };
+        final FloatIterator failingOnce = new FloatIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < values.length;
+            }
+
+            @Override
+            public float nextFloat() {
+                if (cursor == 3 && calls[0]++ == 0) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return values[cursor++];
+            }
+        };
+
+        try (FloatStream stream = FloatStream.of(failingOnce).top(2)) {
+            final FloatIterator top = stream.iterator();
+            assertThrows(IllegalStateException.class, top::hasNext);
+
+            final List<Float> result = new java.util.ArrayList<>();
+            while (top.hasNext()) {
+                result.add(top.nextFloat());
+            }
+            result.sort(null);
+            assertEquals(java.util.Arrays.asList(300f, Float.NaN), result);
+        }
+    }
+
+    // ---- deep review 2026-11-02 G124 end ----
 }

@@ -1388,7 +1388,7 @@ class ArrayFloatStream extends AbstractFloatStream {
     /**
      * Returns a stream consisting of the top {@code n} elements of this stream according to the given comparator.
      * If the stream is sorted and the comparator matches the natural ordering, an O(1) tail-range restriction is applied.
-     * Otherwise, a partial sort over the backing array is performed.
+     * Otherwise, the top elements are selected from the backing array range with a bounded heap; the backing array is not modified.
      *
      * @param n the number of top elements to return; must be non-negative
      * @param comparator the comparator used to determine element ordering

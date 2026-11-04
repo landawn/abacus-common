@@ -291,6 +291,12 @@ public final class EscapeUtil {
      * @see #escapeJava(String)
      */
     public static String escapeEcmaScript(final String input) {
+        if (input != null && !input.isEmpty() && isUnchangedByJsonStyleEscaper(input, true)) {
+            // Same result as the translator path below, which copies such an input char by char into a fresh String;
+            // new String(String) is that fresh instance without the copy (it shares the immutable contents).
+            return new String(input);
+        }
+
         return ESCAPE_ECMASCRIPT.translate(input);
     }
 
@@ -319,7 +325,29 @@ public final class EscapeUtil {
      * @see #unescapeJson(String)
      */
     public static String escapeJson(final String input) {
+        if (input != null && !input.isEmpty() && isUnchangedByJsonStyleEscaper(input, false)) {
+            // Same result as the translator path below, which copies such an input char by char into a fresh String;
+            // new String(String) is that fresh instance without the copy (it shares the immutable contents).
+            return new String(input);
+        }
+
         return ESCAPE_JSON.translate(input);
+    }
+
+    // True if ESCAPE_JSON (or, with ecmaScript, ESCAPE_ECMASCRIPT) leaves every char of input unchanged. Both pass a
+    // char through exactly when it lies in [0x20, 0x7F] and is not '"', '\\', '/' (or '\'' for EcmaScript): their lookup
+    // tables hold only those one-char keys plus control chars below 0x20, and their JavaUnicodeEscaper escapes every
+    // code point outside [0x20, 0x7F]. Keep this in step with those translator definitions.
+    private static boolean isUnchangedByJsonStyleEscaper(final String input, final boolean ecmaScript) {
+        for (int i = 0, len = input.length(); i < len; i++) {
+            final char ch = input.charAt(i);
+
+            if (ch < 0x20 || ch > 0x7F || ch == '"' || ch == '\\' || ch == '/' || (ecmaScript && ch == '\'')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -346,7 +374,19 @@ public final class EscapeUtil {
      * @see #escapeJava(String)
      */
     public static String unescapeJava(final String input) throws IllegalArgumentException {
+        if (isUnchangedByJavaStyleUnescaper(input)) {
+            return new String(input); // the same fresh String the translator path would build, without the char-by-char copy
+        }
+
         return UNESCAPE_JAVA.translate(input);
+    }
+
+    // True if UNESCAPE_JAVA (also UNESCAPE_ECMASCRIPT and UNESCAPE_JSON) would copy the non-empty input unchanged: each
+    // of its translators (octal, unicode, and the two lookup tables) consumes input only at a backslash, so for input
+    // without one the translator path copies every char into a fresh String and can throw nothing. null and "" keep the
+    // translator path. Keep this in step with the UNESCAPE_JAVA definition.
+    private static boolean isUnchangedByJavaStyleUnescaper(final String input) {
+        return input != null && !input.isEmpty() && input.indexOf('\\') < 0;
     }
 
     /**
@@ -372,6 +412,10 @@ public final class EscapeUtil {
      * @see #unescapeJava(String)
      */
     public static String unescapeEcmaScript(final String input) throws IllegalArgumentException {
+        if (isUnchangedByJavaStyleUnescaper(input)) {
+            return new String(input); // the same fresh String the translator path would build, without the char-by-char copy
+        }
+
         return UNESCAPE_ECMASCRIPT.translate(input);
     }
 
@@ -401,6 +445,10 @@ public final class EscapeUtil {
      * @see #unescapeJava(String)
      */
     public static String unescapeJson(final String input) throws IllegalArgumentException {
+        if (isUnchangedByJavaStyleUnescaper(input)) {
+            return new String(input); // the same fresh String the translator path would build, without the char-by-char copy
+        }
+
         return UNESCAPE_JSON.translate(input);
     }
 

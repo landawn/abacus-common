@@ -1518,18 +1518,24 @@ class IteratorIntStream extends AbstractIntStream {
                             heap = new PriorityQueue<>(Math.min(n, 16), cmp);
                         }
 
-                        Integer next = null;
-                        while (elements.hasNext()) {
-                            next = elements.nextInt();
+                        if (cmp == INT_COMPARATOR) {
+                            // Natural order (top(n)): test a candidate against the heap head with a primitive compare
+                            // (== Integer.compare(..) > 0), so only accepted values are boxed, not every element.
+                            int value = 0;
+                            while (elements.hasNext()) {
+                                value = elements.nextInt();
 
-                            if (heap.size() >= n) {
-                                if (cmp.compare(next, heap.peek()) > 0) {
-                                    heap.poll();
-                                    heap.offer(next);
+                                if (heap.size() >= n) {
+                                    if (value > heap.peek()) {
+                                        heap.poll();
+                                        heap.offer(value);
+                                    }
+                                } else {
+                                    heap.offer(value);
                                 }
-                            } else {
-                                heap.offer(next);
                             }
+                        } else {
+                            offerTopByComparator(elements, heap, n, cmp);
                         }
 
                         aar = Array.unbox(heap.toArray(N.EMPTY_INT_OBJ_ARRAY));
@@ -1542,6 +1548,26 @@ class IteratorIntStream extends AbstractIntStream {
                 }
             }
         }, false);
+    }
+
+    // The unchanged comparator loop of top(n, Comparator)'s heap path. It is kept out of init() on purpose: next to the
+    // natural-order loop in the same method, it ran ~1.5-3x slower on large sources once the natural loop had been
+    // JIT-compiled first (uncommon-trap/OSR profile of the shared method).
+    private static void offerTopByComparator(final IntIteratorEx iterator, final Queue<Integer> heap, final int n,
+            final Comparator<? super Integer> comparator) {
+        Integer next = null;
+        while (iterator.hasNext()) {
+            next = iterator.nextInt();
+
+            if (heap.size() >= n) {
+                if (comparator.compare(next, heap.peek()) > 0) {
+                    heap.poll();
+                    heap.offer(next);
+                }
+            } else {
+                heap.offer(next);
+            }
+        }
     }
 
     @Override

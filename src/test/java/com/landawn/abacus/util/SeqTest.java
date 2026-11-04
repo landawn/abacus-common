@@ -1471,4 +1471,75 @@ public class SeqTest extends SeqTestSupport {
 
     // ---- bug review 2026-09-30 G143 end ----
 
+    // ---- deep review 2026-11-02b G073 begin ----
+
+    // G073-02 (pin): flatMapArray walks each mapped array by index; results, mapper calls and laziness unchanged.
+    @Test
+    public void testFlatMapArray_indexWalkPin_r116() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.<Integer, Exception> empty().flatMapArray(n -> new Integer[] { n }).toList());
+        assertEquals(Arrays.asList(7, 70), Seq.of(7).flatMapArray(n -> new Integer[] { n, n * 10 }).toList());
+        assertEquals(Collections.emptyList(), Seq.of(1, 2, 3).flatMapArray(n -> n == 2 ? null : new Integer[0]).toList());
+
+        // null, empty and non-empty arrays mixed, null elements kept, trailing empties at the end
+        assertEquals(Arrays.asList(1, null, 4, 40, 400),
+                Seq.of(1, 2, 3, 4, 5, 6)
+                        .flatMapArray(n -> n == 1 ? new Integer[] { 1, null } : n == 4 ? new Integer[] { 4, 40, 400 } : n == 2 ? null : new Integer[0])
+                        .toList());
+
+        // elements are read when consumed: a change to a not-yet-consumed slot of the current array is visible
+        final Integer[] shared = new Integer[2];
+        final AtomicInteger mapperCalls = new AtomicInteger();
+
+        try (Seq<Integer, Exception> seq = Seq.of(1, 2).flatMapArray(n -> {
+            mapperCalls.incrementAndGet();
+            shared[0] = n;
+            shared[1] = n * 10;
+            return shared;
+        })) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertTrue(iter.hasNext());
+            assertTrue(iter.hasNext());
+            assertEquals(1, mapperCalls.get());
+            assertEquals(1, iter.next());
+            shared[1] = 99;
+            assertEquals(99, iter.next());
+            assertEquals(1, mapperCalls.get());
+            assertEquals(2, iter.next()); // next() without hasNext() maps the following element
+            assertEquals(2, mapperCalls.get());
+            assertEquals(20, iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+            assertEquals(2, mapperCalls.get());
+        }
+
+        // a failing mapper loses only its own element; manual iteration continues with the next one
+        try (Seq<Integer, Exception> seq = Seq.of(1, 2, 3).flatMapArray(n -> {
+            if (n == 2) {
+                throw new IllegalStateException("boom");
+            }
+
+            return new Integer[] { n };
+        })) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertEquals(1, iter.next());
+            assertThrows(IllegalStateException.class, iter::hasNext);
+            assertTrue(iter.hasNext());
+            assertEquals(3, iter.next());
+            assertFalse(iter.hasNext());
+        }
+
+        // short-circuit: only the first source element is mapped
+        final AtomicInteger calls = new AtomicInteger();
+        assertEquals(Arrays.asList(1), Seq.of(1, 2, 3).flatMapArray(n -> {
+            calls.incrementAndGet();
+            return new Integer[] { n, n };
+        }).limit(1).toList());
+        assertEquals(1, calls.get());
+
+        assertEquals(6, Seq.of(1, 2, 3).flatMapArray(n -> new String[] { "a", "b" }).count());
+        assertEquals(Arrays.asList("b", "a", "b"), Seq.of(1, 2).flatMapArray(n -> new String[] { "a", "b" }).skip(1).toList());
+    }
+
+    // ---- deep review 2026-11-02b G073 end ----
+
 }

@@ -3015,10 +3015,11 @@ public final class RowDataset implements Dataset, Cloneable {
      * {@inheritDoc}
      * @throws IllegalStateException if this dataset is frozen
      * @throws IllegalArgumentException {@inheritDoc}
+     * @throws ConcurrentModificationException {@inheritDoc}
      * @throws RuntimeException {@inheritDoc}
      */
     @Override
-    public void addRow(final Object row) throws IllegalStateException, IllegalArgumentException, RuntimeException {
+    public void addRow(final Object row) throws IllegalStateException, IllegalArgumentException, ConcurrentModificationException, RuntimeException {
         addRow(size(), row);
     }
 
@@ -3027,18 +3028,19 @@ public final class RowDataset implements Dataset, Cloneable {
      * @throws IllegalStateException if this dataset is frozen
      * @throws IllegalArgumentException {@inheritDoc}
      * @throws IndexOutOfBoundsException {@inheritDoc}
+     * @throws ConcurrentModificationException {@inheritDoc}
      * @throws RuntimeException {@inheritDoc}
      */
     @Override
     public void addRow(final int newRowPosition, final Object row)
-            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException, ConcurrentModificationException, RuntimeException {
         checkFrozen();
         N.checkArgument(columnCount() > 0, "Cannot add a row to a Dataset without columns");
 
         final int size = size();
         N.checkPositionIndex(newRowPosition, size);
 
-        final Object[] values = normalizeRow(row, null);
+        final Object[] values = normalizeRow(row, null, null, null);
 
         if (newRowPosition == size) {
             for (int columnIndex = 0, len = values.length; columnIndex < len; columnIndex++) {
@@ -3057,10 +3059,11 @@ public final class RowDataset implements Dataset, Cloneable {
      * {@inheritDoc}
      * @throws IllegalStateException if this dataset is frozen
      * @throws IllegalArgumentException {@inheritDoc}
+     * @throws ConcurrentModificationException {@inheritDoc}
      * @throws RuntimeException {@inheritDoc}
      */
     @Override
-    public void addRows(final Collection<?> rows) throws IllegalStateException, IllegalArgumentException, RuntimeException {
+    public void addRows(final Collection<?> rows) throws IllegalStateException, IllegalArgumentException, ConcurrentModificationException, RuntimeException {
         addRows(size(), rows);
     }
 
@@ -3069,11 +3072,12 @@ public final class RowDataset implements Dataset, Cloneable {
      * @throws IllegalStateException if this dataset is frozen
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws IllegalArgumentException {@inheritDoc}
+     * @throws ConcurrentModificationException {@inheritDoc}
      * @throws RuntimeException {@inheritDoc}
      */
     @Override
     public void addRows(final int newRowPosition, final Collection<?> rows)
-            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException {
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, ConcurrentModificationException, RuntimeException {
         checkFrozen();
 
         final int size = size();
@@ -3083,7 +3087,12 @@ public final class RowDataset implements Dataset, Cloneable {
             return;
         }
 
-        final int columnCount = columnCount();
+        // The columns every row of the batch is read against: the values of the rows read so far stay aligned to these
+        // positions, so each row (and the commit below) is checked against this layout, not just against its count. It is
+        // taken before rows.size(), whose code may change the columns too (a change made by isEmpty() above only means the
+        // batch is read against the new layout), and the column count is derived from it, so the two cannot disagree.
+        final Object[] columnLayout = _columnList.toArray();
+        final int columnCount = columnLayout.length;
         final int rowCountToAdd = rows.size();
         final List<List<Object>> columnsToAdd = new ArrayList<>(columnCount);
 
@@ -3097,14 +3106,22 @@ public final class RowDataset implements Dataset, Cloneable {
         // One scratch row for the whole batch (collection, map and bean rows; an object-array row is read in place):
         // each row's values are copied out before the next row is read.
         final Object[] buffer = new Object[columnCount];
+        final BeanRowAccessors beanRowAccessors = new BeanRowAccessors();
 
         for (final Object row : rows) {
-            final Object[] values = normalizeRow(row, buffer);
+            // rows.size() and the rows collection's own iterator may have run code too; the buffer must still fit the columns.
+            checkColumnLayoutUnchanged(columnLayout);
+
+            final Object[] values = normalizeRow(row, buffer, beanRowAccessors, columnLayout);
 
             for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
                 columnsToAdd.get(columnIndex).add(values[columnIndex]);
             }
         }
+
+        // The iterator's final hasNext() runs after the last row's checks: without this, a column it added, removed or
+        // moved left the rows committed under shifted columns, or the columns at different lengths.
+        checkColumnLayoutUnchanged(columnLayout);
 
         for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
             _columnList.get(columnIndex).addAll(newRowPosition, columnsToAdd.get(columnIndex));
@@ -3128,16 +3145,22 @@ public final class RowDataset implements Dataset, Cloneable {
      * @param buffer an array of {@code columnCount()} elements that receives the values of a collection, map or bean row
      *            and is returned, overwriting every element, or {@code null} to use a new array. An object-array row is
      *            returned itself, uncopied, and leaves the buffer untouched.
+     * @param beanRowAccessors the property accessors resolved for earlier bean rows of the same batch, or {@code null}
+     * @param columnLayout the batch's column layout (see {@link #checkColumnLayoutUnchanged(Object[])}), or {@code null} to
+     *            take it from the current columns
      * @return the row's values, in column order
      * @throws IllegalArgumentException if this dataset has no columns, {@code row} is null or has an unsupported type, its array or collection size differs from the column count, or a required column is absent from its map or bean
+     * @throws ConcurrentModificationException if reading the row (for example a bean getter) added, removed, moved or replaced a column of this dataset
      */
-    private Object[] normalizeRow(final Object row, final Object[] buffer) throws IllegalArgumentException {
+    private Object[] normalizeRow(final Object row, final Object[] buffer, final BeanRowAccessors beanRowAccessors, final Object[] columnLayout)
+            throws IllegalArgumentException, ConcurrentModificationException {
         N.checkArgument(columnCount() > 0, "Cannot add a row to a Dataset without columns");
         N.checkArgNotNull(row, ROW);
 
         final Class<?> rowClass = row.getClass();
         final Type<?> rowType = Type.of(rowClass);
         final int columnCount = columnCount();
+        final int startModCount = modCount;
 
         if (rowType.isObjectArray()) {
             final Object[] array = (Object[]) row;
@@ -3153,6 +3176,8 @@ public final class RowDataset implements Dataset, Cloneable {
             return array;
         }
 
+        // Taken before any code of the row runs (an array row above runs none, so it needs no snapshot).
+        final Object[] layout = columnLayout == null ? _columnList.toArray() : columnLayout;
         final Object[] values = buffer == null ? new Object[columnCount] : buffer;
 
         if (rowType.isCollection()) {
@@ -3172,6 +3197,12 @@ public final class RowDataset implements Dataset, Cloneable {
             final Map<?, ?> map = (Map<?, ?>) row;
 
             for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                // The map's own get/containsKey may have added, removed or moved a column: fail before the column name list
+                // is read at a shifted (or no longer existing) position, as the bean branch does.
+                if (modCount != startModCount) {
+                    checkColumnLayoutUnchanged(layout);
+                }
+
                 final String columnName = _columnNameList.get(columnIndex);
                 values[columnIndex] = map.get(columnName);
 
@@ -3180,13 +3211,64 @@ public final class RowDataset implements Dataset, Cloneable {
                 }
             }
         } else if (rowType.isBean()) {
-            final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowClass);
+            // In a batch, the accessors resolved for the previous row are reused while the bean class and this
+            // dataset's columns (modCount) are unchanged: resolving every column of every row by name cost about as
+            // much as reading the values. Each column is still resolved lazily, in column order, so a failure surfaces
+            // at the same column as before.
+            Object[] accessors;
+            final BeanInfo beanInfo;
+
+            if (beanRowAccessors == null) {
+                accessors = null;
+                beanInfo = ParserUtil.getBeanInfo(rowClass);
+            } else {
+                if (beanRowAccessors.beanClass != rowClass || beanRowAccessors.modCount != modCount) {
+                    beanRowAccessors.beanClass = null; // stays unusable if getBeanInfo throws
+                    beanRowAccessors.beanInfo = ParserUtil.getBeanInfo(rowClass);
+                    beanRowAccessors.accessors = new Object[columnCount];
+                    beanRowAccessors.modCount = modCount;
+                    beanRowAccessors.beanClass = rowClass;
+                }
+
+                accessors = beanRowAccessors.accessors;
+                beanInfo = beanRowAccessors.beanInfo;
+            }
 
             for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+                // The cached accessors always belong to startModCount here (they are rebuilt above otherwise).
+                if (modCount != startModCount) {
+                    // A getter of this row changed the dataset. An added, removed or moved column fails at once: the values
+                    // read so far no longer line up with the columns. Otherwise (e.g. a renamed column) the cached accessors
+                    // no longer match the columns: drop the cache for the batch and resolve the rest of this row by the
+                    // current column names.
+                    checkColumnLayoutUnchanged(layout);
+
+                    if (accessors != null) {
+                        beanRowAccessors.beanClass = null;
+                        accessors = null;
+                    }
+                }
+
+                final Object accessor = accessors == null ? null : accessors[columnIndex];
+
+                if (accessor instanceof PropInfo propInfo) {
+                    values[columnIndex] = propInfo.getPropValue(row);
+                    continue;
+                } else if (accessor != null) {
+                    @SuppressWarnings("unchecked")
+                    final List<PropInfo> propInfoChain = (List<PropInfo>) accessor;
+                    values[columnIndex] = getChainedPropValue(row, propInfoChain);
+                    continue;
+                }
+
                 final String columnName = _columnNameList.get(columnIndex);
                 final PropInfo propInfo = beanInfo.getPropInfo(columnName);
 
                 if (propInfo != null) {
+                    if (accessors != null) {
+                        accessors[columnIndex] = propInfo;
+                    }
+
                     values[columnIndex] = propInfo.getPropValue(row);
                 } else {
                     // A nested column such as "address.city" - the shape getRow/toList(beanClass) fill - is read through
@@ -3198,13 +3280,11 @@ public final class RowDataset implements Dataset, Cloneable {
                         throw new IllegalArgumentException("Column (" + columnName + ") is not found in bean (" + rowClass + ")");
                     }
 
-                    Object value = row;
-
-                    for (final PropInfo link : propInfoChain) {
-                        value = value == null ? null : link.getPropValue(value);
+                    if (accessors != null) {
+                        accessors[columnIndex] = propInfoChain;
                     }
 
-                    values[columnIndex] = value;
+                    values[columnIndex] = getChainedPropValue(row, propInfoChain);
                 }
             }
         } else {
@@ -3212,7 +3292,67 @@ public final class RowDataset implements Dataset, Cloneable {
                     "Unsupported row type: " + ClassUtil.getCanonicalClassName(rowClass) + ". Only Array, List/Set, Map and bean class are supported");
         }
 
+        // A column added, removed or moved while the last value was read (or by a collection or map row's own code) is
+        // caught here, before the caller adds anything.
+        if (modCount != startModCount) {
+            checkColumnLayoutUnchanged(layout);
+        }
+
         return values;
+    }
+
+    /**
+     * addRow/addRows read every value of the new rows before changing any column. Code that runs meanwhile - a bean
+     * getter, or a row collection's or map's own methods - and adds, removes, moves or replaces a column of this dataset
+     * would leave those values misaligned with the columns (or overflow the batch's scratch row), so it fails before
+     * anything is added.
+     *
+     * <p>The columns are compared by their storage lists, not just counted: removing a column and adding one back keeps
+     * the count but shifts the positions, which committed values under the wrong columns. A renamed column keeps its
+     * storage list and passes; the readers then use its current name.</p>
+     *
+     * @param columnLayout the column storage lists ({@code _columnList.toArray()}) taken before the rows were read
+     * @throws ConcurrentModificationException if a column was added, removed, moved or replaced since {@code columnLayout} was taken
+     */
+    private void checkColumnLayoutUnchanged(final Object[] columnLayout) throws ConcurrentModificationException {
+        final int columnCount = _columnList.size();
+
+        if (columnCount != columnLayout.length) {
+            throw new ConcurrentModificationException("The number of columns changed from " + columnLayout.length + " to " + columnCount
+                    + " while the rows to add were being read (for example by a bean getter); no row was added");
+        }
+
+        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
+            if (_columnList.get(columnIndex) != columnLayout[columnIndex]) {
+                throw new ConcurrentModificationException("The columns were removed and re-added, moved or replaced while the rows to add were being read"
+                        + " (for example by a bean getter); no row was added");
+            }
+        }
+    }
+
+    /**
+     * Reads a nested column's value through its property chain; a {@code null} link yields {@code null}.
+     */
+    private static Object getChainedPropValue(final Object bean, final List<PropInfo> propInfoChain) {
+        Object value = bean;
+
+        for (final PropInfo link : propInfoChain) {
+            value = value == null ? null : link.getPropValue(value);
+        }
+
+        return value;
+    }
+
+    /**
+     * The per-column accessors ({@code PropInfo}, or the {@code List<PropInfo>} chain of a nested column) that one
+     * {@code addRows} batch resolved for bean rows of {@code beanClass} while this dataset's {@code modCount} was
+     * {@code modCount}. Local to the batch; nothing outlives the call.
+     */
+    private static final class BeanRowAccessors {
+        private Class<?> beanClass;
+        private int modCount;
+        private BeanInfo beanInfo;
+        private Object[] accessors;
     }
 
     /**

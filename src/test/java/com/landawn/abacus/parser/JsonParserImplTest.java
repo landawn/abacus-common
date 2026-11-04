@@ -5420,4 +5420,91 @@ public class JsonParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 verify G142 end ----
+
+    // ---- deep review 2026-11-02b G009 begin ----
+
+    // G009-01 (perf pin): a String source of at most 256 chars starts with an empty token buffer that the reader grows on
+    // demand (escapes, whitespace after an unquoted value); every String entry point reads such tokens as with the pooled one.
+    @Test
+    public void testStringSourceEntryPoints_shortSourceEscapesAndWhitespace_r116() {
+        final String json = "{\"\\u0061\\\"b\": \"\\n\\t\\u00E9x\\\\\", \"n\": 12 , \"l\": [ 1 , \"\\/\" , true ] , \"e\": \"\"}";
+        assertTrue(json.length() <= 256);
+
+        final Map<String, Object> expected = new LinkedHashMap<>();
+        expected.put("a\"b", "\n\t" + (char) 0xE9 + "x\\");
+        expected.put("n", 12);
+        expected.put("l", Arrays.asList(1, "/", true));
+        expected.put("e", "");
+
+        assertEquals(expected, parser.deserialize(json, Map.class));
+        assertEquals(expected, parser.deserialize(json, JsonDeserConfig.create(), Type.of(Map.class)));
+        assertEquals(expected, parser.parse(json, Map.class));
+        assertEquals(expected, parser.deserialize("[[" + json + "]]", 2, 2 + json.length(), null, Map.class));
+
+        final Map<Object, Object> map = new LinkedHashMap<>();
+        parser.parseInto(json, null, map);
+        assertEquals(expected, map);
+
+        parser.validate(json);
+        assertEquals(List.of(expected, expected), parser.stream("[" + json + ", " + json + "]", null, Type.of(Map.class)).toList());
+
+        final String elements = "[\"\\u0041\", 2 , \"c\\\"\", \"\" ]";
+        final List<Object> list = new ArrayList<>();
+        parser.parseInto(elements, null, list);
+        assertEquals(Arrays.asList("A", 2, "c\"", ""), list);
+
+        final Object[] array = new Object[4];
+        parser.parseInto(elements, null, array);
+        assertArrayEquals(new Object[] { "A", 2, "c\"", "" }, array);
+
+        assertEquals(List.of(7), parser.deserialize(" [ 7   ] ", List.class));
+        assertEquals(Integer.valueOf(1), parser.deserialize("{\"a\": 1   }", Map.class).get("a"));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[\"\\nabc", List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[\"\\u12\"]", List.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.validate("{\"a\\n\": 1 2}"));
+    }
+
+    // G009-01 (perf pin): one escaped token filling the whole source on both sides of the 256-char switch between the
+    // empty token buffer (grown from nothing) and the pooled buffer, through each String entry point.
+    @Test
+    public void testStringSourceEntryPoints_escapedTokenAroundEmptyTokenBufferLimit_r116() {
+        for (int length = 248; length <= 264; length++) {
+            final StringBuilder json = new StringBuilder("[\"\\n");
+            final StringBuilder content = new StringBuilder("\n");
+
+            while (json.length() < length - 2) {
+                if (json.length() % 5 == 0 && json.length() + 2 <= length - 2) {
+                    json.append("\\t");
+                    content.append('\t');
+                } else {
+                    json.append('x');
+                    content.append('x');
+                }
+            }
+
+            json.append("\"]");
+            assertEquals(length, json.length());
+
+            final String source = json.toString();
+            final List<String> expected = List.of(content.toString());
+
+            assertEquals(expected, parser.deserialize(source, List.class), source);
+            assertArrayEquals(new String[] { content.toString() }, parser.deserialize(source, String[].class), source);
+            assertEquals(expected, parser.parse(source, null, Type.of(List.class)), source);
+            assertEquals(expected, parser.deserialize("#" + source + "#", 1, 1 + source.length(), null, List.class), source);
+
+            final List<Object> into = new ArrayList<>();
+            parser.parseInto(source, null, into);
+            assertEquals(expected, into, source);
+
+            parser.validate(source);
+
+            // An unquoted value followed by whitespace up to the same lengths.
+            final String padded = "[123" + " ".repeat(length - 5) + "]";
+            assertEquals(length, padded.length());
+            assertEquals(List.of(123), parser.deserialize(padded, List.class), padded);
+        }
+    }
+
+    // ---- deep review 2026-11-02b G009 end ----
 }

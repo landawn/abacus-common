@@ -96,7 +96,8 @@ final class Converters {
      * @return the registered converter, or {@code null} if there is none
      */
     static BiFunction<Object, Class<?>, Object> getConverter(final Class<?> sourceClass) {
-        if (sourceClass == null) {
+        // Nothing registered (the common case): skip the superclass walk.
+        if (sourceClass == null || converterMap.isEmpty()) {
             return null;
         }
 

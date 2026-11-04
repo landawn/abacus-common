@@ -18,7 +18,7 @@
  * <p>Object-arity types with JDK counterparts ({@link Consumer}, {@link Function}, {@link Predicate},
  * {@link Supplier}, {@link BiConsumer}, {@link BiFunction}, {@link BiPredicate}, {@link UnaryOperator},
  * {@link BinaryOperator}, and the {@code java.util.function} primitive specializations for
- * {@code int}/{@code long}/{@code double}) extend those JDK interfaces and also extend the matching
+ * {@code int}/{@code long}/{@code double}, plus {@link BooleanSupplier}) extend those JDK interfaces and also extend the matching
  * {@link com.landawn.abacus.util.Throwables} nested type with {@code RuntimeException}. They can be
  * used anywhere the JDK type is required. Additional arities and primitives have no JDK counterpart.</p>
  *
@@ -36,7 +36,9 @@
  *       {@link com.landawn.abacus.util.function.Runnable} that extend the matching {@code Throwables} types.</li>
  * </ul>
  *
- * <p>Ready-made instances live in {@code com.landawn.abacus.util}, not here:
+ * <p>Apart from a few constants declared on the interfaces themselves (for example
+ * {@link ShortPredicate#IS_POSITIVE}, {@link ToIntFunction#UNBOX}, {@link IntFunction#BOX}, {@link IntSupplier#RANDOM}),
+ * ready-made instances live in {@code com.landawn.abacus.util}:
  * {@link com.landawn.abacus.util.Fn} and {@link com.landawn.abacus.util.Fnn} (the latter for
  * {@code Throwables} callbacks), plus {@link com.landawn.abacus.util.Consumers},
  * {@link com.landawn.abacus.util.Predicates}, {@link com.landawn.abacus.util.Functions},

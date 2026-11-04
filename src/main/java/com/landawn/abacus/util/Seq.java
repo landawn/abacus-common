@@ -2552,7 +2552,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
-     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     * be read, the {@link IOException} is thrown from that terminal operation. A directory is rejected there too, but
+     * with an {@link IllegalArgumentException}, not an {@code IOException}.</p>
      *
      * @param file the file to read lines from.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
@@ -2580,7 +2581,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
-     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     * be read, the {@link IOException} is thrown from that terminal operation. A directory is rejected there too, but
+     * with an {@link IllegalArgumentException}, not an {@code IOException}.</p>
      *
      * @param file the file to read lines from.
      * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
@@ -2612,7 +2614,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
-     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     * be read, the {@link IOException} is thrown from that terminal operation. A directory is rejected there too, but
+     * with an {@link IllegalArgumentException}, not an {@code IOException}.</p>
      *
      * @param path the path to read lines from.
      * @return a {@code Seq<String, IOException>} containing the lines of the file.
@@ -2639,7 +2642,8 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p>The file is opened by the first terminal operation, not by this method: if it does not exist or cannot
-     * be read, the {@link IOException} is thrown from that terminal operation.</p>
+     * be read, the {@link IOException} is thrown from that terminal operation. A directory is rejected there too, but
+     * with an {@link IllegalArgumentException}, not an {@code IOException}.</p>
      *
      * @param path the path to read lines from.
      * @param charset the charset to use for decoding the file; if {@code null}, the default charset is used.
@@ -5648,16 +5652,29 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
         checkArgNotNull(mapper, cs.mapper);
 
         return create(new Throwables.Iterator<>() {
-            private Iterator<? extends R> cur = null;
+            // The current mapped array is walked by index (its length read once, when it becomes current) instead of
+            // through an ObjIterator.of(array) wrapper: same elements and calls, one allocation fewer per mapped array.
+            private R[] cur = null;
+            private int cursor = 0;
+            private int len = 0;
 
             @Override
             public boolean hasNext() throws E {
-                while ((cur == null || !cur.hasNext()) && elements.hasNext()) {
+                while (cursor >= len && elements.hasNext()) {
                     final R[] a = mapper.apply(elements.next());
-                    cur = N.isEmpty(a) ? null : ObjIterator.of(a);
+
+                    if (N.isEmpty(a)) {
+                        cur = null;
+                        len = 0;
+                    } else {
+                        cur = a;
+                        len = a.length;
+                    }
+
+                    cursor = 0;
                 }
 
-                return cur != null && cur.hasNext();
+                return cursor < len;
             }
 
             /**
@@ -5667,11 +5684,11 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
              */
             @Override
             public R next() throws E, NoSuchElementException {
-                if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                if (cursor >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return cur.next();
+                return cur[cursor++];
             }
         }, closeHandlersForNewSeq());
     }
@@ -13052,7 +13069,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * }</pre>
      *
      * <p>The index is an {@code int} (matching {@code Stream.forEachIndexed(..)}), so this operation supports at
-     * most {@link Integer#MAX_VALUE} elements. A longer sequence - reachable for a file- or JDBC-backed source -
+     * most {@code Integer.MAX_VALUE + 1} elements (indexes {@code 0} to {@link Integer#MAX_VALUE}). A longer sequence - reachable for a file- or JDBC-backed source -
      * fails with an {@link ArithmeticException} on the element that would overflow rather than reporting a
      * negative index. Use {@link #indexed()}, whose index is a {@code long}, for such sources.</p>
      *
@@ -13063,7 +13080,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * @throws IllegalStateException if the sequence is already closed
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
-     * @throws ArithmeticException if the sequence holds more than {@link Integer#MAX_VALUE} elements
+     * @throws ArithmeticException if the sequence holds more than {@code Integer.MAX_VALUE + 1} elements
      * @throws E2 if the action throws an exception
      * @see #indexed()
      */
@@ -15761,7 +15778,7 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * // Group persons by age in a TreeMap
      * TreeMap<Integer, List<Person>> byAge = seq.groupTo(
      *     person -> person.getAge(),
-     *     TreeMap::new
+     *     () -> new TreeMap<>()   // not TreeMap::new: ambiguous with groupTo(keyMapper, valueMapper)
      * );
      * }</pre>
      *

@@ -570,7 +570,7 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * Compares this HBaseColumn with another for ordering.
      * The primary comparison is ascending order of versions. If the versions are equal, the values break the
      * tie using only information derived from the values themselves, so the same columns sort the same way in
-     * every run and in every process:
+     * every run and in every process (for values whose hash code is not identity-based; see the last term):
      *
      * <ol>
      * <li>a {@code null} value comes before a non-{@code null} one;</li>
@@ -582,7 +582,11 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *     runtime class is required on both sides, which prevents the asymmetric comparison that a base-class
      *     value and a subclass value would otherwise produce;</li>
      * <li>finally the {@linkplain Object#hashCode() hash code} and then the {@linkplain Object#toString() string
-     *     form} of the values are compared.</li>
+     *     form} of the values are compared. A value that keeps the identity-based {@code Object.hashCode()} - an
+     *     array such as a {@code byte[]} cell value, or an instance of a class that does not override
+     *     {@code hashCode()} - reaches this term with its identity hash code, so equal-version columns holding
+     *     such values are ordered by a process-local number and can sort differently from one run to the next;
+     *     order them with an application-supplied {@link Comparator}.</li>
      * </ol>
      *
      * <p>No process-local fallback (an encounter-order sequence or an identity hash code) is applied after those

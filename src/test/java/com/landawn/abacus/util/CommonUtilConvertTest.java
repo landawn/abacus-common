@@ -1776,4 +1776,52 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
     }
 
     // ---- deep review 2026-10-16 G154 end ----
+
+    // ---- deep review 2026-11-02 G030 begin ----
+
+    // G030-01 (pin): exact-wrapper elements stored directly into a primitive array target; values, nulls and mixed elements unchanged.
+    @Test
+    public void testConvert_wrapperElementsToPrimitiveArray_pinned() {
+        assertArrayEquals(new int[0], CommonUtil.convert(new ArrayList<Integer>(), int[].class));
+        assertArrayEquals(new int[] { 7 }, CommonUtil.convert(List.of(7), int[].class));
+        assertArrayEquals(new int[] { Integer.MIN_VALUE, 0, Integer.MAX_VALUE },
+                CommonUtil.convert(Arrays.asList(Integer.MIN_VALUE, null, Integer.MAX_VALUE), int[].class));
+        assertArrayEquals(new int[] { 1, 0, 3 }, CommonUtil.convert(new Integer[] { 1, null, 3 }, int[].class));
+        assertArrayEquals(new int[] { 1, 2, 3 }, CommonUtil.convert(new java.util.LinkedList<>(Arrays.asList(1, 2L, "3")), int[].class));
+        assertArrayEquals(new int[] { 4, 5 }, CommonUtil.convert(Arrays.asList(4, 5), TypeFactory.getType(int[].class)));
+        assertArrayEquals(new long[] { Long.MIN_VALUE, 0L, 9L }, CommonUtil.convert(Arrays.asList(Long.MIN_VALUE, null, 9), long[].class));
+        assertArrayEquals(new short[] { Short.MIN_VALUE, 2 }, CommonUtil.convert(Arrays.asList(Short.MIN_VALUE, (short) 2), short[].class));
+        assertArrayEquals(new byte[] { Byte.MAX_VALUE, -1 }, CommonUtil.convert(Arrays.asList(Byte.MAX_VALUE, (byte) -1), byte[].class));
+        assertArrayEquals(new boolean[] { true, false, false }, CommonUtil.convert(Arrays.asList(true, null, Boolean.FALSE), boolean[].class));
+        assertArrayEquals(new char[] { 'a', '\0', '\uD800', '\uffff', '7' },
+                CommonUtil.convert(Arrays.asList('a', '\0', '\uD800', '\uffff', '7'), char[].class));
+
+        // floating-point bit patterns (NaN payloads, -0.0) are kept
+        final double[] doubles = CommonUtil.convert(Arrays.asList(-0.0, Double.longBitsToDouble(0x7ff8000000000123L), Double.NEGATIVE_INFINITY),
+                double[].class);
+        assertEquals(Double.doubleToRawLongBits(-0.0), Double.doubleToRawLongBits(doubles[0]));
+        assertEquals(0x7ff8000000000123L, Double.doubleToRawLongBits(doubles[1]));
+        assertEquals(Double.NEGATIVE_INFINITY, doubles[2]);
+        final float[] floats = CommonUtil.convert(Arrays.asList(-0.0f, Float.intBitsToFloat(0x7fc00123)), float[].class);
+        assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(floats[0]));
+        assertEquals(0x7fc00123, Float.floatToRawIntBits(floats[1]));
+
+        // elements that are not the exact wrapper still take the full conversion, with its exceptions
+        assertThrows(ArithmeticException.class, () -> CommonUtil.convert(Arrays.asList(1, Long.MAX_VALUE), int[].class));
+        assertThrows(NumberFormatException.class, () -> CommonUtil.convert(Arrays.asList(1, "x"), int[].class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(Arrays.asList(true, 2), boolean[].class));
+        assertArrayEquals(new double[] { 1.0, 2.5 }, CommonUtil.convert(Arrays.asList(1, 2.5f), double[].class));
+
+        // nested primitive arrays and map values
+        final int[][] nested = CommonUtil.convert(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3)), int[][].class);
+        assertArrayEquals(new int[] { 1, 2 }, nested[0]);
+        assertArrayEquals(new int[] { 3 }, nested[1]);
+        final Map<String, Object> source = new LinkedHashMap<>();
+        source.put("a", Arrays.asList(1, 2));
+        final Map<String, int[]> converted = CommonUtil.convert(source, new TypeReference<Map<String, int[]>>() {
+        }.type());
+        assertArrayEquals(new int[] { 1, 2 }, converted.get("a"));
+    }
+
+    // ---- deep review 2026-11-02 G030 end ----
 }

@@ -52,6 +52,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.util.ClassSecurityValidator;
 
+import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
@@ -90,7 +91,10 @@ import com.landawn.abacus.util.cs;
  * representations, for example {@code Utf8} keys). Any other datum for a bean or Map target, such as an array
  * datum, is rejected with {@code IllegalArgumentException}. A schema field without a matching bean property is skipped while the inherited
  * {@code ignoreUnmatchedProperty} option is enabled (the default) and rejected with a
- * {@link ParsingException} otherwise.</p>
+ * {@link ParsingException} otherwise. A schema field naming a read-only bean property (one with no write path, such
+ * as a computed getter, whose value serialization does write) is skipped, as the JSON and XML parsers skip it - unless
+ * its field is annotated {@code @JsonXmlField(direction = DESERIALIZE_ONLY)}: that property is not serialize-only, so a
+ * schema field naming it is rejected with an {@code IllegalArgumentException} (it has nothing to write the value to).</p>
  *
  * <p>Serialization applies the same Type range checks to {@code Number} values written to {@code int} and
  * {@code long} fields, array items and map values: {@code Integer}/{@code Short}/{@code Byte} (and {@code Long}
@@ -1292,6 +1296,15 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                         throw new ParsingException("Unknown property: " + field.name() + " in class: " + targetType.name());
                     }
 
+                    continue;
+                }
+
+                // A read-only property (a computed getter on an @Entity, an @AccessFieldByMethod field without a setter)
+                // is written by toGenericRecord but has no write path: skip its value as the JSON/XML readers skip a
+                // serialize-only property. BeanInfo.setPropValue would reject it whatever ignoreUnmatchedProperty says.
+                // A read-only property whose field declares DESERIALIZE_ONLY is not serialize-only and is still rejected
+                // there (documented in the class description).
+                if (property.isReadOnlyProperty && property.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY) {
                     continue;
                 }
 

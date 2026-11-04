@@ -166,6 +166,8 @@ public class RefType extends AbstractType<Ref> {
      * @throws UncheckedSQLException if reading the referenced object fails; the original SQLException is retained as the cause
      * @throws ParsingException if a nested value cannot be formatted: a value inside the referenced object that is a
      *         Struct, Array, Ref, SQLXML, RowId or Blob, or any other value the JSON serializer does not support
+     * @throws UnsupportedOperationException if the referenced object itself is a {@link java.sql.Blob}, which its own
+     *         handler cannot format
      */
     @Override
     public String stringOf(final Ref x) throws UncheckedSQLException, ParsingException {

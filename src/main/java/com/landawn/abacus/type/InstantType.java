@@ -22,7 +22,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -182,6 +186,18 @@ public class InstantType extends AbstractTemporalType<Instant> {
         }
 
         final int len = str.length();
+
+        // The yyyy-MM-dd'T'HH:mm:ss[.fraction]Z text stringOf/serializeTo write (years 0000-9999) is read directly:
+        // every java.time path below yields exactly this instant for it, at many times the cost. Any other text (a
+        // lower-case 'z', 24:00, a leap second, ...), and every failure, is left to the parsers below.
+        if (len >= 20 && str.charAt(len - 1) == 'Z' && str.charAt(10) == 'T') {
+            final LocalDate date = LocalDateType.parseIsoLocalDate(str);
+            final LocalTime time = date == null ? null : LocalTimeType.parseIsoLocalTime(str, 11, len - 1, true);
+
+            if (time != null) {
+                return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC);
+            }
+        }
 
         // Fast path for the two most common ISO-8601 UTC forms produced by stringOf/serializeTo. If the fast-path
         // formatter rejects the input, fall back to the general parser below so that every Instant.toString()

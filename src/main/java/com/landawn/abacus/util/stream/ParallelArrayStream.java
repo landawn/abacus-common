@@ -1649,7 +1649,106 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return flatmap(t -> Array.asList(mapper.apply(t)));
+        if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
+            return flatmap(t -> Array.asList(mapper.apply(t)));
+        }
+
+        // The workers of flatmap(t -> Array.asList(mapper.apply(t))), except that each mapped array is indexed directly
+        // (as ArrayStream.flatMapArray does): the List and Iterator wrapped around every mapped array were the only
+        // per-source-element allocations. An exhausted array is dropped, as flatmap drops its exhausted iterator.
+        final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
+        final List<ObjIteratorEx<R>> iters = new ArrayList<>(threadNum);
+
+        if (splitStrategy == SplitStrategy.ARRAY) {
+            final int sliceSize = (toIndex - fromIndex) / threadNum + ((toIndex - fromIndex) % threadNum == 0 ? 0 : 1);
+
+            for (int i = 0; i < threadNum; i++) {
+                final int sliceIndex = i;
+                iters.add(new ObjIteratorEx<>() {
+                    private int cursor = arraySliceBoundary(fromIndex, toIndex, sliceIndex, sliceSize);
+                    private final int to = arraySliceBoundary(fromIndex, toIndex, sliceIndex + 1, sliceSize);
+                    private R[] cur = null;
+                    private int len = 0;
+                    private int idx = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        while (idx >= len && cursor < to) {
+                            cur = null;
+                            cur = mapper.apply(elements[cursor++]);
+                            len = N.len(cur);
+                            idx = 0;
+                        }
+
+                        if (idx < len) {
+                            return true;
+                        }
+
+                        cur = null;
+                        return false;
+                    }
+
+                    @Override
+                    public R next() throws NoSuchElementException {
+                        if (idx >= len && !hasNext()) {
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                        }
+
+                        return cur[idx++];
+                    }
+                });
+            }
+        } else {
+            final MutableInt cursor = MutableInt.of(fromIndex);
+
+            for (int i = 0; i < threadNum; i++) {
+                iters.add(new ObjIteratorEx<>() {
+                    private boolean exhausted = false;
+                    private R[] cur = null;
+                    private int len = 0;
+                    private int idx = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        while (idx >= len && !exhausted) {
+                            cur = null;
+                            final T next;
+
+                            synchronized (elements) {
+                                if (cursor.value() < toIndex) {
+                                    next = elements[cursor.getAndIncrement()];
+                                } else {
+                                    exhausted = true;
+                                    break;
+                                }
+                            }
+
+                            cur = mapper.apply(next);
+                            len = N.len(cur);
+                            idx = 0;
+                        }
+
+                        if (idx < len) {
+                            return true;
+                        }
+
+                        cur = null;
+                        return false;
+                    }
+
+                    @Override
+                    public R next() throws NoSuchElementException {
+                        if (idx >= len && !hasNext()) {
+                            throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                        }
+
+                        return cur[idx++];
+                    }
+                });
+            }
+        }
+
+        return newStream(Stream.parallelConcatIterators(iters, iters.size(), cancelUncompletedThreads, asyncExecutor), false, null);
     }
 
     /**

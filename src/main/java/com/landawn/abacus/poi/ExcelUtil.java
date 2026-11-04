@@ -150,7 +150,10 @@ import lombok.Data;
  * (no SXSSF streaming-write variant), so very large exports may exhaust memory.
  * {@code writeRowsToSheet} writes each data row using that row's own size, so rows wider or narrower
  * than {@code headers} are emitted ragged (no padding or truncation to the header column count); the
- * {@code Dataset} overloads are rectangular by construction. The {@code exportSheetToCsv} File-sink
+ * {@code Dataset} overloads are rectangular by construction. Excel's own limits apply to every writer: a cell
+ * holds at most 32,767 characters, and a sheet at most 65,536 rows and 256 columns in XLS (1,048,576 rows and
+ * 16,384 columns in XLSX), header row included; POI rejects content beyond them with an
+ * {@code IllegalArgumentException}, and nothing is written. The {@code exportSheetToCsv} File-sink
  * overloads use whatever charset {@link IOUtil#newOutputStreamWriter(OutputStream)} selects; supply a
  * {@link Writer} (e.g. an {@link java.io.OutputStreamWriter} over a chosen
  * {@link java.nio.charset.Charset}) for explicit encoding control.
@@ -1195,7 +1198,11 @@ public final class ExcelUtil {
      * <p>Cell values are automatically converted based on their Java types: String, Boolean,
      * Date, LocalDate, LocalDateTime, Calendar, and Number types (set as double) are set using
      * type-specific cell methods, while other types are converted to strings.
-     * {@code null} values result in blank cells.</p>
+     * {@code null} values result in blank cells. An Excel number cell cannot hold NaN or an infinite
+     * value: such a number (including a {@code BigDecimal} beyond the {@code double} range) is stored by POI
+     * as an error cell ({@code #NUM!} or {@code #DIV/0!}), which the readers return as an empty string. Likewise a
+     * date or date-time before 1899-12-31, which Excel's 1900 date system cannot represent, is stored by POI as the
+     * number {@code -1} (read back as {@code -1.0}, exported to CSV as {@code -1}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1969,7 +1976,7 @@ public final class ExcelUtil {
     /**
      * Converts the specified sheet from an Excel file to a CSV file.
      * This convenience method exports an Excel sheet to comma-separated values format,
-     * preserving all data including the header row. The charset depends on the
+     * exporting every row including the header row. The charset depends on the
      * underlying {@code IOUtil.newOutputStreamWriter} implementation.
      *
      * <p>Cell values are converted to their string representations: numeric cells are rendered exactly as
@@ -2031,12 +2038,13 @@ public final class ExcelUtil {
      * Converts the sheet with the specified name from an Excel file to a CSV file.
      * This method allows exporting a specific worksheet by name rather than index, which is
      * more robust when working with workbooks where sheet positions might change. The charset
-     * depends on the underlying {@code IOUtil.newOutputStreamWriter} implementation and all original
-     * data, including headers, is preserved.
+     * depends on the underlying {@code IOUtil.newOutputStreamWriter} implementation and every row,
+     * including the header row, is exported.
      *
-     * <p>The conversion process maintains data fidelity by converting each cell type appropriately:
-     * strings remain as text, numbers are formatted, and formulas are exported as their text
-     * representation. The output CSV uses standard comma delimiting with proper escaping.</p>
+     * <p>Each cell type is converted as described for {@link #exportSheetToCsv(File, int, File)}:
+     * strings remain as text, numbers are rendered as the sheet displays them (under the General format a
+     * long value is rounded or written in scientific notation, so it can lose digits), and formulas are
+     * exported as their text representation. The output CSV uses standard comma delimiting with proper escaping.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

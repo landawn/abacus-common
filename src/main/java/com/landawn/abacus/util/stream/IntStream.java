@@ -2718,7 +2718,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * IntStream.of(1, 2, 3).kthLargest(5);   // returns OptionalInt.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers up to {@code k} elements,
+     * except that an unsorted array-backed stream may select the result in a copy of all its elements.
      *
      * @param k the position (1-based) of the largest element to retrieve; must be positive
      * @return an OptionalInt containing the k-th largest element, or an empty OptionalInt if the stream is empty or the count of elements is less than k
@@ -3789,8 +3790,84 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
         final IntBuffer view = buf.duplicate();
 
-        //noinspection resource
-        return range(view.position(), view.limit()).map(view::get);
+        if (!view.hasRemaining()) {
+            // An empty window keeps the original empty stream (its toArray() returns a new empty array).
+            //noinspection resource
+            return range(view.position(), view.limit()).map(view::get);
+        }
+
+        // Every element it returns is read by the same get(i), in the same order, as range(position, limit).map(view::get).
+        // count() and advance() move the cursor without reading the skipped elements (an absolute get(i) inside the fixed
+        // window has no side effect and cannot fail), and toArray()/toList() fill an exactly sized array instead of
+        // growing a list one element at a time through two iterator layers.
+        final int toIndex = view.limit();
+
+        // range(..).map(view::get) gave its stream exactly one close handler: the run-once link to its internal range
+        // stream, whose close() releases nothing. Keep that shape (one run-once no-op handler, not EMPTY_CLOSE_HANDLER,
+        // which counts as none) so that iterator()'s close warning, toJdkStream()'s close link and the
+        // onClose()/close() behaviour stay as they were.
+        final Collection<LocalRunnable> closeHandlers = mergeCloseHandlers(() -> {
+            // the internal range stream's close(): nothing to release
+        }, null);
+
+        return new IteratorIntStream(new IntIteratorEx() {
+            private int cursor = view.position();
+
+            @Override
+            public boolean hasNext() {
+                return cursor < toIndex;
+            }
+
+            @Override
+            public int nextInt() throws NoSuchElementException {
+                if (cursor >= toIndex) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                return view.get(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n <= 0 || cursor >= toIndex) {
+                    return;
+                }
+
+                cursor = n < toIndex - cursor ? cursor + (int) n : toIndex;
+            }
+
+            @Override
+            public long count() {
+                final long ret = toIndex - cursor;
+                cursor = toIndex;
+                return ret;
+            }
+
+            @Override
+            public int[] toArray() {
+                if (cursor >= toIndex) {
+                    return N.EMPTY_INT_ARRAY; // what the inherited toList().trimToSize().internalArray() returned
+                }
+
+                final int[] result = new int[toIndex - cursor];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = view.get(cursor++);
+                }
+
+                return result;
+            }
+
+            @Override
+            public IntList toList() {
+                return IntList.of(toArray());
+            }
+        }, closeHandlers);
     }
 
     /**
@@ -4138,6 +4215,25 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return a[rowNum++][colNum];
             }
+
+            // The remaining size is known: fill an exactly sized list with the same nextInt() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
+            }
         };
 
         return of(iter);
@@ -4200,6 +4296,25 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 activeIndex = 0;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same nextInt() calls instead of growing
+            // one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final long remaining = count - cnt;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
             }
         };
     }
@@ -4281,6 +4396,25 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                         return a[rowNum++][colNum];
                     }
                 }
+
+                // The remaining size is known: fill an exactly sized list with the same nextInt() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public IntList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final int[] result = new int[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextInt();
+                    }
+
+                    return IntList.of(result);
+                }
             };
 
         } else {
@@ -4314,6 +4448,24 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                     }
                 }
 
+                // The remaining size is known: fill an exactly sized list with the same nextInt() calls instead of
+                // growing one element by element. The inherited toArray() uses this, and its trimToSize() then copies nothing.
+                @Override
+                public IntList toList() {
+                    final long remaining = count - cnt;
+
+                    if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                        return super.toList();
+                    }
+
+                    final int[] result = new int[(int) remaining];
+
+                    for (int i = 0; i < result.length; i++) {
+                        result[i] = nextInt();
+                    }
+
+                    return IntList.of(result);
+                }
             };
         }
 
@@ -4442,6 +4594,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
+
+            // toIntList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public IntList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return IntList.of(toArray());
+            }
         }, true, null);
     }
 
@@ -4548,6 +4711,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
+
+            // toIntList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public IntList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return IntList.of(toArray());
+            }
         }, by > 0, null);
     }
 
@@ -4643,6 +4817,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 cnt = 0;
 
                 return result;
+            }
+
+            // toIntList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public IntList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return IntList.of(toArray());
             }
         }, true, null);
     }
@@ -4749,6 +4934,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 cnt = 0;
 
                 return result;
+            }
+
+            // toIntList() reads this: wrap the exactly sized toArray() result instead of growing a list element by element.
+            // An empty or over-limit remainder keeps the inherited path (and its result/exception for that case).
+            @Override
+            public IntList toList() {
+                if (cnt <= 0 || cnt > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                return IntList.of(toArray());
             }
         }, by > 0, null);
     }
@@ -5842,6 +6038,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return zipFunction.applyAsInt(a[cursor], b[cursor++]);
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextInt() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return IntList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
+            }
         });
     }
 
@@ -5892,6 +6112,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 return zipFunction.applyAsInt(a[cursor], b[cursor], c[cursor++]);
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextInt() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return IntList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
             }
         });
     }
@@ -6137,6 +6381,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 cursor++;
                 return ret;
             }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextInt() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return IntList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
+            }
         });
     }
 
@@ -6195,6 +6463,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                         cursor < cLen ? c[cursor] : valueForNoneC);
                 cursor++;
                 return ret;
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextInt() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final int remaining = len - cursor;
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[remaining];
+
+                for (int i = 0; i < remaining; i++) {
+                    if (!hasNext()) {
+                        return IntList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
             }
         });
     }
@@ -6482,6 +6774,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 } else {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
+            }
+
+            // The remaining size is known: fill an exactly sized list with the same hasNext()/nextInt() calls instead of
+            // growing one element by element (a callback that consumes this iterator re-entrantly still ends the walk early).
+            // The inherited toArray() uses this, and its trimToSize() then copies nothing.
+            @Override
+            public IntList toList() {
+                final long remaining = (long) (lenA - cursorA) + (lenB - cursorB);
+
+                if (remaining <= 0 || remaining > Integer.MAX_VALUE - 8) {
+                    return super.toList();
+                }
+
+                final int[] result = new int[(int) remaining];
+
+                for (int i = 0; i < result.length; i++) {
+                    if (!hasNext()) {
+                        return IntList.of(result, i); // only after a callback consumed this iterator re-entrantly
+                    }
+
+                    result[i] = nextInt();
+                }
+
+                return IntList.of(result);
             }
         });
     }

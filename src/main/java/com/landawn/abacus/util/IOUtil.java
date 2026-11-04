@@ -263,7 +263,7 @@ import lombok.experimental.Accessors;
  *       <p>The {@code InputStream} text overloads split the same way: {@code readAllToString(InputStream[, Charset])}
  *       reads its bytes through {@code read(..)} first and so follows the byte rule above (a zero from the very
  *       first read is retried), while {@code readAllChars}, {@code readChars}, {@code readToString(InputStream,
- *       offset, maxLength)}, {@code readAllLines}, {@code readLines} and {@code readFirstLine} over an
+ *       offset, maxLength)}, {@code readAllLines} and {@code readLines} over an
  *       {@code InputStream} are driven by the JDK decoder and report a zero-byte read as
  *       {@link UncheckedIOException} ("Underlying input stream returned zero bytes").</li>
  *   <li><b>Empty file writes:</b> Every {@code write}/{@code writeLines} overload targeting a {@code File}

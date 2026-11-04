@@ -1177,5 +1177,70 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
             assertTrue(Double.isNaN(g103Parallel(values).findLast(v -> Double.isNaN(v)).get()));
         }
     }
+
     // ---- perf review 2026-09-26 G103 end ----
+    // ---- deep review 2026-11-02 G120 begin ----
+    // G120-01 (pin): the parallel flatMapArray workers index the mapped array directly; null and empty arrays contribute
+    // nothing, every element of every non-empty array is emitted once, and a mapper exception propagates.
+    @Test
+    public void testFlatMapArray_parallelNullEmptyAndMultiElementArrays() {
+        final double[] source = new double[37];
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (i % 26 + 3) * 1.5d;
+        }
+
+        final java.util.function.DoubleFunction<double[]> mapper = v -> {
+            switch (((int) v) % 4) {
+                case 0:
+                    return null;
+                case 1:
+                    return new double[0];
+                case 2:
+                    return new double[] { v };
+                default:
+                    return new double[] { v, (v + 100), -1 };
+            }
+        };
+
+        for (final int from : new int[] { 0, 3 }) {
+            final int to = source.length - from;
+            final double[] expected = DoubleStream.of(source, from, to).flatMapArray(mapper).toArray();
+            Arrays.sort(expected);
+            assertEquals(from == 0 ? 37 : 29, expected.length);
+
+            for (final SplitStrategy strategy : SplitStrategy.values()) {
+                for (int threads = 2; threads <= 5; threads++) {
+                    final double[] actual = new ParallelIteratorDoubleStream(com.landawn.abacus.util.DoubleIterator.of(source, from, to), false, threads,
+                            strategy, null, false, null).flatMapArray(mapper).toArray();
+                    Arrays.sort(actual);
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(expected, actual, strategy + "/" + threads + "/" + from);
+                }
+            }
+        }
+
+        // Only null / empty arrays -> empty result; one source element per worker.
+        final double[] four = { source[0], source[1], source[2], source[3] };
+        assertEquals(0,
+                new ParallelIteratorDoubleStream(com.landawn.abacus.util.DoubleIterator.of(four), false, 4, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> ((int) v) % 2 == 0 ? null : new double[0])
+                        .count());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { 7, 7, 7, 7 },
+                new ParallelIteratorDoubleStream(com.landawn.abacus.util.DoubleIterator.of(four), false, 4, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> new double[] { 7 })
+                        .toArray());
+
+        final RuntimeException failure = new IllegalStateException("G120 boom");
+        final RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> new ParallelIteratorDoubleStream(com.landawn.abacus.util.DoubleIterator.of(source), false, 3, SplitStrategy.ITERATOR, null, false, null)
+                        .flatMapArray(v -> {
+                            if (v == source[10]) {
+                                throw failure;
+                            }
+
+                            return new double[] { v };
+                        })
+                        .toArray());
+        assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
+    }
+    // ---- deep review 2026-11-02 G120 end ----
 }

@@ -1499,4 +1499,230 @@ public class AbstractCharStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G085 end ----
+
+    // ---- deep review 2026-11-02b G090 begin ----
+    // G090-01 (perf pin): sorted()/shuffled(Random) results read through toArray() - empty, single and several elements;
+    // array, iterator, mapped and parallel sources; and the reversed()/skip()/limit() stages that read the snapshot again.
+    @Test
+    public void testSortedShuffledToArray_sourcesAndSizes_g090b() {
+        final char[][] inputs = { {}, { 'h' }, { 'c', '0', 'b', '0', 'j', 'a' }, { 'f', 'e', 'd', 'c', 'b', 'a', 'Z', 'Y', 'X', 'W', 'V', 'q' } };
+
+        for (final char[] a : inputs) {
+            final char[] expected = a.clone();
+            java.util.Arrays.sort(expected);
+            final char[] descending = new char[expected.length];
+
+            for (int i = 0; i < expected.length; i++) {
+                descending[i] = expected[expected.length - 1 - i];
+            }
+
+            final int k = Math.min(2, a.length);
+            final char[] original = a.clone();
+
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, CharStream.of(a).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(original, a);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, CharStream.of(com.landawn.abacus.util.CharIterator.of(a.clone())).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, CharStream.of(a.clone()).map(x -> x).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, CharStream.of(a.clone()).parallel(2).sorted().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(descending, CharStream.of(a.clone()).map(x -> x).sorted().reversed().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOfRange(expected, k, expected.length),
+                    CharStream.of(a.clone()).sorted().skip(2).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(expected, k), CharStream.of(a.clone()).sorted().limit(2).toArray());
+
+            final char[] shuffledExpected = a.clone();
+            com.landawn.abacus.util.N.shuffle(shuffledExpected, new Random(42));
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected, CharStream.of(a.clone()).shuffled(new Random(42)).toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(shuffledExpected,
+                    CharStream.of(com.landawn.abacus.util.CharIterator.of(a.clone())).shuffled(new Random(42)).toArray());
+        }
+    }
+
+    // G090-01 (perf pin): toArray() on a partially consumed sorted() iterator returns exactly the remaining elements and
+    // exhausts the iterator; an exhausted or empty one returns an empty array.
+    @Test
+    public void testSortedIterator_toArrayAfterPartialConsumption_g090b() {
+        final com.landawn.abacus.util.CharIterator iter = CharStream.of('f', 'd', 'j', 'b', 'h').map(x -> x).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals('b', iter.nextChar());
+        org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals('d', iter.nextChar());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { 'f', 'h', 'j' }, iter.toArray());
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertEquals(0, iter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextChar);
+
+        final com.landawn.abacus.util.CharIterator emptyIter = CharStream.of(com.landawn.abacus.util.CharIterator.of(new char[0])).sorted().iterator();
+        org.junit.jupiter.api.Assertions.assertEquals(0, emptyIter.toArray().length);
+        org.junit.jupiter.api.Assertions.assertFalse(emptyIter.hasNext());
+    }
+
+    // G090-01 (perf pin): sorted() stays lazy, and a failure while loading its snapshot is rethrown as the same instance by
+    // every later access (toArray() included) without reading the source again.
+    @Test
+    public void testSortedIterator_loadFailureRethrownByEveryAccess_g090b() {
+        final int[] calls = { 0 };
+        final com.landawn.abacus.util.CharIterator iter = CharStream.of('b', 'c', 'd').map(x -> {
+            calls[0]++;
+
+            if (x == 'c') {
+                throw new IllegalStateException("load failed");
+            }
+
+            return x;
+        }).sorted().iterator();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+
+        final IllegalStateException first = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray);
+        org.junit.jupiter.api.Assertions.assertEquals("load failed", first.getMessage());
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::toArray));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::hasNext));
+        org.junit.jupiter.api.Assertions.assertSame(first, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextChar));
+        org.junit.jupiter.api.Assertions.assertEquals(2, calls[0]);
+    }
+
+    // G090-01 (perf pin): the snapshot is loaded once on the terminal toArray() and the source's close handler runs once.
+    @Test
+    public void testSortedToArray_loadsOnceAndClosesSourceOnce_g090b() {
+        final int[] closed = { 0 };
+        final int[] calls = { 0 };
+        final CharStream sorted = CharStream.of('d', 'b', 'c').map(x -> {
+            calls[0]++;
+            return x;
+        }).onClose(() -> closed[0]++).sorted();
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls[0]);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new char[] { 'b', 'c', 'd' }, sorted.toArray());
+        org.junit.jupiter.api.Assertions.assertEquals(3, calls[0]);
+        org.junit.jupiter.api.Assertions.assertEquals(1, closed[0]);
+    }
+
+    // ---- deep review 2026-11-02b G090 end ----
+    // ---- deep review 2026-11-02b G123 begin ----
+    private static CharList drainG123(final CharIterator iter) {
+        final CharList result = new CharList();
+
+        while (iter.hasNext()) {
+            result.add(iter.nextChar());
+        }
+
+        return result;
+    }
+
+    private static String outcomeG123(final java.util.function.Supplier<CharList> action) {
+        try {
+            return "OK " + Arrays.toString(action.get().toArray());
+        } catch (final RuntimeException e) {
+            return "EX " + e.getClass().getName();
+        }
+    }
+
+    private static CharIterator brokenSourceOpG123(final int op) {
+        final CharIterator failingSource = new CharIterator() {
+            private int cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= 2) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return true;
+            }
+
+            @Override
+            public char nextChar() {
+                return (char) cnt++;
+            }
+        };
+
+        final CharStream stream = CharStream.of(failingSource);
+
+        return (op == 0 ? stream.reversed() : op == 1 ? stream.reverseSorted() : stream.rotated(1)).iteratorEx();
+    }
+
+    // G123-01 (perf pin, port of G091-03): reversed()/rotated()/reverseSorted() iterators build toList() (used by toCharList())
+    // from an exactly sized copy; pin it against the element-by-element walk for empty/single/partially consumed/sub-range/
+    // iterator/parallel sources and rotate distances beyond the size.
+    @Test
+    public void testReversedRotatedReverseSorted_toCharList_g123() {
+        assertArrayEquals(new char[] { 'e', 'd', 'c', 'b', 'a' }, CharStream.of('a', 'b', 'c', 'd', 'e').reversed().toCharList().toArray());
+        assertArrayEquals(new char[] { 'd', 'e', 'a', 'b', 'c' }, CharStream.of('a', 'b', 'c', 'd', 'e').rotated(2).toCharList().toArray());
+        assertArrayEquals(new char[] { 'b', 'c', 'd', 'e', 'a' }, CharStream.of('a', 'b', 'c', 'd', 'e').rotated(-1).toCharList().toArray());
+        assertArrayEquals(new char[] { 'c', 'b', 'a' }, CharStream.of('c', 'a', 'b').reverseSorted().toCharList().toArray());
+        assertTrue(CharStream.empty().reversed().toCharList().isEmpty());
+        assertTrue(CharStream.empty().rotated(3).toCharList().isEmpty());
+        assertTrue(CharStream.empty().reverseSorted().toCharList().isEmpty());
+        final char[] source = { 'c', 'a', 'b' };
+        final CharList reversed = CharStream.of(source).reversed().toCharList();
+        reversed.set(0, 'z');
+        reversed.add('g');
+        final CharList rotated = CharStream.of(source).rotated(1).toCharList();
+        rotated.set(0, 'z');
+        final CharList reverseSorted = CharStream.of(source).reverseSorted().toCharList();
+        reverseSorted.set(0, 'z');
+        assertArrayEquals(new char[] { 'c', 'a', 'b' }, source);
+        assertArrayEquals(new char[] { 'z', 'a', 'c', 'g' }, reversed.toArray());
+
+        final int[] distances = { Integer.MIN_VALUE, -7, -1, 0, 1, 2, 6, Integer.MAX_VALUE };
+        final List<java.util.function.UnaryOperator<CharStream>> ops = new ArrayList<>();
+        ops.add(CharStream::reversed);
+        ops.add(CharStream::reverseSorted);
+
+        for (final int distance : distances) {
+            ops.add(s -> s.rotated(distance));
+        }
+
+        for (int len = 0; len <= 6; len++) {
+            final int n = len;
+            final char[] padded = new char[n + 2];
+
+            for (int i = 0; i < padded.length; i++) {
+                padded[i] = (char) ('a' + (i * 5) % 7);
+            }
+
+            final char[] a = Arrays.copyOfRange(padded, 1, 1 + n);
+            final List<java.util.function.Supplier<CharStream>> sources = List.of(() -> CharStream.of(a.clone()), () -> CharStream.of(padded, 1, 1 + n),
+                    () -> CharStream.of(CharList.of(a.clone()).iterator()), () -> CharStream.of(a.clone()).parallel(2));
+
+            for (final java.util.function.Supplier<CharStream> src : sources) {
+                for (final java.util.function.UnaryOperator<CharStream> op : ops) {
+                    assertArrayEquals(drainG123(op.apply(src.get()).iteratorEx()).toArray(), op.apply(src.get()).toCharList().toArray());
+
+                    for (int consumed = 0; consumed <= n + 1; consumed++) {
+                        final CharIterator expectedIter = op.apply(src.get()).iteratorEx();
+                        final CharIterator iter = op.apply(src.get()).iteratorEx();
+
+                        for (int i = 0; i < consumed && iter.hasNext(); i++) {
+                            assertEquals(expectedIter.nextChar(), iter.nextChar());
+                        }
+
+                        final CharList rest = iter.toList();
+                        assertArrayEquals(drainG123(expectedIter).toArray(), rest.toArray());
+                        assertFalse(iter.hasNext());
+                        assertTrue(iter.toList().isEmpty());
+                        rest.add('g');
+                        assertEquals('g', rest.get(rest.size() - 1));
+                    }
+                }
+            }
+        }
+    }
+
+    // G123-01 (perf pin): after a failed materialization, toList() must keep behaving like the element-by-element walk on every
+    // retry (reversed() keeps the inherited walk while its backing array is still null).
+    @Test
+    public void testReversedRotatedReverseSorted_toListRetryAfterFailure_g123() {
+        for (int op = 0; op < 3; op++) {
+            final CharIterator viaToList = brokenSourceOpG123(op);
+            final CharIterator viaWalk = brokenSourceOpG123(op);
+
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(viaToList::toList));
+            assertEquals("EX java.lang.IllegalStateException", outcomeG123(() -> drainG123(viaWalk)));
+
+            for (int retry = 0; retry < 3; retry++) {
+                assertEquals(outcomeG123(() -> drainG123(viaWalk)), outcomeG123(viaToList::toList), "op=" + op + ", retry=" + retry);
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G123 end ----
 }

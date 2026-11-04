@@ -50,7 +50,7 @@
  *
  * <h2>XML parser: known limitations and fixed issues</h2>
  * <p><i>XML parser: known limitations, and the issues fixed in the review rounds of 2026-10-05 to 2026-10-07 (r47 to r57, r62 and r63)</i>.
- * The same content is kept as plain text in {@code docs/xml_parser_limitation.txt} of the project.</p>
+ * The same content, extended by L18 and the fixed issues I56 .. I58, is kept as plain text in {@code docs/xml_parser_limitation.txt} of the project.</p>
  * <h3>Scope and notation</h3>
  * <p>Scope: the deserialization behavior of the two XML parsers, XmlParserImpl (standard XML, StAX and DOM backends) and AbacusXmlParserImpl
  * (Abacus XML, StAX, DOM and SAX backends), for compact JSON text, type metadata and XmlDeserConfig. Every issue below was reproduced on the
@@ -81,11 +81,12 @@
  *   backend.</li>
  *   <li>A collection root with no items or only blank text, such as &lt;list/&gt;, is an empty collection of the requested type on
  *   every reader. A root of any type (bean, map, array, collection or scalar) marked isNull="true" is null on every reader, whatever payload it
- *   carries; a null collection root is distinct from an empty collection or a collection containing a null item. A blank map, bean or MapEntity
+ *   carries (a primitive target class such as int.class reads as its default value on the standard readers, as null on the Abacus readers);
+ *   a null collection root is distinct from an empty collection or a collection containing a null item. A blank map, bean or MapEntity
  *   item of an array or collection is an empty value of that type on both standard readers. Declared MapEntity elements retain their names
  *   and type in root containers and collection/array properties; a blank
  *   nested list or array item written by hand (&lt;list&gt;&lt;list/&gt;&lt;/list&gt;) remains backend-specific on the standard parser
- *   (L18); the writers emit [] or isNull="true" for those.</li>
+ *   (an empty container on its StAX reader, null on its DOM reader; L18 in docs/xml_parser_limitation.txt); the writers emit [] or isNull="true" for those.</li>
  *   <li>Map implementation metadata never breaks the declared value shape: a list-valued map (Spring MultiValueMap) that cannot hold the
  *   declared, configured or overridden values falls back to an ordinary LinkedHashMap; a declared reference array keeps its class, metadata
  *   types the items.</li>

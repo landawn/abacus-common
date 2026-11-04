@@ -1432,7 +1432,8 @@ public final class ClassUtil {
 
             if (file.exists() && file.isDirectory()) {
                 findClassesInDirectory(file, packageName, isRecursive, skipClassLoadingException, predicate, classes);
-            } else if (file.exists() && file.getName().endsWith(JAR_POSTFIX)) {
+            } else if (file.exists() && Strings.endsWithIgnoreCase(file.getName(), JAR_POSTFIX)) {
+                // Case-insensitive: the class loader serves "LIB.JAR" / "Lib.Jar" archives like any other JAR.
                 JarFile jarFile = null;
 
                 try { //NOSONAR
@@ -2913,10 +2914,8 @@ public final class ClassUtil {
             }
         }
 
-        MethodHandles.Lookup lookup = null;
-
         try {
-            lookup = MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup());
+            final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(declaringClass, MethodHandles.lookup());
 
             return lookup.in(declaringClass).unreflect(method);
         } catch (final Exception e) {
@@ -2927,11 +2926,9 @@ public final class ClassUtil {
                 return constructor.newInstance(declaringClass).in(declaringClass).unreflect(method);
             } catch (final Exception ex) {
                 try {
-                    if (lookup == null) {
-                        lookup = MethodHandles.lookup();
-                    }
-
-                    return lookup.unreflect(method);
+                    // Always this class's own full-privilege lookup. Retrying the private lookup of the first attempt would
+                    // only repeat its failure - e.g. a caller-sensitive method (Class.forName) once its package is opened.
+                    return MethodHandles.lookup().unreflect(method);
                 } catch (final Exception exx) {
                     throw new UnsupportedOperationException(exx);
                 }

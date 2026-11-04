@@ -2096,4 +2096,109 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertThrows(NullPointerException.class, () -> Stream.of(withNull.iterator()).parallel(4).findFirst(x -> x == null));
     }
     // ---- perf review 2026-09-26 G104 end ----
+
+    // ---- deep review 2026-11-02b G111 begin ----
+    // G111-01: pin for the parallel flatMapArray worker that reads the mapped arrays in place (null, empty, single and
+    // multi-element arrays, null elements, a shared array, mapper call count, close count, sequential fallback).
+    @Test
+    public void testFlatMapArray_parallelInPlaceArrays_r116() {
+        final List<Integer> data = new ArrayList<>();
+
+        for (int i = 0; i < 300; i++) {
+            data.add(i);
+        }
+
+        final Integer[] shared = { 7, null, 8 };
+        final java.util.function.Function<Integer, Integer[]> arrays = x -> {
+            switch (x % 6) {
+                case 0:
+                    return null;
+                case 1:
+                    return new Integer[0];
+                case 2:
+                    return new Integer[] { x };
+                case 3:
+                    return new Integer[] { x, null, -x };
+                case 4:
+                    return shared;
+                default:
+                    return new Integer[] { x, x + 1000 };
+            }
+        };
+
+        final java.util.Comparator<Integer> order = java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder());
+        final List<Integer> expected = new ArrayList<>();
+
+        for (final Integer x : data) {
+            final Integer[] a = arrays.apply(x);
+
+            if (a != null) {
+                expected.addAll(Arrays.asList(a));
+            }
+        }
+
+        expected.sort(order);
+
+        for (final int threads : new int[] { 1, 2, 4, 7 }) {
+            final AtomicInteger calls = new AtomicInteger();
+            final AtomicInteger closed = new AtomicInteger();
+            final List<Integer> actual = new ArrayList<>(Stream.of(data.iterator()).parallel(threads).onClose(closed::incrementAndGet).flatMapArray(x -> {
+                calls.incrementAndGet();
+                return arrays.apply(x);
+            }).toList());
+
+            actual.sort(order);
+            assertEquals(expected, actual, "threads=" + threads);
+            assertEquals(data.size(), calls.get(), "threads=" + threads);
+            assertEquals(1, closed.get(), "threads=" + threads);
+        }
+
+        assertTrue(Stream.of(new ArrayList<Integer>().iterator()).parallel(4).flatMapArray(x -> new Integer[] { x }).toList().isEmpty());
+        assertEquals(0, Stream.of(data.iterator()).parallel(4).flatMapArray(x -> (x & 1) == 0 ? null : new Integer[0]).count());
+        assertEquals(600, Stream.of(data.iterator()).parallel(4).flatMapArray(x -> new Integer[] { x, x }).count());
+    }
+
+    // G111-01: pin - drained iterator, mapper failure and a null mapper on the parallel flatMapArray path.
+    @Test
+    public void testFlatMapArray_parallelIteratorAndFailure_r116() {
+        try (Stream<Integer> s = Stream.of(Arrays.asList(1, 2, 3).iterator()).parallel(4).flatMapArray(x -> new Integer[] { x, null })) {
+            final Iterator<Integer> it = s.iterator();
+            int count = 0;
+            int nulls = 0;
+
+            while (it.hasNext()) {
+                if (it.next() == null) {
+                    nulls++;
+                }
+
+                count++;
+            }
+
+            assertEquals(6, count);
+            assertEquals(3, nulls);
+            assertFalse(it.hasNext());
+            assertThrows(java.util.NoSuchElementException.class, it::next);
+        }
+
+        final List<Integer> data = new ArrayList<>();
+
+        for (int i = 0; i < 100; i++) {
+            data.add(i);
+        }
+
+        final AtomicBoolean closed = new AtomicBoolean();
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> Stream.of(data.iterator()).parallel(4).onClose(() -> closed.set(true)).flatMapArray(x -> {
+                    if (x == 50) {
+                        throw new IllegalStateException("flatMapArray failure");
+                    }
+
+                    return new Integer[] { x };
+                }).toList());
+
+        assertEquals("flatMapArray failure", thrown.getMessage());
+        assertTrue(closed.get());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(data.iterator()).parallel(4).flatMapArray(null));
+    }
+    // ---- deep review 2026-11-02b G111 end ----
 }

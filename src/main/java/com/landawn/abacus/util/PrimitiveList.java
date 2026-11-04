@@ -221,8 +221,10 @@ import com.landawn.abacus.annotation.Beta;
  * {@code final}</b>, so none of them can be customized this way; a caller who needs different behaviour
  * has to subclass {@code PrimitiveList} directly and implement its abstract contract.
  * <ul>
- *   <li><b>Algorithm Tuning:</b> {@link #needToSet(int, int)} decides between the linear and the
- *       hash-based path in {@code containsAll}, {@code disjoint}, {@code removeAll} and {@code retainAll}</li>
+ *   <li><b>Algorithm Tuning:</b> {@link #needToSet(int, int)} is the size heuristic the shipped lists other than
+ *       {@code BooleanList} use to choose between the linear and the hash-based path in {@code containsAll},
+ *       {@code disjoint}, {@code removeAll} and {@code retainAll}. Those methods are abstract here and this
+ *       class never calls it, so it only takes effect in a subclass whose own implementations call it</li>
  *   <li><b>Collection Suppliers:</b> {@link #createMultisetSupplier()} backs {@link #toMultiset()} and
  *       {@link #createSetSupplier()} backs {@link #toSet()}. {@link #createListSupplier()} and
  *       {@link #createMapSupplier()} are provided for subclass use and are not called by this class</li>

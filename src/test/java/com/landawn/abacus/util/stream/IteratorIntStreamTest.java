@@ -495,4 +495,69 @@ public class IteratorIntStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G098 end ----
+
+    // ---- deep review 2026-11-02 G124 begin ----
+
+    // G124-01 (pin): top(n) with the natural comparator rejects candidates by a primitive compare; the result (incl. its
+    // element order) must equal the generic comparator path, for edge values, duplicates and every n around the size.
+    @Test
+    public void testTop_naturalOrderMatchesComparatorPath() {
+        final int[][] inputs = { {}, { 7 }, { 3, 3, 3 }, { Integer.MIN_VALUE, Integer.MAX_VALUE, 0, -1, 1, 128, -129, Integer.MAX_VALUE },
+                { 5, 1, 9, -3, 1000, 7, 9, -1000, 2, 8, 6, 4, 1000, 3, -7, 11, 12, 13, 0, 14 },
+                { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }, { 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 } };
+
+        for (final int[] input : inputs) {
+            for (int n = 1; n <= input.length + 2; n++) {
+                final int[] expected = iter(input).top(n, (a, b) -> Integer.compare(a, b)).toArray();
+                final int[] actual = iter(input).top(n).toArray();
+                assertArrayEquals(expected, actual, "n=" + n + ", input=" + java.util.Arrays.toString(input));
+
+                final int[] sortedInput = input.clone();
+                java.util.Arrays.sort(sortedInput);
+                final int[] sortedActual = actual.clone();
+                java.util.Arrays.sort(sortedActual);
+                assertArrayEquals(java.util.Arrays.copyOfRange(sortedInput, Math.max(0, input.length - n), input.length), sortedActual);
+
+                assertEquals(Math.max(0, Math.min(n, input.length) - 1), iter(input).top(n).skip(1).count());
+            }
+        }
+    }
+
+    // G124-01 (pin): the natural-order heap survives a failed source read, so a retry resumes with the accepted values.
+    @Test
+    public void testTop_naturalOrderRetryAfterSourceFailure() {
+        final int[] values = { 4, 9, 1, 7, 300, -2 };
+        final int[] calls = { 0 };
+        final IntIterator failingOnce = new IntIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < values.length;
+            }
+
+            @Override
+            public int nextInt() {
+                if (cursor == 3 && calls[0]++ == 0) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return values[cursor++];
+            }
+        };
+
+        try (IntStream stream = IntStream.of(failingOnce).top(2)) {
+            final IntIterator top = stream.iterator();
+            assertThrows(IllegalStateException.class, top::hasNext);
+
+            final List<Integer> result = new java.util.ArrayList<>();
+            while (top.hasNext()) {
+                result.add(top.nextInt());
+            }
+            result.sort(null);
+            assertEquals(java.util.Arrays.asList(9, 300), result);
+        }
+    }
+
+    // ---- deep review 2026-11-02 G124 end ----
 }

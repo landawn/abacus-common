@@ -48,14 +48,54 @@ final class GuavaHashFunction implements HashFunction {
     final com.google.common.hash.HashFunction gHashFunction;
 
     /**
+     * {@code true} only for MessageDigest / Mac / Checksum based functions (see {@link #wrapByteHashFunction}): their
+     * hashers are {@link GuavaHasher.ByteHasher}s with a bulk {@code put(CharSequence)} path. A performance switch
+     * only; it never changes a result.
+     */
+    final boolean bulkUnencodedChars;
+
+    /**
+     * {@code true} only for Murmur3_32 based functions (see {@link #wrapPerCharHashFunction}): their hashers are
+     * {@link GuavaHasher.PerCharHasher}s, which add char arrays one {@code putChar} at a time. A performance switch
+     * only; it never changes a result.
+     */
+    final boolean perCharArrays;
+
+    /**
      * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
      *
      * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
      * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
      */
     GuavaHashFunction(final com.google.common.hash.HashFunction guavaHashFunction) throws NullPointerException {
+        this(guavaHashFunction, false);
+    }
+
+    /**
+     * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
+     *
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @param bulkUnencodedChars whether unencoded character sequences may be fed to its hashers in bulk chunks
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
+     */
+    GuavaHashFunction(final com.google.common.hash.HashFunction guavaHashFunction, final boolean bulkUnencodedChars) throws NullPointerException {
+        this(guavaHashFunction, bulkUnencodedChars, false);
+    }
+
+    /**
+     * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
+     *
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @param bulkUnencodedChars whether unencoded character sequences may be fed to its hashers in bulk chunks
+     * @param perCharArrays whether its hashers add char arrays one {@code putChar} at a time (ignored if {@code bulkUnencodedChars})
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
+     */
+    GuavaHashFunction(final com.google.common.hash.HashFunction guavaHashFunction, final boolean bulkUnencodedChars, final boolean perCharArrays)
+            throws NullPointerException {
         N.requireNonNull(guavaHashFunction, cs.guavaHashFunction);
         this.gHashFunction = guavaHashFunction;
+        this.bulkUnencodedChars = bulkUnencodedChars;
+        this.perCharArrays = perCharArrays;
     }
 
     /**
@@ -85,6 +125,31 @@ final class GuavaHashFunction implements HashFunction {
     }
 
     /**
+     * Wraps a Guava hash function whose hashers are byte-oriented (backed by a {@code MessageDigest}, {@code Mac}
+     * or {@code Checksum}, with Guava's default per-char {@code putUnencodedChars}/{@code hashUnencodedChars}),
+     * so that unencoded character sequences are hashed through the bulk path. Results are identical to {@link #wrap}.
+     *
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @return a new GuavaHashFunction instance wrapping the given function
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
+     */
+    static GuavaHashFunction wrapByteHashFunction(final com.google.common.hash.HashFunction guavaHashFunction) throws NullPointerException {
+        return new GuavaHashFunction(guavaHashFunction, true);
+    }
+
+    /**
+     * Wraps a Guava Murmur3_32 hash function, whose hashers add a char more cheaply with {@code putChar} than through
+     * the bulk byte-buffer path of {@link GuavaHasher#put(char[], int, int)}. Results are identical to {@link #wrap}.
+     *
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @return a new GuavaHashFunction instance wrapping the given function
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
+     */
+    static GuavaHashFunction wrapPerCharHashFunction(final com.google.common.hash.HashFunction guavaHashFunction) throws NullPointerException {
+        return new GuavaHashFunction(guavaHashFunction, false, true);
+    }
+
+    /**
      * {@inheritDoc}
      *
      * <p>Creates a new hasher by delegating to the wrapped Guava hash function's
@@ -95,7 +160,10 @@ final class GuavaHashFunction implements HashFunction {
      */
     @Override
     public Hasher newHasher() {
-        return GuavaHasher.wrap(gHashFunction.newHasher());
+        final com.google.common.hash.Hasher guavaHasher = gHashFunction.newHasher();
+
+        return bulkUnencodedChars ? new GuavaHasher.ByteHasher(guavaHasher)
+                : perCharArrays ? new GuavaHasher.PerCharHasher(guavaHasher) : GuavaHasher.wrap(guavaHasher);
     }
 
     /**
@@ -111,7 +179,10 @@ final class GuavaHashFunction implements HashFunction {
      */
     @Override
     public Hasher newHasher(final int expectedInputSize) throws IllegalArgumentException {
-        return GuavaHasher.wrap(gHashFunction.newHasher(expectedInputSize));
+        final com.google.common.hash.Hasher guavaHasher = gHashFunction.newHasher(expectedInputSize);
+
+        return bulkUnencodedChars ? new GuavaHasher.ByteHasher(guavaHasher)
+                : perCharArrays ? new GuavaHasher.PerCharHasher(guavaHasher) : GuavaHasher.wrap(guavaHasher);
     }
 
     /**
@@ -179,7 +250,8 @@ final class GuavaHashFunction implements HashFunction {
      * {@inheritDoc}
      *
      * <p>Computes the hash of a character sequence without encoding by delegating to
-     * the wrapped Guava hash function's {@code hashUnencodedChars()} method.
+     * the wrapped Guava hash function's {@code hashUnencodedChars()} method (for MessageDigest, Mac and
+     * Checksum based functions: to a {@link GuavaHasher.ByteHasher}'s bulk {@code put(CharSequence)}, with the same result).
      *
      * @param input the character sequence to hash
      * @return the hash code for the supplied character sequence
@@ -187,6 +259,15 @@ final class GuavaHashFunction implements HashFunction {
      */
     @Override
     public HashCode hash(final CharSequence input) throws NullPointerException {
+        final int length;
+
+        if (bulkUnencodedChars && (length = input.length()) >= GuavaHasher.BULK_CHARS_THRESHOLD) {
+            // The same steps as Guava's AbstractHashFunction.hashUnencodedChars (which these functions inherit),
+            // including newHasher(length * 2) and its IllegalArgumentException when that overflows, but the chars
+            // go through GuavaHasher's bulk path instead of one engine update per char.
+            return new GuavaHasher.ByteHasher(gHashFunction.newHasher(length * 2)).put(input).hash();
+        }
+
         return gHashFunction.hashUnencodedChars(input);
     }
 

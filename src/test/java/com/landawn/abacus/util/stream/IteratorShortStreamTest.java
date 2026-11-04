@@ -443,4 +443,74 @@ public class IteratorShortStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G099 end ----
+
+    // ---- deep review 2026-11-02 G105 begin ----
+
+    // G105-01 (pin): top(n) with the natural comparator rejects candidates by a primitive compare; the result (incl. its
+    // element order) must equal the generic comparator path, for edge values, duplicates and every n around the size.
+    @Test
+    public void testTop_naturalOrderMatchesComparatorPath() {
+        final short[][] inputs = { {}, { (short) 7 }, { (short) 3, (short) 3, (short) 3 },
+                { Short.MIN_VALUE, Short.MAX_VALUE, (short) 0, (short) -1, (short) 1, (short) 128, (short) -129, Short.MAX_VALUE },
+                { (short) 5, (short) 1, (short) 9, (short) -3, (short) 1000, (short) 7, (short) 9, (short) -1000, (short) 2, (short) 8, (short) 6, (short) 4,
+                        (short) 1000, (short) 3, (short) -7, (short) 11, (short) 12, (short) 13, (short) 0, (short) 14 },
+                { (short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9, (short) 10, (short) 11, (short) 12,
+                        (short) 13, (short) 14, (short) 15, (short) 16, (short) 17, (short) 18, (short) 19 },
+                { (short) 19, (short) 18, (short) 17, (short) 16, (short) 15, (short) 14, (short) 13, (short) 12, (short) 11, (short) 10, (short) 9, (short) 8,
+                        (short) 7, (short) 6, (short) 5, (short) 4, (short) 3, (short) 2, (short) 1 } };
+
+        for (final short[] input : inputs) {
+            for (int n = 1; n <= input.length + 2; n++) {
+                final short[] expected = iter(input).top(n, (a, b) -> Short.compare(a, b)).toArray();
+                final short[] actual = iter(input).top(n).toArray();
+                assertArrayEquals(expected, actual, "n=" + n + ", input=" + java.util.Arrays.toString(input));
+
+                final short[] sortedInput = input.clone();
+                java.util.Arrays.sort(sortedInput);
+                final short[] sortedActual = actual.clone();
+                java.util.Arrays.sort(sortedActual);
+                assertArrayEquals(java.util.Arrays.copyOfRange(sortedInput, Math.max(0, input.length - n), input.length), sortedActual);
+
+                assertEquals(Math.max(0, Math.min(n, input.length) - 1), iter(input).top(n).skip(1).count());
+            }
+        }
+    }
+
+    // G105-01 (pin): the natural-order heap survives a failed source read, so a retry resumes with the accepted values.
+    @Test
+    public void testTop_naturalOrderRetryAfterSourceFailure() {
+        final short[] values = { (short) 4, (short) 9, (short) 1, (short) 7, (short) 300, (short) -2 };
+        final int[] calls = { 0 };
+        final ShortIterator failingOnce = new ShortIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < values.length;
+            }
+
+            @Override
+            public short nextShort() {
+                if (cursor == 3 && calls[0]++ == 0) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return values[cursor++];
+            }
+        };
+
+        try (ShortStream stream = ShortStream.of(failingOnce).top(2)) {
+            final ShortIterator top = stream.iterator();
+            assertThrows(IllegalStateException.class, top::hasNext);
+
+            final List<Short> result = new java.util.ArrayList<>();
+            while (top.hasNext()) {
+                result.add(top.nextShort());
+            }
+            result.sort(null);
+            assertEquals(java.util.Arrays.asList((short) 9, (short) 300), result);
+        }
+    }
+
+    // ---- deep review 2026-11-02 G105 end ----
 }

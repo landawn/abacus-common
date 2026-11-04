@@ -165,7 +165,7 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
     /**
      * Serializes a multiset to its JSON string representation.
      * The multiset is serialized as a JSON object where each element maps to its count
-     * (e.g., {@code {"apple":3,"banana":2}}).
+     * (e.g., {@code {"apple": 3, "banana": 2}}).
      * For ordered multisets ({@link LinkedHashMultiset}, {@link ImmutableMultiset} and {@link SortedMultiset} implementations), insertion or
      * sort order is preserved.
      *

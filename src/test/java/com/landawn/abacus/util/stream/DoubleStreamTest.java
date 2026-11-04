@@ -1494,4 +1494,251 @@ public class DoubleStreamTest extends DoubleStreamTestSupport {
                 DoubleStream.of(1, 2, 3).map(e -> e).zipWith(DoubleStream.of(4, 5), DoubleStream.of(7), 0, 10, 20, (a, b, c) -> a + b + c).skip(1).toList());
     }
 
+    // ---- deep review 2026-11-02b G120 begin ----
+    // G120-06 (pin): DoubleStream.of(DoubleBuffer) for a buffer without an accessible array (direct, read-only, sliced, view of a heap
+    // ByteBuffer) reads the window [position, limit) through a dedicated iterator; toArray()/toList() fill an exact-size
+    // array with the same get(i) reads. Results, laziness (live view), window snapshot and iterator states must match element-wise traversal.
+    @Test
+    public void testOfDoubleBuffer_nonArrayBufferTerminalsMatchElementwise_r116() {
+        final double[] content = { 10, Double.NaN, -0.0d, 0.0d, Double.MAX_VALUE, -1.5d, 5, 5, Double.NEGATIVE_INFINITY, -7, 2, 1 };
+
+        for (int kind = 0; kind < 5; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final double[] expected = Arrays.copyOfRange(content, from, to);
+                    final java.nio.DoubleBuffer buf = g120DoubleBuffer(kind, content, from, to);
+
+                    assertFalse(buf.hasArray());
+                    assertArrayEquals(expected, DoubleStream.of(buf).toArray());
+                    assertArrayEquals(expected, DoubleStream.of(buf).toDoubleList().toArray());
+                    assertEquals(expected.length, DoubleStream.of(buf).count());
+                    assertArrayEquals(g120DoubleSuffix(expected, 3), DoubleStream.of(buf).skip(3).toArray());
+                    assertArrayEquals(g120DoubleSorted(expected), DoubleStream.of(buf).sorted().toArray());
+
+                    final com.landawn.abacus.util.DoubleList list = DoubleStream.of(buf).toDoubleList();
+                    list.add((double) 42); // a fresh, mutable list
+                    assertEquals(expected.length + 1, list.size());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final DoubleIterator iter = DoubleStream.of(buf).iterator();
+
+                        for (int n = 0; n < consumed; n++) {
+                            assertEquals(expected[n], iter.nextDouble());
+                        }
+
+                        final boolean viaArray = (consumed + from + kind) % 2 == 0;
+                        final double[] rest = viaArray ? iter.toArray() : iter.toList().toArray();
+                        assertArrayEquals(g120DoubleSuffix(expected, consumed), rest);
+                        assertFalse(iter.hasNext());
+                        assertEquals(0, iter.toList().size());
+                        assertThrows(NoSuchElementException.class, iter::nextDouble);
+
+                        if (expected.length > 0) {
+                            // an exhausted iterator returns the shared empty array, as the element-wise toArray() did
+                            org.junit.jupiter.api.Assertions.assertSame(com.landawn.abacus.util.N.EMPTY_DOUBLE_ARRAY, iter.toArray());
+                        } else {
+                            assertEquals(0, iter.toArray().length);
+                        }
+                    }
+
+                    final DoubleIteratorEx iterEx = (DoubleIteratorEx) DoubleStream.of(buf).iterator();
+                    iterEx.advance(2);
+                    assertArrayEquals(g120DoubleSuffix(expected, 2), iterEx.toArray());
+                }
+            }
+        }
+
+        // live view of the window taken at the call: later writes are seen, later position/limit changes are not
+        final java.nio.DoubleBuffer direct = java.nio.ByteBuffer.allocateDirect(6 * 8).asDoubleBuffer();
+        direct.put(new double[] { 1, 2, 3, 4, 5, 6 });
+        direct.position(1);
+        direct.limit(5);
+
+        final DoubleStream stream = DoubleStream.of(direct);
+        direct.put(4, (double) 40);
+        direct.clear();
+        direct.limit(0);
+
+        assertArrayEquals(new double[] { 2, 3, 4, 40 }, stream.toArray());
+        assertEquals(0, direct.position());
+        assertEquals(0, direct.limit());
+    }
+
+    private static java.nio.DoubleBuffer g120DoubleBuffer(final int kind, final double[] content, final int from, final int to) {
+        final java.nio.DoubleBuffer buf;
+
+        if (kind == 0) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 8).asDoubleBuffer().put(content);
+        } else if (kind == 1) {
+            buf = java.nio.DoubleBuffer.wrap(content.clone()).asReadOnlyBuffer();
+        } else if (kind == 2) {
+            final java.nio.DoubleBuffer outer = java.nio.ByteBuffer.allocateDirect((content.length + 3) * 8).asDoubleBuffer();
+            outer.position(2);
+            outer.put(content);
+            outer.position(2);
+            outer.limit(2 + content.length);
+            buf = outer.slice();
+        } else if (kind == 3) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 8).asDoubleBuffer().put(content).asReadOnlyBuffer();
+        } else {
+            buf = java.nio.ByteBuffer.allocate(content.length * 8).order(java.nio.ByteOrder.LITTLE_ENDIAN).asDoubleBuffer().put(content);
+        }
+
+        buf.limit(to);
+        buf.position(from);
+
+        return buf;
+    }
+
+    private static double[] g120DoubleSuffix(final double[] a, final int k) {
+        return Arrays.copyOfRange(a, Math.min(k, a.length), a.length);
+    }
+
+    private static double[] g120DoubleSorted(final double[] a) {
+        final double[] copy = a.clone();
+        Arrays.sort(copy);
+        return copy;
+    }
+
+    // ---- deep review 2026-11-02b G120 end ----
+    // ---- deep review 2026-11-02b G124 begin ----
+    // G124: a buffer without an accessible array keeps the close-handler shape of the former
+    // IntStream.range(position, limit).mapToDouble(view::get) stream: exactly one (run-once, no-op) close handler.
+    @Test
+    public void testOfDoubleBuffer_nonArrayBufferKeepsRangeCloseHandler_r116() {
+        final java.nio.DoubleBuffer direct = java.nio.ByteBuffer.allocateDirect(4 * 8).asDoubleBuffer();
+        direct.put(new double[] { (double) 1, (double) 2, (double) 3, (double) 4 });
+        direct.position(1);
+        final java.nio.DoubleBuffer emptyWindow = direct.duplicate();
+        emptyWindow.position(4);
+
+        for (final java.nio.DoubleBuffer buf : java.util.List.of(direct, emptyWindow)) {
+            // closing the JDK view closes the source stream, as for every stream that has close handlers
+            final DoubleStream source = DoubleStream.of(buf);
+            source.toJdkStream().close();
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+
+            // what iterator()'s "Remember to close" warning checks
+            final DoubleStream stream = DoubleStream.of(buf);
+            org.junit.jupiter.api.Assertions.assertFalse(StreamBase.isEmptyCloseHandlers(stream.closeHandlers()));
+            org.junit.jupiter.api.Assertions.assertEquals(1, stream.closeHandlers().size());
+
+            // handlers registered later run once, in order; a failing one does not stop the others
+            final java.util.List<String> calls = new java.util.ArrayList<>();
+            final DoubleStream withHandlers = DoubleStream.of(buf).onClose(() -> calls.add("a")).onClose(() -> {
+                calls.add("b");
+                throw new IllegalStateException("b");
+            }).onClose(() -> calls.add("c"));
+            org.junit.jupiter.api.Assertions.assertEquals("b",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::close).getMessage());
+            withHandlers.close();
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of("a", "b", "c"), calls);
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::count);
+        }
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new double[] { (double) 2, (double) 3, (double) 4 }, DoubleStream.of(direct).toArray());
+    }
+    // ---- deep review 2026-11-02b G124 end ----
+
+    // ---- re-review 2026-11-03 R04 begin ----
+    // R04 (pin): DoubleStream.of(DoubleBuffer) for a buffer without an accessible array counts and skips by moving the cursor of its
+    // window iterator instead of reading every skipped element. Pinned for every window, read position and skip length:
+    // count(), advance(n) (negative, zero, inside, exactly to and past the end, Long.MAX_VALUE), the elements read after
+    // it, the stream-level skip/step/count, the failure-atomic advance flag, and the live view of elements not yet read.
+    @Test
+    public void testOfDoubleBuffer_nonArrayBufferCountAndAdvanceMoveCursor_r116() {
+        final double[] content = { 1.5, -0.0, Double.NaN, 0d, -1d, 5d, 5d, 3.25, Double.MAX_VALUE, -7d, 2d, 1d };
+
+        for (int kind = 0; kind < 2; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final double[] expected = java.util.Arrays.copyOfRange(content, from, to);
+                    final java.nio.DoubleBuffer buf = r04Buffer(kind, content, from, to);
+                    org.junit.jupiter.api.Assertions.assertFalse(buf.hasArray());
+
+                    org.junit.jupiter.api.Assertions.assertEquals(expected.length, DoubleStream.of(buf).count());
+
+                    for (int k = 0; k <= expected.length + 1; k++) {
+                        final int start = Math.min(k, expected.length);
+                        final double[] rest = java.util.Arrays.copyOfRange(expected, start, expected.length);
+                        org.junit.jupiter.api.Assertions.assertEquals(rest.length, DoubleStream.of(buf).skip(k).count());
+                        org.junit.jupiter.api.Assertions.assertArrayEquals(rest, DoubleStream.of(buf).skip(k).toArray());
+                    }
+
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(r04Step(expected, 3), DoubleStream.of(buf).step(3).toArray());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final int remaining = expected.length - consumed;
+
+                        for (final long n : new long[] { -1, 0, 1, 2, remaining, remaining + 1L, Long.MAX_VALUE }) {
+                            final int next = consumed + (int) Math.min(Math.max(n, 0), remaining);
+                            final DoubleIteratorEx iter = (DoubleIteratorEx) DoubleStream.of(buf).iterator();
+
+                            if (expected.length > 0) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.supportsFailureAtomicAdvance());
+                            }
+
+                            for (int i = 0; i < consumed; i++) {
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextDouble());
+                            }
+
+                            iter.advance(n);
+
+                            for (int i = next; i < expected.length; i++) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextDouble());
+                            }
+
+                            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                            org.junit.jupiter.api.Assertions.assertEquals(0, iter.count());
+                            org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextDouble);
+
+                            final DoubleIteratorEx counted = (DoubleIteratorEx) DoubleStream.of(buf).iterator();
+
+                            for (int i = 0; i < consumed; i++) {
+                                counted.nextDouble();
+                            }
+
+                            counted.advance(n);
+                            org.junit.jupiter.api.Assertions.assertEquals(expected.length - next, counted.count());
+                            org.junit.jupiter.api.Assertions.assertFalse(counted.hasNext());
+                            counted.advance(1);
+                            org.junit.jupiter.api.Assertions.assertEquals(0, counted.count());
+                        }
+                    }
+                }
+            }
+        }
+
+        // A skip moves the cursor only: an element written after the skip is read live, a skipped one is never read.
+        final java.nio.DoubleBuffer live = r04Buffer(1, content, 0, 6);
+        final DoubleIteratorEx liveIter = (DoubleIteratorEx) DoubleStream.of(live).iterator();
+        liveIter.advance(2);
+        live.put(1, 77.5);
+        live.put(3, 88.5);
+        org.junit.jupiter.api.Assertions.assertEquals(content[2], liveIter.nextDouble());
+        org.junit.jupiter.api.Assertions.assertEquals(88.5, liveIter.nextDouble());
+        org.junit.jupiter.api.Assertions.assertEquals(2, liveIter.count());
+        org.junit.jupiter.api.Assertions.assertFalse(liveIter.hasNext());
+    }
+
+    private static java.nio.DoubleBuffer r04Buffer(final int kind, final double[] content, final int from, final int to) {
+        // kind 0: read-only view of a heap array; kind 1: writable view of direct memory. Neither exposes an array.
+        final java.nio.DoubleBuffer buf = kind == 0 ? java.nio.DoubleBuffer.wrap(content.clone()).asReadOnlyBuffer()
+                : java.nio.ByteBuffer.allocateDirect(content.length * 8).asDoubleBuffer().put(content).clear();
+        buf.limit(to);
+        buf.position(from);
+        return buf;
+    }
+
+    private static double[] r04Step(final double[] a, final int step) {
+        final double[] result = new double[(a.length + step - 1) / step];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = a[i * step];
+        }
+
+        return result;
+    }
+    // ---- re-review 2026-11-03 R04 end ----
 }

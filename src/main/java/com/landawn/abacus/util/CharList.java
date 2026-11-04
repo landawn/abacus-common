@@ -1225,12 +1225,18 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
             }
 
         } else if (size <= BIT_SET_THRESHOLD) {
-            final Set<Character> set = N.newLinkedHashSet(size);
-            set.add(elementData[0]);
-
+            // At most BIT_SET_THRESHOLD elements: scanning the kept prefix [0, idx] is cheaper than boxing every
+            // element into a hash set, and allocates nothing. The first occurrence of each value is kept, in order.
             for (int i = 1; i < size; i++) {
-                if (set.add(elementData[i])) {
-                    elementData[++idx] = elementData[i];
+                final char ch = elementData[i];
+                int j = 0;
+
+                while (j <= idx && elementData[j] != ch) {
+                    j++;
+                }
+
+                if (j > idx) {
+                    elementData[++idx] = ch;
                 }
             }
         } else {

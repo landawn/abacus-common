@@ -148,7 +148,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
 
     /**
      * Serializes an immutable map entry to its JSON string representation as a single-entry object
-     * (e.g., {@code {"age":25}}).
+     * (e.g., {@code {"age": 25}}).
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is

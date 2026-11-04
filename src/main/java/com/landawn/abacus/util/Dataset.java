@@ -2617,9 +2617,12 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if row is null, uses an unsupported representation, has a positional size different from the column count,
      *         omits a required map key or bean property, or the Dataset has no columns
+     * @throws ConcurrentModificationException if reading an input row (for example a bean getter) adds a column to, removes one
+     *         from, or moves one within this Dataset - including removing a column and adding it back, which keeps the column
+     *         count; no row is added. Renaming a column is allowed: the remaining values are read by its new name
      * @throws RuntimeException if reading a bean property while normalizing an input row fails
      */
-    void addRow(Object row) throws IllegalStateException, IllegalArgumentException, RuntimeException;
+    void addRow(Object row) throws IllegalStateException, IllegalArgumentException, ConcurrentModificationException, RuntimeException;
 
     /**
      * Adds a new row to the Dataset at the specified position.
@@ -2645,9 +2648,13 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if row is null, uses an unsupported representation, has a positional size different from the column count,
      *         omits a required map key or bean property, or the Dataset has no columns
      * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
+     * @throws ConcurrentModificationException if reading an input row (for example a bean getter) adds a column to, removes one
+     *         from, or moves one within this Dataset - including removing a column and adding it back, which keeps the column
+     *         count; no row is added. Renaming a column is allowed: the remaining values are read by its new name
      * @throws RuntimeException if reading a bean property while normalizing an input row fails
      */
-    void addRow(int newRowPosition, Object row) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+    void addRow(int newRowPosition, Object row)
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException, ConcurrentModificationException, RuntimeException;
 
     /**
      * Adds multiple new rows to the Dataset.
@@ -2672,9 +2679,12 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if any row is {@code null}, uses an unsupported representation, holds a number of positional values different
      *         from the column count, or does not provide a value for every named column, or rows are added without columns.
+     * @throws ConcurrentModificationException if reading an input row (for example a bean getter) adds a column to, removes one
+     *         from, or moves one within this Dataset - including removing a column and adding it back, which keeps the column
+     *         count; no row is added. Renaming a column is allowed: the remaining values are read by its new name
      * @throws RuntimeException if reading a bean property while normalizing an input row fails
      */
-    void addRows(Collection<?> rows) throws IllegalStateException, IllegalArgumentException, RuntimeException;
+    void addRows(Collection<?> rows) throws IllegalStateException, IllegalArgumentException, ConcurrentModificationException, RuntimeException;
 
     /**
      * Adds multiple new rows to the Dataset at the specified position.
@@ -2698,9 +2708,13 @@ public sealed interface Dataset permits RowDataset {
      * @throws IndexOutOfBoundsException if {@code newRowPosition < 0} or {@code newRowPosition > size()}.
      * @throws IllegalArgumentException if any row is {@code null}, uses an unsupported representation, holds a number of positional values different
      *         from the column count, or does not provide a value for every named column, or rows are added without columns.
+     * @throws ConcurrentModificationException if reading an input row (for example a bean getter) adds a column to, removes one
+     *         from, or moves one within this Dataset - including removing a column and adding it back, which keeps the column
+     *         count; no row is added. Renaming a column is allowed: the remaining values are read by its new name
      * @throws RuntimeException if reading a bean property while normalizing an input row fails
      */
-    void addRows(int newRowPosition, Collection<?> rows) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
+    void addRows(int newRowPosition, Collection<?> rows)
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, ConcurrentModificationException, RuntimeException;
 
     /**
      * Removes a row from the Dataset.

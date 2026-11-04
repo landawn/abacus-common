@@ -38,7 +38,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -620,7 +619,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      *
      * <p>An {@code Optional}/{@code Nullable} property is written as the value it holds: an empty wrapper
      * produces the same {@code isNull="true"} element as a {@code null} property (and is dropped by
-     * {@link Exclusion#NULL}), a present one produces its unwrapped value. A tuple-like property
+     * {@link Exclusion#NULL}), a present one produces its unwrapped value. An empty wrapper held by a property
+     * declared {@code Object} is written as {@code null} the same way, so it reads back as {@code null}, as in a map; a
+     * present one held there is written as its value. A tuple-like property
      * ({@code Pair}, {@code Triple}, {@code Tuple1..9}, {@code Indexed}, {@code Timed}, {@code Map.Entry}) is written as its
      * JSON text so that a comma inside a String slot stays inside that slot. Neither shape carries a
      * {@code type} attribute, because the element holds the unwrapped value rather than the wrapper.</p>
@@ -681,6 +682,14 @@ final class XmlParserImpl extends AbstractXmlParser {
 
             if (unwrapped) {
                 propValue = unwrapOptional(propValue);
+            } else if (propValue != null && !propInfo.isJsonRawValue && !propInfo.hasFormat && mayHoldUndeclaredOptional(propInfo.jsonXmlType)
+                    && isEmptyOptional(propValue)) {
+                // An EMPTY wrapper held by a property declared Object (any type writeValue hands to write()) is written like
+                // a null property as well: it reads back as null and is dropped by Exclusion.NULL, as writeMap writes the
+                // same value in a map. It used to reach writeValue, whose empty element read back as "" (and, before that,
+                // the wrapper's JSON literal null read back as the String "null"). A present wrapper keeps the writeValue
+                // path; a present-null Nullable is rejected here with the ParsingException writeValue raised for it.
+                propValue = null;
             }
 
             // The element carries the UNWRAPPED value (or the isNull marker), never the wrapper itself, so the
@@ -1363,6 +1372,17 @@ final class XmlParserImpl extends AbstractXmlParser {
             }
 
         } else {
+            // An EMPTY wrapper held by a slot declared Object: write() would hand it to the wrapper's own serializeTo,
+            // whose JSON literal null was read back as the String "null" - the same bytes as a genuine "null". This class
+            // never gets here with one (writeProperties writes such a property as null, writeMap and writeMapEntity unwrap
+            // first); for any other caller of this protected method the element stays empty, as documented above. A
+            // present wrapper keeps the write() path. The per-value type lookup is skipped where no empty wrapper can
+            // arrive: a property value (propInfo != null) was already checked by writeProperties, which applies the same
+            // test to every declared type reaching this branch, and a bean or map slot cannot hold a wrapper.
+            if (propInfo == null && !valueType.isBean() && !valueType.isMap() && isEmptyOptional(value)) {
+                return;
+            }
+
             // A repeated object (circularReferenceSupported) is still held by an enclosing level, and write()
             // then emits nothing at all: tested before write(), which removes a completed value from the set.
             final boolean isRepeatedObject = serializedObjects != null && serializedObjects.contains(value);
@@ -1378,6 +1398,20 @@ final class XmlParserImpl extends AbstractXmlParser {
                 bw.write(propIndentation);
             }
         }
+    }
+
+    // Whether value is an Optional/Nullable wrapper holding nothing; a present-null Nullable is rejected by unwrapOptional,
+    // with the ParsingException write() raised for it.
+    private static boolean isEmptyOptional(final Object value) throws ParsingException {
+        return Type.of(value.getClass()).isOptionalOrNullable() && unwrapOptional(value) == null;
+    }
+
+    // Whether a property declared as declaredType reaches the last branch of writeValue (written by write()), the only one
+    // that receives a runtime Optional/Nullable its declared type does not unwrap: Object, for example. A bean or map
+    // property cannot hold a wrapper, so the common nested-bean properties skip the per-value type lookup.
+    private static boolean mayHoldUndeclaredOptional(final Type<?> declaredType) {
+        return !declaredType.isSerializable() && !declaredType.isObjectArray() && !declaredType.isCollection() && !declaredType.isBean()
+                && !declaredType.isMap();
     }
 
     // Whether write(value, ...) writes the value as element text rather than as a nested element.
@@ -2274,11 +2308,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * coalesced instead of truncated.</p>
      *
      * @throws IllegalArgumentException if {@code br} is {@code null}
+     * @throws ParsingException if the content the StAX provider reads while creating the reader (the XML declaration)
+     *         is malformed, for example {@code <?xml version="2.5"?>}
+     * @throws UncheckedIOException if reading from {@code br} fails while the reader is created
      * @throws RuntimeException if the StAX provider cannot create the reader over {@code br} or its filtering wrapper
      */
     @Override
     protected XMLStreamReader createXMLStreamReader(final Reader br) throws IllegalArgumentException, RuntimeException {
-        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br), NO_COMMENT_OR_PI);
+        return createFilteredXMLStreamReader(br, NO_COMMENT_OR_PI);
     }
 
     /**
@@ -2288,11 +2325,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * coalesced instead of truncated.</p>
      *
      * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws ParsingException if the content the StAX provider reads while creating the reader (the XML declaration)
+     *         is malformed, for example {@code <?xml version="2.5"?>}
+     * @throws UncheckedIOException if reading from {@code is} fails while the reader is created
      * @throws RuntimeException if the StAX provider cannot create the reader over {@code is} or its filtering wrapper
      */
     @Override
     protected XMLStreamReader createXMLStreamReader(final InputStream is) throws IllegalArgumentException, RuntimeException {
-        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is), NO_COMMENT_OR_PI);
+        return createFilteredXMLStreamReader(is, NO_COMMENT_OR_PI);
     }
 
     /** Maximum permitted XML element-nesting depth. Defends against StackOverflowError on hostile input. */
@@ -4103,8 +4143,6 @@ final class XmlParserImpl extends AbstractXmlParser {
         String propName = null;
         Node propNode = null;
         Object propValue = null;
-        NodeList propNodes = node.getChildNodes();
-        int propNodeLength = getNodeLength(propNodes);
 
         switch (deserializationType) {
             case ENTITY: {
@@ -4126,9 +4164,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
                 final Object result = beanInfo.createBeanResult();
 
-                for (int i = 0; i < propNodeLength; i++) {
-                    propNode = propNodes.item(i);
-
+                // Sibling links rather than getChildNodes().item(i): on the JDK DOM an item(i) pass over a child list that the
+                // caller (or a second read) also passes releases its NodeList cache twice, leaving the caller's document with a
+                // cyclic cache pool on which every later interleaved child-list traversal is quadratic (see XmlUtil.isTextElement).
+                for (propNode = node.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
                     if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4238,8 +4277,6 @@ final class XmlParserImpl extends AbstractXmlParser {
                     return (T) readContainerText(compactText, compactMapSchema(isFirstCall, propType, keyType, valueType), targetClass, configToUse);
                 }
 
-                propNodes = node.getChildNodes();
-                propNodeLength = getNodeLength(propNodes);
                 //noinspection DataFlowIssue
                 propNode = null;
                 propType = null;
@@ -4249,9 +4286,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 // Whether the entries themselves decide if the document carries type information (no enclosing element did).
                 final boolean typeInfoDecidedByEntries = !checkedAttr;
 
-                for (int i = 0; i < propNodeLength; i++) {
-                    propNode = propNodes.item(i);
-
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                for (propNode = node.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
                     if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4328,8 +4364,6 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 final MapEntity mResult = new MapEntity(node.getNodeName());
 
-                propNodes = node.getChildNodes();
-                propNodeLength = getNodeLength(propNodes);
                 //noinspection DataFlowIssue
                 propNode = null;
                 propType = null;
@@ -4338,9 +4372,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 final boolean typeInfoDecidedByEntries = !checkedAttr;
 
-                for (int i = 0; i < propNodeLength; i++) {
-                    propNode = propNodes.item(i);
-
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                for (propNode = node.getFirstChild(); propNode != null; propNode = propNode.getNextSibling()) {
                     if (propNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4432,13 +4465,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final List<Object> c = Objectory.createList();
 
                 try {
-                    final NodeList eleNodes = node.getChildNodes();
                     Node eleNode = null;
                     final boolean typeInfoDecidedByElements = !checkedAttr;
 
-                    for (int i = 0; i < eleNodes.getLength(); i++) {
-                        eleNode = eleNodes.item(i);
-
+                    // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                    for (eleNode = node.getFirstChild(); eleNode != null; eleNode = eleNode.getNextSibling()) {
                         if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                             continue;
                         }
@@ -4546,13 +4577,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
                         : newPropInstance(targetClass, node);
 
-                final NodeList eleNodes = node.getChildNodes();
                 Node eleNode = null;
                 final boolean typeInfoDecidedByElements = !checkedAttr;
 
-                for (int i = 0; i < eleNodes.getLength(); i++) {
-                    eleNode = eleNodes.item(i);
-
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in the ENTITY branch.
+                for (eleNode = node.getFirstChild(); eleNode != null; eleNode = eleNode.getNextSibling()) {
                     if (eleNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -4830,11 +4859,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 // or by its name, as the writer records it (see structuredItemType).
                 final boolean openEleType = hasOpenElementType(propType, slotComponent);
 
-                final NodeList subPropNodes = propNode.getChildNodes();
-                final int subPropNodeLength = getNodeLength(subPropNodes);
-                Node subPropNode = null;
-                for (int k = 0; k < subPropNodeLength; k++) {
-                    subPropNode = subPropNodes.item(k);
+                // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in readByDOMParserBody.
+                for (Node subPropNode = propNode.getFirstChild(); subPropNode != null; subPropNode = subPropNode.getNextSibling()) {
                     if (subPropNode.getNodeType() != Node.ELEMENT_NODE) {
                         continue;
                     }
@@ -5149,11 +5175,9 @@ final class XmlParserImpl extends AbstractXmlParser {
         final List<Object> items = new ArrayList<>();
         // Whether a single child is the slot's value itself rather than its only item.
         boolean nestedValue = true;
-        final NodeList children = slotNode.getChildNodes();
 
-        for (int i = 0; i < children.getLength(); i++) {
-            final Node child = children.item(i);
-
+        // Sibling links, not NodeList.item(i), for the JDK DOM cache-pool reason given in readByDOMParserBody.
+        for (Node child = slotNode.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }

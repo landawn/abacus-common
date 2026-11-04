@@ -410,5 +410,54 @@ public class LocalTimeTypeTest extends TestBase {
         assertThrows(DateTimeParseException.class,
                 () -> localTimeType.valueOf((Object) java.time.OffsetTime.of(10, 30, 0, 0, java.time.ZoneOffset.ofHours(2))));
     }
+
     // ---- deep review 2026-10-27 G135 end ----
+    // ---- deep review 2026-11-02b G017 begin ----
+    // G017-01 (pin): the HH:mm[:ss[.fraction]] text stringOf writes is read without the java.time grammar; valueOf(String)
+    // and valueOf(char[], int, int) must still answer exactly what LocalTime.parse answers.
+    @Test
+    public void testValueOfString_canonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "00:00", "10:30", "23:59", "10:30:45", "00:00:00", "23:59:59", "10:30:45.1", "10:30:45.123", "10:30:45.123456",
+                "23:59:59.999999999", "10:30:45.000000001", "10:30:45.000" };
+
+        for (final String text : texts) {
+            assertEquals(LocalTime.parse(text), localTimeType.valueOf(text), text);
+
+            final char[] cbuf = ("x" + text + "y").toCharArray();
+            assertEquals(LocalTime.parse(text), localTimeType.valueOf(cbuf, 1, text.length()), text);
+        }
+
+        final LocalTime value = LocalTime.of(7, 5, 0, 9);
+        assertEquals(value, localTimeType.valueOf(localTimeType.stringOf(value)));
+    }
+
+    // G017-01 (pin): text the direct read leaves to LocalTime.parse (24:00, out-of-range fields, a leap second, an empty
+    // or ten-digit fraction, short fields, non-ASCII digits, padding, a date or offset part) keeps its answer or exception.
+    @Test
+    public void testValueOfString_nonCanonicalTextSameAsJdkParser_r116() {
+        final String[] texts = { "24:00", "23:60", "23:59:60", "10:30:45.", "10:30:45.1234567890", "1:30", "10:3", "10:30:4", "10-30", "10:30:", "10:30::45",
+                "10:30:45..1", "10:30:45.12a", "-10:30", "+10:30", "\u0661\u0662:30", "10:3\u0661", "10:30 ", " 10:30", "T10:30", "10:30Z", "10:30:45+01:00",
+                "2021-01-01T10:30", "99:99", "1a:30" };
+
+        for (final String text : texts) {
+            Object expected;
+
+            try {
+                expected = LocalTime.parse(text);
+            } catch (final RuntimeException e) {
+                expected = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            Object actual;
+
+            try {
+                actual = localTimeType.valueOf(text);
+            } catch (final RuntimeException e) {
+                actual = e.getClass().getName() + ": " + e.getMessage();
+            }
+
+            assertEquals(expected, actual, text);
+        }
+    }
+    // ---- deep review 2026-11-02b G017 end ----
 }

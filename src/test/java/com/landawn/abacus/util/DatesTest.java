@@ -1188,5 +1188,103 @@ public class DatesTest extends TestBase {
         assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> Dates.formatTo(new java.util.Date(0L), failing));
         assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> Dates.formatTo(new Timestamp(0L), failing));
     }
+
     // ---- perf review 2026-09-26 G035 end ----
+    // ---- deep review 2026-11-02 G039 begin ----
+    // G039-01 (pin): isSameDay/isSameMonth/isSameYear and isLastDayOf*/lengthOf* read the civil date through a
+    // rules-offset + floor-division helper; it must equal Instant.atZone(zone).toLocalDate() everywhere.
+    @Test
+    public void testIsSameDay_civilDateHelper_pin() {
+        final ZoneId minus12 = ZoneOffset.ofHours(-12);
+        assertTrue(Dates.isSameDay(new java.util.Date(-1L), new java.util.Date(43_199_999L), minus12));
+        assertFalse(Dates.isSameDay(new java.util.Date(43_199_999L), new java.util.Date(43_200_000L), minus12));
+
+        final ZoneId utc = ZoneOffset.UTC;
+        assertFalse(Dates.isSameDay(new java.util.Date(-1L), new java.util.Date(0L), utc));
+        assertTrue(Dates.isSameDay(new java.util.Date(-86_400_000L), new java.util.Date(-1L), utc));
+        assertFalse(Dates.isSameDay(new java.util.Date(-86_400_001L), new java.util.Date(-86_400_000L), utc));
+        assertFalse(Dates.isSameMonth(new java.util.Date(-1L), new java.util.Date(0L), utc));
+        assertFalse(Dates.isSameYear(new java.util.Date(-1L), new java.util.Date(0L), utc));
+        assertTrue(Dates.isSameDay(new java.util.Date(Long.MIN_VALUE), new java.util.Date(Long.MIN_VALUE + 1), utc));
+        assertTrue(Dates.isSameYear(new java.util.Date(Long.MAX_VALUE), new java.util.Date(Long.MAX_VALUE - 1), utc));
+
+        final long[] millis = { Long.MIN_VALUE, -62_135_596_800_001L, -86_400_001L, -1_001L, -1L, 0L, 999L, 1_741_503_600_000L, 1_741_505_400_000L,
+                1_762_063_199_999L, 1_762_063_200_000L, 1_762_066_800_000L, 253_402_300_799_999L, Long.MAX_VALUE };
+        for (final String id : new String[] { "UTC", "America/New_York", "Asia/Kathmandu", "Australia/Lord_Howe", "Pacific/Chatham", "Africa/Monrovia" }) {
+            final ZoneId zone = ZoneId.of(id);
+            for (final long m1 : millis) {
+                for (final long m2 : millis) {
+                    final java.time.LocalDate l1 = Instant.ofEpochMilli(m1).atZone(zone).toLocalDate();
+                    final java.time.LocalDate l2 = Instant.ofEpochMilli(m2).atZone(zone).toLocalDate();
+                    final java.util.Date d1 = new java.util.Date(m1);
+                    final java.util.Date d2 = new java.util.Date(m2);
+                    final String context = id + " " + m1 + " " + m2;
+                    assertEquals(l1.equals(l2), Dates.isSameDay(d1, d2, zone), context);
+                    assertEquals(l1.getYear() == l2.getYear() && l1.getMonth() == l2.getMonth(), Dates.isSameMonth(d1, d2, zone), context);
+                    assertEquals(l1.getYear() == l2.getYear(), Dates.isSameYear(d1, d2, zone), context);
+                    assertEquals(l1.equals(l2), Dates.isSameDay(Dates.createCalendar(m1), Dates.createCalendar(m2), zone), context);
+                }
+            }
+        }
+    }
+
+    // G039-01 (pin): the default-zone civil queries on the same helper.
+    @Test
+    public void testLengthOfMonth_civilDateHelper_pin() {
+        final TimeZone previous = TimeZone.getDefault();
+
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            final java.util.Date leapDayEnd = new java.util.Date(Instant.parse("2024-02-29T23:59:59.999Z").toEpochMilli());
+            assertTrue(Dates.isLastDayOfMonth(leapDayEnd));
+            assertFalse(Dates.isLastDayOfMonth(new java.util.Date(leapDayEnd.getTime() + 1)));
+            assertEquals(29, Dates.lengthOfMonth(leapDayEnd));
+            assertEquals(366, Dates.lengthOfYear(leapDayEnd));
+            assertTrue(Dates.isLastDayOfYear(new java.util.Date(-1L)));
+            assertFalse(Dates.isLastDayOfYear(new java.util.Date(0L)));
+            assertEquals(31, Dates.lengthOfMonth(new java.util.Date(Long.MAX_VALUE))); // +292278994-08-17
+            assertEquals(31, Dates.lengthOfMonth(new java.util.Date(Long.MIN_VALUE))); // -292275055-05-16
+
+            for (final String id : new String[] { "America/New_York", "Asia/Kathmandu", "Pacific/Kiritimati", "Etc/GMT+12" }) {
+                TimeZone.setDefault(TimeZone.getTimeZone(id));
+                final ZoneId zone = ZoneId.of(id);
+                for (final long m : new long[] { Long.MIN_VALUE, -1L, 0L, 1_709_251_199_999L, 1_709_251_200_000L, 1_735_689_599_999L, 1_735_689_600_000L,
+                        Long.MAX_VALUE }) {
+                    final java.time.LocalDate expected = Instant.ofEpochMilli(m).atZone(zone).toLocalDate();
+                    final java.util.Date date = new java.util.Date(m);
+                    assertEquals(expected.lengthOfMonth(), Dates.lengthOfMonth(date), id + " " + m);
+                    assertEquals(expected.lengthOfYear(), Dates.lengthOfYear(date), id + " " + m);
+                    assertEquals(expected.getDayOfMonth() == expected.lengthOfMonth(), Dates.isLastDayOfMonth(date), id + " " + m);
+                    assertEquals(expected.getDayOfYear() == expected.lengthOfYear(), Dates.isLastDayOfYear(date), id + " " + m);
+                }
+            }
+        } finally {
+            TimeZone.setDefault(previous);
+        }
+    }
+
+    // G039-02 (pin): round/truncate/ceiling reject a UTC year magnitude above 280,000,000 through constant
+    // epoch-millis bounds; the first instants of the years -280,000,000 and 280,000,001 are the exact edges.
+    @Test
+    public void testRound_yearMagnitudeGuardBounds_pin() {
+        final long minAccepted = java.time.LocalDate.of(-280_000_000, 1, 1).toEpochDay() * 86_400_000L;
+        final long firstRejected = java.time.LocalDate.of(280_000_001, 1, 1).toEpochDay() * 86_400_000L;
+
+        assertEquals(minAccepted, Dates.round(new java.util.Date(minAccepted), Calendar.MILLISECOND).getTime());
+        assertEquals(firstRejected - 1, Dates.truncate(new java.util.Date(firstRejected - 1), Calendar.MILLISECOND).getTime());
+        assertEquals(0, Dates.truncatedCompareTo(new java.util.Date(firstRejected - 1), new java.util.Date(firstRejected - 1), Calendar.MILLISECOND));
+        assertThrows(ArithmeticException.class, () -> Dates.round(new java.util.Date(minAccepted - 1), Calendar.MILLISECOND));
+        assertThrows(ArithmeticException.class, () -> Dates.ceiling(new java.util.Date(firstRejected), Calendar.MILLISECOND));
+        assertThrows(ArithmeticException.class, () -> Dates.truncate(new java.util.Date(Long.MIN_VALUE), Calendar.YEAR));
+        assertThrows(ArithmeticException.class, () -> Dates.truncate(new java.util.Date(Long.MAX_VALUE), Calendar.YEAR));
+        assertThrows(ArithmeticException.class,
+                () -> Dates.truncatedCompareTo(new java.util.Date(firstRejected), new java.util.Date(0L), Calendar.MILLISECOND));
+        assertThrows(ArithmeticException.class, () -> Dates.round(Dates.createCalendar(minAccepted - 1), Calendar.MILLISECOND));
+        // the half-up sub-millisecond rounding step of a Timestamp can carry it onto the first rejected millisecond
+        final Timestamp ts = new Timestamp(firstRejected - 1);
+        ts.setNanos(ts.getNanos() + 600_000);
+        assertThrows(ArithmeticException.class, () -> Dates.round(ts, Calendar.MILLISECOND));
+        assertThrows(IllegalArgumentException.class, () -> Dates.round(new java.util.Date(0L), Calendar.WEEK_OF_YEAR));
+    }
+    // ---- deep review 2026-11-02 G039 end ----
 }

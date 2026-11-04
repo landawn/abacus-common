@@ -1028,4 +1028,229 @@ public class AbstractShortStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G086 end ----
+
+    // ---- deep review 2026-11-02b G091 begin ----
+    private static ShortList drainG091(final ShortIterator iter) {
+        final ShortList result = new ShortList();
+
+        while (iter.hasNext()) {
+            result.add(iter.nextShort());
+        }
+
+        return result;
+    }
+
+    private static String outcomeG091(final java.util.function.Supplier<ShortList> action) {
+        try {
+            return "OK " + action.get();
+        } catch (final RuntimeException e) {
+            return "EX " + e.getClass().getName();
+        }
+    }
+
+    private static ShortIterator brokenSourceOpG091(final int op) {
+        final ShortIterator failingSource = new ShortIterator() {
+            private short cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (cnt >= 2) {
+                    throw new IllegalStateException("source failure");
+                }
+
+                return true;
+            }
+
+            @Override
+            public short nextShort() {
+                return cnt++;
+            }
+        };
+
+        final ShortStream stream = ShortStream.of(failingSource);
+
+        return (op == 0 ? stream.reversed() : op == 1 ? stream.reverseSorted() : stream.rotated(1)).iteratorEx();
+    }
+
+    // G091-03: reversed()/rotated()/reverseSorted() iterators build toList() (used by toShortList()) from an exactly sized
+    // copy; pin it against the element-by-element walk for empty/single/partially consumed/sub-range/iterator/parallel sources.
+    @Test
+    public void testReversedRotatedReverseSorted_toShortList_r116() {
+        assertEquals(ShortList.of((short) 5, (short) 4, (short) 3, (short) 2, (short) 1),
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).reversed().toShortList());
+        assertEquals(ShortList.of((short) 4, (short) 5, (short) 1, (short) 2, (short) 3),
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).rotated(2).toShortList());
+        assertEquals(ShortList.of((short) 2, (short) 3, (short) 4, (short) 5, (short) 1),
+                ShortStream.of((short) 1, (short) 2, (short) 3, (short) 4, (short) 5).rotated(-1).toShortList());
+        assertEquals(ShortList.of((short) 3, (short) 2, (short) 1), ShortStream.of((short) 3, (short) 1, (short) 2).reverseSorted().toShortList());
+        assertTrue(ShortStream.empty().reversed().toShortList().isEmpty());
+        assertTrue(ShortStream.empty().rotated(3).toShortList().isEmpty());
+        assertTrue(ShortStream.empty().reverseSorted().toShortList().isEmpty());
+
+        final short[] source = { 3, 1, 2 };
+        final ShortList reversed = ShortStream.of(source).reversed().toShortList();
+        reversed.set(0, (short) 100);
+        reversed.add((short) 7);
+        final ShortList rotated = ShortStream.of(source).rotated(1).toShortList();
+        rotated.set(0, (short) 100);
+        final ShortList reverseSorted = ShortStream.of(source).reverseSorted().toShortList();
+        reverseSorted.set(0, (short) 100);
+        assertArrayEquals(new short[] { 3, 1, 2 }, source);
+        assertEquals(ShortList.of((short) 100, (short) 1, (short) 3, (short) 7), reversed);
+
+        final int[] distances = { Integer.MIN_VALUE, -7, -1, 0, 1, 2, 6, Integer.MAX_VALUE };
+        final List<java.util.function.UnaryOperator<ShortStream>> ops = new ArrayList<>();
+        ops.add(ShortStream::reversed);
+        ops.add(ShortStream::reverseSorted);
+
+        for (final int distance : distances) {
+            ops.add(s -> s.rotated(distance));
+        }
+
+        for (int len = 0; len <= 6; len++) {
+            final int n = len;
+            final short[] padded = new short[n + 2];
+
+            for (int i = 0; i < padded.length; i++) {
+                padded[i] = (short) ((i * 5) % 7 - 3);
+            }
+
+            final short[] a = Arrays.copyOfRange(padded, 1, 1 + n);
+            final List<java.util.function.Supplier<ShortStream>> sources = List.of(() -> ShortStream.of(a.clone()), () -> ShortStream.of(padded, 1, 1 + n),
+                    () -> ShortStream.of(ShortList.of(a.clone()).iterator()), () -> ShortStream.of(a.clone()).parallel(2));
+
+            for (final java.util.function.Supplier<ShortStream> src : sources) {
+                for (final java.util.function.UnaryOperator<ShortStream> op : ops) {
+                    assertEquals(drainG091(op.apply(src.get()).iteratorEx()), op.apply(src.get()).toShortList());
+
+                    for (int consumed = 0; consumed <= n + 1; consumed++) {
+                        final ShortIterator expectedIter = op.apply(src.get()).iteratorEx();
+                        final ShortIterator iter = op.apply(src.get()).iteratorEx();
+
+                        for (int i = 0; i < consumed && iter.hasNext(); i++) {
+                            assertEquals(expectedIter.nextShort(), iter.nextShort());
+                        }
+
+                        final ShortList rest = iter.toList();
+                        assertEquals(drainG091(expectedIter), rest);
+                        assertFalse(iter.hasNext());
+                        assertTrue(iter.toList().isEmpty());
+                        rest.add((short) 42);
+                        assertEquals((short) 42, rest.get(rest.size() - 1));
+                    }
+                }
+            }
+        }
+    }
+
+    // G091-03: after a failed materialization, toList() must keep behaving like the element-by-element walk on every retry.
+    @Test
+    public void testReversedRotatedReverseSorted_toListRetryAfterFailure_r116() {
+        for (int op = 0; op < 3; op++) {
+            final ShortIterator viaToList = brokenSourceOpG091(op);
+            final ShortIterator viaWalk = brokenSourceOpG091(op);
+
+            assertEquals("EX java.lang.IllegalStateException", outcomeG091(viaToList::toList));
+            assertEquals("EX java.lang.IllegalStateException", outcomeG091(() -> drainG091(viaWalk)));
+
+            for (int retry = 0; retry < 3; retry++) {
+                assertEquals(outcomeG091(() -> drainG091(viaWalk)), outcomeG091(viaToList::toList), "op=" + op + ", retry=" + retry);
+            }
+        }
+    }
+
+    // G091-04 (perf pin, port of G090-01): sorted()/shuffled(Random) results read through toArray() - empty, single and
+    // several elements; array, iterator, mapped and parallel sources; and the reversed()/skip()/limit() stages after them.
+    @Test
+    public void testSortedShuffledToArray_sourcesAndSizes_g091b() {
+        final short[][] inputs = { {}, { 7 }, { 3, -1, 2, -1, 9, 0 }, { 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, 12, Short.MIN_VALUE, Short.MAX_VALUE } };
+
+        for (final short[] a : inputs) {
+            final short[] expected = a.clone();
+            Arrays.sort(expected);
+            final short[] descending = new short[expected.length];
+
+            for (int i = 0; i < expected.length; i++) {
+                descending[i] = expected[expected.length - 1 - i];
+            }
+
+            final int k = Math.min(2, a.length);
+            final short[] original = a.clone();
+
+            assertArrayEquals(expected, ShortStream.of(a).sorted().toArray());
+            assertArrayEquals(original, a);
+            assertArrayEquals(expected, ShortStream.of(ShortIterator.of(a.clone())).sorted().toArray());
+            assertArrayEquals(expected, ShortStream.of(a.clone()).map(x -> x).sorted().toArray());
+            assertArrayEquals(expected, ShortStream.of(a.clone()).parallel(2).sorted().toArray());
+            assertArrayEquals(descending, ShortStream.of(a.clone()).map(x -> x).sorted().reversed().toArray());
+            assertEquals(ShortList.of(descending), ShortStream.of(a.clone()).map(x -> x).sorted().reversed().toShortList());
+            assertArrayEquals(Arrays.copyOfRange(expected, k, expected.length), ShortStream.of(a.clone()).sorted().skip(2).toArray());
+            assertArrayEquals(Arrays.copyOf(expected, k), ShortStream.of(a.clone()).sorted().limit(2).toArray());
+
+            final short[] shuffledExpected = a.clone();
+            com.landawn.abacus.util.N.shuffle(shuffledExpected, new Random(42));
+            assertArrayEquals(shuffledExpected, ShortStream.of(a.clone()).shuffled(new Random(42)).toArray());
+            assertArrayEquals(shuffledExpected, ShortStream.of(ShortIterator.of(a.clone())).shuffled(new Random(42)).toArray());
+        }
+    }
+
+    // G091-04 (perf pin): toArray() on a partially consumed sorted() iterator returns exactly the remaining elements and
+    // exhausts the iterator; an exhausted or empty one returns an empty array.
+    @Test
+    public void testSortedIterator_toArrayAfterPartialConsumption_g091b() {
+        final ShortIterator iter = ShortStream.of(new short[] { 5, 3, 9, 1, 7 }).map(x -> x).sorted().iteratorEx();
+        assertEquals((short) 1, iter.nextShort());
+        assertTrue(iter.hasNext());
+        assertEquals((short) 3, iter.nextShort());
+        assertArrayEquals(new short[] { 5, 7, 9 }, iter.toArray());
+        assertFalse(iter.hasNext());
+        assertEquals(0, iter.toArray().length);
+        assertThrows(java.util.NoSuchElementException.class, iter::nextShort);
+
+        final ShortIterator emptyIter = ShortStream.of(ShortIterator.of(new short[0])).sorted().iteratorEx();
+        assertEquals(0, emptyIter.toArray().length);
+        assertFalse(emptyIter.hasNext());
+    }
+
+    // G091-04 (perf pin): sorted() stays lazy, and a failure while loading its snapshot is rethrown as the same instance by
+    // every later access (toArray() included) without reading the source again.
+    @Test
+    public void testSortedIterator_loadFailureRethrownByEveryAccess_g091b() {
+        final int[] calls = { 0 };
+        final ShortIterator iter = ShortStream.of(new short[] { 1, 2, 3 }).map(x -> {
+            calls[0]++;
+
+            if (x == 2) {
+                throw new IllegalStateException("load failed");
+            }
+
+            return x;
+        }).sorted().iteratorEx();
+
+        assertEquals(0, calls[0]);
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, iter::toArray);
+        assertEquals("load failed", first.getMessage());
+        assertSame(first, assertThrows(IllegalStateException.class, iter::toArray));
+        assertSame(first, assertThrows(IllegalStateException.class, iter::hasNext));
+        assertSame(first, assertThrows(IllegalStateException.class, iter::nextShort));
+        assertEquals(2, calls[0]);
+    }
+
+    // G091-04 (perf pin): the snapshot is loaded once on the terminal toArray() and the source's close handler runs once.
+    @Test
+    public void testSortedToArray_loadsOnceAndClosesSourceOnce_g091b() {
+        final int[] closed = { 0 };
+        final int[] calls = { 0 };
+        final ShortStream sorted = ShortStream.of(new short[] { 3, 1, 2 }).map(x -> {
+            calls[0]++;
+            return x;
+        }).onClose(() -> closed[0]++).sorted();
+
+        assertEquals(0, calls[0]);
+        assertArrayEquals(new short[] { 1, 2, 3 }, sorted.toArray());
+        assertEquals(3, calls[0]);
+        assertEquals(1, closed[0]);
+    }
+    // ---- deep review 2026-11-02b G091 end ----
 }

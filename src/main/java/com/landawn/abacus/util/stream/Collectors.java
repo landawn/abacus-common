@@ -12695,8 +12695,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          * column names based on the properties of the elements.</p>
          *
          * <p>The returned collector accumulates elements into a list and then creates a
-         * {@code Dataset} from that list. The column names are automatically determined
-         * based on the structure of the elements.</p>
+         * {@code Dataset} from that list. The column names are taken from the first element, which
+         * must be a bean (its property names) or a {@code Map} (its keys), as in
+         * {@link com.landawn.abacus.util.N#newDataset(java.util.Collection) N.newDataset(Collection)}.
+         * An empty input gives an empty {@code Dataset}.</p>
+         *
+         * <p>During reduction, the returned collector throws {@link IllegalArgumentException} if the first
+         * element is {@code null} or is neither a bean nor a {@code Map} (e.g. an array or a {@code List}),
+         * if it is a {@code Map} without usable {@code String} keys, or if a later element cannot be read
+         * against the column names derived from the first element.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

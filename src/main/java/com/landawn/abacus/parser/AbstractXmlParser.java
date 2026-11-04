@@ -46,11 +46,11 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 
 import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
@@ -458,10 +458,13 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param br the reader containing XML content to parse
      * @return an XMLStreamReader configured to skip comments and processing instructions, and to retain whitespace
      * @throws IllegalArgumentException if {@code br} is {@code null}
+     * @throws ParsingException if the content the StAX provider reads while creating the reader (the XML declaration)
+     *         is malformed, for example {@code <?xml version="2.5"?>}
+     * @throws UncheckedIOException if reading from {@code br} fails while the reader is created
      * @throws RuntimeException if the StAX provider cannot create the reader over {@code br} or its filtering wrapper
      */
     protected XMLStreamReader createXMLStreamReader(final Reader br) throws IllegalArgumentException, RuntimeException {
-        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br), NO_COMMENT_OR_PI);
+        return createFilteredXMLStreamReader(br, NO_COMMENT_OR_PI);
     }
 
     /**
@@ -471,10 +474,37 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param is the input stream containing XML content to parse
      * @return an XMLStreamReader configured to skip comments and processing instructions, and to retain whitespace
      * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws ParsingException if the content the StAX provider reads while creating the reader (BOM and XML
+     *         declaration) is malformed, for example {@code <?xml version="2.5"?>}
+     * @throws UncheckedIOException if reading from {@code is} fails while the reader is created
      * @throws RuntimeException if the StAX provider cannot create the reader over {@code is} or its filtering wrapper
      */
     protected XMLStreamReader createXMLStreamReader(final InputStream is) throws IllegalArgumentException, RuntimeException {
-        return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is), NO_COMMENT_OR_PI);
+        return createFilteredXMLStreamReader(is, NO_COMMENT_OR_PI);
+    }
+
+    // Shared by every StAX backend (XmlParserImpl overrides createXMLStreamReader with its own filter). The provider
+    // reads the XML declaration while the reader is created and XmlUtil wraps a failure there in an UncheckedException:
+    // a malformed declaration must be the ParsingException every later StAX failure (and SAX/DOM) raises. An I/O
+    // failure (UncheckedIOException, whose cause is the IOException) and anything else are rethrown unchanged.
+    static XMLStreamReader createFilteredXMLStreamReader(final Reader br, final StreamFilter filter) {
+        try {
+            return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br), filter);
+        } catch (final UncheckedException e) {
+            throw streamReaderCreationFailure(e);
+        }
+    }
+
+    static XMLStreamReader createFilteredXMLStreamReader(final InputStream is, final StreamFilter filter) {
+        try {
+            return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is), filter);
+        } catch (final UncheckedException e) {
+            throw streamReaderCreationFailure(e);
+        }
+    }
+
+    private static RuntimeException streamReaderCreationFailure(final UncheckedException e) {
+        return e.getCause() instanceof final XMLStreamException cause ? new ParsingException(cause) : e;
     }
 
     // Use only between structural wrappers; scalar readers must retain whitespace events.
@@ -2407,7 +2437,8 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * registration aliases and the former system-property switch never grant permission.
      *
      * @param typeAttr the decoded attribute value, or {@code null}
-     * @return the resolved type, or {@code null} when the value is empty or not allowed
+     * @return the resolved type, or {@code null} when the value is empty or not allowed (including an allowed class
+     *         with arguments its type cannot take, such as {@code Map<String>} or {@code String(1)})
      */
     protected Type<?> resolveTypeAttribute(final String typeAttr) {
         if (Strings.isEmpty(typeAttr)) {
@@ -2422,7 +2453,20 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
         if (isAllowedXmlTypeAttributeName(typeName)) {
             final Type<?> approved = approvedXmlTypes.get(typeName);
-            final Type<?> resolved = approved != null ? approved : Type.of(typeName);
+            final Type<?> resolved;
+
+            if (approved != null) {
+                resolved = approved;
+            } else {
+                try {
+                    resolved = Type.of(typeName);
+                } catch (final IllegalArgumentException e) {
+                    // Allowed class names with arguments their handler cannot take (Map<String>, String(1)) are a
+                    // document error like malformed syntax: not allowed, so readers report a ParsingException, not IAE.
+                    return null;
+                }
+            }
+
             return isApprovedResolvedType(resolved) ? resolved : null;
         }
 
@@ -3232,12 +3276,12 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @throws ParsingException if the element contains more than one child element node
      */
     protected static Node checkOneNode(final Node eleNode) throws ParsingException {
-        final NodeList subEleNodes = eleNode.getChildNodes();
         Node subEleNode = null;
 
-        for (int j = 0; j < subEleNodes.getLength(); j++) {
-            final Node child = subEleNodes.item(j);
-
+        // Sibling links rather than getChildNodes().item(i): on the JDK DOM an item(i) pass over a child list that the
+        // caller (or a second read) also passes releases its NodeList cache twice, leaving the caller's document with a
+        // cyclic cache pool on which every later interleaved child-list traversal is quadratic (see XmlUtil.isTextElement).
+        for (Node child = eleNode.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
@@ -3250,16 +3294,6 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         }
 
         return subEleNode;
-    }
-
-    /**
-     * Returns the number of nodes in the given {@link NodeList}, or {@code 0} if the list is {@code null}.
-     *
-     * @param nodeList the node list to measure; may be {@code null}
-     * @return the number of nodes in {@code nodeList}, or {@code 0} if {@code nodeList} is {@code null}
-     */
-    protected static int getNodeLength(final NodeList nodeList) {
-        return (nodeList == null) ? 0 : nodeList.getLength();
     }
 
     /**

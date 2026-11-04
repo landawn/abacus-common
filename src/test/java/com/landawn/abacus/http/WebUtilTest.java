@@ -1125,9 +1125,10 @@ public class WebUtilTest extends TestBase {
             assertTrue(code.contains(".get();"), code);
         }
 
-        // Together with an explicit header of the same name it is a repeated header, which is rejected.
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl -A a -H 'User-Agent: b' " + target));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curl -H 'referer: a' -e b " + target));
+        // Together with an explicit header of the same name, the -H wins in either order, as in curl
+        // (was rejected as a repeated header before 2026-11-02 G004-02).
+        assertTrue(WebUtil.curlToHttpRequestCode("curl -A a -H 'User-Agent: b' " + target).contains(".header(\"User-Agent\", \"b\")"));
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -H 'referer: a' -e b " + target).contains(".header(\"referer\", \"a\")"));
 
         for (final String option : new String[] { "-A", "--user-agent", "-e", "--referer" }) {
             final String command = "curl " + target + " " + option;
@@ -1584,9 +1585,12 @@ public class WebUtilTest extends TestBase {
             assertFalse(code.contains("suppress the header(s)"), command + " -> " + code);
         }
 
-        // An empty -A after a captured User-Agent is still a repeated header that cannot be reproduced.
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode("curl -A x -A '' " + target));
-        assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl -H 'User-Agent: x' -A '' " + target));
+        // An empty -A after an -A value is the last -A and suppresses the User-Agent (G004-03); after an -H value the -H
+        // wins (G004-02), as in curl. Both were rejected as repeated headers before 2026-11-02.
+        final String lastEmpty = WebUtil.curlToOkHttpRequestCode("curl -A x -A '' " + target);
+        assertFalse(lastEmpty.contains(".header(\"User-Agent\""), lastEmpty);
+        assertTrue(lastEmpty.contains("// cURL was told to suppress the header(s) User-Agent"), lastEmpty);
+        assertTrue(WebUtil.curlToHttpRequestCode("curl -H 'User-Agent: x' -A '' " + target).contains(".header(\"User-Agent\", \"x\")"));
     }
     // ---- deep review 2026-10-26 G004 end ----
 
@@ -1629,11 +1633,21 @@ public class WebUtilTest extends TestBase {
             }
         }
 
-        // Repeats that keep a captured User-Agent stay rejected.
-        for (final String command : new String[] { "curl -A x -A y" + target, "curl -H 'user-agent: x' -A ''" + target,
-                "curl -H 'User-Agent;' -A ''" + target }) {
-            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command), command);
-            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command), command);
+        // Of repeated -A the last one counts (G004-03); an -H value (also the empty 'Name;') wins over a later empty -A
+        // (G004-02), as in curl. All three commands were rejected as repeated headers before 2026-11-02.
+        for (final String code : both.apply("curl -A x -A y" + target)) {
+            assertTrue(code.contains(".header(\"User-Agent\", \"y\")"), code);
+            assertFalse(code.contains("\"x\"") || code.contains(note), code);
+        }
+
+        for (final String code : both.apply("curl -H 'user-agent: x' -A ''" + target)) {
+            assertTrue(code.contains(".header(\"user-agent\", \"x\")"), code);
+            assertFalse(code.contains(note), code);
+        }
+
+        for (final String code : both.apply("curl -H 'User-Agent;' -A ''" + target)) {
+            assertTrue(code.contains(".header(\"User-Agent\", \"\")"), code);
+            assertFalse(code.contains(note), code);
         }
     }
     // ---- deep review 2026-10-26 verify G120 end ----
@@ -1740,4 +1754,115 @@ public class WebUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-10-27 verify G146 end ----
+
+    // ---- deep review 2026-11-02 G004 begin ----
+    // G004-01: curl drops its -A/-e value when the command also suppresses that header with -H 'Name:' (either order);
+    // the converters emitted the -A/-e value instead (curl 8.21 sends no User-Agent / Referer for these commands).
+    @Test
+    public void testCurlConverters_headerSuppressionWinsOverUserAgentAndReferer() {
+        final String target = " http://localhost:18080/x";
+        final String[][] suppressed = { { "curl -H 'User-Agent:' -A foo" + target, "User-Agent" }, { "curl -A foo -H 'User-Agent:'" + target, "User-Agent" },
+                { "curl -H 'user-agent:' --user-agent=foo" + target, "user-agent" }, { "curl -A foo -H 'User-Agent:' -A bar" + target, "User-Agent" },
+                { "curl -H 'Referer:' -e http://r/" + target, "Referer" }, { "curl -e http://r/ -H 'Referer:'" + target, "Referer" } };
+
+        for (final String[] entry : suppressed) {
+            final String command = entry[0];
+
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertFalse(code.contains(".header("), command + " -> " + code);
+                assertTrue(code.contains("// cURL was told to suppress the header(s) " + entry[1] + " "), command + " -> " + code);
+            }
+        }
+
+        // An explicit -H value still wins over the suppression, and -A/-e alone are still emitted.
+        for (final String command : new String[] { "curl -A foo -H 'User-Agent:' -H 'User-Agent: x'" + target,
+                "curl -H 'User-Agent:' -A foo -H 'User-Agent: x'" + target }) {
+            final String code = WebUtil.curlToOkHttpRequestCode(command);
+            assertTrue(code.contains(".header(\"User-Agent\", \"x\")"), command + " -> " + code);
+            assertFalse(code.contains("foo") || code.contains("suppress the header(s)"), command + " -> " + code);
+        }
+
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -A foo -e http://r/" + target).contains(".header(\"User-Agent\", \"foo\")"));
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -A foo -e http://r/" + target).contains(".header(\"Referer\", \"http://r/\")"));
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -H 'X-A:' -A foo" + target).contains(".header(\"User-Agent\", \"foo\")"));
+    }
+
+    // G004-02: an -H that sets User-Agent / Referer ('Name: value' or the empty 'Name;') also wins over -A / -e in either
+    // order, as in curl (its own value is sent only when no custom header of that name exists). The converters rejected
+    // these commands as an unreproducible repeated header.
+    @Test
+    public void testCurlConverters_headerValueWinsOverUserAgentAndReferer() {
+        final String target = " http://localhost:18080/x";
+        final String[][] cases = { { "curl -A foo -H 'User-Agent: x'" + target, "User-Agent", "x" },
+                { "curl -H 'User-Agent: x' -A foo" + target, "User-Agent", "x" }, { "curl --user-agent=foo -H 'user-agent: x'" + target, "user-agent", "x" },
+                { "curl -H 'User-Agent: x' -A foo -A bar" + target, "User-Agent", "x" }, { "curl -A foo -H 'User-Agent;'" + target, "User-Agent", "" },
+                { "curl -H 'User-Agent;' -A foo" + target, "User-Agent", "" }, { "curl -H 'User-Agent: x' -A ''" + target, "User-Agent", "x" },
+                { "curl -H 'user-agent: x' -A ''" + target, "user-agent", "x" }, { "curl -H 'User-Agent;' -A ''" + target, "User-Agent", "" },
+                { "curl -e http://r/ -H 'Referer: x'" + target, "Referer", "x" }, { "curl -H 'referer: x' -e http://r/" + target, "referer", "x" },
+                { "curl -e http://r/ -H 'Referer;'" + target, "Referer", "" } };
+
+        for (final String[] entry : cases) {
+            final String command = entry[0];
+
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertTrue(code.contains(".header(\"" + entry[1] + "\", \"" + entry[2] + "\")"), command + " -> " + code);
+                assertFalse(code.contains("foo") || code.contains("bar") || code.contains("http://r/") || code.contains("suppress the header(s)"),
+                        command + " -> " + code);
+            }
+        }
+
+        // The other header of the pair is unaffected, and repeats of one -H name stay rejected.
+        final String code = WebUtil.curlToOkHttpRequestCode("curl -A foo -e http://r/ -H 'User-Agent: x'" + target);
+        assertTrue(code.contains(".header(\"User-Agent\", \"x\")") && code.contains(".header(\"Referer\", \"http://r/\")"), code);
+        assertFalse(code.contains("foo"), code);
+
+        for (final String command : new String[] { "curl -H 'User-Agent: x' -H 'User-Agent: y'" + target,
+                "curl -A foo -H 'User-Agent: x' -H 'User-Agent: y'" + target, "curl -H 'Referer: a' -H 'Referer: b'" + target }) {
+            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command), command);
+            assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command), command);
+        }
+    }
+
+    // G004-03: of repeated -A / -e options curl keeps only the last one (an empty last -A, or an empty or bare ';auto' last
+    // -e, sends none); the converters rejected every such command as an unreproducible repeated header.
+    @Test
+    public void testCurlConverters_repeatedUserAgentAndRefererLastOneWins() {
+        final String target = " http://localhost:18080/x";
+        final String note = "// cURL was told to suppress the header(s) User-Agent";
+        final String[][] sent = { { "curl -A x -A y" + target, "User-Agent", "y" }, { "curl -A x --user-agent=y -Az" + target, "User-Agent", "z" },
+                { "curl -A x -A '' -A y" + target, "User-Agent", "y" }, { "curl -A x -A ' '" + target, "User-Agent", " " },
+                { "curl -e http://a/ -e http://b/" + target, "Referer", "http://b/" },
+                { "curl -e http://a/ --referer='http://b/;auto'" + target, "Referer", "http://b/" },
+                { "curl -e ';auto' -e http://b/" + target, "Referer", "http://b/" } };
+
+        for (final String[] entry : sent) {
+            final String command = entry[0];
+
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertTrue(code.contains(".header(\"" + entry[1] + "\", \"" + entry[2] + "\")"), command + " -> " + code);
+                assertEquals(1, com.landawn.abacus.util.Strings.countMatches(code, ".header(\"" + entry[1] + "\""), command + " -> " + code);
+                assertFalse(code.contains("http://a/") || code.contains(note), command + " -> " + code);
+            }
+        }
+
+        // An empty last -A suppresses the User-Agent; an empty or bare ';auto' last -e sends no Referer (and nothing is suppressed).
+        for (final String command : new String[] { "curl -A x -A ''" + target, "curl -A x -A y --user-agent=''" + target }) {
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertFalse(code.contains(".header(\"User-Agent\""), command + " -> " + code);
+                assertTrue(code.contains(note), command + " -> " + code);
+            }
+        }
+
+        for (final String command : new String[] { "curl -e http://a/ -e ''" + target, "curl -e http://a/ -e ';auto'" + target }) {
+            for (final String code : new String[] { WebUtil.curlToHttpRequestCode(command), WebUtil.curlToOkHttpRequestCode(command) }) {
+                assertFalse(code.contains("Referer") || code.contains("http://a/") || code.contains("suppress the header(s)"), command + " -> " + code);
+            }
+        }
+
+        // Each option replaces only its own header, and an -H for the name still wins over every -A of it.
+        final String both = WebUtil.curlToOkHttpRequestCode("curl -A x -e http://a/ -A y -e http://b/" + target);
+        assertTrue(both.contains(".header(\"User-Agent\", \"y\")") && both.contains(".header(\"Referer\", \"http://b/\")"), both);
+        assertTrue(WebUtil.curlToOkHttpRequestCode("curl -A x -H 'User-Agent: h' -A y" + target).contains(".header(\"User-Agent\", \"h\")"));
+    }
+    // ---- deep review 2026-11-02 G004 end ----
 }

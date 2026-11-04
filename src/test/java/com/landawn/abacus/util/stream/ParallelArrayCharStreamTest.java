@@ -1107,5 +1107,61 @@ public class ParallelArrayCharStreamTest extends TestBase {
                             .isPresent());
         }
     }
+
     // ---- perf review 2026-09-26 G101 end ----
+    // ---- deep review 2026-11-02 G107 begin ----
+    // G107-01 (pin): the parallel flatMapArray workers index the mapped array directly; null and empty arrays contribute
+    // nothing, every element of every non-empty array is emitted once, and a mapper exception propagates.
+    @Test
+    public void testFlatMapArray_parallelNullEmptyAndMultiElementArrays() {
+        final char[] source = new char[37];
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (char) ('a' + (i % 26));
+        }
+
+        final CharFunction<char[]> mapper = c -> {
+            switch (c % 4) {
+                case 0:
+                    return null;
+                case 1:
+                    return new char[0];
+                case 2:
+                    return new char[] { c };
+                default:
+                    return new char[] { c, Character.toUpperCase(c), '#' };
+            }
+        };
+
+        for (final int from : new int[] { 0, 3 }) {
+            final int to = source.length - from;
+            final char[] expected = CharStream.of(source, from, to).flatMapArray(mapper).toArray();
+            Arrays.sort(expected);
+
+            for (final SplitStrategy strategy : SplitStrategy.values()) {
+                for (int threads = 2; threads <= 5; threads++) {
+                    final char[] actual = CharStream.of(source, from, to)
+                            .parallel(new ParallelSettings(threads, strategy, null))
+                            .flatMapArray(mapper)
+                            .toArray();
+                    Arrays.sort(actual);
+                    assertArrayEquals(expected, actual, strategy + "/" + threads + "/" + from);
+                }
+            }
+        }
+
+        // Only null / empty arrays -> empty result; one source element per worker.
+        assertEquals(0, CharStream.of('a', 'b', 'c', 'd').parallel(4).flatMapArray(c -> c % 2 == 0 ? null : new char[0]).count());
+        assertArrayEquals(new char[] { 'x', 'x', 'x', 'x' }, CharStream.of('a', 'b', 'c', 'd').parallel(4).flatMapArray(c -> new char[] { 'x' }).toArray());
+
+        final RuntimeException failure = new IllegalStateException("G107 boom");
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> CharStream.of(source).parallel(3).flatMapArray(c -> {
+            if (c == 'k') {
+                throw failure;
+            }
+
+            return new char[] { c };
+        }).toArray());
+        assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
+    }
+    // ---- deep review 2026-11-02 G107 end ----
 }

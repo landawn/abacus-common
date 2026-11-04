@@ -3819,4 +3819,247 @@ public class NTest extends NTestSupport {
     }
 
     // ---- bug review 2026-10-02 final G133 end ----
+
+    // ---- deep review 2026-11-02 G122b begin ----
+    // G122b-02 (pin): formatXml walks the document's top-level nodes through sibling links instead of NodeList.item(i);
+    // prolog and epilog comments / processing instructions keep their order, one per line, around the formatted root.
+    @Test
+    public void testFormatXml_topLevelNodesInDocumentOrder() {
+        final String xml = "<?xml version=\"1.0\"?><!-- head --><?pi one?><root><a>1</a><!-- in --><b>2</b></root><!-- tail --><?pi two?>";
+        final String expected = "<!-- head -->\n<?pi one?>\n<root>\n  <a>1</a>\n  <!-- in -->\n  <b>2</b>\n</root>\n<!-- tail -->\n<?pi two?>";
+
+        assertEquals(expected, N.formatXml(xml, new XmlSerConfig().setIndentation("  ")));
+        assertEquals("<root/>", N.formatXml("<root/>", new XmlSerConfig().setIndentation("  ")));
+    }
+
+    // ---- deep review 2026-11-02 G122b end ----
+    // ---- deep review 2026-11-02b G063 begin ----
+    // G063-01: with close=true a null elementType must close the handed-over source, as the parser does for a rejected element type.
+    // 2026-11-03: every failed call closes it exactly once - a failure inside the parser is closed by the parser alone.
+    @Test
+    public void testStreamJson_nullElementTypeClosesHandedOverSource_r116() {
+        final Type<Map<String, Object>> nullType = null;
+        final AtomicInteger closed = new AtomicInteger();
+
+        final Reader reader = new StringReader("[{}]") {
+            @Override
+            public void close() {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(reader, true, nullType));
+        assertEquals(1, closed.get());
+
+        final Reader reader2 = new StringReader("[{}]") {
+            @Override
+            public void close() {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(reader2, com.landawn.abacus.parser.JsonDeserConfig.create(), true, nullType));
+        assertEquals(2, closed.get());
+
+        final InputStream in = new ByteArrayInputStream("[{}]".getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public void close() throws IOException {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(in, true, nullType));
+        assertEquals(3, closed.get());
+
+        final InputStream in2 = new ByteArrayInputStream("[{}]".getBytes(StandardCharsets.UTF_8)) {
+            @Override
+            public void close() throws IOException {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(in2, com.landawn.abacus.parser.JsonDeserConfig.create(), true, nullType));
+        assertEquals(4, closed.get());
+
+        // the same as an unsupported element type, which the parser rejects and closes
+        final Reader reader3 = new StringReader("[1]") {
+            @Override
+            public void close() {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(reader3, true, Type.of(Integer.class)));
+        assertEquals(5, closed.get());
+
+        // close=false: the caller keeps the source, nothing is closed
+        final Reader kept = new StringReader("[{}]") {
+            @Override
+            public void close() {
+                closed.incrementAndGet();
+                super.close();
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(kept, false, nullType));
+        assertThrows(IllegalArgumentException.class, () -> N.streamJson(kept, nullType));
+        assertEquals(5, closed.get());
+
+        // A failure inside the parser (rejected element type or root) closes the source exactly once: the parser closes it, and
+        // N.streamJson, which only closes a source the parser never received, does not close it again.
+        final AtomicInteger parserClosed = new AtomicInteger();
+        final Object[][] parserFailures = { { "[1]", Type.of(Integer.class), IllegalArgumentException.class },
+                { "{\"a\":1}", Type.of(Map.class), UnsupportedOperationException.class },
+                { "\"text\"", Type.of(Map.class), UnsupportedOperationException.class }, { "123", Type.of(Map.class), ParsingException.class } };
+
+        for (final Object[] failure : parserFailures) {
+            final String json = (String) failure[0];
+            @SuppressWarnings("unchecked")
+            final Type<Object> type = (Type<Object>) failure[1];
+            @SuppressWarnings("unchecked")
+            final Class<? extends Throwable> expected = (Class<? extends Throwable>) failure[2];
+
+            for (int overload = 0; overload < 4; overload++) {
+                parserClosed.set(0);
+                final Reader reader4 = new StringReader(json) {
+                    @Override
+                    public void close() {
+                        parserClosed.incrementAndGet();
+                        super.close();
+                    }
+                };
+                final InputStream in4 = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8)) {
+                    @Override
+                    public void close() throws IOException {
+                        parserClosed.incrementAndGet();
+                        super.close();
+                    }
+                };
+
+                final int currentOverload = overload;
+                assertThrows(expected, () -> {
+                    switch (currentOverload) {
+                        case 0 -> N.streamJson(reader4, true, type);
+                        case 1 -> N.streamJson(reader4, com.landawn.abacus.parser.JsonDeserConfig.create(), true, type);
+                        case 2 -> N.streamJson(in4, true, type);
+                        default -> N.streamJson(in4, com.landawn.abacus.parser.JsonDeserConfig.create(), true, type);
+                    }
+                }, json + " overload " + overload);
+                assertEquals(1, parserClosed.get(), json + " overload " + overload);
+            }
+        }
+
+        // a null source with a null elementType still reports the elementType
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> N.streamJson((Reader) null, true, nullType));
+        assertTrue(e.getMessage().contains("elementType"), e.getMessage());
+
+        // a valid element type is unaffected: the source is closed with the returned stream (the terminal operation), once
+        final AtomicInteger closedWithStream = new AtomicInteger();
+        final Reader ok = new StringReader("[{\"a\":1}]") {
+            @Override
+            public void close() {
+                closedWithStream.incrementAndGet();
+                super.close();
+            }
+        };
+        try (com.landawn.abacus.util.stream.Stream<Map<String, Object>> s = N.streamJson(ok, true, Type.ofMap(String.class, Object.class))) {
+            assertEquals(1, s.count());
+        }
+        assertEquals(1, closedWithStream.get());
+    }
+
+    // ---- deep review 2026-11-02b G063 end ----
+    // ---- deep review 2026-11-02b G064 begin ----
+    // G064-01: a command that a direct (or caller-runs) executor ran on the calling thread and that failed with an
+    // InterruptedException consumed the caller's interrupt status; it must be restored, as for the first command.
+    @Test
+    public void testRunInParallel_directExecutorCommandInterruptRestored_r116() {
+        final java.util.concurrent.Executor direct = Runnable::run;
+        final Throwables.Runnable<Exception> ok = () -> {
+        };
+        final Throwables.Runnable<Exception> interrupted = () -> {
+            Thread.currentThread().interrupt();
+            Thread.sleep(10); // throws InterruptedException at once and clears the flag
+        };
+        final Throwables.Runnable<Exception> failing = () -> {
+            throw new IOException("first");
+        };
+
+        Thread.interrupted();
+
+        try {
+            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.runInParallel(Arrays.asList(ok, interrupted), direct));
+            assertTrue(e1.getCause() instanceof InterruptedException);
+            assertTrue(Thread.interrupted());
+
+            // the first command's failure is reported, but the interrupt consumed by the second one is still restored
+            final RuntimeException e2 = assertThrows(RuntimeException.class, () -> N.runInParallel(Arrays.asList(failing, interrupted), direct));
+            assertEquals("first", e2.getCause().getMessage());
+            assertTrue(Thread.interrupted());
+
+            N.runInParallel(Arrays.asList(ok, ok, ok), direct);
+            assertFalse(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    // G064-01: same for callInParallel(Collection, Executor).
+    @Test
+    public void testCallInParallel_directExecutorCommandInterruptRestored_r116() {
+        final java.util.concurrent.Executor direct = Runnable::run;
+        final java.util.concurrent.Callable<String> ok = () -> "ok";
+        final java.util.concurrent.Callable<String> interrupted = () -> {
+            Thread.currentThread().interrupt();
+            Thread.sleep(10); // throws InterruptedException at once and clears the flag
+            return "unreachable";
+        };
+
+        Thread.interrupted();
+
+        try {
+            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.callInParallel(Arrays.asList(ok, interrupted, ok), direct));
+            assertTrue(e1.getCause() instanceof InterruptedException);
+            assertTrue(Thread.interrupted());
+
+            assertEquals(Arrays.asList("ok", "ok", "ok"), N.callInParallel(Arrays.asList(ok, ok, ok), direct));
+            assertFalse(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    // G064-01 (pin): an InterruptedException thrown by a command on a pool thread says nothing about the caller,
+    // which must stay uninterrupted.
+    @Test
+    public void testRunCallInParallel_poolCommandInterruptDoesNotInterruptCaller_r116() throws Exception {
+        final java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+
+        Thread.interrupted();
+
+        try {
+            final Throwables.Runnable<Exception> ok = () -> {
+            };
+            final Throwables.Runnable<Exception> interrupted = () -> {
+                throw new InterruptedException("worker");
+            };
+            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.runInParallel(Arrays.asList(ok, interrupted), pool));
+            assertEquals("worker", e1.getCause().getMessage());
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            final java.util.concurrent.Callable<String> okC = () -> "ok";
+            final java.util.concurrent.Callable<String> interruptedC = () -> {
+                throw new InterruptedException("worker");
+            };
+            final RuntimeException e2 = assertThrows(RuntimeException.class, () -> N.callInParallel(Arrays.asList(okC, interruptedC), pool));
+            assertEquals("worker", e2.getCause().getMessage());
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertEquals(Arrays.asList("ok", "ok"), N.callInParallel(Arrays.asList(okC, okC), pool));
+        } finally {
+            Thread.interrupted();
+            pool.shutdown();
+            assertTrue(pool.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS));
+        }
+    }
+    // ---- deep review 2026-11-02b G064 end ----
 }

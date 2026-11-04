@@ -2916,4 +2916,684 @@ public class FloatStreamTest extends FloatStreamTestSupport {
         assertEquals(N.toList(7f, 6f), a.map(e -> e).zipWith(b, 0, 0, (x, y) -> x + y).skip(1).toList());
     }
 
+    // ---- deep review 2026-11-02 G102 begin ----
+    private static final float[] G102_SAMPLES = { 0f, -0f, 1.5f, -2.25f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, 3e38f };
+
+    private static float[] g102RandomArray(final Random rnd, final int maxLength) {
+        final float[] a = new float[rnd.nextInt(maxLength + 1)];
+
+        for (int i = 0; i < a.length; i++) {
+            a[i] = rnd.nextInt(4) == 0 ? G102_SAMPLES[rnd.nextInt(G102_SAMPLES.length)] : rnd.nextInt(1000) / 8f;
+        }
+
+        return a;
+    }
+
+    private static float[] g102Drain(final FloatIterator iterator) {
+        final FloatList list = new FloatList();
+
+        while (iterator.hasNext()) {
+            list.add(iterator.nextFloat());
+        }
+
+        return list.toArray();
+    }
+
+    private static float[] g102Suffix(final float[] a, final int from) {
+        return from >= a.length ? new float[0] : Arrays.copyOfRange(a, from, a.length);
+    }
+
+    // variant 0: zip(a, b), 1: zip(a, b, c), 2: zip(a, b, -0f, NaN), 3: zip(a, b, c, -0f, NaN, 7.5f); every call is recorded
+    private static FloatStream g102Zip(final int variant, final float[] a, final float[] b, final float[] c, final List<String> calls) {
+        switch (variant) {
+            case 0:
+                return FloatStream.zip(a, b, (x, y) -> {
+                    calls.add(x + "," + y);
+                    return x * 3 + y;
+                });
+            case 1:
+                return FloatStream.zip(a, b, c, (x, y, z) -> {
+                    calls.add(x + "," + y + "," + z);
+                    return x * 3 + y - z;
+                });
+            case 2:
+                return FloatStream.zip(a, b, -0f, Float.NaN, (x, y) -> {
+                    calls.add(x + "," + y);
+                    return x * 3 + y;
+                });
+            default:
+                return FloatStream.zip(a, b, c, -0f, Float.NaN, 7.5f, (x, y, z) -> {
+                    calls.add(x + "," + y + "," + z);
+                    return x * 3 + y - z;
+                });
+        }
+    }
+
+    private static float[] g102ZipReference(final int variant, final float[] a, final float[] b, final float[] c) {
+        final int len = variant == 0 ? Math.min(a.length, b.length)
+                : variant == 1 ? Math.min(a.length, Math.min(b.length, c.length))
+                        : variant == 2 ? Math.max(a.length, b.length) : Math.max(a.length, Math.max(b.length, c.length));
+        final float[] result = new float[len];
+
+        for (int i = 0; i < len; i++) {
+            final float x = i < a.length ? a[i] : -0f;
+            final float y = i < b.length ? b[i] : Float.NaN;
+            final float z = i < c.length ? c[i] : 7.5f;
+            result[i] = variant == 0 || variant == 2 ? x * 3 + y : x * 3 + y - z;
+        }
+
+        return result;
+    }
+
+    // G102-01: zip(float[]...) toArray()/toFloatList()/skip(k).toArray()/iterator().toArray()|toList()/sorted() fill an exactly sized
+    // array; values and the zipFunction call sequence equal the element-by-element traversal (pin: GREEN on base and fix)
+    @Test
+    public void testZipArrays_bulkTerminalsMatchElementwiseTraversal() {
+        final Random rnd = new Random(102);
+
+        for (int round = 0; round < 200; round++) {
+            final float[] a = g102RandomArray(rnd, 12);
+            final float[] b = g102RandomArray(rnd, 12);
+            final float[] c = g102RandomArray(rnd, 12);
+
+            for (int variant = 0; variant < 4; variant++) {
+                final float[] expected = g102ZipReference(variant, a, b, c);
+                final List<String> expectedCalls = new ArrayList<>();
+                assertArrayEquals(expected, g102Drain(g102Zip(variant, a, b, c, expectedCalls).iterator()));
+                assertEquals(expected.length, expectedCalls.size());
+
+                final List<String> calls = new ArrayList<>();
+                assertArrayEquals(expected, g102Zip(variant, a, b, c, calls).toArray());
+                assertEquals(expectedCalls, calls);
+
+                calls.clear();
+                final FloatList list = g102Zip(variant, a, b, c, calls).toFloatList();
+                assertArrayEquals(expected, list.toArray());
+                assertEquals(expectedCalls, calls);
+                list.add(42f);
+                assertEquals(expected.length + 1, list.size());
+
+                final int k = rnd.nextInt(expected.length + 2);
+                calls.clear();
+                assertArrayEquals(g102Suffix(expected, k), g102Zip(variant, a, b, c, calls).skip(k).toArray());
+                assertEquals(expectedCalls, calls);
+
+                calls.clear();
+                final FloatIterator iter = g102Zip(variant, a, b, c, calls).iterator();
+                final int consumed = Math.min(k, expected.length);
+
+                for (int i = 0; i < consumed; i++) {
+                    iter.nextFloat();
+                }
+
+                assertArrayEquals(g102Suffix(expected, consumed), rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+                assertEquals(expectedCalls, calls);
+                assertFalse(iter.hasNext());
+                org.junit.jupiter.api.Assertions.assertSame(N.EMPTY_FLOAT_ARRAY, iter.toArray());
+                assertEquals(0, iter.toList().size());
+
+                calls.clear();
+                final float[] sorted = expected.clone();
+                Arrays.sort(sorted);
+                assertArrayEquals(sorted, g102Zip(variant, a, b, c, calls).sorted().toArray());
+                assertEquals(expectedCalls, calls);
+            }
+        }
+    }
+
+    private static boolean g102TakeFirst(final boolean stateful, final float x, final float y, final List<String> calls) {
+        calls.add(x + "," + y);
+        return stateful ? calls.size() % 3 != 0 : Float.compare(x, y) <= 0;
+    }
+
+    private static FloatStream g102Merge(final float[] a, final float[] b, final boolean stateful, final List<String> calls) {
+        return FloatStream.merge(a, b, (x, y) -> g102TakeFirst(stateful, x, y, calls) ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+    }
+
+    // G102-01: merge(float[], float[]) toArray()/toFloatList() fill an exactly sized array; values and the order and number of
+    // nextSelector calls (a stateful selector makes the result depend on them) equal the element-by-element traversal (pin)
+    @Test
+    public void testMergeArrays_bulkTerminalsMatchElementwiseTraversal() {
+        final Random rnd = new Random(10203);
+
+        for (int round = 0; round < 200; round++) {
+            final float[] a = g102RandomArray(rnd, 10);
+            final float[] b = g102RandomArray(rnd, 10);
+
+            if (rnd.nextBoolean()) {
+                Arrays.sort(a);
+                Arrays.sort(b);
+            }
+
+            final boolean stateful = rnd.nextBoolean();
+            final FloatList expectedList = new FloatList();
+            final List<String> expectedCalls = new ArrayList<>();
+            int i = 0;
+            int j = 0;
+
+            while (i < a.length || j < b.length) {
+                if (i < a.length && (j >= b.length || g102TakeFirst(stateful, a[i], b[j], expectedCalls))) {
+                    expectedList.add(a[i++]);
+                } else {
+                    expectedList.add(b[j++]);
+                }
+            }
+
+            final float[] expected = expectedList.toArray();
+            final List<String> calls = new ArrayList<>();
+            assertArrayEquals(expected, g102Drain(g102Merge(a, b, stateful, calls).iterator()));
+            assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            assertArrayEquals(expected, g102Merge(a, b, stateful, calls).toArray());
+            assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            final FloatList list = g102Merge(a, b, stateful, calls).toFloatList();
+            assertArrayEquals(expected, list.toArray());
+            assertEquals(expectedCalls, calls);
+            list.add(1f);
+            assertEquals(expected.length + 1, list.size());
+
+            final int k = rnd.nextInt(expected.length + 2);
+            calls.clear();
+            assertArrayEquals(g102Suffix(expected, k), g102Merge(a, b, stateful, calls).skip(k).toArray());
+            assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            final FloatIterator iter = g102Merge(a, b, stateful, calls).iterator();
+            final int consumed = Math.min(k, expected.length);
+
+            for (int n = 0; n < consumed; n++) {
+                iter.nextFloat();
+            }
+
+            assertArrayEquals(g102Suffix(expected, consumed), rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+            assertEquals(expectedCalls, calls);
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.toArray().length);
+        }
+    }
+
+    private static Object g102Bulk(final FloatIterator iterator, final boolean useList) {
+        return useList ? iterator.toList() : iterator.toArray();
+    }
+
+    // G102-01: a failing zipFunction or nextSelector inside toArray()/toList() leaves the iterator exactly where element-by-element
+    // traversal leaves it (zip(a, b)/zip(a, b, c) advance before the call, the padded zips and merge do not) (pin)
+    @Test
+    public void testZipAndMergeArrays_failingCallbackKeepsIteratorState() {
+        final float[] a = { 1, 2, 3, 4, 5 };
+        final float[] b = { 10, 20, 30, 40, 50, 60 };
+        final float[] c = { 100, 200, 300, 400, 500, 600, 700 };
+
+        for (int viaList = 0; viaList < 2; viaList++) {
+            final boolean useList = viaList == 1;
+            final int[] calls = { 0 };
+
+            final FloatIterator zip2 = FloatStream.zip(a, b, (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("zip2");
+                }
+
+                return x + y;
+            }).iterator();
+            assertEquals("zip2", assertThrows(IllegalStateException.class, () -> g102Bulk(zip2, useList)).getMessage());
+            assertEquals(3, calls[0]);
+            assertArrayEquals(new float[] { 44, 55 }, g102Drain(zip2));
+            assertEquals(5, calls[0]);
+
+            calls[0] = 0;
+            final FloatIterator zip3 = FloatStream.zip(a, b, c, (x, y, z) -> {
+                if (++calls[0] == 2) {
+                    throw new IllegalStateException("zip3");
+                }
+
+                return x + y + z;
+            }).iterator();
+            assertEquals("zip3", assertThrows(IllegalStateException.class, () -> g102Bulk(zip3, useList)).getMessage());
+            assertArrayEquals(new float[] { 333, 444, 555 }, g102Drain(zip3));
+            assertEquals(5, calls[0]);
+
+            calls[0] = 0;
+            final FloatIterator pad2 = FloatStream.zip(a, b, 0.5f, 0.25f, (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("pad2");
+                }
+
+                return x + y;
+            }).iterator();
+            assertEquals("pad2", assertThrows(IllegalStateException.class, () -> g102Bulk(pad2, useList)).getMessage());
+            assertArrayEquals(new float[] { 33, 44, 55, 60.5f }, g102Drain(pad2));
+            assertEquals(7, calls[0]);
+
+            calls[0] = 0;
+            final FloatIterator pad3 = FloatStream.zip(a, b, c, 0.5f, 0.25f, 0.125f, (x, y, z) -> {
+                if (++calls[0] == 6) {
+                    throw new IllegalStateException("pad3");
+                }
+
+                return x + y + z;
+            }).iterator();
+            assertEquals("pad3", assertThrows(IllegalStateException.class, () -> g102Bulk(pad3, useList)).getMessage());
+            assertArrayEquals(new float[] { 660.5f, 700.75f }, g102Drain(pad3));
+            assertEquals(8, calls[0]);
+
+            calls[0] = 0;
+            final FloatIterator merge = FloatStream.merge(new float[] { 1, 3, 5 }, new float[] { 2, 4, 6 }, (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("merge");
+                }
+
+                return x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+            }).iterator();
+            assertEquals("merge", assertThrows(IllegalStateException.class, () -> g102Bulk(merge, useList)).getMessage());
+            assertArrayEquals(new float[] { 3, 4, 5, 6 }, g102Drain(merge));
+            assertEquals(6, calls[0]);
+        }
+    }
+
+    // G102-01: a zipFunction that consumes its own stream's iterator re-entrantly (once) ends toArray()/toFloatList() where the
+    // hasNext()-driven loop ends, instead of failing with NoSuchElementException (pin)
+    @Test
+    public void testZipArrays_reentrantCallbackEndsBulkTerminalEarly() {
+        final float[] a = { 1, 2, 3, 4, 5 };
+        final float[] b = { 10, 20, 30, 40, 50 };
+        final float[] c = { 100, 200, 300, 400, 500 };
+        final Runnable[] consume = new Runnable[1];
+        final boolean[] once = { true };
+
+        FloatStream s = FloatStream.zip(a, b, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return x + y;
+        });
+        FloatIterator it = s.iterator();
+        consume[0] = it::nextFloat;
+        assertArrayEquals(new float[] { 11, 33, 44, 55 }, it.toArray());
+        assertFalse(it.hasNext());
+
+        once[0] = true;
+        s = FloatStream.zip(a, b, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return x + y;
+        });
+        it = s.iterator();
+        consume[0] = it::nextFloat;
+        assertArrayEquals(new float[] { 11, 33, 44, 55 }, s.toFloatList().toArray());
+
+        once[0] = true;
+        s = FloatStream.zip(a, b, c, (x, y, z) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return x + y + z;
+        });
+        it = s.iterator();
+        consume[0] = it::nextFloat;
+        assertArrayEquals(new float[] { 111, 333, 444, 555 }, it.toArray());
+
+        once[0] = true;
+        s = FloatStream.zip(a, new float[] { 7 }, -1, -2, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return x + y;
+        });
+        it = s.iterator();
+        consume[0] = it::nextFloat;
+        assertArrayEquals(new float[] { 8, 1, 2, 3 }, it.toArray());
+
+        once[0] = true;
+        s = FloatStream.zip(a, new float[] { 7 }, new float[0], -1, -2, -3, (x, y, z) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return x + y + z;
+        });
+        it = s.iterator();
+        consume[0] = it::nextFloat;
+        assertArrayEquals(new float[] { 5, -2, -1, 0 }, it.toArray());
+    }
+
+    private static FloatStream g102Flatten(final float[][] a, final int mode, final float pad) {
+        return mode == 0 ? FloatStream.flatten(a, true) : FloatStream.flatten(a, pad, mode == 1);
+    }
+
+    // G102-01: flatten(float[][], true) (rectangular walk and the sparse jagged walk) and flatten(float[][], value, vertically)
+    // toArray()/toFloatList() fill an exactly sized array; pinned against plain column-major / row-major references, also after
+    // skip(k) and partial iteration (pin)
+    @Test
+    public void testFlattenVerticalAndAligned_bulkTerminalsMatchReference() {
+        final Random rnd = new Random(10202);
+
+        for (int round = 0; round < 300; round++) {
+            final int shape = rnd.nextInt(3);
+            final int rows = shape == 2 ? 5 + rnd.nextInt(6) : rnd.nextInt(7);
+            final float[][] a = new float[rows][];
+            final int width = 1 + rnd.nextInt(6);
+
+            for (int r = 0; r < rows; r++) {
+                if (shape == 1) {
+                    a[r] = new float[width];
+                    Arrays.fill(a[r], r + 0.5f);
+                } else if (shape == 2) {
+                    // one long row among null, empty and one-element rows: rows * maxLen > 4 * n selects the jagged walk
+                    a[r] = r == rows / 2 ? g102RandomArray(rnd, 40) : rnd.nextInt(3) == 0 ? null : new float[rnd.nextInt(2)];
+                } else {
+                    a[r] = rnd.nextInt(5) == 0 ? null : g102RandomArray(rnd, 6);
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final float[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final float pad = G102_SAMPLES[rnd.nextInt(G102_SAMPLES.length)];
+            final FloatList vertical = new FloatList();
+            final FloatList alignedVertical = new FloatList();
+            final FloatList alignedHorizontal = new FloatList();
+
+            for (int col = 0; col < maxLen; col++) {
+                for (final float[] row : a) {
+                    if (row != null && col < row.length) {
+                        vertical.add(row[col]);
+                        alignedVertical.add(row[col]);
+                    } else {
+                        alignedVertical.add(pad);
+                    }
+                }
+            }
+
+            for (final float[] row : a) {
+                for (int col = 0; col < maxLen; col++) {
+                    alignedHorizontal.add(row != null && col < row.length ? row[col] : pad);
+                }
+            }
+
+            for (int mode = 0; mode < 3; mode++) {
+                // a single row is returned as-is (no padding) by both flatten overloads
+                final float[] expected = rows == 1 ? (a[0] == null ? new float[0] : a[0].clone())
+                        : (mode == 0 ? vertical : mode == 1 ? alignedVertical : alignedHorizontal).toArray();
+
+                assertArrayEquals(expected, g102Flatten(a, mode, pad).toArray());
+                assertArrayEquals(expected, g102Flatten(a, mode, pad).toFloatList().toArray());
+                assertArrayEquals(expected, g102Drain(g102Flatten(a, mode, pad).iterator()));
+
+                final int k = rnd.nextInt(expected.length + 2);
+                assertArrayEquals(g102Suffix(expected, k), g102Flatten(a, mode, pad).skip(k).toArray());
+
+                final FloatIterator iter = g102Flatten(a, mode, pad).iterator();
+                final int consumed = Math.min(k, expected.length);
+
+                for (int n = 0; n < consumed; n++) {
+                    iter.nextFloat();
+                }
+
+                assertArrayEquals(g102Suffix(expected, consumed), rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+                assertFalse(iter.hasNext());
+                assertEquals(0, iter.toList().size());
+                assertThrows(NoSuchElementException.class, iter::nextFloat);
+            }
+        }
+    }
+
+    // ---- deep review 2026-11-02 G102 end ----
+    // ---- deep review 2026-11-02b G120 begin ----
+    // G120-05 (pin): FloatStream.of(FloatBuffer) for a buffer without an accessible array (direct, read-only, sliced, view of a heap
+    // ByteBuffer) reads the window [position, limit) through a dedicated iterator; toArray()/toList() fill an exact-size
+    // array with the same get(i) reads. Results, laziness (live view), window snapshot and iterator states must match element-wise traversal.
+    @Test
+    public void testOfFloatBuffer_nonArrayBufferTerminalsMatchElementwise_r116() {
+        final float[] content = { 10, Float.NaN, -0.0f, 0.0f, Float.MAX_VALUE, -1.5f, 5, 5, Float.NEGATIVE_INFINITY, -7, 2, 1 };
+
+        for (int kind = 0; kind < 5; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final float[] expected = Arrays.copyOfRange(content, from, to);
+                    final java.nio.FloatBuffer buf = g120FloatBuffer(kind, content, from, to);
+
+                    assertFalse(buf.hasArray());
+                    assertArrayEquals(expected, FloatStream.of(buf).toArray());
+                    assertArrayEquals(expected, FloatStream.of(buf).toFloatList().toArray());
+                    assertEquals(expected.length, FloatStream.of(buf).count());
+                    assertArrayEquals(g120FloatSuffix(expected, 3), FloatStream.of(buf).skip(3).toArray());
+                    assertArrayEquals(g120FloatSorted(expected), FloatStream.of(buf).sorted().toArray());
+
+                    final com.landawn.abacus.util.FloatList list = FloatStream.of(buf).toFloatList();
+                    list.add((float) 42); // a fresh, mutable list
+                    assertEquals(expected.length + 1, list.size());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final FloatIterator iter = FloatStream.of(buf).iterator();
+
+                        for (int n = 0; n < consumed; n++) {
+                            assertEquals(expected[n], iter.nextFloat());
+                        }
+
+                        final boolean viaArray = (consumed + from + kind) % 2 == 0;
+                        final float[] rest = viaArray ? iter.toArray() : iter.toList().toArray();
+                        assertArrayEquals(g120FloatSuffix(expected, consumed), rest);
+                        assertFalse(iter.hasNext());
+                        assertEquals(0, iter.toList().size());
+                        assertThrows(NoSuchElementException.class, iter::nextFloat);
+
+                        if (expected.length > 0) {
+                            // an exhausted iterator returns the shared empty array, as the element-wise toArray() did
+                            org.junit.jupiter.api.Assertions.assertSame(com.landawn.abacus.util.N.EMPTY_FLOAT_ARRAY, iter.toArray());
+                        } else {
+                            assertEquals(0, iter.toArray().length);
+                        }
+                    }
+
+                    final FloatIteratorEx iterEx = (FloatIteratorEx) FloatStream.of(buf).iterator();
+                    iterEx.advance(2);
+                    assertArrayEquals(g120FloatSuffix(expected, 2), iterEx.toArray());
+                }
+            }
+        }
+
+        // live view of the window taken at the call: later writes are seen, later position/limit changes are not
+        final java.nio.FloatBuffer direct = java.nio.ByteBuffer.allocateDirect(6 * 4).asFloatBuffer();
+        direct.put(new float[] { 1, 2, 3, 4, 5, 6 });
+        direct.position(1);
+        direct.limit(5);
+
+        final FloatStream stream = FloatStream.of(direct);
+        direct.put(4, (float) 40);
+        direct.clear();
+        direct.limit(0);
+
+        assertArrayEquals(new float[] { 2, 3, 4, 40 }, stream.toArray());
+        assertEquals(0, direct.position());
+        assertEquals(0, direct.limit());
+    }
+
+    private static java.nio.FloatBuffer g120FloatBuffer(final int kind, final float[] content, final int from, final int to) {
+        final java.nio.FloatBuffer buf;
+
+        if (kind == 0) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 4).asFloatBuffer().put(content);
+        } else if (kind == 1) {
+            buf = java.nio.FloatBuffer.wrap(content.clone()).asReadOnlyBuffer();
+        } else if (kind == 2) {
+            final java.nio.FloatBuffer outer = java.nio.ByteBuffer.allocateDirect((content.length + 3) * 4).asFloatBuffer();
+            outer.position(2);
+            outer.put(content);
+            outer.position(2);
+            outer.limit(2 + content.length);
+            buf = outer.slice();
+        } else if (kind == 3) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 4).asFloatBuffer().put(content).asReadOnlyBuffer();
+        } else {
+            buf = java.nio.ByteBuffer.allocate(content.length * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN).asFloatBuffer().put(content);
+        }
+
+        buf.limit(to);
+        buf.position(from);
+
+        return buf;
+    }
+
+    private static float[] g120FloatSuffix(final float[] a, final int k) {
+        return Arrays.copyOfRange(a, Math.min(k, a.length), a.length);
+    }
+
+    private static float[] g120FloatSorted(final float[] a) {
+        final float[] copy = a.clone();
+        Arrays.sort(copy);
+        return copy;
+    }
+
+    // ---- deep review 2026-11-02b G120 end ----
+    // ---- deep review 2026-11-02b G124 begin ----
+    // G124: a buffer without an accessible array keeps the close-handler shape of the former
+    // IntStream.range(position, limit).mapToFloat(view::get) stream: exactly one (run-once, no-op) close handler.
+    @Test
+    public void testOfFloatBuffer_nonArrayBufferKeepsRangeCloseHandler_r116() {
+        final java.nio.FloatBuffer direct = java.nio.ByteBuffer.allocateDirect(4 * 4).asFloatBuffer();
+        direct.put(new float[] { (float) 1, (float) 2, (float) 3, (float) 4 });
+        direct.position(1);
+        final java.nio.FloatBuffer emptyWindow = direct.duplicate();
+        emptyWindow.position(4);
+
+        for (final java.nio.FloatBuffer buf : java.util.List.of(direct, emptyWindow)) {
+            // what iterator()'s "Remember to close" warning checks
+            final FloatStream stream = FloatStream.of(buf);
+            org.junit.jupiter.api.Assertions.assertFalse(StreamBase.isEmptyCloseHandlers(stream.closeHandlers()));
+            org.junit.jupiter.api.Assertions.assertEquals(1, stream.closeHandlers().size());
+
+            // handlers registered later run once, in order; a failing one does not stop the others
+            final java.util.List<String> calls = new java.util.ArrayList<>();
+            final FloatStream withHandlers = FloatStream.of(buf).onClose(() -> calls.add("a")).onClose(() -> {
+                calls.add("b");
+                throw new IllegalStateException("b");
+            }).onClose(() -> calls.add("c"));
+            org.junit.jupiter.api.Assertions.assertEquals("b",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::close).getMessage());
+            withHandlers.close();
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of("a", "b", "c"), calls);
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::count);
+        }
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new float[] { (float) 2, (float) 3, (float) 4 }, FloatStream.of(direct).toArray());
+    }
+    // ---- deep review 2026-11-02b G124 end ----
+
+    // ---- re-review 2026-11-03 R04 begin ----
+    // R04 (pin): FloatStream.of(FloatBuffer) for a buffer without an accessible array counts and skips by moving the cursor of its
+    // window iterator instead of reading every skipped element. Pinned for every window, read position and skip length:
+    // count(), advance(n) (negative, zero, inside, exactly to and past the end, Long.MAX_VALUE), the elements read after
+    // it, the stream-level skip/step/count, the failure-atomic advance flag, and the live view of elements not yet read.
+    @Test
+    public void testOfFloatBuffer_nonArrayBufferCountAndAdvanceMoveCursor_r116() {
+        final float[] content = { 1.5f, -0.0f, Float.NaN, 0f, -1f, 5f, 5f, 3.25f, Float.MAX_VALUE, -7f, 2f, 1f };
+
+        for (int kind = 0; kind < 2; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final float[] expected = java.util.Arrays.copyOfRange(content, from, to);
+                    final java.nio.FloatBuffer buf = r04Buffer(kind, content, from, to);
+                    org.junit.jupiter.api.Assertions.assertFalse(buf.hasArray());
+
+                    org.junit.jupiter.api.Assertions.assertEquals(expected.length, FloatStream.of(buf).count());
+
+                    for (int k = 0; k <= expected.length + 1; k++) {
+                        final int start = Math.min(k, expected.length);
+                        final float[] rest = java.util.Arrays.copyOfRange(expected, start, expected.length);
+                        org.junit.jupiter.api.Assertions.assertEquals(rest.length, FloatStream.of(buf).skip(k).count());
+                        org.junit.jupiter.api.Assertions.assertArrayEquals(rest, FloatStream.of(buf).skip(k).toArray());
+                    }
+
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(r04Step(expected, 3), FloatStream.of(buf).step(3).toArray());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final int remaining = expected.length - consumed;
+
+                        for (final long n : new long[] { -1, 0, 1, 2, remaining, remaining + 1L, Long.MAX_VALUE }) {
+                            final int next = consumed + (int) Math.min(Math.max(n, 0), remaining);
+                            final FloatIteratorEx iter = (FloatIteratorEx) FloatStream.of(buf).iterator();
+
+                            if (expected.length > 0) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.supportsFailureAtomicAdvance());
+                            }
+
+                            for (int i = 0; i < consumed; i++) {
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextFloat());
+                            }
+
+                            iter.advance(n);
+
+                            for (int i = next; i < expected.length; i++) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextFloat());
+                            }
+
+                            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                            org.junit.jupiter.api.Assertions.assertEquals(0, iter.count());
+                            org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextFloat);
+
+                            final FloatIteratorEx counted = (FloatIteratorEx) FloatStream.of(buf).iterator();
+
+                            for (int i = 0; i < consumed; i++) {
+                                counted.nextFloat();
+                            }
+
+                            counted.advance(n);
+                            org.junit.jupiter.api.Assertions.assertEquals(expected.length - next, counted.count());
+                            org.junit.jupiter.api.Assertions.assertFalse(counted.hasNext());
+                            counted.advance(1);
+                            org.junit.jupiter.api.Assertions.assertEquals(0, counted.count());
+                        }
+                    }
+                }
+            }
+        }
+
+        // A skip moves the cursor only: an element written after the skip is read live, a skipped one is never read.
+        final java.nio.FloatBuffer live = r04Buffer(1, content, 0, 6);
+        final FloatIteratorEx liveIter = (FloatIteratorEx) FloatStream.of(live).iterator();
+        liveIter.advance(2);
+        live.put(1, 77.5f);
+        live.put(3, 88.5f);
+        org.junit.jupiter.api.Assertions.assertEquals(content[2], liveIter.nextFloat());
+        org.junit.jupiter.api.Assertions.assertEquals(88.5f, liveIter.nextFloat());
+        org.junit.jupiter.api.Assertions.assertEquals(2, liveIter.count());
+        org.junit.jupiter.api.Assertions.assertFalse(liveIter.hasNext());
+    }
+
+    private static java.nio.FloatBuffer r04Buffer(final int kind, final float[] content, final int from, final int to) {
+        // kind 0: read-only view of a heap array; kind 1: writable view of direct memory. Neither exposes an array.
+        final java.nio.FloatBuffer buf = kind == 0 ? java.nio.FloatBuffer.wrap(content.clone()).asReadOnlyBuffer()
+                : java.nio.ByteBuffer.allocateDirect(content.length * 4).asFloatBuffer().put(content).clear();
+        buf.limit(to);
+        buf.position(from);
+        return buf;
+    }
+
+    private static float[] r04Step(final float[] a, final int step) {
+        final float[] result = new float[(a.length + step - 1) / step];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = a[i * step];
+        }
+
+        return result;
+    }
+    // ---- re-review 2026-11-03 R04 end ----
 }

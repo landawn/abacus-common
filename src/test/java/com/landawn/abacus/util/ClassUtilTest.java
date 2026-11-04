@@ -2258,4 +2258,73 @@ public class ClassUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-09-25 G025 end ----
+
+    // ---- deep review 2026-11-02 G028 begin ----
+    // G028-01: a public caller-sensitive method must get a handle whether or not its package is opened to this module
+    // (the suite opens java.lang and java.lang.reflect, which made the last fallback retry the failing private lookup).
+    @Test
+    public void testCreateMethodHandle_callerSensitivePublicMethodWithOpenedPackage() throws Throwable {
+        final MethodHandle forName = ClassUtil.createMethodHandle(Class.class.getMethod("forName", String.class));
+        assertEquals(String.class, forName.invoke("java.lang.String"));
+
+        final MethodHandle invoke = ClassUtil.createMethodHandle(Method.class.getMethod("invoke", Object.class, Object[].class));
+        assertEquals(3, invoke.invoke(String.class.getMethod("length"), "abc", new Object[0]));
+
+        // A private method of an opened package still comes from the private lookup (first strategy).
+        assertEquals(0, (byte) ClassUtil.createMethodHandle(String.class.getDeclaredMethod("coder")).invoke("abc"));
+    }
+    // ---- deep review 2026-11-02 G028 end ----
+
+    // ---- deep review 2026-11-02b G028 begin ----
+    // G028-01: a class-path JAR whose file extension is not lower-case (".JAR", ".Jar") is served by the class loader
+    // but was skipped by the scan, which silently returned no classes for its packages.
+    @Test
+    public void testFindClassesInPackage_scansJarWithUpperCaseExtension_r116(@org.junit.jupiter.api.io.TempDir final Path tempDir) throws Exception {
+        final Path root = tempDir.toAbsolutePath();
+        final Path classes = Files.createDirectories(root.resolve("compiled"));
+        final Path pkg = Files.createDirectories(classes.resolve("g028jarcase"));
+        Files.writeString(pkg.resolve("Keep.java"), "package g028jarcase;\npublic class Keep {}\n");
+        assertEquals(0,
+                ToolProvider.getSystemJavaCompiler().run(null, null, null, "-proc:none", "-d", classes.toString(), pkg.resolve("Keep.java").toString()));
+
+        for (final String archiveName : new String[] { "lower.jar", "UPPER.JAR", "Mixed.Jar" }) {
+            final Path archive = root.resolve(archiveName);
+
+            try (java.util.jar.JarOutputStream jar = new java.util.jar.JarOutputStream(Files.newOutputStream(archive))) {
+                jar.putNextEntry(new java.util.jar.JarEntry("g028jarcase/"));
+                jar.closeEntry();
+                jar.putNextEntry(new java.util.jar.JarEntry("g028jarcase/Keep.class"));
+                Files.copy(pkg.resolve("Keep.class"), jar);
+                jar.closeEntry();
+            }
+
+            // findClassesInPackage scans what ClassUtil's own loader sees, so the archive under test is put on the
+            // class path of an isolated loader that holds its own copy of ClassUtil.
+            final List<URL> urls = new ArrayList<>();
+            urls.add(archive.toUri().toURL());
+            urls.add(ClassUtil.class.getProtectionDomain().getCodeSource().getLocation());
+
+            for (final String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+                if (!entry.isEmpty()) {
+                    urls.add(new File(entry).toURI().toURL());
+                }
+            }
+
+            try (URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getPlatformClassLoader())) {
+                assertEquals("jar", loader.getResource("g028jarcase/").getProtocol(), archiveName);
+                assertEquals("g028jarcase.Keep", Class.forName("g028jarcase.Keep", false, loader).getName(), archiveName);
+
+                final Class<?> isolatedClassUtil = Class.forName(ClassUtil.class.getName(), true, loader);
+                final Method find = isolatedClassUtil.getMethod("findClassesInPackage", String.class, boolean.class, boolean.class);
+
+                for (final boolean recursive : new boolean[] { false, true }) {
+                    // Before the fix: [] for UPPER.JAR and Mixed.Jar (only "*.jar" archives were opened).
+                    final List<?> found = (List<?>) find.invoke(null, "g028jarcase", recursive, false);
+                    assertEquals(1, found.size(), archiveName + ": " + found);
+                    assertEquals("g028jarcase.Keep", ((Class<?>) found.get(0)).getName(), archiveName);
+                }
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G028 end ----
 }

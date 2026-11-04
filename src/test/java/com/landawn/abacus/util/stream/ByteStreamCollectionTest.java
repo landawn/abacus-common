@@ -321,4 +321,109 @@ public class ByteStreamCollectionTest extends ByteStreamTestSupport {
         assertEquals(1, stream2.toSet().size());
     }
 
+    // ---- deep review 2026-11-02 G093 begin ----
+    // G093-03 (pin): ArrayByteStream.toSet skips repeated values before the hash lookup above 512 elements; the result must
+    // equal - in content, iteration order and type - a HashSet filled with every element, for sizes around the threshold.
+    @Test
+    public void testToSet_duplicateSkipMatchesPlainHashSet() {
+        final java.util.Random rnd = new java.util.Random(20261102);
+        final int[] sizes = { 0, 1, 2, 255, 256, 257, 300, 511, 512, 513, 514, 1000, 4096, 100_000 };
+
+        for (final int size : sizes) {
+            for (int variant = 0; variant < 3; variant++) {
+                final byte[] a = new byte[size + 3];
+
+                if (variant == 0) {
+                    rnd.nextBytes(a);
+                } else if (variant == 1) {
+                    for (int i = 0; i < a.length; i++) {
+                        a[i] = (byte) (i % 7 - 3);
+                    }
+                } else {
+                    for (int i = 0; i < a.length; i++) {
+                        a[i] = (byte) (255 - i); // every byte value once before any repeat
+                    }
+                }
+
+                final int[] closeCount = { 0 };
+                final Set<Byte> actual = ByteStream.of(a, 2, size + 2).onClose(() -> closeCount[0]++).toSet();
+
+                final Set<Byte> expected = N.newHashSet(Math.min(size, 256));
+
+                for (int i = 2; i < size + 2; i++) {
+                    expected.add(a[i]);
+                }
+
+                assertEquals(HashSet.class, actual.getClass(), "size=" + size + " variant=" + variant);
+                assertEquals(expected, actual, "size=" + size + " variant=" + variant);
+                assertEquals(new ArrayList<>(expected), new ArrayList<>(actual), "iteration order, size=" + size + " variant=" + variant);
+                assertEquals(1, closeCount[0], "close handler, size=" + size + " variant=" + variant);
+
+                actual.add((byte) 0); // still a mutable set
+                assertTrue(actual.contains((byte) 0));
+            }
+        }
+    }
+    // ---- deep review 2026-11-02 G093 end ----
+
+    // ---- deep review 2026-11-02b G093 begin ----
+    // G093-03 (pin): ArrayByteStream.toMultiset counts in a 256-entry table above 1024 elements and then adds each distinct
+    // value once; the result must equal - in counts, iteration order (incl. the colliding keys 0/-1) and type - a Multiset
+    // filled with one add per element, for sizes around the threshold, sequential and parallel.
+    @Test
+    public void testToMultiset_countTableMatchesPerElementAdd_r116() {
+        final java.util.Random rnd = new java.util.Random(202611022);
+        final int[] sizes = { 0, 1, 2, 255, 256, 257, 512, 513, 1023, 1024, 1025, 1026, 2000, 4096, 100_000 };
+
+        for (final int size : sizes) {
+            for (int variant = 0; variant < 4; variant++) {
+                final byte[] a = new byte[size + 3];
+
+                if (variant == 0) {
+                    rnd.nextBytes(a);
+                } else if (variant == 1) {
+                    for (int i = 0; i < a.length; i++) {
+                        a[i] = (byte) (i % 7 - 3); // includes 0 and -1, which share a hash bucket
+                    }
+                } else if (variant == 2) {
+                    for (int i = 0; i < a.length; i++) {
+                        a[i] = (byte) (255 - i); // every byte value once before any repeat
+                    }
+                } else {
+                    for (int i = 0; i < a.length; i++) {
+                        a[i] = (byte) (rnd.nextInt(3) == 0 ? -1 : rnd.nextInt(2) * 127);
+                    }
+                }
+
+                final Multiset<Byte> expected = N.newMultiset(N.min(64, size / 2));
+
+                for (int i = 2; i < size + 2; i++) {
+                    expected.add(a[i]);
+                }
+
+                for (final boolean parallel : new boolean[] { false, true }) {
+                    final String msg = "size=" + size + " variant=" + variant + " parallel=" + parallel;
+                    final int[] closeCount = { 0 };
+                    ByteStream stream = ByteStream.of(a, 2, size + 2).onClose(() -> closeCount[0]++);
+
+                    if (parallel) {
+                        stream = stream.parallel();
+                    }
+
+                    final Multiset<Byte> actual = stream.toMultiset();
+
+                    assertEquals(Multiset.class, actual.getClass(), msg);
+                    assertEquals(expected, actual, msg);
+                    assertEquals(expected.toString(), actual.toString(), "counts and iteration order, " + msg);
+                    assertEquals(new ArrayList<>(expected.elementSet()), new ArrayList<>(actual.elementSet()), "element order, " + msg);
+                    assertEquals(size, actual.size(), msg);
+                    assertEquals(1, closeCount[0], "close handler, " + msg);
+
+                    actual.add((byte) 5, 2); // still a mutable multiset
+                    assertEquals(expected.getCount((byte) 5) + 2, actual.getCount((byte) 5), msg);
+                }
+            }
+        }
+    }
+    // ---- deep review 2026-11-02b G093 end ----
 }

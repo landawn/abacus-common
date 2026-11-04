@@ -536,7 +536,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * @param element the float value to be repeated
      * @param length the number of times to repeat the element. Must be non-negative.
      * @return a new FloatList containing the repeated elements
-     * @throws IllegalArgumentException if len is negative.
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
     public static FloatList repeat(final float element, final int length) throws IllegalArgumentException {
         return of(Array.repeat(element, length));
@@ -562,7 +562,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      *
      * @param length the number of random float values to generate. Must be non-negative.
      * @return a new FloatList containing the specified number of random float values
-     * @throws NegativeArraySizeException if len is negative
+     * @throws NegativeArraySizeException if {@code length} is negative
      */
     public static FloatList random(final int length) throws NegativeArraySizeException {
         final float[] a = new float[length];

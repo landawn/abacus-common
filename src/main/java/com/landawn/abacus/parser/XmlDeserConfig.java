@@ -100,7 +100,8 @@ package com.landawn.abacus.parser;
  * <p>A collection root with no items or only blank text ({@code <list/>}, {@code <list> </list>}) is an empty collection of
  * the requested type on every backend. A root of any type - bean, map, array, collection or scalar - marked {@code isNull="true"}
  * is {@code null} on every backend, whatever payload it carries, after its {@code type} attribute has been checked against
- * the type allowlist. A blank map, bean or {@code MapEntity} item of an array or collection ({@code <list><map></map></list>}, the standard
+ * the type allowlist (a primitive target class such as {@code int.class} reads as its default value on the standard backends
+ * and as {@code null} on the Abacus backends). A blank map, bean or {@code MapEntity} item of an array or collection ({@code <list><map></map></list>}, the standard
  * writer's empty structured item) is an empty value of that type on both standard backends; declared {@code MapEntity} elements also retain
  * their entity names and type in collection/array properties. A blank nested list or array item
  * written by hand ({@code <list><list/></list>}) is backend-specific on the standard parser (an empty container on its

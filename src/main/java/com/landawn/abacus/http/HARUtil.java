@@ -77,6 +77,12 @@ import com.landawn.abacus.util.stream.Stream;
  * <p>Archive traversal validates all entries before applying URL filters or issuing requests. Missing optional
  * nodes and explicit null optional nodes are empty; other malformed nodes fail with an IllegalArgumentException naming their HAR path.</p>
  *
+ * <p>Captured headers are replayed as recorded, including the {@code Accept-Encoding} a browser sends (for example
+ * {@code gzip, deflate, br, zstd}). If the server answers in a coding this library does not decode ({@code deflate},
+ * {@code zstd}, ...), the response body is not decoded: a {@code String} result holds the encoded bytes and a typed
+ * result fails to parse (see {@link HttpUtil#wrapInputStream(java.io.InputStream, ContentFormat)}); exclude {@code Accept-Encoding} with
+ * {@link #setThreadLocalHeaderFilter(BiPredicate)} when the server may choose such a coding.</p>
+ *
  * @see HttpRequest
  * @see HttpResponse
  * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -109,6 +115,12 @@ public final class HARUtil {
      * <p>The filter receives the header name and value as parameters and should return
      * {@code true} to include the header or {@code false} to exclude it.</p>
      *
+     * <p>The filter <i>replaces</i> the default {@link HttpUtil#isValidHttpHeader(String, String)} check
+     * rather than being applied in addition to it. A filter that accepts names it does not validate lets
+     * through headers that {@code java.net.HttpURLConnection} refuses, such as the HTTP/2 pseudo-headers
+     * ({@code :authority}, {@code :method}, ...) that browsers record for HTTP/2 requests, and the replay then
+     * fails with an {@link IllegalArgumentException}. Combine a custom filter with the default check, as below.</p>
+     *
      * <p><b>Note:</b> This setting is stored in thread-local state and only affects HAR request
      * replay on the current thread.</p>
      *
@@ -116,7 +128,7 @@ public final class HARUtil {
      * <pre>{@code
      * // Exclude authorization headers when replaying requests
      * HARUtil.setThreadLocalHeaderFilter((name, value) ->
-     *     !name.equalsIgnoreCase("Authorization"));
+     *     HttpUtil.isValidHttpHeader(name, value) && !name.equalsIgnoreCase("Authorization"));
      * }</pre>
      *
      * @param httpHeaderFilterForHARRequest the filter to apply to headers; must not be {@code null}.

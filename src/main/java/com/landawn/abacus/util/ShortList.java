@@ -1133,13 +1133,18 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
             }
 
         } else if (size <= BIT_SET_THRESHOLD) {
-            // Membership only: the kept order comes from the in-place compaction, so a plain HashSet suffices.
-            final Set<Short> set = N.newHashSet(size);
-            set.add(elementData[0]);
-
+            // At most BIT_SET_THRESHOLD elements: scanning the kept prefix [0, idx] is cheaper than boxing every
+            // element into a hash set, and allocates nothing. The first occurrence of each value is kept, in order.
             for (int i = 1; i < size; i++) {
-                if (set.add(elementData[i])) {
-                    elementData[++idx] = elementData[i];
+                final short e = elementData[i];
+                int j = 0;
+
+                while (j <= idx && elementData[j] != e) {
+                    j++;
+                }
+
+                if (j > idx) {
+                    elementData[++idx] = e;
                 }
             }
         } else {

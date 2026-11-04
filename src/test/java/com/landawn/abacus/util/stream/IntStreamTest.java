@@ -2746,4 +2746,808 @@ public class IntStreamTest extends IntStreamTestSupport {
         assertEquals(N.toList(11, 22, 103, 104, 105), IntStream.of(1, 2, 3, 4, 5).map(e -> e).zipWith(streamB, 0, 100, (a, b) -> a + b).toList());
     }
 
+    // ---- deep review 2026-11-02 G121 begin ----
+    private static final int[] G121_SAMPLES = { 0, -1, 1, Integer.MIN_VALUE, Integer.MAX_VALUE };
+    private static final int G121_PAD_A = (int) -1;
+    private static final int G121_PAD_B = (int) 9;
+    private static final int G121_PAD_C = (int) 7;
+
+    private static int[] g121Of(final int... values) {
+        final int[] result = new int[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+            result[i] = (int) values[i];
+        }
+
+        return result;
+    }
+
+    private static int[] g121RandomArray(final java.util.Random rnd, final int maxLength) {
+        final int[] a = new int[rnd.nextInt(maxLength + 1)];
+
+        for (int i = 0; i < a.length; i++) {
+            a[i] = rnd.nextInt(4) == 0 ? G121_SAMPLES[rnd.nextInt(G121_SAMPLES.length)] : (int) rnd.nextInt(1000);
+        }
+
+        return a;
+    }
+
+    private static int[] g121Drain(final com.landawn.abacus.util.IntIterator iterator) {
+        final com.landawn.abacus.util.IntList list = new com.landawn.abacus.util.IntList();
+
+        while (iterator.hasNext()) {
+            list.add(iterator.nextInt());
+        }
+
+        return list.toArray();
+    }
+
+    private static int[] g121Suffix(final int[] a, final int from) {
+        return from >= a.length ? new int[0] : java.util.Arrays.copyOfRange(a, from, a.length);
+    }
+
+    // variant 0: zip(a, b), 1: zip(a, b, c), 2: zip(a, b, padA, padB), 3: zip(a, b, c, padA, padB, padC); every call is recorded
+    private static IntStream g121Zip(final int variant, final int[] a, final int[] b, final int[] c, final java.util.List<String> calls) {
+        switch (variant) {
+            case 0:
+                return IntStream.zip(a, b, (x, y) -> {
+                    calls.add(x + "," + y);
+                    return (int) (x * 3 + y);
+                });
+            case 1:
+                return IntStream.zip(a, b, c, (x, y, z) -> {
+                    calls.add(x + "," + y + "," + z);
+                    return (int) (x * 3 + y - z);
+                });
+            case 2:
+                return IntStream.zip(a, b, G121_PAD_A, G121_PAD_B, (x, y) -> {
+                    calls.add(x + "," + y);
+                    return (int) (x * 3 + y);
+                });
+            default:
+                return IntStream.zip(a, b, c, G121_PAD_A, G121_PAD_B, G121_PAD_C, (x, y, z) -> {
+                    calls.add(x + "," + y + "," + z);
+                    return (int) (x * 3 + y - z);
+                });
+        }
+    }
+
+    private static int[] g121ZipReference(final int variant, final int[] a, final int[] b, final int[] c) {
+        final int len = variant == 0 ? Math.min(a.length, b.length)
+                : variant == 1 ? Math.min(a.length, Math.min(b.length, c.length))
+                        : variant == 2 ? Math.max(a.length, b.length) : Math.max(a.length, Math.max(b.length, c.length));
+        final int[] result = new int[len];
+
+        for (int i = 0; i < len; i++) {
+            final int x = i < a.length ? a[i] : G121_PAD_A;
+            final int y = i < b.length ? b[i] : G121_PAD_B;
+            final int z = i < c.length ? c[i] : G121_PAD_C;
+            result[i] = variant == 0 || variant == 2 ? (int) (x * 3 + y) : (int) (x * 3 + y - z);
+        }
+
+        return result;
+    }
+
+    // G121-01: zip(int[]...) toArray()/toIntList()/skip(k).toArray()/iterator().toArray()|toList()/sorted() fill an exactly sized
+    // array; values and the zipFunction call sequence equal the element-by-element traversal (pin: GREEN on base and fix)
+    @org.junit.jupiter.api.Test
+    public void testZipArrays_bulkTerminalsMatchElementwiseTraversal() {
+        final java.util.Random rnd = new java.util.Random(121);
+
+        for (int round = 0; round < 200; round++) {
+            final int[] a = g121RandomArray(rnd, 12);
+            final int[] b = g121RandomArray(rnd, 12);
+            final int[] c = g121RandomArray(rnd, 12);
+
+            for (int variant = 0; variant < 4; variant++) {
+                final int[] expected = g121ZipReference(variant, a, b, c);
+                final java.util.List<String> expectedCalls = new java.util.ArrayList<>();
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Drain(g121Zip(variant, a, b, c, expectedCalls).iterator()));
+                org.junit.jupiter.api.Assertions.assertEquals(expected.length, expectedCalls.size());
+
+                final java.util.List<String> calls = new java.util.ArrayList<>();
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Zip(variant, a, b, c, calls).toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+
+                calls.clear();
+                final com.landawn.abacus.util.IntList list = g121Zip(variant, a, b, c, calls).toIntList();
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, list.toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+                list.add((int) 42);
+                org.junit.jupiter.api.Assertions.assertEquals(expected.length + 1, list.size());
+
+                final int k = rnd.nextInt(expected.length + 2);
+                calls.clear();
+                org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, k), g121Zip(variant, a, b, c, calls).skip(k).toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+
+                calls.clear();
+                final com.landawn.abacus.util.IntIterator iter = g121Zip(variant, a, b, c, calls).iterator();
+                final int consumed = Math.min(k, expected.length);
+
+                for (int i = 0; i < consumed; i++) {
+                    iter.nextInt();
+                }
+
+                org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, consumed),
+                        rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+                org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                org.junit.jupiter.api.Assertions.assertSame(com.landawn.abacus.util.N.EMPTY_INT_ARRAY, iter.toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(0, iter.toList().size());
+
+                calls.clear();
+                final int[] sorted = expected.clone();
+                java.util.Arrays.sort(sorted);
+                org.junit.jupiter.api.Assertions.assertArrayEquals(sorted, g121Zip(variant, a, b, c, calls).sorted().toArray());
+                org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+            }
+        }
+    }
+
+    private static boolean g121TakeFirst(final boolean stateful, final int x, final int y, final java.util.List<String> calls) {
+        calls.add(x + "," + y);
+        return stateful ? calls.size() % 3 != 0 : x <= y;
+    }
+
+    private static IntStream g121Merge(final int[] a, final int[] b, final boolean stateful, final java.util.List<String> calls) {
+        return IntStream.merge(a, b, (x, y) -> g121TakeFirst(stateful, x, y, calls) ? com.landawn.abacus.util.MergeResult.TAKE_FIRST
+                : com.landawn.abacus.util.MergeResult.TAKE_SECOND);
+    }
+
+    // G121-01: merge(int[], int[]) toArray()/toIntList() fill an exactly sized array; values and the order and number of
+    // nextSelector calls (a stateful selector makes the result depend on them) equal the element-by-element traversal (pin)
+    @org.junit.jupiter.api.Test
+    public void testMergeArrays_bulkTerminalsMatchElementwiseTraversal() {
+        final java.util.Random rnd = new java.util.Random(12103);
+
+        for (int round = 0; round < 200; round++) {
+            final int[] a = g121RandomArray(rnd, 10);
+            final int[] b = g121RandomArray(rnd, 10);
+
+            if (rnd.nextBoolean()) {
+                java.util.Arrays.sort(a);
+                java.util.Arrays.sort(b);
+            }
+
+            final boolean stateful = rnd.nextBoolean();
+            final com.landawn.abacus.util.IntList expectedList = new com.landawn.abacus.util.IntList();
+            final java.util.List<String> expectedCalls = new java.util.ArrayList<>();
+            int i = 0;
+            int j = 0;
+
+            while (i < a.length || j < b.length) {
+                if (i < a.length && (j >= b.length || g121TakeFirst(stateful, a[i], b[j], expectedCalls))) {
+                    expectedList.add(a[i++]);
+                } else {
+                    expectedList.add(b[j++]);
+                }
+            }
+
+            final int[] expected = expectedList.toArray();
+            final java.util.List<String> calls = new java.util.ArrayList<>();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Drain(g121Merge(a, b, stateful, calls).iterator()));
+            org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Merge(a, b, stateful, calls).toArray());
+            org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            final com.landawn.abacus.util.IntList list = g121Merge(a, b, stateful, calls).toIntList();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expected, list.toArray());
+            org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+            list.add((int) 1);
+            org.junit.jupiter.api.Assertions.assertEquals(expected.length + 1, list.size());
+
+            final int k = rnd.nextInt(expected.length + 2);
+            calls.clear();
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, k), g121Merge(a, b, stateful, calls).skip(k).toArray());
+            org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+
+            calls.clear();
+            final com.landawn.abacus.util.IntIterator iter = g121Merge(a, b, stateful, calls).iterator();
+            final int consumed = Math.min(k, expected.length);
+
+            for (int n = 0; n < consumed; n++) {
+                iter.nextInt();
+            }
+
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, consumed), rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+            org.junit.jupiter.api.Assertions.assertEquals(expectedCalls, calls);
+            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+            org.junit.jupiter.api.Assertions.assertEquals(0, iter.toArray().length);
+        }
+    }
+
+    private static Object g121Bulk(final com.landawn.abacus.util.IntIterator iterator, final boolean useList) {
+        return useList ? iterator.toList() : iterator.toArray();
+    }
+
+    // G121-01: a failing zipFunction or nextSelector inside toArray()/toList() leaves the iterator exactly where element-by-element
+    // traversal leaves it (zip(a, b)/zip(a, b, c) advance before the call, the padded zips and merge do not) (pin)
+    @org.junit.jupiter.api.Test
+    public void testZipAndMergeArrays_failingCallbackKeepsIteratorState() {
+        final int[] a = g121Of(1, 2, 3, 4, 5);
+        final int[] b = g121Of(10, 20, 30, 40, 50, 60);
+        final int[] c = g121Of(100, 200, 300, 400, 500, 600, 700);
+
+        for (int viaList = 0; viaList < 2; viaList++) {
+            final boolean useList = viaList == 1;
+            final int[] calls = { 0 };
+
+            final com.landawn.abacus.util.IntIterator zip2 = IntStream.zip(a, b, (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("zip2");
+                }
+
+                return (int) (x + y);
+            }).iterator();
+            org.junit.jupiter.api.Assertions.assertEquals("zip2",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> g121Bulk(zip2, useList)).getMessage());
+            org.junit.jupiter.api.Assertions.assertEquals(3, calls[0]);
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(44, 55), g121Drain(zip2));
+            org.junit.jupiter.api.Assertions.assertEquals(5, calls[0]);
+
+            calls[0] = 0;
+            final com.landawn.abacus.util.IntIterator zip3 = IntStream.zip(a, b, c, (x, y, z) -> {
+                if (++calls[0] == 2) {
+                    throw new IllegalStateException("zip3");
+                }
+
+                return (int) (x + y + z);
+            }).iterator();
+            org.junit.jupiter.api.Assertions.assertEquals("zip3",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> g121Bulk(zip3, useList)).getMessage());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(333, 444, 555), g121Drain(zip3));
+            org.junit.jupiter.api.Assertions.assertEquals(5, calls[0]);
+
+            calls[0] = 0;
+            final com.landawn.abacus.util.IntIterator pad2 = IntStream.zip(a, b, (int) -1, (int) -2, (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("pad2");
+                }
+
+                return (int) (x + y);
+            }).iterator();
+            org.junit.jupiter.api.Assertions.assertEquals("pad2",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> g121Bulk(pad2, useList)).getMessage());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(33, 44, 55, 59), g121Drain(pad2));
+            org.junit.jupiter.api.Assertions.assertEquals(7, calls[0]);
+
+            calls[0] = 0;
+            final com.landawn.abacus.util.IntIterator pad3 = IntStream.zip(a, b, c, (int) -1, (int) -2, (int) -3, (x, y, z) -> {
+                if (++calls[0] == 6) {
+                    throw new IllegalStateException("pad3");
+                }
+
+                return (int) (x + y + z);
+            }).iterator();
+            org.junit.jupiter.api.Assertions.assertEquals("pad3",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> g121Bulk(pad3, useList)).getMessage());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(659, 697), g121Drain(pad3));
+            org.junit.jupiter.api.Assertions.assertEquals(8, calls[0]);
+
+            calls[0] = 0;
+            final com.landawn.abacus.util.IntIterator merge = IntStream.merge(g121Of(1, 3, 5), g121Of(2, 4, 6), (x, y) -> {
+                if (++calls[0] == 3) {
+                    throw new IllegalStateException("merge");
+                }
+
+                return x <= y ? com.landawn.abacus.util.MergeResult.TAKE_FIRST : com.landawn.abacus.util.MergeResult.TAKE_SECOND;
+            }).iterator();
+            org.junit.jupiter.api.Assertions.assertEquals("merge",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> g121Bulk(merge, useList)).getMessage());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(3, 4, 5, 6), g121Drain(merge));
+            org.junit.jupiter.api.Assertions.assertEquals(6, calls[0]);
+        }
+    }
+
+    // G121-01: a zipFunction that consumes its own stream's iterator re-entrantly (once) ends toArray()/toIntList() where the
+    // hasNext()-driven loop ends, instead of failing with NoSuchElementException (pin)
+    @org.junit.jupiter.api.Test
+    public void testZipArrays_reentrantCallbackEndsBulkTerminalEarly() {
+        final int[] a = g121Of(1, 2, 3, 4, 5);
+        final int[] b = g121Of(10, 20, 30, 40, 50);
+        final int[] c = g121Of(100, 200, 300, 400, 500);
+        final Runnable[] consume = new Runnable[1];
+        final boolean[] once = { true };
+
+        IntStream s = IntStream.zip(a, b, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return (int) (x + y);
+        });
+        com.landawn.abacus.util.IntIterator it = s.iterator();
+        consume[0] = it::nextInt;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(11, 33, 44, 55), it.toArray());
+        org.junit.jupiter.api.Assertions.assertFalse(it.hasNext());
+
+        once[0] = true;
+        s = IntStream.zip(a, b, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return (int) (x + y);
+        });
+        it = s.iterator();
+        consume[0] = it::nextInt;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(11, 33, 44, 55), s.toIntList().toArray());
+
+        once[0] = true;
+        s = IntStream.zip(a, b, c, (x, y, z) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return (int) (x + y + z);
+        });
+        it = s.iterator();
+        consume[0] = it::nextInt;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(111, 333, 444, 555), it.toArray());
+
+        once[0] = true;
+        s = IntStream.zip(a, g121Of(7), (int) -1, (int) -2, (x, y) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return (int) (x + y);
+        });
+        it = s.iterator();
+        consume[0] = it::nextInt;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(8, 1, 2, 3), it.toArray());
+
+        once[0] = true;
+        s = IntStream.zip(a, g121Of(7), new int[0], (int) -1, (int) -2, (int) -3, (x, y, z) -> {
+            if (once[0]) {
+                once[0] = false;
+                consume[0].run();
+            }
+
+            return (int) (x + y + z);
+        });
+        it = s.iterator();
+        consume[0] = it::nextInt;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(g121Of(5, -2, -1, 0), it.toArray());
+    }
+
+    private static IntStream g121Flatten(final int[][] a, final int mode, final int pad) {
+        return mode == 0 ? IntStream.flatten(a, true) : IntStream.flatten(a, pad, mode == 1);
+    }
+
+    // G121-01: flatten(int[][], true) (rectangular walk and the sparse jagged walk) and flatten(int[][], value, vertically)
+    // toArray()/toIntList() fill an exactly sized array; pinned against plain column-major / row-major references, also after
+    // skip(k) and partial iteration (pin)
+    @org.junit.jupiter.api.Test
+    public void testFlattenVerticalAndAligned_bulkTerminalsMatchReference() {
+        final java.util.Random rnd = new java.util.Random(12102);
+
+        for (int round = 0; round < 300; round++) {
+            final int shape = rnd.nextInt(3);
+            final int rows = shape == 2 ? 5 + rnd.nextInt(6) : rnd.nextInt(7);
+            final int[][] a = new int[rows][];
+            final int width = 1 + rnd.nextInt(6);
+
+            for (int r = 0; r < rows; r++) {
+                if (shape == 1) {
+                    a[r] = new int[width];
+                    java.util.Arrays.fill(a[r], (int) (r + 1));
+                } else if (shape == 2) {
+                    // one long row among null, empty and one-element rows: rows * maxLen > 4 * n selects the jagged walk
+                    a[r] = r == rows / 2 ? g121RandomArray(rnd, 40) : rnd.nextInt(3) == 0 ? null : new int[rnd.nextInt(2)];
+                } else {
+                    a[r] = rnd.nextInt(5) == 0 ? null : g121RandomArray(rnd, 6);
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final int[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final int pad = G121_SAMPLES[rnd.nextInt(G121_SAMPLES.length)];
+            final com.landawn.abacus.util.IntList vertical = new com.landawn.abacus.util.IntList();
+            final com.landawn.abacus.util.IntList alignedVertical = new com.landawn.abacus.util.IntList();
+            final com.landawn.abacus.util.IntList alignedHorizontal = new com.landawn.abacus.util.IntList();
+
+            for (int col = 0; col < maxLen; col++) {
+                for (final int[] row : a) {
+                    if (row != null && col < row.length) {
+                        vertical.add(row[col]);
+                        alignedVertical.add(row[col]);
+                    } else {
+                        alignedVertical.add(pad);
+                    }
+                }
+            }
+
+            for (final int[] row : a) {
+                for (int col = 0; col < maxLen; col++) {
+                    alignedHorizontal.add(row != null && col < row.length ? row[col] : pad);
+                }
+            }
+
+            for (int mode = 0; mode < 3; mode++) {
+                // a single row is returned as-is (no padding) by both flatten overloads
+                final int[] expected = rows == 1 ? (a[0] == null ? new int[0] : a[0].clone())
+                        : (mode == 0 ? vertical : mode == 1 ? alignedVertical : alignedHorizontal).toArray();
+
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Flatten(a, mode, pad).toArray());
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Flatten(a, mode, pad).toIntList().toArray());
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, g121Drain(g121Flatten(a, mode, pad).iterator()));
+
+                final int k = rnd.nextInt(expected.length + 2);
+                org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, k), g121Flatten(a, mode, pad).skip(k).toArray());
+
+                final com.landawn.abacus.util.IntIterator iter = g121Flatten(a, mode, pad).iterator();
+                final int consumed = Math.min(k, expected.length);
+
+                for (int n = 0; n < consumed; n++) {
+                    iter.nextInt();
+                }
+
+                org.junit.jupiter.api.Assertions.assertArrayEquals(g121Suffix(expected, consumed),
+                        rnd.nextBoolean() ? iter.toArray() : iter.toList().toArray());
+                org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                org.junit.jupiter.api.Assertions.assertEquals(0, iter.toList().size());
+                org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextInt);
+            }
+        }
+    }
+
+    // ---- deep review 2026-11-02 G121 end ----
+    // ---- deep review 2026-11-02b G103 begin ----
+    // G103-01 (pin): toIntList() of range/rangeClosed (with and without a step) and iterator().toList() take the range
+    // iterators' exact-size toList(); the result must equal an arithmetic oracle for every shape, also after partial iteration.
+    @Test
+    public void testRangeToIntList_matchesOracleForEveryShape_r116() {
+        // {kind, start, end, by}: kind 0 = range(s, e), 1 = range(s, e, by), 2 = rangeClosed(s, e), 3 = rangeClosed(s, e, by)
+        final int[][] shapes = { { 0, 0, 0, 0 }, { 0, 5, 5, 0 }, { 0, 10, 5, 0 }, { 0, 0, 1, 0 }, { 0, -3, 0, 0 }, { 0, 0, 10, 0 }, { 0, 0, 11, 0 },
+                { 0, -500, 500, 0 }, { 0, Integer.MAX_VALUE - 3, Integer.MAX_VALUE, 0 }, { 0, Integer.MIN_VALUE, Integer.MIN_VALUE + 3, 0 }, { 1, 0, 10, 2 },
+                { 1, 10, 0, -2 }, { 1, 0, 10, -1 }, { 1, 10, 0, 1 }, { 1, 5, 5, 3 }, { 1, 0, 1, 5 }, { 1, 0, 1000, 7 }, { 1, 1000, -1000, -9 },
+                { 1, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE }, { 1, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE }, { 2, 10, 5, 0 },
+                { 2, 5, 6, 0 }, { 2, -1, 1, 0 }, { 2, 0, 999, 0 }, { 2, Integer.MAX_VALUE - 2, Integer.MAX_VALUE, 0 },
+                { 2, Integer.MIN_VALUE, Integer.MIN_VALUE + 2, 0 }, { 3, 0, 10, 2 }, { 3, 10, 0, -2 }, { 3, 4, 4, -3 }, { 3, 0, 10, -1 }, { 3, 10, 0, 1 },
+                { 3, 3, 15, 3 }, { 3, 2997, 0, -3 }, { 3, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE },
+                { 3, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE } };
+
+        for (final int[] shape : shapes) {
+            final String name = java.util.Arrays.toString(shape);
+            final int[] expected = g103bRangeOracle(shape);
+
+            final IntList list = g103bRange(shape).toIntList();
+            assertArrayEquals(expected, list.toArray(), name);
+            assertEquals(expected.length, list.size(), name);
+
+            // the returned list is a fresh, mutable list
+            list.add(42);
+            assertEquals(expected.length + 1, list.size(), name);
+            assertEquals(42, list.get(expected.length), name);
+
+            // partial iteration, then the bulk terminal continues from the cursor and exhausts the iterator
+            for (int consumed = 0; consumed <= Math.min(3, expected.length); consumed++) {
+                final IntIterator iter = g103bRange(shape).iterator();
+
+                for (int i = 0; i < consumed; i++) {
+                    assertEquals(expected[i], iter.nextInt(), name);
+                }
+
+                assertArrayEquals(java.util.Arrays.copyOfRange(expected, consumed, expected.length), iter.toList().toArray(), name);
+                assertFalse(iter.hasNext(), name);
+                assertEquals(0, iter.toList().size(), name);
+                assertEquals(0, iter.toArray().length, name);
+                assertEquals(0L, iter.count(), name);
+                assertThrows(NoSuchElementException.class, iter::nextInt, name);
+            }
+
+            // advance(n) (skip) followed by the bulk terminals
+            final int k = Math.min(2, expected.length);
+            assertArrayEquals(java.util.Arrays.copyOfRange(expected, k, expected.length), g103bRange(shape).skip(k).toIntList().toArray(), name);
+            assertArrayEquals(java.util.Arrays.copyOfRange(expected, k, expected.length), g103bRange(shape).skip(k).toArray(), name);
+        }
+
+        // ofIndices(n) / ofIndices(n, step) are range-backed
+        assertArrayEquals(new int[] { 0, 1, 2, 3, 4 }, IntStream.ofIndices(5).toIntList().toArray());
+        assertArrayEquals(new int[] { 0, 2, 4, 6, 8 }, IntStream.ofIndices(10, 2).toIntList().toArray());
+        assertArrayEquals(new int[] { 4, 3, 2, 1, 0 }, IntStream.ofIndices(5, -1).toIntList().toArray());
+        assertEquals(0, IntStream.ofIndices(0).toIntList().size());
+    }
+
+    // G103-01 (pin): a range bigger than an int array can hold keeps its documented behaviour on the other terminals
+    // (toArray() rejects it with IllegalStateException before reading anything; count/skip stay O(1)).
+    @Test
+    public void testRangeClosedFullIntRange_bulkTerminalsUnchanged_r116() {
+        assertThrows(IllegalStateException.class, () -> IntStream.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE).toArray());
+        assertThrows(IllegalStateException.class, () -> IntStream.range(Integer.MIN_VALUE, Integer.MAX_VALUE).toArray());
+        assertEquals(1L << 32, IntStream.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE).count());
+        assertArrayEquals(new int[] { Integer.MAX_VALUE - 1, Integer.MAX_VALUE },
+                IntStream.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE).skip((1L << 32) - 2).toIntList().toArray());
+        assertArrayEquals(new int[] { Integer.MAX_VALUE - 3, Integer.MAX_VALUE - 1 },
+                IntStream.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE, 2).skip((1L << 31) - 2).toIntList().toArray());
+    }
+
+    private static IntStream g103bRange(final int[] shape) {
+        switch (shape[0]) {
+            case 0:
+                return IntStream.range(shape[1], shape[2]);
+            case 1:
+                return IntStream.range(shape[1], shape[2], shape[3]);
+            case 2:
+                return IntStream.rangeClosed(shape[1], shape[2]);
+            default:
+                return IntStream.rangeClosed(shape[1], shape[2], shape[3]);
+        }
+    }
+
+    private static int[] g103bRangeOracle(final int[] shape) {
+        final long start = shape[1];
+        final long end = shape[2];
+        final long by = shape[0] == 0 || shape[0] == 2 ? 1 : shape[3];
+        final boolean closed = shape[0] >= 2;
+        final IntList result = new IntList();
+
+        for (long v = start; by > 0 ? (closed ? v <= end : v < end) : (closed ? v >= end : v > end); v += by) {
+            result.add((int) v);
+        }
+
+        return result.toArray();
+    }
+
+    // ---- deep review 2026-11-02b G103 end ----
+    // ---- deep review 2026-11-02b G120 begin ----
+    // G120-03 (pin): IntStream.of(IntBuffer) for a buffer without an accessible array (direct, read-only, sliced, view of a heap
+    // ByteBuffer) reads the window [position, limit) through a dedicated iterator; toArray()/toList() fill an exact-size
+    // array with the same get(i) reads. Results, laziness (live view), window snapshot and iterator states must match element-wise traversal.
+    @Test
+    public void testOfIntBuffer_nonArrayBufferTerminalsMatchElementwise_r116() {
+        final int[] content = { 10, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, -1, 5, 5, 3, 9, -7, 2, 1 };
+
+        for (int kind = 0; kind < 5; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final int[] expected = Arrays.copyOfRange(content, from, to);
+                    final java.nio.IntBuffer buf = g120IntBuffer(kind, content, from, to);
+
+                    assertFalse(buf.hasArray());
+                    assertArrayEquals(expected, IntStream.of(buf).toArray());
+                    assertArrayEquals(expected, IntStream.of(buf).toIntList().toArray());
+                    assertEquals(expected.length, IntStream.of(buf).count());
+                    assertArrayEquals(g120IntSuffix(expected, 3), IntStream.of(buf).skip(3).toArray());
+                    assertArrayEquals(g120IntSorted(expected), IntStream.of(buf).sorted().toArray());
+
+                    final com.landawn.abacus.util.IntList list = IntStream.of(buf).toIntList();
+                    list.add((int) 42); // a fresh, mutable list
+                    assertEquals(expected.length + 1, list.size());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final IntIterator iter = IntStream.of(buf).iterator();
+
+                        for (int n = 0; n < consumed; n++) {
+                            assertEquals(expected[n], iter.nextInt());
+                        }
+
+                        final boolean viaArray = (consumed + from + kind) % 2 == 0;
+                        final int[] rest = viaArray ? iter.toArray() : iter.toList().toArray();
+                        assertArrayEquals(g120IntSuffix(expected, consumed), rest);
+                        assertFalse(iter.hasNext());
+                        assertEquals(0, iter.toList().size());
+                        assertThrows(NoSuchElementException.class, iter::nextInt);
+
+                        if (expected.length > 0) {
+                            // an exhausted iterator returns the shared empty array, as the element-wise toArray() did
+                            org.junit.jupiter.api.Assertions.assertSame(com.landawn.abacus.util.N.EMPTY_INT_ARRAY, iter.toArray());
+                        } else {
+                            assertEquals(0, iter.toArray().length);
+                        }
+                    }
+
+                    final IntIteratorEx iterEx = (IntIteratorEx) IntStream.of(buf).iterator();
+                    iterEx.advance(2);
+                    assertArrayEquals(g120IntSuffix(expected, 2), iterEx.toArray());
+                }
+            }
+        }
+
+        // live view of the window taken at the call: later writes are seen, later position/limit changes are not
+        final java.nio.IntBuffer direct = java.nio.ByteBuffer.allocateDirect(6 * 4).asIntBuffer();
+        direct.put(new int[] { 1, 2, 3, 4, 5, 6 });
+        direct.position(1);
+        direct.limit(5);
+
+        final IntStream stream = IntStream.of(direct);
+        direct.put(4, (int) 40);
+        direct.clear();
+        direct.limit(0);
+
+        assertArrayEquals(new int[] { 2, 3, 4, 40 }, stream.toArray());
+        assertEquals(0, direct.position());
+        assertEquals(0, direct.limit());
+    }
+
+    private static java.nio.IntBuffer g120IntBuffer(final int kind, final int[] content, final int from, final int to) {
+        final java.nio.IntBuffer buf;
+
+        if (kind == 0) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 4).asIntBuffer().put(content);
+        } else if (kind == 1) {
+            buf = java.nio.IntBuffer.wrap(content.clone()).asReadOnlyBuffer();
+        } else if (kind == 2) {
+            final java.nio.IntBuffer outer = java.nio.ByteBuffer.allocateDirect((content.length + 3) * 4).asIntBuffer();
+            outer.position(2);
+            outer.put(content);
+            outer.position(2);
+            outer.limit(2 + content.length);
+            buf = outer.slice();
+        } else if (kind == 3) {
+            buf = java.nio.ByteBuffer.allocateDirect(content.length * 4).asIntBuffer().put(content).asReadOnlyBuffer();
+        } else {
+            buf = java.nio.ByteBuffer.allocate(content.length * 4).order(java.nio.ByteOrder.LITTLE_ENDIAN).asIntBuffer().put(content);
+        }
+
+        buf.limit(to);
+        buf.position(from);
+
+        return buf;
+    }
+
+    private static int[] g120IntSuffix(final int[] a, final int k) {
+        return Arrays.copyOfRange(a, Math.min(k, a.length), a.length);
+    }
+
+    private static int[] g120IntSorted(final int[] a) {
+        final int[] copy = a.clone();
+        Arrays.sort(copy);
+        return copy;
+    }
+
+    // ---- deep review 2026-11-02b G120 end ----
+    // ---- deep review 2026-11-02b G124 begin ----
+    // G124: a buffer without an accessible array keeps the close-handler shape of the former
+    // IntStream.range(position, limit).map(view::get) stream: exactly one (run-once, no-op) close handler.
+    @Test
+    public void testOfIntBuffer_nonArrayBufferKeepsRangeCloseHandler_r116() {
+        final java.nio.IntBuffer direct = java.nio.ByteBuffer.allocateDirect(4 * 4).asIntBuffer();
+        direct.put(new int[] { (int) 1, (int) 2, (int) 3, (int) 4 });
+        direct.position(1);
+        final java.nio.IntBuffer emptyWindow = direct.duplicate();
+        emptyWindow.position(4);
+
+        for (final java.nio.IntBuffer buf : java.util.List.of(direct, emptyWindow)) {
+            // closing the JDK view closes the source stream, as for every stream that has close handlers
+            final IntStream source = IntStream.of(buf);
+            source.toJdkStream().close();
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
+
+            // what iterator()'s "Remember to close" warning checks
+            final IntStream stream = IntStream.of(buf);
+            org.junit.jupiter.api.Assertions.assertFalse(StreamBase.isEmptyCloseHandlers(stream.closeHandlers()));
+            org.junit.jupiter.api.Assertions.assertEquals(1, stream.closeHandlers().size());
+
+            // handlers registered later run once, in order; a failing one does not stop the others
+            final java.util.List<String> calls = new java.util.ArrayList<>();
+            final IntStream withHandlers = IntStream.of(buf).onClose(() -> calls.add("a")).onClose(() -> {
+                calls.add("b");
+                throw new IllegalStateException("b");
+            }).onClose(() -> calls.add("c"));
+            org.junit.jupiter.api.Assertions.assertEquals("b",
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::close).getMessage());
+            withHandlers.close();
+            org.junit.jupiter.api.Assertions.assertEquals(java.util.List.of("a", "b", "c"), calls);
+            org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, withHandlers::count);
+        }
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new int[] { (int) 2, (int) 3, (int) 4 }, IntStream.of(direct).toArray());
+    }
+    // ---- deep review 2026-11-02b G124 end ----
+
+    // ---- re-review 2026-11-03 R04 begin ----
+    // R04 (pin): IntStream.of(IntBuffer) for a buffer without an accessible array counts and skips by moving the cursor of its
+    // window iterator instead of reading every skipped element. Pinned for every window, read position and skip length:
+    // count(), advance(n) (negative, zero, inside, exactly to and past the end, Long.MAX_VALUE), the elements read after
+    // it, the stream-level skip/step/count, the failure-atomic advance flag, and the live view of elements not yet read.
+    @Test
+    public void testOfIntBuffer_nonArrayBufferCountAndAdvanceMoveCursor_r116() {
+        final int[] content = { 10, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, -1, 5, 5, 3, 9, -7, 2, 1 };
+
+        for (int kind = 0; kind < 2; kind++) {
+            for (int from = 0; from <= content.length; from++) {
+                for (int to = from; to <= content.length; to++) {
+                    final int[] expected = java.util.Arrays.copyOfRange(content, from, to);
+                    final java.nio.IntBuffer buf = r04Buffer(kind, content, from, to);
+                    org.junit.jupiter.api.Assertions.assertFalse(buf.hasArray());
+
+                    org.junit.jupiter.api.Assertions.assertEquals(expected.length, IntStream.of(buf).count());
+
+                    for (int k = 0; k <= expected.length + 1; k++) {
+                        final int start = Math.min(k, expected.length);
+                        final int[] rest = java.util.Arrays.copyOfRange(expected, start, expected.length);
+                        org.junit.jupiter.api.Assertions.assertEquals(rest.length, IntStream.of(buf).skip(k).count());
+                        org.junit.jupiter.api.Assertions.assertArrayEquals(rest, IntStream.of(buf).skip(k).toArray());
+                    }
+
+                    org.junit.jupiter.api.Assertions.assertArrayEquals(r04Step(expected, 3), IntStream.of(buf).step(3).toArray());
+
+                    for (int consumed = 0; consumed <= expected.length; consumed++) {
+                        final int remaining = expected.length - consumed;
+
+                        for (final long n : new long[] { -1, 0, 1, 2, remaining, remaining + 1L, Long.MAX_VALUE }) {
+                            final int next = consumed + (int) Math.min(Math.max(n, 0), remaining);
+                            final IntIteratorEx iter = (IntIteratorEx) IntStream.of(buf).iterator();
+
+                            if (expected.length > 0) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.supportsFailureAtomicAdvance());
+                            }
+
+                            for (int i = 0; i < consumed; i++) {
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextInt());
+                            }
+
+                            iter.advance(n);
+
+                            for (int i = next; i < expected.length; i++) {
+                                org.junit.jupiter.api.Assertions.assertTrue(iter.hasNext());
+                                org.junit.jupiter.api.Assertions.assertEquals(expected[i], iter.nextInt());
+                            }
+
+                            org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+                            org.junit.jupiter.api.Assertions.assertEquals(0, iter.count());
+                            org.junit.jupiter.api.Assertions.assertThrows(java.util.NoSuchElementException.class, iter::nextInt);
+
+                            final IntIteratorEx counted = (IntIteratorEx) IntStream.of(buf).iterator();
+
+                            for (int i = 0; i < consumed; i++) {
+                                counted.nextInt();
+                            }
+
+                            counted.advance(n);
+                            org.junit.jupiter.api.Assertions.assertEquals(expected.length - next, counted.count());
+                            org.junit.jupiter.api.Assertions.assertFalse(counted.hasNext());
+                            counted.advance(1);
+                            org.junit.jupiter.api.Assertions.assertEquals(0, counted.count());
+                        }
+                    }
+                }
+            }
+        }
+
+        // A skip moves the cursor only: an element written after the skip is read live, a skipped one is never read.
+        final java.nio.IntBuffer live = r04Buffer(1, content, 0, 6);
+        final IntIteratorEx liveIter = (IntIteratorEx) IntStream.of(live).iterator();
+        liveIter.advance(2);
+        live.put(1, 777);
+        live.put(3, 888);
+        org.junit.jupiter.api.Assertions.assertEquals(content[2], liveIter.nextInt());
+        org.junit.jupiter.api.Assertions.assertEquals(888, liveIter.nextInt());
+        org.junit.jupiter.api.Assertions.assertEquals(2, liveIter.count());
+        org.junit.jupiter.api.Assertions.assertFalse(liveIter.hasNext());
+    }
+
+    private static java.nio.IntBuffer r04Buffer(final int kind, final int[] content, final int from, final int to) {
+        // kind 0: read-only view of a heap array; kind 1: writable view of direct memory. Neither exposes an array.
+        final java.nio.IntBuffer buf = kind == 0 ? java.nio.IntBuffer.wrap(content.clone()).asReadOnlyBuffer()
+                : java.nio.ByteBuffer.allocateDirect(content.length * 4).asIntBuffer().put(content).clear();
+        buf.limit(to);
+        buf.position(from);
+        return buf;
+    }
+
+    private static int[] r04Step(final int[] a, final int step) {
+        final int[] result = new int[(a.length + step - 1) / step];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = a[i * step];
+        }
+
+        return result;
+    }
+    // ---- re-review 2026-11-03 R04 end ----
 }

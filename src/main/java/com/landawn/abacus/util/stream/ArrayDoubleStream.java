@@ -1341,7 +1341,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     /**
      * Returns a stream consisting of at most {@code maxSize} elements from the start of this stream.
-     * Implemented as an index range restriction — no additional iteration cost.
+     * Implemented as an index range restriction - no additional iteration cost.
      *
      * @param maxSize the maximum number of elements the stream should contain; must be &gt;= 0
      * @return a new {@code DoubleStream} containing at most {@code maxSize} elements
@@ -1362,7 +1362,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
 
     /**
      * Returns a stream consisting of the remaining elements of this stream after discarding the first {@code n} elements.
-     * Implemented as a {@code fromIndex} offset — no additional iteration cost.
+     * Implemented as a {@code fromIndex} offset - no additional iteration cost.
      *
      * @param n the number of leading elements to skip; must be &gt;= 0
      * @return a new {@code DoubleStream} with the first {@code n} elements skipped
@@ -1389,7 +1389,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
     /**
      * Returns a stream consisting of the top {@code n} elements of this stream according to the given comparator.
      * If the stream is sorted and the comparator matches the natural order, an O(1) range restriction is applied;
-     * otherwise a partial sort is performed.
+     * otherwise the top elements are selected from the backing array range with a bounded heap; the backing array is not modified.
      *
      * @param n the number of top elements to include; must be &gt;= 0
      * @param comparator the comparator used to determine element ordering

@@ -419,4 +419,206 @@ public class CsvUtilTest extends CsvUtilTestSupport {
         }
     }
 
+    // ---- deep review 2026-11-02b G035 begin ----
+    // Unselected fields hold doubled quotes, text after a closing quote, a quoted line break, padding and a short row.
+    private static final String G035_TRICKY_CSV = "id,note,name,memo\r\n" //
+            + "1,\"a \"\"q\"\" b\",John,\"multi\r\nline\"\n" //
+            + "2,  \"x\" tail ,Jane,   spaced   \n" //
+            + "3,,Bob,\"c, d\"  \n" //
+            + "4,\"only\"\n";
+
+    private static List<Object> g035Column(final Dataset ds, final String columnName) {
+        return new java.util.ArrayList<>(ds.getColumn(columnName));
+    }
+
+    // G035-01 (pin): the load engines build only the selected fields when there is no row filter - same values as a full load
+    @Test
+    public void testLoadSelectedColumns_unselectedFieldsSkipped_r116() {
+        final Dataset full = CsvUtil.load(new StringReader(G035_TRICKY_CSV));
+        assertEquals(List.of("id", "note", "name", "memo"), full.columnNames());
+        assertEquals("a \"q\" b", full.get(0, 1));
+        assertEquals("multi\r\nline", full.get(0, 3));
+        assertEquals("x tail ", full.get(1, 1));
+        assertEquals("spaced", full.get(1, 3));
+        assertEquals("c, d", full.get(2, 3));
+        assertEquals(null, (Object) full.get(3, 2));
+
+        final Dataset names = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("name"));
+        assertEquals(List.of("name"), names.columnNames());
+        assertEquals(java.util.Arrays.asList("John", "Jane", "Bob", null), g035Column(names, "name"));
+
+        final Dataset memoId = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("memo", "id"));
+        assertEquals(List.of("id", "memo"), memoId.columnNames());
+        assertEquals(g035Column(full, "id"), g035Column(memoId, "id"));
+        assertEquals(g035Column(full, "memo"), g035Column(memoId, "memo"));
+
+        final Dataset explicitAlwaysTrue = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("memo", "id"), 0, Long.MAX_VALUE, Fn.alwaysTrue());
+        assertEquals(g035Column(memoId, "memo"), g035Column(explicitAlwaysTrue, "memo"));
+
+        final Map<String, Type<?>> typeMap = new java.util.HashMap<>();
+        typeMap.put("id", Type.of(Integer.class));
+        final Dataset typed = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("id", "note"), 1, 2, typeMap);
+        assertEquals(List.of(2, 3), g035Column(typed, "id"));
+        assertEquals(java.util.Arrays.asList("x tail ", ""), g035Column(typed, "note"));
+
+        final Dataset beanTyped = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("name", "id"), Person.class);
+        assertEquals(List.of("id", "name"), beanTyped.columnNames());
+        assertEquals(g035Column(full, "name"), g035Column(beanTyped, "name"));
+
+        final Dataset extracted = CsvUtil.load(new StringReader(G035_TRICKY_CSV), List.of("memo", "name"), (columns, row, output) -> {
+            output[0] = columns.get(0) + "=" + row.get(0);
+            output[1] = columns.get(1) + "=" + row.get(1);
+        });
+        assertEquals(List.of("name=John", "name=Jane", "name=Bob", "name=null"), g035Column(extracted, "name"));
+        assertEquals(List.of("memo=multi\r\nline", "memo=spaced", "memo=c, d", "memo=null"), g035Column(extracted, "memo"));
+
+        final Dataset loaded = CsvUtil.loader().source(new StringReader(G035_TRICKY_CSV)).selectColumns(List.of("note")).load();
+        assertEquals(g035Column(full, "note"), g035Column(loaded, "note"));
+    }
+
+    // G035-01 (pin): the stream engines and csvToJson build only the selected fields when there is no row filter
+    @Test
+    public void testStreamAndCsvToJsonSelectedColumns_unselectedFieldsSkipped_r116() {
+        assertEquals(java.util.Arrays.asList("John", "Jane", "Bob", null),
+                CsvUtil.stream(new StringReader(G035_TRICKY_CSV), List.of("name"), String.class, false).toList());
+
+        final List<Object[]> idMemo = CsvUtil.stream(new StringReader(G035_TRICKY_CSV), List.of("memo", "id"), Object[].class, false).toList();
+        assertEquals("[[1, multi\r\nline], [2, spaced], [3, c, d], [4, null]]", java.util.Arrays.deepToString(idMemo.toArray()));
+
+        final List<Map<String, Object>> notes = CsvUtil.stream(new StringReader(G035_TRICKY_CSV), List.of("note"), Clazz.<String, Object> ofMap(), false)
+                .toList();
+        assertEquals("[{note=a \"q\" b}, {note=x tail }, {note=}, {note=only}]", notes.toString());
+
+        // A null selection with a bean target reads only the columns that map to a property (id, name).
+        assertEquals(List.of(new Person("1", "John", null, null), new Person("2", "Jane", null, null), new Person("3", "Bob", null, null),
+                new Person("4", null, null, null)), CsvUtil.stream(new StringReader(G035_TRICKY_CSV), null, Person.class, false).toList());
+
+        assertEquals(List.of("[name]=John", "[name]=Jane", "[name]=Bob", "[name]=null"),
+                CsvUtil.stream(new StringReader(G035_TRICKY_CSV), List.of("name"), (columns, row) -> columns + "=" + row.get(0), false).toList());
+
+        final StringWriter json = new StringWriter();
+        assertEquals(4, CsvUtil.csvToJson(new StringReader(G035_TRICKY_CSV), List.of("memo", "id"), json, null));
+        assertEquals("[\n{\"id\":\"1\",\"memo\":\"multi\\r\\nline\"},\n{\"id\":\"2\",\"memo\":\"spaced\"},\n{\"id\":\"3\",\"memo\":\"c, d\"},\n"
+                + "{\"id\":\"4\",\"memo\":null}\n]", json.toString());
+    }
+
+    // G035-01 (pin): an unselected field is still validated - the same ParsingException as a full read
+    @Test
+    public void testSelectedColumns_unselectedFieldFailuresUnchanged_r116() {
+        // An extra field after the last header column, holding a doubled quote.
+        final String overflow = "a,b\n1,2\n3,4,\"x\"\"y\"\n";
+        final ParsingException fullFailure = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader(overflow)));
+        assertEquals("CSV data row has more fields than the expected 2 column(s): 3,4,\"x\"\"y\"", fullFailure.getMessage());
+
+        final ParsingException loadFailure = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader(overflow), List.of("a")));
+        assertEquals(fullFailure.getMessage(), loadFailure.getMessage());
+        assertEquals(fullFailure.getCause().getMessage(), loadFailure.getCause().getMessage());
+
+        final ParsingException streamFailure = assertThrows(ParsingException.class,
+                () -> CsvUtil.stream(new StringReader(overflow), List.of("b"), Object[].class, false).toList());
+        assertEquals(fullFailure.getMessage(), streamFailure.getMessage());
+
+        final ParsingException jsonFailure = assertThrows(ParsingException.class,
+                () -> CsvUtil.csvToJson(new StringReader(overflow), List.of("a"), new StringWriter(), null));
+        assertEquals(fullFailure.getMessage(), jsonFailure.getMessage());
+
+        // An unselected quoted field left open at the end of the input.
+        final String unterminated = "a,b\n1,\"open\n";
+        final ParsingException openFull = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader(unterminated)));
+        final ParsingException openSelected = assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader(unterminated), List.of("a")));
+        assertEquals(openFull.getMessage(), openSelected.getMessage());
+
+        // count stops before the bad record, with or without a selection.
+        assertEquals(1, CsvUtil.load(new StringReader(overflow), List.of("a"), 0, 1).size());
+    }
+
+    // G035-01 (pin): a row filter still sees every raw field, unselected ones included
+    @Test
+    public void testSelectedColumns_rowFilterSeesWholeRawRow_r116() {
+        final String csv = "id,name,age\n1,John,25\n2,\"J\"\"ane\",30\n";
+        final List<String> seen = new java.util.ArrayList<>();
+        final java.util.function.Predicate<String[]> filter = row -> {
+            seen.add(java.util.Arrays.toString(row));
+            return !"1".equals(row[0]);
+        };
+
+        final Dataset ds = CsvUtil.load(new StringReader(csv), List.of("name"), 0, Long.MAX_VALUE, filter);
+        assertEquals(List.of("[1, John, 25]", "[2, J\"ane, 30]"), seen);
+        assertEquals(List.of("J\"ane"), g035Column(ds, "name"));
+
+        seen.clear();
+        assertEquals(List.of("J\"ane"), CsvUtil.stream(new StringReader(csv), List.of("name"), 0, Long.MAX_VALUE, filter, String.class, false).toList());
+        assertEquals(List.of("[1, John, 25]", "[2, J\"ane, 30]"), seen);
+
+        seen.clear();
+        assertEquals(List.of("[J\"ane]"), CsvUtil
+                .stream(new StringReader(csv), List.of("name"), 0, Long.MAX_VALUE, filter, (columns, row) -> java.util.Arrays.toString(row.copy()), false)
+                .toList());
+        assertEquals(List.of("[1, John, 25]", "[2, J\"ane, 30]"), seen);
+
+        // The public CsvRecordReader API still parses every field.
+        final CsvUtil.CsvRecordReader records = new CsvUtil.CsvRecordReader(new StringReader(csv));
+        try {
+            assertEquals(List.of("id", "name", "age"), List.of(records.readHeader(CsvUtil.CSV_HEADER_PARSER)));
+            assertEquals(List.of("[1, John, 25]", "[2, J\"ane, 30]"),
+                    records.stream(CsvUtil.CSV_LINE_PARSER, 0, new String[3]).map(java.util.Arrays::toString).toList());
+        } catch (final IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+    // ---- deep review 2026-11-02b G035 end ----
+
+    // ---- re-review 2026-11-03 R03 begin ----
+    // R03 (pin): an unselected quoted field is scanned without copying its content into the shared field builder (a doubled
+    // quote or text after the closing quote no longer appends), so a selected quoted field after it - in the same record or
+    // a later one - must still get exactly its own content. Every column subset of a table that mixes doubled quotes, text
+    // after the closing quote and plain quoted fields must match a full load, through the load and the stream engines.
+    @Test
+    public void testSelectedColumns_unselectedQuotedFieldsDoNotTouchFieldBuilder_r116() {
+        final String csv = "a,b,c,d\n" //
+                + "\"1\"\"x\",\"2\"\"y\"\"\",\"3\" tail,\"\"\"4\"\n" //
+                + "\"p\" q,\"r\",\"s\"\"\"\"t\",u\n" //
+                + "\"\",\"\"\"\",\"v\" w ,\"x\"\"\" y\n";
+        final List<String> columns = List.of("a", "b", "c", "d");
+        final Dataset full = CsvUtil.load(new StringReader(csv));
+
+        assertEquals(columns, full.columnNames());
+        assertEquals("1\"x", full.get(0, 0));
+        assertEquals("2\"y\"", full.get(0, 1));
+        assertEquals("3 tail", full.get(0, 2));
+        assertEquals("\"4", full.get(0, 3));
+        assertEquals("p q", full.get(1, 0));
+        assertEquals("s\"\"t", full.get(1, 2));
+        assertEquals("", full.get(2, 0));
+        assertEquals("\"", full.get(2, 1));
+        assertEquals("x\" y", full.get(2, 3));
+
+        for (int mask = 1; mask < 16; mask++) {
+            final List<String> selected = new java.util.ArrayList<>();
+
+            for (int i = 0; i < columns.size(); i++) {
+                if ((mask & (1 << i)) != 0) {
+                    selected.add(columns.get(i));
+                }
+            }
+
+            final Dataset loaded = CsvUtil.load(new StringReader(csv), selected);
+            assertEquals(selected, loaded.columnNames());
+
+            final List<Object[]> streamed = CsvUtil.stream(new StringReader(csv), selected, Object[].class, false).toList();
+            assertEquals(full.size(), streamed.size());
+
+            for (int j = 0; j < selected.size(); j++) {
+                final String column = selected.get(j);
+                final List<Object> expected = g035Column(full, column);
+                assertEquals(expected, g035Column(loaded, column), column + " of " + selected);
+
+                for (int row = 0; row < full.size(); row++) {
+                    assertEquals(expected.get(row), streamed.get(row)[j], column + " of " + selected + ", row " + row);
+                }
+            }
+        }
+    }
+    // ---- re-review 2026-11-03 R03 end ----
+
 }

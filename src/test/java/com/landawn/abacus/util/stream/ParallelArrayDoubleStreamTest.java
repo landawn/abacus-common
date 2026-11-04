@@ -1491,5 +1491,70 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
             assertTrue(Double.isNaN(DoubleStream.of(source).parallel(ps).findLast(v -> v != v).get()));
         }
     }
+
     // ---- perf review 2026-09-26 G101 end ----
+    // ---- deep review 2026-11-02 G107 begin ----
+    // G107-01 (pin): the parallel flatMapArray workers index the mapped array directly; null and empty arrays contribute
+    // nothing, every element of every non-empty array is emitted once (raw bits kept), and a mapper exception propagates.
+    @Test
+    public void testFlatMapArray_parallelNullEmptyAndMultiElementArrays() {
+        final double[] specials = { Double.NaN, Double.longBitsToDouble(0x7ff8000000000123L), -0.0, 0.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                Double.MAX_VALUE, -Double.MIN_VALUE };
+        final double[] source = new double[41];
+        for (int i = 0; i < source.length; i++) {
+            source[i] = i % 5 == 4 ? specials[i % specials.length] : i;
+        }
+
+        final DoubleFunction<double[]> mapper = v -> {
+            final int k = Double.isNaN(v) || Double.isInfinite(v) || Math.abs(v) > 1000 ? 3 : (int) Math.abs(v) % 4;
+            switch (k) {
+                case 0:
+                    return null;
+                case 1:
+                    return new double[0];
+                case 2:
+                    return new double[] { v };
+                default:
+                    return new double[] { v, -v, Double.NaN };
+            }
+        };
+
+        for (final int from : new int[] { 0, 3 }) {
+            final int to = source.length - from;
+            final long[] expected = bitsDoubleG107(DoubleStream.of(source, from, to).flatMapArray(mapper).toArray());
+
+            for (final SplitStrategy strategy : SplitStrategy.values()) {
+                for (int threads = 2; threads <= 5; threads++) {
+                    final long[] actual = bitsDoubleG107(
+                            DoubleStream.of(source, from, to).parallel(new ParallelSettings(threads, strategy, null)).flatMapArray(mapper).toArray());
+                    assertArrayEquals(expected, actual, strategy + "/" + threads + "/" + from);
+                }
+            }
+        }
+
+        // Only null / empty arrays -> empty result; one source element per worker.
+        assertEquals(0, DoubleStream.of(1, 2, 3, 4).parallel(4).flatMapArray(v -> v % 2 == 0 ? null : new double[0]).count());
+        assertEquals(4, DoubleStream.of(1, 2, 3, 4).parallel(4).flatMapArray(v -> new double[] { 7 }).filter(v -> v == 7).count());
+
+        final RuntimeException failure = new IllegalStateException("G107 boom");
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> DoubleStream.of(source).parallel(3).flatMapArray(v -> {
+            if (v == 10) {
+                throw failure;
+            }
+
+            return new double[] { v };
+        }).toArray());
+        assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
+    }
+
+    private static long[] bitsDoubleG107(final double[] values) {
+        final long[] result = new long[values.length];
+        for (int i = 0; i < values.length; i++) {
+            result[i] = Double.doubleToRawLongBits(values[i]);
+        }
+
+        Arrays.sort(result);
+        return result;
+    }
+    // ---- deep review 2026-11-02 G107 end ----
 }

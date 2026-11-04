@@ -764,4 +764,89 @@ public class NumberTypeTest extends TestBase {
     }
 
     // ---- deep review 2026-10-16 G154 end ----
+
+    // ---- deep review 2026-11-02 G018 begin ----
+
+    public static final class G018BoxedDoubleFieldNumber extends Number {
+        private final Double value;
+
+        // Declared first on purpose: the narrower constructor must not win over the field-typed (double) one.
+        public G018BoxedDoubleFieldNumber(final float value) {
+            this.value = (double) value;
+        }
+
+        public G018BoxedDoubleFieldNumber(final double value) {
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return value.intValue();
+        }
+
+        @Override
+        public long longValue() {
+            return value.longValue();
+        }
+
+        @Override
+        public float floatValue() {
+            return value.floatValue();
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    public static final class G018PrimitiveLongFieldNumber extends Number {
+        private final long value;
+
+        // Declared first on purpose: the int constructor must not win over the field-typed (Long) one.
+        public G018PrimitiveLongFieldNumber(final int value) {
+            this.value = value;
+        }
+
+        public G018PrimitiveLongFieldNumber(final Long value) {
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return (int) value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    // G018-01: the field-typed constructor is matched with primitive/wrapper equivalence (as step 2 does for factories);
+    // base picked the first numeric constructor: (float) -> 0.10000000149011612, (int) -> ArithmeticException.
+    @Test
+    public void testValueOf_constructorMatchesFieldTypeAcrossPrimitiveAndWrapper() {
+        final Type<G018BoxedDoubleFieldNumber> doubleType = Type.of(G018BoxedDoubleFieldNumber.class);
+        assertEquals(0.1d, doubleType.valueOf("0.1").doubleValue());
+        assertEquals(Double.MAX_VALUE, doubleType.valueOf(Double.toString(Double.MAX_VALUE)).doubleValue());
+        assertNull(doubleType.valueOf(""));
+
+        final Type<G018PrimitiveLongFieldNumber> longType = Type.of(G018PrimitiveLongFieldNumber.class);
+        assertEquals(3_000_000_000L, longType.valueOf("3000000000").longValue());
+        assertEquals(Long.MIN_VALUE, longType.valueOf(Long.toString(Long.MIN_VALUE)).longValue());
+        assertNull(longType.valueOf(null));
+    }
+
+    // ---- deep review 2026-11-02 G018 end ----
 }

@@ -754,7 +754,7 @@ public class Seid implements EntityId {
         }
 
         // Compare structurally (entity name + property map) rather than by toString(): the rendered
-        // string is ambiguous — a single value containing ", "/"=" collides with a two-property id,
+        // string is ambiguous - a single value containing ", "/"=" collides with a two-property id,
         // and 123 renders identically to "123" despite being a different value.
         // The entries are walked in the shape of AbstractMap.equals but with N.deepEquals, because
         // Map.equals compares an array-valued property by reference, contradicting the contract above.

@@ -58,7 +58,7 @@ package com.landawn.abacus.pool;
  *
  * @param capacity the maximum number of objects the pool can hold
  * @param size the current number of objects in the pool
- * @param putCount the total number of put/add operations performed
+ * @param putCount the total number of successful put/add operations (admissions); a rejected put/add is not counted
  * @param getCount the total number of get/poll (retrieval) operations performed. Despite the {@code get}
  *        prefix, the accessor {@code getCount()} is <b>not</b> a JavaBean getter for a "count" field — it
  *        returns the count of <i>get</i> operations (the retrieval counterpart of {@code putCount})
@@ -82,7 +82,7 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      *
      * @param capacity the maximum number of objects the pool can hold
      * @param size the current number of objects in the pool
-     * @param putCount the total number of put/add operations performed
+     * @param putCount the total number of successful put/add operations (admissions); a rejected put/add is not counted
      * @param getCount the total number of get/poll operations performed
      * @param hitCount the number of successful get/poll operations
      * @param missCount the number of unsuccessful get/poll operations

@@ -3481,4 +3481,919 @@ public class RowDatasetTest extends RowDatasetTestSupport {
     }
 
     // ---- deep review 2026-10-26 verify G124 end ----
+
+    // ---- deep review 2026-11-02 G070 begin ----
+
+    public static class G070Address {
+        private String city;
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(final String city) {
+            this.city = city;
+        }
+    }
+
+    public static class G070Person {
+        private int id;
+        private String name;
+        private G070Address address;
+
+        public G070Person() {
+        }
+
+        G070Person(final int id, final String name, final String city) {
+            this.id = id;
+            this.name = name;
+
+            if (city != null) {
+                address = new G070Address();
+                address.setCity(city);
+            }
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G070Address getAddress() {
+            return address;
+        }
+
+        public void setAddress(final G070Address address) {
+            this.address = address;
+        }
+    }
+
+    public static class G070Other {
+        private int id;
+        private String name;
+        private String extra;
+
+        public G070Other() {
+        }
+
+        G070Other(final int id, final String name) {
+            this.id = id;
+            this.name = name;
+            this.extra = "x" + id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getExtra() {
+            return extra;
+        }
+
+        public void setExtra(final String extra) {
+            this.extra = extra;
+        }
+    }
+
+    static final List<String> G070_GETTER_CALLS = new ArrayList<>();
+
+    @com.landawn.abacus.annotation.AccessFieldByMethod
+    public static class G070Failing {
+        private int id;
+        private String name;
+
+        public G070Failing() {
+        }
+
+        G070Failing(final int id, final String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            G070_GETTER_CALLS.add("id " + id);
+
+            if (id < 0) {
+                throw new IllegalStateException("bad id " + id);
+            }
+
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            G070_GETTER_CALLS.add("name " + name);
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    private static List<List<Object>> g070Rows(final Dataset dataset) {
+        final List<List<Object>> result = new ArrayList<>();
+
+        for (final Object[] row : dataset.toList()) {
+            result.add(Arrays.asList(row));
+        }
+
+        return result;
+    }
+
+    // G070-01 (pin): addRows reuses the bean-row accessors resolved for the previous row of the same class. Rows of
+    // different bean classes, nested columns (null link -> null), and array/map/collection rows interleaved with beans
+    // must still land in the right columns.
+    @Test
+    public void testAddRows_beanRowAccessorsAcrossClassesAndRowKinds() {
+        final Dataset nested = Dataset.rows(Arrays.asList("name", "id", "address.city"), new ArrayList<List<Object>>());
+        final Map<String, Object> mapRow = new LinkedHashMap<>();
+        mapRow.put("id", 7);
+        mapRow.put("address.city", "cm");
+        mapRow.put("name", "m");
+
+        nested.addRows(Arrays.asList(new G070Person(1, "a", "c1"), new G070Person(2, "b", null), new Object[] { "x", 9, "cx" }, mapRow,
+                Arrays.asList("l", 8, "cl"), new G070Person(3, null, "c3")));
+
+        assertEquals(Arrays.asList(Arrays.asList("a", 1, "c1"), Arrays.asList("b", 2, null), Arrays.asList("x", 9, "cx"), Arrays.asList("m", 7, "cm"),
+                Arrays.asList("l", 8, "cl"), Arrays.asList(null, 3, "c3")), g070Rows(nested));
+
+        final Dataset flat = Dataset.rows(Arrays.asList("id", "name"), new ArrayList<List<Object>>());
+        flat.addRow(new Object[] { 0, "first" });
+        flat.addRows(1, Arrays.asList(new G070Person(1, "p1", null), new G070Other(2, "o2"), new G070Person(3, "p3", "c"), new G070Other(4, "o4"),
+                new G070Other(5, "o5")));
+
+        assertEquals(Arrays.asList(Arrays.asList(0, "first"), Arrays.asList(1, "p1"), Arrays.asList(2, "o2"), Arrays.asList(3, "p3"), Arrays.asList(4, "o4"),
+                Arrays.asList(5, "o5")), g070Rows(flat));
+
+        // Single-row and one-row-batch paths agree with the batch.
+        final Dataset single = Dataset.rows(Arrays.asList("name", "id", "address.city"), new ArrayList<List<Object>>());
+        single.addRow(new G070Person(1, "a", "c1"));
+        single.addRows(Collections.singletonList(new G070Person(2, "b", null)));
+        assertEquals(Arrays.asList(Arrays.asList("a", 1, "c1"), Arrays.asList("b", 2, null)), g070Rows(single));
+    }
+
+    // G070-01 (pin): a column that a later bean class lacks still fails the whole batch with the same message, and an
+    // invalid nested chain is rejected; the dataset is left unchanged.
+    @Test
+    public void testAddRows_beanRowAccessorsMissingColumnInLaterClass() {
+        final Dataset dataset = Dataset.rows(Arrays.asList("id", "extra"), new ArrayList<List<Object>>());
+        dataset.addRow(new Object[] { 0, "e0" });
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> dataset.addRows(Arrays.asList(new G070Other(1, "a"), new G070Other(2, "b"), new G070Person(3, "c", null))));
+        assertTrue(e.getMessage().startsWith("Column (extra) is not found in bean"), e.getMessage());
+        assertEquals(Arrays.asList(Arrays.asList(0, "e0")), g070Rows(dataset));
+
+        final Dataset chain = Dataset.rows(Arrays.asList("id", "address.zip"), new ArrayList<List<Object>>());
+        assertThrows(IllegalArgumentException.class, () -> chain.addRows(Arrays.asList(new G070Person(1, "a", "c"))));
+        assertEquals(0, chain.size());
+    }
+
+    // G070-01 (pin): accessors are resolved lazily in column order, so a failing accessor-backed getter surfaces at the
+    // same row and column, after the same getter calls, and the batch adds nothing.
+    @Test
+    public void testAddRows_beanRowAccessorsGetterFailureTiming() {
+        final Dataset dataset = Dataset.rows(Arrays.asList("name", "id"), new ArrayList<List<Object>>());
+        G070_GETTER_CALLS.clear();
+
+        final IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> dataset.addRows(Arrays.asList(new G070Failing(1, "a"), new G070Failing(-2, "b"), new G070Failing(3, "c"))));
+        assertEquals("bad id -2", e.getMessage());
+        assertEquals(Arrays.asList("name a", "id 1", "name b", "id -2"), G070_GETTER_CALLS);
+        assertEquals(0, dataset.size());
+
+        G070_GETTER_CALLS.clear();
+        dataset.addRows(Arrays.asList(new G070Failing(1, "a"), new G070Failing(2, "b")));
+        assertEquals(Arrays.asList(Arrays.asList("a", 1), Arrays.asList("b", 2)), g070Rows(dataset));
+    }
+
+    // G070-01 (pin): the resolved accessors belong to one call; a later batch after the columns were moved or renamed
+    // resolves them again.
+    @Test
+    public void testAddRows_beanRowAccessorsNotReusedAcrossCalls() {
+        final Dataset dataset = Dataset.rows(Arrays.asList("id", "name"), new ArrayList<List<Object>>());
+        dataset.addRows(Arrays.asList(new G070Person(1, "a", null), new G070Person(2, "b", null)));
+
+        dataset.moveColumn("name", 0);
+        dataset.addRows(Arrays.asList(new G070Person(3, "c", null), new G070Person(4, "d", null)));
+
+        assertEquals(Arrays.asList(Arrays.asList("a", 1), Arrays.asList("b", 2), Arrays.asList("c", 3), Arrays.asList("d", 4)), g070Rows(dataset));
+
+        dataset.renameColumn("name", "extra");
+        assertThrows(IllegalArgumentException.class, () -> dataset.addRows(Arrays.asList(new G070Person(5, "e", null))));
+        dataset.addRows(Arrays.asList(new G070Other(6, "f")));
+        assertEquals(Arrays.asList("x6", 6), g070Rows(dataset).get(4));
+    }
+
+    // ---- deep review 2026-11-02 G070 end ----
+
+    // ---- deep review 2026-11-02 G129 begin ----
+
+    static Dataset g129Target;
+    static int g129HookId;
+    static String g129RenameFrom;
+    static String g129RenameTo;
+
+    @com.landawn.abacus.annotation.AccessFieldByMethod
+    public static class G129Hooked {
+        private int id;
+        private String name;
+        private String extra;
+        private G070Address address;
+
+        public G129Hooked() {
+        }
+
+        G129Hooked(final int id, final String name, final String extra, final String city) {
+            this.id = id;
+            this.name = name;
+            this.extra = extra;
+
+            if (city != null) {
+                address = new G070Address();
+                address.setCity(city);
+            }
+        }
+
+        public int getId() {
+            // Renames a column of the dataset being filled while this row is read.
+            if (id == g129HookId && g129Target != null) {
+                g129Target.renameColumn(g129RenameFrom, g129RenameTo);
+            }
+
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getExtra() {
+            return extra;
+        }
+
+        public void setExtra(final String extra) {
+            this.extra = extra;
+        }
+
+        public G070Address getAddress() {
+            return address;
+        }
+
+        public void setAddress(final G070Address address) {
+            this.address = address;
+        }
+    }
+
+    private static Dataset g129Dataset(final String... columnNames) {
+        return Dataset.rows(Arrays.asList(columnNames), new ArrayList<List<Object>>());
+    }
+
+    private static void g129Hook(final Dataset target, final int hookId, final String from, final String to) {
+        g129Target = target;
+        g129HookId = hookId;
+        g129RenameFrom = from;
+        g129RenameTo = to;
+    }
+
+    private static void g129Unhook() {
+        g129Target = null;
+        g129HookId = 0;
+        g129RenameFrom = null;
+        g129RenameTo = null;
+    }
+
+    // G129-01: a getter of a later row renames a column to a name the bean lacks. Every remaining column of that row
+    // must be resolved by its current name, so addRows fails like addRow does (the cached accessor used to read the
+    // old property and commit the batch).
+    @Test
+    public void testAddRows_getterRenamesColumnToMissingProperty() {
+        try {
+            final Dataset batch = g129Dataset("id", "name");
+            g129Hook(batch, 2, "name", "zzz");
+            final IllegalArgumentException batchError = assertThrows(IllegalArgumentException.class,
+                    () -> batch.addRows(Arrays.asList(new G129Hooked(1, "a", "x1", null), new G129Hooked(2, "b", "x2", null))));
+            assertTrue(batchError.getMessage().startsWith("Column (zzz) is not found in bean"), batchError.getMessage());
+            assertEquals(0, batch.size());
+
+            final Dataset single = g129Dataset("id", "name");
+            single.addRow(new G129Hooked(1, "a", "x1", null));
+            g129Hook(single, 2, "name", "zzz");
+            final IllegalArgumentException singleError = assertThrows(IllegalArgumentException.class, () -> single.addRow(new G129Hooked(2, "b", "x2", null)));
+            assertEquals(singleError.getMessage(), batchError.getMessage());
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    // G129-01: the same rename to a name the bean has - the rest of the row is read through the new column name.
+    @Test
+    public void testAddRows_getterRenamesColumnToExistingProperty() {
+        try {
+            final Dataset dataset = g129Dataset("id", "name");
+            g129Hook(dataset, 2, "name", "extra");
+            dataset.addRows(Arrays.asList(new G129Hooked(1, "a", "x1", null), new G129Hooked(2, "b", "x2", null), new G129Hooked(3, "c", "x3", null)));
+
+            assertEquals(Arrays.asList("id", "extra"), dataset.columnNames());
+            assertEquals(Arrays.asList(Arrays.asList(1, "a"), Arrays.asList(2, "x2"), Arrays.asList(3, "x3")), g070Rows(dataset));
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    // G129-01: a nested-chain column renamed by a getter of a later row is resolved again as well.
+    @Test
+    public void testAddRows_getterRenamesNestedChainColumn() {
+        try {
+            final Dataset dataset = g129Dataset("id", "address.city");
+            g129Hook(dataset, 2, "address.city", "extra");
+            dataset.addRows(Arrays.asList(new G129Hooked(1, "a", "x1", "c1"), new G129Hooked(2, "b", "x2", "c2"), new G129Hooked(3, "c", "x3", "c3")));
+
+            assertEquals(Arrays.asList(Arrays.asList(1, "c1"), Arrays.asList(2, "x2"), Arrays.asList(3, "x3")), g070Rows(dataset));
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    // G129-01 (pin): a rename during the first row, while the accessors are being resolved, leaves later rows reading
+    // the current columns.
+    @Test
+    public void testAddRows_getterRenamesColumnDuringFirstRow() {
+        try {
+            final Dataset dataset = g129Dataset("id", "name");
+            g129Hook(dataset, 1, "name", "extra");
+            dataset.addRows(Arrays.asList(new G129Hooked(1, "a", "x1", null), new G129Hooked(2, "b", "x2", null)));
+
+            assertEquals(Arrays.asList(Arrays.asList(1, "x1"), Arrays.asList(2, "x2")), g070Rows(dataset));
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    static String g129StructuralProperty;
+    static int g129StructuralRowId;
+    static java.util.function.Consumer<Dataset> g129StructuralAction;
+
+    // A bean whose getter for g129StructuralProperty runs g129StructuralAction on g129Target while row g129StructuralRowId
+    // is read.
+    @com.landawn.abacus.annotation.AccessFieldByMethod
+    public static class G129Structural {
+        private int id;
+        private String name;
+        private String extra;
+
+        public G129Structural() {
+        }
+
+        G129Structural(final int id, final String name, final String extra) {
+            this.id = id;
+            this.name = name;
+            this.extra = extra;
+        }
+
+        private void fire(final String property) {
+            if (id == g129StructuralRowId && property.equals(g129StructuralProperty) && g129Target != null) {
+                final Dataset target = g129Target;
+                g129Target = null; // once
+                g129StructuralAction.accept(target);
+            }
+        }
+
+        public int getId() {
+            fire("id");
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            fire("name");
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getExtra() {
+            fire("extra");
+            return extra;
+        }
+
+        public void setExtra(final String extra) {
+            this.extra = extra;
+        }
+    }
+
+    private static void g129StructuralHook(final Dataset target, final int rowId, final String property, final java.util.function.Consumer<Dataset> action) {
+        g129Target = target;
+        g129StructuralRowId = rowId;
+        g129StructuralProperty = property;
+        g129StructuralAction = action;
+    }
+
+    private static Dataset g129OneRowDataset() {
+        final Dataset dataset = g129Dataset("id", "name", "extra");
+        dataset.addRow(new Object[] { 0, "n0", "e0" });
+        return dataset;
+    }
+
+    // Nothing of the failed call is in the dataset: still one row, every remaining column holds exactly that row.
+    private static void g129AssertOnlyFirstRow(final Dataset dataset) {
+        assertEquals(1, dataset.size());
+
+        for (final String columnName : dataset.columnNames()) {
+            assertEquals(1, dataset.getColumn(columnName).size(), columnName);
+        }
+    }
+
+    // G129-02: a getter that adds or removes a column while addRows / addRow reads the rows fails fast with a
+    // ConcurrentModificationException and adds nothing. addRows used to commit values under shifted columns or overflow its
+    // scratch row; addRow could add the row to some columns and then throw IndexOutOfBoundsException.
+    @Test
+    public void testAddRows_getterAddsOrRemovesColumnFailsFast() {
+        final Object[][] cases = { // property whose getter fires, row id, action
+                { "id", 2, (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("extra") }, // mid-row, a later column
+                { "extra", 2, (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("id") }, // last cell of a row
+                { "name", 1, (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("name") }, // first row
+                { "id", 2, (java.util.function.Consumer<Dataset>) ds -> ds.addColumn("added", Arrays.asList("a0")) }, // add
+                { "extra", 3, (java.util.function.Consumer<Dataset>) ds -> ds.addColumn(0, "added", Arrays.asList("a0")) } }; // last row
+
+        try {
+            for (final Object[] entry : cases) {
+                @SuppressWarnings("unchecked")
+                final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) entry[2];
+                final String label = entry[0] + "@" + entry[1];
+
+                final Dataset batch = g129OneRowDataset();
+                g129StructuralHook(batch, (Integer) entry[1], (String) entry[0], action);
+                final java.util.ConcurrentModificationException batchError = assertThrows(java.util.ConcurrentModificationException.class, () -> batch
+                        .addRows(Arrays.asList(new G129Structural(1, "n1", "e1"), new G129Structural(2, "n2", "e2"), new G129Structural(3, "n3", "e3"))),
+                        label);
+                assertTrue(batchError.getMessage().contains("no row was added"), batchError.getMessage());
+                g129AssertOnlyFirstRow(batch);
+
+                // The single-row path, for the rows whose getter fires.
+                final Dataset single = g129OneRowDataset();
+                g129StructuralHook(single, (Integer) entry[1], (String) entry[0], action);
+                assertThrows(java.util.ConcurrentModificationException.class, () -> single.addRow(new G129Structural((Integer) entry[1], "n", "e")), label);
+                g129AssertOnlyFirstRow(single);
+            }
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    // G129-02: the rows collection's own iterator removing a column between two rows fails fast as well.
+    @Test
+    public void testAddRows_rowsIteratorChangesColumnCountFailsFast() {
+        final Dataset dataset = g129OneRowDataset();
+        final List<Object> source = Arrays.asList(new Object[] { 1, "n1", "e1" }, new Object[] { 2, "n2", "e2" });
+        final Collection<Object> rows = new java.util.AbstractCollection<>() {
+            @Override
+            public java.util.Iterator<Object> iterator() {
+                final java.util.Iterator<Object> iterator = source.iterator();
+
+                return new java.util.Iterator<>() {
+                    private int returned = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public Object next() {
+                        if (returned++ == 1) {
+                            dataset.removeColumn("extra");
+                        }
+
+                        return iterator.next();
+                    }
+                };
+            }
+
+            @Override
+            public int size() {
+                return source.size();
+            }
+        };
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> dataset.addRows(rows));
+        g129AssertOnlyFirstRow(dataset);
+    }
+
+    // ---- deep review 2026-11-02 G129 end ----
+
+    // ---- deep review 2026-11-02b G070 begin ----
+
+    // A map row whose get(key) runs action on target the first time key is read.
+    private static Map<String, Object> g070bHookedMapRow(final Dataset target, final String key, final java.util.function.Consumer<Dataset> action) {
+        final Map<String, Object> row = new HashMap<>() {
+            private static final long serialVersionUID = 1L;
+            private boolean fired = false;
+
+            @Override
+            public Object get(final Object k) {
+                if (!fired && key.equals(k)) {
+                    fired = true;
+                    action.accept(target);
+                }
+
+                return super.get(k);
+            }
+        };
+
+        row.put("id", 1);
+        row.put("name", "n1");
+        row.put("extra", "e1");
+        return row;
+    }
+
+    // G070-01: a map row whose get() adds or removes a column fails with the documented ConcurrentModificationException and
+    // adds nothing. The map branch read the column names at shifted positions instead: IndexOutOfBoundsException for a
+    // removed column, IllegalArgumentException "Column (added) is not found in map" for a column inserted mid-row.
+    @Test
+    public void testAddRow_mapRowGetAddsOrRemovesColumnFailsFast_r116() {
+        final Object[][] cases = { // key whose get() fires, action
+                { "id", (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("extra") }, // was IndexOutOfBoundsException
+                { "id", (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("id") }, // was IndexOutOfBoundsException
+                { "name", (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("id") }, // was IndexOutOfBoundsException
+                { "id", (java.util.function.Consumer<Dataset>) ds -> ds.addColumn(1, "added", Arrays.asList("a0")) }, // was IAE
+                { "id", (java.util.function.Consumer<Dataset>) ds -> ds.addColumn("added", Arrays.asList("a0")) }, // already CME
+                { "extra", (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("name") } }; // last cell: already CME
+
+        for (final Object[] entry : cases) {
+            final String key = (String) entry[0];
+            @SuppressWarnings("unchecked")
+            final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) entry[1];
+
+            final Dataset single = g129OneRowDataset();
+            final java.util.ConcurrentModificationException singleError = assertThrows(java.util.ConcurrentModificationException.class,
+                    () -> single.addRow(g070bHookedMapRow(single, key, action)), key);
+            assertTrue(singleError.getMessage().contains("no row was added"), singleError.getMessage());
+            g129AssertOnlyFirstRow(single);
+
+            final Dataset batch = g129OneRowDataset();
+            assertThrows(java.util.ConcurrentModificationException.class,
+                    () -> batch.addRows(Arrays.asList(new Object[] { 2, "n2", "e2" }, g070bHookedMapRow(batch, key, action))), key);
+            g129AssertOnlyFirstRow(batch);
+        }
+    }
+
+    // G070-01 (pin): a map row whose get() renames a column (the count is unchanged) still reads the rest of the row by the
+    // current column names, and a map row that changes nothing is added as before.
+    @Test
+    public void testAddRow_mapRowGetRenamesColumnStillReadsCurrentNames_r116() {
+        final Dataset dataset = g129OneRowDataset();
+        final Map<String, Object> row = g070bHookedMapRow(dataset, "id", ds -> ds.renameColumn("name", "nm"));
+        row.put("nm", "renamed");
+        dataset.addRow(row);
+
+        assertEquals(Arrays.asList("id", "nm", "extra"), new ArrayList<>(dataset.columnNames()));
+        assertEquals(Arrays.asList(0, 1), new ArrayList<>(dataset.getColumn("id")));
+        assertEquals(Arrays.asList("n0", "renamed"), new ArrayList<>(dataset.getColumn("nm")));
+        assertEquals(Arrays.asList("e0", "e1"), new ArrayList<>(dataset.getColumn("extra")));
+
+        final Map<String, Object> plain = new HashMap<>();
+        plain.put("id", 2);
+        plain.put("nm", "n2");
+        plain.put("extra", null);
+        dataset.addRows(Arrays.asList(plain, Arrays.asList(3, "n3", "e3")));
+        assertEquals(4, dataset.size());
+        assertEquals(Arrays.asList(0, 1, 2, 3), new ArrayList<>(dataset.getColumn("id")));
+        assertNull(dataset.get(2, 2));
+    }
+
+    // G070-02: the rows iterator's final hasNext() (the call that returns false) adding or removing a column fails with
+    // ConcurrentModificationException before anything is committed. It used to commit the rows under shifted columns and
+    // throw IndexOutOfBoundsException without rowsChanged() (a removed column), or leave the columns at different lengths
+    // with no exception at all (an added column).
+    @Test
+    public void testAddRows_rowsIteratorFinalHasNextChangesColumnCountFailsFast_r116() {
+        final List<java.util.function.Consumer<Dataset>> actions = Arrays.asList(ds -> ds.removeColumn("extra"), ds -> ds.removeColumn("id"),
+                ds -> ds.addColumn("added", Arrays.asList("a0")), ds -> ds.addColumn(0, "added", Arrays.asList("a0")));
+
+        for (int i = 0; i < actions.size(); i++) {
+            final java.util.function.Consumer<Dataset> action = actions.get(i);
+            final Dataset dataset = g129OneRowDataset();
+            final List<Object> source = Arrays.asList(new Object[] { 1, "n1", "e1" }, new Object[] { 2, "n2", "e2" });
+            final Collection<Object> rows = new java.util.AbstractCollection<>() {
+                @Override
+                public java.util.Iterator<Object> iterator() {
+                    final java.util.Iterator<Object> iterator = source.iterator();
+
+                    return new java.util.Iterator<>() {
+                        private boolean fired = false;
+
+                        @Override
+                        public boolean hasNext() {
+                            final boolean hasNext = iterator.hasNext();
+
+                            if (!hasNext && !fired) {
+                                fired = true;
+                                action.accept(dataset);
+                            }
+
+                            return hasNext;
+                        }
+
+                        @Override
+                        public Object next() {
+                            return iterator.next();
+                        }
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return source.size();
+                }
+            };
+
+            assertThrows(java.util.ConcurrentModificationException.class, () -> dataset.addRows(rows), "action " + i);
+            g129AssertOnlyFirstRow(dataset);
+        }
+    }
+
+    // ---- deep review 2026-11-02b G070 end ----
+
+    // ---- deep review 2026-11-03 review P2 begin ----
+
+    // Column layout changes that keep the column count (so the former count-only check let them through).
+    private static List<Object[]> p2NetZeroLayoutChanges() {
+        return Arrays.asList(new Object[] { "remove and re-add id", (java.util.function.Consumer<Dataset>) ds -> {
+            final List<Object> ids = new ArrayList<>(ds.getColumn("id"));
+            ds.removeColumn("id");
+            ds.addColumn("id", ids); // same name, same count, now the last column
+        } }, new Object[] { "move id to the end", (java.util.function.Consumer<Dataset>) ds -> ds.moveColumn("id", 2) },
+                new Object[] { "swap id and extra", (java.util.function.Consumer<Dataset>) ds -> ds.swapColumns("id", "extra") },
+                new Object[] { "replace name by another column", (java.util.function.Consumer<Dataset>) ds -> {
+                    ds.removeColumn("name");
+                    ds.addColumn(1, "other", Arrays.asList("o0"));
+                } });
+    }
+
+    // The first row is intact under every column name it still has.
+    private static void p2AssertFirstRowIntact(final Dataset dataset) {
+        g129AssertOnlyFirstRow(dataset);
+        final Map<String, Object> expected = new HashMap<>();
+        expected.put("id", 0);
+        expected.put("name", "n0");
+        expected.put("extra", "e0");
+        expected.put("other", "o0");
+
+        for (final String columnName : dataset.columnNames()) {
+            assertEquals(expected.get(columnName), dataset.getColumn(columnName).get(0), columnName);
+        }
+    }
+
+    // Review P2: a map row whose get() removes a column and adds it back (or moves, swaps or replaces one) keeps the column
+    // count, which was all the check compared: the row was committed under shifted columns (name=1 instead of "n1"), and in
+    // addRows the rows read before it were scrambled as well. It now fails with ConcurrentModificationException and adds
+    // nothing, like an added or removed column.
+    @Test
+    public void testAddRow_mapRowGetNetZeroColumnLayoutChangeFailsFast_r116() {
+        for (final Object[] change : p2NetZeroLayoutChanges()) {
+            final String label = (String) change[0];
+            @SuppressWarnings("unchecked")
+            final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) change[1];
+
+            for (final String key : Arrays.asList("id", "name", "extra")) {
+                final Dataset single = g129OneRowDataset();
+                final java.util.ConcurrentModificationException singleError = assertThrows(java.util.ConcurrentModificationException.class,
+                        () -> single.addRow(g070bHookedMapRow(single, key, action)), label + " @" + key);
+                assertTrue(singleError.getMessage().contains("no row was added"), singleError.getMessage());
+                p2AssertFirstRowIntact(single);
+
+                final Dataset batch = g129OneRowDataset();
+                assertThrows(java.util.ConcurrentModificationException.class,
+                        () -> batch
+                                .addRows(Arrays.asList(new Object[] { 2, "n2", "e2" }, g070bHookedMapRow(batch, key, action), new Object[] { 3, "n3", "e3" })),
+                        label + " @" + key);
+                p2AssertFirstRowIntact(batch);
+            }
+        }
+    }
+
+    // Review P2: the same for a bean row whose getter changes the column layout (single row and batch, first or later row).
+    @Test
+    public void testAddRows_getterNetZeroColumnLayoutChangeFailsFast_r116() {
+        try {
+            for (final Object[] change : p2NetZeroLayoutChanges()) {
+                final String label = (String) change[0];
+                @SuppressWarnings("unchecked")
+                final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) change[1];
+
+                for (final Object[] hook : new Object[][] { { "id", 1 }, { "extra", 1 }, { "name", 2 }, { "extra", 3 } }) {
+                    final String hookLabel = label + " @" + hook[0] + "#" + hook[1];
+
+                    final Dataset batch = g129OneRowDataset();
+                    g129StructuralHook(batch, (Integer) hook[1], (String) hook[0], action);
+                    assertThrows(java.util.ConcurrentModificationException.class,
+                            () -> batch.addRows(
+                                    Arrays.asList(new G129Structural(1, "n1", "e1"), new G129Structural(2, "n2", "e2"), new G129Structural(3, "n3", "e3"))),
+                            hookLabel);
+                    p2AssertFirstRowIntact(batch);
+
+                    final Dataset single = g129OneRowDataset();
+                    g129StructuralHook(single, (Integer) hook[1], (String) hook[0], action);
+                    assertThrows(java.util.ConcurrentModificationException.class, () -> single.addRow(new G129Structural((Integer) hook[1], "n", "e")),
+                            hookLabel);
+                    p2AssertFirstRowIntact(single);
+                }
+            }
+        } finally {
+            g129Unhook();
+        }
+    }
+
+    // Review P2: the rows iterator's final hasNext() making a count-preserving layout change fails before the commit too;
+    // the rows read before it were aligned to the old positions.
+    @Test
+    public void testAddRows_rowsIteratorFinalHasNextNetZeroLayoutChangeFailsFast_r116() {
+        for (final Object[] change : p2NetZeroLayoutChanges()) {
+            @SuppressWarnings("unchecked")
+            final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) change[1];
+            final Dataset dataset = g129OneRowDataset();
+            final List<Object> source = Arrays.asList(new Object[] { 1, "n1", "e1" }, new Object[] { 2, "n2", "e2" });
+            final Collection<Object> rows = new java.util.AbstractCollection<>() {
+                @Override
+                public java.util.Iterator<Object> iterator() {
+                    final java.util.Iterator<Object> iterator = source.iterator();
+
+                    return new java.util.Iterator<>() {
+                        private boolean fired = false;
+
+                        @Override
+                        public boolean hasNext() {
+                            final boolean hasNext = iterator.hasNext();
+
+                            if (!hasNext && !fired) {
+                                fired = true;
+                                action.accept(dataset);
+                            }
+
+                            return hasNext;
+                        }
+
+                        @Override
+                        public Object next() {
+                            return iterator.next();
+                        }
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return source.size();
+                }
+            };
+
+            assertThrows(java.util.ConcurrentModificationException.class, () -> dataset.addRows(rows), (String) change[0]);
+            p2AssertFirstRowIntact(dataset);
+        }
+    }
+
+    // Review P2 (pin): a getter that renames a column keeps the layout (same storage lists), so a batch is still added and
+    // read by the current names; a column moved before the call does not matter.
+    @Test
+    public void testAddRows_renameDuringReadAndLayoutChangeBeforeCallStillAdd_r116() {
+        final Dataset dataset = g129OneRowDataset();
+        dataset.moveColumn("id", 2);
+        dataset.addRows(Arrays.asList(Map.of("id", 1, "name", "n1", "extra", "e1"), new Object[] { "n2", "e2", 2 }));
+        assertEquals(Arrays.asList(0, 1, 2), new ArrayList<>(dataset.getColumn("id")));
+        assertEquals(Arrays.asList("n0", "n1", "n2"), new ArrayList<>(dataset.getColumn("name")));
+
+        final Dataset renamed = g129OneRowDataset();
+        final Map<String, Object> row = g070bHookedMapRow(renamed, "id", ds -> ds.renameColumn("extra", "ex"));
+        row.put("ex", "renamed");
+        renamed.addRows(Arrays.asList(row, new Object[] { 2, "n2", "e2" }));
+        assertEquals(Arrays.asList("e0", "renamed", "e2"), new ArrayList<>(renamed.getColumn("ex")));
+        assertEquals(Arrays.asList("n0", "n1", "n2"), new ArrayList<>(renamed.getColumn("name")));
+    }
+
+    // A rows collection whose size() runs action on target the first time it is called. isEmpty() does not call size(), so
+    // the action runs from addRows' own rows.size() call, after its emptiness check.
+    private static Collection<Object> p2SizeHookedRows(final Dataset target, final java.util.function.Consumer<Dataset> action) {
+        final List<Object> source = Arrays.asList(new Object[] { 1, "n1", "e1" }, new Object[] { 2, "n2", "e2" });
+
+        return new java.util.AbstractCollection<>() {
+            private boolean fired = false;
+
+            @Override
+            public boolean isEmpty() {
+                return source.isEmpty();
+            }
+
+            @Override
+            public int size() {
+                if (!fired) {
+                    fired = true;
+                    action.accept(target);
+                }
+
+                return source.size();
+            }
+
+            @Override
+            public java.util.Iterator<Object> iterator() {
+                return source.iterator();
+            }
+        };
+    }
+
+    // Review P2 follow-up: the layout baseline was taken after addRows called rows.size(), so a column change made by that
+    // size() became the baseline. A column added there was then committed with only its original row (the other columns
+    // got two more), and a removed, moved or re-added column was not detected. The baseline is now taken before size():
+    // every such change fails with ConcurrentModificationException and adds nothing, at the end or at a position.
+    @Test
+    public void testAddRows_rowsSizeChangesColumnLayoutFailsFast_r116() {
+        final List<Object[]> changes = new ArrayList<>(p2NetZeroLayoutChanges());
+        changes.add(new Object[] { "add a column at the end", (java.util.function.Consumer<Dataset>) ds -> ds.addColumn("added", Arrays.asList("a0")) });
+        changes.add(new Object[] { "add a column first", (java.util.function.Consumer<Dataset>) ds -> ds.addColumn(0, "added", Arrays.asList("a0")) });
+        changes.add(new Object[] { "remove a column", (java.util.function.Consumer<Dataset>) ds -> ds.removeColumn("extra") });
+
+        for (final Object[] change : changes) {
+            @SuppressWarnings("unchecked")
+            final java.util.function.Consumer<Dataset> action = (java.util.function.Consumer<Dataset>) change[1];
+
+            for (final int position : new int[] { -1, 0, 1 }) {
+                final String label = change[0] + " / position " + position;
+                final Dataset dataset = g129OneRowDataset();
+                final Collection<Object> rows = p2SizeHookedRows(dataset, action);
+                final java.util.ConcurrentModificationException error = assertThrows(java.util.ConcurrentModificationException.class, () -> {
+                    if (position < 0) {
+                        dataset.addRows(rows);
+                    } else {
+                        dataset.addRows(position, rows);
+                    }
+                }, label);
+                assertTrue(error.getMessage().contains("no row was added"), error.getMessage());
+
+                // Still one row in every column, and the original cells are where their names say.
+                g129AssertOnlyFirstRow(dataset);
+                final Map<String, Object> expected = new HashMap<>();
+                expected.put("id", 0);
+                expected.put("name", "n0");
+                expected.put("extra", "e0");
+                expected.put("other", "o0");
+                expected.put("added", "a0");
+
+                for (final String columnName : dataset.columnNames()) {
+                    assertEquals(expected.get(columnName), dataset.getColumn(columnName).get(0), label + ": " + columnName);
+                }
+            }
+        }
+    }
+
+    // Review P2 follow-up (pin): a size() that only renames a column keeps the layout, so the rows are still added.
+    @Test
+    public void testAddRows_rowsSizeRenamesColumnStillAdds_r116() {
+        final Dataset dataset = g129OneRowDataset();
+        dataset.addRows(p2SizeHookedRows(dataset, ds -> ds.renameColumn("extra", "ex")));
+
+        assertEquals(Arrays.asList("id", "name", "ex"), new ArrayList<>(dataset.columnNames()));
+        assertEquals(Arrays.asList(0, 1, 2), new ArrayList<>(dataset.getColumn("id")));
+        assertEquals(Arrays.asList("e0", "e1", "e2"), new ArrayList<>(dataset.getColumn("ex")));
+    }
+
+    // ---- deep review 2026-11-03 review P2 end ----
 }

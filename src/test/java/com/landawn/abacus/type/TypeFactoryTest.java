@@ -2558,4 +2558,58 @@ public class TypeFactoryTest extends TestBase {
                 () -> TypeFactory.registerType(G122RegisteredBeanLikeClob.class, clob -> "x", text -> (G122RegisteredBeanLikeClob) null));
     }
     // ---- deep review 2026-10-26 verify G122 end ----
+
+    // ---- deep review 2026-11-02b G020 begin ----
+    // G020-01: ValueTypeResolver rebuilt a primitive list argument as "IntList<int>" (IntList is not generic), a name that
+    // resolves to an ObjectType, so a single-value wrapper's IntList/DoubleList/... value was read as raw text (a String).
+    @Test
+    public void testValueType_primitiveListArgumentOfSingleValueWrapper_r116() {
+        final String box = "com.landawn.abacus.type.TypeFactoryTest.G017Box";
+        final Type<Object> intListBox = TypeFactory.getType(box + "<IntList>");
+
+        assertEquals(com.landawn.abacus.util.IntList.of(1, 2, 3), ((G017Box<?>) intListBox.valueOf("[1, 2, 3]")).value());
+        assertEquals(com.landawn.abacus.util.IntList.of(4, 5),
+                ((G017Box<?>) intListBox.valueOf(intListBox.stringOf(new G017Box<>(com.landawn.abacus.util.IntList.of(4, 5))))).value());
+        assertEquals(com.landawn.abacus.util.DoubleList.of(1.5, 2.0), ((G017Box<?>) TypeFactory.getType(box + "<DoubleList>").valueOf("[1.5, 2]")).value());
+        assertEquals(List.of(com.landawn.abacus.util.LongList.of(1, 2)),
+                ((G017Box<?>) TypeFactory.getType(box + "<List<LongList>>").valueOf("[[1, 2]]")).value());
+
+        // unchanged neighbours: a primitive array and a generic list argument
+        assertTrue(java.util.Arrays.equals(new int[] { 1, 2 }, (int[]) ((G017Box<?>) TypeFactory.getType(box + "<int[]>").valueOf("[1, 2]")).value()));
+        assertEquals(List.of(1L, 2L), ((G017Box<?>) TypeFactory.getType(box + "<List<Long>>").valueOf("[1, 2]")).value());
+    }
+
+    // G020-02: ValueTypeResolver named a member class by its binary name ("...u$OptionalShort"). TypeFactory pools it under
+    // the canonical name only, so unless the class had already been looked up by Class the wrapper's value type was an
+    // ObjectType: the value was read as raw text (a String), or the creator call failed with "argument type mismatch".
+    @Test
+    public void testValueType_memberClassArgumentOfSingleValueWrapper_r116() {
+        final String box = "com.landawn.abacus.type.TypeFactoryTest.G017Box";
+
+        assertEquals(com.landawn.abacus.util.u.OptionalShort.of((short) 3), ((G017Box<?>) TypeFactory.getType(box + "<OptionalShort>").valueOf("3")).value());
+        assertEquals(List.of(com.landawn.abacus.util.u.OptionalByte.of((byte) 4)),
+                ((G017Box<?>) TypeFactory.getType(box + "<List<OptionalByte>>").valueOf("[4]")).value());
+        assertEquals(com.landawn.abacus.util.u.OptionalChar.of('x'),
+                ((G020OptionalCharBox) TypeFactory.getType(G020OptionalCharBox.class).valueOf("x")).value());
+
+        // unchanged neighbours: a generic member class and an array of member classes
+        assertEquals(com.landawn.abacus.util.Tuple.of(1L, "a"),
+                ((G017Box<?>) TypeFactory.getType(box + "<Tuple2<Long, String>>").valueOf("[1, \"a\"]")).value());
+        final Object[] optionals = (Object[]) ((G017Box<?>) TypeFactory.getType(box + "<OptionalInt[]>").valueOf("[1, 2]")).value();
+        assertEquals(List.of(com.landawn.abacus.util.u.OptionalInt.of(1), com.landawn.abacus.util.u.OptionalInt.of(2)), List.of(optionals));
+    }
+
+    // a single-value wrapper, not a bean: like G017Box, its accessor name does not match the field name
+    public static class G020OptionalCharBox {
+        private com.landawn.abacus.util.u.OptionalChar v;
+
+        public G020OptionalCharBox(final com.landawn.abacus.util.u.OptionalChar v) {
+            this.v = v;
+        }
+
+        public com.landawn.abacus.util.u.OptionalChar value() {
+            return v;
+        }
+    }
+    // ---- deep review 2026-11-02b G020 end ----
 }

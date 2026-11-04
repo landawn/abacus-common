@@ -106,7 +106,9 @@ final class ValueTypeResolver {
             return component instanceof Class<?> cls ? Array.newInstance(cls, 0).getClass() : new GenericArray(component);
         }
         final List<Type<?>> parameters = type.parameterTypes();
-        if (parameters.isEmpty()) {
+        // A primitive list handler reports its primitive element type as a parameter, but IntList etc. are not generic:
+        // "IntList<int>" names no handler, so the wrapper's value was read by an ObjectType as raw text.
+        if (parameters.isEmpty() || type.isPrimitiveList()) {
             return type.javaType();
         }
         return new Parameterized(type.javaType(), parameters.stream().map(ValueTypeResolver::reflectionType).toArray(java.lang.reflect.Type[]::new));
@@ -231,6 +233,10 @@ final class ValueTypeResolver {
                 result.append(parsingName(argument, visiting));
             }
             return result.append('>').toString();
+        } else if (type instanceof Class<?> cls && cls.getCanonicalName() != null) {
+            // TypeFactory pools a member class under its canonical name ("...u.OptionalInt"); the binary name getTypeName()
+            // gives ("...u$OptionalInt") can miss that entry and resolve to an ObjectType that reads the value as raw text.
+            return cls.getCanonicalName();
         }
         return type.getTypeName();
     }

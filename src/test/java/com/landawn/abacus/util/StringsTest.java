@@ -1430,4 +1430,120 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("[]", Strings.wrapIfMissing("", "[", "]"));
     }
 
+    // ---- deep review 2026-11-02 G079 begin ----
+
+    // G079-01: pin for the nested-mode int[] content-start stack (was Deque<Integer>): growth past the initial
+    // 8 slots, bottom-of-stack resume position, unclosed outer begin, maxCount, bounded range, overlapping delimiters.
+    @Test
+    public void testSubstringIndicesBetween_nestedModesStackPin() {
+        final Strings.DelimiterMatchMode all = Strings.DelimiterMatchMode.ALL_LEVELS;
+        final Strings.DelimiterMatchMode outer = Strings.DelimiterMatchMode.OUTERMOST_ONLY;
+        final String deep = "(".repeat(20) + "x" + ")".repeat(20);
+
+        assertEquals(
+                "[[20, 21), [19, 22), [18, 23), [17, 24), [16, 25), [15, 26), [14, 27), [13, 28), [12, 29), [11, 30), [10, 31), [9, 32), "
+                        + "[8, 33), [7, 34), [6, 35), [5, 36), [4, 37), [3, 38), [2, 39), [1, 40)]",
+                Strings.substringIndicesBetween(deep, "(", ")", all).toString());
+        assertEquals("[[1, 40)]", Strings.substringIndicesBetween(deep, "(", ")", outer).toString());
+        assertEquals("[[20, 21), [19, 22), [18, 23)]", Strings.substringIndicesBetween(deep, 0, deep.length(), "(", ")", all, 3).toString());
+        assertEquals("[[1, 40)]", Strings.substringIndicesBetween(deep, 0, deep.length(), "(", ")", outer, 1).toString());
+        assertEquals("[[7, 34)]", Strings.substringIndicesBetween(deep, 5, 35, "(", ")", outer, Integer.MAX_VALUE).toString());
+        assertEquals(Arrays.asList("x", "(x)"), Strings.substringsBetween(deep, 0, deep.length(), "(", ")", all, 2));
+
+        assertEquals("[[2, 3), [5, 6)]", Strings.substringIndicesBetween("((a)(b)", "(", ")", outer).toString());
+        assertEquals("[[2, 3), [5, 6)]", Strings.substringIndicesBetween("((a)(b)", "(", ")", all).toString());
+        assertEquals("[[2, 3)]", Strings.substringIndicesBetween("ababcbc", "ab", "bc", all).toString());
+        assertEquals("[[2, 3)]", Strings.substringIndicesBetween("ababcbc", "ab", "bc", outer).toString());
+        assertEquals("[[3, 4), [2, 6)]", Strings.substringIndicesBetween("x[[a]b]y", 1, 7, "[", "]", all, Integer.MAX_VALUE).toString());
+        assertEquals("[[3, 4)]", Strings.substringIndicesBetween("x[[a]b]y", 2, 7, "[", "]", outer, Integer.MAX_VALUE).toString());
+        assertEquals("[]", Strings.substringIndicesBetween("(", "(", ")", all).toString());
+        assertEquals("[[1, 1)]", Strings.substringIndicesBetween("()", "(", ")", outer).toString());
+        assertEquals(Arrays.asList("a", "c"), Strings.substringsBetween("'a'b'c'", "'", "'", all));
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < 12; i++) {
+            sb.append('(').append(i);
+        }
+
+        final String numbered = sb.append(")".repeat(12)).toString();
+        final List<String> allLevels = Strings.substringsBetween(numbered, "(", ")", all);
+
+        assertEquals(12, allLevels.size());
+        assertEquals("11", allLevels.get(0));
+        assertEquals("10(11)", allLevels.get(1));
+        assertEquals(numbered.substring(1, numbered.length() - 1), allLevels.get(11));
+        assertEquals(Arrays.asList(numbered.substring(1, numbered.length() - 1)), Strings.substringsBetween(numbered, "(", ")", outer));
+    }
+
+    // ---- deep review 2026-11-02 G079 end ----
+
+    // ---- deep review 2026-11-02b G079 begin ----
+
+    // G079-01: pin for the char-delimiter overloads of substringsBetween / substringIndicesBetween, which now pass
+    // N.stringOf(char) (cached String for ASCII, String.valueOf otherwise) instead of String.valueOf(char): ASCII,
+    // the 127/128 cache boundary, Latin-1, CJK and lone-surrogate delimiters, equal delimiters, all modes, ranges,
+    // null/empty input and the unchanged exception types.
+    @Test
+    public void testCharDelimiterOverloads_stringOfPin_r116() {
+        final Strings.DelimiterMatchMode seq = Strings.DelimiterMatchMode.SEQUENTIAL;
+        final Strings.DelimiterMatchMode all = Strings.DelimiterMatchMode.ALL_LEVELS;
+        final Strings.DelimiterMatchMode outer = Strings.DelimiterMatchMode.OUTERMOST_ONLY;
+
+        // substringsBetween(String, char, char) and (String, char, char, DelimiterMatchMode)
+        assertEquals(Arrays.asList("a", "b"), Strings.substringsBetween("3[a]2[b]", '[', ']'));
+        assertEquals(Arrays.asList("a", "c"), Strings.substringsBetween("'a'b'c'", '\'', '\''));
+        assertEquals(Arrays.asList("a", "b"), Strings.substringsBetween("\u007fa\u0080\u007fb\u0080", '\u007f', '\u0080'));
+        assertEquals(Arrays.asList("a", "b"), Strings.substringsBetween("x\u00aba\u00bby\u00abb\u00bb", '\u00ab', '\u00bb'));
+        assertEquals(Arrays.asList(""), Strings.substringsBetween("\ud83d\ude00", '\ud83d', '\ude00'));
+        assertEquals(new ArrayList<String>(), Strings.substringsBetween(null, '[', ']'));
+        assertEquals(new ArrayList<String>(), Strings.substringsBetween("", '[', ']'));
+        assertEquals(Arrays.asList("a2[c", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', seq));
+        assertEquals(Arrays.asList("c", "a2[c]", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', all));
+        assertEquals(Arrays.asList("a2[c]", "a"), Strings.substringsBetween("3[a2[c]]2[a]", '[', ']', outer));
+        assertEquals(Arrays.asList("c", "a\u3010c\u3011"), Strings.substringsBetween("\u3010a\u3010c\u3011\u3011", '\u3010', '\u3011', all));
+        assertEquals(Arrays.asList("a\u3010c\u3011"), Strings.substringsBetween("\u3010a\u3010c\u3011\u3011", '\u3010', '\u3011', outer));
+        assertThrows(IllegalArgumentException.class, () -> Strings.substringsBetween(null, '[', ']', null));
+        assertThrows(IllegalArgumentException.class, () -> Strings.substringsBetween("[a]", '[', ']', null));
+
+        // substringsBetween(String, int, int, char, char)
+        assertEquals(Arrays.asList("d"), Strings.substringsBetween("a[b]c[d]e[f]", 2, 8, '[', ']'));
+        assertEquals(Arrays.asList("1", "2"), Strings.substringsBetween("(1)(2)(3)", 0, 6, '(', ')'));
+        assertEquals(Arrays.asList("b"), Strings.substringsBetween("\u0080a\u0081\u0080b\u0081", 3, 6, '\u0080', '\u0081'));
+        assertEquals(new ArrayList<String>(), Strings.substringsBetween(null, 0, 0, '[', ']'));
+        assertThrows(IndexOutOfBoundsException.class, () -> Strings.substringsBetween(null, 0, 1, '[', ']'));
+        assertThrows(IndexOutOfBoundsException.class, () -> Strings.substringsBetween("[a]", 2, 1, '[', ']'));
+
+        // substringIndicesBetween(String, char, char) and (String, char, char, DelimiterMatchMode)
+        assertEquals("[[2, 3), [6, 7)]", Strings.substringIndicesBetween("3[a]2[b]", '[', ']').toString());
+        assertEquals("[[1, 2), [4, 5)]", Strings.substringIndicesBetween("\u007fa\u0080\u007fb\u0080", '\u007f', '\u0080').toString());
+        assertEquals("[]", Strings.substringIndicesBetween(null, '[', ']').toString());
+        assertEquals("[]", Strings.substringIndicesBetween("", '[', ']').toString());
+        assertEquals("[[2, 6), [10, 11)]", Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', seq).toString());
+        assertEquals("[[5, 6), [2, 7), [10, 11)]", Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', all).toString());
+        assertEquals("[[2, 7), [10, 11)]", Strings.substringIndicesBetween("3[a2[c]]2[a]", '[', ']', outer).toString());
+        assertEquals("[[3, 4), [1, 5)]", Strings.substringIndicesBetween("\u00aba\u00abc\u00bb\u00bb", '\u00ab', '\u00bb', all).toString());
+        assertThrows(IllegalArgumentException.class, () -> Strings.substringIndicesBetween(null, '[', ']', null));
+        assertThrows(IllegalArgumentException.class, () -> Strings.substringIndicesBetween("[a]", '[', ']', null));
+
+        // substringIndicesBetween(String, int, int, char, char)
+        assertEquals("[[6, 7)]", Strings.substringIndicesBetween("a[b]c[d]e[f]", 2, 8, '[', ']').toString());
+        assertEquals("[[4, 5)]", Strings.substringIndicesBetween("\u3010a\u3011\u3010b\u3011", 2, 6, '\u3010', '\u3011').toString());
+        assertEquals("[]", Strings.substringIndicesBetween("a[b]c", 4, 5, '[', ']').toString());
+        assertEquals("[]", Strings.substringIndicesBetween(null, 0, 0, '[', ']').toString());
+        assertThrows(IndexOutOfBoundsException.class, () -> Strings.substringIndicesBetween(null, 0, 1, '[', ']'));
+        assertThrows(IndexOutOfBoundsException.class, () -> Strings.substringIndicesBetween("[a]", -1, 2, '[', ']'));
+
+        // every char of the cached range and just above it behaves exactly like the equivalent String delimiters
+        for (char c = 0; c < 300; c++) {
+            final String s = "x" + c + "ab" + c + "y" + c + "c" + c;
+
+            assertEquals(Strings.substringsBetween(s, String.valueOf(c), String.valueOf(c)), Strings.substringsBetween(s, c, c));
+            assertEquals(Strings.substringIndicesBetween(s, String.valueOf(c), String.valueOf(c), all).toString(),
+                    Strings.substringIndicesBetween(s, c, c, all).toString());
+        }
+    }
+
+    // ---- deep review 2026-11-02b G079 end ----
+
 }

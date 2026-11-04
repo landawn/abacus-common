@@ -284,9 +284,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} (except on the Kryo parser, which reads class-and-object data
+     *         for a {@code null} class)
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
     <T> T deserialize(String source, Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException;
@@ -334,9 +336,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the source string to deserialize from; a {@code null} source typically yields the target type's default value
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} (except on the Kryo parser, which reads class-and-object data
+     *         for a {@code null} class)
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
     <T> T deserialize(String source, DC config, Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException;
@@ -379,9 +383,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if opening or reading {@code source} fails, including a missing file, or an implementation cannot
      *         close its owned file resource
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
@@ -433,9 +439,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the source file to read from (must not be {@code null} and must exist)
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if opening or reading {@code source} fails, including a missing file, or an implementation cannot
      *         close its owned file resource
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
@@ -482,9 +490,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the input stream to read from (must not be {@code null})
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
@@ -536,9 +546,11 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the input stream to read from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
@@ -587,11 +599,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param <T> the target type
      * @param source the reader to read from (must not be {@code null})
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
      * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
      *         validating the arguments)
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
@@ -651,11 +665,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param <T> the target type
      * @param source the reader to read from (must not be {@code null})
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param targetType the class of the object to create (must not be {@code null})
+     * @param targetType the class of the object to create (must not be {@code null}, except on the Kryo parser, which reads
+     *        class-and-object data for a {@code null} class)
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
      * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
      *         validating the arguments)
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null} (a {@code null} class is accepted by the Kryo parser,
+     *         which then reads class-and-object data)
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */

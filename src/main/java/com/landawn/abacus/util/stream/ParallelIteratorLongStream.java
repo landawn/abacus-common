@@ -774,11 +774,15 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
             iters.add(new LongIterator() {
                 private long next;
                 private boolean exhausted;
-                private LongIterator cur = null;
+                // Index the mapped array directly (as the sequential flatMapArray does) instead of wrapping each
+                // one in a LongIterator: that wrapper was the only per-source-element allocation of this worker.
+                private long[] cur = null;
+                private int len = 0;
+                private int idx = 0;
 
                 @Override
                 public boolean hasNext() {
-                    while ((cur == null || !cur.hasNext()) && !exhausted) {
+                    while (idx >= len && !exhausted) {
                         synchronized (source) {
                             if (source.hasNext()) {
                                 next = source.nextLong();
@@ -789,19 +793,21 @@ final class ParallelIteratorLongStream extends IteratorLongStream {
                             }
                         }
 
-                        cur = LongIterator.of(mapper.apply(next));
+                        cur = mapper.apply(next);
+                        len = N.len(cur);
+                        idx = 0;
                     }
 
-                    return cur != null && cur.hasNext();
+                    return idx < len;
                 }
 
                 @Override
                 public long nextLong() throws NoSuchElementException {
-                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    if (idx >= len && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return cur.nextLong();
+                    return cur[idx++];
                 }
             });
         }

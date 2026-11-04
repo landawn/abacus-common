@@ -1193,7 +1193,11 @@ public final class ParserUtil {
         /** Immutable list of all property information */
         public final ImmutableList<PropInfo> propInfoList;
 
-        /** Immutable list of property names marked as IDs */
+        /**
+         * Immutable list of the ID property names: the properties marked as IDs or, when none is marked, a property
+         * named {@code id} of type {@code int}, {@code long}, their wrappers, {@code String}, {@code Timestamp} or
+         * {@code UUID}.
+         */
         public final ImmutableList<String> idPropNameList;
 
         /** Immutable list of property information for ID properties */
@@ -2868,12 +2872,14 @@ public final class ParserUtil {
         public final Field field;
 
         /**
-         * The getter method for this property, or {@code null} if the property is write-only.
+         * The getter method for this property, or {@code null} if the property has no getter (it is then backed by {@link #field}).
          */
         public final Method getMethod;
 
         /**
-         * The setter method for this property, or {@code null} if the property is read-only.
+         * The setter method for this property, or {@code null} if it has none. For a bean built through a builder,
+         * this is the setter declared by the <i>builder</i> class, invoked on the builder instance (see
+         * {@link #setPropValue(Object, Object)}).
          */
         public final Method setMethod;
 
