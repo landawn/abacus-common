@@ -212,4 +212,20 @@ public class LazyInitializerTest extends TestBase {
         assertEquals(1, lazy.get());
     }
 
+    @Test
+    public void testLazyInitializerRejectsValueAfterSwallowedRecursion() {
+        final AtomicReference<LazyInitializer<String>> ref = new AtomicReference<>();
+        final LazyInitializer<String> lazy = LazyInitializer.of(() -> {
+            try {
+                ref.get().get();
+            } catch (final IllegalStateException e) {
+                // swallowed on purpose
+            }
+            return "value";
+        });
+        ref.set(lazy);
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, lazy::get);
+        assertTrue(first.getMessage().contains("Recursive"));
+    }
 }

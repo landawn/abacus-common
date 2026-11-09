@@ -1,6 +1,7 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,12 +18,16 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.Objectory;
 
 public class DurationTypeTest extends TestBase {
 
@@ -155,5 +160,41 @@ public class DurationTypeTest extends TestBase {
         final java.sql.PreparedStatement stmt = org.mockito.Mockito.mock(java.sql.PreparedStatement.class);
         durationType.set(stmt, 1, max);
         org.mockito.Mockito.verify(stmt).setLong(1, Long.MAX_VALUE);
+    }
+
+    @Test
+    public void testSqlNullColumnsMapToNull() throws Exception {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.wasNull()).thenReturn(true);
+
+        assertNull(Type.of(MutableBoolean.class).get(rs, 1));
+        assertNull(Type.of(MutableBoolean.class).get(rs, "c"));
+        assertNull(Type.of(java.time.Duration.class).get(rs, 1));
+        assertNull(Type.of(java.time.Duration.class).get(rs, "c"));
+        assertNull(Type.of(AtomicBoolean.class).get(rs, 1));
+        assertNull(Type.of(AtomicBoolean.class).get(rs, "c"));
+    }
+
+    @Test
+    public void testSqlNonNullColumns() throws Exception {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.wasNull()).thenReturn(false);
+        when(rs.getLong(1)).thenReturn(5L);
+        when(rs.getLong("c")).thenReturn(6L);
+        assertEquals(java.time.Duration.ofMillis(5), Type.of(java.time.Duration.class).get(rs, 1));
+        assertEquals(java.time.Duration.ofMillis(6), Type.of(java.time.Duration.class).get(rs, "c"));
+    }
+
+    @Test
+    public void testDurationTypeCsvAndNullSerialize() throws Exception {
+        final Type<Duration> type = TypeFactory.getType(Duration.class);
+        assertFalse(type.isCsvQuoteRequired());
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(writer, null, null);
+            assertEquals("null", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
     }
 }

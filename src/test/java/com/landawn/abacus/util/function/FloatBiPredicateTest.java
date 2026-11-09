@@ -85,4 +85,22 @@ public class FloatBiPredicateTest extends TestBase {
         FloatBiPredicate instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((FloatBiPredicate) null));
     }
+
+    @Test
+    public void testComparisonConstantsBothOutcomes() {
+        assertTrue(FloatBiPredicate.NOT_EQUAL.test(1f, 2f));
+        assertFalse(FloatBiPredicate.NOT_EQUAL.test(1f, 1f));
+
+        assertTrue(FloatBiPredicate.GREATER_THAN.test(2f, 1f));
+        assertFalse(FloatBiPredicate.GREATER_THAN.test(1f, 1f));
+
+        assertTrue(FloatBiPredicate.GREATER_THAN_OR_EQUAL.test(1f, 1f));
+        assertFalse(FloatBiPredicate.GREATER_THAN_OR_EQUAL.test(1f, 2f));
+
+        assertTrue(FloatBiPredicate.LESS_THAN.test(1f, 2f));
+        assertFalse(FloatBiPredicate.LESS_THAN.test(2f, 2f));
+
+        assertTrue(FloatBiPredicate.LESS_THAN_OR_EQUAL.test(2f, 2f));
+        assertFalse(FloatBiPredicate.LESS_THAN_OR_EQUAL.test(3f, 2f));
+    }
 }

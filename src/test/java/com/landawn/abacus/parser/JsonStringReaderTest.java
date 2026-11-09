@@ -965,4 +965,20 @@ public class JsonStringReaderTest extends TestBase {
     }
 
     // ---- perf review 2026-10-07 G15 end ----
+
+    private final JsonParser parser2 = ParserFactory.createJsonParser();
+
+    @Test
+    public void testUnquotedTextWithConsecutiveEscapes() {
+        final List<?> list = parser2.deserialize("[a\\u0041\\u0042]", List.class);
+        assertEquals(List.of("aAB"), list);
+    }
+
+    @Test
+    public void testUnquotedTextEndingWithEscapedSpace() {
+        final List<?> list = parser2.deserialize("[a\\u0041\\u0020]", List.class);
+        assertEquals(List.of("aA"), list);
+        final List<?> list2 = parser2.deserialize("[a\\u0020]", List.class);
+        assertEquals(List.of("a"), list2);
+    }
 }

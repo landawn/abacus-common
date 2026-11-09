@@ -998,4 +998,120 @@ public class ReflectionTest extends TestBase {
         assertEquals(2L, ((java.util.stream.Stream<?>) reflection.invoke("stream")).count());
     }
     // ---- bug review 2026-10-02 verify G120 end ----
+
+    public static class StaticHolder {
+        public static String shared = "init";
+        public int plain;
+    }
+
+    public static class Overloads {
+        public Overloads() {
+        }
+
+        private String f(final short x) {
+            return "short";
+        }
+
+        private String f(final int x) {
+            return "int";
+        }
+
+        private String f(final long x) {
+            return "long";
+        }
+
+        private String f(final float x) {
+            return "float";
+        }
+
+        private String f(final double x) {
+            return "double";
+        }
+
+        private String g(final int x, final Object y) {
+            return "g-object";
+        }
+
+        private String g(final int x, final String y) {
+            return "g-string";
+        }
+
+        private String h(final Integer x, final Object y) {
+            return "h-object";
+        }
+
+        private String h(final Integer x, final String y) {
+            return "h-string";
+        }
+
+        private String q(final Integer x, final Object y) {
+            return "q-object";
+        }
+
+        private String q(final Integer x, final CharSequence y) {
+            return "q-chars";
+        }
+
+        private String k(final Object o) {
+            return "k-" + o.getClass().getSimpleName();
+        }
+
+        private String boom() {
+            throw new IllegalStateException("boom");
+        }
+    }
+
+    @Test
+    public void testSetPublicStaticField() {
+        final Reflection<StaticHolder> r = Reflection.on(StaticHolder.class).newInstance();
+        try {
+            r.set("shared", "changed");
+            assertEquals("changed", StaticHolder.shared);
+            assertEquals("changed", (String) r.get("shared"));
+            r.set("shared", "again");
+            assertEquals("again", StaticHolder.shared);
+        } finally {
+            StaticHolder.shared = "init";
+        }
+    }
+
+    @Test
+    public void testPrimitiveWideningOverloadResolution() {
+        final Reflection<Overloads> r = Reflection.on(Overloads.class).newInstance();
+        assertEquals("short", (String) r.invoke("f", (byte) 1));
+        assertEquals("short", (String) r.invoke("f", (short) 1));
+        assertEquals("int", (String) r.invoke("f", 'c'));
+        assertEquals("int", (String) r.invoke("f", 1));
+        assertEquals("long", (String) r.invoke("f", 1L));
+        assertEquals("float", (String) r.invoke("f", 1.5f));
+        assertEquals("double", (String) r.invoke("f", 1.5d));
+        assertThrows(RuntimeException.class, () -> r.invoke("f", true));
+    }
+
+    @Test
+    public void testMostSpecificWithEqualLeadingParameter() {
+        final Reflection<Overloads> r = Reflection.on(Overloads.class).newInstance();
+        assertEquals("g-string", (String) r.invoke("g", 1, "s"));
+        assertEquals("h-string", (String) r.invoke("h", 1, "s"));
+        assertEquals("h-object", (String) r.invoke("h", 1, 2));
+        assertEquals("q-chars", (String) r.invoke("q", 1, new StringBuilder("x")));
+    }
+
+    @Test
+    public void testArgumentOfApplicationClassLoaderType() {
+        final Reflection<Overloads> r = Reflection.on(Overloads.class).newInstance();
+        assertEquals("k-StaticHolder", (String) r.invoke("k", new StaticHolder()));
+        assertEquals("k-StaticHolder", (String) r.invoke("k", new StaticHolder()));
+    }
+
+    @Test
+    public void testInvokeTargetThrows() {
+        final Reflection<Overloads> r = Reflection.on(Overloads.class).newInstance();
+        final RuntimeException e = assertThrows(RuntimeException.class, () -> r.invoke("boom"));
+        Throwable t = e;
+        while (t.getCause() != null && t.getCause() != t) {
+            t = t.getCause();
+        }
+        assertEquals("boom", t.getMessage());
+    }
 }

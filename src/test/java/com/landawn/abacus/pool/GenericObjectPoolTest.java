@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.pool.Poolable.Caller;
 
 public class GenericObjectPoolTest extends TestBase {
 
@@ -1472,4 +1475,119 @@ public class GenericObjectPoolTest extends TestBase {
         }
     }
     // ---- deep review 2026-09-25 G011 end ----
+
+    static final class Res extends AbstractPoolable {
+        final List<Caller> destroyed = new ArrayList<>();
+
+        Res() {
+            super(Long.MAX_VALUE, Long.MAX_VALUE);
+        }
+
+        Res(final long liveTime) {
+            super(liveTime, liveTime);
+        }
+
+        @Override
+        public void destroy(final Caller caller) {
+            destroyed.add(caller);
+        }
+    }
+
+    @Test
+    public void testKeyedTimedGetDestroysExpiredBeforeWaiting() throws Exception {
+        final GenericKeyedObjectPool<String, Res> pool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            final Res r = new Res(5);
+            assertTrue(pool.put("k", r));
+            Thread.sleep(15);
+            assertEquals(null, pool.get("k", 20, TimeUnit.MILLISECONDS));
+            assertEquals(List.of(Caller.EVICT), r.destroyed);
+        } finally {
+            pool.close();
+        }
+    }
+
+    @Test
+    public void testMemoryLimitWithoutMeasureRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new GenericObjectPool<Res>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 100, null));
+        assertThrows(IllegalArgumentException.class,
+                () -> new GenericKeyedObjectPool<String, Res>(10, 0, EvictionPolicy.LAST_ACCESS_TIME, false, 0.2f, 100, null));
+    }
+
+    @Test
+    public void testObjectPoolDestroyAllHook() {
+        final GenericObjectPool<Res> pool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            final Res a = new Res();
+            final Res b = new Res();
+            pool.destroyAll(List.of(a, b), Caller.EVICT);
+            pool.destroyAll(List.of(), Caller.EVICT);
+            assertEquals(List.of(Caller.EVICT), a.destroyed);
+            assertEquals(List.of(Caller.EVICT), b.destroyed);
+        } finally {
+            pool.close();
+        }
+    }
+
+    @Test
+    public void testKeyedPoolDestroyAllHookAndEquals() {
+        final GenericKeyedObjectPool<String, Res> pool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            assertTrue(pool.equals(pool));
+            final Res a = new Res();
+            final Map<String, Res> map = new LinkedHashMap<>();
+            map.put("a", a);
+            pool.destroyAll(map, Caller.EVICT);
+            pool.destroyAll(Map.of(), Caller.EVICT);
+            assertEquals(List.of(Caller.EVICT), a.destroyed);
+        } finally {
+            pool.close();
+        }
+    }
+
+    @Test
+    public void testAutoBalanceCannotFreeEnoughMemory() throws Exception {
+        final ObjectPool.MemoryMeasure<AbstractPoolable> measure = e -> e instanceof Big ? 50 : 9;
+        final GenericObjectPool<AbstractPoolable> pool = new GenericObjectPool<>(20, 0, EvictionPolicy.LAST_ACCESS_TIME, true, 0.1f, 100, measure);
+        try {
+            for (int i = 0; i < 10; i++) {
+                assertTrue(pool.add(new Res()));
+            }
+            assertFalse(pool.add(new Big()));
+            final int sizeAfterFirst = pool.size();
+            assertTrue(sizeAfterFirst < 10);
+            // refill and try the timed variant
+            while (pool.size() < 10) {
+                assertTrue(pool.add(new Res()));
+            }
+            assertFalse(pool.add(new Big(), 10, TimeUnit.MILLISECONDS));
+            assertTrue(pool.size() < 10);
+        } finally {
+            pool.close();
+        }
+    }
+
+    static final class Big extends AbstractPoolable {
+        Big() {
+            super(Long.MAX_VALUE, Long.MAX_VALUE);
+        }
+
+        @Override
+        public void destroy(final Caller caller) {
+        }
+    }
+
+    @Test
+    public void testActivityPrintEquals() {
+        final ActivityPrint p = new ActivityPrint(1000, 1000);
+        final ActivityPrint c = p.clone();
+        assertEquals(p, c);
+        assertEquals(p.hashCode(), c.hashCode());
+        assertFalse(p.equals("x"));
+        assertFalse(p.equals(new ActivityPrint(2000, 1000)));
+        final ActivityPrint d = p.clone();
+        d.updateLastAccessTime();
+        d.updateAccessCount();
+        assertFalse(p.equals(d));
+    }
 }

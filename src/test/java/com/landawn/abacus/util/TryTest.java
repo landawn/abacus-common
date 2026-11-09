@@ -521,4 +521,12 @@ public class TryTest extends TestBase {
         }));
         assertEquals("fbPred", Try.with(nullSupplier).call(body, e -> true, "fbPred"));
     }
+
+    @Test
+    public void testCallWithPredicateAndDefaultValue() {
+        assertEquals("ok", Try.call(() -> "ok", e -> true, "default"));
+        assertEquals("default", Try.call(() -> {
+            throw new IOException("x");
+        }, e -> true, "default"));
+    }
 }

@@ -340,4 +340,12 @@ public class LongIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0]);
         assertThrows(IllegalArgumentException.class, () -> LongIterator.of(1L).foreachIndexed(null));
     }
+
+    @Test
+    public void testLimitNextAfterExhausted() {
+        final LongIterator iter = LongIterator.of(1, 2, 3).limit(1);
+        assertEquals(1L, iter.nextLong());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+    }
 }

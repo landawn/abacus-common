@@ -24,8 +24,8 @@ public class JodaDateTimeCodecTest extends AbstractTest {
         final FastDateFormat fdf = FastDateFormat.getInstance(pattern);
         N.println(fdf.format(date));
         N.println(Dates.format(date, pattern));
-        Profiler.run(1, 100, 1, "Commons Lang", () -> fdf.format(date)).printResult();
-        Profiler.run(1, 100, 1, "abacus-common", () -> Dates.format(date, pattern)).printResult();
+        Profiler.run(1, 10, 1, "Commons Lang", () -> fdf.format(date)).printResult();
+        Profiler.run(1, 10, 1, "abacus-common", () -> Dates.format(date, pattern)).printResult();
         assertNotNull(fdf);
     }
 

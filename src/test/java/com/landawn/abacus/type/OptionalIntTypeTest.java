@@ -306,4 +306,10 @@ public class OptionalIntTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> optionalIntType.valueOf(" "));
         assertEquals(Integer.MAX_VALUE, optionalIntType.valueOf("2147483647").get());
     }
+
+    @Test
+    public void testOptionalIntAndLongNotCsvQuoted() {
+        assertFalse(new OptionalIntType().isCsvQuoteRequired());
+        assertFalse(new OptionalLongType().isCsvQuoteRequired());
+    }
 }

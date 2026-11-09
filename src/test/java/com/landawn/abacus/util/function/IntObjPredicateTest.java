@@ -76,4 +76,12 @@ public class IntObjPredicateTest extends TestBase {
         IntObjPredicate<String> instance = (a, b) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((IntObjPredicate) null));
     }
+
+    @Test
+    public void testNegateBothOutcomes() {
+        final IntObjPredicate<String> lenEq = (n, s) -> s.length() == n;
+        final IntObjPredicate<String> neg = lenEq.negate();
+        assertFalse(neg.test(2, "ab"));
+        assertTrue(neg.test(3, "ab"));
+    }
 }

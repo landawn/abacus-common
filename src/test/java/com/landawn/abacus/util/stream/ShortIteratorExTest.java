@@ -1,12 +1,16 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -363,4 +367,78 @@ public class ShortIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    private static final class CloseableShortIterator extends ShortIterator implements AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private int cursor = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cursor < 2;
+        }
+
+        @Override
+        public short nextShort() {
+            return (short) (++cursor);
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    private static final class CloseableIterator implements Iterator<Short>, AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private final Iterator<Short> it = Arrays.asList((Short) (short) 1, (Short) (short) 2).iterator();
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Short next() {
+            return it.next();
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(ShortIteratorEx.EMPTY.supportsFailureAtomicAdvance());
+        assertFalse(ShortIteratorEx.EMPTY.hasNext());
+    }
+
+    @Test
+    public void testOfPlainIteratorClosesResource() {
+        final CloseableShortIterator src = new CloseableShortIterator();
+        final ShortIteratorEx iter = ShortIteratorEx.of(src);
+        assertEquals((short) 1, iter.nextShort());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
+
+    @Test
+    public void testFromObjIteratorEx2() {
+        final ObjIteratorEx<Short> src = ObjIteratorEx.of((Short) (short) 1, (Short) (short) 2, (Short) (short) 3);
+        final ShortIteratorEx iter = ShortIteratorEx.from(src);
+        assertEquals(ObjIteratorEx.supportsFailureAtomicAdvance(src), iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        assertEquals((short) 1, iter.nextShort());
+        iter.advance(-1);
+        assertEquals((short) 2, iter.nextShort());
+    }
+
+    @Test
+    public void testFromPlainIteratorClosesResource() {
+        final CloseableIterator src = new CloseableIterator();
+        final ShortIteratorEx iter = ShortIteratorEx.from(src);
+        assertEquals((short) 1, iter.nextShort());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
 }

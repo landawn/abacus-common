@@ -1,6 +1,9 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -363,4 +366,39 @@ public class DoubleIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(DoubleIteratorEx.EMPTY.supportsFailureAtomicAdvance());
+        assertFalse(DoubleIteratorEx.EMPTY.hasNext());
+    }
+
+    @Test
+    public void testOfPlainDoubleIteratorCloseResource() {
+        final DoubleIterator plain = DoubleIterator.of(1d, 2d);
+        final DoubleIteratorEx iter = DoubleIteratorEx.of(plain);
+        assertEquals(1d, iter.nextDouble());
+        iter.closeResource();
+        assertEquals(2d, iter.nextDouble());
+    }
+
+    @Test
+    public void testFromObjIteratorEx2() {
+        final DoubleIteratorEx iter = DoubleIteratorEx.from(ObjIteratorEx.of(1d, 2d, 3d, 4d));
+        assertTrue(iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        iter.advance(-3);
+        assertEquals(1d, iter.nextDouble());
+        iter.advance(2);
+        assertEquals(4d, iter.nextDouble());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromPlainIteratorCloseResource() {
+        final Iterator<Double> plain = Arrays.asList(5d, 6d).iterator();
+        final DoubleIteratorEx iter = DoubleIteratorEx.from(plain);
+        assertEquals(5d, iter.nextDouble());
+        iter.closeResource();
+        assertEquals(6d, iter.nextDouble());
+    }
 }

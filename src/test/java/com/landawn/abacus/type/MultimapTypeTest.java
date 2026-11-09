@@ -1,6 +1,8 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Set;
@@ -11,9 +13,11 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SetMultimap;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class MultimapTypeTest extends TestBase {
 
     private MultimapType<String, Integer, List<Integer>, ListMultimap<String, Integer>> listMultimapType;
@@ -227,5 +231,25 @@ public class MultimapTypeTest extends TestBase {
         final String xml = N.toXml(bean);
         Assertions.assertTrue(xml.contains("<lm>{&quot;z&quot;: [1], &quot;a&quot;: [2]}</lm>"), xml);
         assertEquals(bean.getLm(), N.fromXml(xml, MultimapBean.class).getLm());
+    }
+
+    @Test
+    public void testConstructorRejectsNonCollectionValueType() {
+        assertThrows(IllegalArgumentException.class, () -> new MultimapType(Multimap.class, "String", "", "Integer"));
+        assertThrows(IllegalArgumentException.class, () -> new MultimapType(ListMultimap.class, "String", "Integer", "Integer"));
+    }
+
+    @Test
+    public void testConstructorRejectsUnsupportedMultimapClassWithElementTypeOnly() {
+        assertThrows(IllegalArgumentException.class, () -> new MultimapType(Multimap.class, "String", "Integer", ""));
+    }
+
+    @Test
+    public void testValueOfBlankAndJsonNull() {
+        final MultimapType type = new MultimapType(ListMultimap.class, "String", "", "List<Integer>");
+        assertNull(type.valueOf("   "));
+        assertNull(type.stringOf(null));
+        final ListMultimap<String, Integer> m = (ListMultimap<String, Integer>) type.valueOf("{\"a\":[1,2]}");
+        assertEquals(2, m.get("a").size());
     }
 }

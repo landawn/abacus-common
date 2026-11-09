@@ -606,4 +606,27 @@ public class JoinerTest extends JoinerTestSupport {
     }
 
     // ---- perf review 2026-09-26 G113 end ----
+
+    @Test
+    public void testPrimitiveArrayRangesWithEmptySeparator() {
+        assertEquals("23", Joiner.with("").appendAll(new byte[] { 1, 2, 3 }, 1, 3).toString());
+        assertEquals("23", Joiner.with("").appendAll(new short[] { 1, 2, 3 }, 1, 3).toString());
+        assertEquals("23", Joiner.with("").appendAll(new long[] { 1, 2, 3 }, 1, 3).toString());
+        assertEquals("2.03.0", Joiner.with("").appendAll(new float[] { 1, 2, 3 }, 1, 3).toString());
+        assertEquals("2.03.0", Joiner.with("").appendAll(new double[] { 1, 2, 3 }, 1, 3).toString());
+    }
+
+    @Test
+    public void testEmptyRangesAreNoOps() {
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(new Object[] { "a", "b" }, 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(BooleanList.of(true, false), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(CharList.of('a', 'b'), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(ByteList.of((byte) 1, (byte) 2), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(ShortList.of((short) 1, (short) 2), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(IntList.of(1, 2), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(LongList.of(1L, 2L), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(FloatList.of(1f, 2f), 1, 1).toString());
+        assertEquals("[]", Joiner.with(", ", "[", "]").appendAll(DoubleList.of(1d, 2d), 1, 1).toString());
+        assertEquals("[b]", Joiner.with(", ", "[", "]").appendAll(Arrays.asList("a", "b"), 1, 2).toString());
+    }
 }

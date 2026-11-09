@@ -548,4 +548,38 @@ public class ObjIteratorTest extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> ObjIterator.of(mutating).remove());
         assertFalse(removed.get(), "of(Iterator) must not let the subclass's remove() through");
     }
+
+    @Test
+    public void testDeferCachesSupplierError() {
+        final AtomicInteger calls = new AtomicInteger();
+        final AssertionError error = new AssertionError("init failed");
+        final ObjIterator<String> it = ObjIterator.defer(() -> {
+            calls.incrementAndGet();
+            throw error;
+        });
+
+        assertSame(error, assertThrows(AssertionError.class, it::hasNext));
+        assertSame(error, assertThrows(AssertionError.class, it::next));
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    public void testGenerateWithStateNextAfterEnd() {
+        final int[] state = { 0 };
+        final ObjIterator<Integer> it = ObjIterator.generate(state, s -> s[0] < 2, s -> s[0]++);
+        assertEquals(0, it.next());
+        assertEquals(1, it.next());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testGenerateWithPreviousNextAfterEnd() {
+        final ObjIterator<Integer> it = ObjIterator.generate(10, (init, prev) -> prev == null || prev < init + 1,
+                (init, prev) -> prev == null ? init : prev + 1);
+        assertEquals(10, it.next());
+        assertEquals(11, it.next());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
 }

@@ -9,7 +9,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -2612,4 +2625,88 @@ public class TypeFactoryTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G020 end ----
+
+    public static class MySqlDate extends java.sql.Date {
+        private static final long serialVersionUID = 1L;
+
+        public MySqlDate(final long t) {
+            super(t);
+        }
+    }
+
+    public static class MySqlTime extends java.sql.Time {
+        private static final long serialVersionUID = 1L;
+
+        public MySqlTime(final long t) {
+            super(t);
+        }
+    }
+
+    public static class MySqlTimestamp extends java.sql.Timestamp {
+        private static final long serialVersionUID = 1L;
+
+        public MySqlTimestamp(final long t) {
+            super(t);
+        }
+    }
+
+    public static class MyCalendar extends GregorianCalendar {
+        private static final long serialVersionUID = 1L;
+    }
+
+    @Test
+    public void testDateAndCalendarSubclassesMapToBuiltIns() throws Exception {
+        assertSame(java.sql.Date.class, TypeFactory.getType(MySqlDate.class).javaType());
+        assertSame(java.sql.Time.class, TypeFactory.getType(MySqlTime.class).javaType());
+        assertSame(java.sql.Timestamp.class, TypeFactory.getType(MySqlTimestamp.class).javaType());
+        assertSame(TypeFactory.getType(java.util.Calendar.class), TypeFactory.getType(MyCalendar.class));
+
+        final XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar();
+        final Type<?> xgcType = TypeFactory.getType(xgc.getClass());
+        assertSame(XMLGregorianCalendar.class, xgcType.javaType());
+    }
+
+    @Test
+    public void testJavaTypeNameOfCustomReflectType() {
+        final java.lang.reflect.Type custom = new java.lang.reflect.Type() {
+            @Override
+            public String getTypeName() {
+                return "custom.Name";
+            }
+        };
+        assertEquals("custom.Name", TypeFactory.getJavaTypeName(custom));
+    }
+
+    @Test
+    public void testUpperBoundedWildcardDelegatesJdbcAndArrays() throws Exception {
+        final Type<Object> type = TypeFactory.getType("? extends String");
+        assertEquals("? extends String", type.name());
+
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("a");
+        when(rs.getString("c")).thenReturn("b");
+        assertEquals("a", type.get(rs, 1));
+        assertEquals("b", type.get(rs, "c"));
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        type.set(ps, 1, "x");
+        verify(ps).setString(1, "x");
+        type.set(ps, 2, "y", Types.VARCHAR);
+        verify(ps).setString(2, "y");
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        type.set(cs, "p", "x");
+        verify(cs).setString("p", "x");
+        type.set(cs, "q", "y", Types.VARCHAR);
+        verify(cs).setString("q", "y");
+
+        final Type<Object> arrayWildcard = TypeFactory.getType("? extends String[]");
+        final String[] arr = { "a", "b" };
+        final Collection<Object> coll = arrayWildcard.arrayToCollection(arr, ArrayList.class);
+        assertEquals(List.of("a", "b"), coll);
+        final List<Object> out = new ArrayList<>();
+        arrayWildcard.arrayToCollection(arr, out);
+        assertEquals(List.of("a", "b"), out);
+        assertTrue(arrayWildcard.isObjectArray());
+    }
 }

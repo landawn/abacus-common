@@ -13,8 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +47,14 @@ import com.landawn.abacus.parser.entity.ImmutableEntity4;
 import com.landawn.abacus.parser.entity.ImmutableEntity5;
 import com.landawn.abacus.parser.entity.ImmutableEntity6;
 import com.landawn.abacus.parser.entity.RecordB;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.EnumType;
 import com.landawn.abacus.util.Maps;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.TypeReference;
 
 import lombok.Value;
@@ -3599,4 +3606,395 @@ public class ParserUtilTest extends AbstractTest {
 
     // ---- deep review 2026-10-26 G127 end ----
 
+    // ---------- annotation helpers ----------
+
+    public static class AnnoBean {
+        @com.alibaba.fastjson2.annotation.JSONField(serialize = false)
+        public String fjHidden;
+
+        @com.fasterxml.jackson.annotation.JsonIgnore
+        public String jkHidden;
+
+        @com.fasterxml.jackson.annotation.JsonIgnore(false)
+        public String jkShown;
+
+        @com.alibaba.fastjson2.annotation.JSONField(format = "yyyy-MM-dd")
+        public java.util.Date fjDate;
+
+        @JsonXmlField(enumerated = EnumType.ORDINAL)
+        public EnumType ordinalEnum;
+
+        @com.alibaba.fastjson2.annotation.JSONField(name = "fjName")
+        public String fjNamed;
+
+        @com.alibaba.fastjson2.annotation.JSONField(alternateNames = { "alt1", "fjAliased" })
+        public String fjAliased;
+    }
+
+    public static class BadNameBean {
+        @JsonXmlField(name = " padded")
+        public String value;
+    }
+
+    @Test
+    public void testIsJsonXmlSerializable_thirdPartyAnnotations() throws Exception {
+        assertFalse(ParserUtil.isJsonXmlSerializable(AnnoBean.class.getField("fjHidden"), null));
+        assertFalse(ParserUtil.isJsonXmlSerializable(AnnoBean.class.getField("jkHidden"), null));
+        assertTrue(ParserUtil.isJsonXmlSerializable(AnnoBean.class.getField("jkShown"), null));
+    }
+
+    @Test
+    public void testGetDateFormat_fastjsonFormat() throws Exception {
+        assertEquals("yyyy-MM-dd", ParserUtil.getDateFormat(AnnoBean.class.getField("fjDate"), null));
+    }
+
+    @Test
+    public void testGetEnumerated_fieldLevelOrdinal() throws Exception {
+        assertEquals(EnumType.ORDINAL, ParserUtil.getEnumerated(AnnoBean.class.getField("ordinalEnum"), null));
+    }
+
+    @Test
+    public void testFastjsonName_usedForJson() throws Exception {
+        final AnnoBean bean = new AnnoBean();
+        bean.fjNamed = "v";
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"fjName\": \"v\""), json);
+        assertFalse(json.contains("fjHidden"));
+        assertFalse(json.contains("jkHidden"));
+    }
+
+    @Test
+    public void testFastjsonAlternateNames_ownNameRemoved() throws Exception {
+        assertArrayEquals(new String[] { "alt1" }, ParserUtil.getAliases(AnnoBean.class.getField("fjAliased")));
+    }
+
+    @Test
+    public void testCustomNameWithWhitespace_throws() throws Exception {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getJsonNameTags("value", BadNameBean.class.getField("value")));
+    }
+
+    // ---------- table / column annotations ----------
+
+    @javax.persistence.Table(name = "javax_tbl")
+    public static class JavaxTableBean {
+        @javax.persistence.Column(name = "javax_col")
+        public String a;
+    }
+
+    @jakarta.persistence.Table(name = "jakarta_tbl")
+    public static class JakartaTableBean {
+        @jakarta.persistence.Column(name = "jakarta_col")
+        public String b;
+    }
+
+    @javax.persistence.Table(name = " bad_tbl")
+    public static class BadTableBean {
+        public String c;
+    }
+
+    public static class BadColumnBean {
+        @javax.persistence.Column(name = "bad_col ")
+        public String d;
+    }
+
+    public static class AliasEqualsColumnBean {
+        @com.landawn.abacus.annotation.Column("col_e")
+        @JsonXmlField(aliases = { "col_e" })
+        public String e;
+    }
+
+    @Test
+    public void testJavaxTableAndColumn() {
+        final BeanInfo bi = ParserUtil.getBeanInfo(JavaxTableBean.class);
+        assertEquals("javax_tbl", bi.tableName.orElseThrow());
+        final PropInfo pi = bi.getPropInfo("a");
+        assertTrue(pi.isMarkedAsColumn);
+        assertEquals("javax_col", pi.columnName.orElseThrow());
+    }
+
+    @Test
+    public void testJakartaTableAndColumn() {
+        final BeanInfo bi = ParserUtil.getBeanInfo(JakartaTableBean.class);
+        assertEquals("jakarta_tbl", bi.tableName.orElseThrow());
+        final PropInfo pi = bi.getPropInfo("b");
+        assertTrue(pi.isMarkedAsColumn);
+        assertEquals("jakarta_col", pi.columnName.orElseThrow());
+    }
+
+    @Test
+    public void testWhitespaceTableAndColumnNames_throw() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(BadTableBean.class, false));
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(BadColumnBean.class, false));
+    }
+
+    @Test
+    public void testAliasRestatingOwnColumn_isNotCollision() {
+        final BeanInfo bi = ParserUtil.getBeanInfo(AliasEqualsColumnBean.class, false);
+        assertSamePropInfo(bi.getPropInfo("e"), bi.getPropInfo("col_e"));
+    }
+
+    private static void assertSamePropInfo(final PropInfo expected, final PropInfo actual) {
+        assertNotNull(expected);
+        assertTrue(expected == actual);
+    }
+
+    // ---------- parameterized bean type ----------
+
+    public static class GenBean<T> {
+        public T value;
+    }
+
+    public static class GenHolder {
+        public GenBean<Integer> holder;
+    }
+
+    @Test
+    public void testGetBeanInfo_parameterizedType_nonAsm() throws Exception {
+        final ParameterizedType pt = (ParameterizedType) GenHolder.class.getField("holder").getGenericType();
+        final BeanInfo bi = ParserUtil.getBeanInfo(pt, false);
+        assertEquals(GenBean.class, bi.clazz);
+        assertEquals(Integer.class, bi.getPropInfo("value").clazz);
+    }
+
+    // ---------- record / getter failures ----------
+
+    public record Pt(int x, int y) {
+    }
+
+    public static class ThrowingGetterBean {
+        public String getBoom() {
+            throw new IllegalStateException("boom");
+        }
+
+        public void setBoom(final String s) {
+            // no-op
+        }
+    }
+
+    @Test
+    public void testImmutableBeanGetPropValueFromArray() {
+        final PropInfo pi = ParserUtil.getBeanInfo(Pt.class).getPropInfo("y");
+        assertEquals(Integer.valueOf(7), pi.getPropValue(new Object[] { 3, 7 }));
+    }
+
+    @Test
+    public void testGetterThrows_wrapped() {
+        final PropInfo pi = ParserUtil.getBeanInfo(ThrowingGetterBean.class, false).getPropInfo("boom");
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> pi.getPropValue(new ThrowingGetterBean()));
+        assertTrue(ex instanceof IllegalStateException || ex.getCause() instanceof IllegalStateException, String.valueOf(ex));
+    }
+
+    // ---------- setPropValue(obj, PropInfo from other bean, ...) with aliases ----------
+
+    public static class AliasSource {
+        @JsonXmlField(aliases = { "target" })
+        public String src;
+    }
+
+    public static class AliasTarget {
+        public String target;
+    }
+
+    public static class AliasNoMatch {
+        public String other;
+    }
+
+    @Test
+    public void testSetPropValueFromOtherBeanByAlias() {
+        final PropInfo srcProp = ParserUtil.getBeanInfo(AliasSource.class).getPropInfo("src");
+        final AliasTarget t = new AliasTarget();
+        assertTrue(ParserUtil.getBeanInfo(AliasTarget.class).setPropValue(t, srcProp, "v", false));
+        assertEquals("v", t.target);
+
+        final BeanInfo noMatch = ParserUtil.getBeanInfo(AliasNoMatch.class);
+        assertFalse(noMatch.setPropValue(new AliasNoMatch(), srcProp, "v", true));
+        assertThrows(IllegalArgumentException.class, () -> noMatch.setPropValue(new AliasNoMatch(), srcProp, "v", false));
+    }
+
+    // ---------- date format "long" readers / writers ----------
+
+    public static class LongDateBean {
+        @JsonXmlField(dateFormat = "long", timeZone = "UTC")
+        public Calendar cal;
+        @JsonXmlField(dateFormat = "long")
+        public java.sql.Timestamp ts;
+        @JsonXmlField(dateFormat = "long")
+        public java.sql.Date sqlDate;
+        @JsonXmlField(dateFormat = "long")
+        public java.sql.Time sqlTime;
+        @JsonXmlField(dateFormat = "long", timeZone = "UTC")
+        public ZonedDateTime zdt;
+        @JsonXmlField(dateFormat = "long", timeZone = "UTC")
+        public org.joda.time.DateTime jodaDt;
+        @JsonXmlField(dateFormat = "long", timeZone = "UTC")
+        public org.joda.time.MutableDateTime jodaMdt;
+        @JsonXmlField(dateFormat = "yyyy")
+        public int notADate;
+        @JsonXmlField(isJsonRawValue = true)
+        public String raw;
+    }
+
+    private static String write(final PropInfo pi, final Object value) throws Exception {
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            pi.writePropValue(writer, value, null);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testLongDateFormat_calendar() throws Exception {
+        final PropInfo pi = ParserUtil.getBeanInfo(LongDateBean.class).getPropInfo("cal");
+        final Calendar c = (Calendar) pi.readPropValue("12345");
+        assertEquals(12345L, c.getTimeInMillis());
+        assertEquals(TimeZone.getTimeZone("UTC"), c.getTimeZone());
+        assertEquals("12345", write(pi, c));
+    }
+
+    @Test
+    public void testLongDateFormat_sqlTypes() throws Exception {
+        final BeanInfo bi = ParserUtil.getBeanInfo(LongDateBean.class);
+
+        final PropInfo ts = bi.getPropInfo("ts");
+        assertEquals(new java.sql.Timestamp(1000L), ts.readPropValue("1000"));
+        assertEquals("1000", write(ts, new java.sql.Timestamp(1000L)));
+
+        final PropInfo d = bi.getPropInfo("sqlDate");
+        assertEquals(2000L, ((java.sql.Date) d.readPropValue("2000")).getTime());
+        assertEquals("2000", write(d, new java.sql.Date(2000L)));
+
+        final PropInfo t = bi.getPropInfo("sqlTime");
+        assertEquals(3000L, ((java.sql.Time) t.readPropValue("3000")).getTime());
+        assertEquals("3000", write(t, new java.sql.Time(3000L)));
+    }
+
+    @Test
+    public void testLongDateFormat_zonedDateTime() throws Exception {
+        final PropInfo pi = ParserUtil.getBeanInfo(LongDateBean.class).getPropInfo("zdt");
+        final ZonedDateTime z = (ZonedDateTime) pi.readPropValue("5000");
+        assertEquals(5000L, z.toInstant().toEpochMilli());
+        assertEquals(ZoneOffset.UTC.normalized(), z.getZone().normalized());
+        assertEquals("5000", write(pi, z));
+    }
+
+    @Test
+    public void testLongDateFormat_joda() throws Exception {
+        final BeanInfo bi = ParserUtil.getBeanInfo(LongDateBean.class);
+
+        final PropInfo dt = bi.getPropInfo("jodaDt");
+        final org.joda.time.DateTime d = (org.joda.time.DateTime) dt.readPropValue("6000");
+        assertEquals(6000L, d.getMillis());
+        assertEquals(org.joda.time.DateTimeZone.UTC, d.getZone());
+        assertEquals("6000", write(dt, d));
+
+        final PropInfo mdt = bi.getPropInfo("jodaMdt");
+        final org.joda.time.MutableDateTime m = (org.joda.time.MutableDateTime) mdt.readPropValue("7000");
+        assertEquals(7000L, m.getMillis());
+        assertEquals(org.joda.time.DateTimeZone.UTC, m.getZone());
+        assertEquals("7000", write(mdt, m));
+    }
+
+    @Test
+    public void testDateFormatOnUnsupportedType_throws() {
+        final PropInfo pi = ParserUtil.getBeanInfo(LongDateBean.class).getPropInfo("notADate");
+        assertThrows(UnsupportedOperationException.class, () -> pi.readPropValue("2020"));
+        assertThrows(UnsupportedOperationException.class, () -> write(pi, 2020));
+    }
+
+    @Test
+    public void testRawValueWriteNull() throws Exception {
+        final PropInfo pi = ParserUtil.getBeanInfo(LongDateBean.class).getPropInfo("raw");
+        assertEquals("null", write(pi, null));
+        assertEquals("{\"a\":1}", write(pi, "{\"a\":1}"));
+    }
+
+    // ---------- relative annotated type names ----------
+
+    public static class Item {
+        public String name;
+    }
+
+    public static class RelTypeBean {
+        @com.landawn.abacus.annotation.Type("ParserUtilTest$Item")
+        public Item item;
+    }
+
+    public static class ColumnNameAttrBean {
+        @com.landawn.abacus.annotation.Column(name = "by_name")
+        public String f;
+    }
+
+    public static class BadTypeNameBean {
+        @com.landawn.abacus.annotation.Type(" string")
+        public String g;
+    }
+
+    public static class EmptyTypeAnnoBean {
+        @com.landawn.abacus.annotation.Type
+        public String h;
+    }
+
+    public static class FuzzyBean {
+        public String firstName;
+    }
+
+    @Test
+    public void testColumnNameAttribute() {
+        final PropInfo pi = ParserUtil.getBeanInfo(ColumnNameAttrBean.class, false).getPropInfo("f");
+        assertEquals("by_name", pi.columnName.orElseThrow());
+    }
+
+    @Test
+    public void testTypeAnnotation_whitespaceAndEmpty() {
+        assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo(BadTypeNameBean.class, false));
+        final PropInfo pi = ParserUtil.getBeanInfo(EmptyTypeAnnoBean.class, false).getPropInfo("h");
+        assertEquals(String.class, pi.type.javaType());
+    }
+
+    @Test
+    public void testFuzzyPropNameNormalized() {
+        final BeanInfo bi = ParserUtil.getBeanInfo(FuzzyBean.class, false);
+        assertTrue(bi.getPropInfo("first name") == bi.getPropInfo("firstName"));
+    }
+
+    @Test
+    public void testDateReadersNullMarkersAndNullWrite() throws Exception {
+        final BeanInfo bi = ParserUtil.getBeanInfo(LongDateBean.class);
+        assertNull(bi.getPropInfo("cal").readPropValue(""));
+        assertNull(bi.getPropInfo("ts").readPropValue("null"));
+        assertEquals("null", write(bi.getPropInfo("cal"), null));
+    }
+
+    @Test
+    public void testNameTagEqualsHashCodeToString() {
+        final ParserUtil.JsonNameTag[] a = ParserUtil.getJsonNameTags("abc");
+        final ParserUtil.JsonNameTag[] b = ParserUtil.getJsonNameTags("abc");
+        assertEquals(a[0], b[0]);
+        assertEquals(a[0].hashCode(), b[0].hashCode());
+        assertEquals(a[0], a[0]);
+        assertFalse(a[0].equals("abc"));
+        assertEquals("[a, b, c]", a[0].toString());
+
+        final ParserUtil.XmlNameTag[] x = ParserUtil.getXmlNameTags("abc", "String", false);
+        final ParserUtil.XmlNameTag[] y = ParserUtil.getXmlNameTags("abc", "String", false);
+        assertEquals(x[0], y[0]);
+        assertEquals(x[0].hashCode(), y[0].hashCode());
+        assertFalse(x[0].equals(null));
+        assertEquals("[a, b, c]", x[0].toString());
+    }
+
+    @Test
+    public void testRecordNonAsmGetPropValueFromArray() {
+        final PropInfo pi = ParserUtil.getBeanInfo(Pt.class, false).getPropInfo("x");
+        assertEquals(Integer.valueOf(3), pi.getPropValue(new Object[] { 3, 7 }));
+    }
+
+    @Test
+    public void testRelativeAnnotatedTypeName_resolvedAgainstPackage() {
+        final PropInfo pi = ParserUtil.getBeanInfo(RelTypeBean.class, false).getPropInfo("item");
+        assertEquals(Item.class, pi.type.javaType());
+        assertEquals("a", N.fromJson("{\"item\":{\"name\":\"a\"}}", RelTypeBean.class).item.name);
+    }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -1021,4 +1023,256 @@ public class SingleValueTypeTest extends TestBase {
         }
     }
     // ---- bug review 2026-10-02 G016 end ----
+
+    public static class Plain {
+        private final int a;
+        private final int b;
+
+        public Plain(final int a, final int b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        @Override
+        public String toString() {
+            return null;
+        }
+
+        int sum() {
+            return a + b;
+        }
+    }
+
+    public static class FieldValue {
+        @JsonXmlValue
+        public final String val;
+
+        private FieldValue(final String val) {
+            this.val = val;
+        }
+
+        @JsonXmlCreator
+        public static FieldValue from(final String s) {
+            return new FieldValue(s);
+        }
+    }
+
+    public static class MethodValue {
+        private final String inner;
+
+        private MethodValue(final String inner) {
+            this.inner = inner;
+        }
+
+        @JsonXmlValue
+        public String getValue() {
+            if ("boom".equals(inner)) {
+                throw new IllegalStateException("boom");
+            }
+            return inner;
+        }
+
+        @JsonXmlCreator
+        public static MethodValue of(final String s) {
+            return new MethodValue(s);
+        }
+    }
+
+    public static class CreatorWrongReturn {
+        @JsonXmlValue
+        public String getValue() {
+            return "";
+        }
+
+        @JsonXmlCreator
+        public static String of(final String s) {
+            return s;
+        }
+    }
+
+    public static class CreatorTwoParams {
+        @JsonXmlValue
+        public String getValue() {
+            return "";
+        }
+
+        @JsonXmlCreator
+        public static CreatorTwoParams of(final String s, final String t) {
+            return new CreatorTwoParams();
+        }
+    }
+
+    public static class TwoValueMethods {
+        @JsonXmlValue
+        public String getValue() {
+            return "";
+        }
+
+        @JsonXmlValue
+        public String getOther() {
+            return "";
+        }
+
+        @JsonXmlCreator
+        public static TwoValueMethods of(final String s) {
+            return new TwoValueMethods();
+        }
+    }
+
+    static <T> SingleValueType<T> typeOf(final Class<T> cls) {
+        return new SingleValueType<>(cls) {
+        };
+    }
+
+    @Test
+    public void testObjectModeJdbc() throws Exception {
+        final SingleValueType<Plain> type = typeOf(Plain.class);
+        final Plain p = new Plain(1, 2);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn(p);
+        when(rs.getObject("c")).thenReturn(p);
+        when(rs.getObject(2)).thenReturn(null);
+        when(rs.getObject("d")).thenReturn(null);
+        assertSame(p, type.get(rs, 1));
+        assertSame(p, type.get(rs, "c"));
+        assertNull(type.get(rs, 2));
+        assertNull(type.get(rs, "d"));
+        assertEquals(3, p.sum());
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        type.set(ps, 1, p);
+        verify(ps).setObject(1, p);
+        type.set(ps, 2, p, Types.OTHER);
+        verify(ps).setObject(2, p, Types.OTHER);
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        type.set(cs, "x", p);
+        verify(cs).setObject("x", p);
+        type.set(cs, "y", p, Types.OTHER);
+        verify(cs).setObject("y", p, Types.OTHER);
+    }
+
+    @Test
+    public void testObjectModeWriteNullToString() throws Exception {
+        final SingleValueType<Plain> type = typeOf(Plain.class);
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(writer, new Plain(1, 2), null);
+            assertEquals("null", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    public static class Text {
+        @Override
+        public String toString() {
+            return "t\"x";
+        }
+    }
+
+    @Test
+    public void testObjectModeWriteNoQuotation() throws Exception {
+        final SingleValueType<Text> type = typeOf(Text.class);
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(writer, new Text(), JsonSerConfig.create().setStringQuotation((char) 0));
+            assertTrue(writer.toString().startsWith("t"));
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testFieldValueJdbcSet() throws Exception {
+        final SingleValueType<FieldValue> type = typeOf(FieldValue.class);
+        final FieldValue v = FieldValue.from("abc");
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        type.set(ps, 1, v);
+        verify(ps).setString(1, "abc");
+        type.set(ps, 2, v, Types.VARCHAR);
+        verify(ps).setString(2, "abc");
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        type.set(cs, "n", v);
+        verify(cs).setString("n", "abc");
+        type.set(cs, "m", v, Types.VARCHAR);
+        verify(cs).setString("m", "abc");
+    }
+
+    @Test
+    public void testMethodValueJdbcSet() throws Exception {
+        final SingleValueType<MethodValue> type = typeOf(MethodValue.class);
+        final MethodValue v = MethodValue.of("abc");
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        type.set(ps, 2, v, Types.VARCHAR);
+        verify(ps).setString(2, "abc");
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        type.set(cs, "n", v);
+        verify(cs).setString("n", "abc");
+        type.set(cs, "m", v, Types.VARCHAR);
+        verify(cs).setString("m", "abc");
+
+        final MethodValue bad = MethodValue.of("boom");
+        assertThrows(IllegalStateException.class, () -> type.set(ps, 1, bad));
+        assertThrows(IllegalStateException.class, () -> type.set(ps, 1, bad, Types.VARCHAR));
+        assertThrows(IllegalStateException.class, () -> type.set(cs, "a", bad));
+        assertThrows(IllegalStateException.class, () -> type.set(cs, "a", bad, Types.VARCHAR));
+    }
+
+    public static class AutoDetected {
+        private String text;
+
+        public AutoDetected(final String text) {
+            this.text = text;
+        }
+
+        // public instance "of": rejected as factory (not static)
+        public AutoDetected of(final String s) {
+            return new AutoDetected(s);
+        }
+
+        public static AutoDetected parse(final String s) {
+            return new AutoDetected(s);
+        }
+
+        // public "getValue" with an incompatible return type: rejected as accessor
+        public int getValue() {
+            return -1;
+        }
+
+        public String getText() {
+            return text;
+        }
+    }
+
+    @Test
+    public void testAutoDetectSkipsUnsuitableNamedMembers() {
+        final SingleValueType<AutoDetected> type = typeOf(AutoDetected.class);
+        assertEquals("abc", type.stringOf(new AutoDetected("abc")));
+        assertEquals("xyz", type.valueOf("xyz").getText());
+        assertEquals(-1, new AutoDetected("a").getValue());
+        assertEquals("q", new AutoDetected("a").of("q").getText());
+    }
+
+    @Test
+    public void testSerializeToAccessorThrows() {
+        final SingleValueType<MethodValue> type = typeOf(MethodValue.class);
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            assertThrows(IllegalStateException.class, () -> type.serializeTo(writer, MethodValue.of("boom"), null));
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testInvalidAnnotationShapes() {
+        assertThrows(IllegalArgumentException.class, () -> typeOf(CreatorWrongReturn.class));
+        assertThrows(IllegalArgumentException.class, () -> typeOf(CreatorTwoParams.class));
+        assertThrows(IllegalArgumentException.class, () -> typeOf(TwoValueMethods.class));
+    }
 }

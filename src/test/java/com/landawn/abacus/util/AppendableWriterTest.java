@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -638,5 +639,90 @@ public class AppendableWriterTest extends TestBase {
 
         assertThrows(IndexOutOfBoundsException.class, () -> writer.write((String) null, 0, 5));
         assertEquals("ll", sb.toString());
+    }
+
+    private static final class FlushFailingAppendable implements Appendable, Flushable, AutoCloseable {
+        private final Throwable flushFailure;
+        private final StringBuilder sb = new StringBuilder();
+        private int flushes;
+        private int closes;
+
+        FlushFailingAppendable(final Throwable flushFailure) {
+            this.flushFailure = flushFailure;
+        }
+
+        @Override
+        public Appendable append(final CharSequence csq) {
+            sb.append(csq);
+            return this;
+        }
+
+        @Override
+        public Appendable append(final CharSequence csq, final int start, final int end) {
+            sb.append(csq, start, end);
+            return this;
+        }
+
+        @Override
+        public Appendable append(final char c) {
+            sb.append(c);
+            return this;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            flushes++;
+            if (flushFailure instanceof IOException e) {
+                throw e;
+            } else if (flushFailure instanceof RuntimeException e) {
+                throw e;
+            } else if (flushFailure instanceof Error e) {
+                throw e;
+            }
+        }
+
+        @Override
+        public void close() throws Exception {
+            closes++;
+            if (flushFailure instanceof Exception e && !(e instanceof IOException) && !(e instanceof RuntimeException)) {
+                throw e;
+            }
+        }
+    }
+
+    @Test
+    public void testAppendableWriterCloseFlushesFlushableTarget() throws IOException {
+        final FlushFailingAppendable target = new FlushFailingAppendable(null);
+        final AppendableWriter writer = new AppendableWriter(target);
+        writer.write("abc");
+        writer.close();
+        writer.close();
+        assertEquals("abc", target.sb.toString());
+        assertEquals(1, target.flushes);
+        assertEquals(1, target.closes);
+    }
+
+    @Test
+    public void testAppendableWriterCloseRethrowsRuntimeException() {
+        final IllegalStateException failure = new IllegalStateException("flush");
+        final FlushFailingAppendable target = new FlushFailingAppendable(failure);
+        final AppendableWriter writer = new AppendableWriter(target);
+        assertSame(failure, assertThrows(IllegalStateException.class, writer::close));
+        assertEquals(1, target.closes);
+    }
+
+    @Test
+    public void testAppendableWriterCloseRethrowsError() {
+        final AssertionError failure = new AssertionError("flush");
+        final AppendableWriter writer = new AppendableWriter(new FlushFailingAppendable(failure));
+        assertSame(failure, assertThrows(AssertionError.class, writer::close));
+    }
+
+    @Test
+    public void testAppendableWriterCloseWrapsCheckedException() {
+        final Exception failure = new Exception("close");
+        final AppendableWriter writer = new AppendableWriter(new FlushFailingAppendable(failure));
+        final RuntimeException thrown = assertThrows(RuntimeException.class, writer::close);
+        assertSame(failure, thrown.getCause());
     }
 }

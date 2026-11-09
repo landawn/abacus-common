@@ -1,7 +1,10 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -380,4 +383,63 @@ public class EntityIdTest extends AbstractTest {
         Assertions.assertEquals(Set.of(), id.keySet());
     }
 
+    /** Minimal implementation that relies on the interface's default {@code isEmpty()}. */
+    private static final class SizedEntityId implements EntityId {
+        private final int size;
+
+        SizedEntityId(final int size) {
+            this.size = size;
+        }
+
+        @Override
+        public String entityName() {
+            return "E";
+        }
+
+        @Override
+        public <T> T get(final String propName) {
+            return null;
+        }
+
+        @Override
+        public int getInt(final String propName) {
+            return 0;
+        }
+
+        @Override
+        public long getLong(final String propName) {
+            return 0;
+        }
+
+        @Override
+        public <T> T get(final String propName, final Class<? extends T> targetType) {
+            return null;
+        }
+
+        @Override
+        public boolean containsKey(final String propName) {
+            return false;
+        }
+
+        @Override
+        public Set<String> keySet() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public Set<Map.Entry<String, Object>> entrySet() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public int size() {
+            return size;
+        }
+    }
+
+    @Test
+    public void testDefaultIsEmpty() {
+        assertTrue(new SizedEntityId(0).isEmpty());
+        assertFalse(new SizedEntityId(2).isEmpty());
+    }
 }

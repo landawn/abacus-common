@@ -611,4 +611,35 @@ public class NoCachingNoUpdatingTest extends NoCachingNoUpdatingTestSupport {
         assertEquals(1, tripleCopy.middle());
     }
 
+    @Test
+    public void testValuesReturnsLiveBackingArray() {
+        final String[] s = { "a" };
+        assertSame(s, DisposableArray.wrap(s).values());
+        final boolean[] z = { true };
+        assertSame(z, DisposableBooleanArray.wrap(z).values());
+        final char[] c = { 'x' };
+        assertSame(c, DisposableCharArray.wrap(c).values());
+        final byte[] b = { 1 };
+        assertSame(b, DisposableByteArray.wrap(b).values());
+        final short[] sh = { 2 };
+        assertSame(sh, DisposableShortArray.wrap(sh).values());
+        final int[] i = { 3 };
+        assertSame(i, DisposableIntArray.wrap(i).values());
+        final long[] l = { 4 };
+        assertSame(l, DisposableLongArray.wrap(l).values());
+        final float[] f = { 5 };
+        assertSame(f, DisposableFloatArray.wrap(f).values());
+        final double[] d = { 6 };
+        assertSame(d, DisposableDoubleArray.wrap(d).values());
+    }
+
+    @Test
+    public void testDisposableEntryEqualsAndHashCodeWithNulls() {
+        final DisposableEntry<String, Integer> e = DisposableEntry.wrap(new AbstractMap.SimpleEntry<>(null, null));
+        assertEquals(0, e.hashCode());
+        assertTrue(e.equals(e));
+        assertFalse(e.equals("not an entry"));
+        final Map.Entry<String, Integer> other = new AbstractMap.SimpleEntry<>(null, null);
+        assertTrue(e.equals(other));
+    }
 }

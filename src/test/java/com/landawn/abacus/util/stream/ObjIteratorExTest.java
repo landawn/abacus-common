@@ -1,9 +1,14 @@
 package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -869,4 +874,27 @@ public class ObjIteratorExTest extends TestBase {
     }
     // ---- bug review 2026-09-30 verify2 G129 end ----
 
+    @Test
+    public void testOfCollectionIsBufferedWithSizeHintAndCloseResource() {
+        final List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c"));
+        final ObjIteratorEx<String> iter = ObjIteratorEx.of(list);
+
+        assertTrue(iter instanceof ObjIteratorEx.BufferedIterator);
+        assertEquals(3, ((ObjIteratorEx.BufferedIterator<String>) iter).max());
+        assertEquals("a", iter.next());
+        iter.closeResource();
+        assertEquals("b", iter.next());
+    }
+
+    @Test
+    public void testBufferedIteratorEmpty() {
+        final ObjIteratorEx.BufferedIterator<String> empty = ObjIteratorEx.BufferedIterator.empty();
+
+        assertSame(ObjIteratorEx.BufferedIterator.EMPTY, empty);
+        assertFalse(empty.hasNext());
+        assertTrue(empty.supportsFailureAtomicAdvance());
+        assertEquals(0, empty.max());
+        empty.advance(5);
+        assertEquals(0, empty.count());
+    }
 }

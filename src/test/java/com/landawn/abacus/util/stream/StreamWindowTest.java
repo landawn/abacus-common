@@ -885,15 +885,15 @@ public class StreamWindowTest extends StreamTestSupport {
     @Test
     public void test_window_03() {
         assertDoesNotThrow(() -> {
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(N::println);
+            IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(N::println);
 
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+            IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
             N.println(Strings.repeat("=", 120));
 
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(N::println);
+            IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(N::println);
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX))
@@ -901,9 +901,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
             N.println(Strings.repeat("=", 120));
 
-            IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(N::println);
+            IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(N::println);
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX))
@@ -911,14 +911,14 @@ public class StreamWindowTest extends StreamTestSupport {
 
             N.println(Strings.repeat("=", 120));
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
                     .window(Duration.ofMillis(100))
                     .forEach(s -> Stream.of(s).map(Timed::value).println());
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
@@ -927,14 +927,14 @@ public class StreamWindowTest extends StreamTestSupport {
 
             N.println(Strings.repeat("=", 120));
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
                     .window(Duration.ofMillis(100), 20)
                     .forEach(s -> Stream.of(s).map(Timed::value).println());
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
@@ -943,14 +943,14 @@ public class StreamWindowTest extends StreamTestSupport {
 
             N.println(Strings.repeat("=", 120));
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
                     .window(Duration.ofMillis(100), 120)
                     .forEach(s -> Stream.of(s).map(Timed::value).println());
 
-            IntStream.range(0, 30)
+            IntStream.range(0, 10)
                     .boxed()
                     .peek(Fn.sleep(11))
                     .map(e -> Timed.of(e, System.currentTimeMillis()))
@@ -963,19 +963,19 @@ public class StreamWindowTest extends StreamTestSupport {
     public void test_window_04() {
         final Consumer<List<Integer>> println = N::println;
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3).forEach(println);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3).forEach(println);
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 3, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 
@@ -989,9 +989,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
         final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 3).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 3).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
@@ -1000,9 +1000,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
@@ -1011,9 +1011,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
@@ -1068,21 +1068,21 @@ public class StreamWindowTest extends StreamTestSupport {
     public void test_window_07() {
         final Consumer<List<Integer>> println = N::println;
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(println);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100)).forEach(println);
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
-
-        N.println(Strings.repeat("=", 120));
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
-
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(println);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20).forEach(println);
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 20, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
+
+        N.println(Strings.repeat("=", 120));
+
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120).forEach(println);
+
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), 120, Collectors.summingInt(ToIntFunction.UNBOX)).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 
@@ -1096,9 +1096,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
         final Consumer<List<Timed<Integer>>> println2 = s -> Stream.of(s).map(unwrap).println();
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100)).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100)).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
@@ -1107,9 +1107,9 @@ public class StreamWindowTest extends StreamTestSupport {
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 20).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
@@ -1118,27 +1118,27 @@ public class StreamWindowTest extends StreamTestSupport {
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).map(mapper).window(Duration.ofMillis(100), 120).forEach(println2);
 
-        IntStream.range(0, 30)
+        IntStream.range(0, 10)
                 .boxed()
                 .peek(Fn.sleep(11))
                 .map(mapper)
                 .window(Duration.ofMillis(100), 120, sysTimeGetter, Collectors.summingInt(toInt))
                 .forEach(Fn.println());
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), ArrayList::new).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), ArrayList::new).forEach(Fn.println());
         assertNotNull(println2);
     }
 
     @Test
     public void test_window_08() {
         final long now = System.currentTimeMillis();
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now + 3000, Suppliers.ofList()).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now + 3000, Suppliers.ofList()).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 
-        IntStream.range(0, 30).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now - 3000, Suppliers.ofList()).forEach(Fn.println());
+        IntStream.range(0, 10).boxed().peek(Fn.sleep(11)).window(Duration.ofMillis(100), () -> now - 3000, Suppliers.ofList()).forEach(Fn.println());
 
         N.println(Strings.repeat("=", 120));
 

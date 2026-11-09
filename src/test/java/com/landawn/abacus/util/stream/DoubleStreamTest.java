@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.DoubleBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -1741,4 +1745,206 @@ public class DoubleStreamTest extends DoubleStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    @Test
+    public void testFromJdkStreamNextWithoutHasNext() {
+        final DoubleIterator iter = DoubleStream.from(java.util.stream.DoubleStream.of(1.0, 2.0)).iterator();
+        assertEquals(1.0, iter.nextDouble());
+        assertEquals(2.0, iter.nextDouble());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromJdkStreamAdvance() {
+        final DoubleIteratorEx iter = DoubleStream.from(java.util.stream.DoubleStream.of(1.0, 2.0, 3.0, 4.0)).iteratorEx();
+        iter.advance(0);
+        iter.advance(1);
+        assertEquals(2.0, iter.nextDouble());
+        iter.advance(1);
+        assertEquals(4.0, iter.nextDouble());
+        assertFalse(iter.hasNext());
+
+        final DoubleIteratorEx iter2 = DoubleStream.from(java.util.stream.DoubleStream.of(1.0, 2.0)).iteratorEx();
+        assertEquals(2, iter2.count());
+        iter2.advance(5);
+        assertFalse(iter2.hasNext());
+    }
+
+    @Test
+    public void testOfNulls() {
+        assertEquals(0, DoubleStream.of((DoubleBuffer) null).count());
+        assertEquals(0, DoubleStream.of((DoubleIterator) null).count());
+        assertEquals(0, DoubleStream.of((OptionalDouble) null).count());
+        assertEquals(0, DoubleStream.of((java.util.OptionalDouble) null).count());
+    }
+
+    @Test
+    public void testFlattenEdgeCases() {
+        assertEquals(0, DoubleStream.flatten(new double[0][], true).count());
+        assertArrayEquals(new double[] { 1, 2 }, DoubleStream.flatten(new double[][] { { 1, 2 } }, true).toArray());
+        assertEquals(0, DoubleStream.flatten(new double[0][], 0.0, true).count());
+        assertArrayEquals(new double[] { 1, 2 }, DoubleStream.flatten(new double[][] { { 1, 2 } }, 0.0, false).toArray());
+        assertEquals(0, DoubleStream.flatten(new double[][] { {}, {} }, 0.0, false).count());
+    }
+
+    @Test
+    public void testFlattenAlignedVerticalWithNullRow() {
+        final double[][] a = { { 1, 2 }, null, { 3 } };
+        assertArrayEquals(new double[] { 1, 0, 3, 2, 0, 0 }, DoubleStream.flatten(a, 0.0, true).toArray());
+        final DoubleIteratorEx iter = DoubleStream.flatten(a, 0.0, true).iteratorEx();
+        while (iter.hasNext()) {
+            iter.nextDouble();
+        }
+        assertEquals(0, iter.toList().size());
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+    }
+
+    @Test
+    public void testFlattenAlignedHorizontalIteration() {
+        final double[][] a = { { 1, 2 }, null, { 3 } };
+        final DoubleIteratorEx iter = DoubleStream.flatten(a, 9.0, false).iteratorEx();
+        final List<Double> list = new ArrayList<>();
+        while (iter.hasNext()) {
+            list.add(iter.nextDouble());
+        }
+        assertEquals(Arrays.asList(1.0, 2.0, 9.0, 9.0, 3.0, 9.0), list);
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+        assertEquals(0, iter.toList().size());
+    }
+
+    @Test
+    public void testRepeatAdvanceNonPositive() {
+        final DoubleIteratorEx iter = DoubleStream.repeat(1.5, 30).iteratorEx();
+        iter.advance(0);
+        iter.advance(-1);
+        assertEquals(30, iter.count());
+    }
+
+    @Test
+    public void testConcatEmpty() {
+        assertEquals(0, DoubleStream.concat(new double[0][]).count());
+        assertEquals(0, DoubleStream.concat(new DoubleIterator[0]).count());
+        assertEquals(0, DoubleStream.concat(new DoubleStream[0]).count());
+        assertEquals(0, DoubleStream.concat(Collections.<double[]> emptyList()).count());
+        assertEquals(0, DoubleStream.concat(Collections.<DoubleStream> emptySet()).count());
+    }
+
+    @Test
+    public void testConcatListWithNullAndLongArrays() {
+        final List<double[]> onlyNull = new ArrayList<>();
+        onlyNull.add(null);
+        assertFalse(DoubleStream.concat(onlyNull).iterator().hasNext());
+
+        final double[] big = new double[20];
+        Arrays.fill(big, 2.0);
+        final List<double[]> list = Arrays.asList(new double[] { 1 }, big);
+        assertEquals(21, DoubleStream.concat(list).toList().size());
+    }
+
+    @Test
+    public void testConcatIteratorsWithNull() {
+        final List<DoubleIterator> list = new ArrayList<>();
+        list.add(null);
+        assertFalse(DoubleStream.concatIterators(list).iterator().hasNext());
+    }
+
+    @Test
+    public void testZipEmptyAndExhaustedToList() {
+        assertEquals(0, DoubleStream.zip(new double[0], new double[] { 1 }, (x, y) -> x + y).count());
+        assertEquals(0, DoubleStream.zip(new double[] { 1 }, new double[0], new double[] { 1 }, (x, y, z) -> x + y + z).count());
+        assertEquals(0, DoubleStream.zip(new double[0], new double[0], 0, 0, (x, y) -> x + y).count());
+        assertEquals(0, DoubleStream.zip(new double[0], new double[0], new double[0], 0, 0, 0, (x, y, z) -> x + y + z).count());
+
+        final DoubleIteratorEx it2 = DoubleStream.zip(new double[] { 1 }, new double[] { 2 }, (x, y) -> x + y).iteratorEx();
+        assertEquals(3.0, it2.nextDouble());
+        assertEquals(0, it2.toList().size());
+
+        final DoubleIteratorEx it3 = DoubleStream.zip(new double[] { 1 }, new double[] { 2 }, new double[] { 3 }, (x, y, z) -> x + y + z).iteratorEx();
+        assertEquals(6.0, it3.nextDouble());
+        assertEquals(0, it3.toList().size());
+
+        final DoubleIteratorEx it4 = DoubleStream.zip(new double[] { 1 }, new double[0], 0, 5, (x, y) -> x + y).iteratorEx();
+        assertEquals(6.0, it4.nextDouble());
+        assertEquals(0, it4.toList().size());
+
+        final DoubleIteratorEx it5 = DoubleStream.zip(new double[] { 1 }, new double[0], new double[0], 0, 5, 7, (x, y, z) -> x + y + z).iteratorEx();
+        assertEquals(13.0, it5.nextDouble());
+        assertEquals(0, it5.toList().size());
+    }
+
+    @Test
+    public void testZipNullIterators() {
+        assertEquals(0, DoubleStream.zip((DoubleIterator) null, (DoubleIterator) null, (x, y) -> x + y).count());
+        assertEquals(0, DoubleStream.zip((DoubleIterator) null, null, (DoubleIterator) null, (x, y, z) -> x + y + z).count());
+        assertEquals(0, DoubleStream.zip((DoubleIterator) null, (DoubleIterator) null, 0, 0, (x, y) -> x + y).count());
+        assertEquals(0, DoubleStream.zip((DoubleIterator) null, null, null, 0, 0, 0, (x, y, z) -> x + y + z).count());
+    }
+
+    @Test
+    public void testMergeEdgeCases() {
+        assertArrayEquals(new double[] { 1, 2 }, DoubleStream.merge(new double[0], new double[] { 1, 2 }, (x, y) -> MergeResult.TAKE_FIRST).toArray());
+        assertArrayEquals(new double[] { 1, 2 }, DoubleStream.merge(new double[] { 1, 2 }, new double[0], (x, y) -> MergeResult.TAKE_FIRST).toArray());
+
+        final DoubleIteratorEx it = DoubleStream.merge(new double[] { 1 }, new double[] { 2 }, (x, y) -> MergeResult.TAKE_FIRST).iteratorEx();
+        assertEquals(1.0, it.nextDouble());
+        assertEquals(1, it.toList().size());
+        assertEquals(0, it.toList().size());
+
+        final DoubleIterator mi = DoubleStream.merge((DoubleIterator) null, (DoubleIterator) null, (x, y) -> MergeResult.TAKE_FIRST).iterator();
+        assertFalse(mi.hasNext());
+        assertThrows(NoSuchElementException.class, mi::nextDouble);
+
+        final DoubleIterator mi2 = DoubleStream
+                .merge(DoubleIterator.of(new double[] { 5 }), DoubleIterator.of(new double[] { 1, 2 }), (x, y) -> MergeResult.TAKE_FIRST)
+                .iterator();
+        assertEquals(5.0, mi2.nextDouble());
+        assertEquals(1.0, mi2.nextDouble());
+        assertEquals(2.0, mi2.nextDouble());
+        assertTrue(!mi2.hasNext());
+    }
+
+    @Test
+    public void testRepeatHugeToArrayRejected() {
+        final DoubleIteratorEx iter = DoubleStream.repeat(1.0, Long.MAX_VALUE).iteratorEx();
+        assertThrows(IllegalStateException.class, iter::toArray);
+    }
+
+    private static ArrayDoubleStream sorted2(final double... a) {
+        return new ArrayDoubleStream(a, true, null);
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        assertArrayEquals(new double[] { 1, 2 }, new ArrayDoubleStream(new double[] { 1, 2 }, null).toArray(), 0.0);
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new double[] { 1, 1, 3, 3 },
+                new ArrayDoubleStream(new double[] { 1, 2, 3 }).flatMap(x -> x == 2 ? null : DoubleStream.of(x, x)).toArray(), 0.0);
+    }
+
+    @Test
+    public void testTopZero() {
+        assertEquals(0, new ArrayDoubleStream(new double[] { 1, 2 }).top(0, Comparator.naturalOrder()).count());
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        assertEquals(1.0, sorted2(1, 2, 3).min().getAsDouble(), 0.0);
+        assertTrue(Double.isNaN(sorted2(1, 2, Double.NaN).min().getAsDouble()));
+        assertEquals(3.0, sorted2(1, 2, 3).max().getAsDouble(), 0.0);
+        assertEquals(2.0, sorted2(1, 2, 3).kthLargest(2).getAsDouble(), 0.0);
+        assertFalse(sorted2(1, 2, 3).kthLargest(4).isPresent());
+    }
+
+    @Test
+    public void testParallelToJdkStreamWithoutCloseHandlers() {
+        assertEquals(6.0, new ArrayDoubleStream(new double[] { 1, 2, 3 }).parallel().toJdkStream().sum(), 0.0);
+    }
+
+    @Test
+    public void testCycledZero() {
+        assertEquals(0, new ArrayDoubleStream(new double[] { 1, 2 }).cycled(0).count());
+    }
 }

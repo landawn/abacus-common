@@ -489,4 +489,23 @@ public class JsonUtilTest extends TestBase {
         assertEquals(BigDecimal.class, JsonUtil.unwrap(scored, HashMap.class).get("score").getClass());
         assertEquals(Double.class, JsonUtil.unwrap(scored, Type.<Map<String, Double>> of("Map<String, Double>")).get("score").getClass());
     }
+
+    @Test
+    public void testUnwrapMapWithNestedArrayValue() {
+        final Map<String, List<Integer>> m = JsonUtil.unwrap(new JSONObject("{\"a\":[1,2]}"),
+                Type.<Map<String, List<Integer>>> of("Map<String, List<Integer>>"));
+        assertEquals(List.of(1, 2), m.get("a"));
+    }
+
+    @Test
+    public void testUnwrapObjectArrayWithNestedContainersAndNull() {
+        final Map<String, Integer>[] maps = JsonUtil.unwrap(new JSONArray("[{\"x\":1}, null]"), Type.<Map<String, Integer>[]> of("Map<String, Integer>[]"));
+        assertEquals(2, maps.length);
+        assertEquals(1, maps[0].get("x"));
+        assertNull(maps[1]);
+
+        final List<Integer>[] lists = JsonUtil.unwrap(new JSONArray("[[1,2],[3]]"), Type.<List<Integer>[]> of("List<Integer>[]"));
+        assertEquals(List.of(1, 2), lists[0]);
+        assertEquals(List.of(3), lists[1]);
+    }
 }

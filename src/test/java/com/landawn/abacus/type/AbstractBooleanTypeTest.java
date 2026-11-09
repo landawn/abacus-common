@@ -2,8 +2,11 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,11 +24,25 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.parser.ParserFactory;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.MutableByte;
+import com.landawn.abacus.util.MutableChar;
+import com.landawn.abacus.util.MutableDouble;
+import com.landawn.abacus.util.MutableFloat;
+import com.landawn.abacus.util.MutableInt;
+import com.landawn.abacus.util.MutableLong;
+import com.landawn.abacus.util.MutableShort;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.u.OptionalBoolean;
+import com.landawn.abacus.util.u.OptionalChar;
+import com.landawn.abacus.util.u.OptionalDouble;
+import com.landawn.abacus.util.u.OptionalFloat;
 
 public class AbstractBooleanTypeTest extends TestBase {
     private Type<Boolean> type;
@@ -540,5 +557,195 @@ public class AbstractBooleanTypeTest extends TestBase {
         assertNull(ParserFactory.createJsonParser().deserialize("{\"w\": \" \"}", BoolBean.class).getW());
         assertNull(ParserFactory.createXmlParser().deserialize("<boolBean><w> </w></boolBean>", BoolBean.class).getW());
         assertEquals(Boolean.FALSE, ParserFactory.createJsonParser().deserialize("{\"w\": \"N\"}", BoolBean.class).getW());
+    }
+
+    private static String serialize(final java.util.function.Consumer<BufferedJsonWriter> action) {
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            action.accept(writer);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testPrimitiveBooleanGetFromResultSet() throws Exception {
+        final Type<Boolean> type = Type.of(boolean.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getBoolean(1)).thenReturn(true);
+        when(rs.getBoolean("c")).thenReturn(false);
+        assertEquals(Boolean.TRUE, type.get(rs, 1));
+        assertEquals(Boolean.FALSE, type.get(rs, "c"));
+    }
+
+    @Test
+    public void testBooleanIntType() throws Exception {
+        final BooleanIntType type = new BooleanIntType();
+        assertFalse(type.isCsvQuoteRequired());
+        assertEquals(Boolean.FALSE, type.valueOf((Object) null));
+
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt(1)).thenReturn(0);
+        when(rs.getInt("c")).thenReturn(0);
+        when(rs.wasNull()).thenReturn(true);
+        assertNull(type.get(rs, 1));
+        assertNull(type.get(rs, "c"));
+    }
+
+    @Test
+    public void testPrimitiveCharGetEmptyUsesDefault() throws Exception {
+        final Type<Character> type = Type.of(char.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("");
+        when(rs.getString("c")).thenReturn(null);
+        assertEquals(type.defaultValue(), type.get(rs, 1));
+        assertEquals(type.defaultValue(), type.get(rs, "c"));
+    }
+
+    @Test
+    public void testOptionalCharType() throws Exception {
+        final Type<OptionalChar> type = Type.of(OptionalChar.class);
+        assertFalse(type.defaultValue().isPresent());
+
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString("c")).thenReturn("");
+        assertFalse(type.get(rs, "c").isPresent());
+
+        assertEquals("'x'", serialize(w -> {
+            try {
+                type.serializeTo(w, OptionalChar.of('x'), JsonSerConfig.create().setCharQuotation('\''));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+        assertEquals("\"'\"", serialize(w -> {
+            try {
+                type.serializeTo(w, OptionalChar.of('\''), JsonSerConfig.create().setCharQuotation('"'));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+    }
+
+    @Test
+    public void testOptionalBooleanType() throws Exception {
+        final Type<OptionalBoolean> type = Type.of(OptionalBoolean.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject("c")).thenReturn(1);
+        assertTrue(type.get(rs, "c").get());
+
+        assertEquals("false", serialize(w -> {
+            try {
+                type.serializeTo(w, OptionalBoolean.empty(), JsonSerConfig.create().setWriteNullBooleanAsFalse(true));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+    }
+
+    @Test
+    public void testOptionalFloatAndDoubleGet() throws Exception {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject("n")).thenReturn(null);
+        when(rs.getObject("d")).thenReturn(2.5d);
+        when(rs.getObject("s")).thenReturn("1.5");
+        when(rs.getObject("f")).thenReturn(1.5f);
+
+        final Type<OptionalFloat> ft = Type.of(OptionalFloat.class);
+        assertFalse(ft.get(rs, "n").isPresent());
+        assertEquals(2.5f, ft.get(rs, "d").get());
+        assertEquals(1.5f, ft.get(rs, "s").get());
+
+        final Type<OptionalDouble> dt = Type.of(OptionalDouble.class);
+        assertFalse(dt.isCsvQuoteRequired());
+        assertEquals(1.5d, dt.get(rs, "f").get());
+        assertEquals(2.5d, dt.get(rs, "d").get());
+    }
+
+    @Test
+    public void testMutableTypesReadSqlNull() throws Exception {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.wasNull()).thenReturn(true);
+        assertNull(Type.of(MutableShort.class).get(rs, 1));
+        assertNull(Type.of(MutableShort.class).get(rs, "c"));
+        assertNull(Type.of(MutableLong.class).get(rs, 1));
+        assertNull(Type.of(MutableLong.class).get(rs, "c"));
+        assertNull(Type.of(MutableInt.class).get(rs, 1));
+        assertNull(Type.of(MutableInt.class).get(rs, "c"));
+        assertNull(Type.of(MutableFloat.class).get(rs, 1));
+        assertNull(Type.of(MutableFloat.class).get(rs, "c"));
+        assertNull(Type.of(MutableDouble.class).get(rs, 1));
+        assertNull(Type.of(MutableDouble.class).get(rs, "c"));
+        assertNull(Type.of(MutableByte.class).get(rs, 1));
+        assertNull(Type.of(MutableByte.class).get(rs, "c"));
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testMutableTypesSerializeNullAsZero() {
+        final JsonSerConfig zero = JsonSerConfig.create().setWriteNullNumberAsZero(true);
+        for (final Class<?> cls : new Class<?>[] { MutableShort.class, MutableFloat.class, MutableDouble.class, MutableByte.class }) {
+            final Type type = Type.of(cls);
+            final String out = serialize(w -> {
+                try {
+                    type.serializeTo(w, null, zero);
+                } catch (final java.io.IOException e) {
+                    throw new java.io.UncheckedIOException(e);
+                }
+            });
+            assertTrue(out.startsWith("0"), cls + " -> " + out);
+        }
+
+        final Type<MutableLong> lt = Type.of(MutableLong.class);
+        assertEquals("\"5\"", serialize(w -> {
+            try {
+                lt.serializeTo(w, MutableLong.of(5), JsonSerConfig.create().setWriteLongAsString(true));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+    }
+
+    @Test
+    public void testMutableCharType() {
+        final Type<MutableChar> type = Type.of(MutableChar.class);
+        assertTrue(type.isComparable());
+        assertEquals("a", serialize(w -> {
+            try {
+                type.serializeTo(w, MutableChar.of('a'), null);
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+        assertEquals("'\\''", serialize(w -> {
+            try {
+                type.serializeTo(w, MutableChar.of('\''), JsonSerConfig.create().setCharQuotation('\''));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+        assertEquals("\"'\"", serialize(w -> {
+            try {
+                type.serializeTo(w, MutableChar.of('\''), JsonSerConfig.create().setCharQuotation('"'));
+            } catch (final java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
+        }));
+    }
+
+    @Test
+    public void testHolderType() throws Exception {
+        final Type<Holder<String>> type = TypeFactory.getType("Holder<String>");
+        assertTrue(type.isParameterizedType());
+        assertNull(type.stringOf(new Holder<>()));
+        assertNull(type.valueOf((String) null).value());
+
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("v");
+        when(rs.getString("c")).thenReturn("w");
+        when(rs.wasNull()).thenReturn(true);
+        assertNull(type.get(rs, 1).value());
+        assertNull(type.get(rs, "c").value());
     }
 }

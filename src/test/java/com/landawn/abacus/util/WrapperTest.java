@@ -247,4 +247,12 @@ public class WrapperTest extends TestBase {
             executor.shutdownNow();
         }
     }
+
+    @Test
+    public void testAnyWrapperThreeArgConstructorAndSelfEquals() {
+        final Wrapper.AnyWrapper<String> w = new Wrapper.AnyWrapper<>("abc", String::length, String::equalsIgnoreCase);
+        assertTrue(w.equals(w));
+        assertEquals(3, w.hashCode());
+        assertSame("abc", w.value());
+    }
 }

@@ -81,11 +81,18 @@ public class BeansRegressionCTest extends TestBase {
         assertThrows(NoClassDefFoundError.class, () -> Beans.newBean(ThrowingInitializer.class));
     }
 
-    /** Its {@code <clinit>} blocks until the test releases it. */
-    public static class BlockingInitializer {
+    /**
+     * The latches for {@link BlockingInitializer}. They live in their own class: reading them from the test thread
+     * must not trigger (and so wait behind, or itself run) {@code BlockingInitializer.<clinit>}, which made the test
+     * thread sit out the full 30-second release timeout before anything was exercised concurrently.
+     */
+    static final class BlockingLatches {
         static final CountDownLatch STARTED = new CountDownLatch(1);
         static final CountDownLatch RELEASE = new CountDownLatch(1);
+    }
 
+    /** Its {@code <clinit>} blocks until the test releases it. */
+    public static class BlockingInitializer {
         public static final String MARKER = block();
 
         private String name;
@@ -99,10 +106,10 @@ public class BeansRegressionCTest extends TestBase {
         }
 
         static String block() {
-            STARTED.countDown();
+            BlockingLatches.STARTED.countDown();
 
             try {
-                RELEASE.await(30, TimeUnit.SECONDS);
+                BlockingLatches.RELEASE.await(30, TimeUnit.SECONDS);
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -135,7 +142,7 @@ public class BeansRegressionCTest extends TestBase {
 
         try {
             blocked.start();
-            assertTrue(BlockingInitializer.STARTED.await(15, TimeUnit.SECONDS), "the blocking <clinit> never started");
+            assertTrue(BlockingLatches.STARTED.await(15, TimeUnit.SECONDS), "the blocking <clinit> never started");
 
             final AtomicReference<Throwable> failure = new AtomicReference<>();
             final Thread other = new Thread(() -> {
@@ -153,7 +160,7 @@ public class BeansRegressionCTest extends TestBase {
             assertFalse(other.isAlive(), "introspecting an unrelated class blocked behind another class's <clinit>");
             assertNull(failure.get(), () -> String.valueOf(failure.get()));
         } finally {
-            BlockingInitializer.RELEASE.countDown();
+            BlockingLatches.RELEASE.countDown();
             blocked.join(TimeUnit.SECONDS.toMillis(15));
         }
     }

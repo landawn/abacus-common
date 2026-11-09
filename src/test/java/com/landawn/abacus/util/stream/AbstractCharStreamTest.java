@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -1725,4 +1726,64 @@ public class AbstractCharStreamTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G123 end ----
+
+    private static CharStream par(final char... a) {
+        return CharStream.of(a).parallel(2);
+    }
+
+    @Test
+    public void testRateLimitedOnParallelStream() {
+        final CharStream s = par('c', 'a', 'b').rateLimited(RateLimiter.create(100000));
+        assertTrue(s.isParallel());
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, s.sorted().toArray());
+    }
+
+    @Test
+    public void testDelayOnParallelStream() {
+        final CharStream s = par('x', 'y').delay(java.time.Duration.ofMillis(1));
+        assertTrue(s.isParallel());
+        assertArrayEquals(new char[] { 'x', 'y' }, s.sorted().toArray());
+    }
+
+    @Test
+    public void testDebounceIteratorExhaustion() {
+        final CharIterator it = CharStream.of('a').debounce(com.landawn.abacus.util.Duration.ofMillis(1)).iterator();
+        assertEquals('a', it.nextChar());
+        assertThrows(NoSuchElementException.class, it::nextChar);
+    }
+
+    @Test
+    public void testStepOne() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, CharStream.of(CharIterator.of('a', 'b', 'c')).step(1).toArray());
+    }
+
+    @Test
+    public void testCycledHasNextAfterAllRounds() {
+        final CharIterator it = CharStream.of('a', 'b').cycled(2).iterator();
+        final StringBuilder sb = new StringBuilder();
+        while (it.hasNext()) {
+            sb.append(it.nextChar());
+        }
+        assertEquals("abab", sb.toString());
+        assertFalse(it.hasNext());
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    public void testMergeWithOnParallelStream() {
+        final CharStream s = par('a', 'c').mergeWith(CharStream.of('b', 'd'), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertTrue(s.isParallel());
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, s.sorted().toArray());
+    }
+
+    @Test
+    public void testPercentilesOnParallelUnsortedStream() {
+        final Optional<Map<Percentage, Character>> p = par('c', 'a', 'b').percentiles();
+        assertTrue(p.isPresent());
+        assertEquals(Character.valueOf('a'), p.get().get(Percentage._0_0001));
+
+        final var stats = par('z', 'm', 'a').summaryStatisticsAndPercentiles();
+        assertEquals(3, stats.left().getCount());
+        assertEquals(Character.valueOf('a'), stats.right().get().get(Percentage._0_0001));
+    }
 }

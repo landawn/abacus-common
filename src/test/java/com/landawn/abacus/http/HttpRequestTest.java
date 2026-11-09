@@ -11,7 +11,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -23,7 +25,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -34,16 +38,19 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLContext;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.HttpResponseException;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.sun.net.httpserver.HttpServer;
 
 public class HttpRequestTest extends TestBase {
 
@@ -1343,4 +1350,64 @@ public class HttpRequestTest extends TestBase {
         assertNull(server.takeRequest(), "PATCH must be rejected before any request is sent");
     }
 
+    @TempDir
+    Path tempDir;
+
+    private HttpServer server2;
+    private String baseUrl2;
+    private final AtomicReference<String> lastQuery = new AtomicReference<>();
+
+    @BeforeEach
+    public void startServer() throws IOException {
+        server2 = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server2.createContext("/echo", ex -> {
+            lastQuery.set(ex.getRequestURI().getRawQuery());
+            final byte[] body;
+            try (InputStream in = ex.getRequestBody()) {
+                body = in.readAllBytes();
+            }
+            final byte[] out = body.length == 0 ? "empty".getBytes(StandardCharsets.UTF_8) : body;
+            ex.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
+            ex.sendResponseHeaders(200, out.length);
+            try (OutputStream os = ex.getResponseBody()) {
+                os.write(out);
+            }
+        });
+        server2.start();
+        baseUrl2 = "http://127.0.0.1:" + server2.getAddress().getPort() + "/echo";
+    }
+
+    @AfterEach
+    public void stopServer() {
+        server2.stop(0);
+    }
+
+    @Test
+    public void testQueryWithEmptyMapClearsQuery() {
+        final String result = HttpRequest.url(baseUrl2)
+                .query(Collections.singletonMap("a", "1"))
+                .query(Collections.<String, Object> emptyMap())
+                .get(String.class);
+        assertEquals("empty", result);
+        assertEquals(null, lastQuery.get());
+
+        final Map<String, ?> nullMap = null;
+        assertEquals("empty", HttpRequest.url(baseUrl2).query(nullMap).get(String.class));
+    }
+
+    @Test
+    public void testExecuteWithBodyToFileStreamAndWriter() throws IOException {
+        final File out = tempDir.resolve("resp.txt").toFile();
+        HttpRequest.url(baseUrl2).body("file-body").execute(HttpMethod.POST, out);
+        assertEquals("file-body", new String(Files.readAllBytes(out.toPath()), StandardCharsets.UTF_8));
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        HttpRequest.url(baseUrl2).body("stream-body").execute(HttpMethod.POST, bos);
+        assertEquals("stream-body", bos.toString(StandardCharsets.UTF_8));
+
+        final StringWriter sw = new StringWriter();
+        HttpRequest.url(baseUrl2).body("writer-body").execute(HttpMethod.PUT, sw);
+        assertEquals("writer-body", sw.toString());
+        assertTrue(out.isFile());
+    }
 }

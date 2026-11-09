@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.IndexedShort;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
@@ -1253,4 +1255,54 @@ public class AbstractShortStreamTest extends TestBase {
         assertEquals(1, closed[0]);
     }
     // ---- deep review 2026-11-02b G091 end ----
+
+    private static short[] arr(final int... values) {
+        final short[] a = new short[values.length];
+        for (int i = 0; i < values.length; i++) {
+            a[i] = (short) values[i];
+        }
+        return a;
+    }
+
+    @Test
+    public void testRateLimitedAndDelayParallel() {
+        final short[] r1 = ShortStream.of(arr(1, 2, 3)).parallel(2).rateLimited(RateLimiter.create(10000)).sorted().toArray();
+        assertArrayEquals(arr(1, 2, 3), r1);
+
+        final short[] r2 = ShortStream.of(arr(3, 1)).parallel(2).delay(com.landawn.abacus.util.Duration.ofMillis(1)).sorted().toArray();
+        assertArrayEquals(arr(1, 3), r2);
+    }
+
+    @Test
+    public void testDebounceNextExhausted() {
+        final com.landawn.abacus.util.ShortIterator it = ShortStream.of(arr(1, 2))
+                .map(x -> x)
+                .debounce(com.landawn.abacus.util.Duration.ofSeconds(10))
+                .iterator();
+        assertEquals((short) 2, it.nextShort());
+        assertThrows(NoSuchElementException.class, it::nextShort);
+    }
+
+    @Test
+    public void testMergeWithParallel() {
+        final short[] merged = ShortStream.of(arr(1, 3))
+                .parallel(2)
+                .mergeWith(ShortStream.of(arr(2, 4)), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .sorted()
+                .toArray();
+        assertArrayEquals(arr(1, 2, 3, 4), merged);
+    }
+
+    @Test
+    public void testPercentilesParallelUnsorted() {
+        final Optional<Map<Percentage, Short>> p = ShortStream.of(arr(5, 1, 4, 2, 3)).parallel(2).percentiles();
+        assertTrue(p.isPresent());
+        assertEquals(N.percentilesOfSorted(arr(1, 2, 3, 4, 5)), p.get());
+
+        final Pair<ShortSummaryStatistics, Optional<Map<Percentage, Short>>> sp = ShortStream.of(arr(5, 1, 4, 2, 3))
+                .parallel(2)
+                .summaryStatisticsAndPercentiles();
+        assertEquals(5, sp.left().getCount());
+        assertEquals(N.percentilesOfSorted(arr(1, 2, 3, 4, 5)), sp.right().get());
+    }
 }

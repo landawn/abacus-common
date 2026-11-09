@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
@@ -686,4 +690,51 @@ public class EnumTypeTest extends TestBase {
     }
     // ---- bug review 2026-09-30 G131 end ----
 
+    public enum Annotated {
+        @com.alibaba.fastjson2.annotation.JSONField(name = "fast")
+        A, @JsonProperty("jack")
+        B, C
+    }
+
+    public enum NoCode {
+        X
+    }
+
+    public enum Valued {
+        ONE("1"), TWO("2");
+
+        private final String v;
+
+        Valued(final String v) {
+            this.v = v;
+        }
+
+        @JsonValue
+        public String getV() {
+            return v;
+        }
+    }
+
+    @Test
+    public void testThirdPartyNameAnnotations() {
+        final EnumType<Annotated> type = new EnumType<>(Annotated.class.getName());
+        assertEquals("A", type.stringOf(Annotated.A));
+        assertEquals("B", type.stringOf(Annotated.B));
+        assertEquals("C", type.stringOf(Annotated.C));
+        assertSame(Annotated.A, type.valueOf("fast"));
+        assertSame(Annotated.B, type.valueOf("jack"));
+    }
+
+    @Test
+    public void testCodeRepresentationRequiresCodeMethod() {
+        assertThrows(RuntimeException.class, () -> new EnumType<NoCode>(NoCode.class.getName(), com.landawn.abacus.util.EnumType.CODE));
+    }
+
+    @Test
+    public void testJsonValueEnumCallableStatementSet() throws Exception {
+        final EnumType<Valued> type = new EnumType<>(Valued.class.getName());
+        final CallableStatement cs = mock(CallableStatement.class);
+        type.set(cs, "p", Valued.TWO);
+        verify(cs).setString("p", "2");
+    }
 }

@@ -18,8 +18,10 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.BiMap;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Fn;
+import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
@@ -1314,4 +1317,106 @@ public class CollectorsTest extends CollectorsTestSupport {
         assertEquals(personList.size(), result.size());
     }
 
+    /** Accumulates {@code left} and {@code right} into two containers, combines them (left, right) and finishes. */
+    private static <T, A, R> R combine2(final Collector<T, A, R> c, final List<T> left, final List<T> right) {
+        final A a = c.supplier().get();
+        left.forEach(t -> c.accumulator().accept(a, t));
+        final A b = c.supplier().get();
+        right.forEach(t -> c.accumulator().accept(b, t));
+        return c.finisher().apply(c.combiner().apply(a, b));
+    }
+
+    private static final Comparator<Integer> NAT = Comparator.naturalOrder();
+
+    @Test
+    public void testReducingMapperCombineEmptyLeft() {
+        final Optional<Integer> r = combine2(Collectors.<Integer, Integer> reducing(x -> x * 10, Integer::sum), List.of(), List.of(2));
+        assertEquals(20, r.get());
+    }
+
+    @Test
+    public void testCreateRejectsNullCharacteristic() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Collectors.create(ArrayList::new, (List<Object> l, Object t) -> l.add(t), (l1, l2) -> l1, new Characteristics[] { null }));
+    }
+
+    @Test
+    public void testToCollectionAtMostSizeCombiner() {
+        final List<Integer> r1 = combine2(Collectors.<Integer, List<Integer>> toCollection(3, ArrayList::new), List.of(1), List.of(2));
+        assertEquals(Arrays.asList(1, 2), r1);
+
+        final Set<Integer> r2 = combine2(Collectors.<Integer, Set<Integer>> toCollection(2, LinkedHashSet::new), List.of(1), List.of(2, 3));
+        assertEquals(new LinkedHashSet<>(Arrays.asList(1, 2)), r2);
+    }
+
+    @Test
+    public void testToArrayWithLargeEnoughSuppliedArray() {
+        final String[] r = Stream.of("x", "y").collect(Collectors.toArray(() -> new String[3]));
+        assertArrayEquals(new String[] { "x", "y", null }, r);
+    }
+
+    @Test
+    public void testOnlyOneAndFirstCombineEmptyLeft() {
+        assertEquals(5, combine2(Collectors.<Integer> onlyOne(), List.of(), List.of(5)).get());
+        assertEquals(5, combine2(Collectors.<Integer> onlyOne(), List.of(5), List.of()).get());
+        assertEquals(5, combine2(Collectors.<Integer> first(), List.of(), List.of(5)).get());
+        assertEquals(5, combine2(Collectors.<Integer> first(), List.of(5), List.of()).get());
+    }
+
+    @Test
+    public void testLastNCombineOneSideEmpty() {
+        assertEquals(List.of(1), combine2(Collectors.<Integer> last(2), List.of(1), List.of()));
+        assertEquals(List.of(2), combine2(Collectors.<Integer> last(2), List.of(), List.of(2)));
+    }
+
+    @Test
+    public void testMaxAllCombiners() {
+        assertEquals(List.of(3, 3), combine2(Collectors.maxAll(NAT, 5), List.of(), List.of(3, 3)));
+
+        final Collector<Integer, ?, List<Integer>> c = Collectors.maxAll(NAT, Collectors.<Integer> toList());
+        assertEquals(List.of(4), combine2(c, List.of(), List.of(4)));
+        assertEquals(List.of(4), combine2(c, List.of(1), List.of(4)));
+        assertEquals(List.of(4), combine2(c, List.of(4), List.of(1)));
+        assertEquals(List.of(4, 4), combine2(c, List.of(4), List.of(4)));
+    }
+
+    @Test
+    public void testMaxAllWithCombiners() {
+        final Collector<Integer, ?, Integer> c = Collectors.maxAllWith(NAT, Collectors.<Integer> counting(),
+                o -> o.isPresent() ? o.get().right().intValue() : -1);
+        assertEquals(1, combine2(c, List.of(), List.of(4)));
+        assertEquals(1, combine2(c, List.of(4), List.of(1)));
+        assertEquals(1, combine2(c, List.of(1), List.of(4)));
+        assertEquals(2, combine2(c, List.of(4), List.of(4)));
+        assertEquals(-1, combine2(c, List.of(), List.of()));
+    }
+
+    @Test
+    public void testMinMaxOrElseThrow() {
+        assertThrows(NoSuchElementException.class, () -> Stream.<Integer> empty().collect(Collectors.minMaxOrElseThrow(NAT)));
+        final Pair<Integer, Integer> p = combine2(Collectors.minMaxOrElseThrow(NAT), List.of(), List.of(2, 1, 3));
+        assertEquals(Pair.of(1, 3), p);
+        assertEquals(Pair.of(1, 9), combine2(Collectors.minMaxOrElseThrow(NAT), List.of(5), List.of(1, 9)));
+    }
+
+    @Test
+    public void testFlatMappingToMultimapWithParallelInnerStreams() {
+        final ListMultimap<String, Integer> m1 = Stream.of("a", "b")
+                .collect(Collectors.flatMappingValueToMultimap(s -> s, s -> Stream.of(1, 2).parallel(), N::<String, Integer> newListMultimap));
+        assertEquals(List.of(1, 2), m1.get("a"));
+        assertEquals(List.of(1, 2), m1.get("b"));
+
+        final ListMultimap<Integer, String> m2 = Stream.of("a", "b")
+                .collect(Collectors.flatMappingKeyToMultimap(s -> Stream.<Integer> of(1, 2).parallel(), s -> s, N::<Integer, String> newListMultimap));
+        assertEquals(List.of("a", "b"), m2.get(1));
+        assertTrue(m2.containsKey(2));
+        assertFalse(m2.containsKey(3));
+    }
+
+    @Test
+    public void testMoreCollectorsCombine3Combiner() {
+        final Collector<Integer, ?, String> c = Collectors.MoreCollectors.combine(Collectors.<Integer> counting(), Collectors.summingInt(x -> x),
+                Collectors.<Integer> toList(), (cnt, sum, list) -> cnt + ":" + sum + ":" + list);
+        assertEquals("3:6:[1, 2, 3]", combine2(c, List.of(1), List.of(2, 3)));
+    }
 }

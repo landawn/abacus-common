@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -1264,4 +1265,92 @@ public class AbstractDoubleStreamTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G123 end ----
+
+    private static DoubleStream par(final double... a) {
+        return DoubleStream.of(a).parallel(2);
+    }
+
+    private static DoubleStream iterStream(final double... a) {
+        return DoubleStream.of(DoubleIterator.of(a));
+    }
+
+    @Test
+    public void testRateLimitedParallel() {
+        assertArrayEquals(new double[] { 1, 2, 3 }, par(1, 2, 3).rateLimited(RateLimiter.create(100000)).sorted().toArray());
+    }
+
+    @Test
+    public void testDelayParallel() {
+        assertArrayEquals(new double[] { 1, 2 }, par(1, 2).delay(Duration.ofMillis(1)).sorted().toArray());
+    }
+
+    @Test
+    public void testDebounceEmptyIteratorNextThrows() {
+        final DoubleIterator iter = DoubleStream.of(DoubleIterator.empty()).debounce(Duration.ofMillis(5)).iterator();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextDouble);
+    }
+
+    @Test
+    public void testDistinctFlatMapArrayFlatmapToObjOnIteratorStream() {
+        assertArrayEquals(new double[] { 1, 2, 3 }, iterStream(1, 2, 1, 3, 2).distinct().toArray());
+        assertArrayEquals(new double[] { 1, 1, 2, 2 }, iterStream(1, 2).flatMapArray(x -> new double[] { x, x }).toArray());
+        final List<String> list = iterStream(1, 2).<String> flatmapToObj(x -> Arrays.asList("a" + x, "b" + x)).toList();
+        assertEquals(Arrays.asList("a1.0", "b1.0", "a2.0", "b2.0"), list);
+    }
+
+    @Test
+    public void testMapMultiMapperFailureAndLargeExpansion() {
+        final DoubleIterator iter = iterStream(1, 2).mapMulti((x, consumer) -> {
+            consumer.accept(x);
+            if (x == 2) {
+                throw new IllegalStateException("boom");
+            }
+        }).iterator();
+        assertTrue(iter.hasNext());
+        assertEquals(1.0, iter.nextDouble());
+        assertThrows(IllegalStateException.class, iter::hasNext);
+
+        final long count = iterStream(1, 2).mapMulti((x, consumer) -> {
+            for (int i = 0; i < 10300; i++) {
+                consumer.accept(x);
+            }
+        }).count();
+        assertEquals(20600, count);
+    }
+
+    @Test
+    public void testScanInitNotIncluded() {
+        assertArrayEquals(new double[] { 11, 13 }, iterStream(1, 2).scan(10, false, Double::sum).toArray());
+    }
+
+    @Test
+    public void testCycledOneRoundHasNextAfterEnd() {
+        final DoubleIterator iter = iterStream(1, 2).cycled(1).iterator();
+        assertEquals(1.0, iter.nextDouble());
+        assertEquals(2.0, iter.nextDouble());
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testMergeWithParallel() {
+        final double[] result = par(1, 3).mergeWith(DoubleStream.of(2, 4), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .sequential()
+                .toArray();
+        assertEquals(4, result.length);
+        assertEquals(10.0, Arrays.stream(result).sum());
+    }
+
+    @Test
+    public void testSummaryStatisticsAndPercentilesParallelAndEmpty() {
+        final Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> p = par(3, 1, 2).summaryStatisticsAndPercentiles();
+        assertEquals(3, p.left().getCount());
+        assertEquals(1.0, p.left().getMin());
+        assertTrue(p.right().isPresent());
+
+        final Pair<DoubleSummaryStatistics, Optional<Map<Percentage, Double>>> e = iterStream().summaryStatisticsAndPercentiles();
+        assertEquals(0, e.left().getCount());
+        assertFalse(e.right().isPresent());
+    }
 }

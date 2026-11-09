@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,9 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -127,5 +131,105 @@ class ProfilerStatisticsContractTest extends TestBase {
         var document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(xml.toByteArray()));
         assertEquals(1, document.getElementsByTagName("error").getLength());
         assertTrue(document.getElementsByTagName("error").item(0).getTextContent().contains("test<failure>&"));
+    }
+
+    public static class Target {
+        final AtomicInteger calls = new AtomicInteger();
+
+        public void work() {
+            calls.incrementAndGet();
+        }
+
+        public void workWithArg(final Object arg) {
+            calls.incrementAndGet();
+        }
+
+        public void boom() {
+            throw new IllegalStateException("boom");
+        }
+
+        public void failingHook() {
+            throw new IllegalArgumentException("hook");
+        }
+    }
+
+    private static Method method(final String name, final Class<?>... types) throws Exception {
+        return Target.class.getMethod(name, types);
+    }
+
+    private static <T> T quietly(final Throwables.Supplier<T, Exception> action) throws Exception {
+        final PrintStream original = System.out;
+        System.setOut(new PrintStream(new ByteArrayOutputStream(), true, "UTF-8"));
+        try {
+            return resumed(action);
+        } finally {
+            System.setOut(original);
+        }
+    }
+
+    // Profiler.suspend() is JVM-global and other suite classes leave it set; a suspended profiler runs a single
+    // round/loop, so run-count assertions must execute with the profiler resumed and restore the previous state.
+    private static <T> T resumed(final Throwables.Supplier<T, Exception> action) throws Exception {
+        final boolean wasSuspended = Profiler.isSuspended();
+        Profiler.resume();
+        try {
+            return action.get();
+        } finally {
+            if (wasSuspended) {
+                Profiler.suspend();
+            }
+        }
+    }
+
+    @Test
+    public void testRunWithArgumentListOverload() throws Exception {
+        final Target target = new Target();
+        final MultiLoopsStatistics stats = resumed(() -> Profiler.run(target, method("work"), (List<?>) null, 1, 3, 1));
+        assertEquals(3, target.calls.get());
+        assertEquals(1, stats.getThreadNum());
+    }
+
+    @Test
+    public void testRunRejectsInvalidParameters() throws Exception {
+        final Target target = new Target();
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(target, method("work"), (List<?>) null, 0, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Profiler.run(target, method("workWithArg", Object.class), List.of("a", "b", "c"), 2, 1, 1));
+    }
+
+    @Test
+    public void testMultipleRoundsPrintsEarlierRounds() throws Exception {
+        final Target target = new Target();
+        final MultiLoopsStatistics stats = quietly(() -> Profiler.run(target, method("work"), (List<?>) null, 1, 2, 2));
+        assertEquals(4, target.calls.get());
+        assertNotNull(stats);
+    }
+
+    @Test
+    public void testFailingHooksAndProfiledMethodAreRecorded() throws Exception {
+        final Target target = new Target();
+        final Method hook = method("failingHook");
+        final MultiLoopsStatistics stats = quietly(() -> Profiler.run(target, method("boom"), null, hook, hook, hook, hook, 1, 0, 2, 0, 1));
+
+        final List<MethodStatistics> failed = stats.getFailedMethodStatisticsList("boom");
+        assertEquals(2, failed.size());
+        assertTrue(failed.get(0).getResult() instanceof IllegalStateException);
+        assertEquals("boom", ((IllegalStateException) failed.get(0).getResult()).getMessage());
+    }
+
+    @Test
+    public void testSleepReturnsImmediatelyWhenSuspended() {
+        // Restore the JVM-global state this test found: AbstractTest suspends the profiler for the whole suite, and
+        // an unconditional resume() here made every later Profiler.run in the suite execute its full thread/loop counts.
+        final boolean wasSuspended = Profiler.isSuspended();
+        Profiler.suspend();
+        try {
+            final long start = System.nanoTime();
+            Profiler.sleep(40);
+            assertTrue(System.nanoTime() - start < 40_000_000L);
+        } finally {
+            if (!wasSuspended) {
+                Profiler.resume();
+            }
+        }
     }
 }

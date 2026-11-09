@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.LongIterator;
+import com.landawn.abacus.util.MergeResult;
 
 /** LongStream general contracts. */
 public class LongStreamTest extends LongStreamTestSupport {
@@ -1019,4 +1020,61 @@ public class LongStreamTest extends LongStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    @Test
+    public void testFromJdkStreamNextWithoutHasNext() {
+        final LongIterator iter = LongStream.from(java.util.stream.LongStream.of(1, 2)).iterator();
+        assertEquals(1L, iter.nextLong());
+        assertEquals(2L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromJdkStreamAdvance() {
+        final LongIteratorEx iter = LongStream.from(java.util.stream.LongStream.of(1, 2, 3, 4)).iteratorEx();
+        iter.advance(0);
+        iter.advance(1);
+        assertEquals(2L, iter.nextLong());
+        iter.advance(1);
+        assertEquals(4L, iter.nextLong());
+        assertFalse(iter.hasNext());
+
+        final LongIteratorEx iter2 = LongStream.from(java.util.stream.LongStream.of(1, 2)).iteratorEx();
+        assertEquals(2, iter2.count());
+        iter2.advance(3);
+        assertFalse(iter2.hasNext());
+    }
+
+    @Test
+    public void testRangeClosedFullSpanAdvanceToExtraElement() {
+        final LongIteratorEx iter = LongStream.rangeClosed(Long.MIN_VALUE, Long.MAX_VALUE, 1).iteratorEx();
+        iter.advance(Long.MAX_VALUE);
+        iter.advance(Long.MAX_VALUE);
+        iter.advance(1);
+        assertTrue(iter.hasNext());
+        assertEquals(Long.MAX_VALUE, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testRepeatCountAndAdvance() {
+        final LongIteratorEx iter = LongStream.repeat(7L, 30).iteratorEx();
+        iter.advance(0);
+        assertEquals(7L, iter.nextLong());
+        assertEquals(29, iter.count());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testMergeIteratorsExhausted() {
+        final LongIterator it = LongStream.merge((LongIterator) null, (LongIterator) null, (x, y) -> MergeResult.TAKE_FIRST).iterator();
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextLong);
+    }
+
+    @Test
+    public void testRepeatHugeToArrayRejected() {
+        final LongIteratorEx iter = LongStream.repeat(1L, Long.MAX_VALUE).iteratorEx();
+        assertThrows(IllegalStateException.class, iter::toArray);
+    }
 }

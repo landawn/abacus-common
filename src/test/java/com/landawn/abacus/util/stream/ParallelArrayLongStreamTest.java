@@ -1509,4 +1509,20 @@ public class ParallelArrayLongStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static LongStream arrayParallel(final int threads, final long... elements) {
+        return LongStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threads).build());
+    }
+
+    @Test
+    public void testReduceWithEmptyTrailingSlice() {
+        // 5 elements over 4 threads: slice size 2, so the 4th slice is empty
+        assertEquals(15L, arrayParallel(4, 1, 2, 3, 4, 5).reduce(Long::sum).get());
+        assertEquals(15L, arrayParallel(4, 1, 2, 3, 4, 5).reduce(0L, Long::sum));
+    }
+
+    @Test
+    public void testDropWhileAllMatching() {
+        assertArrayEquals(new long[0], arrayParallel(3, 1, 2, 3, 4, 5, 6).dropWhile(x -> true).toArray());
+    }
 }

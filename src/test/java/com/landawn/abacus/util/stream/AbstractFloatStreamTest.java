@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import com.landawn.abacus.util.FloatSummaryStatistics;
 import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
@@ -1004,4 +1006,69 @@ public class AbstractFloatStreamTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G123 end ----
+
+    private static FloatStream par(final float... a) {
+        return FloatStream.of(a).parallel(2);
+    }
+
+    @Test
+    public void testRateLimitedParallel() {
+        final float[] result = par(1f, 2f, 3f).rateLimited(RateLimiter.create(100000)).sorted().toArray();
+        assertArrayEquals(new float[] { 1f, 2f, 3f }, result);
+    }
+
+    @Test
+    public void testDelayParallel() {
+        final float[] result = par(1f, 2f).delay(java.time.Duration.ofMillis(1)).sorted().toArray();
+        assertArrayEquals(new float[] { 1f, 2f }, result);
+    }
+
+    @Test
+    public void testDebounceEmptyIteratorNextThrows() {
+        final FloatIterator iter = FloatStream.of(FloatIterator.empty()).debounce(com.landawn.abacus.util.Duration.ofMillis(5)).iterator();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+    }
+
+    @Test
+    public void testScanInitNotIncluded() {
+        assertArrayEquals(new float[] { 11f, 13f }, FloatStream.of(1f, 2f).scan(10f, false, (a, b) -> a + b).toArray());
+    }
+
+    @Test
+    public void testCycledRoundsExhaustedHasNextStaysFalse() {
+        final FloatIterator iter = FloatStream.of(1f, 2f).cycled(2).iterator();
+        int count = 0;
+        while (iter.hasNext()) {
+            iter.nextFloat();
+            count++;
+        }
+        assertEquals(4, count);
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testMergeWithParallel() {
+        final float[] merged = par(1f, 3f, 5f).mergeWith(FloatStream.of(2f, 4f), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .sequential()
+                .toArray();
+        assertEquals(5, merged.length);
+        final float[] sorted = merged.clone();
+        N.sort(sorted);
+        assertArrayEquals(new float[] { 1f, 2f, 3f, 4f, 5f }, sorted);
+    }
+
+    @Test
+    public void testPercentilesParallel() {
+        final Optional<Map<Percentage, Float>> p = par(5f, 1f, 3f, 2f, 4f).percentiles();
+        assertTrue(p.isPresent());
+        assertFalse(p.get().isEmpty());
+
+        final Pair<FloatSummaryStatistics, Optional<Map<Percentage, Float>>> both = par(5f, 1f, 3f).summaryStatisticsAndPercentiles();
+        assertEquals(3, both.left().getCount());
+        assertEquals(1f, both.left().getMin(), 0f);
+        assertEquals(5f, both.left().getMax(), 0f);
+        assertTrue(both.right().isPresent());
+    }
 }

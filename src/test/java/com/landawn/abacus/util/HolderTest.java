@@ -219,4 +219,11 @@ public class HolderTest extends TestBase {
         assertEquals(7, result.get());
         assertFalse(Holder.of((String) null).mapIfNotNull(String::toUpperCase).mapToNonNullIfNotNull(String::length).isPresent());
     }
+
+    @Test
+    public void testHolderOrElseThrowIfNull() {
+        assertEquals("x", Holder.of("x").orElseThrowIfNull("missing"));
+        assertEquals("missing", assertThrows(java.util.NoSuchElementException.class, () -> Holder.of(null).orElseThrowIfNull("missing")).getMessage());
+        assertTrue(Holder.of(null).isNull());
+    }
 }

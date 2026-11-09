@@ -20,6 +20,7 @@ import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.AbstractCollection;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -4062,4 +4064,802 @@ public class NTest extends NTestSupport {
         }
     }
     // ---- deep review 2026-11-02b G064 end ----
+
+    /** A plain Collection: not a List, Set, Deque or SequencedCollection, and without a descendingIterator method. */
+    static final class PlainCollection<T> extends AbstractCollection<T> {
+        private final List<T> list;
+
+        PlainCollection(final List<T> list) {
+            this.list = new ArrayList<>(list);
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return list.iterator();
+        }
+
+        @Override
+        public int size() {
+            return list.size();
+        }
+    }
+
+    /** An Iterable that is not a Collection. */
+    static <T> Iterable<T> iterable(final List<T> list) {
+        return list::iterator;
+    }
+
+    @Test
+    public void testContainsOnPlainIterable() {
+        assertTrue(N.contains(iterable(Arrays.asList("a", "b")), "b"));
+        assertFalse(N.contains(iterable(Arrays.asList("a", "b")), "c"));
+        assertTrue(N.containsAll(iterable(Arrays.asList("a")), Collections.emptyList()));
+    }
+
+    @Test
+    public void testSplitEmptyRange() {
+        final String[] a = { "a", "b", "c" };
+        assertTrue(N.split(a, 1, 1, 2).isEmpty());
+        assertTrue(N.split((String[]) null, 0, 0, 2).isEmpty());
+    }
+
+    @Test
+    public void testFlattenNextExhausted() {
+        final ObjIterator<String> it = N.flatten(Arrays.asList(Arrays.asList("x").iterator()).iterator());
+        assertEquals("x", it.next());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testDatasetColumnChecks() {
+        final Dataset a = N.newDataset(Arrays.asList("id", "name"), new Object[][] { { 1, "a" } });
+        final Dataset b = N.newDataset(Arrays.asList("id"), new Object[][] { { 1 } });
+        final Dataset c = N.newDataset(Arrays.asList("other"), new Object[][] { { 1 } });
+
+        assertThrows(IllegalArgumentException.class, () -> N.intersection(a, b, true));
+        assertThrows(IllegalArgumentException.class, () -> N.intersection(a, c, false));
+        assertEquals(1, N.intersection(a, b, false).size());
+    }
+
+    @Test
+    public void testAddAllEmptyElements() {
+        final float[] f = { 1f, 2f };
+        final float[] rf = N.addAll(f);
+        assertArrayEquals(f, rf);
+        assertFalse(f == rf);
+
+        final double[] d = { 1d };
+        final double[] rd = N.addAll(d);
+        assertArrayEquals(d, rd);
+        assertFalse(d == rd);
+    }
+
+    @Test
+    public void testInsertMiddle() {
+        assertArrayEquals(new boolean[] { true, false, true }, N.insert(new boolean[] { true, true }, 1, false));
+        assertArrayEquals(new String[] { "a", "x", "b" }, N.insert(new String[] { "a", "b" }, 1, "x"));
+    }
+
+    @Test
+    public void testInsertAllEmptyElements() {
+        assertArrayEquals(new char[0], N.insertAll((char[]) null, 0, new char[0]));
+        assertArrayEquals(new char[] { 'a' }, N.insertAll(new char[] { 'a' }, 0, new char[0]));
+        assertArrayEquals(new byte[0], N.insertAll((byte[]) null, 0, new byte[0]));
+        assertArrayEquals(new byte[] { 1 }, N.insertAll(new byte[] { 1 }, 1, new byte[0]));
+        assertArrayEquals(new short[0], N.insertAll((short[]) null, 0, new short[0]));
+        assertArrayEquals(new short[] { 1 }, N.insertAll(new short[] { 1 }, 1, new short[0]));
+        assertArrayEquals(new long[0], N.insertAll((long[]) null, 0, new long[0]));
+        assertArrayEquals(new long[] { 1 }, N.insertAll(new long[] { 1 }, 1, new long[0]));
+        assertArrayEquals(new float[0], N.insertAll((float[]) null, 0, new float[0]));
+        assertArrayEquals(new float[] { 1 }, N.insertAll(new float[] { 1 }, 1, new float[0]));
+        assertArrayEquals(new double[0], N.insertAll((double[]) null, 0, new double[0]));
+        assertArrayEquals(new double[] { 1 }, N.insertAll(new double[] { 1 }, 1, new double[0]));
+    }
+
+    @Test
+    public void testRemoveAtGeneric() {
+        final String[] a = { "a", "b", "c", "d" };
+        final String[] r0 = N.removeAt(a, new int[0]);
+        assertArrayEquals(a, r0);
+        assertFalse(a == r0);
+        assertArrayEquals(new String[] { "a", "c", "d" }, N.removeAt(a, 1));
+        assertArrayEquals(new String[] { "a", "d" }, N.removeAt(a, 1, 2, 2, 1));
+    }
+
+    @Test
+    public void testRemoveVariantsEmpty() {
+        final Integer[] emptyInts = new Integer[0];
+        assertSame(emptyInts, N.remove(emptyInts, 1));
+        assertSame(emptyInts, N.removeAll(emptyInts, 1, 2));
+        assertSame(emptyInts, N.removeAllOccurrences(emptyInts, 1));
+
+        final String[] s = { "a", "b", "a" };
+        final String[] sc = N.removeAll(s);
+        assertArrayEquals(s, sc);
+        assertFalse(s == sc);
+        assertArrayEquals(new String[] { "b" }, N.removeAll(s, "a"));
+
+        final Integer[] ints = { 1, 2, 1, 3 };
+        assertArrayEquals(new Integer[] { 2, 3 }, N.removeAll(ints, 1));
+    }
+
+    @Test
+    public void testRemoveDuplicatesEdges() {
+        assertArrayEquals(new boolean[] { true }, N.removeDuplicates(new boolean[] { false, true, false }, 1, 2));
+        assertArrayEquals(new String[0], N.removeDuplicates(new String[0], false));
+        final Integer[] emptyInts = new Integer[0];
+        assertSame(emptyInts, N.removeDuplicates(emptyInts, false));
+        final Integer[] ints = { 1, 2, 2 };
+        assertEquals(0, N.removeDuplicates(ints, 1, 1, false).length);
+        assertArrayEquals(new Integer[] { 2 }, N.removeDuplicates(ints, 1, 2, false));
+    }
+
+    @Test
+    public void testRemoveDuplicatesPlainCollection() {
+        final PlainCollection<Integer> two = new PlainCollection<>(Arrays.asList(5, 5));
+        assertTrue(N.removeDuplicates(two, false));
+        assertEquals(1, two.size());
+
+        final PlainCollection<Integer> sorted = new PlainCollection<>(Arrays.asList(1, 1, 2, 3, 3));
+        assertTrue(N.removeDuplicates(sorted, true));
+        assertEquals(Arrays.asList(1, 2, 3), new ArrayList<>(sorted));
+
+        final PlainCollection<Integer> noDup = new PlainCollection<>(Arrays.asList(1, 2, 3));
+        assertFalse(N.removeDuplicates(noDup, true));
+    }
+
+    @Test
+    public void testRemoveRangeStringEmptyRange() {
+        assertArrayEquals(new String[0], N.removeRange((String[]) null, 0, 0));
+        final String[] s = { "a", "b" };
+        final String[] r = N.removeRange(s, 1, 1);
+        assertArrayEquals(s, r);
+        assertFalse(s == r);
+    }
+
+    @Test
+    public void testReplaceRangeLinkedListSameSize() {
+        final List<String> list = new LinkedList<>(Arrays.asList("a", "b", "c", "d"));
+        assertTrue(N.replaceRange(list, 1, 3, Arrays.asList("x", "y")));
+        assertEquals(Arrays.asList("a", "x", "y", "d"), list);
+    }
+
+    @Test
+    public void testContainsDuplicatesVariants() {
+        assertFalse(N.containsDuplicates(new boolean[] { true, false }, 0, 1));
+        assertFalse(N.containsDuplicates(new byte[0], false));
+        assertFalse(N.containsDuplicates(new short[0], false));
+        assertFalse(N.containsDuplicates(new short[] { 1, 2, 1 }, 0, 2, false));
+        assertTrue(N.containsDuplicates(new short[] { 3, 3 }, 0, 2, false));
+        assertFalse(N.containsDuplicates(new short[] { 3, 4 }, 0, 2, false));
+        assertFalse(N.containsDuplicates(new short[] { 1, 2, 3, 4, 5 }, 0, 5, false));
+
+        final short[] big = new short[40];
+        for (int i = 0; i < big.length; i++) {
+            big[i] = (short) i;
+        }
+        assertFalse(N.containsDuplicates(big, 0, big.length, false));
+        big[39] = 7;
+        assertTrue(N.containsDuplicates(big, 0, big.length, false));
+
+        assertFalse(N.containsDuplicates(new int[] { 1 }, 0, 1, false));
+        assertFalse(N.containsDuplicates(new int[] { 1, 2, 3, 4 }, 0, 4, false));
+        assertTrue(N.containsDuplicates(new int[] { 1, 2, 3, 1 }, 0, 4, false));
+        assertFalse(N.containsDuplicates(new long[0], false));
+        assertFalse(N.containsDuplicates(new long[] { 1, 2, 3, 4 }, 0, 4, false));
+        assertTrue(N.containsDuplicates(new long[] { 1, 2, 3, 2 }, 0, 4, false));
+        assertFalse(N.containsDuplicates(new float[] { 1, 2, 3, 4 }, 0, 4, false));
+        assertTrue(N.containsDuplicates(new float[] { 1, 2, 3, 2 }, 0, 4, false));
+        assertFalse(N.containsDuplicates(new double[] { 1, 2, 3, 4 }, 0, 4, false));
+        assertTrue(N.containsDuplicates(new double[] { 1, 2, 3, 2 }, 0, 4, false));
+        assertFalse(N.containsDuplicates(new String[] { "a", "b" }, 0, 1, false));
+    }
+
+    @Test
+    public void testSumAverageEmptyRanges() {
+        final float[] f = { 1f, 2f };
+        assertEquals(0f, N.sum(f, 1, 1));
+        assertEquals(0d, N.sumToDouble(f, 1, 1));
+        assertEquals(0d, N.average(new char[] { 'a' }, 1, 1));
+        assertEquals(0d, N.average(new short[] { 1 }, 0, 0));
+        assertEquals(0d, N.average(new int[] { 1 }, 0, 0));
+        assertEquals(0d, N.average(new long[] { 1 }, 0, 0));
+        assertEquals(0d, N.average(new float[] { 1 }, 0, 0));
+        assertEquals(0d, N.average(new double[] { 1 }, 0, 0));
+
+        final String[] s = { "a", "bb" };
+        final List<String> list = Arrays.asList("a", "bb");
+        assertEquals(0, N.sumInt(s, 1, 1, String::length));
+        assertEquals(0L, N.sumLong(s, 1, 1, (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0L, N.sumLong(list, 1, 1, (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0d, N.averageInt(s, 1, 1, String::length));
+        assertEquals(0d, N.averageLong(new String[0], (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0d, N.averageLong(s, 1, 1, (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0d, N.averageLong(list, 1, 1, (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0d, N.averageLong(iterable(new ArrayList<String>()), (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(1.5d, N.averageLong(iterable(list), (java.util.function.ToLongFunction<String>) String::length));
+        assertEquals(0d, N.averageDouble(new String[0], (java.util.function.ToDoubleFunction<String>) String::length));
+        assertEquals(0d, N.averageDouble(s, 1, 1, (java.util.function.ToDoubleFunction<String>) String::length));
+        assertEquals(0d, N.averageDouble(list, 1, 1, (java.util.function.ToDoubleFunction<String>) String::length));
+    }
+
+    @Test
+    public void testMinMaxMedianKthEmptyRangesThrow() {
+        assertThrows(IllegalArgumentException.class, () -> N.min(new char[] { 'a' }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new byte[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new short[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new int[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new long[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new float[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new double[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.min(new String[] { "a" }, 1, 1, Comparator.<String> naturalOrder()));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new char[] { 'a' }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new byte[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new short[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new int[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new long[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new float[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.max(new double[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.median(new short[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.median(new float[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.lowerMedian(new byte[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.lowerMedian(new short[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.lowerMedian(new float[] { 1 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.lowerMedian(new String[] { "a" }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.lowerMedian(new String[] { "a" }, 1, 1, Comparator.<String> naturalOrder()));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new char[] { 'a' }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new byte[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new short[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new int[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new long[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new float[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new double[] { 1 }, 1, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> N.kthLargest(new String[] { "a" }, 1, 1, 1));
+    }
+
+    @Test
+    public void testMinMaxNullFirstComparator() {
+        final Comparator<String> nullMin = N.NULL_MIN_COMPARATOR;
+        final Comparator<String> nullMax = N.NULL_MAX_COMPARATOR;
+        assertNull(N.min(new String[] { "b", null, "a" }, 0, 3, nullMin));
+        assertNull(N.max(new String[] { "b", null, "a" }, 0, 3, nullMax));
+        assertNull(N.min(Arrays.asList("b", null, "a"), 0, 3, nullMin));
+        assertNull(N.max(Arrays.asList("b", null, "a"), 0, 3, nullMax));
+        assertNull(N.min(new LinkedList<>(Arrays.asList("z", "b", null, "a")), 1, 4, nullMin));
+        assertNull(N.max(new LinkedList<>(Arrays.asList("z", "b", null, "a")), 1, 4, nullMax));
+        assertEquals("a", N.min(new LinkedList<>(Arrays.asList("0", "b", "a")), 1, 3, nullMin));
+        assertEquals("b", N.max(new LinkedList<>(Arrays.asList("z", "b", "a")), 1, 3, nullMax));
+    }
+
+    @Test
+    public void testMinAllMaxAllAndDefaults() {
+        final Comparator<Integer> cmp = Comparator.naturalOrder();
+        assertEquals(Arrays.asList(1), N.minAll(new Integer[] { 3, 3, 1 }, cmp));
+        assertTrue(N.minAll((Iterator<Integer>) null, cmp).isEmpty());
+        assertEquals(Arrays.asList(1, 1), N.minAll(Arrays.asList(3, 3, 1, 1).iterator(), cmp));
+        assertTrue(N.maxAll((Iterator<Integer>) null, cmp).isEmpty());
+
+        assertEquals("d", N.minValueOrDefaultIfEmpty(new ArrayList<String>(), s -> s, "d"));
+        assertEquals("d", N.maxValueOrDefaultIfEmpty(new ArrayList<String>(), s -> s, "d"));
+        assertEquals(1, N.minIntOrDefaultIfEmpty(new String[] { "abc", "a" }, String::length, -1));
+        assertEquals(-1L, N.minLongOrDefaultIfEmpty(new String[0], (java.util.function.ToLongFunction<String>) String::length, -1L));
+        assertEquals(1L, N.minLongOrDefaultIfEmpty(new String[] { "abc", "a" }, (java.util.function.ToLongFunction<String>) String::length, -1L));
+        assertEquals(1L, N.minLongOrDefaultIfEmpty(Arrays.asList("abc", "a"), (java.util.function.ToLongFunction<String>) String::length, -1L));
+        assertEquals(-1d, N.minDoubleOrDefaultIfEmpty(new ArrayList<String>(), (java.util.function.ToDoubleFunction<String>) String::length, -1d));
+        assertEquals(-1L, N.maxLongOrDefaultIfEmpty(new String[0], (java.util.function.ToLongFunction<String>) String::length, -1L));
+        assertEquals(3L, N.maxLongOrDefaultIfEmpty(Arrays.asList("abc", "a"), (java.util.function.ToLongFunction<String>) String::length, -1L));
+
+        final Pair<String, String> p = N.minMax(new String[] { "x" }, Comparator.<String> naturalOrder());
+        assertEquals("x", p.left());
+        assertEquals("x", p.right());
+
+        assertEquals("c", N.max(iterable(Arrays.asList("a", "c", "b")), Comparator.<String> naturalOrder()));
+    }
+
+    @Test
+    public void testKthLargestAndTopOnLinkedList() {
+        final Comparator<Integer> cmp = Comparator.naturalOrder();
+        final List<Integer> ll = new LinkedList<>(Arrays.asList(100, 5, 1, 4, 2, 3, 6));
+        // range [1,7) = 5,1,4,2,3,6
+        assertEquals(5, N.kthLargest(ll, 1, 7, 2, cmp));
+        assertEquals(2, N.kthLargest(ll, 1, 7, 5, cmp));
+
+        assertEquals(Arrays.asList("b", "c"), N.top(new String[] { "a", "b", "c" }, 1, 3, 5, Comparator.<String> naturalOrder()));
+        assertTrue(N.top(new LinkedList<Integer>(Arrays.asList(1, 2)), 1, 1, 1, cmp).isEmpty());
+        final List<Integer> top = N.top(ll, 1, 7, 2, cmp);
+        assertEquals(2, top.size());
+        assertTrue(top.containsAll(Arrays.asList(5, 6)));
+        final List<Integer> top2 = N.top(ll, 1, 7, 2, cmp, false);
+        assertTrue(top2.containsAll(Arrays.asList(5, 6)));
+    }
+
+    @Test
+    public void testFilterEmptyRanges() {
+        assertEquals(0, N.filter(new boolean[] { true }, 1, 1, v -> v).length);
+        assertEquals(0, N.filter(new char[] { 'a' }, 1, 1, v -> true).length);
+        assertEquals(0, N.filter(new byte[] { 1 }, 1, 1, v -> true).length);
+        assertEquals(0, N.filter(new short[] { 1 }, 1, 1, v -> true).length);
+        assertEquals(0, N.filter(new long[] { 1 }, 1, 1, (java.util.function.LongPredicate) v -> true).length);
+        assertEquals(0, N.filter(new float[] { 1 }, 1, 1, v -> true).length);
+        assertEquals(0, N.filter(new double[] { 1 }, 1, 1, (java.util.function.DoublePredicate) v -> true).length);
+
+        final List<String> r1 = N.filter(new String[0], (java.util.function.Predicate<String>) s -> true, ArrayList::new);
+        assertTrue(r1.isEmpty());
+        final List<String> r2 = N.filter(new String[] { "a" }, 1, 1, (java.util.function.Predicate<String>) s -> true, ArrayList::new);
+        assertTrue(r2.isEmpty());
+        final List<String> r3 = N.filter(Arrays.asList("a"), 1, 1, (java.util.function.Predicate<String>) s -> true, ArrayList::new);
+        assertTrue(r3.isEmpty());
+    }
+
+    @Test
+    public void testMapToEmptyInputs() {
+        final String[] s = { "a" };
+        final List<String> empty = new ArrayList<>();
+        final List<String> one = Arrays.asList("a");
+        assertEquals(0, N.mapToBoolean(s, 1, 1, x -> true).length);
+        assertEquals(0, N.mapToBoolean(empty, x -> true).length);
+        assertEquals(0, N.mapToBoolean(one, 1, 1, x -> true).length);
+        assertEquals(0, N.mapToChar(new String[0], x -> 'c').length);
+        assertEquals(0, N.mapToChar(s, 1, 1, x -> 'c').length);
+        assertEquals(0, N.mapToChar(empty, x -> 'c').length);
+        assertEquals(0, N.mapToChar(one, 1, 1, x -> 'c').length);
+        assertEquals(0, N.mapToByte(new String[0], x -> (byte) 1).length);
+        assertEquals(0, N.mapToByte(s, 1, 1, x -> (byte) 1).length);
+        assertEquals(0, N.mapToByte(empty, x -> (byte) 1).length);
+        assertEquals(0, N.mapToShort(new String[0], x -> (short) 1).length);
+        assertEquals(0, N.mapToShort(s, 1, 1, x -> (short) 1).length);
+        assertEquals(0, N.mapToShort(empty, x -> (short) 1).length);
+        assertEquals(0, N.mapToInt(s, 1, 1, (java.util.function.ToIntFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToInt(empty, (java.util.function.ToIntFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToInt((long[]) null, (java.util.function.LongToIntFunction) x -> 1).length);
+        assertEquals(0, N.mapToInt((double[]) null, (java.util.function.DoubleToIntFunction) x -> 1).length);
+        assertEquals(0, N.mapToLong(new String[0], (java.util.function.ToLongFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToLong(s, 1, 1, (java.util.function.ToLongFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToLong(empty, (java.util.function.ToLongFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToFloat(new String[0], x -> 1f).length);
+        assertEquals(0, N.mapToFloat(s, 1, 1, x -> 1f).length);
+        assertEquals(0, N.mapToFloat(empty, x -> 1f).length);
+        assertEquals(0, N.mapToDouble(new String[0], (java.util.function.ToDoubleFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToDouble(s, 1, 1, (java.util.function.ToDoubleFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToDouble(empty, (java.util.function.ToDoubleFunction<String>) x -> 1).length);
+        assertEquals(0, N.mapToDouble((int[]) null, (java.util.function.IntToDoubleFunction) x -> 1).length);
+    }
+
+    @Test
+    public void testMapFlatMapRanges() {
+        final List<String> r1 = N.map(new String[0], (java.util.function.Function<String, String>) x -> x, ArrayList::new);
+        assertTrue(r1.isEmpty());
+        final List<String> r2 = N.map(new String[] { "a" }, 1, 1, (java.util.function.Function<String, String>) x -> x, ArrayList::new);
+        assertTrue(r2.isEmpty());
+        final LinkedList<String> ll = new LinkedList<>(Arrays.asList("a", "b", "c"));
+        final List<String> r3 = N.map(ll, 1, 3, (java.util.function.Function<String, String>) String::toUpperCase, ArrayList::new);
+        assertEquals(Arrays.asList("B", "C"), r3);
+
+        final List<String> f1 = N.flatMap(new String[0], (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x, x),
+                (java.util.function.IntFunction<List<String>>) ArrayList::new);
+        assertTrue(f1.isEmpty());
+        final List<String> f2 = N.flatMap(ll, 1, 3, (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x, x), ArrayList::new);
+        assertEquals(Arrays.asList("b", "b", "c", "c"), f2);
+        final List<String> f3 = N.flatMap((Iterator<String>) null, (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x),
+                (java.util.function.IntFunction<List<String>>) ArrayList::new);
+        assertTrue(f3.isEmpty());
+        final List<String> f4 = N.flatMap(new ArrayList<String>(), (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x),
+                (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x), ArrayList::new);
+        assertTrue(f4.isEmpty());
+        final List<String> f5 = N.flatMap((Iterator<String>) null, (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x),
+                (java.util.function.Function<String, List<String>>) x -> Arrays.asList(x), ArrayList::new);
+        assertTrue(f5.isEmpty());
+    }
+
+    @Test
+    public void testTakeDropSkipEmpty() {
+        final java.util.function.Predicate<String> p = x -> true;
+        assertTrue(N.takeWhile(new ArrayList<String>(), p).isEmpty());
+        assertTrue(N.takeWhile((Iterator<String>) null, p).isEmpty());
+        assertTrue(N.takeWhileInclusive(new ArrayList<String>(), p).isEmpty());
+        assertTrue(N.takeWhileInclusive((Iterator<String>) null, p).isEmpty());
+        assertTrue(N.dropWhile(new ArrayList<String>(), p).isEmpty());
+        assertTrue(N.dropWhile((Iterator<String>) null, p).isEmpty());
+        assertTrue(N.skipUntil(new ArrayList<String>(), p).isEmpty());
+        assertTrue(N.skipUntil((Iterator<String>) null, p).isEmpty());
+    }
+
+    @Test
+    public void testDistinctVariants() {
+        final LinkedList<String> ll = new LinkedList<>(Arrays.asList("z", "a", "a", "b"));
+        assertEquals(Arrays.asList("a", "b"), N.distinct(ll, 1, 4));
+        assertTrue(N.distinctBy(new String[] { "a" }, 1, 1, (java.util.function.Function<String, String>) x -> x).isEmpty());
+        final List<String> d = N.distinctBy(new String[0], (java.util.function.Function<String, String>) x -> x, ArrayList::new);
+        assertTrue(d.isEmpty());
+        assertEquals(Arrays.asList("a", "b"), N.distinctBy(ll, 1, 4, (java.util.function.Function<String, String>) x -> x));
+        final List<String> d2 = N.distinctBy(new ArrayList<String>(), (java.util.function.Function<String, String>) x -> x, ArrayList::new);
+        assertTrue(d2.isEmpty());
+    }
+
+    @Test
+    public void testMatchVariants() {
+        final java.util.function.Predicate<String> isA = "a"::equals;
+        assertTrue(N.allMatch(new ArrayList<String>(), isA));
+        assertFalse(N.allMatch(Arrays.asList("a", "b"), isA));
+        assertTrue(N.allMatch((Iterator<String>) null, isA));
+        assertFalse(N.allMatch(Arrays.asList("a", "b").iterator(), isA));
+        assertFalse(N.anyMatch(new ArrayList<String>(), isA));
+        assertFalse(N.anyMatch((Iterator<String>) null, isA));
+        assertFalse(N.anyMatch(Arrays.asList("b").iterator(), isA));
+        assertTrue(N.noneMatch(new ArrayList<String>(), isA));
+        assertFalse(N.noneMatch(Arrays.asList("b", "a"), isA));
+        assertTrue(N.noneMatch((Iterator<String>) null, isA));
+        assertFalse(N.noneMatch(Arrays.asList("b", "a").iterator(), isA));
+
+        assertFalse(N.hasMatchCountBetween(new String[] { "a" }, 2, 3, isA));
+        assertTrue(N.hasMatchCountBetween(new ArrayList<String>(), 0, 3, isA));
+        assertFalse(N.hasMatchCountBetween(Arrays.asList("a"), 2, 3, isA));
+        assertTrue(N.hasMatchCountBetween((Iterator<String>) null, 0, 3, isA));
+    }
+
+    @Test
+    public void testCountEmpty() {
+        assertEquals(0, N.count(new boolean[] { true }, 1, 1, v -> v));
+        assertEquals(0, N.count(new char[0], v -> true));
+        assertEquals(0, N.count(new byte[0], v -> true));
+        assertEquals(0, N.count(new byte[] { 1 }, 1, 1, v -> true));
+        assertEquals(0, N.count(new short[0], v -> true));
+        assertEquals(0, N.count(new short[] { 1 }, 1, 1, v -> true));
+        assertEquals(0, N.count(new long[0], (java.util.function.LongPredicate) v -> true));
+        assertEquals(0, N.count(new long[] { 1 }, 1, 1, (java.util.function.LongPredicate) v -> true));
+        assertEquals(0, N.count(new float[0], v -> true));
+        assertEquals(0, N.count(new float[] { 1 }, 1, 1, v -> true));
+        assertEquals(0, N.count(new double[0], (java.util.function.DoublePredicate) v -> true));
+        assertEquals(0, N.count(new double[] { 1 }, 1, 1, (java.util.function.DoublePredicate) v -> true));
+        assertEquals(0, N.count(new String[] { "a" }, 1, 1, (java.util.function.Predicate<String>) v -> true));
+        assertEquals(0, N.count(Arrays.asList("a"), 1, 1, (java.util.function.Predicate<String>) v -> true));
+        assertEquals(0, N.count(new ArrayList<String>(), (java.util.function.Predicate<String>) v -> true));
+        assertEquals(0, N.count((Iterator<String>) null, (java.util.function.Predicate<String>) v -> true));
+    }
+
+    @Test
+    public void testMergeTwoIterables() {
+        final List<Integer> a = Arrays.asList(1, 4, 5, 9);
+        final List<Integer> b = Arrays.asList(2, 3, 6, 7, 8);
+        final List<Iterable<Integer>> sources = Arrays.asList(a, b);
+        final List<Integer> merged = N.merge(sources, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, ArrayList::new);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9), merged);
+
+        final List<Iterable<Integer>> sources2 = Arrays.asList(Arrays.asList(5, 6, 7), Arrays.asList(1));
+        assertEquals(Arrays.asList(1, 5, 6, 7), N.merge(sources2, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, ArrayList::new));
+        final List<Iterable<Integer>> sources3 = Arrays.asList(Arrays.asList(1), Arrays.asList(5, 6, 7));
+        assertEquals(Arrays.asList(1, 5, 6, 7), N.merge(sources3, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, ArrayList::new));
+    }
+
+    @Test
+    public void testZipArraysBShorter() {
+        final String[] r = N.zip(new String[] { "a", "b", "c" }, new Integer[] { 1 }, "x", 0, (x, y) -> x + y, String.class);
+        assertArrayEquals(new String[] { "a1", "b0", "c0" }, r);
+    }
+
+    @Test
+    public void testGroupByNullInputs() {
+        final java.util.function.Function<String, Integer> len = String::length;
+        assertTrue(N.groupBy((Collection<String>) null, 0, 0, len, LinkedHashMap::new).isEmpty());
+        assertTrue(N.groupBy((Iterable<String>) null, len, (java.util.function.Supplier<Map<Integer, List<String>>>) LinkedHashMap::new).isEmpty());
+        assertTrue(N.groupBy((Iterator<String>) null, len, (java.util.function.Supplier<Map<Integer, List<String>>>) LinkedHashMap::new).isEmpty());
+        assertTrue(N.groupBy((Iterable<String>) null, len, len, LinkedHashMap::new).isEmpty());
+        assertTrue(N.groupBy((Iterator<String>) null, len, len, LinkedHashMap::new).isEmpty());
+        final Map<Integer, Long> m = N.groupBy((Iterator<String>) null, len, java.util.stream.Collectors.counting(), LinkedHashMap::new);
+        assertTrue(m.isEmpty());
+    }
+
+    /** Iterates fresh String copies each time, so identity never matches between traversals; removal is supported. */
+    static final class FreshCopyCollection extends AbstractCollection<String> {
+        final List<String> backing;
+
+        FreshCopyCollection(final List<String> values) {
+            this.backing = new ArrayList<>(values);
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            final Iterator<String> it = backing.iterator();
+            return new Iterator<String>() {
+                @Override
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                @Override
+                public String next() {
+                    return new String(it.next());
+                }
+
+                @Override
+                public void remove() {
+                    it.remove();
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return backing.size();
+        }
+    }
+
+    /** A plain collection whose iterator allows exactly one remove(), then throws UnsupportedOperationException. */
+    static final class OneRemoveCollection extends AbstractCollection<Integer> {
+        final List<Integer> backing;
+
+        OneRemoveCollection(final List<Integer> values) {
+            this.backing = new ArrayList<>(values);
+        }
+
+        @Override
+        public Iterator<Integer> iterator() {
+            final Iterator<Integer> it = backing.iterator();
+            return new Iterator<Integer>() {
+                int removed = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return it.hasNext();
+                }
+
+                @Override
+                public Integer next() {
+                    return it.next();
+                }
+
+                @Override
+                public void remove() {
+                    if (removed++ > 0) {
+                        throw new UnsupportedOperationException();
+                    }
+                    it.remove();
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return backing.size();
+        }
+    }
+
+    @Test
+    public void testRemoveAtGenericNonString() {
+        final Integer[] a = { 1, 2, 3, 4 };
+        final Integer[] r0 = N.removeAt(a, new int[0]);
+        assertArrayEquals(a, r0);
+        assertFalse(a == r0);
+        assertArrayEquals(new Integer[] { 1, 3, 4 }, N.removeAt(a, new int[] { 1 }));
+        assertArrayEquals(new Integer[] { 1, 4 }, N.removeAt(a, 2, 1, 1));
+    }
+
+    @Test
+    public void testRemoveAllFreshCopyReceiver() {
+        final FreshCopyCollection c = new FreshCopyCollection(Arrays.asList("a", "b", "a", "c"));
+        final java.util.Set<String> toRemove = Collections.unmodifiableSet(new java.util.HashSet<>(Arrays.asList("a")));
+        assertTrue(N.removeAll(c, (Iterable<String>) toRemove));
+        assertEquals(Arrays.asList("b", "c"), c.backing);
+    }
+
+    @Test
+    public void testRemoveDuplicatesSortedPartialRemovalFailure() {
+        final OneRemoveCollection c = new OneRemoveCollection(Arrays.asList(1, 1, 2, 2));
+        assertThrows(UnsupportedOperationException.class, () -> N.removeDuplicates(c, true));
+        assertEquals(Arrays.asList(1, 2, 2), c.backing);
+    }
+
+    @Test
+    public void testContainsDuplicatesSortedNoDuplicates() {
+        assertFalse(N.containsDuplicates(new int[] { 1, 2, 3, 4 }, 0, 4, true));
+        assertFalse(N.containsDuplicates(new long[] { 1, 2, 3, 4 }, 0, 4, true));
+        assertFalse(N.containsDuplicates(new float[] { 1, 2, 3, 4 }, 0, 4, true));
+        assertFalse(N.containsDuplicates(new double[] { 1, 2, 3, 4 }, 0, 4, true));
+    }
+
+    @Test
+    public void testTopArrayZero() {
+        assertTrue(N.top(new String[] { "a", "b" }, 0, 2, 0, Comparator.<String> naturalOrder()).isEmpty());
+    }
+
+    @Test
+    public void testFormatXmlMalformed() {
+        assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> N.formatXml("<a><b></a>", (com.landawn.abacus.parser.XmlSerConfig) null));
+    }
+
+    @Test
+    public void testForEachEdges() throws Exception {
+        final List<Object> seen = new ArrayList<>();
+        N.forEach(0, 5, -1, "x", (i, x) -> seen.add(i));
+        assertTrue(seen.isEmpty());
+
+        N.forEach(new LinkedHashMap<String, Integer>(), e -> seen.add(e));
+        N.forEach(new String[0], s -> Arrays.asList(s), (s, u) -> seen.add(u));
+        N.forEach(new ArrayList<String>(), s -> Arrays.asList(s), (s, u) -> seen.add(u));
+        N.forEach(new ArrayList<String>(), s -> Arrays.asList(s), u -> Arrays.asList(u), (s, u, v) -> seen.add(v));
+        N.forEach((Iterator<String>) null, Arrays.asList("a").iterator(), (x, y) -> seen.add(x));
+        N.forEach((Iterator<String>) null, Arrays.asList("a").iterator(), Arrays.asList("a").iterator(), (x, y, z) -> seen.add(x));
+        N.forEachNonNull(new String[0], s -> seen.add(s));
+        N.forEachNonNull(new ArrayList<String>(), s -> seen.add(s));
+        N.forEachNonNull((Iterator<String>) null, s -> seen.add(s));
+        N.forEachNonNull(new String[0], s -> Arrays.asList(s), (s, u) -> seen.add(u));
+        N.forEachNonNull(new String[0], s -> Arrays.asList(s), u -> Arrays.asList(u), (s, u, v) -> seen.add(v));
+        N.forEachNonNull(new ArrayList<String>(), s -> Arrays.asList(s), u -> Arrays.asList(u), (s, u, v) -> seen.add(v));
+        N.forEachIndexed(new String[0], (i, s) -> seen.add(s));
+        N.forEachIndexed((Iterable<String>) null, (i, s) -> seen.add(s));
+        N.forEachIndexed((Iterator<String>) null, (i, s) -> seen.add(s));
+        N.forEachIndexed(new LinkedHashMap<String, String>(), (i, k, v) -> seen.add(k));
+        N.forEachPair(new String[0], 1, (x, y) -> seen.add(x));
+        N.forEachTriple(new String[0], 1, (x, y, z) -> seen.add(x));
+        N.forEachTriple((Iterable<String>) null, 1, (x, y, z) -> seen.add(x));
+        N.forEachTriple((Iterator<String>) null, 1, (x, y, z) -> seen.add(x));
+        N.forEachIndexedInParallel(new ArrayList<String>(), (i, s) -> seen.add(s), 2, java.util.concurrent.ForkJoinPool.commonPool());
+        assertTrue(seen.isEmpty());
+    }
+
+    @Test
+    public void testForEachReverseNonRandomAccess() throws Exception {
+        final List<Integer> out = new ArrayList<>();
+        N.forEach(new LinkedList<>(Arrays.asList(0, 1, 2, 3, 4)), 4, 1, out::add);
+        assertEquals(Arrays.asList(4, 3, 2), out);
+
+        out.clear();
+        N.forEach(new PlainCollection<>(Arrays.asList(0, 1, 2, 3, 4)), 4, 1, out::add);
+        assertEquals(Arrays.asList(4, 3, 2), out);
+
+        final List<String> idx = new ArrayList<>();
+        N.forEachIndexed(new String[] { "a", "b", "c", "d" }, 3, 0, (i, s) -> idx.add(i + s));
+        assertEquals(Arrays.asList("3d", "2c", "1b"), idx);
+
+        idx.clear();
+        N.forEachIndexed(new LinkedList<>(Arrays.asList("a", "b", "c", "d")), 3, 0, (i, s) -> idx.add(i + s));
+        assertEquals(Arrays.asList("3d", "2c", "1b"), idx);
+
+        idx.clear();
+        N.forEachIndexed(new PlainCollection<>(Arrays.asList("a", "b", "c", "d")), 3, 0, (i, s) -> idx.add(i + s));
+        assertEquals(Arrays.asList("3d", "2c", "1b"), idx);
+    }
+
+    @Test
+    public void testForEachPairIteratorSkipEnds() throws Exception {
+        final List<String> out = new ArrayList<>();
+        N.forEachPair(Arrays.asList("a", "b", "c").iterator(), 3, (x, y) -> out.add(x + y));
+        assertEquals(Arrays.asList("ab"), out);
+    }
+
+    @Test
+    public void testAsyncAndCallHelpers() throws Exception {
+        final java.util.concurrent.atomic.AtomicInteger counter = new java.util.concurrent.atomic.AtomicInteger();
+        assertNull(N.asyncExecute(counter::incrementAndGet, 1, 0, e -> false).get());
+        assertEquals(1, counter.get());
+
+        final java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            assertTrue(N.asyncExecute(new ArrayList<Throwables.Runnable<Exception>>(), pool).isEmpty());
+
+            final ObjIterator<Void> it = N.runAsync((Collection<Throwables.Runnable<Exception>>) null, pool);
+            assertFalse(it.hasNext());
+            assertThrows(NoSuchElementException.class, it::next);
+            final ObjIterator<Void> it2 = N.runAsync(Arrays.<Throwables.Runnable<Exception>> asList(counter::incrementAndGet), pool);
+            assertNull(it2.next());
+            assertThrows(NoSuchElementException.class, it2::next);
+
+            final ObjIterator<String> ct = N.callAsync((Collection<java.util.concurrent.Callable<String>>) null, pool);
+            assertFalse(ct.hasNext());
+            final ObjIterator<String> ct2 = N.callAsync(Arrays.<java.util.concurrent.Callable<String>> asList(() -> "v"), pool);
+            assertEquals("v", ct2.next());
+            assertThrows(NoSuchElementException.class, ct2::next);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> N.callWithRetry(() -> {
+            throw new java.io.IOException("boom");
+        }, 0, 0, (r, e) -> false));
+        assertTrue(ex.getCause() instanceof java.io.IOException || ex.getMessage().contains("boom"));
+    }
+
+    @Test
+    public void testBatchEmpty() throws Exception {
+        final List<String> seen = new ArrayList<>();
+        N.runByBatch(new String[0], 2, (i, s) -> seen.add(s), () -> seen.add("batch"));
+        N.runByBatch(new ArrayList<String>(), 2, (i, s) -> seen.add(s), () -> seen.add("batch"));
+        assertTrue(N.callByBatch(new String[0], 2, (i, s) -> seen.add(s), () -> "r").isEmpty());
+        assertTrue(N.callByBatch(new ArrayList<String>(), 2, (i, s) -> seen.add(s), () -> "r").isEmpty());
+        assertTrue(seen.isEmpty());
+    }
+
+    @Test
+    public void testCallUninterruptiblyRetries() {
+        final int[] calls = { 0 };
+        try {
+            final String r = N.callUninterruptibly(() -> {
+                if (calls[0]++ == 0) {
+                    throw new InterruptedException();
+                }
+                return "ok";
+            });
+            assertEquals("ok", r);
+            assertEquals(2, calls[0]);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testTryOrDefaultWithInterruptedException() {
+        try {
+            assertFalse(N.tryOrEmptyIfExceptionOccurred(() -> {
+                throw new InterruptedException();
+            }).isPresent());
+            assertTrue(Thread.interrupted());
+            assertFalse(N.tryOrEmptyIfExceptionOccurred("x", x -> {
+                throw new InterruptedException();
+            }).isPresent());
+            assertTrue(Thread.interrupted());
+            assertEquals("d", N.tryOrDefaultIfExceptionOccurred(() -> {
+                throw new InterruptedException();
+            }, () -> "d"));
+            assertTrue(Thread.interrupted());
+            assertEquals("d", N.tryOrDefaultIfExceptionOccurred((java.util.concurrent.Callable<String>) () -> {
+                throw new InterruptedException();
+            }, "d"));
+            assertTrue(Thread.interrupted());
+            assertEquals("d", N.tryOrDefaultIfExceptionOccurred("x", x -> {
+                throw new InterruptedException();
+            }, () -> "d"));
+            assertTrue(Thread.interrupted());
+            assertEquals("d", N.tryOrDefaultIfExceptionOccurred("x", (Throwables.Function<String, String, Exception>) x -> {
+                throw new InterruptedException();
+            }, "d"));
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testParallelFailureCancelsPending() throws Exception {
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+        final Throwables.Runnable<Exception> wait = () -> latch.await(2, java.util.concurrent.TimeUnit.SECONDS);
+        final java.util.concurrent.Callable<String> waitCall = () -> {
+            latch.await(2, java.util.concurrent.TimeUnit.SECONDS);
+            return "w";
+        };
+        final Throwables.Runnable<Exception> fail = () -> {
+            throw new IllegalStateException("first");
+        };
+        final java.util.concurrent.Callable<String> failCall = () -> {
+            throw new IllegalStateException("first");
+        };
+
+        try {
+            assertThrows(IllegalStateException.class, () -> N.runInParallel(fail, wait, wait, wait, wait));
+            assertThrows(IllegalStateException.class, () -> N.callInParallel(failCall, waitCall, waitCall));
+            assertThrows(IllegalStateException.class, () -> N.callInParallel(failCall, waitCall, waitCall, waitCall));
+            assertThrows(IllegalStateException.class, () -> N.callInParallel(failCall, waitCall, waitCall, waitCall, waitCall));
+
+            final java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(2);
+            try {
+                assertThrows(IllegalStateException.class, () -> N.runInParallel(Arrays.asList(fail, wait), pool));
+                assertThrows(IllegalStateException.class, () -> N.callInParallel(Arrays.asList(failCall, waitCall), pool));
+            } finally {
+                latch.countDown();
+                pool.shutdownNow();
+            }
+        } finally {
+            latch.countDown();
+        }
+    }
+
+    @Test
+    public void testForEachForwardNonRandomAccessToEnd() throws Exception {
+        final List<Integer> out = new ArrayList<>();
+        N.forEach(new LinkedList<>(Arrays.asList(0, 1, 2, 3)), 1, 4, out::add);
+        assertEquals(Arrays.asList(1, 2, 3), out);
+        final List<String> idx = new ArrayList<>();
+        N.forEachIndexed(new LinkedList<>(Arrays.asList("a", "b", "c")), 1, 3, (i, s) -> idx.add(i + s));
+        assertEquals(Arrays.asList("1b", "2c"), idx);
+    }
 }

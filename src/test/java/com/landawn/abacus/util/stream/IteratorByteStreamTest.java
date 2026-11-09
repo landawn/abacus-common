@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -598,4 +600,84 @@ public class IteratorByteStreamTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G097 end ----
+
+    private static IteratorByteStream of2(final byte... a) {
+        return new IteratorByteStream(ByteIterator.of(a));
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new byte[] { 1, 1, 3, 3 }, of2((byte) 1, (byte) 2, (byte) 3).flatMap(x -> x == 2 ? null : ByteStream.of(x, x)).toArray());
+    }
+
+    @Test
+    public void testFindLastOnEmpty() {
+        assertFalse(of2().findLast(x -> true).isPresent());
+        assertEquals(2, of2((byte) 1, (byte) 2).findLast(x -> x > 0).get());
+    }
+
+    @Test
+    public void testAsIntStreamAdvance() {
+        final IntIteratorEx it = of2((byte) 1, (byte) 2, (byte) 3).asIntStream().iteratorEx();
+        it.advance(2);
+        assertTrue(it.hasNext());
+        assertEquals(3, it.nextInt());
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    public void testIfEmptyIteratorPaths() {
+        final AtomicInteger calls = new AtomicInteger();
+
+        final ByteIteratorEx it1 = of2((byte) 5, (byte) 6).ifEmpty(calls::incrementAndGet).iteratorEx();
+        assertEquals(5, it1.nextByte());
+        assertEquals(6, it1.nextByte());
+        assertFalse(it1.hasNext());
+
+        final ByteIteratorEx it2 = of2((byte) 1, (byte) 2, (byte) 3).ifEmpty(calls::incrementAndGet).iteratorEx();
+        it2.advance(0);
+        it2.advance(2);
+        assertEquals(3, it2.nextByte());
+        assertEquals(0, calls.get());
+
+        final ByteIteratorEx it3 = of2().ifEmpty(calls::incrementAndGet).iteratorEx();
+        it3.advance(-1);
+        assertFalse(it3.hasNext());
+        assertEquals(1, calls.get());
+    }
+
+    // AbstractByteStream paths reached through the iterator-backed implementation
+
+    @Test
+    public void testParallelRateLimitedDelayMergeAndPercentiles() {
+        final ByteStream p = of2((byte) 3, (byte) 1, (byte) 2).parallel(2);
+        final byte[] limited = p.rateLimited(com.landawn.abacus.util.RateLimiter.create(100000)).sorted().toArray();
+        assertArrayEquals(new byte[] { 1, 2, 3 }, limited);
+
+        assertArrayEquals(new byte[] { 1, 2, 3 }, of2((byte) 3, (byte) 1, (byte) 2).parallel(2).delay(java.time.Duration.ZERO).sorted().toArray());
+
+        final byte[] merged = of2((byte) 1, (byte) 3).parallel(2)
+                .mergeWith(ByteStream.of((byte) 2, (byte) 4),
+                        (a, b) -> a <= b ? com.landawn.abacus.util.MergeResult.TAKE_FIRST : com.landawn.abacus.util.MergeResult.TAKE_SECOND)
+                .sorted()
+                .toArray();
+        assertArrayEquals(new byte[] { 1, 2, 3, 4 }, merged);
+
+        assertEquals(Byte.valueOf((byte) 1), of2((byte) 3, (byte) 1, (byte) 2).parallel(2).percentiles().get().values().iterator().next());
+        assertEquals(3, of2((byte) 3, (byte) 1, (byte) 2).parallel(2).summaryStatisticsAndPercentiles().left().getCount());
+    }
+
+    @Test
+    public void testStepOneAndCycled() {
+        assertArrayEquals(new byte[] { 1, 2 }, of2((byte) 1, (byte) 2).step(1).toArray());
+
+        final ByteIteratorEx it = of2((byte) 1, (byte) 2).cycled(2).iteratorEx();
+        int n = 0;
+        while (it.hasNext()) {
+            it.nextByte();
+            n++;
+        }
+        assertEquals(4, n);
+        assertFalse(it.hasNext());
+    }
 }

@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NavigableSet;
+import java.util.NoSuchElementException;
 import java.util.RandomAccess;
 import java.util.Set;
 import java.util.TreeSet;
@@ -2289,4 +2291,71 @@ public class IterablesTest extends IterablesTestSupport {
     }
 
     // ---- deep review 2026-09-25 G048 end ----
+
+    @Test
+    public void testMaxIntAndMaxLongIncreasing() {
+        assertEquals(3, Iterables.maxInt(new String[] { "a", "bb", "ccc" }, String::length).getAsInt());
+        assertEquals(3L, Iterables.maxLong(new String[] { "a", "bb", "ccc" }, s -> (long) s.length()).getAsLong());
+    }
+
+    @Test
+    public void testReversedListIteratorBounds() {
+        final List<String> reversed = Iterables.asReversed(new LinkedList<>(Arrays.asList("a", "b")));
+        final ListIterator<String> it = reversed.listIterator();
+        assertThrows(NoSuchElementException.class, it::previous);
+        assertEquals("b", it.next());
+        assertEquals("a", it.next());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testPowerSetMisc() {
+        final Set<Set<String>> ps = Iterables.powerSet(new LinkedHashSet<>(Arrays.asList("a", "b")));
+        assertFalse(ps.isEmpty());
+
+        final Set<Set<String>> plain = new HashSet<>();
+        plain.add(new HashSet<>());
+        plain.add(new HashSet<>(Arrays.asList("a")));
+        plain.add(new HashSet<>(Arrays.asList("b")));
+        plain.add(new HashSet<>(Arrays.asList("a", "b")));
+        assertEquals(ps, plain);
+        assertNotEquals(ps, new HashSet<>());
+
+        Set<String> full = null;
+        for (final Set<String> s : ps) {
+            if (s.size() == 2) {
+                full = s;
+            }
+        }
+        final Iterator<String> it = full.iterator();
+        it.next();
+        it.next();
+        assertThrows(NoSuchElementException.class, it::next);
+        assertThrows(UnsupportedOperationException.class, it::remove);
+
+        final Iterator<Set<String>> psIter = ps.iterator();
+        int n = 0;
+        while (psIter.hasNext()) {
+            psIter.next();
+            n++;
+        }
+        assertEquals(4, n);
+        assertThrows(NoSuchElementException.class, psIter::next);
+    }
+
+    @Test
+    public void testPermutationsNotEmpty() {
+        final Collection<List<Integer>> perms = Iterables.permutations(Arrays.asList(1, 2, 3));
+        assertFalse(perms.isEmpty());
+        assertEquals(6, perms.size());
+    }
+
+    @Test
+    public void testOrderedPermutationsSizeSaturates() {
+        final List<Integer> input = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            input.add(i);
+        }
+        assertEquals(Integer.MAX_VALUE, Iterables.orderedPermutations(input).size());
+    }
 }

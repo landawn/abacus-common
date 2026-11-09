@@ -75,4 +75,12 @@ public class IntBiObjPredicateTest extends TestBase {
         IntBiObjPredicate<String, String> instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((IntBiObjPredicate) null));
     }
+
+    @Test
+    public void testNegateBothOutcomes() {
+        final IntBiObjPredicate<String, String> totalLen = (n, a, b) -> a.length() + b.length() == n;
+        final IntBiObjPredicate<String, String> neg = totalLen.negate();
+        assertFalse(neg.test(3, "a", "bc"));
+        assertTrue(neg.test(4, "a", "bc"));
+    }
 }

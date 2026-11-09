@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,6 +38,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Dataset;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Range;
 import com.landawn.abacus.util.TypeReference;
 
 public class AbstractTypeTest extends TestBase {
@@ -620,4 +622,71 @@ public class AbstractTypeTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 G134 end ----
+
+    @Test
+    public void testDecimalEndExponentWithoutDigits() {
+        assertEquals(-1, AbstractType.decimalEnd("1e", 0, 2, true));
+        assertEquals(-1, AbstractType.decimalEnd("1e+", 0, 3, true));
+    }
+
+    @Test
+    public void testParseOverflowFallsBackToNumbers() {
+        assertThrows(ArithmeticException.class, () -> AbstractType.parseInt("99999999999".toCharArray(), 0, 11));
+        assertThrows(ArithmeticException.class, () -> AbstractType.parseLong("99999999999999999999".toCharArray(), 0, 20));
+        assertEquals(Integer.MIN_VALUE, AbstractType.parseInt("-2147483648".toCharArray(), 0, 11));
+    }
+
+    @Test
+    public void testGetColumnValueAndBufferSize() throws Exception {
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getString(1)).thenReturn("a");
+        when(rs.getString("c")).thenReturn("b");
+        assertEquals("a", AbstractType.getColumnValue(rs, 1, String.class));
+        assertEquals("b", AbstractType.getColumnValue(rs, "c", String.class));
+        assertEquals(0, AbstractType.calculateBufferSize(5, 0));
+    }
+
+    @Test
+    public void testRangeTypeMetadata() {
+        final Type<Range<Integer>> type = TypeFactory.getType("Range<Integer>");
+        assertEquals(Integer.class, type.elementType().javaType());
+        assertEquals(1, type.parameterTypes().size());
+        assertTrue(type.isParameterizedType());
+    }
+
+    @Test
+    public void testObjectArrayAppendToWithNullElements() throws Exception {
+        final Type<Object[]> type = TypeFactory.getType(String[].class);
+        final StringWriter writer = new StringWriter();
+        type.appendTo(writer, new String[] { "a", null });
+        assertEquals("[a, null]", writer.toString());
+
+        final StringBuilder target = new StringBuilder();
+        final Appendable custom = new Appendable() {
+            @Override
+            public Appendable append(final CharSequence csq) {
+                target.append(csq);
+                return this;
+            }
+
+            @Override
+            public Appendable append(final CharSequence csq, final int start, final int end) {
+                target.append(csq, start, end);
+                return this;
+            }
+
+            @Override
+            public Appendable append(final char c) {
+                target.append(c);
+                return this;
+            }
+        };
+        type.appendTo(custom, new String[] { "a", null });
+        assertEquals("[a, null]", target.toString());
+
+        target.setLength(0);
+        final Type<List<String>> listType = TypeFactory.getType("List<String>");
+        listType.appendTo(custom, new ArrayList<>(Arrays.asList("a", null)));
+        assertEquals("[a, null]", target.toString());
+    }
 }

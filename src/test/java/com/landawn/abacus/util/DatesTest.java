@@ -3,9 +3,13 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -25,6 +29,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.Dates.DTF;
 
 public class DatesTest extends TestBase {
 
@@ -1287,4 +1293,151 @@ public class DatesTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Dates.round(new java.util.Date(0L), Calendar.WEEK_OF_YEAR));
     }
     // ---- deep review 2026-11-02 G039 end ----
+
+    private static final TimeZone UTC2 = TimeZone.getTimeZone("UTC");
+
+    private static final class FailingAppendable implements Appendable {
+        @Override
+        public Appendable append(final CharSequence csq) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public Appendable append(final CharSequence csq, final int start, final int end) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public Appendable append(final char c) throws IOException {
+            throw new IOException("boom");
+        }
+    }
+
+    @Test
+    public void testUnregisterRestrictedCreator() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.unregisterDateCreator(java.sql.Date.class));
+    }
+
+    @Test
+    public void testParseNullLiteralReturnsNull() {
+        assertNull(Dates.parseToLocalDate("null", "yyyy-MM-dd"));
+        assertNull(Dates.parseToLocalTime("NULL", "HH:mm:ss"));
+        assertNull(Dates.parseToLocalDateTime(null, "yyyy-MM-dd HH:mm:ss"));
+        assertNull(Dates.parseToOffsetDateTime("null", null, UTC2));
+        assertNull(Dates.parseToZonedDateTime("null", null, UTC2));
+        assertNull(Dates.parseToInstant("null", null, UTC2));
+    }
+
+    @Test
+    public void testParseEpochMillisRejectsNonNumeric() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseEpochMillis("12a"));
+        assertEquals(-5L, Dates.parseEpochMillis("-5"));
+    }
+
+    @Test
+    public void testParseIncompleteInstantFormatRejected() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToJUDate("10:11:12", Dates.LOCAL_TIME_FORMAT, UTC2));
+    }
+
+    @Test
+    public void testParseAmbiguousNumericTextRejected() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToJUDate("1234567"));
+    }
+
+    @Test
+    public void testLegacyPatternsWithDayOfYearAndWeekFields() {
+        final java.util.Date d = Dates.parseToJUDate("2024-032", "yyyy-DDD", UTC2);
+        assertEquals(Dates.parseToJUDate("2024-02-01", "yyyy-MM-dd", UTC2).getTime(), d.getTime());
+        final java.util.Date quoted = Dates.parseToJUDate("2024-02-01 o'clock", "yyyy-MM-dd 'o''clock'", UTC2);
+        assertEquals(d.getTime(), quoted.getTime());
+    }
+
+    @Test
+    public void testFormatToNullDateAndFailingAppendable() {
+        final StringBuilder sb = new StringBuilder();
+        Dates.formatTo((java.util.Date) null, sb);
+        assertEquals("null", sb.toString());
+        assertThrows(UncheckedIOException.class, () -> Dates.formatTo((java.util.Date) null, new FailingAppendable()));
+        final java.util.Date d = new java.util.Date(0);
+        assertThrows(UncheckedIOException.class, () -> Dates.formatTo(d, Dates.ISO_ZONED_DATE_TIME_FORMAT, UTC2, new FailingAppendable()));
+    }
+
+    @Test
+    public void testFormatToGenericAppendable() throws IOException {
+        final java.io.StringWriter w = new java.io.StringWriter();
+        final Writer writer = w;
+        Dates.formatTo(new java.util.Date(0), Dates.ISO_8601_TIMESTAMP_FORMAT, UTC2, writer);
+        assertEquals("1970-01-01T00:00:00.000Z", w.toString());
+        final java.io.StringWriter w2 = new java.io.StringWriter();
+        Dates.formatTo(new java.util.Date(0), Dates.ISO_ZONED_DATE_TIME_FORMAT, UTC2, w2);
+        assertTrue(w2.toString().startsWith("1970-01-01T00:00:00"));
+    }
+
+    @Test
+    public void testRollCalendarElapsedFieldAndOverflowNames() {
+        final Calendar c = new GregorianCalendar(UTC2);
+        c.setTimeInMillis(0);
+        final Calendar rolled = Dates.roll(c, 2, CalendarField.HOUR_OF_DAY);
+        assertEquals(2 * 3_600_000L, rolled.getTimeInMillis());
+
+        final java.util.Date max = new java.util.Date(Long.MAX_VALUE - 10);
+        final ArithmeticException e1 = assertThrows(ArithmeticException.class, () -> Dates.roll(max, 5, CalendarField.MINUTE));
+        assertTrue(e1.getMessage().contains("addMinutes"), e1.getMessage());
+        final ArithmeticException e2 = assertThrows(ArithmeticException.class, () -> Dates.roll(max, 5L, TimeUnit.SECONDS));
+        assertTrue(e2.getMessage().contains("addSeconds"), e2.getMessage());
+    }
+
+    @Test
+    public void testInstantParseRejectsAmbiguousAndIncomplete() {
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToInstant("1234567", null, UTC2));
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToInstant("10:11:12", Dates.LOCAL_TIME_FORMAT, UTC2));
+    }
+
+    @Test
+    public void testFormatToPlainAppendable() {
+        final StringBuilder target = new StringBuilder();
+        final Appendable plain = new Appendable() {
+            @Override
+            public Appendable append(final CharSequence csq) {
+                target.append(csq);
+                return this;
+            }
+
+            @Override
+            public Appendable append(final CharSequence csq, final int start, final int end) {
+                target.append(csq, start, end);
+                return this;
+            }
+
+            @Override
+            public Appendable append(final char c) {
+                target.append(c);
+                return this;
+            }
+        };
+        Dates.formatTo(new java.util.Date(0), Dates.ISO_8601_TIMESTAMP_FORMAT, UTC2, plain);
+        assertEquals("1970-01-01T00:00:00.000Z", target.toString());
+    }
+
+    @Test
+    public void testEscapedQuotesInPatterns() {
+        final java.util.Date d = Dates.parseToJUDate("2024-02-01'", "yyyy-MM-dd''", UTC2);
+        assertEquals(Dates.parseToJUDate("2024-02-01", "yyyy-MM-dd", UTC2).getTime(), d.getTime());
+        assertEquals(java.time.LocalDate.of(2024, 2, 1), DTF.of("uuuu-MM-dd 'o''clock'").parseToLocalDate("2024-02-01 o'clock"));
+    }
+
+    @Test
+    public void testGetFragmentMillisecondField() {
+        final java.util.Date d = new java.util.Date(1234);
+        assertEquals(0L, Dates.getFragmentInMilliseconds(d, CalendarField.MILLISECOND));
+    }
+
+    @Test
+    public void testDtfOfProlepticPatternsAndEquals() {
+        assertSame(DTF.ISO_LOCAL_DATE_TIME, DTF.of("uuuu-MM-dd'T'HH:mm:ss"));
+        assertSame(DTF.ISO_ZONED_DATE_TIME, DTF.of("uuuu-MM-dd'T'HH:mm:ssXXXXX'['VV']'"));
+        assertFalse(DTF.ISO_LOCAL_DATE_TIME.equals("x"));
+        assertTrue(DTF.ISO_LOCAL_DATE_TIME.equals(DTF.ISO_LOCAL_DATE_TIME));
+        assertEquals(LocalDateTime.of(2024, 1, 2, 3, 4, 5), DTF.ISO_LOCAL_DATE_TIME.parseToLocalDateTime("2024-01-02T03:04:05"));
+    }
 }

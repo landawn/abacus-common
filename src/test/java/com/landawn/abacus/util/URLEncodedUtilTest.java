@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
@@ -1340,4 +1341,20 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals("\u4e2d\ufffd", URLEncodedUtil.decodeLenient("k=%E4%B8%AD%E4%B8").get("k"));
     }
     // ---- perf review 2026-09-26 G079 end ----
+
+    @Test
+    public void testValuelessTokenInNullHostileMapEscapesControlCharsButKeepsPairs() {
+        final NullPointerException e = assertThrows(NullPointerException.class,
+                () -> URLEncodedUtil.decode("a%01%F0%9F%98%80", StandardCharsets.UTF_8, ConcurrentHashMap::new));
+        assertTrue(e.getMessage().contains("a\\u0001😀"), e.getMessage());
+    }
+
+    @Test
+    public void testEncodeNullValueAndUrlWithEmptyArray() {
+        final Map<String, Object> m = new LinkedHashMap<>();
+        m.put("a", null);
+        m.put("b", "x y");
+        assertEquals("a&b=x+y", URLEncodedUtil.encode(m));
+        assertEquals("http://h/p", URLEncodedUtil.encode("http://h/p", new Object[0], StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
+    }
 }

@@ -405,4 +405,11 @@ public class OffsetDateTimeTypeTest extends TestBase {
         // A java.util.Date carries no zone, so it keeps being read in the default zone.
         assertEquals(ZoneId.systemDefault().getRules().getOffset(Instant.ofEpochMilli(millis)), offsetDateTimeType.valueOf(new Date(millis)).getOffset());
     }
+
+    @Test
+    public void testOffsetDateTimeValueOfOtherObject() {
+        final Type<OffsetDateTime> type = Type.of(OffsetDateTime.class);
+        final String text = "2020-01-02T03:04:05Z";
+        assertEquals(type.valueOf(text), type.valueOf((Object) new StringBuilder(text)));
+    }
 }

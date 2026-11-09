@@ -1,24 +1,40 @@
 package com.landawn.abacus.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.helpers.AttributesImpl;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
@@ -4063,4 +4080,454 @@ public class XmlParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02b G012 end ----
+
+    @TempDir
+    Path tempDir2;
+
+    private final XmlParserImpl stax2 = new XmlParserImpl(XmlParserType.StAX);
+    private final XmlParserImpl dom2 = new XmlParserImpl(XmlParserType.DOM);
+
+    public static class Chain {
+        private Chain child;
+
+        public Chain getChild() {
+            return child;
+        }
+
+        public void setChild(final Chain child) {
+            this.child = child;
+        }
+    }
+
+    public static class Inner {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class Outer {
+        private String id;
+        private Inner inner;
+        private List<Inner> inners;
+        private Map<String, Inner> innerMap;
+        private Inner[] innerArray;
+        private Object anything;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(final String id) {
+            this.id = id;
+        }
+
+        public Inner getInner() {
+            return inner;
+        }
+
+        public void setInner(final Inner inner) {
+            this.inner = inner;
+        }
+
+        public List<Inner> getInners() {
+            return inners;
+        }
+
+        public void setInners(final List<Inner> inners) {
+            this.inners = inners;
+        }
+
+        public Map<String, Inner> getInnerMap() {
+            return innerMap;
+        }
+
+        public void setInnerMap(final Map<String, Inner> innerMap) {
+            this.innerMap = innerMap;
+        }
+
+        public Inner[] getInnerArray() {
+            return innerArray;
+        }
+
+        public void setInnerArray(final Inner[] innerArray) {
+            this.innerArray = innerArray;
+        }
+
+        public Object getAnything() {
+            return anything;
+        }
+
+        public void setAnything(final Object anything) {
+            this.anything = anything;
+        }
+    }
+
+    private static Outer sample() {
+        final Outer o = new Outer();
+        o.setId("o1");
+        final Inner i = new Inner();
+        i.setName("n1");
+        o.setInner(i);
+        o.setInners(new ArrayList<>(Arrays.asList(i, i)));
+        final Map<String, Inner> m = new LinkedHashMap<>();
+        m.put("k", i);
+        o.setInnerMap(m);
+        o.setInnerArray(new Inner[] { i });
+        o.setAnything(Arrays.asList(1, 2));
+        return o;
+    }
+
+    private static Map<String, Type<?>> outerNodeTypes() {
+        final Map<String, Type<?>> nodeTypes = new LinkedHashMap<>();
+        nodeTypes.put("outer", Type.of(Outer.class));
+        return nodeTypes;
+    }
+
+    @Test
+    public void testDeserializeFileWithNodeTypes() throws Exception {
+        final File file = tempDir2.resolve("outer.xml").toFile();
+        Files.write(file.toPath(), stax2.serialize(sample()).getBytes(StandardCharsets.UTF_8));
+        final Outer o = stax2.deserialize(file, null, outerNodeTypes());
+        assertEquals("o1", o.getId());
+        assertEquals("n1", o.getInner().getName());
+        assertEquals(2, o.getInners().size());
+    }
+
+    @Test
+    public void testDeserializeNodeWithUnknownNodeType() throws Exception {
+        final Document doc = DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(new ByteArrayInputStream("<other><id>x</id></other>".getBytes(StandardCharsets.UTF_8)));
+        assertThrows(ParsingException.class, () -> dom2.deserialize(doc.getDocumentElement(), null, outerNodeTypes()));
+    }
+
+    @Test
+    public void testUnknownRootWithNodeTypes() {
+        final String xml = "<other><id>x</id></other>";
+        assertThrows(ParsingException.class, () -> dom2.deserialize(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), null, outerNodeTypes()));
+        assertThrows(ParsingException.class, () -> dom2.deserialize(new StringReader(xml), null, outerNodeTypes()));
+        assertThrows(ParsingException.class, () -> stax2.deserialize(new StringReader(xml), null, outerNodeTypes()));
+    }
+
+    @Test
+    public void testKnownRootWithNodeTypesByReader() {
+        final String xml = stax2.serialize(sample());
+        final Outer viaDom = dom2.deserialize(new StringReader(xml), null, outerNodeTypes());
+        assertEquals("o1", viaDom.getId());
+        final Outer viaStax = stax2.deserialize(new StringReader(xml), null, outerNodeTypes());
+        assertEquals("n1", viaStax.getInner().getName());
+    }
+
+    @Test
+    public void testNestingDepthExceeded() throws Exception {
+        final StringBuilder sb = new StringBuilder();
+        final int levels = 1100;
+        sb.append("<chain>");
+        for (int i = 0; i < levels; i++) {
+            sb.append("<child><chain>");
+        }
+        for (int i = 0; i < levels; i++) {
+            sb.append("</chain></child>");
+        }
+        sb.append("</chain>");
+        final String xml = sb.toString();
+
+        // Cold (interpreted) frames of the recursive reader can overflow a default-size stack before the 1000-level
+        // limit trips, so run on a thread whose stack is big enough for the depth limit to be what stops the parse.
+        final Throwable[] failure = new Throwable[1];
+        final Thread worker = new Thread(null, () -> {
+            try {
+                // the XML parsers' own element-depth limits reject the document
+                assertThrows(ParsingException.class, () -> stax2.deserialize(xml, null, Chain.class));
+                assertThrows(ParsingException.class, () -> dom2.deserialize(xml, null, Chain.class));
+
+                // the depth counter is restored: a shallow document still parses on the same thread
+                final Chain c = dom2.deserialize("<chain><child><chain></chain></child></chain>", null, Chain.class);
+                assertTrue(c.getChild() != null);
+            } catch (final Throwable e) {
+                failure[0] = e;
+            }
+        }, "deep-xml-parse", 256L * 1024 * 1024);
+        worker.start();
+        worker.join();
+
+        if (failure[0] instanceof Error) {
+            throw (Error) failure[0];
+        } else if (failure[0] != null) {
+            throw (Exception) failure[0];
+        }
+    }
+
+    @Test
+    public void testSecondChildOfSingleValuePropertyRejected() {
+        final String xml = "<outer><inner><inner><name>a</name></inner><inner><name>b</name></inner></inner></outer>";
+        final ParsingException e = assertThrows(ParsingException.class, () -> stax2.deserialize(xml, null, Outer.class));
+        assertTrue(e.getMessage().contains("Only one child element"), e.getMessage());
+    }
+
+    @Test
+    public void testUnmatchedPropertyIgnored() {
+        final String xml = "<outer><zzz><a>1</a><b><c>2</c></b></zzz><id>x</id></outer>";
+        final Outer o = stax2.deserialize(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(true), Outer.class);
+        assertEquals("x", o.getId());
+        assertNull(o.getInner());
+    }
+
+    @Test
+    public void testMapEntityIgnoredPropNames() {
+        final MapEntity me = new MapEntity("ent");
+        me.set("a", 1);
+        me.set("b", 2);
+        final String xml = stax2.serialize(me, XmlSerConfig.create().setIgnoredPropNames(Map.class, N.asSet("a")));
+        assertEquals("<ent><b>2</b></ent>", xml);
+    }
+
+    @Test
+    public void testSerializeNonListNonSetCollectionOfBeans() {
+        final Inner i = new Inner();
+        i.setName("q");
+        final ArrayDeque<Inner> deque = new ArrayDeque<>(Collections.singletonList(i));
+        final String xml = stax2.serialize(deque);
+        assertTrue(xml.startsWith("<collection>"), xml);
+        assertTrue(xml.contains("<name>q</name>"), xml);
+        assertFalse(xml.contains("<list>"), xml);
+    }
+
+    @Test
+    public void testMalformedStructuresRejectedByStaxReader() {
+        assertThrows(ParsingException.class, () -> stax2.deserialize("<outer><id>x<y/></id></outer>", null, Outer.class));
+        final Type<Map<String, Inner>> mapType = Type.ofMap(String.class, Inner.class);
+        assertThrows(ParsingException.class,
+                () -> stax2.deserialize("<map><k><inner><name>a</name></inner><inner><name>b</name></inner></k></map>", null, mapType));
+        assertThrows(ParsingException.class, () -> stax2.deserialize("<map><k>v<y/></k></map>", null, Type.ofMap(String.class, String.class)));
+    }
+
+    @Test
+    public void testMapEntityUnknownChildHandling() {
+        final MapEntity me = stax2.deserialize("<ent><a>1</a><b><c>2</c></b></ent>", null, MapEntity.class);
+        assertEquals("ent", me.entityName());
+        assertEquals("1", String.valueOf((Object) me.get("a")));
+    }
+
+    private final AbstractXmlParser parser2 = new XmlParserImpl(XmlParserType.StAX);
+
+    @Test
+    public void testListValuedMapGuardDelegates() {
+        final Map<Object, Object> backing = new HashMap<>();
+        final AbstractXmlParser.ListValuedMapGuard guard = new AbstractXmlParser.ListValuedMapGuard(backing);
+        final Map<Object, Object> src = new LinkedHashMap<>();
+        src.put("a", List.of(1));
+        src.put("b", List.of(2));
+        guard.putAll(src);
+
+        assertEquals(2, guard.size());
+        assertFalse(guard.isEmpty());
+        assertTrue(guard.containsKey("a"));
+        assertTrue(guard.containsValue(List.of(2)));
+        assertEquals(List.of(1), guard.get("a"));
+        assertEquals(Set.of("a", "b"), guard.keySet());
+        assertEquals(2, guard.values().size());
+        assertEquals(2, guard.entrySet().size());
+        assertTrue(guard.equals(guard));
+        assertTrue(guard.equals(src));
+        assertEquals(src.hashCode(), guard.hashCode());
+        assertEquals(backing.toString(), guard.toString());
+        assertSame(backing, guard.unwrap());
+
+        assertEquals(List.of(1), guard.remove("a"));
+        guard.clear();
+        assertTrue(guard.isEmpty());
+    }
+
+    @Test
+    public void testListValuedMapGuardSwitchesOnScalar() {
+        final Map<Object, Object> backing = new HashMap<>();
+        final AbstractXmlParser.ListValuedMapGuard guard = new AbstractXmlParser.ListValuedMapGuard(backing);
+        guard.put("a", List.of(1));
+        guard.put("b", "scalar");
+        assertTrue(guard.unwrap() instanceof LinkedHashMap);
+        assertEquals("scalar", guard.unwrap().get("b"));
+        guard.put("c", "x");
+        assertEquals(3, guard.unwrap().size());
+        assertFalse(backing.containsKey("b"));
+    }
+
+    @Test
+    public void testEscapeEmbeddedJson() {
+        assertNull(AbstractXmlParser.escapeEmbeddedJson(null));
+        assertEquals("abc", AbstractXmlParser.escapeEmbeddedJson("abc"));
+        final String pair = "😀";
+        assertEquals("\\ufffe" + pair + "z", AbstractXmlParser.escapeEmbeddedJson("￾" + pair + "z"));
+        assertEquals("a\\ud800b", AbstractXmlParser.escapeEmbeddedJson("a\uD800b"));
+    }
+
+    @Test
+    public void testSerializeEmbeddedJsonOptional() {
+        assertEquals("\"a\"", parser2.serializeEmbeddedJson(java.util.Optional.of("a"), null));
+        assertEquals("[1, 2]", parser2.serializeEmbeddedJson(List.of(1, 2), null));
+    }
+
+    @Test
+    public void testWriteEmbeddedJsonVariants() throws Exception {
+        assertEquals("&quot;a&quot;", writeEmbedded(java.util.Optional.of("a"), null, false));
+        assertEquals("abc", writeEmbedded("abc", null, false));
+        final XmlSerConfig quoted = new XmlSerConfig().setStringQuotation('\'');
+        assertEquals("'[1, 2]'", writeEmbedded(new ArrayList<>(List.of(1, 2)), quoted, false));
+        assertEquals("[1, 2]", writeEmbedded(new ArrayList<>(List.of(1, 2)), null, true));
+    }
+
+    private String writeEmbedded(final Object value, final XmlSerConfig config, final boolean raw) throws Exception {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            if (raw) {
+                parser2.writeEmbeddedRawJson(bw, value, config);
+            } else {
+                parser2.writeEmbeddedJson(bw, value, config);
+            }
+            return bw.toString();
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    private static Writer newEmbeddedJsonWriter(final BufferedXmlWriter bw, final boolean raw) throws Exception {
+        for (final Class<?> cls : AbstractXmlParser.class.getDeclaredClasses()) {
+            if (cls.getSimpleName().equals("EmbeddedJsonWriter")) {
+                final Constructor<?> c = cls.getDeclaredConstructor(BufferedXmlWriter.class, boolean.class);
+                c.setAccessible(true);
+                return (Writer) c.newInstance(bw, raw);
+            }
+        }
+        throw new IllegalStateException();
+    }
+
+    private static void finish(final Writer w) throws Exception {
+        final Method m = w.getClass().getDeclaredMethod("finish");
+        m.setAccessible(true);
+        m.invoke(w);
+    }
+
+    @Test
+    public void testEmbeddedJsonWriterSurrogatesAcrossWrites() throws Exception {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            final Writer w = newEmbeddedJsonWriter(bw, false);
+            w.write('a');
+            w.write("x\uD83D", 0, 2);
+            w.write(new char[] { '\uDE00', 'b' }, 0, 2);
+            w.write("\uD800", 0, 1);
+            w.write("c", 0, 1);
+            w.write("", 0, 0);
+            w.write("\uD800", 0, 1);
+            finish(w);
+            w.flush();
+            w.close();
+            assertEquals("ax😀b\\ud800c\\ud800", bw.toString());
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testEmbeddedJsonWriterRaw() throws Exception {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            final Writer w = newEmbeddedJsonWriter(bw, true);
+            w.write("a<b", 0, 3);
+            w.write(new char[] { 'c', '&', 'd' }, 0, 3);
+            w.write("￾", 0, 1);
+            assertEquals("a&lt;bc&amp;d\\ufffe", bw.toString());
+            assertThrows(ParsingException.class, () -> w.write("\u0001", 0, 1));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testConcreteClassFromAttributesAndReader() throws Exception {
+        assertSame(List.class, parser2.getConcreteClass((org.xml.sax.Attributes) null, List.class));
+        assertNull(parser2.getAttributeTypeClass((org.xml.sax.Attributes) null));
+        final AttributesImpl attrs = new AttributesImpl();
+        attrs.addAttribute("", "type", "type", "CDATA", "ArrayList");
+        assertSame(ArrayList.class, parser2.getConcreteClass(attrs, List.class));
+
+        final XMLInputFactory factory = XMLInputFactory.newInstance();
+        final XMLStreamReader noAttrs = factory.createXMLStreamReader(new StringReader("<a/>"));
+        AbstractXmlParser.moveToRootElement(noAttrs);
+        AbstractXmlParser.moveToRootElement(noAttrs);
+        assertSame(List.class, parser2.getConcreteClass(noAttrs, List.class));
+        assertNull(parser2.getAttributeTypeClass(noAttrs));
+
+        final XMLStreamReader withAttrs = factory.createXMLStreamReader(new StringReader("<a type=\"ArrayList\"/>"));
+        AbstractXmlParser.moveToRootElement(withAttrs);
+        assertSame(ArrayList.class, parser2.getConcreteClass(withAttrs, List.class));
+        assertSame(ArrayList.class, parser2.getAttributeTypeClass(withAttrs));
+    }
+
+    @Test
+    public void testStaticHelpersAcceptNull() throws Exception {
+        AbstractXmlParser.checkXmlText(null, "x");
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            AbstractXmlParser.writeRawJson(bw, null);
+            assertEquals("", bw.toString());
+            AbstractXmlParser.writeRawJson(bw, "a<b");
+            assertEquals("a&lt;b", bw.toString());
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testJaxbNodeTypesUnsupported(@TempDir final Path tempDir) {
+        final JaxbParser jaxb = new JaxbParser();
+        assertThrows(UnsupportedOperationException.class, () -> jaxb.deserialize(tempDir.resolve("unused.xml").toFile(), null, Map.of()));
+    }
+
+    @Test
+    public void testApprovedSimpleNameType() {
+        final AbstractXmlParser p = new XmlParserImpl(XmlParserType.StAX, null, null, Set.of(String.class));
+        assertNotNull(p.resolveTypeAttribute("String"));
+    }
+
+    @Test
+    public void testCheckXmlAttributeNameSurrogatePair() {
+        AbstractXmlParser.checkXmlAttributeName("a😀b".toCharArray(), "Property name");
+        assertThrows(ParsingException.class, () -> AbstractXmlParser.checkXmlAttributeName("a\u0001".toCharArray(), "Property name"));
+    }
+
+    @Test
+    public void testWriteXmlScalarOptionalCharSequence() throws Exception {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            final Type<Object> type = Type.of(java.util.Optional.class);
+            AbstractXmlParser.writeXmlScalar(bw, type, java.util.Optional.of("ab"), null, "Property", "p");
+            assertTrue(bw.toString().contains("ab"));
+            assertThrows(ParsingException.class, () -> AbstractXmlParser.writeXmlScalar(bw, type, java.util.Optional.of("a\u0001"), null, "Property", "p"));
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testMapCreatorAndConverterTwoArg() {
+        assertNull(AbstractXmlParser.mapCreatorAndConverter(LinkedHashMap.class, null));
+        assertNull(AbstractXmlParser.mapCreatorAndConverter(LinkedHashMap.class, null, null));
+    }
+
+    @Test
+    public void testConcreteClassNullNode() throws Exception {
+        assertSame(List.class, parser2.getConcreteClass((org.w3c.dom.Node) null, List.class));
+    }
+
+    @Test
+    public void testMalformedTypeAttributeRejected() {
+        assertNull(parser2.resolveTypeAttribute("List<String"));
+    }
 }

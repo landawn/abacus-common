@@ -192,4 +192,12 @@ public class MutableByteTest extends TestBase {
         assertEquals("-128", MutableByte.of(Byte.MIN_VALUE).toString());
         assertEquals("127", MutableByte.of(Byte.MAX_VALUE).toString());
     }
+
+    @Test
+    public void testPackagePrivateDefaultConstructor() {
+        final MutableByte m = new MutableByte();
+        assertEquals(0, m.value());
+        m.setValue((byte) 5);
+        assertEquals(5, m.value());
+    }
 }

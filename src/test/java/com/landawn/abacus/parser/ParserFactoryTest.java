@@ -299,4 +299,11 @@ public class ParserFactoryTest extends TestBase {
             ParserFactory._kryoRegistrationVersion.incrementAndGet();
         }
     }
+
+    @Test
+    public void testJaxbAvailabilityProbeConstructor() {
+        final ParserFactory.JaxbAvailabilityProbe probe = new ParserFactory.JaxbAvailabilityProbe();
+        assertNotNull(probe);
+        assertTrue(ParserFactory.JaxbAvailabilityProbe.class.isAnnotationPresent(jakarta.xml.bind.annotation.XmlRootElement.class));
+    }
 }

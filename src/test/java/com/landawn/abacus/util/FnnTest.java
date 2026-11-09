@@ -1556,4 +1556,40 @@ public class FnnTest extends TestBase {
     }
     // ---- perf review 2026-09-26 G041 end ----
 
+    static final class DualRunnable implements java.lang.Runnable, Throwables.Runnable<RuntimeException> {
+        int runs;
+
+        @Override
+        public void run() {
+            runs++;
+        }
+    }
+
+    static final class DualCallable implements java.util.concurrent.Callable<String>, Throwables.Callable<String, Exception> {
+        @Override
+        public String call() {
+            return "dual";
+        }
+    }
+
+    @Test
+    public void testJr2rReturnsSameInstanceWhenAlreadyThrowable() {
+        final DualRunnable r = new DualRunnable();
+        final Throwables.Runnable<RuntimeException> converted = Fnn.jr2r(r);
+        assertSame(r, converted);
+        converted.run();
+        assertEquals(1, r.runs);
+    }
+
+    @Test
+    public void testCallableConversionsReturnSameInstance() throws Exception {
+        final DualCallable c = new DualCallable();
+        final Throwables.Callable<String, Exception> tc = Fnn.jc2c(c);
+        assertSame(c, tc);
+        assertEquals("dual", tc.call());
+
+        final java.util.concurrent.Callable<String> jc = Fnn.c2jc(c);
+        assertSame(c, jc);
+        assertEquals("dual", jc.call());
+    }
 }

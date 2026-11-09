@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -30,11 +31,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.Pair;
 
 public class JsonHttpMessageConverterTest extends TestBase {
 
@@ -927,4 +930,43 @@ public class JsonHttpMessageConverterTest extends TestBase {
         }
     }
     // ---- deep review 2026-10-27 verify G146 end ----
+
+    private final JsonHttpMessageConverter converter2 = new JsonHttpMessageConverter();
+
+    static final class FailingWriter2 extends Writer {
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            throw new IOException("writeFail");
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            throw new IOException("writeFail");
+        }
+
+        @Override
+        public void flush() {
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    @Test
+    public void testReadStringScalarEndingWithBackslashIsRejected() {
+        assertThrows(ParsingException.class, () -> converter2.readInternal(String.class, new StringReader("\"abc\\")));
+        assertEquals("abc", converter2.readInternal(String.class, new StringReader("\"abc\"")));
+    }
+
+    @Test
+    public void testWriteStructuredValueWriterFailure() {
+        final StringWriter ok = new StringWriter();
+        converter2.writeInternal(Pair.of(1, 2), Pair.class, ok);
+        assertEquals(com.landawn.abacus.util.N.toJson(Pair.of(1, 2)), ok.toString());
+
+        final UncheckedIOException ex = assertThrows(UncheckedIOException.class,
+                () -> converter2.writeInternal(Pair.of(1, 2), Pair.class, new FailingWriter2()));
+        assertEquals("writeFail", ex.getCause().getMessage());
+    }
 }

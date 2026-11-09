@@ -22,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalLong;
 import com.landawn.abacus.util.function.LongBinaryOperator;
@@ -1201,4 +1202,14 @@ public class ParallelIteratorLongStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static LongStream par(final long... a) {
+        return new ParallelIteratorLongStream(LongIterator.of(a), false, 4, null, null, false, null);
+    }
+
+    @Test
+    public void testTakeWhileConsumesWholeSource() {
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, par(1, 2, 3, 4, 5).takeWhile(x -> true).sorted().toArray());
+        assertArrayEquals(new long[0], par().takeWhile(x -> true).toArray());
+    }
 }

@@ -1,5 +1,8 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -449,5 +452,21 @@ public class HBaseColumnTest extends TestBase {
         set.add(HBaseColumn.valueOf("z", 9L));
 
         Assertions.assertEquals(List.of(HBaseColumn.valueOf("z", 9L), HBaseColumn.valueOf("a", 1L), HBaseColumn.valueOf("v", 1L)), new ArrayList<>(set));
+    }
+
+    @Test
+    public void testHBaseColumnCompareNonComparableValuesByHash() {
+        final int[] x = { 1 };
+        final int[] y = { 2 };
+        final HBaseColumn<int[]> a = new HBaseColumn<>(x, 1);
+        final HBaseColumn<int[]> b = new HBaseColumn<>(y, 1);
+        final int ab = a.compareTo(b);
+        assertTrue(ab != 0);
+        assertEquals(-Integer.signum(ab), Integer.signum(b.compareTo(a)));
+        // compareTo sees the values as Object, so the hash tie-break is N.hashCode(Object) (identity hash for arrays)
+        final int byHash = Integer.compare(N.hashCode((Object) x), N.hashCode((Object) y));
+        if (byHash != 0) {
+            assertEquals(Integer.signum(byHash), Integer.signum(ab));
+        }
     }
 }

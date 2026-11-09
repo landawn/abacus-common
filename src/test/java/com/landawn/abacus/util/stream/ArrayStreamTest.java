@@ -11,9 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +32,20 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
+import com.landawn.abacus.util.ByteIterator;
+import com.landawn.abacus.util.CharIterator;
+import com.landawn.abacus.util.DoubleIterator;
+import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.IntFunctions;
+import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.ObjIterator;
+import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Suppliers;
+import com.landawn.abacus.util.stream.StreamBase.LocalRunnable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u;
 
@@ -2083,4 +2093,168 @@ public class ArrayStreamTest extends TestBase {
         assertThrows(UnsupportedOperationException.class, () -> Stream.of(src).skip(1).limit(12).toCollection(() -> Arrays.asList(new String[0])));
     }
     // ---- perf review 2026-09-26 G112 end ----
+
+    private static final Comparator<Integer> CMP = (a, b) -> Integer.compare(a, b);
+
+    private static Stream<Integer> s2(final Integer... a) {
+        return Stream.of(a);
+    }
+
+    private static <T> void drainAndExpectNoSuchElement(final Iterator<T> iter, final int expectedCount) {
+        int n = 0;
+        while (iter.hasNext()) {
+            iter.next();
+            n++;
+        }
+        assertEquals(expectedCount, n);
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        try (Stream<Integer> st = new ArrayStream<>(new Integer[] { 1, 2, 3 }, (Collection<LocalRunnable>) null)) {
+            assertEquals(Arrays.asList(1, 2, 3), st.toList());
+        }
+    }
+
+    @Test
+    public void testSlidingMapIteratorExhausted() {
+        drainAndExpectNoSuchElement(s2(1, 2, 3).slidingMap(1, false, (a, b) -> a + "" + b).iterator(), 2);
+        drainAndExpectNoSuchElement(s2(1, 2, 3).slidingMap(1, false, (a, b, c) -> a + "" + b + c).iterator(), 1);
+    }
+
+    @Test
+    public void testMapFirstLastOrElseIteratorExhausted() {
+        drainAndExpectNoSuchElement(s2(1, 2, 3).mapFirstOrElse(x -> -x, x -> x).iterator(), 3);
+        drainAndExpectNoSuchElement(s2(1, 2, 3).mapLastOrElse(x -> -x, x -> x).iterator(), 3);
+    }
+
+    @Test
+    public void testFlatMapArrayToPrimitiveIteratorExhausted() {
+        final CharIterator ci = s2(1, 2).flatMapArrayToChar(x -> new char[] { 'a' }).iterator();
+        assertEquals('a', ci.nextChar());
+        assertEquals('a', ci.nextChar());
+        assertThrows(NoSuchElementException.class, ci::nextChar);
+
+        final ByteIterator bi = s2(1, 2).flatMapArrayToByte(x -> new byte[] { x.byteValue() }).iterator();
+        assertEquals(1, bi.nextByte());
+        assertEquals(2, bi.nextByte());
+        assertThrows(NoSuchElementException.class, bi::nextByte);
+
+        final ShortIterator si = s2(1, 2).flatMapArrayToShort(x -> new short[] { x.shortValue() }).iterator();
+        assertEquals(1, si.nextShort());
+        assertEquals(2, si.nextShort());
+        assertThrows(NoSuchElementException.class, si::nextShort);
+
+        final IntIterator ii = s2(1, 2).flatMapArrayToInt(x -> new int[] { x }).iterator();
+        assertEquals(1, ii.nextInt());
+        assertEquals(2, ii.nextInt());
+        assertThrows(NoSuchElementException.class, ii::nextInt);
+
+        final LongIterator li = s2(1, 2).flatMapArrayToLong(x -> new long[] { x }).iterator();
+        assertEquals(1L, li.nextLong());
+        assertEquals(2L, li.nextLong());
+        assertThrows(NoSuchElementException.class, li::nextLong);
+
+        final FloatIterator fi = s2(1, 2).flatMapArrayToFloat(x -> new float[] { x }).iterator();
+        assertEquals(1f, fi.nextFloat());
+        assertEquals(2f, fi.nextFloat());
+        assertThrows(NoSuchElementException.class, fi::nextFloat);
+
+        final DoubleIterator di = s2(1, 2).flatMapArrayToDouble(x -> new double[] { x }).iterator();
+        assertEquals(1d, di.nextDouble());
+        assertEquals(2d, di.nextDouble());
+        assertThrows(NoSuchElementException.class, di::nextDouble);
+    }
+
+    @Test
+    public void testSplitIteratorExhausted() {
+        drainAndExpectNoSuchElement(s2(1, 2, 3, 4).split(x -> x < 3).iterator(), 2);
+        drainAndExpectNoSuchElement(s2(1, 2, 3, 4).split(x -> x < 3, ArrayList::new).iterator(), 2);
+        drainAndExpectNoSuchElement(s2(1, 2, 3, 4).split(x -> x < 3, Collectors.toList()).iterator(), 2);
+    }
+
+    @Test
+    public void testOnEachIteratorExhausted() {
+        final List<Integer> seen = new ArrayList<>();
+        drainAndExpectNoSuchElement(s2(1, 2).onEach(seen::add).iterator(), 2);
+        assertEquals(Arrays.asList(1, 2), seen);
+    }
+
+    @Test
+    public void testTopOnSortedStream() {
+        assertEquals(Arrays.asList(4, 5), s2(5, 3, 1, 4, 2).sorted(CMP).top(2, CMP).toList());
+        assertEquals(Arrays.asList(4, 5), sortedStream(1, 2, 3, 4, 5).top(2, CMP).toList());
+    }
+
+    private static Stream<Integer> sortedStream(final Integer... sortedValues) {
+        return new ArrayStream<>(sortedValues, true, CMP, null);
+    }
+
+    @Test
+    public void testTopIteratorToArrayWithLargerArray() {
+        final ObjIteratorEx<Integer> iter = ((ArrayStream<Integer>) s2(5, 3, 1, 4, 2)).top(2, Comparator.naturalOrder()).iteratorEx();
+        final Integer[] target = { 9, 9, 9, 9 };
+        final Integer[] result = iter.toArray(target);
+        assertTrue(result == target);
+        assertNull(result[2]);
+        final List<Integer> firstTwo = new ArrayList<>(Arrays.asList(result[0], result[1]));
+        firstTwo.sort(null);
+        assertEquals(Arrays.asList(4, 5), firstTwo);
+    }
+
+    @Test
+    public void testMaxAllAndKthLargestOnSortedStream() {
+        assertEquals(Arrays.asList(5, 5), s2(5, 3, 5, 1).sorted(CMP).maxAll(CMP));
+        assertEquals(4, s2(5, 3, 4, 1).sorted(CMP).kthLargest(2, CMP).get());
+        assertEquals(Arrays.asList(5, 5), sortedStream(1, 3, 5, 5).maxAll(CMP));
+        assertEquals(Arrays.asList(5), sortedStream(5).maxAll(CMP));
+        assertEquals(4, sortedStream(1, 3, 4, 5).kthLargest(2, CMP).get());
+        assertEquals(Arrays.asList(3, 3), new ArrayStream<>(new Integer[] { 1, 3, 3 }, true, null, null).maxAll(Comparator.naturalOrder()));
+    }
+
+    @Test
+    public void testCycledEmptyNext() {
+        final Iterator<Integer> iter = Stream.<Integer> empty().cycled().iterator();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+
+        final Iterator<Integer> iter2 = new ArrayStream<>(new Integer[0], (Collection<LocalRunnable>) null).cycled().iterator();
+        assertThrows(NoSuchElementException.class, iter2::next);
+    }
+
+    @Test
+    public void testAppendIfEmptyIteratorPaths() {
+        final ObjIteratorEx<Integer> iter = ((ArrayStream<Integer>) new ArrayStream<>(new Integer[0], (Collection<LocalRunnable>) null))
+                .appendIfEmpty(() -> Stream.of(7, 8, 9))
+                .iteratorEx();
+        assertEquals(7, iter.next());
+        iter.advance(0);
+        iter.advance(1);
+        assertEquals(9, iter.next());
+        assertFalse(iter.hasNext());
+
+        final ObjIteratorEx<Integer> iter2 = new ArrayStream<>(new Integer[0], (Collection<LocalRunnable>) null).appendIfEmpty(() -> Stream.of(7, 8, 9))
+                .iteratorEx();
+        iter2.advance(2);
+        assertEquals(9, iter2.next());
+    }
+
+    @Test
+    public void testIfEmptyNextWithoutHasNext() {
+        final AtomicInteger cnt = new AtomicInteger();
+        final Iterator<Integer> iter = new ArrayStream<>(new Integer[0], (Collection<LocalRunnable>) null).ifEmpty(cnt::incrementAndGet).iterator();
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, cnt.get());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertEquals(1, cnt.get());
+    }
+
+    @Test
+    public void testToJdkStreamParallelNoCloseHandlers() {
+        try (java.util.stream.Stream<Integer> js = s2(1, 2, 3).parallel().toJdkStream()) {
+            assertTrue(js.isParallel());
+            assertArrayEquals(new Integer[] { 1, 2, 3 }, js.sorted().toArray(Integer[]::new));
+        }
+    }
 }

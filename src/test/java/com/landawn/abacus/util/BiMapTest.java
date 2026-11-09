@@ -11,10 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -2372,4 +2374,30 @@ public class BiMapTest extends AbstractTest {
         assertEquals("z", biMap.getByValue(30));
     }
     // ---- bug review 2026-09-30 G021 end ----
+
+    @Test
+    public void testReplaceAllOnEmptyIsNoOp() {
+        final BiMap<String, Integer> map = new BiMap<>();
+        map.replaceAll((k, v) -> v + 1);
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void testCopyOfLargeDefaultBiMapKeepsOrder() {
+        final BiMap<Integer, String> map = new BiMap<>(Suppliers.<Integer, String> ofLinkedHashMap(), Suppliers.<String, Integer> ofLinkedHashMap());
+        for (int i = 0; i < 20; i++) {
+            map.put(i, "v" + i);
+        }
+
+        final BiMap<Integer, String> copy = map.copy();
+        assertNotSame(map, copy);
+        assertEquals(map, copy);
+        assertEquals(new ArrayList<>(map.keySet()), new ArrayList<>(copy.keySet()));
+        assertEquals(Integer.valueOf(7), copy.getByValue("v7"));
+
+        copy.put(100, "v100");
+        assertEquals(20, map.size());
+        final List<Integer> keys = new ArrayList<>(copy.keySet());
+        assertEquals(Integer.valueOf(100), keys.get(keys.size() - 1));
+    }
 }

@@ -23,6 +23,7 @@ import java.time.DayOfWeek;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -6381,4 +6382,82 @@ public class AbacusXmlParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G122 end ----
+
+    private static final XmlParserType[] ALL_TYPES2 = { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX };
+
+    public static class GapPerson {
+        private String name;
+        private int age;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(final int age) {
+            this.age = age;
+        }
+    }
+
+    private static AbacusXmlParserImpl parserOf2(final XmlParserType type) {
+        final Set<Class<?>> types = new HashSet<>(Arrays.asList(AbacusXmlParserImplTest.class.getDeclaredClasses()));
+        return new AbacusXmlParserImpl(type, null, null, types);
+    }
+
+    private static Document parseDom(final String xml) throws Exception {
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        return factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void testNodeTypesWithoutMatchingNode() throws Exception {
+        final Document doc = parseDom("<gapPerson><name>a</name></gapPerson>");
+        final Map<String, Type<?>> nodeTypes = Map.of("other", Type.of(GapPerson.class));
+
+        for (final XmlParserType type : ALL_TYPES2) {
+            final ParsingException ex = assertThrows(ParsingException.class, () -> parserOf2(type).deserialize(doc, null, nodeTypes), type.name());
+            assertTrue(ex.getMessage().contains("No target class"), ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testBeanPropertyMissingNameAttribute() {
+        final String xml = "<gapPerson name=\"gapPerson\"><property name=\"name\">a</property><property>1</property></gapPerson>";
+
+        for (final XmlParserType type : ALL_TYPES2) {
+            final ParsingException ex = assertThrows(ParsingException.class, () -> parserOf2(type).deserialize(xml, GapPerson.class), type.name());
+            assertTrue(ex.getMessage().contains("Missing 'name' attribute"), type.name() + ": " + ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testMapPropertyMissingNameAttribute() {
+        final String xml = "<map name=\"m\"><property name=\"a\">1</property><property>2</property></map>";
+
+        for (final XmlParserType type : ALL_TYPES2) {
+            final ParsingException ex = assertThrows(ParsingException.class, () -> parserOf2(type).deserialize(xml, Map.class), type.name());
+            if (type != XmlParserType.SAX) {
+                // SAX reports the unnamed element as a malformed map entry instead
+                assertTrue(ex.getMessage().contains("Missing 'name' attribute"), type.name() + ": " + ex.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testSerializeNonListNonSetCollection() {
+        final ArrayDeque<String> deque = new ArrayDeque<>(Arrays.asList("a", "b"));
+
+        for (final XmlParserType type : ALL_TYPES2) {
+            final String xml = parserOf2(type).serialize(deque);
+            assertTrue(xml.startsWith("<collection>"), type.name() + ": " + xml);
+            assertEquals(Arrays.asList("a", "b"), parserOf2(type).deserialize(xml, List.class), type.name());
+        }
+    }
 }

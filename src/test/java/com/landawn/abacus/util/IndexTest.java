@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.u.OptionalInt;
@@ -54,6 +55,7 @@ public class IndexTest extends IndexTestSupport {
     }
 
     @Test
+    @Tag("slow-test")
     public void testOf_IteratorPastIntegerMaxValue() {
         assertThrows(ArithmeticException.class, () -> Index.of(reviewFixes20260906TargetAfter(Integer.MAX_VALUE + 1L), "target"));
         assertEquals(OptionalInt.of(3), Index.of(reviewFixes20260906TargetAfter(3L), "target"));

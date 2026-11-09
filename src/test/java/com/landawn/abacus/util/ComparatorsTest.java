@@ -2228,4 +2228,26 @@ public class ComparatorsTest extends TestBase {
         // A null element is the minimum under Comparators.naturalOrder().
         assertEquals(-1, Integer.signum(cmp.compare(Arrays.asList((String) null), Arrays.asList("a"))));
     }
+
+    @Test
+    public void testArrayAndCollectionComparatorsRightNull() {
+        assertEquals(1, Comparators.OBJECT_ARRAY_COMPARATOR.compare(new Object[] { 1 }, null));
+        assertEquals(-1, Comparators.OBJECT_ARRAY_COMPARATOR.compare(null, new Object[] { 1 }));
+        assertEquals(1, Comparators.COLLECTION_COMPARATOR.compare(List.of(1), null));
+        assertEquals(0, Comparators.COLLECTION_COMPARATOR.compare(null, null));
+    }
+
+    @Test
+    public void testIterableAndMapComparatorsRightNull() {
+        final Comparator<List<Integer>> iterableCmp = Comparators.comparingIterable(Comparator.<Integer> naturalOrder());
+        assertEquals(1, iterableCmp.compare(List.of(1), null));
+        assertEquals(-1, iterableCmp.compare(null, List.of(1)));
+
+        final Comparator<Map<String, Integer>> byKey = Comparators.comparingMapByKey(Comparator.<String> naturalOrder());
+        assertEquals(1, byKey.compare(Map.of("a", 1), null));
+
+        final Comparator<Map<String, Integer>> byValue = Comparators.comparingMapByValue(Comparator.<Integer> naturalOrder());
+        assertEquals(1, byValue.compare(Map.of("a", 1), null));
+        assertEquals(-1, byValue.compare(null, Map.of("a", 1)));
+    }
 }

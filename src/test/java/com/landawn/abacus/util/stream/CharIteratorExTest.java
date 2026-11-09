@@ -1,6 +1,9 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -363,4 +366,78 @@ public class CharIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    static final class CloseableCharIterator extends CharIterator implements AutoCloseable {
+        private char next = 'a';
+        int closed = 0;
+
+        @Override
+        public boolean hasNext() {
+            return next <= 'b';
+        }
+
+        @Override
+        public char nextChar() {
+            return next++;
+        }
+
+        @Override
+        public void close() {
+            closed++;
+        }
+    }
+
+    static final class CloseableIterator implements Iterator<Character>, AutoCloseable {
+        private final Iterator<Character> it = Arrays.asList('a', 'b').iterator();
+        int closed = 0;
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Character next() {
+            return it.next();
+        }
+
+        @Override
+        public void close() {
+            closed++;
+        }
+    }
+
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(CharIteratorEx.empty().supportsFailureAtomicAdvance());
+    }
+
+    @Test
+    public void testOfPlainIteratorClosesSource() {
+        final CloseableCharIterator src = new CloseableCharIterator();
+        final CharIteratorEx iter = CharIteratorEx.of(src);
+        assertEquals('a', iter.nextChar());
+        iter.closeResource();
+        assertEquals(1, src.closed);
+    }
+
+    @Test
+    public void testFromObjIteratorExDelegates() {
+        final ObjIteratorEx<Character> src = ObjIteratorEx.of('a', 'b', 'c');
+        final CharIteratorEx iter = CharIteratorEx.from(src);
+        assertEquals(src.supportsFailureAtomicAdvance(), iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        assertEquals('a', iter.nextChar());
+        iter.advance(1);
+        assertEquals('c', iter.nextChar());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromPlainIteratorClosesSource() {
+        final CloseableIterator src = new CloseableIterator();
+        final CharIteratorEx iter = CharIteratorEx.from(src);
+        assertEquals('a', iter.nextChar());
+        iter.closeResource();
+        assertEquals(1, src.closed);
+    }
 }

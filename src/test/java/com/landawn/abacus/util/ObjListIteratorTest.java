@@ -435,4 +435,22 @@ public class ObjListIteratorTest extends TestBase {
         assertEquals("a", limited.next());
         assertEquals("a", limited.previous());
     }
+
+    @Test
+    public void testOfFullArrayRange() {
+        final ObjListIterator<String> iter = ObjListIterator.of(new String[] { "a", "b" }, 0, 2);
+        final List<String> seen = new ArrayList<>();
+        iter.forEachRemaining(seen::add);
+        assertEquals(List.of("a", "b"), seen);
+    }
+
+    @Test
+    public void testSkipThenIndexes() {
+        final ObjListIterator<String> skippedForPrev = ObjListIterator.of(List.of("a", "b", "c")).skip(2);
+        assertEquals(1, skippedForPrev.previousIndex());
+
+        final ObjListIterator<String> skippedForNext = ObjListIterator.of(List.of("a", "b", "c")).skip(1);
+        assertEquals(1, skippedForNext.nextIndex());
+        assertEquals("b", skippedForNext.next());
+    }
 }

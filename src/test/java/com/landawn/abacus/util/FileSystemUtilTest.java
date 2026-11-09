@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 
@@ -193,5 +195,47 @@ public class FileSystemUtilTest extends TestBase {
             }
             Files.deleteIfExists(childPidFile);
         }
+    }
+
+    @TempDir
+    Path tempDir;
+
+    private static FileSystemUtil newFileSystemUtil2() throws ReflectiveOperationException {
+        final java.lang.reflect.Constructor<FileSystemUtil> constructor = FileSystemUtil.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return constructor.newInstance();
+    }
+
+    @Test
+    public void testFreeSpaceOsUnknownCode() throws Exception {
+        final FileSystemUtil fs = newFileSystemUtil2();
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> fs.freeSpaceOS(".", 99, true, 0));
+        assertTrue(ex.getMessage().contains("determining operating system"));
+    }
+
+    @Test
+    public void testFreeSpaceWindowsUnnormalizablePath() throws Exception {
+        final FileSystemUtil fs = newFileSystemUtil2();
+        final IOException ex = assertThrows(IOException.class, () -> fs.freeSpaceWindows("/../../x", 0));
+        assertTrue(ex.getMessage().contains("unable to normalize"));
+    }
+
+    @Test
+    public void testFreeSpaceOsUnixAndPosix() throws Exception {
+        final FileSystemUtil fs = newFileSystemUtil2();
+        final String dir = tempDir.toFile().getAbsolutePath();
+
+        for (final int os : new int[] { 2, 3 }) {
+            for (final boolean kb : new boolean[] { true, false }) {
+                try {
+                    // depends on a 'df' executable being available on the PATH
+                    assertTrue(fs.freeSpaceOS(dir, os, kb, 5_000L) >= 0L);
+                } catch (final IOException e) {
+                    assertNotNull(e.getMessage());
+                }
+            }
+        }
+
+        assertTrue(new File(dir).isDirectory());
     }
 }

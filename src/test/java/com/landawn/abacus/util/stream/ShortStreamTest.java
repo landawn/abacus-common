@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.Duration;
+import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.ShortIterator;
@@ -1874,4 +1877,92 @@ public class ShortStreamTest extends ShortStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    @Test
+    public void testRangeClosedZeroStep() {
+        assertThrows(IllegalArgumentException.class, () -> ShortStream.rangeClosed((short) 1, (short) 5, (short) 0));
+    }
+
+    @Test
+    public void testRepeatLarge() {
+        assertEquals(20L, ShortStream.repeat((short) 7, 20).count());
+
+        final short[] arr = ShortStream.repeat((short) 7, 12).toArray();
+        assertEquals(12, arr.length);
+        assertEquals(7, arr[11]);
+
+        assertEquals(15L, ShortStream.repeat((short) 7, 20).skip(5).count());
+
+        final ShortIterator iter = ShortStream.repeat((short) 7, 10).iterator();
+        int n = 0;
+        while (iter.hasNext()) {
+            assertEquals(7, iter.nextShort());
+            n++;
+        }
+        assertEquals(10, n);
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+    }
+
+    @Test
+    public void testConcatEmptyInputs() {
+        assertEquals(0L, ShortStream.concat(new short[0][]).count());
+        assertEquals(0L, ShortStream.concat(new ShortIterator[0]).count());
+        assertEquals(0L, ShortStream.concat(new ShortStream[0]).count());
+        assertEquals(0L, ShortStream.concat(new ArrayList<short[]>()).count());
+        assertEquals(0L, ShortStream.concat(new ArrayList<ShortStream>()).count());
+        assertEquals(0L, ShortStream.concatIterators(new ArrayList<ShortIterator>()).count());
+    }
+
+    @Test
+    public void testMergeIteratorExhausted() {
+        final ShortIterator iter = ShortStream
+                .merge(ShortIterator.of((short) 1), ShortIterator.of((short) 2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .iterator();
+        assertEquals(1, iter.nextShort());
+        assertEquals(2, iter.nextShort());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+    }
+
+    @Test
+    public void testMergeCollectionOfTwo() {
+        final short[] result = ShortStream
+                .merge(Arrays.asList(ShortStream.of((short) 1, (short) 4), ShortStream.of((short) 2, (short) 3)),
+                        (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new short[] { 1, 2, 3, 4 }, result);
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        final AtomicInteger closed = new AtomicInteger();
+        final List<StreamBase.LocalRunnable> handlers = new ArrayList<>();
+        handlers.add(StreamBase.LocalRunnable.wrap((Runnable) closed::incrementAndGet));
+        try (ArrayShortStream s = new ArrayShortStream(new short[] { 1, 2, 3 }, handlers)) {
+            assertEquals(6, s.sum());
+        }
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new short[] { 1, 3 }, ShortStream.of((short) 1, (short) 2, (short) 3).flatMap(x -> x == 2 ? null : ShortStream.of(x)).toArray());
+    }
+
+    @Test
+    public void testTopZero() {
+        assertEquals(0, ShortStream.of((short) 3, (short) 1, (short) 2).top(0, Comparator.naturalOrder()).count());
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        final short[] sorted = { 1, 2, 3 };
+        assertEquals(1, new ArrayShortStream(sorted, true, null).min().get());
+        assertEquals(3, new ArrayShortStream(sorted, true, null).max().get());
+        assertEquals(2, new ArrayShortStream(sorted, true, null).kthLargest(2).get());
+    }
+
+    @Test
+    public void testCycledOneRound() {
+        assertArrayEquals(new short[] { 1, 2 }, ShortStream.of((short) 1, (short) 2).cycled(1).toArray());
+    }
 }

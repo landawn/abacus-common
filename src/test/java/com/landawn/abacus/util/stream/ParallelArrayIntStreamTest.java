@@ -1564,4 +1564,37 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static IntStream singleParallel() {
+        final IntStream s = IntStream.of(7).parallel(4);
+        return s;
+    }
+
+    @Test
+    public void testSingleElementFallsBackToSequential() {
+        assertEquals(ParallelArrayIntStream.class, singleParallel().getClass());
+
+        final List<Integer> seen = new ArrayList<>();
+        assertArrayEquals(new int[] { 7 }, singleParallel().onEach(seen::add).toArray());
+        assertEquals(List.of(7), seen);
+
+        final List<Integer> seen2 = new ArrayList<>();
+        singleParallel().forEach(seen2::add);
+        assertEquals(List.of(7), seen2);
+
+        final Map<Integer, Integer> m = singleParallel().toMap(x -> x, x -> x * 2, Integer::sum, java.util.HashMap::new);
+        assertEquals(Map.of(7, 14), m);
+
+        final Map<Integer, Long> g = singleParallel().groupTo(x -> x % 2, Collectors.counting(), java.util.HashMap::new);
+        assertEquals(Map.of(1, 1L), g);
+
+        assertArrayEquals(new int[] { 10 }, singleParallel().zipWith(IntStream.of(3, 4), Integer::sum).toArray());
+        assertArrayEquals(new int[] { 12 }, singleParallel().zipWith(IntStream.of(3), IntStream.of(2), (a, b, c) -> a + b + c).toArray());
+    }
+
+    @Test
+    public void testReduceArraySplitWithEmptySlice() {
+        final IntStream s = IntStream.of(1, 2, 3, 4, 5).parallel(new ParallelSettings(4, SplitStrategy.ARRAY, null));
+        assertEquals(15, s.reduce(Integer::sum).getAsInt());
+    }
 }

@@ -116,4 +116,11 @@ public class ShortArrayTypeTest extends TestBase {
     }
 
     // ---- deep review 2026-10-16 G151 end ----
+
+    @Test
+    public void testBoxedArrayTypesStringOfEmpty() {
+        assertEquals("[]", new ShortArrayType().stringOf(new Short[0]));
+        assertEquals("[]", new FloatArrayType().stringOf(new Float[0]));
+        assertEquals("[]", new DoubleArrayType().stringOf(new Double[0]));
+    }
 }

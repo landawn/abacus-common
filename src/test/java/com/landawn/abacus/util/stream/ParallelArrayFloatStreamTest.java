@@ -1533,4 +1533,19 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         return result;
     }
     // ---- deep review 2026-11-02 G107 end ----
+
+    private static FloatStream arrayParallel(final int threads, final float... elements) {
+        return FloatStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threads).build());
+    }
+
+    @Test
+    public void testReduceWithEmptyTrailingSlice() {
+        assertEquals(15f, arrayParallel(4, 1, 2, 3, 4, 5).reduce((a, b) -> a + b).get(), 0.0001f);
+        assertEquals(15f, arrayParallel(4, 1, 2, 3, 4, 5).reduce(0f, (a, b) -> a + b), 0.0001f);
+    }
+
+    @Test
+    public void testDropWhileAllMatching() {
+        assertArrayEquals(new float[0], arrayParallel(3, 1, 2, 3, 4, 5, 6).dropWhile(x -> true).toArray());
+    }
 }

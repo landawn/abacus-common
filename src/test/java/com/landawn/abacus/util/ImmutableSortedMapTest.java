@@ -985,4 +985,15 @@ public class ImmutableSortedMapTest extends TestBase {
         assertEquals("{b=2, a=1}", wrapped.toString());
         assertNotSame(wrapped, ImmutableSortedMap.copyOf(wrapped));
     }
+
+    @Test
+    public void testImmutableSortedMapBackingConstructor() {
+        final TreeMap<String, Integer> backing = new TreeMap<>();
+        backing.put("b", 2);
+        final ImmutableSortedMap<String, Integer> view = new ImmutableSortedMap<>(backing);
+        backing.put("a", 1);
+        assertEquals("a", view.firstKey());
+        assertEquals(2, view.size());
+        assertThrows(UnsupportedOperationException.class, () -> view.put("c", 3));
+    }
 }

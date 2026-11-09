@@ -2551,4 +2551,35 @@ public class ByteListTest extends ByteListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G024 end ----
+
+    @Test
+    public void testAddAllAtIndexEmpty() {
+        final ByteList list = ByteList.of((byte) 1, (byte) 2);
+        assertFalse(list.addAll(1, new ByteList()));
+        assertArrayEquals(new byte[] { 1, 2 }, list.toArray());
+    }
+
+    @Test
+    public void testRemoveAbsent() {
+        final ByteList list = ByteList.of((byte) 1, (byte) 2);
+        assertFalse(list.remove((byte) 9));
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testReplaceRangeWithEmptyList() {
+        final ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);
+        list.replaceRange(1, 3, new ByteList());
+        assertArrayEquals(new byte[] { 1, 4 }, list.toArray());
+    }
+
+    @Test
+    public void testReplaceAllOnEmpty() {
+        assertEquals(0, new ByteList().replaceAll((byte) 1, (byte) 2));
+    }
+
+    @Test
+    public void testContainsAllOnEmptyList() {
+        assertFalse(new ByteList().containsAll(new byte[] { 1 }));
+    }
 }

@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -713,5 +715,11 @@ public class JsonMappersTest extends TestBase {
         final IllegalArgumentException e3 = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> JsonMappers.wrap(new ObjectMapper()).fromJson(missing, missingType));
         Assertions.assertEquals("'targetType' cannot be null", e3.getMessage());
+    }
+
+    @Test
+    public void testFromJsonWithNullDeserializationConfigUsesDefault() {
+        final Map<?, ?> m = JsonMappers.fromJson("{\"a\":1}", Map.class, (DeserializationConfig) null);
+        assertEquals(1, m.get("a"));
     }
 }

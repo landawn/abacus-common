@@ -15,12 +15,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.IntIterator;
 
@@ -378,5 +380,39 @@ class ParallelPrimitiveBufferReview20261005Test extends TestBase {
             assertEquals("worker failure", e.getMessage());
             assertAllTerminate(workers, "a worker failure without close (cancelUncompletedThreads=" + cancelUncompletedThreads + ")");
         }
+    }
+
+    @Test
+    public void testStartFailsWhenExecutorRejects() {
+        final AsyncExecutor rejecting = new AsyncExecutor(r -> {
+            throw new RejectedExecutionException("rejected");
+        });
+
+        final IntStream s = new ParallelIteratorIntStream(IntIterator.of(1, 2, 3), false, 2, null, rejecting, false, null).map(x -> x + 1);
+        final RuntimeException ex = assertThrows(RuntimeException.class, s::toArray);
+        Throwable t = ex;
+        boolean found = false;
+
+        while (t != null) {
+            if (t instanceof RejectedExecutionException) {
+                found = true;
+                break;
+            }
+            t = t.getCause();
+        }
+
+        assertTrue(found, String.valueOf(ex));
+    }
+
+    @Test
+    public void testWorkerFailureIsRethrownByConsumer() {
+        final IntStream s = new ParallelIteratorIntStream(IntIterator.of(1, 2, 3, 4), false, 2, null, null, false, null).map(x -> {
+            if (x == 3) {
+                throw new IllegalStateException("worker");
+            }
+            return x;
+        });
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, s::toArray);
+        assertTrue(ex.getMessage().contains("worker"));
     }
 }

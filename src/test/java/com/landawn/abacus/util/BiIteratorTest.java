@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -545,4 +547,76 @@ public class BiIteratorTest extends TestBase {
         assertThrows(NullPointerException.class, () -> BiIterator.of(entries.iterator()).map((k, v) -> k).next());
     }
     // ---- deep review 2026-09-25 G021 end ----
+
+    private static void assertExhausted(final BiIterator<?, ?> iter) {
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertThrows(NoSuchElementException.class, () -> iter.next((a, b) -> {
+        }));
+    }
+
+    private static BiIterator<Integer, String> generated2(final int n) {
+        final int[] count = { 0 };
+        return BiIterator.generate(() -> count[0] < n, p -> {
+            p.set(count[0], "v" + count[0]);
+            count[0]++;
+        });
+    }
+
+    @Test
+    public void testGenerateWithBooleanSupplierExhausted() {
+        final BiIterator<Integer, String> iter = generated2(1);
+        assertEquals(Pair.of(0, "v0"), iter.next());
+        assertExhausted(iter);
+        assertThrows(NoSuchElementException.class, () -> generated2(0).map((a, b) -> a).next());
+    }
+
+    @Test
+    public void testGenerateWithIndexRangeExhausted() {
+        final BiIterator<Integer, Integer> iter = BiIterator.generate(0, 1, (i, p) -> p.set(i, i * 2));
+        final List<Integer> seen = new ArrayList<>();
+        iter.next((a, b) -> seen.add(b));
+        assertEquals(List.of(0), seen);
+        assertExhausted(iter);
+        assertThrows(NoSuchElementException.class, () -> BiIterator.<Integer, Integer> generate(0, 0, (i, p) -> p.set(i, i)).map((a, b) -> a).next());
+    }
+
+    @Test
+    public void testZipExhausted() {
+        final BiIterator<String, Integer> iter = BiIterator.zip(Arrays.asList("a").iterator(), Arrays.asList(1, 2).iterator());
+        assertEquals(Pair.of("a", 1), iter.next());
+        assertExhausted(iter);
+        assertThrows(NoSuchElementException.class,
+                () -> BiIterator.zip(Collections.<String> emptyIterator(), Collections.<Integer> emptyIterator()).map((a, b) -> a).next());
+    }
+
+    @Test
+    public void testZipWithDefaultsExhausted() {
+        final BiIterator<String, Integer> iter = BiIterator.zip(Arrays.asList("a").iterator(), Arrays.asList(1, 2).iterator(), "none", -1);
+        final List<Pair<String, Integer>> seen = new ArrayList<>();
+        iter.next((a, b) -> seen.add(Pair.of(a, b)));
+        iter.next((a, b) -> seen.add(Pair.of(a, b)));
+        assertEquals(List.of(Pair.of("a", 1), Pair.of("none", 2)), seen);
+        assertExhausted(iter);
+        assertThrows(NoSuchElementException.class,
+                () -> BiIterator.zip(Collections.<String> emptyIterator(), Collections.<Integer> emptyIterator(), "x", 0).map((a, b) -> a).next());
+    }
+
+    @Test
+    public void testSkipLimitFilterExhausted() {
+        final BiIterator<Integer, String> skipped = generated2(3).skip(2);
+        final List<Integer> seen = new ArrayList<>();
+        skipped.next((a, b) -> seen.add(a));
+        assertEquals(List.of(2), seen);
+        assertExhausted(skipped);
+
+        final BiIterator<Integer, String> limited = generated2(3).limit(1);
+        assertEquals(Pair.of(0, "v0"), limited.next());
+        assertExhausted(limited);
+
+        final BiIterator<Integer, String> filtered = generated2(4).filter((a, b) -> a == 1);
+        filtered.next((a, b) -> seen.add(a));
+        assertEquals(List.of(2, 1), seen);
+        assertExhausted(filtered);
+    }
 }

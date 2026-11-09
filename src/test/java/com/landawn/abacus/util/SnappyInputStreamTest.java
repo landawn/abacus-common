@@ -205,4 +205,29 @@ public class SnappyInputStreamTest extends TestBase {
             assertArrayEquals(raw, baos.toByteArray());
         }
     }
+
+    private static byte[] compress2(final byte[] raw) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (SnappyOutputStream out = new SnappyOutputStream(baos)) {
+            out.write(raw);
+        }
+        return baos.toByteArray();
+    }
+
+    @Test
+    public void testReadIntoNullBufferThrowsNpe() throws Exception {
+        try (SnappyInputStream in = new SnappyInputStream(new ByteArrayInputStream(compress2("abc".getBytes())))) {
+            final NullPointerException ex = assertThrows(NullPointerException.class, () -> in.read(null, -1, 5));
+            assertEquals("b", ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testResetDelegatesToUnderlyingStream() throws Exception {
+        try (SnappyInputStream in = new SnappyInputStream(new ByteArrayInputStream(compress2("abc".getBytes())))) {
+            assertEquals('a', in.read());
+            // The underlying xerial stream does not support mark/reset.
+            assertThrows(IOException.class, in::reset);
+        }
+    }
 }

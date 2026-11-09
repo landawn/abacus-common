@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -3550,4 +3552,68 @@ public class IntStreamTest extends IntStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    @Test
+    public void testFromNullAndIteratorPaths() {
+        assertEquals(0, IntStream.from(null).count());
+
+        final IntIteratorEx it = IntStream.from(java.util.stream.IntStream.of(1, 2, 3)).iteratorEx();
+        assertEquals(1, it.nextInt());
+        it.advance(0);
+        it.advance(1);
+        assertEquals(3, it.nextInt());
+        assertFalse(it.hasNext());
+
+        final IntIteratorEx it2 = IntStream.from(java.util.stream.IntStream.of(1, 2, 3, 4)).iteratorEx();
+        it2.advance(2);
+        assertEquals(3, it2.nextInt());
+        assertEquals(4, it2.nextInt());
+    }
+
+    @Test
+    public void testOfCodePointsExhausted() {
+        final IntIterator it = IntStream.ofCodePoints("a").iterator();
+        assertEquals('a', it.nextInt());
+        assertThrows(NoSuchElementException.class, it::nextInt);
+    }
+
+    @Test
+    public void testHugeRangeToArrayRejected() {
+        assertThrows(IllegalStateException.class, () -> IntStream.range(Integer.MIN_VALUE, Integer.MAX_VALUE, 2).toArray());
+        assertThrows(IllegalStateException.class, () -> IntStream.rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE, 2).toArray());
+        assertThrows(IllegalStateException.class, () -> IntStream.repeat(7, 3_000_000_000L).toArray());
+    }
+
+    @Test
+    public void testRangeClosedZeroStep() {
+        assertThrows(IllegalArgumentException.class, () -> IntStream.rangeClosed(1, 5, 0));
+    }
+
+    @Test
+    public void testRepeatAdvanceNonPositive() {
+        final IntIteratorEx it = IntStream.repeat(5, 30).iteratorEx();
+        it.advance(0);
+        assertEquals(30, it.count());
+    }
+
+    @Test
+    public void testConcatEmptyInputs() {
+        assertEquals(0, IntStream.concat(new int[0][]).count());
+        assertEquals(0, IntStream.concat(new IntIterator[0]).count());
+        assertEquals(0, IntStream.concat(new IntStream[0]).count());
+        assertEquals(0, IntStream.concat(new ArrayList<int[]>()).count());
+        assertEquals(0, IntStream.concat(Collections.<IntStream> emptyList()).count());
+    }
+
+    @Test
+    public void testMergeIteratorsExhausted() {
+        final IntIterator it = IntStream.merge(IntIterator.of(1), IntIterator.of(2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .iterator();
+        assertEquals(1, it.nextInt());
+        assertEquals(2, it.nextInt());
+        assertTrue(!it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextInt);
+        assertArrayEquals(new int[] { 1, 2, 3 },
+                IntStream.merge(IntIterator.of(1, 3), IntIterator.of(2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
+    }
 }

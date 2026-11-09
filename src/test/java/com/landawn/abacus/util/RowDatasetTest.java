@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.Dataset.MissingPropertyPolicy;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.Tuple.Tuple3;
@@ -4396,4 +4398,394 @@ public class RowDatasetTest extends RowDatasetTestSupport {
     }
 
     // ---- deep review 2026-11-03 review P2 end ----
+
+    public static class Emp {
+        private int id;
+        private String firstName;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(final String firstName) {
+            this.firstName = firstName;
+        }
+    }
+
+    public static class Addr {
+        private String city;
+        private String zip;
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(final String city) {
+            this.city = city;
+        }
+
+        public String getZip() {
+            return zip;
+        }
+
+        public void setZip(final String zip) {
+            this.zip = zip;
+        }
+    }
+
+    public static class Holder {
+        private int id;
+        private Addr home;
+        private Addr work;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public Addr getHome() {
+            return home;
+        }
+
+        public void setHome(final Addr home) {
+            this.home = home;
+        }
+
+        public Addr getWork() {
+            return work;
+        }
+
+        public void setWork(final Addr work) {
+            this.work = work;
+        }
+    }
+
+    private static RowDataset ds3(final List<String> names, final Object[]... rows) {
+        final List<List<Object>> columns = new ArrayList<>();
+        for (int c = 0; c < names.size(); c++) {
+            final List<Object> col = new ArrayList<>();
+            for (final Object[] row : rows) {
+                col.add(row[c]);
+            }
+            columns.add(col);
+        }
+        return new RowDataset(new ArrayList<>(names), columns);
+    }
+
+    private static RowDataset sample() {
+        return ds3(Arrays.asList("id", "name", "age"), new Object[] { 1, "a", 10 }, new Object[] { 2, "b", 20 }, new Object[] { 3, "c", 30 });
+    }
+
+    private static RowDataset empty2(final String... names) {
+        final List<List<Object>> columns = new ArrayList<>();
+        for (int i = 0; i < names.length; i++) {
+            columns.add(new ArrayList<>());
+        }
+        return new RowDataset(new ArrayList<>(Arrays.asList(names)), columns);
+    }
+
+    @Test
+    public void testColumnNamesListIterator() {
+        final RowDataset ds3 = sample();
+        final ListIterator<String> iter = ds3.columnNames().listIterator();
+        assertFalse(iter.hasPrevious());
+        assertEquals(0, iter.nextIndex());
+        assertEquals(-1, iter.previousIndex());
+        assertEquals("id", iter.next());
+        assertTrue(iter.hasPrevious());
+        assertEquals(1, iter.nextIndex());
+        assertEquals(0, iter.previousIndex());
+        assertThrows(UnsupportedOperationException.class, () -> iter.remove());
+        assertThrows(UnsupportedOperationException.class, () -> iter.set("x"));
+        assertThrows(UnsupportedOperationException.class, () -> iter.add("x"));
+
+        final List<String> seen = new ArrayList<>();
+        ds3.columnNames().forEach(seen::add);
+        assertEquals(Arrays.asList("id", "name", "age"), seen);
+    }
+
+    @Test
+    public void testLastRowEmpty2() {
+        final RowDataset ds3 = empty2("id", "name");
+        assertFalse(ds3.lastRow(Arrays.asList("id"), n -> new Object[n]).isPresent());
+    }
+
+    @Test
+    public void testForEachTuple3Reverse() throws Exception {
+        final RowDataset ds3 = sample();
+        final List<Object> seen = new ArrayList<>();
+        ds3.forEach(2, -1, Tuple.of("id", "name", "age"), (a, b, c) -> seen.add(a));
+        assertEquals(Arrays.asList(3, 2, 1), seen);
+    }
+
+    @Test
+    public void testToListIdentityFilter() {
+        final RowDataset ds3 = sample();
+        final List<Object[]> list = ds3.toList(0, 2, Fn.alwaysTrue(), Fn.identity(), Object[].class);
+        assertEquals(2, list.size());
+        assertEquals(Arrays.asList(1, "a", 10), Arrays.asList(list.get(0)));
+    }
+
+    @Test
+    public void testToStringWithProperties() {
+        final Map<String, Object> props = new HashMap<>();
+        props.put("k", "v");
+        final RowDataset ds3 = new RowDataset(new ArrayList<>(Arrays.asList("id")), new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(1)))), props);
+        assertTrue(ds3.toString().contains("properties={k=v}"));
+    }
+
+    @Test
+    public void testPaginatePageCount() {
+        final RowDataset ds3 = sample();
+        @SuppressWarnings("deprecation")
+        final int pages = ds3.paginate(2).pageCount();
+        assertEquals(2, pages);
+    }
+
+    @Test
+    public void testTopByInvalidN() {
+        final RowDataset ds3 = sample();
+        assertThrows(IllegalArgumentException.class, () -> ds3.topBy("id", 0, (a, b) -> 0));
+        assertThrows(IllegalArgumentException.class, () -> ds3.topBy(Arrays.asList("id"), 0, (Object[] a, Object[] b) -> 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> ds3.topBy(Arrays.asList("id"), 0, (java.util.function.Function<NoCachingNoUpdating.DisposableObjArray, Comparable>) a -> 1));
+    }
+
+    @Test
+    public void testSortOnEmpty() {
+        final RowDataset ds3 = empty2("id", "name");
+        ds3.sortBy("id", (a, b) -> 0);
+        ds3.sortBy(Arrays.asList("id"), (Object[] a, Object[] b) -> 0);
+        ds3.sortBy(Arrays.asList("id"), (java.util.function.Function<NoCachingNoUpdating.DisposableObjArray, Comparable>) a -> (Comparable) a.get(0));
+        assertEquals(0, ds3.size());
+    }
+
+    @Test
+    public void testParallelSortByKeyExtractor() {
+        final RowDataset ds3 = ds3(Arrays.asList("id", "name"), new Object[] { 3, "c" }, new Object[] { 1, "a" }, new Object[] { 2, "b" });
+        ds3.parallelSortBy(Arrays.asList("id"), (java.util.function.Function<NoCachingNoUpdating.DisposableObjArray, Comparable>) a -> (Comparable) a.get(0));
+        assertEquals(Arrays.asList(1, 2, 3), ds3.getColumn("id"));
+    }
+
+    @Test
+    public void testGroupByIdentityKeyExtractor() {
+        final RowDataset ds3 = ds3(Arrays.asList("k", "k2", "v"), new Object[] { 1, "x", 10 }, new Object[] { 1, "x", 20 }, new Object[] { 2, "y", 30 });
+        final Dataset g1 = ds3.groupBy(Arrays.asList("k"), Fn.identity(), Arrays.asList("v"), "vs", List.class);
+        assertEquals(2, g1.size());
+        final Dataset g2 = ds3.groupBy(Arrays.asList("k", "k2"), Fn.identity(), Arrays.asList("v"), "vs", List.class);
+        assertEquals(2, g2.size());
+        assertEquals(Arrays.asList("k", "k2", "vs"), new ArrayList<>(g2.columnNames()));
+    }
+
+    @Test
+    public void testGroupByDuplicateResultName() {
+        final RowDataset ds3 = sample();
+        assertThrows(IllegalArgumentException.class,
+                () -> ds3.groupBy("id", Fn.identity(), Arrays.asList("age"), "id", a -> a.get(0), com.landawn.abacus.util.stream.Collectors.toList()));
+        assertThrows(IllegalArgumentException.class, () -> ds3.groupBy(Arrays.asList("id"), a -> a.get(0), Arrays.asList("age"), "id", a -> a.get(0),
+                com.landawn.abacus.util.stream.Collectors.toList()));
+    }
+
+    @Test
+    public void testGroupBySingleKeyExtractorOnEmpty() {
+        final RowDataset ds3 = empty2("id", "name");
+        final Dataset g = ds3.groupBy(Arrays.asList("id"), a -> a.get(0));
+        assertEquals(0, g.size());
+        assertEquals(Arrays.asList("id"), new ArrayList<>(g.columnNames()));
+    }
+
+    @Test
+    public void testPivotResultNameClash() {
+        final RowDataset ds3 = ds3(Arrays.asList("__pivot_result", "p", "v"), new Object[] { "r1", "c1", 1 }, new Object[] { "r1", "c2", 2 });
+        final Sheet<Object, Object, Object> sheet = ds3.pivot("__pivot_result", "p", "v",
+                com.landawn.abacus.util.stream.Collectors.summingInt(x -> (Integer) x));
+        assertEquals(1, sheet.get("r1", "c1"));
+        assertEquals(2, sheet.get("r1", "c2"));
+    }
+
+    @Test
+    public void testFlatMapColumnsNoCopying() {
+        final RowDataset ds3 = sample();
+        final Dataset r1 = ds3.flatMapColumns(Tuple.of("id", "age"), "x", null, (a, b) -> Arrays.asList(a, b));
+        assertEquals(Arrays.asList(1, 10, 2, 20, 3, 30), r1.getColumn("x"));
+
+        final Dataset r2 = ds3.flatMapColumns(Arrays.asList("id", "age"), "x", null, a -> (Integer) a.get(0) == 2 ? null : Arrays.asList(a.get(1)));
+        assertEquals(Arrays.asList(10, 30), r2.getColumn("x"));
+    }
+
+    @Test
+    public void testJoinsWithEmptySides() {
+        final RowDataset left = empty2("id", "name");
+        final RowDataset right = ds3(Arrays.asList("rid", "rname"), new Object[] { 1, "x" }, new Object[] { 1, "y" });
+        final Map<String, String> on1 = new LinkedHashMap<>();
+        on1.put("id", "rid");
+        final Map<String, String> on2 = new LinkedHashMap<>();
+        on2.put("id", "rid");
+        on2.put("name", "rname");
+
+        assertEquals(0, left.innerJoin(right, on2).size());
+        assertEquals(0, left.leftJoin(right, on1).size());
+        assertEquals(0, left.innerJoin(right, on1, "nc", Object[].class).size());
+        assertEquals(0, left.innerJoin(right, on2, "nc", Object[].class).size());
+        assertEquals(0, left.innerJoin(right, on1, "nc", Object[].class, n -> new ArrayList<>()).size());
+        assertEquals(0, left.innerJoin(right, on2, "nc", Object[].class, n -> new ArrayList<>()).size());
+
+        final RowDataset emptyRight = empty2("rid", "rname");
+        final RowDataset full = sample();
+        final Map<String, String> onF1 = new LinkedHashMap<>();
+        onF1.put("id", "rid");
+        final Map<String, String> onF2 = new LinkedHashMap<>();
+        onF2.put("id", "rid");
+        onF2.put("name", "rname");
+        assertEquals(0, full.rightJoin(emptyRight, onF1).size());
+        assertEquals(0, full.rightJoin(emptyRight, onF1, "nc", Object[].class).size());
+        assertEquals(0, full.rightJoin(emptyRight, onF2, "nc", Object[].class).size());
+        assertEquals(0, full.rightJoin(emptyRight, onF1, "nc", Object[].class, n -> new ArrayList<>()).size());
+        assertEquals(0, full.rightJoin(emptyRight, onF2, "nc", Object[].class, n -> new ArrayList<>()).size());
+    }
+
+    @Test
+    public void testMultiKeyJoinDuplicateRightKeys() {
+        final RowDataset left = ds3(Arrays.asList("id", "name"), new Object[] { 1, "x" });
+        final RowDataset right = ds3(Arrays.asList("rid", "rname", "v"), new Object[] { 1, "x", "p" }, new Object[] { 1, "x", "q" });
+        final Map<String, String> on2 = new LinkedHashMap<>();
+        on2.put("id", "rid");
+        on2.put("name", "rname");
+        final Dataset r = left.innerJoin(right, on2);
+        assertEquals(2, r.size());
+        assertEquals(Arrays.asList("p", "q"), r.getColumn("v"));
+    }
+
+    @Test
+    public void testCombineColumnsEmptyNames() {
+        final RowDataset ds3 = sample();
+        assertThrows(IllegalArgumentException.class, () -> ds3.combineColumns(new ArrayList<String>(), "x", Object[].class));
+        assertThrows(IllegalArgumentException.class, () -> ds3.combineColumns(new ArrayList<String>(), "x", (NoCachingNoUpdating.DisposableObjArray a) -> 1));
+    }
+
+    @Test
+    public void testToMergedEntitiesIdNameResolution() {
+        final RowDataset ds3 = ds3(Arrays.asList("ID", "first_name"), new Object[] { 1, "a" }, new Object[] { 1, "a" }, new Object[] { 2, "b" });
+        final List<Emp> l1 = ds3.toMergedEntities(Arrays.asList("id"), Arrays.asList("ID", "first_name"), null, Emp.class);
+        assertEquals(2, l1.size());
+        assertEquals(1, l1.get(0).getId());
+        assertEquals("a", l1.get(0).getFirstName());
+
+        final List<Emp> l2 = ds3.toMergedEntities(Arrays.asList("firstName"), Arrays.asList("ID", "first_name"), null, Emp.class);
+        assertEquals(2, l2.size());
+        assertEquals("b", l2.get(1).getFirstName());
+
+        final RowDataset ds2 = ds3(Arrays.asList("id", "FIRSTNAME"), new Object[] { 1, "a" });
+        final List<Emp> l3 = ds2.toMergedEntities(Arrays.asList("id", "firstName"), Arrays.asList("id", "FIRSTNAME"), null, Emp.class);
+        assertEquals(1, l3.size());
+    }
+
+    @Test
+    public void testStrictPolicyUnknownPrefixedProperty() {
+        final RowDataset ds3 = ds3(Arrays.asList("id", "zzz.q"), new Object[] { 1, "a" });
+        final Dataset strict = ds3.withMissingPropertyPolicy(MissingPropertyPolicy.ERROR);
+        assertThrows(IllegalArgumentException.class, () -> strict.toList(Emp.class));
+        assertThrows(IllegalArgumentException.class, () -> strict.getRow(0, Emp.class));
+
+        final List<Emp> lenient = ds3.toList(Emp.class);
+        assertEquals(1, lenient.get(0).getId());
+        assertEquals(1, ds3.getRow(0, Emp.class).getId());
+    }
+
+    @Test
+    public void testToXmlNonAsciiElementNameAndBeanValue() {
+        final RowDataset ds3 = ds3(Arrays.asList("id"), new Object[] { 1 });
+        final String xml = ds3.toXml("élément");
+        assertTrue(xml.contains("<élément>"));
+
+        final Emp e = new Emp();
+        e.setId(7);
+        e.setFirstName("z");
+        final RowDataset beanDs = ds3(Arrays.asList("emp"), new Object[] { e });
+        final String xml2 = beanDs.toXml();
+        assertTrue(xml2.contains("7"));
+        assertTrue(xml2.contains("z"));
+    }
+
+    @Test
+    public void testGetRowInterleavedNestedColumns() {
+        final RowDataset ds3 = ds3(Arrays.asList("home.city", "work.city", "home.zip"), new Object[] { "A", "B", "Z" });
+        final Holder h = ds3.getRow(0, Holder.class);
+        assertEquals("A", h.getHome().getCity());
+        assertEquals("Z", h.getHome().getZip());
+        assertEquals("B", h.getWork().getCity());
+    }
+
+    @Test
+    public void testGetRowPrefixOnNonBeanProperty() {
+        final RowDataset ds3 = ds3(Arrays.asList("id.x"), new Object[] { 1 });
+        assertThrows(UnsupportedOperationException.class, () -> ds3.getRow(0, Holder.class));
+    }
+
+    @Test
+    public void testIteratorsNextActionWhenExhausted() {
+        final RowDataset ds3 = sample();
+        final BiIterator<Object, Object> bi = ds3.iterator("id", "name");
+        while (bi.hasNext()) {
+            bi.next();
+        }
+        assertThrows(java.util.NoSuchElementException.class, () -> bi.next());
+        assertThrows(java.util.NoSuchElementException.class, () -> bi.next((a, b) -> {
+        }));
+
+        final TriIterator<Object, Object, Object> tri = ds3.iterator("id", "name", "age");
+        while (tri.hasNext()) {
+            tri.next();
+        }
+        assertThrows(java.util.NoSuchElementException.class, () -> tri.next());
+        assertThrows(java.util.NoSuchElementException.class, () -> tri.next((a, b, c) -> {
+        }));
+    }
+
+    @Test
+    public void testPaginateIteratorExhausted() {
+        final RowDataset ds3 = sample();
+        final java.util.Iterator<Dataset> it = ds3.paginate(2).iterator();
+        assertEquals(2, it.next().size());
+        assertEquals(1, it.next().size());
+        assertFalse(it.hasNext());
+        assertThrows(java.util.NoSuchElementException.class, () -> it.next());
+    }
+
+    @Test
+    public void testGroupByIdentitySingleKeyOnEmpty() {
+        final RowDataset ds3 = empty2("id", "name");
+        final Dataset g = ds3.groupBy(Arrays.asList("id"), Fn.identity());
+        assertEquals(0, g.size());
+        assertEquals(Arrays.asList("id"), new ArrayList<>(g.columnNames()));
+    }
+
+    @Test
+    public void testRightJoinMultiKeyEmptyRight() {
+        final RowDataset emptyRight = empty2("rid", "rname");
+        final Map<String, String> on2 = new LinkedHashMap<>();
+        on2.put("id", "rid");
+        on2.put("name", "rname");
+        final Dataset r = sample().rightJoin(emptyRight, on2);
+        assertEquals(0, r.size());
+        assertEquals(5, r.columnCount());
+    }
+
+    @Test
+    public void testRemoveColumnsByFilterNoColumns() {
+        final RowDataset ds3 = new RowDataset(new ArrayList<>(), new ArrayList<>());
+        ds3.removeColumns(name -> true);
+        assertEquals(0, ds3.columnCount());
+    }
 }

@@ -1243,4 +1243,11 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    @Test
+    public void testTakeWhileAllPassExhaustsSource() {
+        final DoubleStream s = DoubleStream.of(DoubleStream.of(1.0, 2.0, 3.0).iterator()).parallel(2);
+        assertEquals(ParallelIteratorDoubleStream.class, s.getClass());
+        assertArrayEquals(new double[] { 1.0, 2.0, 3.0 }, s.takeWhile(x -> true).sorted().toArray());
+    }
 }

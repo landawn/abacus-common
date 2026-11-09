@@ -1079,4 +1079,13 @@ public class ImmutableSetTest extends TestBase {
         assertSame(ImmutableSet.empty(), ImmutableSet.copyOf((Collection<String>) null));
     }
     // ---- perf review 2026-09-26 G045 end ----
+
+    @Test
+    public void testPackageConstructorWrapsSetUnmodifiably() {
+        final Set<String> backing = new HashSet<>(Set.of("a", "b"));
+        final ImmutableSet<String> s = new ImmutableSet<>(backing);
+        assertEquals(2, s.size());
+        assertTrue(s.contains("a"));
+        assertThrows(UnsupportedOperationException.class, () -> s.add("c"));
+    }
 }

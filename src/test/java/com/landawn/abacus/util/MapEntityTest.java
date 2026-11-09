@@ -591,4 +591,17 @@ public class MapEntityTest extends TestBase {
         final IllegalArgumentException ex2 = Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("age", (Class<Object>) null));
         assertTrue(ex2.getMessage().contains("targetType"), ex2.getMessage());
     }
+
+    @Test
+    public void testNoArgConstructorHasEmptyName() {
+        final MapEntity entity = new MapEntity();
+        assertEquals("", entity.entityName());
+        assertTrue(entity.isEmpty());
+    }
+
+    @Test
+    public void testMutableCharNoArgConstructor() {
+        final MutableChar ch = new MutableChar();
+        assertEquals((char) 0, ch.value());
+    }
 }

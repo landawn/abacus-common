@@ -1,5 +1,10 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -169,4 +174,23 @@ public class ShortSummaryStatisticsTest extends TestBase {
         }
     }
 
+    @Test
+    public void testSummaryStatisticsStateValidation() {
+        assertThrows(IllegalArgumentException.class, () -> new ShortSummaryStatistics(-1, (short) 0, (short) 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> new ShortSummaryStatistics(2, (short) 5, (short) 1, 6));
+        assertThrows(IllegalArgumentException.class, () -> new ShortSummaryStatistics(0, Short.MAX_VALUE, Short.MIN_VALUE, 1));
+        assertEquals(2, new ShortSummaryStatistics(2, (short) 1, (short) 5, 6).getCount());
+
+        assertThrows(IllegalArgumentException.class, () -> new CharSummaryStatistics(-1, 'a', 'a', 0));
+        assertThrows(IllegalArgumentException.class, () -> new CharSummaryStatistics(2, 'z', 'a', 1));
+        assertThrows(IllegalArgumentException.class, () -> new CharSummaryStatistics(0, Character.MAX_VALUE, Character.MIN_VALUE, 1));
+        assertEquals('a', new CharSummaryStatistics(1, 'a', 'a', 'a').getMin());
+
+        assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(-1, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(0, BigDecimal.ONE, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(0, null, null, BigDecimal.ONE));
+        assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(1, null, BigDecimal.ONE, BigDecimal.ONE));
+        assertThrows(IllegalArgumentException.class, () -> new BigDecimalSummaryStatistics(2, BigDecimal.TEN, BigDecimal.ONE, BigDecimal.TEN));
+        assertEquals(0, new BigDecimalSummaryStatistics(0, null, null, null).getCount());
+    }
 }

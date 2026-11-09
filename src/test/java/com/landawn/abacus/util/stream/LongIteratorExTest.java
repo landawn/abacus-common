@@ -1,6 +1,9 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -363,4 +366,39 @@ public class LongIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(LongIteratorEx.EMPTY.supportsFailureAtomicAdvance());
+        assertFalse(LongIteratorEx.EMPTY.hasNext());
+    }
+
+    @Test
+    public void testOfPlainLongIteratorCloseResource() {
+        final LongIterator plain = LongIterator.of(1L, 2L);
+        final LongIteratorEx iter = LongIteratorEx.of(plain);
+        assertEquals(1L, iter.nextLong());
+        iter.closeResource();
+        assertEquals(2L, iter.nextLong());
+    }
+
+    @Test
+    public void testFromObjIteratorEx2() {
+        final LongIteratorEx iter = LongIteratorEx.from(ObjIteratorEx.of(1L, 2L, 3L, 4L));
+        assertTrue(iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        iter.advance(-3);
+        assertEquals(1L, iter.nextLong());
+        iter.advance(2);
+        assertEquals(4L, iter.nextLong());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromPlainIteratorCloseResource() {
+        final Iterator<Long> plain = Arrays.asList(5L, 6L).iterator();
+        final LongIteratorEx iter = LongIteratorEx.from(plain);
+        assertEquals(5L, iter.nextLong());
+        iter.closeResource();
+        assertEquals(6L, iter.nextLong());
+    }
 }

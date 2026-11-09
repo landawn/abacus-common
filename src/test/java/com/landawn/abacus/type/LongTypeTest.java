@@ -341,4 +341,14 @@ public class LongTypeTest extends TestBase {
         assertEquals(42L, longType.get(rs, "v"));
         assertNull(longType.valueOf(""));
     }
+
+    @Test
+    public void testLongTypeResultSetGetters() throws Exception {
+        final Type<Long> type = Type.of(long.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getLong(1)).thenReturn(7L);
+        when(rs.getLong("c")).thenReturn(8L);
+        assertEquals(7L, type.get(rs, 1).longValue());
+        assertEquals(8L, type.get(rs, "c").longValue());
+    }
 }

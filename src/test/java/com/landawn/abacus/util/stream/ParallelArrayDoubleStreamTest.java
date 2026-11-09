@@ -1557,4 +1557,16 @@ public class ParallelArrayDoubleStreamTest extends TestBase {
         return result;
     }
     // ---- deep review 2026-11-02 G107 end ----
+
+    @Test
+    public void testReduceWithEmptyTrailingSlice() {
+        // 5 elements over 4 threads: slice size 2 leaves the last slice empty.
+        final ParallelArrayDoubleStream s = new ParallelArrayDoubleStream(new double[] { 1, 2, 3, 4, 5 }, 0, 5, false, 4, SplitStrategy.ARRAY, null, false,
+                new ArrayList<>());
+        assertEquals(15d, s.reduce(Double::sum).getAsDouble(), 0.0);
+
+        final ParallelArrayDoubleStream s2 = new ParallelArrayDoubleStream(new double[] { 1, 2, 3, 4, 5 }, 0, 5, false, 4, SplitStrategy.ARRAY, null, false,
+                new ArrayList<>());
+        assertEquals(5d, s2.reduce(Math::max).getAsDouble(), 0.0);
+    }
 }

@@ -23,6 +23,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.IntIterator;
+import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.IntBinaryOperator;
@@ -1383,4 +1385,49 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static IntStream seq12(final int... a) {
+        return new ParallelIteratorIntStream(IntIterator.of(a), false, 1, null, null, false, null);
+    }
+
+    private static IntStream par(final int... a) {
+        return new ParallelIteratorIntStream(IntIterator.of(a), false, 4, null, null, false, null);
+    }
+
+    @Test
+    public void testZeroThreadNumUsesDefault() {
+        final IntStream s = new ParallelIteratorIntStream(IntIterator.of(1, 2, 3), false, 0, null, null, false, null);
+        assertEquals(6, s.sum());
+    }
+
+    @Test
+    public void testSequentialFallbacks() {
+        final IntList seen = new IntList();
+        assertArrayEquals(new int[] { 1, 2 }, seq12(1, 2).onEach(seen::add).toArray());
+        assertArrayEquals(new int[] { 1, 2 }, seen.toArray());
+
+        final List<Integer> out = new ArrayList<>();
+        seq12(3, 4).forEach(out::add);
+        assertEquals(Arrays.asList(3, 4), out);
+
+        assertEquals(6, seq12(1, 2, 3).reduce(Integer::sum).getAsInt());
+        assertEquals(Arrays.asList(1, 2), seq12(1, 2).collect(ArrayList<Integer>::new, ArrayList::add, ArrayList::addAll));
+        assertTrue(seq12(1, 2).anyMatch(x -> x == 2));
+        assertTrue(seq12(1, 2).allMatch(x -> x > 0));
+        assertTrue(seq12(1, 2).noneMatch(x -> x > 2));
+        assertEquals(2, seq12(1, 2, 3).findFirst(x -> x > 1).getAsInt());
+        assertEquals(3, seq12(3).findAny(x -> x > 1).getAsInt());
+        assertEquals(3, seq12(1, 2, 3).findLast(x -> x > 1).getAsInt());
+        assertFalse(seq12(1).findLast(x -> x > 1).isPresent());
+
+        assertArrayEquals(new int[] { 11, 22 }, seq12(1, 2).zipWith(IntStream.of(10, 20), Integer::sum).toArray());
+        assertArrayEquals(new int[] { 111, 222 }, seq12(1, 2).zipWith(IntStream.of(10, 20), IntStream.of(100, 200), (a, b, c) -> a + b + c).toArray());
+        assertArrayEquals(new int[] { 11, 2 + 99 }, seq12(1, 2).zipWith(IntStream.of(10), 0, 99, Integer::sum).toArray());
+    }
+
+    @Test
+    public void testParallelFlatMapWithNullMappedStreams() {
+        final int[] r = par(1, 2, 3).flatMap(x -> x == 2 ? null : IntStream.of(x, x)).sorted().toArray();
+        assertArrayEquals(new int[] { 1, 1, 3, 3 }, r);
+    }
 }

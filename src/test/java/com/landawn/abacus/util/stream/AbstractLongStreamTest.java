@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -1194,4 +1195,69 @@ public class AbstractLongStreamTest extends TestBase {
         assertEquals(1, closed[0]);
     }
     // ---- deep review 2026-11-02b G091 end ----
+
+    private static long[] sorted2(final LongStream s) {
+        final long[] a = s.toArray();
+        Arrays.sort(a);
+        return a;
+    }
+
+    @Test
+    public void testRateLimitedAndDelayParallel() {
+        assertArrayEquals(new long[] { 1, 2, 3 }, sorted2(LongStream.of(1, 2, 3).parallel().rateLimited(RateLimiter.create(100000))));
+        final LongStream delayed = LongStream.of(1, 2, 3).parallel().delay(java.time.Duration.ofMillis(1));
+        assertTrue(delayed.isParallel());
+        assertArrayEquals(new long[] { 1, 2, 3 }, sorted2(delayed));
+    }
+
+    @Test
+    public void testDebounceEmptyNext() {
+        final LongIterator iter = LongStream.empty().debounce(com.landawn.abacus.util.Duration.ofSeconds(1)).iterator();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+    }
+
+    @Test
+    public void testMapMultiMapperThrows() {
+        final LongIterator iter = LongStream.of(1, 2, 3).mapMulti((x, c) -> {
+            c.accept(x);
+            if (x == 2) {
+                throw new IllegalStateException("mapFail");
+            }
+        }).iterator();
+        assertEquals(1L, iter.nextLong());
+        assertThrows(IllegalStateException.class, iter::hasNext);
+    }
+
+    @Test
+    public void testMapMultiLargeExpansionResetsBuffer() {
+        final long count = LongStream.of(1, 2).mapMulti((x, c) -> {
+            final int n = x == 1 ? 10241 : 2;
+            for (int i = 0; i < n; i++) {
+                c.accept(x);
+            }
+        }).count();
+        assertEquals(10243L, count);
+    }
+
+    @Test
+    public void testMergeWithParallel() {
+        final LongStream merged = LongStream.of(1, 3, 5)
+                .parallel()
+                .mergeWith(LongStream.of(2, 4), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+        assertTrue(merged.isParallel());
+        assertArrayEquals(new long[] { 1, 2, 3, 4, 5 }, sorted2(merged));
+    }
+
+    @Test
+    public void testPercentilesParallelUnsorted() {
+        final Optional<Map<Percentage, Long>> p = LongStream.of(5, 1, 4, 2, 3).parallel().percentiles();
+        assertTrue(p.isPresent());
+        assertEquals(LongStream.of(1, 2, 3, 4, 5).percentiles().get(), p.get());
+
+        final Pair<LongSummaryStatistics, Optional<Map<Percentage, Long>>> sp = LongStream.of(5, 1, 4, 2, 3).parallel().summaryStatisticsAndPercentiles();
+        assertEquals(5, sp.left().getCount());
+        assertEquals(15, sp.left().getSum());
+        assertEquals(p.get(), sp.right().get());
+    }
 }

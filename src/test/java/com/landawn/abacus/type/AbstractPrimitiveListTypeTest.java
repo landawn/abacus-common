@@ -1,12 +1,16 @@
 package com.landawn.abacus.type;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.IntList;
+import com.landawn.abacus.util.Objectory;
 
 public class AbstractPrimitiveListTypeTest extends TestBase {
 
@@ -93,4 +97,78 @@ public class AbstractPrimitiveListTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertEquals(list, charListType.valueOf(charListType.stringOf(list)));
     }
     // ---- deep review 2026-11-02b G015 end ----
+
+    @FunctionalInterface
+    interface WriterAction {
+        void run(BufferedJsonWriter writer) throws Exception;
+    }
+
+    private static String write(final WriterAction action) throws Exception {
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        try {
+            action.run(writer);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testNullArraysStringOf() {
+        assertNull(AbstractPrimitiveListType.stringOf((boolean[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((byte[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((short[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((int[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((long[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((float[]) null, 0));
+        assertNull(AbstractPrimitiveListType.stringOf((double[]) null, 0));
+    }
+
+    @Test
+    public void testNullArraysAppendTo() throws Exception {
+        final StringBuilder sb = new StringBuilder();
+        AbstractPrimitiveListType.appendTo(sb, (char[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (boolean[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (byte[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (short[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (int[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (long[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (float[]) null, 0);
+        AbstractPrimitiveListType.appendTo(sb, (double[]) null, 0);
+        assertEquals("null".repeat(8), sb.toString());
+    }
+
+    @Test
+    public void testNullArraysSerializeTo() throws Exception {
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (char[]) null, 0, null)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (boolean[]) null, 0)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (byte[]) null, 0)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (short[]) null, 0)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (int[]) null, 0)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (long[]) null, 0, null)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (float[]) null, 0)));
+        assertEquals("null", write(w -> AbstractPrimitiveListType.serializeTo(w, (double[]) null, 0)));
+    }
+
+    @Test
+    public void testDefaultArrayTypeIsNull() {
+        final AbstractPrimitiveListType<IntList> custom = new AbstractPrimitiveListType<>("CustomIntList") {
+            @Override
+            public Class<IntList> javaType() {
+                return IntList.class;
+            }
+
+            @Override
+            public String stringOf(final IntList x) {
+                return x == null ? null : x.toString();
+            }
+
+            @Override
+            public IntList valueOf(final String str) {
+                return IntList.of(1);
+            }
+        };
+        assertNull(custom.arrayType());
+        assertTrue(custom.isPrimitiveList());
+    }
 }

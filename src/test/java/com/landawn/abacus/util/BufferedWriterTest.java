@@ -19,6 +19,7 @@ import javax.xml.datatype.DatatypeFactory;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedIOException;
 
 public class BufferedWriterTest extends TestBase {
 
@@ -623,5 +624,107 @@ public class BufferedWriterTest extends TestBase {
         writer.write('|');
         writer.write((javax.xml.datatype.XMLGregorianCalendar) null);
         assertEquals("2024-06-15T10:30:00Z|2024-06-15T10:30:00.123+09:00|null", writer.toString());
+    }
+
+    private static String repeat2(final char c, final int n) {
+        final char[] a = new char[n];
+        java.util.Arrays.fill(a, c);
+        return new String(a);
+    }
+
+    @Test
+    public void testScalarBypassesNearlyFullBuffer() throws IOException {
+        final StringWriter sw = new StringWriter();
+        final BufferedWriter bw = new BufferedWriter(sw);
+        final String filler = repeat2('a', Objectory.BUFFER_SIZE - 3);
+        bw.write(filler);
+        bw.write(Long.MIN_VALUE);
+        bw.flush();
+        assertEquals(filler + Long.MIN_VALUE, sw.toString());
+        bw.close();
+    }
+
+    @Test
+    public void testWriteCharFlushesFullBuffer() throws IOException {
+        final StringWriter sw = new StringWriter();
+        final BufferedWriter bw = new BufferedWriter(sw);
+        final int n = Objectory.BUFFER_SIZE + 1;
+        for (int i = 0; i < n; i++) {
+            bw.write('x');
+        }
+        assertTrue(sw.toString().length() >= Objectory.BUFFER_SIZE);
+        bw.flush();
+        assertEquals(n, sw.toString().length());
+        bw.close();
+    }
+
+    @Test
+    public void testWriteNonNullString() throws IOException {
+        final BufferedWriter bw = new BufferedWriter();
+        bw.writeNonNull("hello");
+        assertEquals("hello", bw.toString());
+        bw.close();
+    }
+
+    @Test
+    public void testCloseFailureFromUnderlyingClose() {
+        final StringWriter target = new StringWriter() {
+            @Override
+            public void close() throws IOException {
+                throw new IOException("close failed");
+            }
+        };
+        final BufferedWriter bw = new BufferedWriter(target);
+        final IOException e = assertThrows(IOException.class, bw::close);
+        assertEquals("close failed", e.getMessage());
+    }
+
+    @Test
+    public void testCloseRuntimeFailureFromFlush() throws IOException {
+        final IllegalStateException failure = new IllegalStateException("flush failed");
+        final StringWriter target = new StringWriter() {
+            @Override
+            public void flush() {
+                throw failure;
+            }
+        };
+        final BufferedWriter bw = new BufferedWriter(target);
+        bw.write("abc");
+        assertSame(failure, assertThrows(IllegalStateException.class, bw::close));
+    }
+
+    @Test
+    public void testCloseErrorFromFlush() throws IOException {
+        final AssertionError failure = new AssertionError("flush error");
+        final StringWriter target = new StringWriter() {
+            @Override
+            public void flush() {
+                throw failure;
+            }
+        };
+        final BufferedWriter bw = new BufferedWriter(target);
+        bw.write("abc");
+        assertSame(failure, assertThrows(AssertionError.class, bw::close));
+    }
+
+    @Test
+    public void testToStringWrapsFlushFailure() throws IOException {
+        final java.io.Writer target = new java.io.Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) {
+            }
+
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("flush io");
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+        final BufferedWriter bw = new BufferedWriter(target);
+        final UncheckedIOException e = assertThrows(UncheckedIOException.class, bw::toString);
+        assertEquals("flush io", e.getCause().getMessage());
     }
 }

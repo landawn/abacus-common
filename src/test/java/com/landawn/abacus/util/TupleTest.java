@@ -2053,4 +2053,66 @@ public class TupleTest extends TestBase {
         assertSame(buf2, Tuple.of("a").toArray(buf2));
         assertArrayEquals(new String[] { "a", "y", "z" }, buf2);
     }
+
+    private static Object[] values(final int n) {
+        final Object[] a = new Object[n];
+        for (int i = 0; i < n; i++) {
+            a[i] = "v" + i;
+        }
+        return a;
+    }
+
+    @Test
+    public void testNoArgConstructorsAreAllNull() {
+        final Tuple<?>[] tuples = { new Tuple.Tuple1<>(), new Tuple.Tuple2<>(), new Tuple.Tuple3<>(), new Tuple.Tuple4<>(), new Tuple.Tuple5<>(),
+                new Tuple.Tuple6<>(), new Tuple.Tuple7<>(), new Tuple.Tuple8<>(), new Tuple.Tuple9<>() };
+
+        for (int i = 0; i < tuples.length; i++) {
+            assertEquals(i + 1, tuples[i].arity());
+            assertTrue(tuples[i].allNull());
+            assertTrue(tuples[i].anyNull());
+            assertArrayEquals(new Object[i + 1], tuples[i].toArray());
+        }
+    }
+
+    @Test
+    public void testNullPatternsContainsAndEqualsPerPosition() {
+        for (int n = 2; n <= 9; n++) {
+            final Object[] full = values(n);
+            final Tuple<?> t = Tuple.fromArray(full);
+            assertFalse(t.anyNull());
+            assertFalse(t.allNull());
+            assertFalse(t.contains("missing"));
+            assertFalse(t.equals("not a tuple"));
+            assertFalse(t.equals(null));
+
+            for (int i = 0; i < n; i++) {
+                assertTrue(t.contains(full[i]), "n=" + n + " i=" + i);
+
+                final Object[] withNull = full.clone();
+                withNull[i] = null;
+                final Tuple<?> tn = Tuple.fromArray(withNull);
+                assertTrue(tn.anyNull(), "n=" + n + " i=" + i);
+                assertFalse(tn.allNull(), "n=" + n + " i=" + i);
+
+                final Object[] onlyNonNull = new Object[n];
+                onlyNonNull[i] = "x";
+                assertFalse(Tuple.fromArray(onlyNonNull).allNull(), "n=" + n + " i=" + i);
+
+                final Object[] diff = full.clone();
+                diff[i] = "other";
+                assertNotEquals(t, Tuple.fromArray(diff), "n=" + n + " i=" + i);
+            }
+
+            assertEquals(t, Tuple.fromArray(full.clone()));
+
+            final String[] bigger = new String[n + 2];
+            final String[] out = t.toArray(bigger);
+            assertTrue(out == bigger);
+            assertEquals(Arrays.asList(full), Arrays.asList(out).subList(0, n));
+
+            final String[] smaller = t.toArray(new String[0]);
+            assertEquals(n, smaller.length);
+        }
+    }
 }

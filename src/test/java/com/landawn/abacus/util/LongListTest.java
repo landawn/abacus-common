@@ -2722,4 +2722,41 @@ public class LongListTest extends LongListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G051 end ----
+
+    @Test
+    public void testReplaceRangeGrowsBackingArray() {
+        final LongList list = LongList.of(1L);
+        list.replaceRange(0, 1, LongList.of(7L, 8L, 9L));
+        assertArrayEquals(new long[] { 7L, 8L, 9L }, list.toArray());
+
+        final LongList list2 = LongList.of(1L);
+        list2.replaceRange(0, 1, new long[] { 4L, 5L, 6L });
+        assertArrayEquals(new long[] { 4L, 5L, 6L }, list2.toArray());
+    }
+
+    @Test
+    public void testSetOperationsWithEmptySides() {
+        final LongList empty = new LongList();
+        final LongList list = LongList.of(1L, 2L, 2L);
+
+        assertFalse(empty.containsAny(new long[] { 1L }));
+        assertFalse(empty.containsAll(new long[] { 1L }));
+        assertTrue(empty.disjoint(new long[] { 1L }));
+        assertTrue(list.intersection(new long[0]).isEmpty());
+        assertArrayEquals(new long[] { 1L, 2L, 2L }, list.difference(new long[0]).toArray());
+        assertArrayEquals(new long[] { 1L, 2L, 2L }, empty.symmetricDifference(list).toArray());
+        assertArrayEquals(new long[] { 1L, 2L, 2L }, list.symmetricDifference(new long[0]).toArray());
+        assertArrayEquals(new long[] { 3L, 4L }, empty.symmetricDifference(new long[] { 3L, 4L }).toArray());
+        assertEquals(0, empty.frequency(1L));
+    }
+
+    @Test
+    public void testShuffleAndEqualsSelf() {
+        final LongList list = LongList.of(1L, 2L, 3L, 4L, 5L);
+        list.shuffle();
+        final long[] sorted = list.toArray();
+        Arrays.sort(sorted);
+        assertArrayEquals(new long[] { 1L, 2L, 3L, 4L, 5L }, sorted);
+        assertTrue(list.equals(list));
+    }
 }

@@ -134,4 +134,10 @@ public class MutableShortTest extends TestBase {
         assertEquals("42", MutableShort.of((short) 42).toString());
         assertEquals("-42", MutableShort.of((short) -42).toString());
     }
+
+    @Test
+    public void testMutableNoArgConstructors() {
+        assertEquals(0, new MutableShort().value());
+        assertEquals(0, new MutableInt().value());
+    }
 }

@@ -1,5 +1,9 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1379,5 +1383,27 @@ public class ImmutableListTest extends TestBase {
 
         final ImmutableList<String> viewSub = ImmutableList.wrap(live).subList(0, 2);
         Assertions.assertNotSame(viewSub, ImmutableList.copyOf(viewSub));
+    }
+
+    @Test
+    public void testPackagePrivateListConstructor() {
+        final List<String> backing = new ArrayList<>(Arrays.asList("a", "b"));
+        final ImmutableList<String> list = new ImmutableList<>(backing);
+        assertEquals(Arrays.asList("a", "b"), list);
+        assertThrows(UnsupportedOperationException.class, () -> list.add("c"));
+    }
+
+    @Test
+    public void testReverseViewListIteratorIsReadOnly() {
+        final ImmutableList<String> reversed = ImmutableList.wrap(new ArrayList<>(Arrays.asList("a", "b", "c"))).reversed();
+        assertEquals(Arrays.asList("c", "b", "a"), reversed);
+
+        final ListIterator<String> it = reversed.listIterator();
+        assertEquals("c", it.next());
+        assertThrows(UnsupportedOperationException.class, it::remove);
+        assertThrows(UnsupportedOperationException.class, () -> it.set("x"));
+        assertThrows(UnsupportedOperationException.class, () -> it.add("x"));
+
+        assertFalse(reversed.equals(Arrays.asList("c", "b")));
     }
 }

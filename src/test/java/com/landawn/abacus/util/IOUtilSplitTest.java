@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 public class IOUtilSplitTest extends IOUtilTestSupport {
@@ -62,6 +63,7 @@ public class IOUtilSplitTest extends IOUtilTestSupport {
     }
 
     @Test
+    @Tag("slow-test")
     public void testSplit_partNamesRemainSortableAboveFourDigits() throws Exception {
         final File src = new File(tempFolder.toFile(), "many-parts.bin");
         Files.write(src.toPath(), new byte[20002]);
@@ -492,6 +494,7 @@ public class IOUtilSplitTest extends IOUtilTestSupport {
     }
 
     @Test
+    @Tag("slow-test")
     public void testSplitBySize_partNamesRemainSortableAboveFourDigits() throws Exception {
         final File src = new File(tempFolder.toFile(), "many-size-parts.bin");
         Files.write(src.toPath(), new byte[10001]);

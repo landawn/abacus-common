@@ -31,6 +31,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Objectory;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImmutableMapEntryTypeTest extends TestBase {
 
     private ImmutableMapEntryType<String, Integer> immutableMapEntryType;
@@ -565,4 +566,21 @@ public class ImmutableMapEntryTypeTest extends TestBase {
     }
 
     // ---- bug review 2026-10-02 final G128 end ----
+
+    private static String serialize2(final Type type, final Object value) throws Exception {
+        final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(w, value, null);
+            return w.toString();
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
+
+    @Test
+    public void testImmutableMapEntryEmptyObjectAndNullKeySerialization() throws Exception {
+        final Type<AbstractMap.SimpleImmutableEntry<String, Integer>> type = Type.of("Map.ImmutableEntry<String, Integer>");
+        assertNull(type.valueOf("{ }"));
+        assertEquals("{null:1}", serialize2(type, new AbstractMap.SimpleImmutableEntry<>(null, 1)));
+    }
 }

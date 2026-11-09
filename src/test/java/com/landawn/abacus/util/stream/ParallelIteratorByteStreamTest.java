@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.ByteIterator;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
@@ -941,4 +942,29 @@ public class ParallelIteratorByteStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static ByteStream seq1(final byte... a) {
+        return new ParallelIteratorByteStream(ByteIterator.of(a), false, 1, null, null, false, null);
+    }
+
+    @Test
+    public void testReduceSequentialFallback() {
+        assertEquals(6, seq1((byte) 1, (byte) 2, (byte) 3).reduce((byte) 0, (a, b) -> (byte) (a + b)));
+        assertEquals(6, seq1((byte) 1, (byte) 2, (byte) 3).reduce((a, b) -> (byte) (a + b)).get());
+        assertFalse(seq1().reduce((a, b) -> (byte) (a + b)).isPresent());
+    }
+
+    @Test
+    public void testZipWithSequentialFallback() {
+        assertArrayEquals(new byte[] { 11, 22 }, seq1((byte) 1, (byte) 2).zipWith(ByteStream.of((byte) 10, (byte) 20), (a, b) -> (byte) (a + b)).toArray());
+        assertArrayEquals(new byte[] { 111, 122 },
+                seq1((byte) 1, (byte) 2).zipWith(ByteStream.of((byte) 10, (byte) 20), ByteStream.of((byte) 100, (byte) 100), (a, b, c) -> (byte) (a + b + c))
+                        .toArray());
+        assertArrayEquals(new byte[] { 11, 2 + 5 },
+                seq1((byte) 1, (byte) 2).zipWith(ByteStream.of((byte) 10), (byte) 0, (byte) 5, (a, b) -> (byte) (a + b)).toArray());
+        assertArrayEquals(new byte[] { 1 + 10 + 100, 2 + 7 + 9 },
+                seq1((byte) 1, (byte) 2)
+                        .zipWith(ByteStream.of((byte) 10), ByteStream.of((byte) 100), (byte) 0, (byte) 7, (byte) 9, (a, b, c) -> (byte) (a + b + c))
+                        .toArray());
+    }
 }

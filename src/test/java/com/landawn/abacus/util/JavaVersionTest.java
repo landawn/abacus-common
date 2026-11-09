@@ -414,4 +414,17 @@ public class JavaVersionTest extends TestBase {
         assertEquals(1, inversions, "JAVA_ANDROID_0_9 is the only declaration-order inversion");
     }
 
+    private static float toFloatVersion(final String value) throws Exception {
+        final Method m = JavaVersion.class.getDeclaredMethod("toFloatVersion", String.class);
+        m.setAccessible(true);
+        return (Float) m.invoke(null, value);
+    }
+
+    @Test
+    public void testToFloatVersionDottedForms() throws Exception {
+        assertEquals(1.8f, toFloatVersion("1.8"));
+        assertEquals(11.0f, toFloatVersion("11.0.2"));
+        assertEquals(-1f, toFloatVersion("."));
+        assertEquals(17f, toFloatVersion("17"));
+    }
 }

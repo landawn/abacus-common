@@ -23,10 +23,12 @@ import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -51,10 +53,15 @@ import javax.xml.stream.util.StreamReaderDelegate;
 import javax.xml.transform.Transformer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.landawn.abacus.TestBase;
@@ -1542,4 +1549,114 @@ public class XmlUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G085 end ----
+
+    @TempDir
+    File tempDir;
+
+    @Test
+    public void testNullAndAttributelessNodes() throws Exception {
+        final Document doc = XmlUtil.createDOMParser().newDocument();
+        final Element root = doc.createElement("root");
+        final Text text = doc.createTextNode("hello");
+        root.appendChild(text);
+        doc.appendChild(root);
+
+        assertNull(XmlUtil.getAttribute(text, "a"));
+        assertFalse(XmlUtil.isTextElement(null));
+        assertNull(XmlUtil.getTextContent(null));
+        assertNull(XmlUtil.getTextContent(null, true));
+        assertEquals("hello", XmlUtil.getTextContent(root));
+        assertTrue(XmlUtil.readAttributes(text).isEmpty());
+    }
+
+    @Test
+    public void testWriteCharactersToBufferedXmlWriter() throws IOException {
+        final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter();
+        try {
+            XmlUtil.writeCharacters("<a>".toCharArray(), bw);
+            XmlUtil.writeCharacters("&b".toCharArray(), 0, 1, bw);
+            XmlUtil.writeCharacters("'c'", bw);
+            XmlUtil.writeCharacters("x\"y", 1, 1, bw);
+            assertEquals("&lt;a&gt;&amp;&apos;c&apos;&quot;", bw.toString());
+        } finally {
+            Objectory.recycle(bw);
+        }
+    }
+
+    @Test
+    public void testIsResolvableXmlTypeAttributeName() {
+        assertTrue(XmlUtil.isResolvableXmlTypeAttributeName("int[][]"));
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName("List<String"));
+        assertFalse(XmlUtil.isResolvableXmlTypeAttributeName("  "));
+    }
+
+    @Test
+    public void testSaxParserXmlReaderView() throws Exception {
+        final SAXParser parser = XmlUtil.createSAXParser();
+        try {
+            final XMLReader reader = parser.getXMLReader();
+            assertSame(reader, parser.getXMLReader());
+
+            reader.setEntityResolver(null);
+            reader.setDTDHandler(null);
+            assertNull(reader.getProperty("http://xml.org/sax/properties/lexical-handler"));
+            reader.setProperty("http://xml.org/sax/properties/lexical-handler", null);
+
+            final List<String> names = new ArrayList<>();
+            final DefaultHandler handler = new DefaultHandler() {
+                @Override
+                public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) {
+                    names.add(qName);
+                }
+            };
+            reader.setContentHandler(handler);
+            reader.setErrorHandler(handler);
+            assertSame(handler, reader.getContentHandler());
+
+            final File file = new File(tempDir, "a.xml");
+            Files.write(file.toPath(), "<root><child/></root>".getBytes(StandardCharsets.UTF_8));
+            reader.parse(file.toURI().toString());
+            assertEquals(List.of("root", "child"), names);
+
+            assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
+            parser.setProperty("http://xml.org/sax/properties/lexical-handler", null);
+        } finally {
+            XmlUtil.recycleSAXParser(parser);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testSaxParserSax1ParserView() throws Exception {
+        final SAXParser parser = XmlUtil.createSAXParser();
+        try {
+            final org.xml.sax.Parser sax1;
+            try {
+                sax1 = parser.getParser();
+            } catch (final org.xml.sax.SAXException e) {
+                // Namespace-aware providers refuse to hand out a SAX1 parser.
+                return;
+            }
+
+            final List<String> names = new ArrayList<>();
+            sax1.setLocale(Locale.ROOT);
+            sax1.setEntityResolver(null);
+            sax1.setDTDHandler(null);
+            sax1.setErrorHandler(null);
+            sax1.setDocumentHandler(new org.xml.sax.HandlerBase() {
+                @Override
+                public void startElement(final String name, final org.xml.sax.AttributeList attributes) {
+                    names.add(name);
+                }
+            });
+
+            final File file = new File(tempDir, "b.xml");
+            Files.write(file.toPath(), "<r><c/></r>".getBytes(StandardCharsets.UTF_8));
+            sax1.parse(file.toURI().toString());
+            sax1.parse(new InputSource(new StringReader("<z/>")));
+            assertEquals(List.of("r", "c", "z"), names);
+        } finally {
+            XmlUtil.recycleSAXParser(parser);
+        }
+    }
 }

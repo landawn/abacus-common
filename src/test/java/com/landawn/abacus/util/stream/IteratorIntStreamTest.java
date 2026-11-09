@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -560,4 +561,68 @@ public class IteratorIntStreamTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G124 end ----
+
+    private static IntStream iterStream(final int... a) {
+        return IntStream.of(IntStream.of(a).iterator());
+    }
+
+    @Test
+    public void testSourceIsIteratorStream() {
+        assertTrue(iterStream(1) instanceof IteratorIntStream);
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new int[] { 1, 1, 3, 3 }, iterStream(1, 2, 3).flatMap(x -> x == 2 ? null : IntStream.of(x, x)).toArray());
+    }
+
+    @Test
+    public void testFlatMapArrayParallel() {
+        assertArrayEquals(new int[] { 1, 1, 2, 2 }, iterStream(1, 2).parallel(2).flatMapArray(x -> new int[] { x, x }).sorted().toArray());
+    }
+
+    @Test
+    public void testFindFirstAndLastEmptyResults() {
+        assertFalse(iterStream(1, 2, 3).findFirst(x -> x > 5).isPresent());
+        assertFalse(iterStream().findLast(x -> true).isPresent());
+    }
+
+    @Test
+    public void testAsOtherStreamsAdvance() {
+        final LongIteratorEx l = (LongIteratorEx) iterStream(1, 2, 3).asLongStream().iterator();
+        l.advance(2);
+        assertEquals(3L, l.nextLong());
+
+        final FloatIteratorEx f = (FloatIteratorEx) iterStream(1, 2, 3).asFloatStream().iterator();
+        f.advance(1);
+        assertEquals(2f, f.nextFloat());
+
+        final DoubleIteratorEx d = (DoubleIteratorEx) iterStream(1, 2, 3).asDoubleStream().iterator();
+        d.advance(1);
+        assertEquals(2d, d.nextDouble());
+    }
+
+    @Test
+    public void testToJdkStreamWithoutCloseHandlers() {
+        assertEquals(6, iterStream(1, 2, 3).toJdkStream().sum());
+    }
+
+    @Test
+    public void testIfEmptyNextAndAdvance() {
+        final AtomicInteger calls = new AtomicInteger();
+        IntIteratorEx it = (IntIteratorEx) iterStream(1, 2, 3).ifEmpty(calls::incrementAndGet).iterator();
+        assertEquals(1, it.nextInt());
+        assertEquals(0, calls.get());
+
+        it = (IntIteratorEx) iterStream(1, 2, 3).ifEmpty(calls::incrementAndGet).iterator();
+        it.advance(0);
+        it.advance(2);
+        assertEquals(3, it.nextInt());
+        assertFalse(it.hasNext());
+
+        it = (IntIteratorEx) iterStream().ifEmpty(calls::incrementAndGet).iterator();
+        it.advance(1);
+        assertFalse(it.hasNext());
+        assertEquals(1, calls.get());
+    }
 }

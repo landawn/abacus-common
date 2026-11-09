@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type.SerializationType;
 import com.landawn.abacus.util.ImmutableMap;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImmutableMapTypeTest extends TestBase {
 
     private ImmutableMapType<String, Integer, ImmutableMap<String, Integer>> immutableMapType;
@@ -378,5 +380,16 @@ public class ImmutableMapTypeTest extends TestBase {
         assertTrue(immutableMapType.valueOf("{null: 1}").containsKey(null));
 
         org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> immutableMapType.valueOf("{\"a\": 1"));
+    }
+
+    @Test
+    public void testImmutableMapAppendToNullKeyAndValueAndJsonNull() throws Exception {
+        final Type<ImmutableMap<String, Integer>> type = Type.of("ImmutableMap<String, Integer>");
+        final Map<String, Integer> m = new LinkedHashMap<>();
+        m.put(null, 1);
+        m.put("a", null);
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, ImmutableMap.wrap(m));
+        assertEquals("{null:1, a:null}", sb.toString().replace("\"", ""));
     }
 }

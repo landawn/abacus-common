@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -140,5 +141,33 @@ public class ThreadMonitorTest extends TestBase {
         }
 
         assertFalse(target.isAlive());
+    }
+
+    @Test
+    public void testStartOnCurrentThreadAndCancel() {
+        final Thread monitor = ThreadMonitor.start(60_000L);
+        assertNotNull(monitor);
+        ThreadMonitor.stop(monitor);
+        Thread.interrupted();
+    }
+
+    @Test
+    public void testStopInterruptsPlainThread() throws Exception {
+        final CountDownLatch started = new CountDownLatch(1);
+        final AtomicBoolean interrupted = new AtomicBoolean();
+        final Thread worker = new Thread(() -> {
+            started.countDown();
+            try {
+                Thread.sleep(10_000L);
+            } catch (final InterruptedException e) {
+                interrupted.set(true);
+            }
+        });
+        worker.setDaemon(true);
+        worker.start();
+        assertTrue(started.await(5, TimeUnit.SECONDS));
+        ThreadMonitor.stop(worker);
+        worker.join(5_000L);
+        assertTrue(interrupted.get());
     }
 }

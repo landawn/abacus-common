@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +35,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.NoCachingNoUpdating.DisposableObjArray;
 import com.landawn.abacus.util.Sheet.Cell;
 import com.landawn.abacus.util.Sheet.Point;
+import com.landawn.abacus.util.function.IntObjFunction;
+import com.landawn.abacus.util.stream.ObjIteratorEx;
 import com.landawn.abacus.util.stream.Stream;
 
 public class SheetTest extends SheetTestSupport {
@@ -3020,4 +3025,191 @@ public class SheetTest extends SheetTestSupport {
         }
     }
 
+    private static Sheet<String, String, Integer> filled() {
+        return Sheet.rows(Arrays.asList("r0", "r1", "r2"), Arrays.asList("c0", "c1", "c2"), new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } });
+    }
+
+    private static Sheet<String, String, Integer> uninitialized2() {
+        return new Sheet<>(Arrays.asList("r0", "r1"), Arrays.asList("c0", "c1"));
+    }
+
+    private static Sheet<String, String, Integer> noRows2() {
+        return new Sheet<>(List.<String> of(), Arrays.asList("c0", "c1"));
+    }
+
+    @Test
+    public void testEmptyRowsReturnEmptyStreams() {
+        final Sheet<String, String, Integer> s = noRows2();
+        assertEquals(0, s.rowCells(0, 0).count());
+        assertEquals(0, s.rowStreams(0, 0).count());
+        assertEquals(0, s.rows(0, 0).count());
+        assertEquals(0, s.rows(0, 0, (i, a) -> a.length()).count());
+    }
+
+    @Test
+    public void testRowCellsInnerSkipAndCount() {
+        final Sheet<String, String, Integer> s = filled();
+        final List<Stream<Sheet.Cell<String, String, Integer>>> rows = s.rowCells(0, 3).toList();
+        assertEquals(List.of(2, 3), rows.get(0).skip(1).map(Sheet.Cell::value).toList());
+        assertEquals(0, rows.get(1).skip(10).count());
+        assertEquals(3, rows.get(2).count());
+
+        final Iterator<Sheet.Cell<String, String, Integer>> it = s.rowCells(0, 1).first().get().iterator();
+        it.next();
+        it.next();
+        it.next();
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testRowCellsUninitializedValuesAreNull() {
+        final List<Sheet.Cell<String, String, Integer>> cells = uninitialized2().rowCells(0, 1).first().get().toList();
+        assertEquals(2, cells.size());
+        assertNull(cells.get(0).value());
+    }
+
+    @Test
+    public void testRowStreamsInnerSkipCountAndUninitialized() {
+        final Sheet<String, String, Integer> s = filled();
+        final List<Stream<Integer>> rows = s.rowStreams(0, 3).toList();
+        assertEquals(List.of(6), rows.get(1).skip(2).toList());
+        assertEquals(0, rows.get(0).skip(5).count());
+        assertEquals(3, rows.get(2).count());
+
+        final Iterator<Integer> it = s.rowStreams(2, 3).first().get().iterator();
+        assertEquals(7, it.next());
+        assertEquals(8, it.next());
+        assertEquals(9, it.next());
+        assertThrows(NoSuchElementException.class, it::next);
+
+        final List<Integer> nulls = uninitialized2().rowStreams(0, 1).first().get().toList();
+        assertEquals(Arrays.asList(null, null), nulls);
+    }
+
+    @Test
+    public void testRowsPairsOuterAndInner() {
+        final Sheet<String, String, Integer> s = filled();
+        assertEquals(1, s.rows(0, 3).skip(2).count());
+        assertEquals(0, s.rows(0, 3).skip(5).count());
+        assertEquals(3, s.rows(0, 3).count());
+
+        final Pair<String, Stream<Integer>> first = s.rows(1, 2).first().get();
+        assertEquals("r1", first.left());
+        assertEquals(List.of(5, 6), first.right().skip(1).toList());
+
+        final List<Pair<String, Stream<Integer>>> all = s.rows(0, 3).toList();
+        assertEquals(0, all.get(0).right().skip(4).count());
+        assertEquals(3, all.get(1).right().count());
+
+        final Iterator<Integer> inner = s.rows(0, 1).first().get().right().iterator();
+        inner.next();
+        inner.next();
+        inner.next();
+        assertThrows(NoSuchElementException.class, inner::next);
+
+        final Iterator<Pair<String, Stream<Integer>>> outer = s.rows(2, 3).iterator();
+        outer.next();
+        assertThrows(NoSuchElementException.class, outer::next);
+
+        assertEquals(Arrays.asList(null, null), uninitialized2().rows(0, 1).first().get().right().toList());
+    }
+
+    @Test
+    public void testRowsWithMapperSkipCountAndExhaustion() {
+        final Sheet<String, String, Integer> s = filled();
+        final IntObjFunction<DisposableObjArray, Integer> sum = (i, a) -> {
+            int total = 0;
+            for (int k = 0; k < a.length(); k++) {
+                total += (Integer) a.get(k);
+            }
+            return total;
+        };
+        assertEquals(List.of(24), s.rows(0, 3, sum).skip(2).map(Pair::right).toList());
+        assertEquals(0, s.rows(0, 3, sum).skip(9).count());
+        assertEquals(3, s.rows(0, 3, sum).count());
+
+        final Iterator<Pair<String, Integer>> it = s.rows(0, 1, sum).iterator();
+        assertEquals(6, it.next().right());
+        assertThrows(NoSuchElementException.class, it::next);
+    }
+
+    @Test
+    public void testColumnsPairsAndMapper() {
+        final Sheet<String, String, Integer> s = filled();
+        assertEquals(1, s.columns(0, 3).skip(2).count());
+        assertEquals(0, s.columns(0, 3).skip(7).count());
+        assertEquals(3, s.columns(0, 3).count());
+
+        final Iterator<Pair<String, Stream<Integer>>> it = s.columns(1, 2).iterator();
+        final Pair<String, Stream<Integer>> p = it.next();
+        assertEquals("c1", p.left());
+        assertEquals(List.of(2, 5, 8), p.right().toList());
+        assertThrows(NoSuchElementException.class, it::next);
+
+        final IntObjFunction<DisposableObjArray, Integer> first = (i, a) -> (Integer) a.get(0);
+        assertEquals(List.of(3), s.columns(0, 3, first).skip(2).map(Pair::right).toList());
+        assertEquals(0, s.columns(0, 3, first).skip(4).count());
+        assertEquals(3, s.columns(0, 3, first).count());
+
+        final Iterator<Pair<String, Integer>> it2 = s.columns(0, 1, first).iterator();
+        assertEquals(1, it2.next().right());
+        assertThrows(NoSuchElementException.class, it2::next);
+    }
+
+    @Test
+    public void testContainsHelpersOnEdgeSheets() {
+        final Sheet<String, String, Integer> s = filled();
+        assertFalse(s.containsValueAt("missing", "c0", 1));
+        assertTrue(s.containsValueAt("r0", "c0", 1));
+        assertFalse(noRows2().containsValue(1));
+        assertFalse(noRows2().containsValue(null));
+    }
+
+    @Test
+    public void testPutAllWithEmptySourceIsNoOp() {
+        final Sheet<String, String, Integer> s = filled();
+        final Sheet<String, String, Integer> empty = new Sheet<>(List.<String> of(), List.<String> of());
+        s.putAll(empty, (a, b) -> a + b);
+        assertEquals(1, s.get("r0", "c0"));
+        assertEquals(9, s.get("r2", "c2"));
+    }
+
+    @Test
+    public void testSortByRowKeyOnRowsOnlyInitializedSheet() {
+        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("b", "a"), List.<String> of(), new Integer[][] { {}, {} });
+        s.sortByRowKey();
+        assertEquals(List.of("a", "b"), List.copyOf(s.rowKeySet()));
+    }
+
+    private static <T> void checkAdvance(final Stream<T> stream, final int total) {
+        final ObjIteratorEx<T> it = (ObjIteratorEx<T>) stream.iterator();
+        it.advance(0);
+        it.advance(-3);
+        assertTrue(it.hasNext());
+        it.advance(1);
+        int remaining = 0;
+        if (total > 2) {
+            it.next();
+            remaining = 1;
+        }
+        it.advance(100);
+        assertFalse(it.hasNext());
+        assertEquals(0, remaining == 1 ? it.count() : 0);
+    }
+
+    @Test
+    public void testIteratorAdvanceOnAllStreamShapes() {
+        final Sheet<String, String, Integer> s = filled();
+        checkAdvance(s.rowCells(0, 1).first().get(), 3);
+        checkAdvance(s.rowStreams(0, 1).first().get(), 3);
+        checkAdvance(s.rows(0, 1).first().get().right(), 3);
+        checkAdvance(s.rows(0, 3), 3);
+        checkAdvance(s.rows(0, 3, (i, a) -> a.length()), 3);
+        checkAdvance(s.columns(0, 3), 3);
+        checkAdvance(s.columns(0, 3, (i, a) -> a.length()), 3);
+
+        final ObjIteratorEx<Integer> it = (ObjIteratorEx<Integer>) s.rowStreams(0, 1).first().get().iterator();
+        it.advance(2);
+        assertEquals(3, it.next());
+    }
 }

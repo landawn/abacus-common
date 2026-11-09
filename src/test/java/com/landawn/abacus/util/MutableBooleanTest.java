@@ -133,4 +133,9 @@ public class MutableBooleanTest extends TestBase {
         assertFalse(map.containsKey(MutableBoolean.of(false)));
         assertEquals(1, map.size()); // still there, just unreachable
     }
+
+    @Test
+    public void testDefaultConstructorIsFalse() {
+        assertFalse(new MutableBoolean().value());
+    }
 }

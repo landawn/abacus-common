@@ -865,4 +865,76 @@ public class IntFunctionsTest extends TestBase {
         assertTrue(wrapped.getCause() instanceof IllegalStateException, String.valueOf(wrapped.getCause()));
     }
 
+    /** A concrete list whose capacity constructor always fails. */
+    public static class FailingCapacityList extends ArrayList<Object> {
+        private static final long serialVersionUID = 1L;
+
+        public FailingCapacityList(final int capacity) {
+            throw new IllegalStateException("no " + capacity);
+        }
+    }
+
+    /** A concrete map whose capacity constructor always fails. */
+    public static class FailingCapacityMap extends HashMap<Object, Object> {
+        private static final long serialVersionUID = 1L;
+
+        public FailingCapacityMap(final int capacity) {
+            throw new IllegalStateException("no " + capacity);
+        }
+    }
+
+    /** A concrete list with neither a no-arg nor an int constructor. */
+    public static class StringOnlyList extends ArrayList<Object> {
+        private static final long serialVersionUID = 1L;
+
+        public StringOnlyList(final String name) {
+            super();
+        }
+    }
+
+    /** A concrete map with neither a no-arg nor an int constructor. */
+    public static class StringOnlyMap extends HashMap<Object, Object> {
+        private static final long serialVersionUID = 1L;
+
+        public StringOnlyMap(final String name) {
+            super();
+        }
+    }
+
+    @Test
+    public void testOfCollectionFailingIntConstructor() {
+        final com.landawn.abacus.util.function.IntFunction<?> f = IntFunctions.ofCollection(FailingCapacityList.class);
+        assertThrows(IllegalArgumentException.class, () -> f.apply(3));
+    }
+
+    @Test
+    public void testOfMapFailingIntConstructor() {
+        final com.landawn.abacus.util.function.IntFunction<?> f = IntFunctions.ofMap(FailingCapacityMap.class);
+        assertThrows(IllegalArgumentException.class, () -> f.apply(3));
+    }
+
+    @Test
+    public void testOfCollectionNoUsableConstructor() {
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(StringOnlyList.class));
+    }
+
+    @Test
+    public void testOfMapNoUsableConstructor() {
+        assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofMap(StringOnlyMap.class));
+    }
+
+    /** A concrete map whose no-arg constructor always fails. */
+    public static class FailingNoArgMap extends HashMap<Object, Object> {
+        private static final long serialVersionUID = 1L;
+
+        public FailingNoArgMap() {
+            throw new IllegalStateException("no");
+        }
+    }
+
+    @Test
+    public void testOfMapFailingNoArgConstructor() {
+        final com.landawn.abacus.util.function.IntFunction<?> f = IntFunctions.ofMap(FailingNoArgMap.class);
+        assertThrows(IllegalArgumentException.class, () -> f.apply(3));
+    }
 }

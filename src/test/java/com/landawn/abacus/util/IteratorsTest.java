@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2471,4 +2473,322 @@ public class IteratorsTest extends IteratorsTestSupport {
         Assertions.assertTrue(result.isEmpty());
     }
 
+    /** A collection whose size() claims one element but whose iterator is empty. */
+    private static final class LyingCollection<T> extends AbstractCollection<T> {
+        @Override
+        public Iterator<T> iterator() {
+            return Collections.<T> emptyIterator();
+        }
+
+        @Override
+        public int size() {
+            return 1;
+        }
+    }
+
+    private static <T> List<T> drain(final Iterator<T> iter) {
+        final List<T> result = new ArrayList<>();
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+        return result;
+    }
+
+    @Test
+    public void testEqualsInOrderBothEmptyDistinct() {
+        assertTrue(Iterators.equalsInOrder(null, Collections.emptyIterator()));
+        assertTrue(Iterators.equalsInOrder(Collections.emptyIterator(), Collections.emptyIterator()));
+    }
+
+    @Test
+    public void testRepeatElementsNonCollectionEmptyIterable() {
+        final Iterable<String> empty = Collections::emptyIterator;
+        assertFalse(Iterators.repeatElements(empty, 3).hasNext());
+
+        final Iterable<String> ab = () -> Arrays.asList("a", "b").iterator();
+        final ObjIterator<String> iter = Iterators.repeatElements(ab, 2);
+        assertEquals(Arrays.asList("a", "a", "b", "b"), drain(iter));
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @Test
+    public void testRepeatElementsToSize() {
+        final ObjIterator<String> iter = Iterators.repeatElementsToSize(Arrays.asList("a", "b"), 5);
+        assertEquals(Arrays.asList("a", "a", "a", "b", "b"), drain(iter));
+        assertThrows(NoSuchElementException.class, iter::next);
+
+        final ObjIterator<String> iter2 = Iterators.repeatElementsToSize(Arrays.asList("a", "b", "c"), 2);
+        assertEquals(Arrays.asList("a", "b"), drain(iter2));
+    }
+
+    @Test
+    public void testCycleCollectionLyingSize() {
+        assertFalse(Iterators.cycle(new LyingCollection<String>()).hasNext());
+    }
+
+    @Test
+    public void testCycleRoundsNonCollection() {
+        final Iterable<Integer> it = () -> Arrays.asList(1, 2).iterator();
+        final ObjIterator<Integer> iter = Iterators.cycle(it, 2);
+        assertEquals(Arrays.asList(1, 2, 1, 2), drain(iter));
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @Test
+    public void testCycleToSizeExhausted() {
+        final ObjIterator<Integer> iter = Iterators.cycleToSize(Arrays.asList(1, 2), 3);
+        assertEquals(Arrays.asList(1, 2, 1), drain(iter));
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @Test
+    public void testConcatPrimitiveArrays() {
+        final BooleanIterator bi = Iterators.concat(null, new boolean[0], new boolean[] { true });
+        assertTrue(bi.nextBoolean());
+        assertThrows(NoSuchElementException.class, bi::nextBoolean);
+
+        final CharIterator ci = Iterators.concat((char[]) null, new char[0], new char[] { 'x' });
+        assertEquals('x', ci.nextChar());
+        assertThrows(NoSuchElementException.class, ci::nextChar);
+
+        final ByteIterator byi = Iterators.concat((byte[]) null, new byte[0], new byte[] { 3 });
+        assertEquals(3, byi.nextByte());
+        assertThrows(NoSuchElementException.class, byi::nextByte);
+
+        final ShortIterator si = Iterators.concat((short[]) null, new short[0], new short[] { 4 });
+        assertEquals(4, si.nextShort());
+        assertThrows(NoSuchElementException.class, si::nextShort);
+
+        final IntIterator ii = Iterators.concat((int[]) null, new int[0], new int[] { 5 });
+        assertEquals(5, ii.nextInt());
+        assertThrows(NoSuchElementException.class, ii::nextInt);
+
+        final LongIterator li = Iterators.concat((long[]) null, new long[0], new long[] { 6 });
+        assertEquals(6L, li.nextLong());
+        assertThrows(NoSuchElementException.class, li::nextLong);
+
+        final FloatIterator fi = Iterators.concat((float[]) null, new float[0], new float[] { 7f });
+        assertEquals(7f, fi.nextFloat());
+        assertThrows(NoSuchElementException.class, fi::nextFloat);
+
+        final DoubleIterator di = Iterators.concat((double[]) null, new double[0], new double[] { 8d });
+        assertEquals(8d, di.nextDouble());
+        assertThrows(NoSuchElementException.class, di::nextDouble);
+    }
+
+    @Test
+    public void testConcatPrimitiveIterators() {
+        final BooleanIterator bi = Iterators.concat(null, BooleanIterator.empty(), BooleanIterator.of(true));
+        assertTrue(bi.nextBoolean());
+        assertThrows(NoSuchElementException.class, bi::nextBoolean);
+
+        final CharIterator ci = Iterators.concat((CharIterator) null, CharIterator.empty(), CharIterator.of('x'));
+        assertEquals('x', ci.nextChar());
+        assertThrows(NoSuchElementException.class, ci::nextChar);
+
+        final ByteIterator byi = Iterators.concat((ByteIterator) null, ByteIterator.empty(), ByteIterator.of((byte) 3));
+        assertEquals(3, byi.nextByte());
+        assertThrows(NoSuchElementException.class, byi::nextByte);
+
+        final ShortIterator si = Iterators.concat((ShortIterator) null, ShortIterator.empty(), ShortIterator.of((short) 4));
+        assertEquals(4, si.nextShort());
+        assertThrows(NoSuchElementException.class, si::nextShort);
+
+        final IntIterator ii = Iterators.concat((IntIterator) null, IntIterator.empty(), IntIterator.of(5));
+        assertEquals(5, ii.nextInt());
+        assertThrows(NoSuchElementException.class, ii::nextInt);
+
+        final LongIterator li = Iterators.concat((LongIterator) null, LongIterator.empty(), LongIterator.of(6L));
+        assertEquals(6L, li.nextLong());
+        assertThrows(NoSuchElementException.class, li::nextLong);
+
+        final FloatIterator fi = Iterators.concat((FloatIterator) null, FloatIterator.empty(), FloatIterator.of(7f));
+        assertEquals(7f, fi.nextFloat());
+        assertThrows(NoSuchElementException.class, fi::nextFloat);
+
+        final DoubleIterator di = Iterators.concat((DoubleIterator) null, DoubleIterator.empty(), DoubleIterator.of(8d));
+        assertEquals(8d, di.nextDouble());
+        assertThrows(NoSuchElementException.class, di::nextDouble);
+    }
+
+    @Test
+    public void testConcatObjectArraysAndIterators() {
+        final ObjIterator<String> ai = Iterators.concat(new String[] { "a" }, null, new String[0], new String[] { "b" });
+        assertEquals("a", ai.next());
+        assertEquals("b", ai.next());
+        assertThrows(NoSuchElementException.class, ai::next);
+
+        final ObjIterator<String> it = Iterators.concat(null, Collections.<String> emptyIterator(), Arrays.asList("a").iterator());
+        assertEquals("a", it.next());
+        assertThrows(NoSuchElementException.class, it::next);
+
+        final ObjIterator<String> itb = Iterators.concat(null, Collections.<String> emptyList(), Arrays.asList("b"));
+        assertEquals("b", itb.next());
+        assertThrows(NoSuchElementException.class, itb::next);
+
+        final List<Iterator<String>> iters = new ArrayList<>();
+        iters.add(null);
+        iters.add(Collections.<String> emptyIterator());
+        iters.add(Arrays.asList("c").iterator());
+        final ObjIterator<String> ic = Iterators.concat(iters);
+        assertEquals("c", ic.next());
+        assertThrows(NoSuchElementException.class, ic::next);
+
+        final List<Iterable<String>> iterables = new ArrayList<>();
+        iterables.add(null);
+        iterables.add(Collections.<String> emptyList());
+        iterables.add(Arrays.asList("d"));
+        final ObjIterator<String> id = Iterators.concatIterables(iterables);
+        assertEquals("d", id.next());
+        assertThrows(NoSuchElementException.class, id::next);
+    }
+
+    @Test
+    public void testConcatBiIterators() throws Exception {
+        final BiIterator<String, Integer> bi = Iterators.concat(null, BiIterator.<String, Integer> empty(),
+                BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }));
+        assertEquals(Pair.of("a", 1), bi.next());
+        assertThrows(NoSuchElementException.class, bi::next);
+
+        final BiIterator<String, Integer> bi2 = Iterators.concat(BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }), null,
+                BiIterator.zip(new String[] { "b" }, new Integer[] { 2 }));
+        final List<String> seen = new ArrayList<>();
+        bi2.next((a, b) -> seen.add(a + b));
+        bi2.foreachRemaining((a, b) -> seen.add(a + b));
+        assertEquals(Arrays.asList("a1", "b2"), seen);
+        assertThrows(NoSuchElementException.class, () -> bi2.next((a, b) -> seen.add(a)));
+        assertThrows(IllegalArgumentException.class, () -> bi2.foreachRemaining((Throwables.BiConsumer<String, Integer, Exception>) null));
+
+        final BiIterator<String, Integer> bi3 = Iterators.concat(null, BiIterator.<String, Integer> empty(),
+                BiIterator.zip(new String[] { "x", "y" }, new Integer[] { 1, 2 }));
+        final ObjIterator<String> mapped = bi3.map((a, b) -> a + b);
+        assertEquals(Arrays.asList("x1", "y2"), drain(mapped));
+        assertThrows(NoSuchElementException.class, mapped::next);
+    }
+
+    @Test
+    public void testConcatTriIterators() throws Exception {
+        final TriIterator<String, Integer, Boolean> ti = Iterators.concat(null, TriIterator.<String, Integer, Boolean> empty(),
+                TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true }));
+        assertEquals(Triple.of("a", 1, true), ti.next());
+        assertThrows(NoSuchElementException.class, ti::next);
+
+        final TriIterator<String, Integer, Boolean> ti2 = Iterators.concat(TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true }),
+                null, TriIterator.zip(new String[] { "b" }, new Integer[] { 2 }, new Boolean[] { false }));
+        final List<String> seen = new ArrayList<>();
+        ti2.next((a, b, c) -> seen.add(a + b + c));
+        ti2.foreachRemaining((a, b, c) -> seen.add(a + b + c));
+        assertEquals(Arrays.asList("a1true", "b2false"), seen);
+        assertThrows(NoSuchElementException.class, () -> ti2.next((a, b, c) -> seen.add(a)));
+
+        final TriIterator<String, Integer, Boolean> ti3 = Iterators.concat(null, TriIterator.<String, Integer, Boolean> empty(),
+                TriIterator.zip(new String[] { "x" }, new Integer[] { 1 }, new Boolean[] { true }));
+        final ObjIterator<String> mapped = ti3.map((a, b, c) -> a + b + c);
+        assertEquals(Arrays.asList("x1true"), drain(mapped));
+        assertThrows(NoSuchElementException.class, mapped::next);
+    }
+
+    @Test
+    public void testMergeSelectorThrowsKeepsBothPending() {
+        final AtomicBoolean fail = new AtomicBoolean(true);
+        final ObjIterator<Integer> iter = Iterators.merge(Arrays.asList(1, 3).iterator(), Arrays.asList(2, 4).iterator(), (a, b) -> {
+            if (fail.getAndSet(false)) {
+                throw new IllegalStateException("boom");
+            }
+            return a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        });
+
+        assertThrows(IllegalStateException.class, iter::next);
+        assertEquals(Arrays.asList(1, 2, 3, 4), drain(iter));
+    }
+
+    @Test
+    public void testMergeCollectionSelectorThrowsKeepsBothPending() {
+        final AtomicInteger calls = new AtomicInteger();
+        final List<Iterator<Integer>> sources = Arrays.asList(Arrays.asList(1, 4).iterator(), Arrays.asList(2, 5).iterator(), Arrays.asList(3, 6).iterator());
+        final ObjIterator<Integer> iter = Iterators.merge(sources, (a, b) -> {
+            if (calls.incrementAndGet() == 2) {
+                throw new IllegalStateException("boom");
+            }
+            return a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        });
+
+        assertThrows(IllegalStateException.class, iter::next);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), drain(iter));
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @Test
+    public void testZipWithNullIterators() {
+        assertFalse(Iterators.zip((Iterator<String>) null, (Iterator<String>) null, (Iterator<String>) null, (a, b, c) -> a + b + c).hasNext());
+
+        final ObjIterator<String> z2 = Iterators.zip((Iterator<String>) null, Arrays.asList("b").iterator(), "A", "B", (a, b) -> a + b);
+        assertEquals(Arrays.asList("Ab"), drain(z2));
+
+        final ObjIterator<String> z3 = Iterators.zip((Iterator<String>) null, (Iterator<String>) null, Arrays.asList("c").iterator(), "A", "B", "C",
+                (a, b, c) -> a + b + c);
+        assertEquals(Arrays.asList("ABc"), drain(z3));
+    }
+
+    @Test
+    public void testSkipLimitDistinctTakeWhileExhausted() {
+        final ObjIterator<Integer> skip = Iterators.skip(Arrays.asList(1, 2).iterator(), 1);
+        assertEquals(2, skip.next());
+        assertThrows(NoSuchElementException.class, skip::next);
+
+        assertFalse(Iterators.skipAndLimit((Iterator<Integer>) null, 1, 2).hasNext());
+
+        final ObjIterator<Integer> distinct = Iterators.distinct(Arrays.asList(1, 1).iterator());
+        assertEquals(1, distinct.next());
+        assertThrows(NoSuchElementException.class, distinct::next);
+
+        final ObjIterator<Integer> distinctBy = Iterators.distinctBy(Arrays.asList(1, 3).iterator(), x -> x % 2);
+        assertEquals(1, distinctBy.next());
+        assertThrows(NoSuchElementException.class, distinctBy::next);
+
+        final ObjIterator<Integer> takeWhile = Iterators.takeWhile(Arrays.asList(1, 5, 2).iterator(), x -> x < 3);
+        assertEquals(1, takeWhile.next());
+        assertFalse(takeWhile.hasNext());
+        assertFalse(takeWhile.hasNext());
+        assertThrows(NoSuchElementException.class, takeWhile::next);
+
+        final ObjIterator<Integer> twi = Iterators.takeWhileInclusive(Arrays.asList(1, 5, 2).iterator(), x -> x < 3);
+        assertEquals(Arrays.asList(1, 5), drain(twi));
+        assertThrows(NoSuchElementException.class, twi::next);
+
+        final ObjIterator<Integer> skipUntil = Iterators.skipUntil(Arrays.asList(1, 5, 2).iterator(), x -> x > 3);
+        assertEquals(Arrays.asList(5, 2), drain(skipUntil));
+        assertThrows(NoSuchElementException.class, skipUntil::next);
+
+        final ObjIterator<Integer> flatMap = Iterators.flatMap(Arrays.asList(1, 2).iterator(), x -> x == 1 ? Collections.<Integer> emptyList() : null);
+        assertFalse(flatMap.hasNext());
+
+        final ObjIterator<Integer> flatmap = Iterators.flatmap(Arrays.asList(1, 2).iterator(), x -> new Integer[] { x });
+        assertEquals(Arrays.asList(1, 2), drain(flatmap));
+        assertThrows(NoSuchElementException.class, flatmap::next);
+    }
+
+    @Test
+    public void testForEachParallelWorkerFailureCollection() {
+        final RuntimeException boom = new RuntimeException("boom");
+        final Collection<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5).iterator());
+
+        final RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> Iterators.forEach(iters, Iterators.IterateOptions.builder().processThreads(2).build(), x -> {
+                    throw boom;
+                }));
+        assertSame(boom, thrown);
+    }
+
+    @Test
+    public void testForEachParallelCollectionSuccess() {
+        final AtomicInteger sum = new AtomicInteger();
+        final AtomicBoolean completed = new AtomicBoolean();
+        final Collection<Iterator<Integer>> iters = Arrays.asList(Arrays.asList(1, 2, 3).iterator(), Arrays.asList(4, 5).iterator());
+
+        Iterators.forEach(iters, Iterators.IterateOptions.builder().processThreads(2).build(), sum::addAndGet, () -> completed.set(true));
+        assertEquals(15, sum.get());
+        assertTrue(completed.get());
+    }
 }

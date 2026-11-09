@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -635,4 +636,41 @@ public class IteratorLongStreamTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G105 end ----
+
+    private static LongStream iterStream(final long... values) {
+        return new IteratorLongStream(LongIteratorEx.of(values));
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new long[] { 1, 3 }, iterStream(1, 2, 3).flatMap(x -> x == 2 ? null : LongStream.of(x)).toArray());
+    }
+
+    @Test
+    public void testSortedMax() {
+        assertEquals(3L, new IteratorLongStream(LongIterator.of(1, 2, 3), true, null).max().getAsLong());
+    }
+
+    @Test
+    public void testFindLastEmpty() {
+        assertFalse(iterStream().findLast(x -> true).isPresent());
+    }
+
+    @Test
+    public void testAsFloatAndDoubleStreamSkip() {
+        assertArrayEquals(new float[] { 3f }, iterStream(1, 2, 3).asFloatStream().skip(2).toArray());
+        assertArrayEquals(new double[] { 3d }, iterStream(1, 2, 3).asDoubleStream().skip(2).toArray(), 0d);
+    }
+
+    @Test
+    public void testIfEmptyIteratorMethods() {
+        final AtomicInteger calls = new AtomicInteger();
+        final LongIterator iter = iterStream(5, 6, 7).ifEmpty(calls::incrementAndGet).iterator();
+        assertEquals(5L, iter.nextLong());
+        assertEquals(0, calls.get());
+
+        assertArrayEquals(new long[] { 7 }, iterStream(5, 6, 7).ifEmpty(calls::incrementAndGet).skip(2).toArray());
+        assertArrayEquals(new long[] { 5, 6 }, iterStream(5, 6).ifEmpty(calls::incrementAndGet).skip(0).toArray());
+        assertEquals(0, calls.get());
+    }
 }

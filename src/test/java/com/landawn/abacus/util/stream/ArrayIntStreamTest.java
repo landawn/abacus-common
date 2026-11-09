@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -302,5 +304,41 @@ public class ArrayIntStreamTest extends TestBase {
             assertArrayEquals(new String[] { "v", "v", null }, actual);
             assertNull(actual[2]);
         }
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        final AtomicInteger closed = new AtomicInteger();
+        final List<StreamBase.LocalRunnable> handlers = new ArrayList<>();
+        handlers.add(StreamBase.LocalRunnable.wrap((Runnable) closed::incrementAndGet));
+        try (ArrayIntStream s = new ArrayIntStream(new int[] { 1, 2, 3 }, handlers)) {
+            assertEquals(6, s.sum());
+        }
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testTopZero() {
+        assertEquals(0, IntStream.of(3, 1, 2).top(0, Comparator.naturalOrder()).count());
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        final int[] sorted = { 1, 2, 3 };
+        assertEquals(1, new ArrayIntStream(sorted, true, null).min().getAsInt());
+        assertEquals(3, new ArrayIntStream(sorted, true, null).max().getAsInt());
+        assertEquals(2, new ArrayIntStream(sorted, true, null).kthLargest(2).getAsInt());
+    }
+
+    @Test
+    public void testToJdkStreamParallelWithoutCloseHandlers() {
+        final java.util.stream.IntStream jdk = new ParallelArrayIntStream(new int[] { 1, 2, 3 }, 0, 3, false, 0, null, null, false, null).toJdkStream();
+        assertTrue(jdk.isParallel());
+        assertEquals(6, jdk.sum());
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new int[] { 1, 3 }, IntStream.of(1, 2, 3).flatMap(x -> x == 2 ? null : IntStream.of(x)).toArray());
     }
 }

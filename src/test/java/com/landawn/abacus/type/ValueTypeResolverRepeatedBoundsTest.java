@@ -2,8 +2,10 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -77,5 +79,36 @@ public class ValueTypeResolverRepeatedBoundsTest extends TestBase {
         public TreeMap<String, String> value() {
             return value;
         }
+    }
+
+    static class Rec<T extends Comparable<T>> {
+        T value;
+    }
+
+    static class ArrBox<T extends List<List<Long>[]>> {
+        T value;
+    }
+
+    @Test
+    public void testRecursiveTypeVariableResolvesToObject() throws Exception {
+        final ValueTypeResolver resolver = new ValueTypeResolver(Rec.class, List.of());
+        final Type<Object> type = resolver.valueType(Rec.class.getDeclaredField("value").getGenericType());
+        assertEquals("Comparable<java.lang.Object>", type.name());
+    }
+
+    @Test
+    public void testClassWithoutCanonicalName() {
+        final Object local = new Object() {
+        };
+        final ValueTypeResolver resolver = new ValueTypeResolver(Rec.class, List.of());
+        final Type<Object> type = resolver.valueType(local.getClass());
+        assertSame(local.getClass(), type.javaType());
+    }
+
+    @Test
+    public void testWildcardArrayHandlerOverlay() throws Exception {
+        final ValueTypeResolver resolver = new ValueTypeResolver(ArrBox.class, List.of(TypeFactory.getType("? extends List<XML<List<?>>[]>")));
+        final Type<Object> type = resolver.valueType(ArrBox.class.getDeclaredField("value").getGenericType());
+        assertEquals("List<XML<List<Long>>[]>", type.name());
     }
 }

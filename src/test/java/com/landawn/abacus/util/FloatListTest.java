@@ -9,6 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -2602,4 +2606,106 @@ public class FloatListTest extends FloatListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G111 end ----
+
+    @Test
+    public void testAddAtEndAndRangeCheck() {
+        final FloatList list = FloatList.of(1f, 2f);
+        list.add(2, 3f);
+        assertArrayEquals(new float[] { 1f, 2f, 3f }, list.toArray());
+        assertThrows(IndexOutOfBoundsException.class, () -> list.add(-1, 0f));
+        assertThrows(IndexOutOfBoundsException.class, () -> list.add(4, 0f));
+    }
+
+    @Test
+    public void testRetainAllEmptyArray() {
+        final FloatList list = FloatList.of(1f, 2f);
+        assertTrue(list.retainAll(new float[0]));
+        assertTrue(list.isEmpty());
+        assertFalse(new FloatList().retainAll(new float[0]));
+    }
+
+    @Test
+    public void testReplaceRangeVariants() {
+        final FloatList list = FloatList.of(1f, 2f, 3f, 4f);
+        list.replaceRange(1, 3, new float[0]);
+        assertArrayEquals(new float[] { 1f, 4f }, list.toArray());
+
+        final FloatList list2 = FloatList.of(1f, 2f, 3f);
+        list2.replaceRange(1, 3, new float[] { 7f, 8f, 9f });
+        assertArrayEquals(new float[] { 1f, 7f, 8f, 9f }, list2.toArray());
+
+        final FloatList list3 = FloatList.of(1f, 2f, 3f);
+        list3.replaceRange(0, 2, FloatList.of(5f, 6f));
+        assertArrayEquals(new float[] { 5f, 6f, 3f }, list3.toArray());
+
+        final FloatList list4 = FloatList.of(1f, 2f, 3f);
+        list4.replaceRange(1, 3, FloatList.of(5f));
+        assertArrayEquals(new float[] { 1f, 5f }, list4.toArray());
+
+        final FloatList list5 = FloatList.of(1f, 2f, 3f);
+        list5.replaceRange(0, 1, new float[] { 4f });
+        assertArrayEquals(new float[] { 4f, 2f, 3f }, list5.toArray());
+    }
+
+    @Test
+    public void testSetOperationsWithEmptyOperands() {
+        final FloatList list = FloatList.of(1f, 2f, 2f);
+        assertTrue(list.intersection(new float[0]).isEmpty());
+        assertArrayEquals(new float[] { 1f, 2f, 2f }, list.difference(new float[0]).toArray());
+        assertArrayEquals(new float[] { 3f, 4f }, new FloatList().symmetricDifference(FloatList.of(3f, 4f)).toArray());
+        assertArrayEquals(new float[] { 1f, 2f, 2f }, list.symmetricDifference(new float[0]).toArray());
+        assertArrayEquals(new float[] { 3f, 4f }, new FloatList().symmetricDifference(new float[] { 3f, 4f }).toArray());
+        assertArrayEquals(new float[] { 1f, 3f }, list.symmetricDifference(FloatList.of(2f, 3f, 2f)).toArray());
+    }
+
+    @Test
+    public void testForEachReverseRange() {
+        final FloatList list = FloatList.of(1f, 2f, 3f, 4f);
+        final List<Float> seen = new ArrayList<>();
+        list.forEach(3, 0, seen::add);
+        assertEquals(List.of(4f, 3f, 2f), seen);
+        seen.clear();
+        list.forEach(3, -1, seen::add);
+        assertEquals(List.of(4f, 3f, 2f, 1f), seen);
+        seen.clear();
+        list.forEach(1, 3, seen::add);
+        assertEquals(List.of(2f, 3f), seen);
+    }
+
+    @Test
+    public void testSortReverseRotateSmall() {
+        final FloatList one = FloatList.of(5f);
+        one.reverseSort();
+        one.reverse(0, 1);
+        one.rotate(3);
+        assertArrayEquals(new float[] { 5f }, one.toArray());
+        final FloatList many = FloatList.of(1f, 3f, 2f);
+        many.reverseSort();
+        assertArrayEquals(new float[] { 3f, 2f, 1f }, many.toArray());
+    }
+
+    @Test
+    public void testCopyWithNegativeStep() {
+        final FloatList list = FloatList.of(1f, 2f, 3f, 4f, 5f);
+        assertArrayEquals(new float[] { 5f, 3f, 1f }, list.copy(4, -1, -2).toArray());
+        assertArrayEquals(new float[] { 1f, 3f }, list.copy(0, 4, 2).toArray());
+    }
+
+    @Test
+    public void testEqualsSizeMismatch() {
+        assertFalse(FloatList.of(1f, 2f).equals(FloatList.of(1f)));
+        assertTrue(FloatList.of(1f, 2f).equals(FloatList.of(1f, 2f)));
+    }
+
+    @Test
+    public void testSerializationFullArray() throws Exception {
+        final FloatList list = FloatList.of(1f, 2f);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ObjectOutputStream os = new ObjectOutputStream(bos)) {
+            os.writeObject(list);
+        }
+        try (ObjectInputStream is = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+            assertEquals(list, is.readObject());
+        }
+    }
 }

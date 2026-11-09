@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Proxy;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.NClob;
@@ -328,5 +329,24 @@ public class NClobTypeTest extends TestBase {
 
         Mockito.verify(own, Mockito.never()).free();
         Mockito.verify(mockNClob, Mockito.never()).free();
+    }
+
+    @Test
+    public void testNClobTypeFreeFailureIsRethrown() {
+        final NClob nclob = (NClob) Proxy.newProxyInstance(NClob.class.getClassLoader(), new Class<?>[] { NClob.class }, (proxy, method, args) -> {
+            switch (method.getName()) {
+                case "length":
+                    return 2L;
+                case "getSubString":
+                    return "ab";
+                case "free":
+                    throw new IllegalStateException("free failed");
+                default:
+                    return null;
+            }
+        });
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> new NClobType().stringOf(nclob));
+        assertEquals("free failed", ex.getMessage());
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.spi.LocationAwareLogger.DEBUG_INT;
@@ -16,6 +17,8 @@ import static org.slf4j.spi.LocationAwareLogger.WARN_INT;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.DisplayName;
@@ -329,5 +332,84 @@ public class SLFJLoggerTest extends TestBase {
 
             return null;
         }
+    }
+
+    /** Records every call made on a plain (not location-aware) SLF4J logger as "method:arg0[:arg1]". */
+    private static org.slf4j.Logger recordingLogger(final List<String> calls, final List<Throwable> throwables) {
+        return (org.slf4j.Logger) Proxy.newProxyInstance(SLFJLoggerTest.class.getClassLoader(), new Class<?>[] { org.slf4j.Logger.class },
+                (proxy, method, args) -> {
+                    final String name = method.getName();
+                    if (name.startsWith("is") && method.getReturnType() == boolean.class) {
+                        return true;
+                    }
+                    if (name.equals("getName")) {
+                        return "plain";
+                    }
+                    if (method.getReturnType() == void.class && args != null) {
+                        calls.add(name + ":" + args[0]);
+                        if (args.length > 1 && args[1] instanceof Throwable t) {
+                            throwables.add(t);
+                        }
+                    }
+                    if (name.equals("hashCode")) {
+                        return System.identityHashCode(proxy);
+                    }
+                    if (name.equals("equals")) {
+                        return proxy == args[0];
+                    }
+                    if (name.equals("toString")) {
+                        return "plain";
+                    }
+                    return null;
+                });
+    }
+
+    @Test
+    public void testPlainLoggerDelegatesEveryLevel() {
+        final List<String> calls = new ArrayList<>();
+        final List<Throwable> throwables = new ArrayList<>();
+        final SLF4JLogger logger = new SLF4JLogger("plain", recordingLogger(calls, throwables));
+        final RuntimeException ex = new RuntimeException("x");
+
+        logger.trace("t1");
+        logger.trace("t2", ex);
+        logger.debug("d1");
+        logger.debug("d2", ex);
+        logger.info("i1");
+        logger.info("i2", ex);
+        logger.warn("w1");
+        logger.warn("w2", ex);
+        logger.error("e1");
+        logger.error("e2", ex);
+
+        assertEquals(List.of("trace:t1", "trace:t2", "debug:d1", "debug:d2", "info:i1", "info:i2", "warn:w1", "warn:w2", "error:e1", "error:e2"), calls);
+        assertEquals(5, throwables.size());
+        for (final Throwable t : throwables) {
+            assertSame(ex, t);
+        }
+    }
+
+    @Test
+    public void testPlainLoggerPackageLogFallsBackToLevelMethods() {
+        final List<String> calls = new ArrayList<>();
+        final List<Throwable> throwables = new ArrayList<>();
+        final SLF4JLogger logger = new SLF4JLogger("plain", recordingLogger(calls, throwables));
+        final RuntimeException ex = new RuntimeException("y");
+
+        logger.log(AbstractLogger.LogLevel.WARN, "m1");
+        logger.log(AbstractLogger.LogLevel.ERROR, "m2", ex);
+
+        assertEquals(List.of("warn:m1", "error:m2"), calls);
+        assertSame(ex, throwables.get(0));
+    }
+
+    @Test
+    public void testThreeArgsWithTwoPlaceholdersAppendsLast() {
+        final List<String> calls = new ArrayList<>();
+        final SLF4JLogger logger = new SLF4JLogger("plain", recordingLogger(calls, new ArrayList<>()));
+
+        logger.info("a {} b {}", 1, "b", 3L);
+
+        assertEquals(List.of("info:a 1 b b [3]"), calls);
     }
 }

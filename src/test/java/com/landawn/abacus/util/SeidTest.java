@@ -436,4 +436,11 @@ public class SeidTest extends TestBase {
 
         return (java.util.Queue<StringBuilder>) field.get(null);
     }
+
+    @Test
+    public void testProtectedNoArgConstructor() {
+        final Seid seid = new Seid();
+        assertEquals("", seid.entityName());
+        assertTrue(seid.isEmpty());
+    }
 }

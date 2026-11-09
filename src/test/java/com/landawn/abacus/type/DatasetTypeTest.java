@@ -52,4 +52,11 @@ public class DatasetTypeTest extends TestBase {
         assertNull(datasetType.valueOf(""));
 
     }
+
+    @Test
+    public void testDatasetTypeNullAndEmpty() {
+        final Type<Dataset> type = Type.of(Dataset.class);
+        assertNull(type.stringOf(null));
+        assertNull(type.valueOf(""));
+    }
 }

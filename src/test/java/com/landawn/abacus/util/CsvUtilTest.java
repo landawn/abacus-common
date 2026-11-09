@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -20,8 +23,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.NoCachingNoUpdating.DisposableArray;
 import com.landawn.abacus.util.stream.Stream;
@@ -621,4 +626,132 @@ public class CsvUtilTest extends CsvUtilTestSupport {
     }
     // ---- re-review 2026-11-03 R03 end ----
 
+    @TempDir
+    Path tempDir2;
+
+    private static final Map<String, Type<?>> TYPES = N.asMap("a", Type.of(int.class));
+
+    @Test
+    public void testLoadWithColumnTypeMapEmptyInputAndMissingColumn() {
+        final Dataset ds = CsvUtil.load(new StringReader(""), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), TYPES);
+        assertEquals(0, ds.size());
+        assertEquals(0, ds.columnCount());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> CsvUtil.load(new StringReader("a,b\n1,2\n"), Arrays.asList("a", "zz"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), TYPES));
+    }
+
+    @Test
+    public void testLoadWithRowExtractorEmptyInputAndMissingColumn() {
+        final Dataset ds = CsvUtil.load(new StringReader(""), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (titles, row, output) -> {
+        });
+        assertEquals(0, ds.size());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> CsvUtil.load(new StringReader("a,b\n1,2\n"), Arrays.asList("zz"), 0, Long.MAX_VALUE, Fn.alwaysTrue(), (titles, row, output) -> {
+                }));
+    }
+
+    @Test
+    public void testStreamFromMissingFileFails() {
+        final File missing = tempDir2.resolve("missing.csv").toFile();
+        assertThrows(RuntimeException.class, () -> CsvUtil.stream(missing, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Map.class));
+        assertThrows(RuntimeException.class, () -> CsvUtil.stream(missing, null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (titles, row) -> row.join(",")));
+    }
+
+    @Test
+    public void testUnterminatedQuotedField() {
+        assertThrows(ParsingException.class, () -> CsvUtil.load(new StringReader("a,b\n1,\"abc"), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), TYPES));
+    }
+
+    @Test
+    public void testCsvToJsonAndJsonToCsvManyRowsFlushBatches() throws Exception {
+        final StringBuilder csv = new StringBuilder("a,b\n");
+        for (int i = 0; i < 1001; i++) {
+            csv.append(i).append(",x").append(i).append('\n');
+        }
+        final File csvFile = tempDir2.resolve("in.csv").toFile();
+        Files.write(csvFile.toPath(), csv.toString().getBytes(StandardCharsets.UTF_8));
+        final File jsonFile = tempDir2.resolve("out.json").toFile();
+        assertEquals(1001, CsvUtil.csvToJson(csvFile, jsonFile));
+
+        final File csvOut = tempDir2.resolve("back.csv").toFile();
+        assertEquals(1001, CsvUtil.jsonToCsv(jsonFile, csvOut));
+        final List<String> lines = Files.readAllLines(csvOut.toPath(), StandardCharsets.UTF_8);
+        assertEquals(1002, lines.size());
+    }
+
+    @Test
+    public void testConverterWithReaderSourceToFileAndWriter() throws Exception {
+        final File jsonOut = tempDir2.resolve("conv.json").toFile();
+        assertEquals(2, CsvUtil.converter().source(new StringReader("a,b\n1,2\n3,4\n")).csvToJson(jsonOut));
+        final String json = new String(Files.readAllBytes(jsonOut.toPath()), StandardCharsets.UTF_8);
+        assertTrue(json.contains("\"a\""), json);
+
+        final File csvOut = tempDir2.resolve("conv.csv").toFile();
+        assertEquals(2, CsvUtil.converter().source(new StringReader(json)).jsonToCsv(csvOut));
+        assertEquals(3, Files.readAllLines(csvOut.toPath(), StandardCharsets.UTF_8).size());
+
+        final StringWriter sw = new StringWriter();
+        assertEquals(2, CsvUtil.converter().source(new StringReader(json)).jsonToCsv(sw));
+        assertTrue(sw.toString().startsWith("\"a\""), sw.toString());
+    }
+
+    @Test
+    public void testConverterRestoresBackSlashEscapeSetting() {
+        CsvUtil.setEscapeCharToBackSlashForWrite();
+        try {
+            final StringWriter sw = new StringWriter();
+            assertEquals(1, CsvUtil.converter().setEscapeCharToBackSlashForWrite().source(new StringReader("a\n1\n")).csvToJson(sw));
+            assertTrue(CsvUtil.isBackSlashEscapeCharForWrite());
+        } finally {
+            CsvUtil.resetEscapeCharForWrite();
+        }
+        assertFalse(CsvUtil.isBackSlashEscapeCharForWrite());
+    }
+
+    public static class Row {
+        private int a;
+
+        public int getA() {
+            return a;
+        }
+
+        public void setA(final int a) {
+            this.a = a;
+        }
+    }
+
+    private static final class FailingReader extends Reader {
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) throws IOException {
+            throw new IOException("read failure");
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    @Test
+    public void testReaderFailuresAreWrapped() {
+        assertThrows(UncheckedIOException.class, () -> CsvUtil.load(new FailingReader(), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Row.class));
+        assertThrows(UncheckedIOException.class, () -> CsvUtil.load(new FailingReader(), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), TYPES));
+        assertThrows(UncheckedIOException.class, () -> CsvUtil.load(new FailingReader(), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (titles, row, output) -> {
+        }));
+        assertThrows(UncheckedIOException.class, () -> CsvUtil.stream(new FailingReader(), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), Map.class, true).count());
+        assertThrows(UncheckedIOException.class,
+                () -> CsvUtil.stream(new FailingReader(), null, 0, Long.MAX_VALUE, Fn.alwaysTrue(), (titles, row) -> row.join(","), true).count());
+        assertThrows(UncheckedIOException.class, () -> CsvUtil.csvToJson(new FailingReader(), null, new StringWriter(), Row.class));
+        assertThrows(RuntimeException.class, () -> CsvUtil.jsonToCsv(new FailingReader(), null, new StringWriter()));
+    }
+
+    @Test
+    public void testOversizedRecordFollowedBySmallRecord() {
+        final String big = Strings.repeat('x', 70_000);
+        final Dataset ds = CsvUtil.load(new StringReader("a,b\n\"" + big + "\",1\n\"y\",2\n"), null, 0, Long.MAX_VALUE, Fn.alwaysTrue());
+        assertEquals(2, ds.size());
+        assertEquals(70_000, ((String) ds.get(0, 0)).length());
+        assertEquals("y", ds.get(1, 0));
+    }
 }

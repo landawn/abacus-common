@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -1091,5 +1092,67 @@ public class AsyncExecutorTest extends TestBase {
 
         assertTrue(executor.toString().contains("activeCount: ?"), executor.toString());
         assertTrue(executor.toString().endsWith("Executor: null}"), executor.toString());
+    }
+
+    @Test
+    public void testFinallyActionFailureWithRunnable() throws Exception {
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+        try {
+            final AsyncExecutor executor = new AsyncExecutor(pool);
+            final IllegalStateException cleanup = new IllegalStateException("cleanup");
+
+            final ExecutionException ex = assertThrows(ExecutionException.class, () -> executor.execute(() -> {
+            }, () -> {
+                throw cleanup;
+            }).get());
+            assertSame(cleanup, ex.getCause());
+
+            final IOException primary = new IOException("primary");
+            final ExecutionException ex2 = assertThrows(ExecutionException.class, () -> executor.execute((Throwables.Runnable<Exception>) () -> {
+                throw primary;
+            }, () -> {
+                throw cleanup;
+            }).get());
+            assertSame(primary, ex2.getCause());
+            assertEquals(1, primary.getSuppressed().length);
+            assertSame(cleanup, primary.getSuppressed()[0]);
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testFinallyActionFailureWithSuccessfulCallable() throws Exception {
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+        try {
+            final AsyncExecutor executor = new AsyncExecutor(pool);
+            final IllegalStateException cleanup = new IllegalStateException("cleanup");
+            final ExecutionException ex = assertThrows(ExecutionException.class, () -> executor.execute(() -> "ok", () -> {
+                throw cleanup;
+            }).get());
+            assertSame(cleanup, ex.getCause());
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testShutdownAndAwaitTimesOutWithActiveTask() throws Exception {
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+        final CountDownLatch release = new CountDownLatch(1);
+        try {
+            final AsyncExecutor executor = new AsyncExecutor(pool);
+            final ContinuableFuture<Void> f = executor.execute(() -> {
+                release.await(5, TimeUnit.SECONDS);
+            });
+            final long start = System.nanoTime();
+            executor.shutdownAndAwait(20, TimeUnit.MILLISECONDS);
+            assertTrue(System.nanoTime() - start < TimeUnit.SECONDS.toNanos(2));
+            release.countDown();
+            f.get(5, TimeUnit.SECONDS);
+        } finally {
+            release.countDown();
+            pool.shutdownNow();
+        }
     }
 }

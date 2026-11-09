@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
@@ -61,6 +62,21 @@ public class CharacterWriterSliceTest extends TestBase {
             final long allocated = allocations.getThreadAllocatedBytes(thread) - before;
             assertTrue(allocated < 1_000_000, "Tiny slices allocated " + allocated + " bytes");
             assertEquals(164, writer.toString().length());
+        }
+    }
+
+    @Test
+    public void testCharacterWriterWriteCharacterStringBadRange() throws IOException {
+        final StringWriter sw = new StringWriter();
+        final BufferedXmlWriter w = Objectory.createBufferedXmlWriter(sw);
+        try {
+            assertThrows(IndexOutOfBoundsException.class, () -> w.writeCharacter("abc", 2, 5));
+            assertThrows(IndexOutOfBoundsException.class, () -> w.writeCharacter("abc", -1, 1));
+            w.writeCharacter("abc", 1, 2);
+            w.flush();
+            assertEquals("bc", sw.toString());
+        } finally {
+            Objectory.recycle(w);
         }
     }
 }

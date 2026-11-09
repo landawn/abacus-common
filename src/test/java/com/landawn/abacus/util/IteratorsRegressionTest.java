@@ -198,8 +198,11 @@ public class IteratorsRegressionTest extends TestBase {
     // ============================================================ merge(Collection): stack safety and edges
 
     @Test
-    public void testMerge_doesNotOverflowTheStackForManyIterators() {
-        final int count = 20_000;
+    public void testMerge_doesNotOverflowTheStackForManyIterators() throws InterruptedException {
+        onSmallStack(() -> mergeManySingletonIterators(5_000));
+    }
+
+    private static void mergeManySingletonIterators(final int count) {
         final List<Iterator<Integer>> iters = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
@@ -379,5 +382,32 @@ public class IteratorsRegressionTest extends TestBase {
                 drain(Iterators.flatMap(Arrays.asList(1, 2, 3).iterator(), i -> i == 2 ? Arrays.asList() : Arrays.asList(i))));
         Assertions.assertEquals(Arrays.asList(1, 3), drain(Iterators.flatMap(Arrays.asList(1, 2, 3).iterator(), i -> i == 2 ? null : Arrays.asList(i))));
         Assertions.assertEquals(Arrays.asList(), drain(Iterators.flatMap(Arrays.asList(1, 2).iterator(), i -> null)));
+    }
+
+    /**
+     * Runs {@code body} on a thread with a 256 KB stack. A merge that recursed once per source (the pre-fix shape)
+     * overflows that stack below 3,000 sources even when JIT-compiled, so 5,000 sources here is a stronger
+     * stack-safety check than 20,000 on the default stack, at about 1/16 of the time: the documented left fold
+     * costs O(elements x sources).
+     */
+    private static void onSmallStack(final Runnable body) throws InterruptedException {
+        final Throwable[] failure = new Throwable[1];
+        final Thread thread = new Thread(null, () -> {
+            try {
+                body.run();
+            } catch (final Throwable e) {
+                failure[0] = e;
+            }
+        }, "small-stack-merge", 256L * 1024);
+        thread.start();
+        thread.join();
+
+        if (failure[0] instanceof RuntimeException e) {
+            throw e;
+        } else if (failure[0] instanceof Error e) {
+            throw e;
+        } else if (failure[0] != null) {
+            throw new AssertionError(failure[0]);
+        }
     }
 }

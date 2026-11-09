@@ -145,4 +145,13 @@ public class TimeTypeTest extends TestBase {
         assertNull(type.valueOf((char[]) null, 0, 0));
         assertNull(type.valueOf(new char[0], 0, 0));
     }
+
+    @Test
+    public void testTimeValueOfObjectAndCharArray() {
+        final Type<Time> type = Type.of(Time.class);
+        final Time expected = type.valueOf("12:30:45");
+        assertEquals(expected, type.valueOf((Object) new StringBuilder("12:30:45")));
+        final char[] cs = "x12:30:45".toCharArray();
+        assertEquals(expected, type.valueOf(cs, 1, cs.length - 1));
+    }
 }

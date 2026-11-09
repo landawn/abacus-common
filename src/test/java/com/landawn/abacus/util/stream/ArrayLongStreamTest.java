@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -282,5 +283,50 @@ public class ArrayLongStreamTest extends TestBase {
     public void testCycled_Zero() {
         List<Long> result = createStream(1L, 2L, 3L).cycled(0).boxed().toList();
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        final AtomicInteger closed = new AtomicInteger();
+        final java.util.List<StreamBase.LocalRunnable> handlers = new java.util.ArrayList<>();
+        handlers.add(StreamBase.LocalRunnable.wrap((Runnable) closed::incrementAndGet));
+        try (ArrayLongStream s = new ArrayLongStream(new long[] { 1, 2, 3 }, handlers)) {
+            assertEquals(6L, s.sum());
+        }
+        assertEquals(1, closed.get());
+
+        try (ArrayLongStream s = new ArrayLongStream(new long[] { 4 }, null)) {
+            assertArrayEquals(new long[] { 4 }, s.toArray());
+        }
+    }
+
+    @Test
+    public void testStepThenSkipUsesBulkAdvance() {
+        assertArrayEquals(new long[] { 3, 5 }, LongStream.of(1, 2, 3, 4, 5).step(2).skip(1).toArray());
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new long[] { 1, 3 }, LongStream.of(1, 2, 3).flatMap(x -> x == 2 ? null : LongStream.of(x)).toArray());
+    }
+
+    @Test
+    public void testTopZero() {
+        assertEquals(0, LongStream.of(3, 1, 2).top(0, Comparator.naturalOrder()).count());
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        final long[] sorted = { 1, 2, 3 };
+        assertEquals(1L, new ArrayLongStream(sorted, true, null).min().getAsLong());
+        assertEquals(3L, new ArrayLongStream(sorted, true, null).max().getAsLong());
+        assertEquals(2L, new ArrayLongStream(sorted, true, null).kthLargest(2).getAsLong());
+    }
+
+    @Test
+    public void testToJdkStreamParallelWithoutCloseHandlers() {
+        final java.util.stream.LongStream jdk = new ParallelArrayLongStream(new long[] { 1, 2, 3 }, 0, 3, false, 0, null, null, false, null).toJdkStream();
+        assertTrue(jdk.isParallel());
+        assertEquals(6L, jdk.sum());
     }
 }

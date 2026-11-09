@@ -1981,4 +1981,55 @@ public class BooleanListTest extends BooleanListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G111 end ----
+
+    @Test
+    public void testRemoveAbsentValue() {
+        final BooleanList list = BooleanList.of(true, true);
+        assertFalse(list.remove(false));
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    public void testRemoveDuplicatesTwoElements() {
+        final BooleanList same = BooleanList.of(true, true);
+        assertTrue(same.removeDuplicates());
+        assertArrayEquals(new boolean[] { true }, same.toArray());
+
+        final BooleanList distinct = BooleanList.of(true, false);
+        assertFalse(distinct.removeDuplicates());
+        assertArrayEquals(new boolean[] { true, false }, distinct.toArray());
+    }
+
+    @Test
+    public void testRemoveEmptyRange() {
+        final BooleanList list = BooleanList.of(true, false);
+        list.removeRange(1, 1);
+        assertArrayEquals(new boolean[] { true, false }, list.toArray());
+    }
+
+    @Test
+    public void testReplaceRangeShrinks() {
+        final BooleanList list = BooleanList.of(true, true, true, true);
+        list.replaceRange(0, 3, BooleanList.of(false));
+        assertArrayEquals(new boolean[] { false, true }, list.toArray());
+
+        final BooleanList list2 = BooleanList.of(true, true, true, true);
+        list2.replaceRange(1, 4, new boolean[] { false });
+        assertArrayEquals(new boolean[] { true, false }, list2.toArray());
+    }
+
+    @Test
+    public void testLastIndexOfNegativeStart() {
+        final BooleanList list = BooleanList.of(true, false);
+        assertEquals(-1, list.lastIndexOf(true, -1));
+        assertEquals(-1, new BooleanList().lastIndexOf(true, 0));
+    }
+
+    @Test
+    public void testForEachReverse() {
+        final BooleanList list = BooleanList.of(true, false, false);
+        final List<Boolean> seen = new ArrayList<>();
+        list.forEach(2, -1, seen::add);
+        assertEquals(List.of(false, false, true), seen);
+    }
 }

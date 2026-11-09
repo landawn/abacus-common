@@ -2432,4 +2432,18 @@ public class CharListTest extends CharListTestSupport {
     }
 
     // ---- deep review 2026-11-02 G027 end ----
+
+    @Test
+    public void testReplaceRangeGrowsBackingArray() {
+        final CharList list = CharList.of('a');
+        list.replaceRange(0, 1, CharList.of('x', 'y', 'z'));
+        assertArrayEquals(new char[] { 'x', 'y', 'z' }, list.toArray());
+    }
+
+    @Test
+    public void testReplaceRangeArrayShrinks() {
+        final CharList list = CharList.of('a', 'b', 'c', 'd');
+        list.replaceRange(0, 3, new char[] { 'z' });
+        assertArrayEquals(new char[] { 'z', 'd' }, list.toArray());
+    }
 }

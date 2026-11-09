@@ -1,6 +1,7 @@
 package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +31,18 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.util.BufferedXmlWriter;
+import com.landawn.abacus.util.ByteList;
+import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
+import com.landawn.abacus.util.DoubleList;
+import com.landawn.abacus.util.FloatList;
+import com.landawn.abacus.util.HBaseColumn;
+import com.landawn.abacus.util.IntList;
+import com.landawn.abacus.util.LongList;
+import com.landawn.abacus.util.MutableInt;
+import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.ShortList;
 
 public class AbstractStringTypeTest extends TestBase {
 
@@ -271,5 +283,102 @@ public class AbstractStringTypeTest extends TestBase {
 
         assertEquals("", stringType.valueOf(new SerialClob(new char[0])));
         assertEquals("abc", stringType.valueOf(new SerialClob("abc".toCharArray())));
+    }
+
+    @Test
+    public void testClobTooLarge() throws Exception {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(Integer.MAX_VALUE + 1L);
+        assertThrows(UnsupportedOperationException.class, () -> Type.of(String.class).valueOf((Object) clob));
+        verify(clob).free();
+    }
+
+    @Test
+    public void testClobFreeFailsWithoutPrimaryFailure() throws Exception {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(2L);
+        when(clob.getSubString(1, 2)).thenReturn("ab");
+        final IllegalStateException freeFailure = new IllegalStateException("free failed");
+        doThrow(freeFailure).when(clob).free();
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class, () -> Type.of(String.class).valueOf((Object) clob));
+        assertSame(freeFailure, thrown);
+    }
+
+    @Test
+    public void testDoubleValueOfSuffixFallback() {
+        final Type<Double> type = Type.of(double.class);
+        assertEquals(Double.POSITIVE_INFINITY, type.valueOf("InfinityL"));
+        assertEquals(8.0, type.valueOf("0x1p3L"));
+    }
+
+    @Test
+    public void testIntegerValueOfSuffixFallback() {
+        final Type<Integer> type = Type.of(int.class);
+        assertEquals(12, type.valueOf("12L"));
+        assertEquals(Integer.MIN_VALUE, type.valueOf("-2147483648F"));
+    }
+
+    @Test
+    public void testStringBuilderAndBufferTypes() {
+        final Type<StringBuilder> sb = Type.of(StringBuilder.class);
+        assertFalse(sb.isImmutable());
+        assertNull(sb.valueOf((String) null));
+        assertNull(Type.of(StringBuffer.class).valueOf((String) null));
+    }
+
+    @Test
+    public void testHBaseColumnInvalidFormat() {
+        final Type<HBaseColumn<String>> type = TypeFactory.getType("HBaseColumn<String>");
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("noSeparator"));
+    }
+
+    @Test
+    public void testCharacterArraySerializeToXmlWriter() throws Exception {
+        final CharacterArrayType type = new CharacterArrayType();
+        final BufferedXmlWriter writer = Objectory.createBufferedXmlWriter();
+        try {
+            type.serializeTo(writer, new Character[] { 'a', 'b' }, null);
+            // XML text keeps the array delimiters and escapes the quote characters
+            assertEquals("[&apos;a&apos;, &apos;b&apos;]", writer.toString());
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    @Test
+    public void testPrimitiveListTypesNullHandling() throws Exception {
+        final Type<ByteList> byteListType = Type.of(ByteList.class);
+        assertNull(byteListType.stringOf(null));
+
+        final Class<?>[] classes = { ByteList.class, ShortList.class, IntList.class, LongList.class, FloatList.class, DoubleList.class, CharList.class };
+        for (final Class<?> cls : classes) {
+            @SuppressWarnings("unchecked")
+            final Type<Object> type = (Type<Object>) Type.of(cls);
+            final StringBuilder sb = new StringBuilder();
+            type.appendTo(sb, null);
+            assertEquals("null", sb.toString(), cls.getName());
+        }
+    }
+
+    @Test
+    public void testMutableTypeConstructor() {
+        final MutableType<MutableInt> type = new MutableType<>("MyMutableInt") {
+            @Override
+            public Class<MutableInt> javaType() {
+                return MutableInt.class;
+            }
+
+            @Override
+            public String stringOf(final MutableInt x) {
+                return x == null ? null : String.valueOf(x.value());
+            }
+
+            @Override
+            public MutableInt valueOf(final String str) {
+                return str == null ? null : MutableInt.of(Integer.parseInt(str));
+            }
+        };
+        assertEquals("MyMutableInt", type.name());
+        assertEquals(3, type.valueOf("3").value());
     }
 }

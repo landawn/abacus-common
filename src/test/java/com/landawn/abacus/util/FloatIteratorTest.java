@@ -339,4 +339,12 @@ public class FloatIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0]);
         assertThrows(IllegalArgumentException.class, () -> FloatIterator.of(1f).foreachIndexed(null));
     }
+
+    @Test
+    public void testFloatIteratorLimitNextAfterEnd() {
+        final FloatIterator it = FloatIterator.of(1f, 2f, 3f).limit(1);
+        assertEquals(1f, it.nextFloat());
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextFloat);
+    }
 }

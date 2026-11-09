@@ -5,15 +5,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.CallableStatement;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.Test;
 
@@ -177,5 +189,89 @@ public class TimestampTypeTest extends TestBase {
 
         assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807".toCharArray(), 0, 19).getTime());
         assertEquals(Long.MAX_VALUE, type.valueOf("9223372036854775807").getTime());
+    }
+
+    @Test
+    public void testTimestampValueOfObject() {
+        final Type<Timestamp> type = Type.of(Timestamp.class);
+        assertEquals(1234L, type.valueOf((Object) new java.util.Date(1234L)).getTime());
+        final String text = "2020-01-02 03:04:05";
+        final Timestamp parsed = type.valueOf((Object) new StringBuilder(text));
+        assertNotNull(parsed);
+        assertEquals(type.valueOf(text), parsed);
+        assertNull(type.valueOf((Object) null));
+    }
+
+    @Test
+    public void testGregorianCalendarSysTime() {
+        final Type<GregorianCalendar> type = Type.of(GregorianCalendar.class);
+        final long before = System.currentTimeMillis();
+        final GregorianCalendar cal = type.valueOf("SYS_TIME");
+        assertNotNull(cal);
+        assertTrue(cal.getTimeInMillis() >= before);
+    }
+
+    @Test
+    public void testLocalTimeJdbcFallbacks() throws Exception {
+        final Type<LocalTime> type = Type.of(LocalTime.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(anyString(), eq(LocalTime.class))).thenThrow(new SQLException("unsupported"));
+        when(rs.getTime("c")).thenReturn(null);
+        assertNull(type.get(rs, "c"));
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        doThrow(new SQLException("unsupported")).when(ps).setObject(anyInt(), any());
+        type.set(ps, 1, null);
+        verify(ps).setTime(eq(1), isNull());
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        doThrow(new SQLException("unsupported")).when(cs).setObject(anyString(), any());
+        type.set(cs, "p", null);
+        verify(cs).setTime(eq("p"), (Time) isNull());
+    }
+
+    @Test
+    public void testLocalDateJdbcFallbacks() throws Exception {
+        final Type<LocalDate> type = Type.of(LocalDate.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(anyString(), eq(LocalDate.class))).thenThrow(new SQLException("unsupported"));
+        when(rs.getDate("c")).thenReturn(null);
+        assertNull(type.get(rs, "c"));
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        doThrow(new SQLException("unsupported")).when(ps).setObject(anyInt(), any());
+        type.set(ps, 1, null);
+        verify(ps).setDate(eq(1), isNull());
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        doThrow(new SQLException("unsupported")).when(cs).setObject(anyString(), any());
+        type.set(cs, "p", null);
+        verify(cs).setDate(eq("p"), (Date) isNull());
+    }
+
+    @Test
+    public void testLocalDateTimeJdbcFallbacks() throws Exception {
+        final Type<LocalDateTime> type = Type.of(LocalDateTime.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(anyString(), eq(LocalDateTime.class))).thenThrow(new SQLException("unsupported"));
+        when(rs.getTimestamp("c")).thenReturn(null);
+        assertNull(type.get(rs, "c"));
+
+        final PreparedStatement ps = mock(PreparedStatement.class);
+        doThrow(new SQLException("unsupported")).when(ps).setObject(anyInt(), any());
+        type.set(ps, 1, null);
+        verify(ps).setTimestamp(eq(1), isNull());
+
+        final CallableStatement cs = mock(CallableStatement.class);
+        doThrow(new SQLException("unsupported")).when(cs).setObject(anyString(), any());
+        type.set(cs, "p", null);
+        verify(cs).setTimestamp(eq("p"), (Timestamp) isNull());
+    }
+
+    @Test
+    public void testNamedConstructors() {
+        assertEquals("MyJUDate", new JUDateType("MyJUDate").name());
+        assertEquals("MyJodaMutable", new JodaMutableDateTimeType("MyJodaMutable").name());
+        assertEquals(java.util.Date.class, new JUDateType("MyJUDate2").javaType());
     }
 }

@@ -1,5 +1,7 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -415,5 +417,11 @@ public class ImmutableArrayTest extends TestBase {
         final ImmutableArray<String> two = ImmutableArray.of("a", "b");
         Assertions.assertEquals(Arrays.asList("a", "b"), two.asList());
         Assertions.assertNotSame(ImmutableList.empty(), two.asList());
+    }
+
+    @Test
+    public void testNullBackingArrayIsEmpty() {
+        final ImmutableArray<String> array = new ImmutableArray<>(null);
+        assertEquals(0, array.length());
     }
 }

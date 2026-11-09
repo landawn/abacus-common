@@ -77,4 +77,24 @@ public class IntTriPredicateTest extends TestBase {
         IntTriPredicate instance = (a, b, c) -> false;
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> instance.and((IntTriPredicate) null));
     }
+
+    @Test
+    public void testNegateAndOrAllCombinations() {
+        final IntTriPredicate sumPositive = (a, b, c) -> a + b + c > 0;
+        final IntTriPredicate allEven = (a, b, c) -> a % 2 == 0 && b % 2 == 0 && c % 2 == 0;
+
+        final IntTriPredicate neg = sumPositive.negate();
+        assertFalse(neg.test(1, 1, 1));
+        assertTrue(neg.test(-1, 0, 0));
+
+        final IntTriPredicate and = sumPositive.and(allEven);
+        assertTrue(and.test(2, 2, 2));
+        assertFalse(and.test(1, 1, 1));
+        assertFalse(and.test(-2, 0, 0));
+
+        final IntTriPredicate or = sumPositive.or(allEven);
+        assertTrue(or.test(1, 1, 1));
+        assertTrue(or.test(-2, 0, 0));
+        assertFalse(or.test(-1, 0, 0));
+    }
 }

@@ -2,6 +2,7 @@ package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,6 +23,7 @@ import com.landawn.abacus.TestBase;
  * Tests for {@link InternalUtil} — its members are deprecated/internal, but the helpers are
  * still exercised across the framework, so we cover the contracts here.
  */
+@SuppressWarnings("deprecation")
 public class InternalUtilTest extends TestBase {
 
     @Test
@@ -140,5 +142,19 @@ public class InternalUtilTest extends TestBase {
         assertNotNull(result, "probe JVM produced no result. Output was:\n" + output);
 
         return result;
+    }
+
+    @Test
+    public void testGetInternalArrayOfNull() {
+        assertNull(InternalUtil.getInternalArray(null));
+    }
+
+    @Test
+    public void testCreateListWithNoElements() {
+        final List<String> list = InternalUtil.createList();
+        assertTrue(list.isEmpty());
+        assertTrue(list instanceof ArrayList);
+        list.add("x");
+        assertEquals(1, list.size());
     }
 }

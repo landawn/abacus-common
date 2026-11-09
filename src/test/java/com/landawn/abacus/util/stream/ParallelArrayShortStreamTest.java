@@ -1490,4 +1490,33 @@ public class ParallelArrayShortStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static ShortStream arrayParallel(final int threads, final short... elements) {
+        return ShortStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threads).build());
+    }
+
+    @Test
+    public void testConstructorDefaults() {
+        try (ParallelArrayShortStream s = new ParallelArrayShortStream(new short[] { 3, 1, 2 }, 0, 3, false, 0, null, null, false, null)) {
+            assertTrue(s.isParallel());
+            assertTrue(s.maxThreadNum() > 0);
+            assertEquals(StreamBase.DEFAULT_SPLIT_STRATEGY, s.splitStrategy());
+            assertEquals(6, s.sum());
+        }
+    }
+
+    @Test
+    public void testReduceWithEmptyTrailingSlice() {
+        // 5 elements over 4 threads: slice size 2, so the 4th slice is empty
+        assertEquals((short) 15, arrayParallel(4, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5).reduce((a, b) -> (short) (a + b)).get());
+        assertEquals((short) 15, arrayParallel(4, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5).reduce((short) 0, (a, b) -> (short) (a + b)));
+    }
+
+    @Test
+    public void testZipWithSingleElementGoesSequential() {
+        assertArrayEquals(new short[] { 3 }, arrayParallel(4, (short) 1).zipWith(ShortStream.of((short) 2, (short) 9), (a, b) -> (short) (a + b)).toArray());
+        assertArrayEquals(new short[] { 6 },
+                arrayParallel(4, (short) 1).zipWith(ShortStream.of((short) 2), ShortStream.of((short) 3, (short) 4), (a, b, c) -> (short) (a + b + c))
+                        .toArray());
+    }
 }

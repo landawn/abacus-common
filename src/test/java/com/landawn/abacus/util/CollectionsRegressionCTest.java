@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -1096,6 +1097,7 @@ public class CollectionsRegressionCTest extends TestBase {
         }
 
         @Test
+        @Tag("slow-test")
         public void c008_mergingPastIntegerMaxValueIsRejectedLikeTheElementWisePath() {
             final Multiset<String> src = new Multiset<>(IdentityHashMap.class);
             src.add(new String("k"), Integer.MAX_VALUE - 5);

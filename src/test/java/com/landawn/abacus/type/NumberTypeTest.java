@@ -849,4 +849,46 @@ public class NumberTypeTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G018 end ----
+
+    /** A Number whose public {@code valueOf(String)} is an instance method, so it is not usable as a factory. */
+    public static class InstanceValueOfNumber extends Number {
+        private static final long serialVersionUID = 1L;
+        private final long value;
+
+        public InstanceValueOfNumber(final String s) {
+            value = Long.parseLong(s);
+        }
+
+        public InstanceValueOfNumber valueOf(final String s) {
+            return new InstanceValueOfNumber(s);
+        }
+
+        @Override
+        public int intValue() {
+            return (int) value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    @Test
+    public void testNumberTypeSkipsInstanceFactoryAndUsesConstructor() {
+        final NumberType<InstanceValueOfNumber> type = new NumberType<>(InstanceValueOfNumber.class);
+        final InstanceValueOfNumber n = type.valueOf("42");
+        assertNotNull(n);
+        assertEquals(42L, n.longValue());
+    }
 }

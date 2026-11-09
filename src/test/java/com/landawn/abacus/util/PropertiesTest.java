@@ -734,13 +734,13 @@ public class PropertiesTest extends AbstractTest {
         PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
         myProperties.getMProps4().setStrProp(oldValue);
 
-        N.sleep(3000);
+        awaitRefresh(() -> newValue.equals(myProperties.getMProps4().getStrProp()));
 
         assertEquals(newValue, myProperties.getMProps4().getStrProp());
 
         myProperties.getMProps4().setStrProp(oldValue);
         PropertiesUtil.storeToXml(myProperties, "MyProperties", false, file);
-        N.sleep(2000);
+        awaitRefresh(() -> oldValue.equals(myProperties.getMProps4().getStrProp()));
 
         assertEquals(oldValue, myProperties.getMProps4().getStrProp());
     }
@@ -757,4 +757,12 @@ public class PropertiesTest extends AbstractTest {
 
     }
 
+    /** Polls the 1-second auto-refresh until {@code refreshed} holds, instead of sleeping a fixed multiple of it. */
+    private static void awaitRefresh(final java.util.function.BooleanSupplier refreshed) {
+        final long deadline = System.currentTimeMillis() + 10_000;
+
+        while (!refreshed.getAsBoolean() && System.currentTimeMillis() < deadline) {
+            N.sleep(50);
+        }
+    }
 }

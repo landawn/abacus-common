@@ -11,12 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Blob;
@@ -485,5 +487,28 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> type.valueOf("[\"null\"]"));
         assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
         assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
+    }
+
+    private final Type<byte[]> bytesType = Type.of(byte[].class);
+
+    @Test
+    public void testByteArrayFromInputStream() {
+        assertArrayEquals(new byte[] { 1, 2, 3 }, bytesType.valueOf(new ByteArrayInputStream(new byte[] { 1, 2, 3 })));
+    }
+
+    @Test
+    public void testBlobTooLarge() throws Exception {
+        final Blob blob = mock(Blob.class);
+        when(blob.length()).thenReturn(Integer.MAX_VALUE + 1L);
+        assertThrows(UnsupportedOperationException.class, () -> bytesType.valueOf(blob));
+    }
+
+    @Test
+    public void testBlobFreeRuntimeFailureWithoutPrimary() throws Exception {
+        final Blob blob = mock(Blob.class);
+        when(blob.length()).thenReturn(0L);
+        final IllegalStateException freeFailure = new IllegalStateException("free");
+        doThrow(freeFailure).when(blob).free();
+        assertSame(freeFailure, assertThrows(IllegalStateException.class, () -> bytesType.valueOf(blob)));
     }
 }

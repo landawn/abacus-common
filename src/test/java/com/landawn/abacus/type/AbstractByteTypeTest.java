@@ -297,4 +297,11 @@ public class AbstractByteTypeTest extends TestBase {
         assertEquals(rawType.stringOf(large), sb.toString());
         assertEquals("44", sb.toString());
     }
+
+    @Test
+    public void testByteSuffixFallbacks() {
+        final Type<Byte> type = TypeFactory.getType(byte.class);
+        assertThrows(ArithmeticException.class, () -> type.valueOf("128f"));
+        assertEquals((byte) 1, type.valueOf("1L"));
+    }
 }

@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.ShortList;
 import com.landawn.abacus.util.u.OptionalShort;
 import com.landawn.abacus.util.function.ShortBinaryOperator;
@@ -1144,4 +1146,33 @@ public class ParallelIteratorShortStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static ShortStream seq1(final short... a) {
+        return new ParallelIteratorShortStream(ShortIterator.of(a), false, 1, null, null, false, null);
+    }
+
+    private static ShortStream par(final short... a) {
+        return new ParallelIteratorShortStream(ShortIterator.of(a), false, 4, null, null, false, null);
+    }
+
+    @Test
+    public void testSequentialZipWithFallbacks() {
+        assertArrayEquals(new short[] { 11, 22 },
+                seq1((short) 1, (short) 2).zipWith(ShortStream.of((short) 10, (short) 20), (a, b) -> (short) (a + b)).toArray());
+        assertArrayEquals(new short[] { 111, 222 },
+                seq1((short) 1, (short) 2)
+                        .zipWith(ShortStream.of((short) 10, (short) 20), ShortStream.of((short) 100, (short) 200), (a, b, c) -> (short) (a + b + c))
+                        .toArray());
+        assertArrayEquals(new short[] { 11, 101 },
+                seq1((short) 1, (short) 2).zipWith(ShortStream.of((short) 10), (short) 0, (short) 99, (a, b) -> (short) (a + b)).toArray());
+        assertArrayEquals(new short[] { 111, 2002 }, seq1((short) 1, (short) 2)
+                .zipWith(ShortStream.of((short) 10), ShortStream.of((short) 100), (short) 0, (short) 1000, (short) 1000, (a, b, c) -> (short) (a + b + c))
+                .toArray());
+    }
+
+    @Test
+    public void testParallelTakeWhileExhaustsSource() {
+        final short[] r = par((short) 1, (short) 2, (short) 3).takeWhile(x -> x > 0).sorted().toArray();
+        assertArrayEquals(new short[] { 1, 2, 3 }, r);
+    }
 }

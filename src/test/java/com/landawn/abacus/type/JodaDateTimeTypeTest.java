@@ -311,4 +311,11 @@ public class JodaDateTimeTypeTest extends TestBase {
         assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf(1700000000123L));
         assertEquals(new DateTime(1700000000123L), dateTimeType.valueOf(new Date(1700000000123L)));
     }
+
+    @Test
+    public void testJodaDateTimeTypeCustomName() {
+        final JodaDateTimeType type = new JodaDateTimeType("CustomJodaDateTime");
+        assertEquals("CustomJodaDateTime", type.name());
+        assertTrue(type.javaType() == DateTime.class);
+    }
 }

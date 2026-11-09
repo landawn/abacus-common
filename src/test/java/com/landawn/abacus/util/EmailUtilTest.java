@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.mail.PasswordAuthentication;
 import javax.mail.Provider;
 import javax.mail.Session;
 import javax.mail.internet.ContentType;
@@ -335,4 +337,13 @@ public class EmailUtilTest extends TestBase {
         smtpProps.put("mail.smtp.writetimeout", SMTP_TIMEOUT_MILLIS);
     }
 
+    @Test
+    public void testSessionAuthenticatorSuppliesCredentials() throws Exception {
+        final MimeMessage message = EmailUtil.createMessage(new String[] { "to@example.com" }, "from@example.com", "s", "body", null, false, "user", "pw",
+                new Properties());
+        final PasswordAuthentication auth = message.getSession().requestPasswordAuthentication(null, 25, "smtp", "prompt", null);
+        assertNotNull(auth);
+        assertEquals("user", auth.getUserName());
+        assertEquals("pw", auth.getPassword());
+    }
 }

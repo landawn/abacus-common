@@ -24,6 +24,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class JdkOptionalIntTypeTest extends TestBase {
 
     private JdkOptionalIntType optionalIntType;
@@ -288,5 +289,16 @@ public class JdkOptionalIntTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> optionalIntType.valueOf("abc"));
         org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> optionalIntType.valueOf(" "));
         assertEquals(Integer.MAX_VALUE, optionalIntType.valueOf("2147483647").getAsInt());
+    }
+
+    @Test
+    public void testJdkOptionalIntCompare() {
+        final Type<OptionalInt> type = Type.of(OptionalInt.class);
+        assertEquals(0, type.compare(null, null));
+        assertEquals(-1, type.compare(null, OptionalInt.of(1)));
+        assertEquals(1, type.compare(OptionalInt.of(1), null));
+        assertEquals(1, type.compare(OptionalInt.of(1), OptionalInt.empty()));
+        assertEquals(0, type.compare(OptionalInt.empty(), OptionalInt.empty()));
+        assertTrue(type.compare(OptionalInt.of(1), OptionalInt.of(2)) < 0);
     }
 }

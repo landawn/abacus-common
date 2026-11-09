@@ -121,10 +121,10 @@ public class MoreStreamTest extends TestBase {
 
         assertTrue(N.isSorted(result));
 
-        Profiler.run(1, 10, 3, "mergeIterables",
+        Profiler.run(1, 1, 3, "mergeIterables",
                 () -> Stream.mergeIterables(lists, (a, b) -> a.compareTo(b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toList()).printResult();
 
-        Profiler.run(1, 10, 3, "parallelMergeIterables",
+        Profiler.run(1, 1, 3, "parallelMergeIterables",
                 () -> Stream.parallelMergeIterables(lists, (a, b) -> a.compareTo(b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND, 20).toList())
                 .printResult();
 
@@ -617,14 +617,14 @@ public class MoreStreamTest extends TestBase {
     @Test
     public void test_perf() {
         assertDoesNotThrow(() -> {
-            Profiler.run(1, 3, 3, "sequential", () -> IntStream.range(0, 1000_000).filter(i -> {
+            Profiler.run(1, 1, 3, "sequential", () -> IntStream.range(0, 1000_000).filter(i -> {
                 if (i % 1000 == 0) {
                     N.sleep(1);
                 }
                 return i > -1;
             }).sum()).printResult();
 
-            Profiler.run(1, 3, 3, "parallel", () -> IntStream.range(0, 1000_000).parallel(8).filter(i -> {
+            Profiler.run(1, 1, 3, "parallel", () -> IntStream.range(0, 1000_000).parallel(8).filter(i -> {
                 if (i % 1000 == 0) {
                     N.sleep(1);
                 }

@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -166,4 +167,10 @@ public class AbstractFloatTypeTest extends TestBase {
         assertThrows(IOException.class, () -> floatType.appendTo(errorAppendable, null));
     }
 
+    @Test
+    public void testFloatSuffixAfterSpecialValue() {
+        final Type<Float> type = Type.of(Float.class);
+        assertTrue(Float.isInfinite(type.valueOf("InfinityL")));
+        assertEquals(8f, type.valueOf("0x1p3L").floatValue());
+    }
 }

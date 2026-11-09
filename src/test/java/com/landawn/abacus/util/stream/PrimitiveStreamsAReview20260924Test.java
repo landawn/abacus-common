@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -173,6 +174,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
     // ------------------------------------------------------------------------------------------------------------
 
     @Test
+    @Tag("slow-test")
     public void c034_iteratorIntSumBeyondLongRangeThrows() {
         // 2^33 * Integer.MIN_VALUE = -2^64: the long accumulator used to wrap back to exactly 0 and return it.
         // The fixed code throws as soon as the running total leaves the long range (after 2^32 + 1 elements).
@@ -180,6 +182,7 @@ public class PrimitiveStreamsAReview20260924Test extends TestBase {
     }
 
     @Test
+    @Tag("slow-test")
     public void c034_iteratorIntAverageBeyondLongRangeIsExact() {
         final com.landawn.abacus.util.u.OptionalDouble avg = IntStream.repeat(Integer.MIN_VALUE, (1L << 32) + 2).average();
         assertEquals(Integer.MIN_VALUE, avg.getAsDouble(), 0.0);

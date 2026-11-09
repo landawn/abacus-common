@@ -1,5 +1,15 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +41,7 @@ import com.landawn.abacus.util.AsyncExecutor;
 import com.landawn.abacus.util.BooleanList;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.ContinuableFuture;
+import com.landawn.abacus.util.Duration;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.If.OrElse;
@@ -40,6 +52,7 @@ import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.RateLimiter;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.Wrapper;
 import com.landawn.abacus.util.stream.BaseStream.ParallelSettings;
@@ -3965,4 +3978,223 @@ public class StreamBaseTest extends TestBase {
     }
 
     // ---- deep review 2026-10-28 G149 end ----
+
+    static final class OddThrowable extends Throwable {
+        private static final long serialVersionUID = 1L;
+
+        OddThrowable(final String msg) {
+            super(msg);
+        }
+    }
+
+    @Test
+    public void testSpsOnAlreadyParallelStream() {
+        final Stream<Integer> s = Stream.of(1, 2, 3).parallel();
+        final Stream<Integer> r = s.sps(x -> x.map(i -> i * 2));
+        assertFalse(r.isParallel());
+        assertEquals(List.of(2, 4, 6), r.sorted().toList());
+    }
+
+    @Test
+    public void testSpsWithSameMaxThreadNumOnParallelStream() {
+        final Stream<Integer> s = Stream.of(1, 2, 3).parallel(2);
+        final int n = s.maxThreadNum();
+        final Stream<Integer> r = s.sps(n, x -> x.map(i -> i + 1));
+        assertFalse(r.isParallel());
+        assertEquals(List.of(2, 3, 4), r.sorted().toList());
+    }
+
+    @Test
+    public void testThrowRuntimeExceptionVariants() {
+        final Holder<Throwable> errorHolder = Holder.of(new AssertionError("boom"));
+        final AssertionError err = assertThrows(AssertionError.class, () -> StreamBase.throwRuntimeException(errorHolder));
+        assertEquals("boom", err.getMessage());
+
+        final IOException io = new IOException("io");
+        final Holder<Throwable> checkedHolder = Holder.of(io);
+        final RuntimeException re = assertThrows(RuntimeException.class, () -> StreamBase.throwRuntimeException(checkedHolder));
+        assertSame(io, re.getCause());
+    }
+
+    @Test
+    public void testThrowExceptionVariants() {
+        final Holder<Throwable> errorHolder = Holder.of(new StackOverflowError("so"));
+        assertThrows(StackOverflowError.class, () -> StreamBase.throwException(errorHolder, (RuntimeException) null));
+
+        final OddThrowable odd = new OddThrowable("odd");
+        final Holder<Throwable> oddHolder = Holder.of(odd);
+        final RuntimeException re = assertThrows(RuntimeException.class, () -> StreamBase.throwException(oddHolder, (RuntimeException) null));
+        assertSame(odd, re.getCause());
+    }
+
+    @Test
+    public void testNewCloseHandlerNulls() {
+        assertSame(StreamBase.EMPTY_CLOSE_HANDLER, StreamBase.newCloseHandler((StreamBase) null));
+
+        final Runnable r = StreamBase.newCloseHandler((Supplier<? extends StreamBase>) null);
+        r.run(); // nothing supplied: must be a harmless no-op
+        r.run();
+    }
+
+    @Test
+    public void testMergeCloseHandlersBothEmpty() {
+        assertNull(StreamBase.mergeCloseHandlers((java.util.Deque<StreamBase.LocalRunnable>) null, (java.util.Deque<StreamBase.LocalRunnable>) null));
+    }
+
+    @Test
+    public void testIsSameComparator2() {
+        final Comparator<Integer> custom = (a, b) -> Integer.compare(b, a);
+        final Comparator<Integer> custom2 = (a, b) -> Integer.compare(a, b);
+        assertFalse(StreamBase.isSameComparator(StreamBase.NATURAL_COMPARATOR, custom));
+        assertFalse(StreamBase.isSameComparator(custom, StreamBase.NATURAL_COMPARATOR));
+        assertFalse(StreamBase.isSameComparator(custom, custom2));
+        assertTrue(StreamBase.isSameComparator(custom, custom));
+    }
+
+    @Test
+    public void testClosingOpenedSourcesTwoClosesBothOnZipperFailure() {
+        final AtomicInteger closedA = new AtomicInteger();
+        final AtomicInteger closedB = new AtomicInteger();
+        final AutoCloseable a = closedA::incrementAndGet;
+        final AutoCloseable b = closedB::incrementAndGet;
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> StreamBase.closingOpenedSources(a, b, () -> "ia", () -> "ib", (x, y) -> {
+                    throw new IllegalStateException("zip");
+                }));
+        assertEquals("zip", ex.getMessage());
+        assertEquals(1, closedA.get());
+        assertEquals(1, closedB.get());
+    }
+
+    @Test
+    public void testClosingOpenedSourcesThreeClosesAllOnZipperFailure() {
+        final AtomicInteger closed = new AtomicInteger();
+        final AutoCloseable a = closed::incrementAndGet;
+        final AutoCloseable b = closed::incrementAndGet;
+        final AutoCloseable c = () -> {
+            closed.incrementAndGet();
+            throw new IOException("closeC");
+        };
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> StreamBase.closingOpenedSources(a, b, c, () -> "ia", () -> "ib", () -> "ic", (x, y, z) -> {
+                    throw new IllegalStateException("zip3");
+                }));
+        assertEquals("zip3", ex.getMessage());
+        assertEquals(3, closed.get());
+        assertEquals(1, ex.getSuppressed().length);
+        assertEquals("closeC", ex.getSuppressed()[0].getMessage());
+    }
+
+    private static final class Recorder {
+        final List<String> calls = new ArrayList<>();
+        Object lastArg;
+        BaseStream<?, ?, ?, ?, ?, ?, ?, ?> self;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static BaseStream newProxy(final Recorder rec) {
+        final InvocationHandler handler = (proxy, method, args) -> {
+            if (method.isDefault()) {
+                return InvocationHandler.invokeDefault(proxy, method, args);
+            }
+
+            rec.calls.add(method.getName());
+            rec.lastArg = args == null || args.length == 0 ? null : args[0];
+
+            if ("close".equals(method.getName())) {
+                return null;
+            }
+
+            if ("hashCode".equals(method.getName())) {
+                return System.identityHashCode(proxy);
+            }
+
+            if ("equals".equals(method.getName())) {
+                return proxy == args[0];
+            }
+
+            if ("toString".equals(method.getName())) {
+                return "BaseStreamProxy";
+            }
+
+            return proxy;
+        };
+
+        final BaseStream p = (BaseStream) Proxy.newProxyInstance(BaseStream.class.getClassLoader(), new Class<?>[] { BaseStream.class }, handler);
+        rec.self = p;
+        return p;
+    }
+
+    @Test
+    public void testRateLimitedDoubleDelegatesToRateLimiter() {
+        final Recorder rec = new Recorder();
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = newProxy(rec);
+
+        final Object result = s.rateLimited(5.0);
+
+        assertSame(rec.self, result);
+        assertEquals(List.of("rateLimited"), rec.calls);
+        assertTrue(rec.lastArg instanceof RateLimiter);
+        assertEquals(5.0, ((RateLimiter) rec.lastArg).getRate(), 0.0001);
+    }
+
+    @Test
+    public void testDelayJavaTimeDurationDelegates() {
+        final Recorder rec = new Recorder();
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = newProxy(rec);
+
+        final Object result = s.delay(java.time.Duration.ofMillis(25));
+
+        assertSame(rec.self, result);
+        assertEquals(List.of("delay"), rec.calls);
+        assertEquals(Duration.ofMillis(25), rec.lastArg);
+    }
+
+    @Test
+    public void testDelayNullJavaTimeDurationPassesNull() {
+        final Recorder rec = new Recorder();
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = newProxy(rec);
+
+        s.delay((java.time.Duration) null);
+
+        assertEquals(List.of("delay"), rec.calls);
+        assertNull(rec.lastArg);
+    }
+
+    @Test
+    public void testDelayHugeJavaTimeDurationClosesAndThrows() {
+        final Recorder rec = new Recorder();
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = newProxy(rec);
+
+        assertThrows(ArithmeticException.class, () -> s.delay(java.time.Duration.ofSeconds(Long.MAX_VALUE)));
+        assertEquals(List.of("close"), rec.calls);
+    }
+
+    @Test
+    public void testDelayHugeJavaTimeDurationCloseFailureSuppressed() {
+        final List<String> calls = new ArrayList<>();
+        final InvocationHandler handler = (proxy, method, args) -> {
+            if (method.isDefault()) {
+                return InvocationHandler.invokeDefault(proxy, method, args);
+            }
+
+            calls.add(method.getName());
+
+            if ("close".equals(method.getName())) {
+                throw new IllegalStateException("close failed");
+            }
+
+            return proxy;
+        };
+
+        final BaseStream<?, ?, ?, ?, ?, ?, ?, ?> s = (BaseStream<?, ?, ?, ?, ?, ?, ?, ?>) Proxy.newProxyInstance(BaseStream.class.getClassLoader(),
+                new Class<?>[] { BaseStream.class }, handler);
+
+        final ArithmeticException ex = assertThrows(ArithmeticException.class, () -> s.delay(java.time.Duration.ofSeconds(Long.MAX_VALUE)));
+        assertEquals(1, ex.getSuppressed().length);
+        assertTrue(ex.getSuppressed()[0] instanceof IllegalStateException);
+        assertEquals(List.of("close"), calls);
+    }
 }

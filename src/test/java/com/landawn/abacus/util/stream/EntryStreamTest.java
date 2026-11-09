@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,6 +36,7 @@ import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.u.Optional;
 
 /** EntryStream general contracts. */
 public class EntryStreamTest extends EntryStreamTestSupport {
@@ -758,4 +761,88 @@ public class EntryStreamTest extends EntryStreamTestSupport {
         assertEquals(3, zippedWithDefault.get("z").intValue());
     }
 
+    private static Map<String, Integer> map4() {
+        final Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("a", 1);
+        m.put("b", 2);
+        m.put("c", 3);
+        return m;
+    }
+
+    private static EntryStream<String, Integer> par() {
+        return EntryStream.of(map4()).parallel(2);
+    }
+
+    @Test
+    public void testParallelPartialMappers() {
+        final Map<String, Integer> r1 = par().mapKeyPartial(k -> k.equals("b") ? Optional.empty() : Optional.of(k + k)).toMap();
+        assertEquals(N.asMap("aa", 1, "cc", 3), r1);
+
+        final Map<String, Integer> r2 = par().mapKeyPartial((k, v) -> v == 2 ? Optional.<String> empty() : Optional.of(k + v)).toMap();
+        assertEquals(N.asMap("a1", 1, "c3", 3), r2);
+
+        final Map<String, Integer> r3 = par().mapValuePartial(v -> v == 2 ? Optional.<Integer> empty() : Optional.of(v * 10)).toMap();
+        assertEquals(N.asMap("a", 10, "c", 30), r3);
+
+        final Map<String, Integer> r4 = par().mapValuePartial((k, v) -> k.equals("a") ? Optional.<Integer> empty() : Optional.of(v + 1)).toMap();
+        assertEquals(N.asMap("b", 3, "c", 4), r4);
+    }
+
+    @Test
+    public void testParallelFlatmapKeyAndValue() {
+        final Map<String, Integer> r1 = par().flatmapKey(k -> List.of(k, k.toUpperCase())).toMap();
+        assertEquals(6, r1.size());
+        assertEquals(2, r1.get("B"));
+
+        final List<Integer> r2 = par().flatmapValue((k, v) -> List.of(v, v * 100)).values().sorted().toList();
+        assertEquals(List.of(1, 2, 3, 100, 200, 300), r2);
+    }
+
+    @Test
+    public void testAppendEmptyOptionalReturnsSame() {
+        final EntryStream<String, Integer> s = EntryStream.of(map4());
+        assertSame(s, s.append(Optional.<Map.Entry<String, Integer>> empty()));
+        assertEquals(3, s.count());
+    }
+
+    @Test
+    public void testProtectedDelegates() {
+        final EntryStream<String, Integer> s = EntryStream.of(map4());
+        assertFalse(s.isSorted());
+        assertNull(s.comparator());
+        assertTrue(s.closeHandlers() == null || s.closeHandlers().isEmpty());
+
+        final EntryStream<String, Integer> sorted = EntryStream.of(map4()).sortedByKey(Comparator.naturalOrder());
+        assertEquals(3, sorted.count());
+    }
+
+    @Test
+    public void testOnCloseRunsHandler() {
+        final AtomicInteger closed = new AtomicInteger();
+        final EntryStream<String, Integer> s = EntryStream.of(map4()).onClose(closed::incrementAndGet);
+        assertEquals(3, s.count());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testEmptyFactories() {
+        assertEquals(0, EntryStream.concat(new Map[0]).count());
+        assertEquals(0, EntryStream.zip(new String[0], new Integer[0], "k", 0).count());
+        assertEquals(0, EntryStream.<String, Integer> zip((java.util.Iterator<String>) null, (java.util.Iterator<Integer>) null, "k", 0).count());
+    }
+
+    @Test
+    public void testMapFunc() {
+        assertEquals(3, EntryStream.<String, Integer> mapFunc().apply(map4()).count());
+    }
+
+    @Test
+    public void testReusableEntryEquals() {
+        final EntryStream.ReusableEntry<String, Integer> e = new EntryStream.ReusableEntry<>();
+        e.set("a", 1);
+        assertTrue(e.equals(e));
+        assertFalse(e.equals("a"));
+        assertTrue(e.equals(N.newEntry("a", 1)));
+    }
 }

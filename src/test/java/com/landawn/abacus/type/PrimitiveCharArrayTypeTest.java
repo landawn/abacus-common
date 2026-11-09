@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -32,6 +33,7 @@ import javax.sql.rowset.serial.SerialClob;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
@@ -556,4 +558,34 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertEquals(cjk.length * 10, type.stringOf(cjk).length());
     }
     // ---- deep review 2026-11-02b G018 end ----
+
+    private final Type<char[]> charsType = Type.of(char[].class);
+
+    @Test
+    public void testClobTooLargeWithFreeSqlFailureSuppressed() throws Exception {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(Integer.MAX_VALUE + 1L);
+        doThrow(new SQLException("free")).when(clob).free();
+        final UnsupportedOperationException ex = assertThrows(UnsupportedOperationException.class, () -> charsType.valueOf(clob));
+        assertEquals(1, ex.getSuppressed().length);
+        assertTrue(ex.getSuppressed()[0] instanceof UncheckedSQLException);
+    }
+
+    @Test
+    public void testClobFreeSqlFailureWithoutPrimary() throws Exception {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(0L);
+        doThrow(new SQLException("free")).when(clob).free();
+        assertThrows(UncheckedSQLException.class, () -> charsType.valueOf(clob));
+    }
+
+    @Test
+    public void testClobFreeRuntimeFailureWithoutPrimary() throws Exception {
+        final Clob clob = mock(Clob.class);
+        when(clob.length()).thenReturn(2L);
+        when(clob.getSubString(1, 2)).thenReturn("ab");
+        final IllegalStateException freeFailure = new IllegalStateException("free");
+        doThrow(freeFailure).when(clob).free();
+        assertSame(freeFailure, assertThrows(IllegalStateException.class, () -> charsType.valueOf(clob)));
+    }
 }

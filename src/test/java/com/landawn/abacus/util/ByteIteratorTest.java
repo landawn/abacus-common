@@ -346,4 +346,12 @@ public class ByteIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0]);
         assertThrows(IllegalArgumentException.class, () -> ByteIterator.of((byte) 1).foreachIndexed(null));
     }
+
+    @Test
+    public void testLimitNextAfterExhausted() {
+        final ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3).limit(1);
+        assertEquals(1, iter.nextByte());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+    }
 }

@@ -238,4 +238,40 @@ public class AddrUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList("fe80::1%eth0"));
         assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList("fe80::1:8080"));
     }
+
+    @Test
+    public void testOnlySeparators() {
+        assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(" , , "));
+    }
+
+    @Test
+    public void testInvalidUnbracketedIPv6Hosts() {
+        final String[] invalid = { "%a:b:80", // zone id at index 0
+                "1::2::3:80", // two "::"
+                ":::1:80", // tail starts with ':'
+                "::1.2.3:80", // embedded IPv4 with three octets
+                "::g:80", // non-hex group
+                "::1.02.3.4:80", // leading zero in octet
+                "::1.a.3.4:80", // non-digit octet
+                "::1.256.3.4:80", // octet > 255
+                "::1.2.3.4.5:80" // five octets
+        };
+
+        for (final String s : invalid) {
+            assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(s), s);
+        }
+    }
+
+    @Test
+    public void testValidEmbeddedIPv4Host() {
+        final List<InetSocketAddress> list = AddrUtil.getAddressList("::1.2.3.4:80");
+        assertEquals(1, list.size());
+        assertEquals(80, list.get(0).getPort());
+    }
+
+    @Test
+    public void testUrlWithoutUsablePort() throws Exception {
+        final URL url = new URL("jar:file:/tmp/a.jar!/b");
+        assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressFromUrl(url));
+    }
 }

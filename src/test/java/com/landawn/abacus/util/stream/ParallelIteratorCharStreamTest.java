@@ -929,4 +929,35 @@ public class ParallelIteratorCharStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static CharStream par(final int threads, final char... chars) {
+        return new ParallelIteratorCharStream(CharIteratorEx.of(chars), false, threads, SplitStrategy.ITERATOR, null, false, null);
+    }
+
+    private static char[] sortedArray(final CharStream s) {
+        final char[] a = s.toArray();
+        Arrays.sort(a);
+        return a;
+    }
+
+    @Test
+    public void testTakeWhileAllMatching() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' }, sortedArray(par(3, 'a', 'b', 'c', 'd').takeWhile(c -> true)));
+    }
+
+    @Test
+    public void testReduceSingleThread() {
+        assertEquals((char) ('a' + 2), par(1, 'a', (char) 1, (char) 1).reduce((char) 0, (x, y) -> (char) (x + y)));
+        assertEquals((char) ('a' + 2), par(1, 'a', (char) 1, (char) 1).reduce((x, y) -> (char) (x + y)).get());
+    }
+
+    @Test
+    public void testZipWithSingleThread() {
+        assertArrayEquals(new char[] { 'b', 'd' }, par(1, 'a', 'b').zipWith(CharStream.of((char) 1, (char) 2), (x, y) -> (char) (x + y)).toArray());
+        assertArrayEquals(new char[] { 'c', 'e' },
+                par(1, 'a', 'b').zipWith(CharStream.of((char) 1, (char) 2), CharStream.of((char) 1, (char) 1), (x, y, z) -> (char) (x + y + z)).toArray());
+        assertArrayEquals(new char[] { 'b', 'z' },
+                par(1, 'a', 'b').zipWith(CharStream.of((char) 1), CharStream.of((char) 0), 'x', (char) 24, (char) 0, (x, y, z) -> (char) (x + y + z))
+                        .toArray());
+    }
 }

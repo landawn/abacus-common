@@ -22,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.u.OptionalFloat;
 import com.landawn.abacus.util.function.FloatBinaryOperator;
@@ -1216,4 +1217,21 @@ public class ParallelIteratorFloatStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static FloatStream par(final float... a) {
+        return new ParallelIteratorFloatStream(FloatIterator.of(a), false, 4, null, null, false, null);
+    }
+
+    @Test
+    public void testTakeWhileConsumesWholeSource() {
+        assertArrayEquals(new float[] { 1f, 2f, 3f }, par(1f, 2f, 3f).takeWhile(x -> true).sorted().toArray());
+    }
+
+    @Test
+    public void testTakeWhileStopsAtFirstFailure() {
+        // parallel takeWhile may still emit matching elements after the first failure (documented), so the
+        // trailing 1f can appear; the failing 5f never does
+        final float[] r = par(1f, 2f, 5f, 1f).takeWhile(x -> x < 3).sorted().toArray();
+        assertTrue(Arrays.equals(new float[] { 1f, 2f }, r) || Arrays.equals(new float[] { 1f, 1f, 2f }, r), Arrays.toString(r));
+    }
 }

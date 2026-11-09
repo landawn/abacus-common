@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -495,4 +497,56 @@ public class IteratorDoubleStreamTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G124 end ----
+
+    private static IteratorDoubleStream of2(final double... a) {
+        return new IteratorDoubleStream(DoubleIterator.of(a));
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new double[] { 1, 1, 3, 3 }, of2(1, 2, 3).flatMap(x -> x == 2 ? null : DoubleStream.of(x, x)).toArray(), 0.0);
+    }
+
+    @Test
+    public void testToSet() {
+        final Set<Double> set = of2(1, 2, 2).toSet();
+        assertEquals(2, set.size());
+        assertTrue(set.contains(2.0));
+    }
+
+    @Test
+    public void testSortedMax() {
+        assertEquals(3.0, new IteratorDoubleStream(DoubleIterator.of(1, 2, 3), true, null).max().getAsDouble(), 0.0);
+    }
+
+    @Test
+    public void testFindLastOnEmpty() {
+        assertFalse(of2().findLast(x -> true).isPresent());
+    }
+
+    @Test
+    public void testToJdkStreamWithoutCloseHandlers() {
+        assertEquals(6.0, of2(1, 2, 3).toJdkStream().sum(), 0.0);
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(of2().isEmpty());
+        assertFalse(of2(1).isEmpty());
+    }
+
+    @Test
+    public void testIfEmptyIteratorPaths() {
+        final AtomicInteger calls = new AtomicInteger();
+
+        final DoubleIteratorEx it1 = of2(5, 6).ifEmpty(calls::incrementAndGet).iteratorEx();
+        assertEquals(5.0, it1.nextDouble(), 0.0);
+
+        final DoubleIteratorEx it2 = of2(1, 2, 3).ifEmpty(calls::incrementAndGet).iteratorEx();
+        it2.advance(0);
+        it2.advance(2);
+        assertEquals(3.0, it2.nextDouble(), 0.0);
+        assertFalse(it2.hasNext());
+        assertEquals(0, calls.get());
+    }
 }

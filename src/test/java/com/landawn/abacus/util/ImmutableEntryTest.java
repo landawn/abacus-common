@@ -1,5 +1,8 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -171,5 +174,13 @@ public class ImmutableEntryTest extends TestBase {
 
         Assertions.assertThrows(UnsupportedOperationException.class, () -> immutable.setValue(2));
         Assertions.assertEquals(1, immutable.getValue());
+    }
+
+    @Test
+    public void testConstructFromEntry() {
+        final ImmutableEntry<String, Integer> e = new ImmutableEntry<>(Map.entry("k", 3));
+        assertEquals("k", e.getKey());
+        assertEquals(3, e.getValue());
+        assertThrows(UnsupportedOperationException.class, () -> e.setValue(4));
     }
 }

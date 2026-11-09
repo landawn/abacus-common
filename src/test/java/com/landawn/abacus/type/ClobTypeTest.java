@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -375,4 +376,23 @@ public class ClobTypeTest extends TestBase {
         assertEquals(2L, sc.length());
     }
 
+    @Test
+    public void testClobTypeStringOfNull() {
+        assertNull(new ClobType().stringOf(null));
+    }
+
+    @Test
+    public void testClobTypeFreeFailureIsRethrown() throws Exception {
+        final SerialClob clob = new SerialClob("ab".toCharArray()) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void free() {
+                throw new IllegalStateException("free failed");
+            }
+        };
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> new ClobType().stringOf(clob));
+        assertEquals("free failed", ex.getMessage());
+    }
 }

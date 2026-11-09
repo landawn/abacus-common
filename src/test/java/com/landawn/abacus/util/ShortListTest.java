@@ -2593,4 +2593,16 @@ public class ShortListTest extends ShortListTestSupport {
     }
 
     // ---- deep review 2026-11-02 G119 end ----
+
+    @Test
+    public void testReplaceRangeArrayGrowsBackingArray() {
+        final ShortList list = ShortList.of((short) 1, (short) 2, (short) 3);
+        list.replaceRange(1, 2, new short[] { 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 });
+        assertArrayEquals(new short[] { 1, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 3 }, list.toArray());
+    }
+
+    @Test
+    public void testReplaceAllOnEmptyList() {
+        assertEquals(0, new ShortList().replaceAll((short) 1, (short) 2));
+    }
 }

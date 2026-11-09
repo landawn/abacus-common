@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.u;
 import com.landawn.abacus.util.function.BiFunction;
@@ -2201,4 +2205,210 @@ public class ParallelIteratorStreamTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Stream.of(data.iterator()).parallel(4).flatMapArray(null));
     }
     // ---- deep review 2026-11-02b G111 end ----
+
+    @SafeVarargs
+    private static <T> Stream<T> seq1(final T... a) {
+        return new ParallelIteratorStream<>(Arrays.asList(a).iterator(), false, null, 1, null, null, false, null);
+    }
+
+    @SafeVarargs
+    private static <T> Stream<T> par(final T... a) {
+        return new ParallelIteratorStream<>(Arrays.asList(a).iterator(), false, null, 4, null, null, false, null);
+    }
+
+    private static <T extends Comparable<? super T>> List<T> sorted2(final List<T> list) {
+        final List<T> copy = new ArrayList<>(list);
+        Collections.sort(copy);
+        return copy;
+    }
+
+    @Test
+    public void testDefaultsWhenZeroThreadsAndNullStrategy() {
+        final Stream<Integer> s = new ParallelIteratorStream<>(Arrays.asList(1, 2, 3).iterator(), false, null, 0, null, null, false, null);
+        assertEquals(Arrays.asList(2, 4, 6), sorted2(s.map(x -> x * 2).toList()));
+    }
+
+    @Test
+    public void testSequentialFallbackIntermediateOps() {
+        assertEquals(Arrays.asList(2, 4), seq1(1, 2, 3, 4).filter(x -> x % 2 == 0).toList());
+        assertEquals(Arrays.asList(1, 2), seq1(1, 2, 3, 1).takeWhile(x -> x < 3).toList());
+        assertEquals(Arrays.asList(10, 20), seq1(1, 2).map(x -> x * 10).toList());
+        assertEquals(Arrays.asList(6, 9), seq1(1, 2, 3, 4).slidingMap(1, true, (a, b, c) -> a + b + c).toList());
+        assertEquals(Arrays.asList("F1", "E2", "E3"), seq1(1, 2, 3).mapFirstOrElse(x -> "F" + x, x -> "E" + x).toList());
+        assertEquals(Arrays.asList(1, 1, 2, 2), seq1(1, 2).flatMap(x -> Stream.of(x, x)).toList());
+
+        final List<Integer> seen = new ArrayList<>();
+        assertEquals(Arrays.asList(1, 2), seq1(1, 2).onEach(seen::add).toList());
+        assertEquals(Arrays.asList(1, 2), seen);
+
+        assertEquals(Arrays.asList(2, 3), seq1(1, 2, 3, 4).intersection(x -> x, Arrays.asList(2, 3)).toList());
+        assertEquals(Arrays.asList(1, 4), seq1(1, 2, 3, 4).difference(x -> x, Arrays.asList(2, 3)).toList());
+    }
+
+    @Test
+    public void testSequentialFallbackTerminalOps() throws Exception {
+        final List<Integer> out = new ArrayList<>();
+        final AtomicInteger done = new AtomicInteger();
+        seq1(1, 2, 3).forEach(out::add, done::incrementAndGet);
+        assertEquals(Arrays.asList(1, 2, 3), out);
+        assertEquals(1, done.get());
+
+        final List<String> pairs = new ArrayList<>();
+        seq1(1, 2).forEach(x -> Arrays.asList("a" + x, "b" + x), (x, y) -> pairs.add(y));
+        assertEquals(Arrays.asList("a1", "b1", "a2", "b2"), pairs);
+
+        final List<String> triples = new ArrayList<>();
+        seq1(1).forEach(x -> Arrays.asList(x, x + 1), y -> Arrays.asList(y * 10), (x, y, z) -> triples.add(x + ":" + y + ":" + z));
+        assertEquals(Arrays.asList("1:1:10", "1:2:20"), triples);
+
+        final List<String> fp = new ArrayList<>();
+        seq1(1, 2, 3).forEachPair(1, (a, b) -> fp.add(a + "-" + b));
+        assertEquals(Arrays.asList("1-2", "2-3"), fp);
+
+        final List<String> ft = new ArrayList<>();
+        seq1(1, 2, 3).forEachTriple(1, (a, b, c) -> ft.add(a + "-" + b + "-" + c));
+        assertEquals(Arrays.asList("1-2-3"), ft);
+
+        final Map<Integer, Integer> m = seq1(1, 2, 3).toMap(x -> x % 2, x -> x, Integer::sum, HashMap::new);
+        assertEquals(4, m.get(1).intValue());
+        assertEquals(2, m.get(0).intValue());
+
+        final Map<Integer, Long> g = seq1(1, 2, 3).groupTo(x -> x % 2, x -> x, Collectors.counting(), HashMap::new);
+        assertEquals(2L, g.get(1).longValue());
+
+        final Map<Integer, Long> fg = seq1(1, 2).flatGroupTo(x -> Arrays.asList(x, 9), (k, x) -> x, Collectors.counting(), HashMap::new);
+        assertEquals(2L, fg.get(9).longValue());
+
+        final ListMultimap<Integer, Integer> mm = seq1(1, 2, 3).toMultimap(x -> x % 2, x -> x, Suppliers.ofListMultimap());
+        assertEquals(Arrays.asList(1, 3), mm.get(1));
+
+        assertEquals(6, seq1(1, 2, 3).reduce(0, (a, b) -> a + b, Integer::sum).intValue());
+        assertEquals(Arrays.asList(1, 2), seq1(1, 2).collect(ArrayList::new, ArrayList::add, ArrayList::addAll));
+
+        assertTrue(seq1(1, 2).anyMatch(x -> x == 2));
+        assertTrue(seq1(1, 2).allMatch(x -> x > 0));
+        assertTrue(seq1(1, 2).noneMatch(x -> x > 5));
+        assertTrue(seq1(1, 2, 3).hasMatchCountBetween(1, 2, x -> x > 1));
+    }
+
+    @Test
+    public void testHasMatchCountBetweenParallel() {
+        assertThrows(IllegalArgumentException.class, () -> par(1, 2).hasMatchCountBetween(3, 1, x -> true));
+        assertFalse(par(1, 2, 3, 4, 5, 6).hasMatchCountBetween(0, 1, x -> true));
+        assertFalse(par(1, 2, 3).hasMatchCountBetween(5, 10, x -> true));
+        assertTrue(par(1, 2, 3).hasMatchCountBetween(1, 3, x -> x > 1));
+        assertThrows(IllegalStateException.class, () -> par(1, 2, 3).hasMatchCountBetween(1, 3, x -> {
+            throw new IllegalStateException("boom");
+        }));
+    }
+
+    @Test
+    public void testSlidingMapPairParallelIncrementGreaterThanWindow() {
+        final List<String> r = par(1, 2, 3, 4, 5, 6, 7).slidingMap(3, false, (a, b) -> a + "-" + b).toList();
+        assertEquals(new HashSet<>(Arrays.asList("1-2", "4-5", "7-null")), new HashSet<>(r));
+        assertEquals(3, r.size());
+
+        final List<String> r2 = par(1, 2, 3, 4, 5, 6, 7).slidingMap(3, true, (a, b) -> a + "-" + b).toList();
+        assertEquals(new HashSet<>(Arrays.asList("1-2", "4-5")), new HashSet<>(r2));
+    }
+
+    @Test
+    public void testSlidingMapTripleParallelIncrementGreaterThanWindow() {
+        final List<String> r = par(1, 2, 3, 4, 5, 6, 7, 8, 9).slidingMap(4, false, (a, b, c) -> a + "-" + b + "-" + c).toList();
+        assertEquals(new HashSet<>(Arrays.asList("1-2-3", "5-6-7", "9-null-null")), new HashSet<>(r));
+    }
+
+    @Test
+    public void testMapFirstOrElseParallelEmpty() {
+        assertTrue(par().mapFirstOrElse(x -> x, x -> x).toList().isEmpty());
+    }
+
+    @Test
+    public void testForEachParallelFailures() {
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> par(1, 2, 3).forEach(x -> {
+            throw new IllegalStateException("action");
+        }, () -> {
+        }));
+        assertTrue(ex.getMessage().contains("action") || (ex.getCause() != null && ex.getCause().getMessage().contains("action")));
+
+        final Stream<Integer> s = par(1, 2, 3).onClose(() -> {
+            throw new IllegalArgumentException("close");
+        });
+        final List<Integer> seen = new CopyOnWriteArrayList<>();
+        assertThrows(IllegalArgumentException.class, () -> s.forEach(seen::add, () -> {
+        }));
+        assertEquals(Arrays.asList(1, 2, 3), sorted2(seen));
+    }
+
+    @Test
+    public void testForEachFlatMapperNullsParallel() throws Exception {
+        final List<String> out = new CopyOnWriteArrayList<>();
+        par(1, 2, 3).forEach(x -> x == 2 ? null : Arrays.asList("v" + x), (x, y) -> out.add(y));
+        assertEquals(Arrays.asList("v1", "v3"), sorted2(out));
+
+        final List<String> out2 = new CopyOnWriteArrayList<>();
+        par(1, 2, 3).forEach(x -> x == 2 ? null : Arrays.asList(x), y -> y == 3 ? null : Arrays.asList(y * 10), (x, y, z) -> out2.add(x + ":" + z));
+        assertEquals(Arrays.asList("1:10"), out2);
+    }
+
+    @Test
+    public void testForEachPairParallel() throws Exception {
+        final List<String> out = new CopyOnWriteArrayList<>();
+        par(1, 2, 3, 4, 5, 6, 7).forEachPair(3, (a, b) -> out.add(a + "-" + b));
+        assertEquals(new HashSet<>(Arrays.asList("1-2", "4-5", "7-null")), new HashSet<>(out));
+
+        final List<String> out2 = new CopyOnWriteArrayList<>();
+        par(1, 2, 3, 4, 5, 6).forEachPair(4, (a, b) -> out2.add(a + "-" + b));
+        assertEquals(new HashSet<>(Arrays.asList("1-2", "5-6")), new HashSet<>(out2));
+
+        final List<String> out3 = new CopyOnWriteArrayList<>();
+        par(1, 2, 3).forEachPair(4, (a, b) -> out3.add(a + "-" + b));
+        assertEquals(Arrays.asList("1-2"), out3);
+
+        assertThrows(IllegalStateException.class, () -> par(1, 2, 3).forEachPair(1, (a, b) -> {
+            throw new IllegalStateException("x");
+        }));
+    }
+
+    @Test
+    public void testForEachTripleParallelSkip() throws Exception {
+        final List<String> out = new CopyOnWriteArrayList<>();
+        par(1, 2, 3, 4, 5, 6, 7, 8).forEachTriple(4, (a, b, c) -> out.add(a + "-" + b + "-" + c));
+        assertEquals(new HashSet<>(Arrays.asList("1-2-3", "5-6-7")), new HashSet<>(out));
+    }
+
+    @Test
+    public void testFlatGroupToEmptyKeysParallel() {
+        final Map<Integer, Long> fg = par(1, 2, 3).flatGroupTo(x -> x == 2 ? Collections.<Integer> emptyList() : Arrays.asList(x), (k, x) -> x,
+                Collectors.counting(), HashMap::new);
+        assertEquals(2, fg.size());
+        assertFalse(fg.containsKey(2));
+    }
+
+    @Test
+    public void testToMultimapParallelFailure() {
+        assertThrows(IllegalStateException.class, () -> par(1, 2, 3).toMultimap(x -> {
+            throw new IllegalStateException("k");
+        }, x -> x, Suppliers.ofListMultimap()));
+    }
+
+    @Test
+    public void testParallelEmptyReductions() {
+        assertEquals(0, ParallelIteratorStreamTest.<Integer> par().reduce(0, (a, b) -> a + b, Integer::sum).intValue());
+        assertTrue(ParallelIteratorStreamTest.<Integer> par().collect(Collectors.toList()).isEmpty());
+    }
+
+    @Test
+    public void testMinMaxSortedShortcut() {
+        final Comparator<Integer> cmp = Comparator.naturalOrder();
+        final Stream<Integer> s = new ParallelIteratorStream<>(Arrays.asList(1, 2, 3).iterator(), true, cmp, 4, null, null, false, null);
+        assertEquals(1, s.min(cmp).get().intValue());
+    }
+
+    @Test
+    public void testFlatMapParallelWithNullMapped() {
+        final List<Integer> r = par(1, 2, 3).flatMap(x -> x == 2 ? null : Stream.of(x, x)).toList();
+        assertEquals(Arrays.asList(1, 1, 3, 3), sorted2(r));
+        assertEquals(N.asList(), par(1).flatMap(x -> null).toList());
+    }
 }

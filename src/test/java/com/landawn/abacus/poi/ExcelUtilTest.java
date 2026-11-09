@@ -36,10 +36,13 @@ import java.util.function.Function;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.PaneInformation;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -965,4 +968,127 @@ public class ExcelUtilTest extends TestBase {
         }
     }
     // ---- perf review 2026-09-26 G010 end ----
+
+    @TempDir
+    Path tempDir2;
+
+    private static final class FailingOutputStream extends OutputStream {
+        @Override
+        public void write(final int b) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            throw new IOException("boom");
+        }
+    }
+
+    /** A destination whose parent "directory" is a regular file, so no temporary file can be created next to it. */
+    private File unwritableTarget(final String name) throws IOException {
+        final File blocker = tempDir2.resolve("blocker-" + name).toFile();
+        Files.writeString(blocker.toPath(), "x");
+        return new File(blocker, name);
+    }
+
+    private File workbookWithFormulaAndError() throws IOException {
+        final File file = tempDir2.resolve("formula.xlsx").toFile();
+        try (Workbook wb = new XSSFWorkbook()) {
+            final Sheet sheet = wb.createSheet("S");
+            final Row row = sheet.createRow(0);
+            row.createCell(0).setCellFormula("1+2");
+            row.createCell(1).setCellErrorValue(FormulaError.DIV0.getCode());
+            row.createCell(2).setCellValue("txt");
+            try (OutputStream os = Files.newOutputStream(file.toPath())) {
+                wb.write(os);
+            }
+        }
+        return file;
+    }
+
+    @Test
+    public void testCellConvertersOnFormulaAndErrorCells() throws IOException {
+        try (Workbook wb = new XSSFWorkbook()) {
+            final Row row = wb.createSheet("S").createRow(0);
+            final Cell formula = row.createCell(0);
+            formula.setCellFormula("1+2");
+            final Cell error = row.createCell(1);
+            error.setCellErrorValue(FormulaError.DIV0.getCode());
+
+            assertEquals(CellType.FORMULA, formula.getCellType());
+            assertEquals(CellType.ERROR, error.getCellType());
+            assertEquals("1+2", ExcelUtil.CELL_GETTER.apply(formula));
+            assertEquals("", ExcelUtil.CELL_GETTER.apply(error));
+            assertEquals("1+2", ExcelUtil.CELL_TO_STRING.apply(formula));
+            assertEquals("", ExcelUtil.CELL_TO_STRING.apply(error));
+        }
+    }
+
+    @Test
+    public void testSetCellValueTwoArgUsesDefaultStyles() throws IOException {
+        try (Workbook wb = new XSSFWorkbook()) {
+            final Cell cell = wb.createSheet("S").createRow(0).createCell(0);
+            ExcelUtil.setCellValue(cell, "hello");
+            assertEquals("hello", cell.getStringCellValue());
+            ExcelUtil.setCellValue(cell, 12);
+            assertEquals(12.0, cell.getNumericCellValue());
+        }
+    }
+
+    @Test
+    public void testFreezeFirstRowOption() throws IOException {
+        final File out = tempDir2.resolve("frozen.xlsx").toFile();
+        final ExcelUtil.SheetCreateOptions options = ExcelUtil.SheetCreateOptions.builder().freezeFirstRow(true).build();
+        ExcelUtil.writeRowsToSheet("S", List.of("a", "b"), List.of(List.of(1, 2)), options, out);
+
+        try (Workbook wb = WorkbookFactory.create(out)) {
+            final PaneInformation pane = wb.getSheetAt(0).getPaneInformation();
+            assertNotNull(pane);
+            assertTrue(pane.isFreezePane());
+            assertEquals(1, pane.getHorizontalSplitPosition());
+            assertEquals(0, pane.getVerticalSplitPosition());
+        }
+    }
+
+    @Test
+    public void testExportFormulaAndErrorCellsToCsv() throws IOException {
+        final File file = workbookWithFormulaAndError();
+        final StringWriter sw = new StringWriter();
+        ExcelUtil.exportSheetToCsv(file, 0, null, sw);
+        assertEquals("\"1+2\",\"\",\"txt\"", sw.toString().strip());
+    }
+
+    @Test
+    public void testWritesToUnwritableTargetsFail() throws IOException {
+        final List<String> headers = List.of("a");
+        final List<List<Integer>> rows = List.of(List.of(1));
+        final Dataset ds = N.newDataset(Arrays.asList("a"), Arrays.asList(Arrays.asList((Object) 1)));
+
+        assertThrows(UncheckedException.class, () -> ExcelUtil.writeRowsToSheet("S", headers, rows, sheet -> {
+        }, unwritableTarget("r1.xlsx")));
+        assertThrows(UncheckedException.class,
+                () -> ExcelUtil.writeDatasetToSheet("S", ds, ExcelUtil.SheetCreateOptions.builder().build(), unwritableTarget("d1.xlsx")));
+        assertThrows(UncheckedException.class, () -> ExcelUtil.writeDatasetToSheet("S", ds, sheet -> {
+        }, unwritableTarget("d2.xlsx")));
+
+        final File src = workbookWithFormulaAndError();
+        assertThrows(UncheckedException.class, () -> ExcelUtil.exportSheetToCsv(src, 0, unwritableTarget("c1.csv")));
+        assertThrows(UncheckedException.class, () -> ExcelUtil.exportSheetToCsv(src, "S", unwritableTarget("c2.csv")));
+    }
+
+    @Test
+    public void testWritesToFailingStreamsFail() {
+        assertThrows(UncheckedException.class, () -> ExcelUtil.writeRowsToSheet("S", List.of("a"), List.of(List.of(1)), sheet -> {
+        }, new FailingOutputStream(), ExcelUtil.ExcelFormat.XLS));
+        final Dataset ds = N.newDataset(Arrays.asList("a"), Arrays.asList(Arrays.asList((Object) 1)));
+        assertThrows(UncheckedException.class, () -> ExcelUtil.writeDatasetToSheet("S", ds, sheet -> {
+        }, new FailingOutputStream(), ExcelUtil.ExcelFormat.XLS));
+    }
+
+    @Test
+    public void testReadMissingFileFails() {
+        final File missing = tempDir2.resolve("missing.xlsx").toFile();
+        assertFalse(missing.exists());
+        assertThrows(UncheckedException.class, () -> ExcelUtil.readRowsFromSheet(missing));
+    }
 }

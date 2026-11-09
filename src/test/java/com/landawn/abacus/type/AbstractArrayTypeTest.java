@@ -414,4 +414,14 @@ public class AbstractArrayTypeTest extends TestBase {
         }
     }
     // ---- deep review 2026-10-16 G162 end ----
+
+    @Test
+    public void testArrayFastParserFallbacks() {
+        assertNull(AbstractArrayType.parseNumericArray("[1,2]", Type.of(String.class), String.class));
+        assertNull(AbstractArrayType.parseNumericArray("[1,\"2',3]", Type.of(int.class), int.class));
+        assertNull(AbstractArrayType.parseNumericArray("[1.0e,2.0]", Type.of(double.class), double.class));
+        final Object ok = AbstractArrayType.parseNumericArray("[1, \"2\", 3]", Type.of(int.class), int.class);
+        assertEquals(3, ((int[]) ok).length);
+        assertEquals(2, ((int[]) ok)[1]);
+    }
 }

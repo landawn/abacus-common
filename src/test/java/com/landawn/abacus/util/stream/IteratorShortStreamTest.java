@@ -7,8 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -513,4 +516,79 @@ public class IteratorShortStreamTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G105 end ----
+
+    private static IteratorShortStream it(final short... a) {
+        return new IteratorShortStream(ShortIterator.of(a));
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        final short[] result = it((short) 1, (short) 2, (short) 3).flatMap(x -> x == 2 ? null : ShortStream.of(x, x)).toArray();
+        assertArrayEquals(new short[] { 1, 1, 3, 3 }, result);
+    }
+
+    @Test
+    public void testParallelFlatMapArray() {
+        final short[] result = it((short) 1, (short) 2).parallel(2).flatMapArray(x -> new short[] { x, (short) (x * 10) }).sorted().toArray();
+        assertArrayEquals(new short[] { 1, 2, 10, 20 }, result);
+    }
+
+    @Test
+    public void testToSetAndToMultiset() {
+        assertEquals(new HashSet<>(Arrays.asList((short) 1, (short) 2)), it((short) 1, (short) 2, (short) 1).toSet());
+
+        final Multiset<Short> ms = it((short) 1, (short) 2, (short) 1).toMultiset();
+        assertEquals(2, ms.count((short) 1));
+        assertEquals(1, ms.count((short) 2));
+    }
+
+    @Test
+    public void testSortedMax() {
+        final IteratorShortStream sorted = new IteratorShortStream(ShortIterator.of((short) 1, (short) 4, (short) 9), true, null);
+        assertEquals(9, sorted.max().get());
+    }
+
+    @Test
+    public void testSumAndAverageWithNegativeValues() {
+        assertEquals(-3, it((short) -1, (short) -2).sum());
+        assertEquals(-1.5, it((short) -1, (short) -2).average().getAsDouble(), 0.0);
+    }
+
+    @Test
+    public void testFindLastOnEmpty() {
+        assertFalse(it().findLast(x -> true).isPresent());
+    }
+
+    @Test
+    public void testAsIntStreamAdvance() {
+        final IntIteratorEx iter = it((short) 1, (short) 2, (short) 3).asIntStream().iteratorEx();
+        iter.advance(2);
+        assertEquals(3, iter.nextInt());
+    }
+
+    @Test
+    public void testIfEmptyIteratorPaths() {
+        final AtomicInteger calls = new AtomicInteger();
+
+        final ShortIteratorEx a = it((short) 1, (short) 2).ifEmpty(calls::incrementAndGet).iteratorEx();
+        assertEquals(1, a.nextShort());
+
+        final ShortIteratorEx b = it((short) 1, (short) 2, (short) 3).ifEmpty(calls::incrementAndGet).iteratorEx();
+        b.advance(0);
+        b.advance(2);
+        assertEquals(3, b.nextShort());
+
+        final ShortIteratorEx c = it((short) 1, (short) 2, (short) 3).ifEmpty(calls::incrementAndGet).iteratorEx();
+        assertEquals(3, c.count());
+
+        final ShortIteratorEx d = it().ifEmpty(calls::incrementAndGet).iteratorEx();
+        assertEquals(0, d.count());
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(it().isEmpty());
+        assertFalse(it((short) 1).isEmpty());
+    }
 }

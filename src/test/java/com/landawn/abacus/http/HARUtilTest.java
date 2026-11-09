@@ -10,7 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +26,12 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.u.Optional;
+import com.sun.net.httpserver.HttpServer;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -878,4 +885,50 @@ public class HARUtilTest extends TestBase {
         }
     }
 
+    @TempDir
+    Path tempDir;
+
+    private HttpServer server2;
+    private String url2;
+
+    @BeforeEach
+    public void startServer() throws IOException {
+        server2 = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server2.createContext("/har", ex -> {
+            try (InputStream in = ex.getRequestBody()) {
+                in.readAllBytes();
+            }
+            final byte[] out = "har-ok".getBytes(StandardCharsets.UTF_8);
+            ex.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
+            ex.sendResponseHeaders(200, out.length);
+            try (OutputStream os = ex.getResponseBody()) {
+                os.write(out);
+            }
+        });
+        server2.start();
+        url2 = "http://127.0.0.1:" + server2.getAddress().getPort() + "/har";
+    }
+
+    @AfterEach
+    public void stopServer() {
+        HARUtil.resetCurlLoggingForCurrentThread();
+        server2.stop(0);
+    }
+
+    private String har2() {
+        return "{\"log\": {\"entries\": [{\"request\": {\"method\": \"GET\", \"url\": \"" + url2 + "\", \"headers\": []}}]}}";
+    }
+
+    @Test
+    public void testSendRequestByUrlFromString() {
+        HARUtil.configureCurlLoggingForCurrentThread(true, '\'');
+        assertEquals("har-ok", HARUtil.sendRequest(har2(), url2));
+    }
+
+    @Test
+    public void testSendRequestByUrlFromFile() throws IOException {
+        final File file = tempDir.resolve("a.har").toFile();
+        Files.write(file.toPath(), har2().getBytes(StandardCharsets.UTF_8));
+        assertEquals("har-ok", HARUtil.sendRequest(file, url2));
+    }
 }

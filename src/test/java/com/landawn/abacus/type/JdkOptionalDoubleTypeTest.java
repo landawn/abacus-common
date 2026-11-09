@@ -309,4 +309,13 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
         assertEquals(0.0d, type.get(rs, 3).getAsDouble());
         assertThrows(NumberFormatException.class, () -> type.get(rs, 4));
     }
+
+    @Test
+    public void testJdkOptionalDoubleCompare() {
+        final Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+        assertEquals(0, type.compare(null, null));
+        assertEquals(-1, type.compare(null, OptionalDouble.of(1)));
+        assertEquals(1, type.compare(OptionalDouble.of(1), null));
+        assertEquals(1, type.compare(OptionalDouble.of(1), OptionalDouble.empty()));
+    }
 }

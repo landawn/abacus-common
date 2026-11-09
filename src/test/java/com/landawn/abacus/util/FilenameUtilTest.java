@@ -406,4 +406,42 @@ public class FilenameUtilTest extends TestBase {
         assertEquals("/", FilenameUtil.getFullPathNoEndSeparator("/"));
         assertEquals("C:", FilenameUtil.getFullPathNoEndSeparator("C:"));
     }
+
+    @Test
+    public void testNullInputs() {
+        assertNull(FilenameUtil.normalize(null));
+        assertNull(FilenameUtil.concat(null, "a"));
+        assertEquals(-1, FilenameUtil.indexOfLastSeparator(null));
+        assertEquals(-1, FilenameUtil.indexOfExtension(null));
+        assertNull(FilenameUtil.getPrefix(null));
+        assertNull(FilenameUtil.getPath(null));
+        assertNull(FilenameUtil.getPathNoEndSeparator(null));
+        assertNull(FilenameUtil.getFullPath(null));
+        assertNull(FilenameUtil.getName(null));
+        assertNull(FilenameUtil.getExtension(null));
+        assertNull(FilenameUtil.removeExtension(null));
+    }
+
+    @Test
+    public void testConcatEmptyBase() {
+        assertEquals(FilenameUtil.normalize("a/b"), FilenameUtil.concat("", "a/b"));
+    }
+
+    @Test
+    public void testDirectoryContainsShorterChild() {
+        assertFalse(FilenameUtil.directoryContains("/a/b", "/a"));
+        assertTrue(FilenameUtil.directoryContains("/a", "/a/b"));
+    }
+
+    @Test
+    public void testGetPath() {
+        assertEquals("a/b/", FilenameUtil.getPath("a/b/c.txt"));
+        assertEquals("a/b", FilenameUtil.getPathNoEndSeparator("a/b/c.txt"));
+    }
+
+    @Test
+    public void testIsExtensionNoMatch() {
+        assertFalse(FilenameUtil.isExtension("a.txt", new String[] { "doc", "pdf" }));
+        assertTrue(FilenameUtil.isExtension("a.txt", new String[] { "doc", "txt" }));
+    }
 }

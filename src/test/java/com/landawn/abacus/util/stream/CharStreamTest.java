@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.StringReader;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3141,4 +3142,103 @@ public class CharStreamTest extends CharStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    /** A CharSequence that is none of String/StringBuilder/StringBuffer/CharBuffer. */
+    static final class PlainCharSequence implements CharSequence {
+        private final String s;
+
+        PlainCharSequence(final String s) {
+            this.s = s;
+        }
+
+        @Override
+        public int length() {
+            return s.length();
+        }
+
+        @Override
+        public char charAt(final int index) {
+            return s.charAt(index);
+        }
+
+        @Override
+        public CharSequence subSequence(final int start, final int end) {
+            return new PlainCharSequence(s.substring(start, end));
+        }
+
+        @Override
+        public String toString() {
+            return s;
+        }
+    }
+
+    @Test
+    public void testOfCharSequenceRange() {
+        assertEquals(0, CharStream.of("", 0, 0).count());
+        assertArrayEquals(new char[] { 'b', 'c' }, CharStream.of(new PlainCharSequence("abcd"), 1, 3).toArray());
+    }
+
+    @Test
+    public void testOfStringRangeEmptyRemainderToList() {
+        assertArrayEquals(new char[0], CharStream.of("abc", 1, 1).toArray());
+
+        final CharIteratorEx iter = ((CharStream) CharStream.of("abc", 0, 2)).iteratorEx();
+        iter.nextChar();
+        iter.nextChar();
+        assertTrue(iter.toList().isEmpty());
+    }
+
+    @Test
+    public void testOfReaderExhaustedNext() {
+        final CharIterator iter = CharStream.of(new StringReader("a"), false).iterator();
+        assertEquals('a', iter.nextChar());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+    }
+
+    @Test
+    public void testRangeClosedWrongDirection() {
+        assertEquals(0, CharStream.rangeClosed('a', 'c', -1).count());
+    }
+
+    @Test
+    public void testRepeatIteratorAdvanceAndToArrayTooLarge() {
+        final CharIteratorEx iter = CharStream.repeat('x', 30).iteratorEx();
+        iter.advance(0);
+        assertEquals(30, iter.count());
+
+        final CharIteratorEx big = CharStream.repeat('x', Integer.MAX_VALUE + 1L).iteratorEx();
+        assertThrows(IllegalStateException.class, big::toArray);
+    }
+
+    @Test
+    public void testConcatEmptyInputs() {
+        assertEquals(0, CharStream.concat(new CharIterator[0]).count());
+        assertEquals(0, CharStream.concat(new CharStream[0]).count());
+        assertEquals(0, CharStream.concat(new ArrayList<char[]>()).count());
+        assertEquals(0, CharStream.concat(new ArrayList<CharStream>()).count());
+        assertEquals(0, CharStream.concatIterators(new ArrayList<CharIterator>()).count());
+    }
+
+    @Test
+    public void testMergeIteratorsExhaustedNext() {
+        final CharIterator iter = CharStream
+                .merge(CharIterator.of('a', 'c'), CharIterator.of('b'), (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .iterator();
+        final StringBuilder sb = new StringBuilder();
+        while (iter.hasNext()) {
+            sb.append(iter.nextChar());
+        }
+        assertEquals("abc", sb.toString());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+    }
+
+    @Test
+    public void testMergeCollectionOfTwo() {
+        assertArrayEquals(new char[] { 'a', 'b', 'c', 'd' },
+                CharStream
+                        .merge(Arrays.asList(CharStream.of('a', 'c'), CharStream.of('b', 'd')),
+                                (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                        .toArray());
+    }
 }

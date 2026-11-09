@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
@@ -94,5 +95,10 @@ public class UUIDTypeTest extends TestBase {
         assertEquals(false, uuidType.isImmutable());
         assertEquals(false, createType(java.net.URI.class).isImmutable());
         assertEquals(true, uuidType.equals(testUUID, uuidType.valueOf(uuidType.stringOf(testUUID))));
+    }
+
+    @Test
+    public void testUuidTypeIsComparable() {
+        assertTrue(new UUIDType().isComparable());
     }
 }

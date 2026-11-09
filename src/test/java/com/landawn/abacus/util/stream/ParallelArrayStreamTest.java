@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -44,6 +45,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.Fn;
 import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.ListMultimap;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
@@ -3313,4 +3315,143 @@ public class ParallelArrayStreamTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G109 end ----
+
+    private static Stream<Integer> par(final SplitStrategy strategy, final int threads, final Integer... elements) {
+        return Stream.of(elements).parallel(ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(threads).build());
+    }
+
+    private static Stream<Integer> arr(final Integer... elements) {
+        return par(SplitStrategy.ARRAY, 4, elements);
+    }
+
+    private static Stream<Integer> iter2(final Integer... elements) {
+        return par(SplitStrategy.ITERATOR, 4, elements);
+    }
+
+    @Test
+    public void testTakeWhileAllMatching() {
+        final List<Integer> result = par(SplitStrategy.ITERATOR, 3, 1, 2, 3, 4, 5).takeWhile(x -> true).toList();
+        Collections.sort(result);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), result);
+    }
+
+    @Test
+    public void testMapLastOrElseSingleElement() {
+        assertEquals(Arrays.asList("last7"), arr(7).mapLastOrElse(x -> "last" + x, x -> "else" + x).toList());
+    }
+
+    @Test
+    public void testSequentialFallbacksForSingleElement() {
+        final List<Integer> seen = new ArrayList<>();
+        assertEquals(Arrays.asList(5), arr(5).onEach(seen::add).toList());
+        assertEquals(Arrays.asList(5), seen);
+
+        final List<Integer> seen2 = new ArrayList<>();
+        final AtomicInteger completed = new AtomicInteger();
+        arr(5).forEach(seen2::add, completed::incrementAndGet);
+        assertEquals(Arrays.asList(5), seen2);
+        assertEquals(1, completed.get());
+
+        final List<String> pairs = new ArrayList<>();
+        arr(5).forEach(x -> Arrays.asList("a", "b"), (x, u) -> pairs.add(x + u));
+        assertEquals(Arrays.asList("5a", "5b"), pairs);
+
+        final List<String> pairs2 = new ArrayList<>();
+        arr(5).forEachPair(1, (a, b) -> pairs2.add(a + ":" + b));
+        assertEquals(Arrays.asList("5:null"), pairs2);
+
+        final List<String> triples = new ArrayList<>();
+        arr(5).forEachTriple(1, (a, b, c) -> triples.add(a + ":" + b + ":" + c));
+        assertEquals(Arrays.asList("5:null:null"), triples);
+    }
+
+    @Test
+    public void testSequentialFallbackCollectors() {
+        final TreeMap<Integer, Integer> m = arr(5).toMap(x -> x, x -> x * 2, Integer::sum, TreeMap::new);
+        assertEquals(Collections.singletonMap(5, 10), m);
+
+        final Map<Integer, Long> g = arr(5).groupTo(x -> x % 2, x -> x, Collectors.counting(), HashMap::new);
+        assertEquals(Collections.singletonMap(1, 1L), g);
+
+        final Map<Integer, Long> fg = arr(5).flatGroupTo(x -> Arrays.asList(x, x + 1), (k, x) -> x, Collectors.counting(), HashMap::new);
+        assertEquals(2, fg.size());
+        assertEquals(1L, fg.get(6));
+
+        final ListMultimap<Integer, Integer> mm = arr(5).toMultimap(x -> x, x -> x + 1, N::newListMultimap);
+        assertEquals(Arrays.asList(6), mm.get(5));
+
+        assertEquals(15, arr(5).reduce(10, (a, b) -> a + b, Integer::sum));
+    }
+
+    @Test
+    public void testSequentialFallbackMatchers() {
+        assertTrue(arr(5).anyMatch(x -> x == 5));
+        assertTrue(arr(5).allMatch(x -> x == 5));
+        assertFalse(arr(5).noneMatch(x -> x == 5));
+        assertTrue(arr(5).hasMatchCountBetween(1, 1, x -> x == 5));
+    }
+
+    @Test
+    public void testSequentialFallbackSetOps() {
+        assertEquals(Arrays.asList(5), arr(5).intersection(x -> x, Arrays.asList(5, 6)).toList());
+        assertEquals(Arrays.asList(), arr(5).difference(x -> x, Arrays.asList(5, 6)).toList());
+        assertEquals(Arrays.asList(5), arr(5).difference(x -> x, Arrays.asList(6)).toList());
+    }
+
+    @Test
+    public void testForEachCloseHandlerFailure() {
+        final List<Integer> seen = Collections.synchronizedList(new ArrayList<>());
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> arr(1, 2, 3, 4).onClose(() -> {
+            throw new IllegalStateException("closeFail");
+        }).forEach(seen::add, () -> {
+        }));
+        assertTrue(ex.toString().contains("closeFail") || (ex.getCause() != null && ex.getCause().toString().contains("closeFail")));
+        assertEquals(4, seen.size());
+    }
+
+    @Test
+    public void testForEachPairActionThrows() {
+        assertThrows(RuntimeException.class, () -> arr(1, 2, 3, 4, 5).forEachPair(1, (a, b) -> {
+            throw new IllegalArgumentException("pairFail");
+        }));
+    }
+
+    @Test
+    public void testToMultimapKeyMapperThrows() {
+        assertThrows(RuntimeException.class, () -> arr(1, 2, 3, 4).toMultimap(x -> {
+            throw new IllegalArgumentException("keyFail");
+        }, x -> x, N::newListMultimap));
+        assertThrows(RuntimeException.class, () -> iter2(1, 2, 3, 4).toMultimap(x -> {
+            throw new IllegalArgumentException("keyFail");
+        }, x -> x, N::newListMultimap));
+    }
+
+    @Test
+    public void testCollectAccumulatorThrows() {
+        final java.util.stream.Collector<Integer, List<Integer>, List<Integer>> c = java.util.stream.Collector.of(ArrayList::new, (l, x) -> {
+            throw new IllegalArgumentException("accFail");
+        }, (a, b) -> a);
+        assertThrows(RuntimeException.class, () -> arr(1, 2, 3, 4).collect(c));
+    }
+
+    @Test
+    public void testIteratorMatchers() {
+        assertFalse(iter2(1, 2, 3, 4, 5, 6).allMatch(x -> x < 3));
+        assertTrue(iter2(1, 2, 3, 4, 5, 6).allMatch(x -> x > 0));
+        assertFalse(iter2(1, 2, 3, 4, 5, 6).noneMatch(x -> x == 4));
+        assertFalse(iter2(1, 2, 3, 4, 5, 6).hasMatchCountBetween(0, 2, x -> x > 0));
+        assertThrows(RuntimeException.class, () -> iter2(1, 2, 3, 4).hasMatchCountBetween(0, 2, x -> {
+            throw new IllegalArgumentException("predFail");
+        }));
+        assertThrows(RuntimeException.class, () -> arr(1, 2, 3, 4).hasMatchCountBetween(0, 2, x -> {
+            throw new IllegalArgumentException("predFail");
+        }));
+    }
+
+    @Test
+    public void testZipWithThreeStreams() {
+        final List<String> result = arr(1, 2, 3).zipWith(Stream.of("a", "b", "c"), Stream.of(10, 20, 30), (x, s, y) -> x + s + y).toList();
+        Collections.sort(result);
+        assertEquals(Arrays.asList("1a10", "2b20", "3c30"), result);
+    }
 }

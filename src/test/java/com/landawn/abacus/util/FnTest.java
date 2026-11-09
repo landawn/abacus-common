@@ -12,7 +12,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,17 +27,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.u.OptionalBoolean;
 import com.landawn.abacus.util.u.OptionalInt;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.BooleanSupplier;
+import com.landawn.abacus.util.function.Consumer;
+import com.landawn.abacus.util.function.Function;
 import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.function.Runnable;
+import com.landawn.abacus.util.function.Supplier;
+import com.landawn.abacus.util.function.TriFunction;
 
 public class FnTest extends FnTestSupport {
 
@@ -813,4 +821,116 @@ public class FnTest extends FnTestSupport {
     }
 
     // ---- perf review 2026-09-26 G039 end ----
+
+    @Test
+    public void testMemoizeWithExpirationRecursionCaughtByDelegate() {
+        final AtomicReference<Supplier<String>> ref = new AtomicReference<>();
+        final Supplier<String> memo = Fn.memoizeWithExpiration(() -> {
+            try {
+                ref.get().get();
+            } catch (final IllegalStateException e) {
+                // swallow the recursive failure and try to return a value anyway
+            }
+            return "value";
+        }, 1, TimeUnit.HOURS);
+        ref.set(memo);
+
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, memo::get);
+        assertTrue(ex.getMessage().contains("Recursive"));
+    }
+
+    @Test
+    public void testClosersRunOnlyOnce() {
+        final AtomicInteger count = new AtomicInteger();
+        final AutoCloseable c = count::incrementAndGet;
+
+        final Runnable closeAll = Fn.closeAll(Arrays.asList(c));
+        closeAll.run();
+        closeAll.run();
+        assertEquals(1, count.get());
+
+        final Runnable closeQuietly = Fn.closeQuietly(c);
+        closeQuietly.run();
+        closeQuietly.run();
+        assertEquals(2, count.get());
+
+        final Runnable closeAllQuietly = Fn.closeAllQuietly(Arrays.asList(c));
+        closeAllQuietly.run();
+        closeAllQuietly.run();
+        assertEquals(3, count.get());
+    }
+
+    @Test
+    public void testConditionalFunctions() {
+        final List<String> seen = new ArrayList<>();
+        final Consumer<String> consumer = Fn.acceptIfOrElse(s -> s.startsWith("a"), s -> seen.add("T:" + s), s -> seen.add("F:" + s));
+        consumer.accept("abc");
+        consumer.accept("xyz");
+        assertEquals(Arrays.asList("T:abc", "F:xyz"), seen);
+
+        final Function<String, Integer> f1 = Fn.applyIfNotNullOrDefault((String s) -> s.isEmpty() ? null : s, String::length, -1);
+        assertEquals(-1, f1.apply(""));
+        assertEquals(3, f1.apply("abc"));
+
+        final Function<String, Integer> f2 = Fn.applyIfNotNullOrElseGet((String s) -> s.isEmpty() ? null : s, String::length, () -> -2);
+        assertEquals(-2, f2.apply(""));
+        assertEquals(2, f2.apply("ab"));
+
+        final Function<String, Integer> f3 = Fn.applyIfOrElseGet((String s) -> s.length() > 1, String::length, () -> 0);
+        assertEquals(3, f3.apply("abc"));
+        assertEquals(0, f3.apply("a"));
+    }
+
+    @Test
+    public void testCompareNaturalOrder() {
+        final BiFunction<Integer, Integer, Integer> cmp = Fn.compare(Comparators.<Integer> naturalOrder());
+        assertTrue(cmp.apply(1, 2) < 0);
+        assertEquals(0, cmp.apply(2, 2));
+    }
+
+    @Test
+    public void testFfRethrowsRuntimeAndHandlesInterrupt() {
+        final BiFunction<String, String, String> bi = Fn.ff((String a, String b) -> {
+            throw new IllegalArgumentException("bad");
+        }, "default");
+        assertThrows(IllegalArgumentException.class, () -> bi.apply("a", "b"));
+
+        final TriFunction<String, String, String, String> tri = Fn.ff((String a, String b, String c) -> {
+            throw new IllegalStateException("bad");
+        }, "default");
+        assertThrows(IllegalStateException.class, () -> tri.apply("a", "b", "c"));
+
+        final TriFunction<String, String, String, String> triInterrupted = Fn.ff((String a, String b, String c) -> {
+            throw new InterruptedException("interrupted");
+        }, "default");
+        try {
+            assertEquals("default", triInterrupted.apply("a", "b", "c"));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted(); // clear the flag
+        }
+    }
+
+    @Test
+    public void testJr2rReturnsSameInstance() {
+        final AtomicInteger count = new AtomicInteger();
+        final Runnable r = count::incrementAndGet;
+        assertSame(r, Fn.jr2r(r));
+    }
+
+    @Test
+    public void testEntriesEf() throws Exception {
+        final com.landawn.abacus.util.Throwables.Function<java.util.Map.Entry<String, Integer>, String, RuntimeException> f = Fn.Entries
+                .ef((String k, Integer v) -> k + "=" + v);
+        assertEquals("a=1", f.apply(new AbstractMap.SimpleEntry<>("a", 1)));
+    }
+
+    @Test
+    public void testPrimitiveArraySumAverage() {
+        assertEquals(6, Fn.FS.sum().apply(new short[] { 1, 2, 3 }));
+        assertEquals(2.0, Fn.FS.average().apply(new short[] { 1, 2, 3 }));
+        assertEquals(1.5, Fn.FL.average().apply(new long[] { 1, 2 }));
+        assertEquals(6f, Fn.FF.sum().apply(new float[] { 1, 2, 3 }));
+        assertEquals(2.0, Fn.FF.average().apply(new float[] { 1, 2, 3 }));
+    }
 }

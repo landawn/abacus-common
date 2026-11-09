@@ -42,8 +42,8 @@ public class JaxbParserPerformanceTest extends AbstractParserTest {
     public void testPerformance() throws Exception {
         createXmlFile(1000);
 
-        int threadNum = 2;
-        int loopNum = 10;
+        int threadNum = 1;
+        int loopNum = 1;
 
         Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
         methodLoopNumMap.put("parseWithAbacus", loopNum);

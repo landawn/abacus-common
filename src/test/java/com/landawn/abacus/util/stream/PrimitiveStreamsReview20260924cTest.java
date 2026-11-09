@@ -319,8 +319,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_charMergeOf20000Sources() {
-        c132Char(20000, true);
+    public void c132_charMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Char(5000, true));
     }
 
     private static void c132Byte(final int k, final boolean countOnly) {
@@ -351,8 +351,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_byteMergeOf20000Sources() {
-        c132Byte(20000, true);
+    public void c132_byteMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Byte(5000, true));
     }
 
     private static void c132Short(final int k, final boolean countOnly) {
@@ -383,8 +383,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_shortMergeOf20000Sources() {
-        c132Short(20000, true);
+    public void c132_shortMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Short(5000, true));
     }
 
     private static void c132Int(final int k, final boolean countOnly) {
@@ -415,8 +415,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_intMergeOf20000Sources() {
-        c132Int(20000, true);
+    public void c132_intMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Int(5000, true));
     }
 
     private static void c132Long(final int k, final boolean countOnly) {
@@ -447,8 +447,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_longMergeOf20000Sources() {
-        c132Long(20000, true);
+    public void c132_longMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Long(5000, true));
     }
 
     private static void c132Float(final int k, final boolean countOnly) {
@@ -479,8 +479,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_floatMergeOf20000Sources() {
-        c132Float(20000, true);
+    public void c132_floatMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Float(5000, true));
     }
 
     private static void c132Double(final int k, final boolean countOnly) {
@@ -511,8 +511,8 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
     }
 
     @Test
-    public void c132_doubleMergeOf20000Sources() {
-        c132Double(20000, true);
+    public void c132_doubleMergeOf5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c132Double(5000, true));
     }
 
     @Test
@@ -1064,4 +1064,30 @@ public class PrimitiveStreamsReview20260924cTest extends TestBase {
         assertTrue(flag[1]);
     }
 
+    /**
+     * Runs {@code body} on a thread with a 256 KB stack. A merge that recursed once per source (the pre-fix shape)
+     * overflows that stack below 3,000 sources even when JIT-compiled, so 5,000 sources here is a stronger
+     * stack-safety check than 20,000 on the default stack, at about 1/16 of the time: the documented left fold
+     * costs O(elements x sources).
+     */
+    private static void onSmallStack(final Runnable body) throws InterruptedException {
+        final Throwable[] failure = new Throwable[1];
+        final Thread thread = new Thread(null, () -> {
+            try {
+                body.run();
+            } catch (final Throwable e) {
+                failure[0] = e;
+            }
+        }, "small-stack-merge", 256L * 1024);
+        thread.start();
+        thread.join();
+
+        if (failure[0] instanceof RuntimeException e) {
+            throw e;
+        } else if (failure[0] instanceof Error e) {
+            throw e;
+        } else if (failure[0] != null) {
+            throw new AssertionError(failure[0]);
+        }
+    }
 }

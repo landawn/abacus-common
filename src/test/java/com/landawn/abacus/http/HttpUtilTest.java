@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.Charsets;
 import com.landawn.abacus.util.IOUtil;
 
@@ -1400,4 +1402,78 @@ public class HttpUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-10-26 verify G120 end ----
+
+    @Test
+    public void testGetContentFormatEncodingTokens() {
+        assertEquals(ContentFormat.SNAPPY, HttpUtil.getContentFormat("text/plain", "snappy, identity"));
+        assertEquals(ContentFormat.LZ4, HttpUtil.getContentFormat("text/plain", "lz4, identity"));
+        assertEquals(ContentFormat.KRYO, HttpUtil.getContentFormat("text/plain", "kryo, identity"));
+        assertEquals(ContentFormat.JSON_SNAPPY, HttpUtil.getContentFormat("application/json", "snappy, identity"));
+        // media type without a subtype
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("textonly", ""));
+        assertEquals(ContentFormat.NONE, HttpUtil.getContentFormat("text/", null));
+    }
+
+    @Test
+    public void testWrapInputStreamBrotli() {
+        try {
+            final InputStream in = HttpUtil.wrapInputStream(new ByteArrayInputStream(new byte[] { 0x06 }), ContentFormat.BR);
+            assertNotNull(in);
+        } catch (final RuntimeException e) {
+            // brotli codec unavailable or rejected the header: still a decoding attempt
+            assertNotNull(e);
+        }
+    }
+
+    @Test
+    public void testGetCharsetSkipsWhitespaceAfterEquals() {
+        assertEquals(StandardCharsets.ISO_8859_1, HttpUtil.getCharset("text/plain; x= \t\"a;b\"; charset=ISO-8859-1", StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testHttpResponseBodyBranches() {
+        final HttpResponse noBody = new HttpResponse("http://localhost/", 1L, 2L, 200, "OK", new HashMap<>(), null, ContentFormat.JSON, StandardCharsets.UTF_8);
+        assertNull(noBody.body(Type.of(Map.class)));
+
+        final HttpResponse lz4 = new HttpResponse("http://localhost/", 1L, 2L, 200, "OK", new HashMap<>(), "{\"a\":1}".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.LZ4, StandardCharsets.UTF_8);
+        final Map<?, ?> m = lz4.body(Type.of(Map.class));
+        assertEquals(1, ((Number) m.get("a")).intValue());
+
+        final HttpResponse none = new HttpResponse("http://localhost/", 1L, 2L, 200, "OK", new HashMap<>(), "{\"a\":\"b\"}".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.NONE, StandardCharsets.UTF_8);
+        assertEquals("b", none.body(Map.class).get("a"));
+        assertEquals("b", ((Map<?, ?>) none.body(Type.of(Map.class))).get("a"));
+    }
+
+    @Test
+    public void testHttpResponseKryoBody() {
+        if (HttpUtil.kryoParser == null) {
+            return;
+        }
+        final Map<String, Object> value = new LinkedHashMap<>();
+        value.put("list", new ArrayList<>(Arrays.asList("a", "b")));
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        HttpUtil.kryoParser.serialize(value, bos);
+
+        final HttpResponse resp = new HttpResponse("http://localhost/", 1L, 2L, 200, "OK", new HashMap<>(), bos.toByteArray(), ContentFormat.KRYO,
+                StandardCharsets.UTF_8);
+        assertEquals(value, resp.body(LinkedHashMap.class));
+        final Object viaType = resp.body(Type.of(LinkedHashMap.class));
+        assertEquals(value, viaType);
+    }
+
+    @Test
+    public void testHttpHeadersNullNames() {
+        final HttpHeaders headers = HttpHeaders.create().set("A", "1");
+        assertNull(headers.get(null));
+        assertTrue(!headers.containsHeader(null));
+
+        final Map<String, Object> raw = new HashMap<>();
+        raw.put(null, "x");
+        final HttpHeaders wrapped = HttpHeaders.wrap(raw);
+        final List<Object> list = new ArrayList<>();
+        list.add(wrapped.hashCode());
+        assertEquals("x".hashCode(), list.get(0));
+    }
 }

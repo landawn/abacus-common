@@ -17,7 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.BufferedJsonWriter;
+import com.landawn.abacus.util.Objectory;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class AtomicBooleanTypeTest extends TestBase {
 
     private final AtomicBooleanType type = new AtomicBooleanType();
@@ -126,4 +129,20 @@ public class AtomicBooleanTypeTest extends TestBase {
         assertNull(type.defaultValue());
     }
 
+    private static String serialize(final Type type, final Object value) throws Exception {
+        final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(w, value, null);
+            return w.toString();
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
+
+    @Test
+    public void testAtomicBooleanSerializeNonNull() throws Exception {
+        final Type<AtomicBoolean> type = Type.of(AtomicBoolean.class);
+        assertEquals("true", serialize(type, new AtomicBoolean(true)));
+        assertEquals("false", serialize(type, new AtomicBoolean(false)));
+    }
 }

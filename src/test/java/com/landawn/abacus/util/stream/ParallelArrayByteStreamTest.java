@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1115,4 +1116,36 @@ public class ParallelArrayByteStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G120 end ----
+
+    private static ByteStream arrayParallel(final int threads, final byte... elements) {
+        return ByteStream.of(elements).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(threads).build());
+    }
+
+    @Test
+    public void testReduceWithEmptyTrailingSlice() {
+        assertEquals((byte) 15, arrayParallel(4, (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reduce((a, b) -> (byte) (a + b)).get());
+        assertEquals((byte) 15, arrayParallel(4, (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).reduce((byte) 0, (a, b) -> (byte) (a + b)));
+    }
+
+    @Test
+    public void testDropWhileAllMatching() {
+        assertArrayEquals(new byte[0], arrayParallel(3, (byte) 1, (byte) 2, (byte) 3, (byte) 4).dropWhile(x -> true).toArray());
+    }
+
+    @Test
+    public void testSingleElementTakesSequentialPaths() {
+        final List<Byte> seen = new ArrayList<>();
+        arrayParallel(4, (byte) 7).forEach(seen::add);
+        assertEquals(1, seen.size());
+        assertEquals((byte) 7, seen.get(0));
+
+        final Map<Byte, Integer> map = arrayParallel(4, (byte) 7).toMap(b -> b, b -> b * 2, Integer::sum, HashMap::new);
+        assertEquals(Integer.valueOf(14), map.get((byte) 7));
+
+        final Map<Byte, Long> grouped = arrayParallel(4, (byte) 7).groupTo(b -> b, java.util.stream.Collectors.counting(), HashMap::new);
+        assertEquals(Long.valueOf(1), grouped.get((byte) 7));
+
+        final byte[] zipped = arrayParallel(4, (byte) 1).zipWith(ByteStream.of((byte) 2), ByteStream.of((byte) 3), (a, b, c) -> (byte) (a + b + c)).toArray();
+        assertArrayEquals(new byte[] { 6 }, zipped);
+    }
 }

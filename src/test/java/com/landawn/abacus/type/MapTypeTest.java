@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import com.landawn.abacus.util.TypeReference;
 
 import lombok.Data;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class MapTypeTest extends TestBase {
 
     private MapType<String, Integer, Map<String, Integer>> mapType;
@@ -313,4 +315,15 @@ public class MapTypeTest extends TestBase {
     }
 
     // ---- bug review 2026-10-02 G114 end ----
+
+    @Test
+    public void testMapAppendToNullKeyAndValue() throws Exception {
+        final Type<Map<String, Integer>> type = Type.of("Map<String, Integer>");
+        final Map<String, Integer> m = new LinkedHashMap<>();
+        m.put(null, 1);
+        m.put("a", null);
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, m);
+        assertEquals("{null:1, a:null}", sb.toString().replace("\"", ""));
+    }
 }

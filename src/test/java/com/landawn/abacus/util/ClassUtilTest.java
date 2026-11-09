@@ -34,6 +34,7 @@ import java.util.concurrent.Callable;
 import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.DiffIgnore;
@@ -2327,4 +2328,29 @@ public class ClassUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G028 end ----
+
+    @TempDir
+    Path tempDir2;
+
+    @Test
+    public void testFormatParameterizedTypeNameObjectArray() {
+        assertEquals("java.util.concurrent.atomic.LongAdder[]", ClassUtil.formatParameterizedTypeName("class [Ljava.util.concurrent.atomic.LongAdder;"));
+    }
+
+    @Test
+    public void testMakeFolderForPackageFailsWhenPathIsFile() throws Exception {
+        final File file = Files.createFile(tempDir2.resolve("plain.txt")).toFile();
+        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> ClassUtil.makeFolderForPackage(file.getAbsolutePath(), "a.b"));
+        assertTrue(ex.getMessage().contains("Failed to create folder"));
+
+        final String created = ClassUtil.makeFolderForPackage(tempDir2.toFile().getAbsolutePath(), "x.y");
+        assertTrue(new File(created).isDirectory());
+    }
+
+    @Test
+    public void testSentinelClass() {
+        ClassUtil.SentinelClass.sentinelMethod();
+        assertNotNull(new ClassUtil.SentinelClass());
+        assertEquals("SENTINEL_FIELD", ClassUtil.SentinelClass.SENTINEL_FIELD);
+    }
 }

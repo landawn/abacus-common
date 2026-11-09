@@ -1,12 +1,16 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -393,4 +397,78 @@ public class ByteIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    private static final class CloseableByteIterator2 extends ByteIterator implements AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private int cursor = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cursor < 2;
+        }
+
+        @Override
+        public byte nextByte() {
+            return (byte) (++cursor);
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    private static final class CloseableIterator implements Iterator<Byte>, AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private final Iterator<Byte> it = Arrays.asList((Byte) (byte) 1, (Byte) (byte) 2).iterator();
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Byte next() {
+            return it.next();
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(ByteIteratorEx.EMPTY.supportsFailureAtomicAdvance());
+        assertFalse(ByteIteratorEx.EMPTY.hasNext());
+    }
+
+    @Test
+    public void testOfPlainIteratorClosesResource() {
+        final CloseableByteIterator2 src = new CloseableByteIterator2();
+        final ByteIteratorEx iter = ByteIteratorEx.of(src);
+        assertEquals((byte) 1, iter.nextByte());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
+
+    @Test
+    public void testFromObjIteratorEx2() {
+        final ObjIteratorEx<Byte> src = ObjIteratorEx.of((Byte) (byte) 1, (Byte) (byte) 2, (Byte) (byte) 3);
+        final ByteIteratorEx iter = ByteIteratorEx.from(src);
+        assertEquals(ObjIteratorEx.supportsFailureAtomicAdvance(src), iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        assertEquals((byte) 1, iter.nextByte());
+        iter.advance(-1);
+        assertEquals((byte) 2, iter.nextByte());
+    }
+
+    @Test
+    public void testFromPlainIteratorClosesResource() {
+        final CloseableIterator src = new CloseableIterator();
+        final ByteIteratorEx iter = ByteIteratorEx.from(src);
+        assertEquals((byte) 1, iter.nextByte());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
 }

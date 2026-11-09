@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -1272,4 +1275,93 @@ public class ContinuableFutureTest extends ContinuableFutureTestSupport {
         assertThrows(IllegalArgumentException.class, () -> ContinuableFuture.wrap(null));
     }
 
+    /** A done future whose get() fails with an unchecked throwable instead of an ExecutionException. */
+    private static Future<String> brokenFuture(final Throwable failure) {
+        return new Future<>() {
+            @Override
+            public boolean cancel(final boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+
+            @Override
+            public String get() {
+                throwUnchecked(failure);
+                return null;
+            }
+
+            @Override
+            public String get(final long timeout, final TimeUnit unit) {
+                throwUnchecked(failure);
+                return null;
+            }
+        };
+    }
+
+    private static void throwUnchecked(final Throwable t) {
+        if (t instanceof RuntimeException re) {
+            throw re;
+        }
+        throw (Error) t;
+    }
+
+    private static ContinuableFuture<Void> failed2(final Exception e) {
+        final ContinuableFuture<Void> f = ContinuableFuture.run(() -> {
+            throw e;
+        });
+        assertThrows(ExecutionException.class, f::get);
+        return f;
+    }
+
+    @Test
+    public void testDelayedWrapperRethrowsUncheckedFailuresOfUpstream() {
+        final IllegalStateException re = new IllegalStateException("re");
+        final ContinuableFuture<String> delayedRe = ContinuableFuture.wrap(brokenFuture(re)).thenDelay(1, TimeUnit.MILLISECONDS);
+        assertSame(re, assertThrows(IllegalStateException.class, delayedRe::get));
+        assertSame(re, assertThrows(IllegalStateException.class, () -> delayedRe.get(5, TimeUnit.SECONDS)));
+
+        final Error err = new Error("err");
+        final ContinuableFuture<String> delayedErr = ContinuableFuture.wrap(brokenFuture(err)).thenDelay(1, TimeUnit.MILLISECONDS);
+        assertSame(err, assertThrows(Error.class, delayedErr::get));
+        assertSame(err, assertThrows(Error.class, () -> delayedErr.get(5, TimeUnit.SECONDS)));
+    }
+
+    @Test
+    public void testRunAfterBothReportsSecondFailureWhenFirstSucceeded() {
+        final IOException e2 = new IOException("second");
+        final ExecutionException ex = assertThrows(ExecutionException.class, () -> ContinuableFuture.completed("x").runAsyncAfterBoth(failed2(e2), () -> {
+        }).get());
+        assertSame(e2, ex.getCause());
+    }
+
+    @Test
+    public void testRunAfterBothWithTheSameFailureAddsNoSuppressed() {
+        final IOException e = new IOException("same");
+        final ContinuableFuture<Void> f = failed2(e);
+        final ExecutionException ex = assertThrows(ExecutionException.class, () -> f.runAsyncAfterBoth(f, () -> {
+        }).get());
+        assertSame(e, ex.getCause());
+        assertEquals(0, e.getSuppressed().length);
+    }
+
+    @Test
+    public void testRunAfterBothSuppressesSecondFailureWithOwnSuppressedChain() {
+        final IOException e1 = new IOException("first");
+        final IOException e2 = new IOException("second");
+        e2.addSuppressed(new IllegalStateException("unrelated"));
+
+        final ExecutionException ex = assertThrows(ExecutionException.class, () -> failed2(e1).runAsyncAfterBoth(failed2(e2), () -> {
+        }).get());
+        assertSame(e1, ex.getCause());
+        assertTrue(Arrays.asList(e1.getSuppressed()).contains(e2));
+    }
 }

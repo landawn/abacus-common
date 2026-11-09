@@ -10,6 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -2457,4 +2462,76 @@ public class DoubleListTest extends DoubleListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G037 end ----
+
+    @Test
+    public void testReplaceRangeShrinkClearsTail() {
+        final DoubleList list = DoubleList.of(1, 2, 3, 4);
+        list.replaceRange(0, 3, DoubleList.of(9));
+        assertArrayEquals(new double[] { 9, 4 }, list.toArray());
+    }
+
+    @Test
+    public void testReplaceRangeArrayGrowsCapacity() {
+        final DoubleList list = DoubleList.of(1, 2);
+        list.replaceRange(0, 1, new double[] { 7, 8, 9 });
+        assertArrayEquals(new double[] { 7, 8, 9, 2 }, list.toArray());
+    }
+
+    @Test
+    public void testEmptyListSetOperations() {
+        final DoubleList empty = new DoubleList();
+        assertEquals(0, empty.replaceAll(1, 2));
+        assertFalse(empty.containsAny(new double[] { 1 }));
+        assertFalse(empty.containsAll(new double[] { 1 }));
+        assertTrue(empty.disjoint(new double[] { 1 }));
+        assertTrue(empty.intersection(new double[] { 1 }).isEmpty());
+        assertTrue(DoubleList.of(1).intersection(new double[0]).isEmpty());
+        assertArrayEquals(new double[] { 1, 2 }, empty.symmetricDifference(DoubleList.of(1, 2)).toArray());
+        assertArrayEquals(new double[] { 3 }, empty.symmetricDifference(new double[] { 3 }).toArray());
+        assertArrayEquals(new double[] { 5, 6 }, DoubleList.of(5, 6).symmetricDifference(new double[0]).toArray());
+    }
+
+    @Test
+    public void testForEachReverseRange() {
+        final List<Double> seen = new ArrayList<>();
+        DoubleList.of(1, 2, 3).forEach(2, 0, seen::add);
+        assertEquals(List.of(3d, 2d), seen);
+    }
+
+    @Test
+    public void testEqualsSelf() {
+        final DoubleList list = DoubleList.of(1);
+        assertTrue(list.equals(list));
+    }
+
+    @Test
+    public void testDeserializeRejectsInconsistentSize() throws Exception {
+        final DoubleList list = DoubleList.of(1.5);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(list);
+        }
+        final byte[] bytes = bos.toByteArray();
+
+        // Round trip of the untouched stream works.
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            assertEquals(list, ois.readObject());
+        }
+
+        // Patch the serialized int "size" (1) - it directly precedes the TC_ARRAY of elementData.
+        int idx = -1;
+        for (int i = 0; i + 4 < bytes.length; i++) {
+            if (bytes[i] == 0 && bytes[i + 1] == 0 && bytes[i + 2] == 0 && bytes[i + 3] == 1 && bytes[i + 4] == 0x75) {
+                idx = i;
+                break;
+            }
+        }
+        assertTrue(idx >= 0);
+        bytes[idx + 3] = 99;
+
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            final InvalidObjectException ex = assertThrows(InvalidObjectException.class, ois::readObject);
+            assertTrue(ex.getMessage().contains("size=99"), ex.getMessage());
+        }
+    }
 }

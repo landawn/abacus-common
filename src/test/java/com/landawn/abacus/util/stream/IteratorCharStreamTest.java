@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -1233,4 +1234,51 @@ public class IteratorCharStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G098 end ----
+
+    private static CharStream it(final char... a) {
+        return new IteratorCharStream(CharIterator.of(a));
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new char[] { 'a', 'a', 'c', 'c' }, it('a', 'b', 'c').flatMap(c -> c == 'b' ? null : CharStream.of(c, c)).toArray());
+    }
+
+    @Test
+    public void testFlatMapArrayParallel() {
+        final CharStream p = new ParallelIteratorCharStream(CharIterator.of('a', 'b'), false, 4, null, null, false, null);
+        assertArrayEquals(new char[] { 'a', 'a', 'b', 'b' }, p.flatMapArray(c -> new char[] { c, c }).sorted().toArray());
+    }
+
+    @Test
+    public void testKthLargestSortedTooFewElements() {
+        assertFalse(new IteratorCharStream(CharIterator.of('a', 'b'), true, null).kthLargest(5).isPresent());
+        assertEquals('b', new IteratorCharStream(CharIterator.of('a', 'b', 'c'), true, null).kthLargest(2).get());
+        assertFalse(it().kthLargest(1).isPresent());
+    }
+
+    @Test
+    public void testAsIntStreamAdvance() {
+        final IntIteratorEx iter = it('a', 'b', 'c').asIntStream().iteratorEx();
+        iter.advance(2);
+        assertEquals('c', iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testIfEmptyNextAndAdvance() {
+        final AtomicInteger calls = new AtomicInteger();
+        assertEquals('a', it('a').ifEmpty(calls::incrementAndGet).iteratorEx().nextChar());
+
+        final CharIteratorEx iter = it('a', 'b', 'c').ifEmpty(calls::incrementAndGet).iteratorEx();
+        iter.advance(0);
+        iter.advance(2);
+        assertEquals('c', iter.nextChar());
+        assertEquals(0, calls.get());
+
+        final CharIteratorEx empty = it().ifEmpty(calls::incrementAndGet).iteratorEx();
+        empty.advance(1);
+        assertFalse(empty.hasNext());
+        assertEquals(1, calls.get());
+    }
 }

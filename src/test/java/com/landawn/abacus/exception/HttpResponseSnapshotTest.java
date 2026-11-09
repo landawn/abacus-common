@@ -209,4 +209,33 @@ public class HttpResponseSnapshotTest extends TestBase {
         assertEquals(body, new HttpResponseException("u", 500, null, null, body).responseBody());
     }
     // ---- deep review 2026-09-25 G001 end ----
+
+    @Test
+    public void testTruncationKeepsLoneHighSurrogateNotFollowedByLowSurrogate() {
+        final int max = HttpUtil.MAX_ERROR_BODY_IN_MESSAGE;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < max - 1; i++) {
+            sb.append('a');
+        }
+        sb.append('\uD800'); // high surrogate at the cut position - 1
+        sb.append("xyz"); // not a low surrogate, so no pair is being split
+
+        final HttpResponseException ex = new HttpResponseException("http://localhost/x", 500, "ERR", null, sb.toString());
+        final String expected = "500: ERR. " + sb.substring(0, max) + "... (truncated)";
+        assertEquals(expected, ex.getMessage());
+        assertTrue(ex.headers().isEmpty());
+    }
+
+    @Test
+    public void testTruncationDoesNotSplitSurrogatePair() {
+        final int max = HttpUtil.MAX_ERROR_BODY_IN_MESSAGE;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < max - 1; i++) {
+            sb.append('a');
+        }
+        sb.append("😀tail");
+
+        final HttpResponseException ex = new HttpResponseException("http://localhost/x", 500, "ERR", null, sb.toString());
+        assertEquals("500: ERR. " + sb.substring(0, max - 1) + "... (truncated)", ex.getMessage());
+    }
 }

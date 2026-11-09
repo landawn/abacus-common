@@ -336,4 +336,12 @@ public class JodaInstantTypeTest extends TestBase {
         assertEquals(1700000000123L, type.valueOf(dateTime).getMillis());
         assertNull(type.valueOf((Object) null));
     }
+
+    @Test
+    public void testJodaInstantAppendNull() throws Exception {
+        final Type<org.joda.time.Instant> type = Type.of(org.joda.time.Instant.class);
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+    }
 }

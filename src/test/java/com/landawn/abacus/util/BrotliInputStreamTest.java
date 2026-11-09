@@ -1,6 +1,8 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -322,5 +324,31 @@ public class BrotliInputStreamTest extends TestBase {
         // Unlike a read there is no caller array to inspect, so not reporting them would discard them silently.
         Assertions.assertEquals(4, overruns.skip(5));
         Assertions.assertThrows(IllegalStateException.class, () -> overruns.skip(1));
+    }
+
+    private static final byte[] HELLO_BR2 = { 0x0b, 0x02, (byte) 0x80, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x03 };
+
+    @Test
+    public void testReadNullBufferThrowsNpe() throws IOException {
+        try (BrotliInputStream in = new BrotliInputStream(new ByteArrayInputStream(HELLO_BR2))) {
+            assertThrows(NullPointerException.class, () -> in.read(null, -1, 1));
+        }
+    }
+
+    @Test
+    public void testSkipWithoutBufferedBytes() throws IOException {
+        try (BrotliInputStream in = new BrotliInputStream(new ByteArrayInputStream(HELLO_BR2))) {
+            assertEquals(2, in.skip(2));
+            final byte[] rest = new byte[10];
+            final int n = in.read(rest, 0, rest.length);
+            assertEquals("llo", new String(rest, 0, n, StandardCharsets.US_ASCII));
+        }
+    }
+
+    @Test
+    public void testResetUnsupported() throws IOException {
+        try (BrotliInputStream in = new BrotliInputStream(new ByteArrayInputStream(HELLO_BR2))) {
+            assertThrows(IOException.class, in::reset);
+        }
     }
 }

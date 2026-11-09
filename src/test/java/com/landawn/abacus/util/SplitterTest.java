@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -648,4 +649,17 @@ public class SplitterTest extends AbstractTest {
     }
 
     // ---- perf review 2026-09-26 G071 end ----
+
+    @Test
+    public void testSplitToFloatAndShortArrays() {
+        assertArrayEquals(new float[] { 1.5f, 2f }, Splitter.with(',').splitToArray("1.5,2", float[].class));
+        assertArrayEquals(new short[] { 3, 4 }, Splitter.with(',').splitToArray("3,4", short[].class));
+    }
+
+    @Test
+    public void testMapSplitterStreamNextOnExhausted() {
+        final Iterator<Map.Entry<String, String>> it = Splitter.MapSplitter.with(",", "=").splitToStream("a=1").iterator();
+        it.next();
+        assertThrows(NoSuchElementException.class, it::next);
+    }
 }

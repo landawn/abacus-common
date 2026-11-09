@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,12 +13,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2078,4 +2082,130 @@ public class AvroParserTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02b G008 end ----
+
+    private static final Schema NAME_SCHEMA = new Schema.Parser()
+            .parse("{\"type\":\"record\",\"name\":\"NameRec\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+
+    private static final Schema LIST_AS_STRING_SCHEMA = new Schema.Parser()
+            .parse("{\"type\":\"record\",\"name\":\"ListRec\",\"fields\":[{\"name\":\"list\",\"type\":\"string\"}]}");
+
+    private final AvroParser parser2 = new AvroParser();
+
+    @TempDir
+    Path tempDir2;
+
+    public static class NameBean {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class ListBean {
+        private List<String> list;
+
+        public List<String> getList() {
+            return list;
+        }
+
+        public void setList(final List<String> list) {
+            this.list = list;
+        }
+    }
+
+    private static final class FailingOutputStream extends OutputStream {
+        @Override
+        public void write(final int b) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void flush() throws IOException {
+            throw new IOException("boom");
+        }
+    }
+
+    private static User user(final String name, final int number) {
+        final User u = new User();
+        u.setName(name);
+        u.setFavoriteNumber(number);
+        return u;
+    }
+
+    @Test
+    public void testSerializeToFailingStreams() {
+        assertThrows(UncheckedIOException.class, () -> parser2.serialize(user("a", 1), null, new FailingOutputStream()));
+        assertThrows(UncheckedIOException.class, () -> parser2.serialize(N.toList(user("a", 1), user("b", 2)), null, new FailingOutputStream()));
+        final NameBean bean = new NameBean();
+        bean.setName("x");
+        assertThrows(UncheckedIOException.class, () -> parser2.serialize(bean, AvroSerConfig.create().setSchema(NAME_SCHEMA), new FailingOutputStream()));
+    }
+
+    @Test
+    public void testSerializeToUnwritableFile() throws IOException {
+        final File blocker = tempDir2.resolve("blocker").toFile();
+        Files.writeString(blocker.toPath(), "x");
+        final File target = new File(blocker, "out.avro");
+        final NameBean bean = new NameBean();
+        bean.setName("x");
+        assertThrows(UncheckedIOException.class, () -> parser2.serialize(bean, AvroSerConfig.create().setSchema(NAME_SCHEMA), target));
+    }
+
+    @Test
+    public void testDeserializeSpecificRecordFromGarbageFails() {
+        final byte[] garbage = "not an avro container".getBytes(StandardCharsets.UTF_8);
+        assertThrows(UncheckedIOException.class, () -> parser2.deserialize(new ByteArrayInputStream(garbage), null, User.class));
+        assertThrows(UncheckedIOException.class,
+                () -> parser2.deserialize(new ByteArrayInputStream(garbage), AvroDeserConfig.create().setElementType(User.class), List.class));
+    }
+
+    @Test
+    public void testGenericRecordIsWrittenAsIs() {
+        final GenericRecord record = new GenericData.Record(NAME_SCHEMA);
+        record.put("name", "rec");
+        final String str = parser2.serialize(record, AvroSerConfig.create().setSchema(NAME_SCHEMA));
+        final NameBean bean = parser2.deserialize(str, AvroDeserConfig.create().setSchema(NAME_SCHEMA), NameBean.class);
+        assertEquals("rec", bean.getName());
+    }
+
+    @Test
+    public void testEmptyRecordFileReadsAsNullBean() {
+        final String str = parser2.serialize(new ArrayList<NameBean>(), AvroSerConfig.create().setSchema(NAME_SCHEMA));
+        assertNull(parser2.deserialize(str, AvroDeserConfig.create().setSchema(NAME_SCHEMA), NameBean.class));
+    }
+
+    @Test
+    public void testSpecificRecordsWrittenWithNonNullableArraySchema() {
+        final List<User> users = N.toList(user("a", 1), user("b", 2));
+        final String str = parser2.serialize(users, AvroSerConfig.create().setSchema(Schema.createArray(User.SCHEMA$)));
+        final List<User> restored = parser2.deserialize(str, AvroDeserConfig.create().setElementType(User.class), List.class);
+        assertEquals(2, restored.size());
+        assertEquals("a", restored.get(0).getName().toString());
+        assertEquals(Integer.valueOf(2), restored.get(1).getFavoriteNumber());
+    }
+
+    @Test
+    public void testScalarFieldIntoCollectionPropertyFails() {
+        final GenericRecord record = new GenericData.Record(LIST_AS_STRING_SCHEMA);
+        record.put("list", "scalar");
+        final String str = parser2.serialize(record, AvroSerConfig.create().setSchema(LIST_AS_STRING_SCHEMA));
+        assertThrows(IllegalArgumentException.class, () -> parser2.deserialize(str, AvroDeserConfig.create().setSchema(LIST_AS_STRING_SCHEMA), ListBean.class));
+    }
+
+    @Test
+    public void testChoosePropClassPrefersCompatibleAttributeType() {
+        assertSame(Integer.class, AbstractParser.choosePropClass(Number.class, Integer.class));
+        assertSame(Integer.class, AbstractParser.choosePropClass(null, Integer.class));
+        assertSame(Number.class, AbstractParser.choosePropClass(Number.class, String.class));
+    }
 }

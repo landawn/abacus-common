@@ -5,15 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -453,5 +456,96 @@ public class DataSourceUtilTest extends TestBase {
         doThrow(stmt3Failure).when(stmt3).close();
         assertSame(stmt3Failure, assertThrows(AssertionError.class, () -> DataSourceUtil.closeQuietly(stmt3, conn3)));
         verify(conn3).close();
+    }
+
+    /** Builds a JDBC proxy whose close() counts calls and optionally throws; getStatement/getConnection return the given objects. */
+    @SuppressWarnings("unchecked")
+    static <T> T jdbc(final Class<T> type, final Throwable closeFailure, final Object linked, final AtomicInteger closes) {
+        return (T) Proxy.newProxyInstance(DataSourceUtilTest.class.getClassLoader(), new Class<?>[] { type }, (proxy, method, args) -> {
+            switch (method.getName()) {
+                case "close":
+                    closes.incrementAndGet();
+                    if (closeFailure != null) {
+                        throw closeFailure;
+                    }
+                    return null;
+                case "getStatement":
+                case "getConnection":
+                    return linked;
+                case "hashCode":
+                    return System.identityHashCode(proxy);
+                case "equals":
+                    return proxy == args[0];
+                case "toString":
+                    return type.getSimpleName() + "Proxy";
+                case "isClosed":
+                    return false;
+                default:
+                    return null;
+            }
+        });
+    }
+
+    @Test
+    public void testCloseResultSetFlags() {
+        final AtomicInteger closes = new AtomicInteger();
+        DataSourceUtil.close((ResultSet) null, false, false);
+
+        final ResultSet rs = jdbc(ResultSet.class, null, null, closes);
+        DataSourceUtil.close(rs, false, false);
+        assertEquals(1, closes.get());
+
+        // getStatement() returns null: only the ResultSet is closed
+        DataSourceUtil.close(rs, true, true);
+        assertEquals(2, closes.get());
+
+        final SQLException failure = new SQLException("rs");
+        final ResultSet bad = jdbc(ResultSet.class, failure, null, closes);
+        final UncheckedSQLException ex = assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(bad, false, false));
+        assertSame(failure, ex.getCause());
+    }
+
+    @Test
+    public void testCloseStatementAndConnectionFailures() {
+        final AtomicInteger closes = new AtomicInteger();
+        final Statement stmt = jdbc(Statement.class, new SQLException("s"), null, closes);
+        assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(stmt));
+        final Connection conn = jdbc(Connection.class, new SQLException("c"), null, closes);
+        assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(conn));
+        assertEquals(2, closes.get());
+    }
+
+    @Test
+    public void testClosePairsAndTriples() {
+        final AtomicInteger closes = new AtomicInteger();
+        DataSourceUtil.close((ResultSet) null, (Statement) null);
+        DataSourceUtil.close((Statement) null, (Connection) null);
+
+        final RuntimeException rsFailure = new IllegalStateException("rs");
+        final ResultSet rs = jdbc(ResultSet.class, rsFailure, null, closes);
+        final Statement stmt = jdbc(Statement.class, new SQLException("s"), null, closes);
+        final RuntimeException thrown = assertThrows(IllegalStateException.class, () -> DataSourceUtil.close(rs, stmt));
+        assertSame(rsFailure, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+
+        final Connection conn = jdbc(Connection.class, new AssertionError("c"), null, closes);
+        final Statement okStmt = jdbc(Statement.class, null, null, closes);
+        assertThrows(AssertionError.class, () -> DataSourceUtil.close(okStmt, conn));
+
+        final ResultSet okRs = jdbc(ResultSet.class, null, null, closes);
+        final Connection badConn = jdbc(Connection.class, new SQLException("c"), null, closes);
+        assertThrows(UncheckedSQLException.class, () -> DataSourceUtil.close(okRs, okStmt, badConn));
+        assertTrue(closes.get() >= 7);
+    }
+
+    @Test
+    public void testCloseQuietlyResultSetFlags() {
+        final AtomicInteger closes = new AtomicInteger();
+        assertDoesNotThrow(() -> DataSourceUtil.closeQuietly((ResultSet) null, false, false));
+        final ResultSet rs = jdbc(ResultSet.class, null, null, closes);
+        DataSourceUtil.closeQuietly(rs, false, false);
+        DataSourceUtil.closeQuietly(rs, true, true);
+        assertEquals(2, closes.get());
+        assertThrows(IllegalArgumentException.class, () -> DataSourceUtil.closeQuietly(rs, false, true));
     }
 }

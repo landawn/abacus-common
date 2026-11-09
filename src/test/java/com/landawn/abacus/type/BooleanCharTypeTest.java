@@ -3,6 +3,7 @@ package com.landawn.abacus.type;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -329,4 +330,8 @@ public class BooleanCharTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertTrue(intType.isComparable());
     }
 
+    @Test
+    public void testBooleanCharValueOfNullObject() {
+        assertSame(Boolean.FALSE, new BooleanCharType().valueOf((Object) null));
+    }
 }

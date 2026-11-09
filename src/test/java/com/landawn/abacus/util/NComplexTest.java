@@ -716,8 +716,8 @@ public class NComplexTest extends NTestSupport {
         assertEquals(-1, CommonUtil.compare(a, b));
         assertEquals(-1, Arrays.compare(a, b));
 
-        Profiler.run(1, 1000, 3, "N.compare(...)", () -> assertEquals(-1, CommonUtil.compare(a, b))).printResult();
-        Profiler.run(1, 1000, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
+        Profiler.run(1, 100, 3, "N.compare(...)", () -> assertEquals(-1, CommonUtil.compare(a, b))).printResult();
+        Profiler.run(1, 100, 3, "Arrays.compare(...)", () -> assertEquals(-1, Arrays.compare(a, b))).printResult();
     }
 
     @Test

@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -592,5 +594,85 @@ public class MedianTest extends TestBase {
                 assertThrows(IllegalArgumentException.class, () -> Median.of((Collection<String>) null, (Comparator<String>) null)).getMessage());
         assertEquals("'comparator' cannot be null",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(Arrays.asList("a", "b"), (Comparator<String>) null)).getMessage());
+    }
+
+    @Test
+    public void testEmptyRangesRejected() {
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new short[] { 1, 2 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new long[] { 1, 2 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new float[] { 1, 2 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new double[] { 1, 2 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new char[] { 'a', 'b' }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new byte[] { 1, 2 }, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Median.of(new int[] { 1, 2 }, 1, 1));
+    }
+
+    @Test
+    public void testTwoElementRangesInDescendingOrder() {
+        assertEquals('a', Median.of(new char[] { 'z', 'b', 'a' }, 1, 3).left());
+        assertEquals((short) 1, Median.of(new short[] { 9, 2, 1 }, 1, 3).left());
+    }
+
+    @Test
+    public void testShortIteratorLimitAndFilterExhaustion() {
+        final ShortIterator limited = ShortIterator.of((short) 1, (short) 2).limit(1);
+        assertEquals((short) 1, limited.nextShort());
+        assertThrows(NoSuchElementException.class, limited::nextShort);
+
+        final ShortIterator filtered = ShortIterator.of((short) 1, (short) 2, (short) 3).filter(x -> x != 2);
+        assertEquals((short) 1, filtered.nextShort());
+        assertEquals((short) 3, filtered.nextShort());
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void testCharIteratorLimitAndFilterExhaustion() {
+        final CharIterator limited = CharIterator.of('a', 'b').limit(1);
+        assertEquals('a', limited.nextChar());
+        assertThrows(NoSuchElementException.class, limited::nextChar);
+
+        final CharIterator filtered = CharIterator.of('a', 'b', 'c').filter(x -> x != 'b');
+        assertEquals('a', filtered.nextChar());
+        assertEquals('c', filtered.nextChar());
+        assertFalse(filtered.hasNext());
+    }
+
+    @Test
+    public void testMultimapComputeIfPresentReturningSameCollection() {
+        final ListMultimap<String, Integer> mm = N.newListMultimap();
+        mm.put("a", 1);
+        mm.put("a", 2);
+        final List<Integer> before = mm.get("a");
+        final List<Integer> result = mm.computeIfPresent("a", (k, v) -> {
+            v.add(3);
+            return v;
+        });
+        assertTrue(result == before);
+        assertEquals(Arrays.asList(1, 2, 3), mm.get("a"));
+    }
+
+    @Test
+    public void testMultimapReplaceEntryInLinkedList() {
+        final ListMultimap<String, Integer> mm = N.newListMultimap(java.util.LinkedHashMap::new, LinkedList::new);
+        mm.put("a", 1);
+        mm.put("a", 2);
+        assertTrue(mm.replaceEntry("a", 2, 5));
+        assertFalse(mm.replaceEntry("a", 9, 5));
+        assertEquals(Arrays.asList(1, 5), mm.get("a"));
+    }
+
+    @Test
+    public void testMultimapReplaceEntryInDequeValueCollection() {
+        final Multimap<String, Integer, java.util.ArrayDeque<Integer>> mm = N.newMultimap(java.util.LinkedHashMap::new, java.util.ArrayDeque::new);
+        mm.put("a", 1);
+        mm.put("a", 2);
+        assertTrue(mm.replaceEntry("a", 1, 7));
+        assertEquals(Arrays.asList(2, 7), new java.util.ArrayList<>(mm.get("a")));
+
+        // ArrayDeque rejects null: the old value is restored and the failure reported
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> mm.replaceEntry("a", 2, null));
+        assertTrue(e.getCause() instanceof NullPointerException);
+        assertEquals(2, mm.get("a").size());
+        assertTrue(mm.get("a").contains(2));
     }
 }

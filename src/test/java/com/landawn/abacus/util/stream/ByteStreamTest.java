@@ -9,7 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.util.ByteIterator;
+import com.landawn.abacus.util.MergeResult;
+import com.landawn.abacus.util.function.ByteBiFunction;
 
 /** ByteStream general contracts. */
 public class ByteStreamTest extends ByteStreamTestSupport {
@@ -1058,4 +1063,101 @@ public class ByteStreamTest extends ByteStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    private static final ByteBiFunction<MergeResult> MIN_FIRST = (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+
+    @Test
+    public void testOfInputStreamNextAfterExhaustion() {
+        try (ByteStream s = ByteStream.of(new ByteArrayInputStream(new byte[] { 1, 2, 3 }), true)) {
+            final ByteIteratorEx iter = s.iteratorEx();
+            assertEquals(1, iter.nextByte());
+            assertEquals(2, iter.nextByte());
+            assertEquals(3, iter.nextByte());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::nextByte);
+        }
+    }
+
+    @Test
+    public void testRangeClosedZeroStep() {
+        assertThrows(IllegalArgumentException.class, () -> ByteStream.rangeClosed((byte) 1, (byte) 5, (byte) 0));
+    }
+
+    @Test
+    public void testRepeatIteratorEdges() {
+        final ByteIteratorEx iter = ByteStream.repeat((byte) 7, 3).iteratorEx();
+        iter.advance(0);
+        iter.advance(-2);
+        assertEquals(3, iter.count());
+
+        final ByteIteratorEx huge = ByteStream.repeat((byte) 7, Long.MAX_VALUE).iteratorEx();
+        assertThrows(IllegalStateException.class, huge::toArray);
+    }
+
+    @Test
+    public void testConcatEmptyInputs() {
+        assertEquals(0, ByteStream.concat(new ByteIterator[0]).count());
+        assertEquals(0, ByteStream.concat(new ByteStream[0]).count());
+        assertEquals(0, ByteStream.concat(Collections.<byte[]> emptyList()).count());
+        assertEquals(0, ByteStream.concat((java.util.Collection<ByteStream>) Collections.<ByteStream> emptySet()).count());
+        assertEquals(0, ByteStream.concatIterators(Collections.<ByteIterator> emptyList()).count());
+    }
+
+    @Test
+    public void testMergeIteratorsNextAfterExhaustion() {
+        try (ByteStream s = ByteStream.merge(ByteIterator.of((byte) 1, (byte) 4), ByteIterator.of((byte) 2), MIN_FIRST)) {
+            final ByteIteratorEx iter = s.iteratorEx();
+            assertEquals(1, iter.nextByte());
+            assertEquals(2, iter.nextByte());
+            assertEquals(4, iter.nextByte());
+            assertThrows(NoSuchElementException.class, iter::nextByte);
+        }
+    }
+
+    @Test
+    public void testMergeCollectionOfTwo() {
+        final List<ByteStream> streams = Arrays.asList(ByteStream.of((byte) 1, (byte) 3), ByteStream.of((byte) 2, (byte) 4));
+        assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ByteStream.merge(streams, MIN_FIRST).toArray());
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        final AtomicInteger closed = new AtomicInteger();
+        final ArrayByteStream s = new ArrayByteStream(new byte[] { 1, 2 }, new ArrayList<>());
+        s.onClose(closed::incrementAndGet);
+        assertArrayEquals(new byte[] { 1, 2 }, s.toArray());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testStepIteratorAdvanceNonPositive() {
+        final ByteIteratorEx iter = new ArrayByteStream(new byte[] { 1, 2, 3, 4, 5 }).step(2).iteratorEx();
+        iter.advance(0);
+        iter.advance(-1);
+        assertEquals(1, iter.nextByte());
+        assertEquals(3, iter.nextByte());
+        assertEquals(5, iter.nextByte());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        final byte[] result = new ArrayByteStream(new byte[] { 1, 2, 3 }).flatMap(b -> b == 2 ? null : ByteStream.of(b, b)).toArray();
+        assertArrayEquals(new byte[] { 1, 1, 3, 3 }, result);
+    }
+
+    @Test
+    public void testParallelFlatMapArray() {
+        final byte[] result = new ArrayByteStream(new byte[] { 1, 2, 3 }).parallel(2).flatMapArray(b -> new byte[] { b, b }).sorted().toArray();
+        assertArrayEquals(new byte[] { 1, 1, 2, 2, 3, 3 }, result);
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        final byte[] sorted = { 1, 3, 5, 7 };
+        assertEquals(1, new ArrayByteStream(sorted, true, null).min().get());
+        assertEquals(7, new ArrayByteStream(sorted, true, null).max().get());
+        assertEquals(5, new ArrayByteStream(sorted, true, null).kthLargest(2).get());
+        assertTrue(new ArrayByteStream(sorted, true, null).kthLargest(5).isEmpty());
+    }
 }

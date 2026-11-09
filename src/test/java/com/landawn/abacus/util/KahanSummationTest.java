@@ -1,5 +1,8 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -230,5 +233,31 @@ public class KahanSummationTest extends TestBase {
 
         final KahanSummation cancelFirst = KahanSummation.of(Double.MAX_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE);
         Assertions.assertEquals(Double.MAX_VALUE, cancelFirst.sum());
+    }
+
+    @Test
+    public void testCombineOverflowedWithOrdinaryFinite() {
+        final KahanSummation a = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE);
+        final KahanSummation b = KahanSummation.of(Double.MAX_VALUE);
+        a.combine(b);
+        assertEquals(3, a.count());
+        assertEquals(Double.MAX_VALUE, a.average().getAsDouble(), Double.MAX_VALUE * 1e-12);
+    }
+
+    @Test
+    public void testCombineWithNonFiniteOther() {
+        final KahanSummation a = KahanSummation.of(1.0);
+        a.combine(KahanSummation.of(Double.POSITIVE_INFINITY));
+        assertEquals(2, a.count());
+        assertEquals(Double.POSITIVE_INFINITY, a.average().getAsDouble());
+    }
+
+    @Test
+    public void testCompensationOverflowWhileSimpleSumFinite() {
+        final double p = Math.scalb(1.0, 969);
+        final KahanSummation a = KahanSummation.of(Double.MAX_VALUE, p, p);
+        final double avg = a.average().getAsDouble();
+        assertTrue(Double.isFinite(avg));
+        assertEquals(Double.MAX_VALUE / 3, avg, Double.MAX_VALUE * 1e-12);
     }
 }

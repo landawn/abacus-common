@@ -6,33 +6,46 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.util.stream.Stream;
 
 public class IOUtilTest extends IOUtilTestSupport {
 
@@ -3511,4 +3524,286 @@ public class IOUtilTest extends IOUtilTestSupport {
     }
 
     // ---- deep review 2026-10-26 verify G121 end ----
+
+    @TempDir
+    Path tempDir;
+
+    private static final class FailingInputStream extends InputStream {
+        boolean closed;
+
+        @Override
+        public int read() throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void close() {
+            closed = true;
+        }
+    }
+
+    private static final class FailingReader extends Reader {
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    /** Returns 0 from every bulk read, -1 from single-byte reads. */
+    private static final class ZeroInputStream extends InputStream {
+        @Override
+        public int read() {
+            return -1;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) {
+            return 0;
+        }
+    }
+
+    /** Returns 0 from every bulk read, -1 from single-char reads. */
+    private static final class ZeroReader extends Reader {
+        @Override
+        public int read() {
+            return -1;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) {
+            return 0;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    private static final class FailingOutputStream extends OutputStream {
+        @Override
+        public void write(int b) throws IOException {
+            throw new IOException("boom");
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            throw new IOException("boom");
+        }
+    }
+
+    /** A charset that is not from java.base, delegating to UTF-8. */
+    private static final class CustomUtf8 extends Charset {
+        CustomUtf8() {
+            super("x-custom-utf8-gap", new String[0]);
+        }
+
+        @Override
+        public boolean contains(Charset cs) {
+            return cs instanceof CustomUtf8;
+        }
+
+        @Override
+        public CharsetDecoder newDecoder() {
+            return StandardCharsets.UTF_8.newDecoder();
+        }
+
+        @Override
+        public CharsetEncoder newEncoder() {
+            return StandardCharsets.UTF_8.newEncoder();
+        }
+    }
+
+    @Test
+    public void testReadBytesInputStreamFailureWrapped() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.readBytes(new FailingInputStream(), 0, 10));
+    }
+
+    @Test
+    public void testReadLinesReaderFailureWrapped() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.readLines(new FailingReader(), 0, 3));
+    }
+
+    @Test
+    public void testReadLastLineReaderFailureWrapped() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.readLastLine(new FailingReader()));
+    }
+
+    @Test
+    public void testReadLineReaderFailureWrapped() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.readLine(new FailingReader(), 1));
+    }
+
+    @Test
+    public void testZeroProgressReadsTreatedAsEnd() {
+        assertEquals(0, IOUtil.readAllBytes(new ZeroInputStream()).length);
+        assertEquals(0, IOUtil.readChars(new ZeroReader(), 0, 10).length);
+        assertEquals("", IOUtil.readToString(new ZeroReader(), 0, 10));
+    }
+
+    @Test
+    public void testReadAllToStringWithNonJavaBaseCharset() {
+        final String text = "hello é world";
+        final String result = IOUtil.readAllToString(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)), new CustomUtf8());
+        assertEquals(text, result);
+    }
+
+    @Test
+    public void testWriteLineNullObject() throws IOException {
+        final StringWriter sw = new StringWriter();
+        IOUtil.writeLine(null, sw, true);
+        assertEquals("null\n", sw.toString());
+    }
+
+    @Test
+    public void testWriteLinesIteratorFailurePropagates() {
+        final Iterable<String> lines = new ArrayList<String>(Arrays.asList("a")) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Iterator<String> iterator() {
+                throw new IllegalStateException("no iterator");
+            }
+        };
+        final StringWriter sw = new StringWriter();
+        assertThrows(IllegalStateException.class, () -> IOUtil.writeLines(lines, sw, true));
+        assertEquals("", sw.toString());
+    }
+
+    @Test
+    public void testWriteEmptyCharArray() throws IOException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        IOUtil.write(new char[0], bos);
+        assertEquals(0, bos.size());
+
+        final StringWriter sw = new StringWriter();
+        IOUtil.write(new char[0], sw);
+        assertEquals("", sw.toString());
+    }
+
+    @Test
+    public void testNewFileOutputStreamUnderRegularFileFails() throws IOException {
+        final File plain = Files.write(tempDir.resolve("plain.txt"), new byte[] { 1 }).toFile();
+        final File child = new File(plain, "child.txt");
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileOutputStream(child, true));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileWriter(child, StandardCharsets.UTF_8));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newFileWriter(child, StandardCharsets.UTF_8, true));
+    }
+
+    @Test
+    public void testCompressionStreamConstructionFailures() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newSnappyInputStream(new FailingInputStream()));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newGZIPInputStream(new ByteArrayInputStream(new byte[] { 1, 2, 3, 4 }), 512));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newGZIPOutputStream(new FailingOutputStream()));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newGZIPOutputStream(new FailingOutputStream(), 512));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.newBrotliInputStream(new FailingInputStream()));
+    }
+
+    @Test
+    public void testContentEqualsStreamFailuresWrapped() {
+        assertThrows(UncheckedIOException.class, () -> IOUtil.contentEquals(new FailingInputStream(), new ByteArrayInputStream(new byte[] { 1 })));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.contentEquals(new FailingReader(), new StringReader("a")));
+        assertThrows(UncheckedIOException.class, () -> IOUtil.contentEqualsIgnoreEOL(new FailingReader(), new StringReader("a")));
+    }
+
+    @Test
+    public void testContentEqualsZeroProgressStreams() {
+        assertTrue(IOUtil.contentEquals(new ZeroInputStream(), new ByteArrayInputStream(new byte[0])));
+        assertFalse(IOUtil.contentEquals(new ZeroInputStream(), new ByteArrayInputStream(new byte[] { 1 })));
+        assertTrue(IOUtil.contentEquals(new ZeroReader(), new StringReader("")));
+        assertFalse(IOUtil.contentEquals(new ZeroReader(), new StringReader("x")));
+    }
+
+    @Test
+    public void testCloseAllQuietlyCollectsErrors() {
+        final Error first = new Error("first");
+        final Error second = new Error("second");
+        final AutoCloseable c1 = () -> {
+            throw first;
+        };
+        final AutoCloseable c2 = () -> {
+            throw second;
+        };
+        final Error thrown = assertThrows(Error.class, () -> IOUtil.closeAllQuietly(Arrays.asList(c1, c2)));
+        assertSame(first, thrown);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertSame(second, thrown.getSuppressed()[0]);
+    }
+
+    @Test
+    public void testTransferFileChannelsSourceAtEnd() throws IOException {
+        final Path src = tempDir.resolve("src.bin");
+        final Path dst = tempDir.resolve("dst.bin");
+        Files.write(src, new byte[] { 1, 2, 3 });
+
+        try (FileChannel in = FileChannel.open(src, StandardOpenOption.READ);
+             FileChannel out = FileChannel.open(dst, StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+            in.position(3);
+            assertEquals(0, IOUtil.transfer(in, out));
+        }
+
+        assertEquals(0, Files.size(dst));
+    }
+
+    @Test
+    public void testForEachLineInputStreamFailureDoesNotCloseCaller() {
+        final FailingInputStream is = new FailingInputStream();
+        final List<String> seen = new ArrayList<>();
+        assertThrows(UncheckedIOException.class, () -> IOUtil.forEachLine(is, seen::add));
+        assertFalse(is.closed);
+        assertTrue(seen.isEmpty());
+    }
+
+    @Test
+    public void testWalkIteratorExhausted() throws IOException {
+        final File dir = Files.createDirectory(tempDir.resolve("walkme")).toFile();
+        Files.write(new File(dir, "a.txt").toPath(), new byte[] { 1 });
+
+        try (Stream<File> s = IOUtil.walk(dir, false, false)) {
+            final Iterator<File> iter = s.iterator();
+            assertTrue(iter.hasNext());
+            assertEquals("a.txt", iter.next().getName());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testCloseHttpUrlConnectionDisconnects() throws IOException {
+        final java.net.URLConnection conn = new java.net.URL("http://localhost:1/never-connected").openConnection();
+        assertTrue(conn instanceof java.net.HttpURLConnection);
+        IOUtil.close(conn);
+        IOUtil.close((java.net.URLConnection) null);
+    }
+
+    @Test
+    public void testIsSymbolicLinkOrJunctionInvalidPath() {
+        assertFalse(IOUtil.isSymbolicLinkOrJunction(new File(tempDir.toFile(), "bad" + (char) 0 + "name")));
+    }
+
+    @Test
+    public void testContentEqualsFileEdgeCases() throws IOException {
+        final File a = Files.write(tempDir.resolve("a.txt"), "x\n".getBytes(StandardCharsets.UTF_8)).toFile();
+        final File missing = tempDir.resolve("missing.txt").toFile();
+        final File dir = tempDir.toFile();
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEquals(a, dir));
+        assertFalse(IOUtil.contentEquals(a, missing));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.contentEqualsIgnoreEOL(a, dir, "UTF-8"));
+        assertFalse(IOUtil.contentEqualsIgnoreEOL(a, missing, "UTF-8"));
+    }
+
+    @Test
+    public void testCheckFileExistsRejectsDirectory() {
+        final File dir = tempDir.toFile();
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.checkFileExists(dir, false, "file"));
+    }
 }

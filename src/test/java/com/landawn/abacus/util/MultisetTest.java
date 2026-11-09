@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.DisplayName;
@@ -462,5 +463,16 @@ public class MultisetTest extends MultisetTestSupport {
         assertEquals("a", keys.get(0));
         assertEquals("m", keys.get(1));
         assertEquals("z", keys.get(2));
+    }
+
+    @Test
+    public void testMultisetEntrySetContains() {
+        final Multiset<String> ms = new Multiset<>();
+        ms.add("a", 2);
+        final Set<Multiset.Entry<String>> entries = ms.entrySet();
+        assertTrue(entries.contains(new Multiset.ImmutableEntry<>("a", 2)));
+        assertFalse(entries.contains(new Multiset.ImmutableEntry<>("a", 1)));
+        assertFalse(entries.contains(new Multiset.ImmutableEntry<>("missing", 1)));
+        assertFalse(entries.contains("a"));
     }
 }

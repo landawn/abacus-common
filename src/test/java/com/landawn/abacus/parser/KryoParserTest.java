@@ -15,7 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -2081,4 +2083,55 @@ public class KryoParserTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 G132 end ----
+
+    private final KryoParser parser2 = ParserFactory.createKryoParser();
+
+    /** Answers every bulk read with 0 bytes, so the reader must fall back to single-byte reads. */
+    private static final class ZeroBulkReadInputStream extends FilterInputStream {
+        ZeroBulkReadInputStream(final InputStream in) {
+            super(in);
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) {
+            return 0;
+        }
+    }
+
+    @Test
+    public void testDeserializeFromStreamReturningZeroForBulkReads() {
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser2.serialize(new java.util.ArrayList<>(List.of("a", "bc", 3)), null, os);
+
+        final List<?> result = parser2.deserialize(new ZeroBulkReadInputStream(new ByteArrayInputStream(os.toByteArray())), null, java.util.ArrayList.class);
+        assertEquals(List.of("a", "bc", 3), result);
+    }
+
+    @Test
+    public void testDeserializeFromEmptyStreamReturningZeroForBulkReads() {
+        assertThrows(com.esotericsoftware.kryo.KryoException.class,
+                () -> parser2.deserialize(new ZeroBulkReadInputStream(new ByteArrayInputStream(new byte[0])), null, List.class));
+    }
+
+    @Test
+    public void testRecycleIgnoresNullAndOversizedBuffers() throws IOException {
+        KryoParser.recycle((Input) null);
+        KryoParser.recycle(new Output(8192 * 4));
+        KryoParser.recycle(new Input(8192 * 4));
+
+        final Output out = KryoParser.createOutput();
+        try {
+            assertNotNull(out.getBuffer());
+            assertTrue(out.getBuffer().length <= 8192);
+        } finally {
+            KryoParser.recycle(out);
+        }
+
+        final Input in = KryoParser.createInput();
+        try {
+            assertTrue(in.getBuffer() == null || in.getBuffer().length <= 8192);
+        } finally {
+            KryoParser.recycle(in);
+        }
+    }
 }

@@ -372,4 +372,11 @@ public class BooleanIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0]);
         assertThrows(IllegalArgumentException.class, () -> BooleanIterator.of(true).foreachIndexed(null));
     }
+
+    @Test
+    public void testLimitNextBeyondLimit() {
+        final BooleanIterator it = BooleanIterator.of(true, false, true).limit(1);
+        assertTrue(it.nextBoolean());
+        assertThrows(NoSuchElementException.class, it::nextBoolean);
+    }
 }

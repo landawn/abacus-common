@@ -27,7 +27,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -1546,4 +1549,575 @@ public class StringsTest extends StringsTestSupport {
 
     // ---- deep review 2026-11-02b G079 end ----
 
+    private static final String PAIR = "\uD83D\uDE00";
+
+    private static String repeat2(final char ch, final int n) {
+        final char[] a = new char[n];
+        Arrays.fill(a, ch);
+        return new String(a);
+    }
+
+    // ---- URL validation ----
+
+    @Test
+    public void testIsValidUrlFileAndServerAuthority() {
+        assertTrue(Strings.isValidUrl("file://localhost/etc/hosts"));
+        assertTrue(Strings.isValidUrl("file:///etc/hosts"));
+        assertFalse(Strings.isValidUrl("file://localhost"));
+        assertFalse(Strings.isValidUrl("file://C:/path"));
+        assertFalse(Strings.isValidUrl("file://a_b/path"));
+        assertFalse(Strings.isValidUrl("http://a_b/path"));
+        assertTrue(Strings.isValidUrl("http://example.com:8080/x"));
+    }
+
+    // ---- case conversion ----
+
+    @Test
+    public void testDelimitedCaseUnicodeSeparatorRuns() {
+        assertEquals("\u00E9_a", Strings.toSnakeCase("\u00E9__a"));
+        assertEquals("\u00E9_a", Strings.toSnakeCase("_\u00E9_ -a_"));
+        assertEquals("\u00C9_A", Strings.toScreamingSnakeCase("\u00E9-a"));
+        assertEquals("\u00E9-a", Strings.toKebabCase("\u00E9 a"));
+        assertEquals("\u00E9_a", Strings.toSnakeCase("\u00E9.a", '.'));
+        assertEquals("\u00C9_A", Strings.toScreamingSnakeCase("\u00E9.a", '.'));
+        assertEquals("\u00C9_A", Strings.toScreamingSnakeCase("\u00E9_a", '_'));
+        assertEquals("\u00C9_A", Strings.toScreamingSnakeCase("\u00E9-a", '-'));
+        assertEquals("\u00E9-a", Strings.toKebabCase("\u00E9.a", '.'));
+    }
+
+    @Test
+    public void testCamelCaseUnicode() {
+        assertEquals("\u00E9A", Strings.toCamelCase("\u00E9__a"));
+        assertEquals("\u00E9A", Strings.toCamelCase("__\u00E9 a"));
+        assertEquals("\u00C9A", Strings.toPascalCase("\u00E9-a"));
+    }
+
+    @Test
+    public void testSwapCaseLongUnicodeUsesBoundedCache() {
+        final StringBuilder sb = new StringBuilder();
+        final StringBuilder expected = new StringBuilder();
+        for (int i = 0; i < 300; i++) {
+            final char upper = (char) ('\u0391' + (i % 17));
+            sb.append(upper);
+            expected.append(Character.toLowerCase(upper));
+        }
+        assertEquals(expected.toString(), Strings.swapCase(sb.toString()));
+    }
+
+    @Test
+    public void testUncapitalizeNonAsciiAlreadyLower() {
+        final String s = "\u00E9clair";
+        assertSame(s, Strings.uncapitalize(s));
+        assertEquals("\u00E9clair", Strings.uncapitalize("\u00C9clair"));
+    }
+
+    @Test
+    public void testCapitalizeWordsFullyNonAsciiNoExclusions() {
+        assertEquals("\u00C9lan Vital", Strings.capitalizeWordsFully("\u00E9LAN vITAL", " ", null));
+        assertEquals("\u00C9lan of Vital", Strings.capitalizeWordsFully("\u00E9LAN OF vITAL", " ", Arrays.asList(null, "of")));
+    }
+
+    // ---- replace ----
+
+    @Test
+    public void testReplaceSameTargetAndReplacement() {
+        final String s = "abcabc";
+        assertSame(s, Strings.replaceAll(s, "b", "b"));
+        assertEquals("aXcaXc", Strings.replaceAllIgnoreCase(s, "B", "X"));
+    }
+
+    // ---- split ----
+
+    @Test
+    public void testSplitEmptyAndNull() {
+        assertArrayEquals(new String[0], Strings.split("", ',', 2, true));
+        assertArrayEquals(new String[0], Strings.splitOnWhitespace("", true));
+        assertArrayEquals(new String[0], Strings.splitOnWhitespacePreserveAllTokens(null, true));
+        assertArrayEquals(new String[] { "" }, Strings.splitOnWhitespacePreserveAllTokens("", true));
+        assertArrayEquals(new String[] { "" }, Strings.splitOnWhitespacePreserveAllTokens("", 2));
+        assertArrayEquals(new String[0], Strings.splitOnWhitespacePreserveAllTokens(null, 2, true));
+        assertArrayEquals(new String[0], Strings.splitPreserveAllTokens(null, ','));
+        assertArrayEquals(new String[] { "" }, Strings.splitPreserveAllTokens("", ','));
+        assertArrayEquals(new String[0], Strings.splitPreserveAllTokens(null, ",,"));
+        assertArrayEquals(new String[] { "" }, Strings.splitPreserveAllTokens("", ",,"));
+        assertArrayEquals(new String[0], Strings.split(null, ','));
+        assertArrayEquals(new String[0], Strings.split("", ",,"));
+    }
+
+    @Test
+    public void testSplitMaxOne() {
+        assertArrayEquals(new String[0], Strings.split(",,", ',', 1));
+        assertArrayEquals(new String[] { ",," }, Strings.splitPreserveAllTokens(",,", ',', 1, false));
+        assertArrayEquals(new String[0], Strings.split("ab", "ab", 1));
+        assertArrayEquals(new String[0], Strings.splitOnWhitespace("   ", 1));
+        assertArrayEquals(new String[] { "   " }, Strings.splitOnWhitespacePreserveAllTokens("   ", 1));
+    }
+
+    @Test
+    public void testSplitOnWhitespaceMax() {
+        assertArrayEquals(new String[] { "a", "b  c" }, Strings.splitOnWhitespace("a   b  c", 2));
+        assertArrayEquals(new String[] { "a" }, Strings.splitOnWhitespace("a   ", 2));
+        assertArrayEquals(new String[] { "a", "" }, Strings.splitOnWhitespacePreserveAllTokens("a ", 2));
+        assertArrayEquals(new String[] { "a", "" }, Strings.splitOnWhitespacePreserveAllTokens("a ", 3));
+    }
+
+    @Test
+    public void testSplitToLines() {
+        assertArrayEquals(new String[] { "" }, Strings.splitToLines("", true, false));
+        assertArrayEquals(new String[0], Strings.splitToLines("", true, true));
+        assertArrayEquals(new String[] { "a", "b", "c" }, Strings.splitToLines(" a \r\n b\r c ", true, false));
+        assertArrayEquals(new String[] { "a", "" }, Strings.splitToLines("a\r", true, false));
+    }
+
+    // ---- *Each no-ops ----
+
+    @Test
+    public void testEachMethodsOnEmptyArrays() {
+        final String[] empty = new String[0];
+        Strings.trimEach(empty);
+        Strings.stripEach(empty);
+        Strings.stripAccentsEach(empty);
+        Strings.chompEach(empty);
+        Strings.chopEach(empty);
+        Strings.truncateEach(empty, 2);
+        Strings.truncateEach(empty, 1, 2);
+        Strings.trimEach((String[]) null);
+        assertEquals(0, empty.length);
+
+        final String[] a = { " x ", "y\n" };
+        Strings.trimEach(a);
+        assertArrayEquals(new String[] { "x", "y" }, a);
+    }
+
+    // ---- chomp/chop/truncate/unwrap ----
+
+    @Test
+    public void testChompChopTruncate() {
+        assertEquals("a", Strings.chomp("a\n"));
+        assertEquals("ab", Strings.chomp("ab"));
+        assertEquals("a", Strings.chop("ab"));
+        assertEquals("a", Strings.chop("a\r\n"));
+        assertEquals("", Strings.truncate("a" + PAIR, 2, 5));
+        assertEquals("", Strings.truncate("abc", 1, 0));
+        assertEquals("", Strings.truncate("abc", 3, 2));
+    }
+
+    @Test
+    public void testUnwrap2() {
+        assertEquals("", Strings.unwrap("", "[", "]"));
+        assertEquals("b", Strings.unwrap("[b]", "[", "]"));
+        assertEquals("[b", Strings.unwrap("[b", "[", "]"));
+        assertEquals("[]", Strings.unwrap("[]", "[]", "]"));
+    }
+
+    @Test
+    public void testIsAsciiControl() {
+        assertTrue(Strings.isAsciiControl((char) 127));
+        assertTrue(Strings.isAsciiControl('\t'));
+        assertFalse(Strings.isAsciiControl('a'));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testIsIntegerDeprecated() {
+        assertTrue(Strings.isInteger("-123"));
+        assertFalse(Strings.isInteger("12a"));
+    }
+
+    // ---- indexOf family ----
+
+    @Test
+    public void testMaxIndexOfAllAndMinLastIndexOfAllHighChars() {
+        final String s = "\u4E2D" + repeat2('x', 300) + "abcdefghijklmnopq" + "\u4E2D";
+        final char[] values = "abcdefghijklmnopq".toCharArray();
+        assertEquals(s.indexOf('q'), Strings.maxIndexOfAll(s, 0, values));
+        assertEquals(s.lastIndexOf('a'), Strings.minLastIndexOfAll(s, s.length(), values));
+    }
+
+    @Test
+    public void testContainsAllCharsEarlyExit() {
+        final char[] values = "abcdefghijklmnopq".toCharArray();
+        assertTrue(Strings.containsAll("qponmlkjihgfedcba" + repeat2('z', 300), values));
+        assertFalse(Strings.containsAll("qponmlkjihgfedcb" + repeat2('z', 300), values));
+    }
+
+    @Test
+    public void testContainsAllNoneIgnoreCaseEmptyValues() {
+        assertTrue(Strings.containsAllIgnoreCase("abc"));
+        assertTrue(Strings.containsAllIgnoreCase("abc", new String[0]));
+        assertTrue(Strings.containsNoneIgnoreCase("abc"));
+        assertTrue(Strings.containsNoneIgnoreCase(null, new String[0]));
+    }
+
+    @Test
+    public void testCommonPrefixSuffixSurrogates() {
+        assertEquals("", Strings.commonPrefix("\uD83D\uDE00", "\uD83D\uDE01"));
+        assertEquals("", Strings.commonPrefix("\uD83D\uDE00", "\uD83D\uDE01", "\uD83D\uDE02"));
+        assertEquals("a", Strings.commonPrefix("a\uD83D\uDE00", "a\uD83D\uDE01", "a\uD83D\uDE02"));
+        assertEquals("a", Strings.commonPrefix("a\uD83D\uDE00", "a\uD83D\uDE01"));
+        assertEquals("", Strings.commonSuffix("\uD83D\uDE00", "\uD83C\uDE00"));
+        assertEquals("", Strings.commonSuffix("\uD83D\uDE00", "\uD83C\uDE00", "\uD83E\uDE00"));
+        assertEquals("a", Strings.commonSuffix("\uD83D\uDE00a", "\uD83C\uDE00a", "\uD83E\uDE00a"));
+        assertEquals("a", Strings.commonSuffix("\uD83D\uDE00a", "\uD83C\uDE00a"));
+    }
+
+    // ---- substrings ----
+
+    @Test
+    public void testSubstringIgnoreCaseEmptyDelimiters() {
+        assertEquals("", Strings.substringAfterLastIgnoreCase("abc", ""));
+        assertEquals("abc", Strings.substringBeforeLastIgnoreCase("abc", ""));
+    }
+
+    @Test
+    public void testSubstringBetweenIndexForms() {
+        assertNull(Strings.substringBetween("abcd", "bc", 2));
+        assertEquals("", Strings.substringBetween("abcd", "bc", 3));
+        assertNull(Strings.substringBetween("abcd", 2, i -> 1));
+        assertNull(Strings.substringBetween("abcd", 2, i -> -1));
+        assertEquals("c", Strings.substringBetween("abcd", 1, i -> i + 2));
+        assertEquals("bc", StrUtil.substringBetween("abcd", 'a', 3).orElse(null));
+        assertFalse(StrUtil.substringBetween("abcd", 'x', 3).isPresent());
+        assertEquals("c", StrUtil.substringBetween("abcd", 1, i -> i + 2).orElse(null));
+        assertFalse(StrUtil.substringBetween("abcd", 2, i -> 1).isPresent());
+    }
+
+    @Test
+    public void testReplaceRange() {
+        final String s = "abc";
+        assertSame(s, Strings.replaceRange(s, 1, 1, ""));
+        assertSame(s, Strings.replaceRange(s, 1, 1, null));
+        assertEquals("", Strings.replaceRange("", 0, 0, null));
+        assertEquals("x", Strings.replaceRange("", 0, 0, "x"));
+    }
+
+    // ---- join ----
+
+    @Test
+    public void testJoinPrimitiveArraysEmptyRangesAndEmptyDelimiter() {
+        assertEquals("]", Strings.join(new char[] { 'a' }, 0, 0, ",", "", "]"));
+        assertEquals("[", Strings.join(new char[] { 'a' }, 0, 0, ",", "[", ""));
+        assertEquals("[]", Strings.join(new char[] { 'a' }, 0, 0, ",", "[", "]"));
+        assertEquals("", Strings.join(new char[0], 0, 0, ",", "", ""));
+
+        assertEquals("]", Strings.join(new byte[] { 1 }, 0, 0, ",", null, "]"));
+        assertEquals("[", Strings.join(new byte[] { 1 }, 0, 0, ",", "[", null));
+        assertEquals("", Strings.join(new byte[0], 0, 0, ",", null, null));
+
+        assertEquals("]", Strings.join(new short[] { 1 }, 0, 0, ",", null, "]"));
+        assertEquals("[", Strings.join(new short[] { 1 }, 0, 0, ",", "[", null));
+        assertEquals("", Strings.join(new short[0], 0, 0, ",", null, null));
+        assertEquals("[12]", Strings.join(new short[] { 1, 2 }, 0, 2, "", "[", "]"));
+
+        assertEquals("[", Strings.join(new int[] { 1 }, 0, 0, ",", "[", null));
+        assertEquals("]", Strings.join(new long[] { 1 }, 0, 0, ",", null, "]"));
+        assertEquals("[", Strings.join(new long[] { 1 }, 0, 0, ",", "[", null));
+        assertEquals("", Strings.join(new long[0], 0, 0, ",", null, null));
+
+        assertEquals("[", Strings.join(new float[] { 1 }, 0, 0, ",", "[", null));
+        assertEquals("[1.02.5]", Strings.join(new float[] { 1f, 2.5f }, 0, 2, "", "[", "]"));
+
+        assertEquals("]", Strings.join(new double[] { 1 }, 0, 0, ",", null, "]"));
+        assertEquals("", Strings.join(new double[0], 0, 0, ",", null, null));
+        assertEquals("[1.02.5]", Strings.join(new double[] { 1d, 2.5d }, 0, 2, "", "[", "]"));
+
+        assertEquals("7", Strings.join(new int[] { 7 }, 0, 1, ",", "", ""));
+        assertEquals("[7]", Strings.join(new int[] { 7 }, 0, 1, ",", "[", "]"));
+    }
+
+    @Test
+    public void testJoinEntriesEmpty() {
+        assertEquals("", Strings.joinEntries(Collections.emptyMap(), ",", "="));
+        final Map<String, Integer> m = new LinkedHashMap<>();
+        m.put("a", 1);
+        assertEquals("]", Strings.joinEntries(m, 0, 0, ",", "=", null, "]"));
+        assertEquals("[", Strings.joinEntries(m, 0, 0, ",", "=", "[", null));
+        assertEquals("", Strings.joinEntries(m, 0, 0, ",", "=", null, null));
+        assertEquals("]", Strings.joinEntries(Collections.<String> emptyList(), ",", "=", null, "]", false, Fn.identity(), Fn.identity()));
+        assertEquals("[", Strings.joinEntries(Collections.<String> emptyList(), ",", "=", "[", null, false, Fn.identity(), Fn.identity()));
+        assertEquals("", Strings.joinEntries(Collections.<String> emptyList(), ",", "=", null, null, false, Fn.identity(), Fn.identity()));
+    }
+
+    // ---- base64 structure ----
+
+    @Test
+    public void testBase64Structure() {
+        assertFalse(Strings.isBase64("QQ=A".getBytes(StandardCharsets.US_ASCII)));
+        assertFalse(Strings.isBase64("QQ=A"));
+        assertFalse(Strings.isBase64Mime("QQ= ="));
+        assertFalse(Strings.isBase64Mime("QQ= =".getBytes(StandardCharsets.US_ASCII)));
+        assertTrue(Strings.isBase64Mime("QUE= "));
+        assertTrue(Strings.isBase64Mime("QUE= ".getBytes(StandardCharsets.US_ASCII)));
+        assertFalse(Strings.isBase64("QQ==="));
+        assertFalse(Strings.isBase64("QQ===".getBytes(StandardCharsets.US_ASCII)));
+        assertFalse(Strings.isBase64("QQ="));
+    }
+
+    @Test
+    public void testParseUrlQueryToMultimapWithCharset() {
+        final ListMultimap<String, String> m = Strings.parseUrlQueryToMultimap("a=1&a=2&b=%C3%A9", StandardCharsets.UTF_8);
+        assertEquals(Arrays.asList("1", "2"), m.get("a"));
+        assertEquals(Collections.singletonList("\u00E9"), m.get("b"));
+    }
+
+    // ---- token search (ignore case) ----
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseUnpairedSurrogateToken() {
+        final String token = "ABCDEFGHIJKLMNO\uD800"; // 16 chars, unpaired surrogate, code point count == length
+        final String str = repeat2('y', 300) + ",abcdefghijklmno\uD800,z";
+        assertEquals(301, StrUtil.indexOfTokenIgnoreCase(str, token, ","));
+        assertEquals(301, StrUtil.lastIndexOfTokenIgnoreCase(str, token, ","));
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(repeat2('y', 300) + ",abcdefghijklmno\uD800z", token, ","));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseMixedSurrogateTokenFallsBack() {
+        final String token = "AABAABAAAC" + PAIR + "DEFG\uD800"; // pair + unpaired surrogate
+        final String lowerToken = "aabaabaaac" + PAIR + "defg\uD800";
+        final String str = repeat2('y', 300) + "," + lowerToken + ",z";
+        assertEquals(301, StrUtil.indexOfTokenIgnoreCase(str, token, ","));
+        assertEquals(301, StrUtil.lastIndexOfTokenIgnoreCase(str, token, ","));
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(repeat2('y', 300) + "," + lowerToken + "z", token, ","));
+        assertEquals(-1, StrUtil.lastIndexOfTokenIgnoreCase(repeat2('y', 300) + "," + lowerToken + "z", token, ","));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseCharKmpFallback() {
+        final String token = "ABABABABABABABA\uD800"; // 16 chars, unpaired surrogate only
+        final String delimiter = PAIR; // a pair: disables the composite KMP path
+        final String str = repeat2('y', 300) + "abababababababa\uD800x" + delimiter + "abababab" + delimiter + "abababababababa\uD800" + delimiter + "z";
+        final int expected = 300 + 17 + 2 + 8 + 2;
+        assertEquals(expected, StrUtil.indexOfTokenIgnoreCase(str, token, delimiter));
+        assertEquals(expected, StrUtil.lastIndexOfTokenIgnoreCase(str, token, delimiter));
+        final String noMatch = repeat2('y', 300) + "abababababababa\uD800x" + delimiter + "z";
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(noMatch, token, delimiter));
+        assertEquals(-1, StrUtil.lastIndexOfTokenIgnoreCase(noMatch, token, delimiter));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseMalformedTextFromTokenCursor() {
+        final String token = "AABAABAAACDEFGHI" + PAIR; // well-formed, contains a pair -> not composite KMP
+        final String lowerToken = "aabaabaaacdefghi" + PAIR;
+        final String str = "yy\uD800" + repeat2('y', 300) + "," + lowerToken + ",z";
+        assertEquals(304, StrUtil.indexOfTokenIgnoreCase(str, token, ","));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseMalformedTextFromRightDelimiterCursor() {
+        final String token = "ABCDEFGHIJKLMNO" + PAIR; // 17 chars
+        final String lower = "abcdefghijklmno" + PAIR;
+        // token occurrence at 47..63 ends exactly at the first validated chunk (64), followed by a non-delimiter
+        final String str = repeat2('y', 46) + "," + lower + "a\uD800" + repeat2('y', 100) + "," + lower + "," + repeat2('y', 100);
+        final int expected = 46 + 1 + 17 + 2 + 100 + 1;
+        assertEquals(expected, StrUtil.indexOfTokenIgnoreCase(str, token, ","));
+    }
+
+    @Test
+    public void testLastIndexOfTokenIgnoreCaseMalformedTextFromLeftDelimiterCursor() {
+        final String token = "ABCDEFGHIJKLMNO" + PAIR; // 17 chars
+        final String lower = "abcdefghijklmno" + PAIR;
+        // the last token occurrence starts inside the first validated reverse chunk (len - 64), with no delimiter
+        // in that chunk to its left; an unpaired surrogate sits in the next chunk.
+        final String head = repeat2('y', 50) + "," + lower + "," + repeat2('y', 50) + "\uD800" + repeat2('y', 100);
+        final String tail = lower + repeat2('y', 64 - 17);
+        final String str = head + tail;
+        assertEquals(51, StrUtil.lastIndexOfTokenIgnoreCase(str, token, ","));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseTokenAtEnd() {
+        final String token = "ABCDEFGHIJKLMNO" + PAIR;
+        final String lower = "abcdefghijklmno" + PAIR;
+        final String str = repeat2('y', 300) + "," + lower;
+        assertEquals(301, StrUtil.indexOfTokenIgnoreCase(str, token, ","));
+    }
+
+    @Test
+    public void testTokenContainingLongSurrogateDelimiter() {
+        final String delimiterWithPair = "abcdefghijklmno" + PAIR; // well-formed, has a pair
+        final String tokenContaining = repeat2('x', 300) + "ABCDEFGHIJKLMNO" + PAIR + repeat2('x', 10);
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(tokenContaining, tokenContaining, delimiterWithPair));
+        final String tokenFree = repeat2('x', 320);
+        assertEquals(0, StrUtil.indexOfTokenIgnoreCase(tokenFree, tokenFree, delimiterWithPair));
+
+        final String delimiterUnpaired = "abcdefghijklmno\uD800"; // 16 chars, code point count == length
+        final String tokenContaining2 = repeat2('x', 300) + "ABCDEFGHIJKLMNO\uD800" + repeat2('x', 10);
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(tokenContaining2, tokenContaining2, delimiterUnpaired));
+        assertEquals(0, StrUtil.indexOfTokenIgnoreCase(tokenFree, tokenFree, delimiterUnpaired));
+    }
+
+    @Test
+    public void testTokenSearchBudgetSwitchesToKmp() {
+        final String delimiter = PAIR + PAIR + PAIR;
+        final String forward = repeat2('a', 100) + delimiter + "a";
+        assertEquals(106, StrUtil.indexOfTokenIgnoreCase(forward, "A", delimiter));
+        final String backward = "a" + delimiter + repeat2('a', 100);
+        assertEquals(0, StrUtil.lastIndexOfTokenIgnoreCase(backward, "A", delimiter));
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(repeat2('a', 10), "A", delimiter));
+        assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(repeat2('a', 11), "A", delimiter));
+        assertEquals(-1, StrUtil.lastIndexOfTokenIgnoreCase("ab", "abc", ","));
+    }
+
+    @Test
+    public void testIndexOfTokenIgnoreCaseLists() {
+        final List<String> parts = Arrays.asList("x", "Y");
+        assertEquals(2, StrUtil.indexOfTokenIgnoreCase(Strings.join(parts, ","), "y", ","));
+    }
+
+    @Test
+    public void testIndexFamilyEdgeArguments() {
+        assertEquals(-1, Strings.indexOf("", 'a', 0));
+        assertEquals(-1, Strings.indexOf((String) null, 'a', 0));
+        assertEquals(-1, Strings.indexOf("abc", (String) null, 0));
+        assertEquals(-1, Strings.indexOfAny("abc", 0, (String[]) null));
+        assertEquals(-1, Strings.indexOfAny((String) null, 0, "a"));
+        assertEquals(-1, Strings.lastIndexOf("", 'a', 3));
+        assertEquals(-1, Strings.lastIndexOf("abc", 'a', -1));
+        assertEquals(-1, Strings.lastIndexOf("abc", (String) null));
+        assertEquals(-1, Strings.lastIndexOf("ab", "abc"));
+        assertEquals(-1, Strings.lastIndexOf("abc", "a", -1));
+        assertEquals(-1, Strings.lastIndexOf("ab", "abc", 2));
+        assertEquals(-1, Strings.lastIndexOf("abc", (String) null, 2));
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("abc", (String) null));
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("ab", "abc"));
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("abc", "A", -1));
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("ab", "ABC", 2));
+        assertEquals(-1, Strings.lastIndexOfIgnoreCase("abc", (String) null, 2));
+        assertEquals(-1, Strings.lastIndexOfAny("", new char[] { 'a' }));
+        assertEquals(-1, Strings.lastIndexOfAny("abc", new char[0]));
+        assertEquals(-1, Strings.lastIndexOfAny((String) null, "a"));
+        assertEquals(-1, Strings.lastIndexOfAny("abc", (String[]) null));
+        assertEquals(-1, Strings.lastIndexOfAny("abc", -1, "a"));
+        assertEquals(-1, Strings.lastIndexOfAny("abc", 2, (String[]) null));
+        assertEquals(-1, Strings.ordinalIndexOf("abc", (String) null, 1));
+        assertEquals(-1, Strings.ordinalIndexOf("ab", "abc", 1));
+        assertEquals(-1, Strings.lastOrdinalIndexOf("ab", "abc", 1));
+        assertEquals(3, Strings.ordinalIndexOf("abc", "", 4));
+        assertEquals(-1, Strings.ordinalIndexOf("abc", "", 5));
+        assertEquals(-1, Strings.minIndexOfAll("abc", 4, "a"));
+        assertEquals(-1, Strings.minIndexOfAll("abc", 0, (String[]) null));
+        assertEquals(-1, Strings.minIndexOfAll("abc", 4, 'a'));
+        assertEquals(-1, Strings.minIndexOfAll("abc", 0, new char[0]));
+        assertEquals(0, Strings.minIndexOfAll("abc", 0, 'c', 'a', 'x'));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", 4, "a"));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", 0, (String[]) null));
+        assertEquals(-1, Strings.maxIndexOfAll((String) null, 0, "a"));
+        assertEquals(1, Strings.maxIndexOfAll("abc", 0, null, "b", "abcd"));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", 4, 'a'));
+        assertEquals(-1, Strings.maxIndexOfAll((String) null, 0, 'a'));
+        assertEquals(-1, Strings.maxIndexOfAll("abc", 0, new char[0]));
+        assertEquals(-1, Strings.minLastIndexOfAll("abc", -1, "a"));
+        assertEquals(-1, Strings.minLastIndexOfAll("abc", 2, (String[]) null));
+        assertEquals(1, Strings.minLastIndexOfAll("abc", 2, null, "b", "abcd"));
+        assertEquals(-1, Strings.maxLastIndexOfAll("abc", -1, "a"));
+        assertEquals(-1, Strings.maxLastIndexOfAll("abc", 2, (String[]) null));
+        assertEquals(1, Strings.maxLastIndexOfAll("abc", 2, null, "b", "abcd"));
+        assertEquals(0, Strings.indicesOf("ab", "abc", 0).count());
+        assertEquals(0, Strings.indicesOf("ab", (String) null, 0).count());
+        assertEquals(0, Strings.indicesOfIgnoreCase("ab", "ABC", 0).count());
+        assertEquals(0, Strings.indicesOfIgnoreCase("ab", (String) null, 0).count());
+        assertEquals(0, Strings.indicesOfIgnoreCase((String) null, "a", 0).count());
+        final String longText = repeat2('x', 300) + "ABCDEFGHIJKLMNO" + PAIR + repeat2('x', 5);
+        assertEquals(1, Strings.indicesOfIgnoreCase(longText, "abcdefghijklmno" + PAIR, 0).count());
+        assertFalse(Strings.containsIgnoreCase("abc", (String) null));
+        assertFalse(Strings.containsIgnoreCase((String) null, "a"));
+    }
+
+    @Test
+    public void testStartsEndsWithAnyEdge() {
+        assertFalse(Strings.startsWithAnyIgnoreCase((String) null, "a"));
+        assertFalse(Strings.startsWithAnyIgnoreCase("abc", (String[]) null));
+        assertFalse(Strings.endsWithAny((String) null, "a"));
+        assertFalse(Strings.endsWithAny("abc", (String[]) null));
+        assertFalse(Strings.endsWithAnyIgnoreCase((String) null, "a"));
+        assertFalse(Strings.endsWithAnyIgnoreCase("abc", (String[]) null));
+    }
+
+    @Test
+    public void testLongestCommonSubstringEdge() {
+        assertNull(Strings.longestCommonSubstring("abc", null));
+        assertNull(Strings.longestCommonSubstring(null, "abc"));
+        assertEquals("abc", Strings.longestCommonSubstring("abc", new StringBuilder("abc")));
+        final StringBuilder sb = new StringBuilder("xyz");
+        assertEquals("xyz", Strings.longestCommonSubstring(sb, sb));
+    }
+
+    @Test
+    public void testSubstringEdgeArguments() {
+        assertNull(Strings.substringAfter("abc", "b", 1));
+        assertNull(Strings.substringAfter("abc", "x", 3));
+        assertNull(Strings.substringAfterLast("abc", (String) null));
+        assertNull(Strings.substringAfterLast((String) null, "a"));
+        assertNull(Strings.substringAfterLastIgnoreCase("abc", (String) null));
+        assertNull(Strings.substringBeforeLast("abc", (String) null));
+        assertNull(Strings.substringBeforeLast((String) null, "a"));
+        assertNull(Strings.substringBeforeLast("abc", 4, "c"));
+        assertNull(Strings.substringBeforeLast("abc", -1, "c"));
+        assertNull(Strings.substringBeforeLast("abc", 0, (String) null));
+        assertNull(Strings.substringBeforeLastIgnoreCase("abc", (String) null));
+        assertNull(Strings.substringBetween("abc", -2, 'c'));
+        assertNull(Strings.substringBetween("abc", 3, 'c'));
+        assertNull(Strings.substringBetween("abc", -2, "c"));
+        assertNull(Strings.substringBetween("abc", 3, "c"));
+        assertNull(Strings.substringBetween("abc", 0, (String) null));
+        assertNull(Strings.substringBetween("abc", 'x', 3));
+        assertNull(Strings.substringBetween("abc", 'b', 1));
+        assertNull(Strings.substringBetweenIgnoreCase("abc", 4, "a", "c"));
+        assertNull(Strings.substringBetweenIgnoreCase("abc", 0, "a", null));
+        assertNull(Strings.substringBetween("abc", -2, i -> 2));
+        assertNull(Strings.substringBetween("abc", 3, i -> 2));
+        assertNull(Strings.substringBetween("abc", "a", i -> -1));
+        assertNull(Strings.substringBetween("abc", "a", i -> 0));
+        assertNull(Strings.substringBetween("abc", i -> 1, "abcd"));
+        assertNull(Strings.substringBetween("abc", i -> -2, "c"));
+        assertNull(Strings.substringBetween("abc", i -> 2, "c"));
+        assertTrue(Strings.substringIndicesBetween("", 0, 0, '[', ']').isEmpty());
+        assertTrue(Strings.substringIndicesBetween((String) null, 0, 0, '[', ']').isEmpty());
+        assertTrue(Strings.substringIndicesBetween("[a]", 0, 3, "", "]", Strings.DelimiterMatchMode.ALL_LEVELS, 5).isEmpty());
+        assertTrue(Strings.substringIndicesBetween("[a]", 0, 3, "[", "", Strings.DelimiterMatchMode.ALL_LEVELS, 5).isEmpty());
+        assertTrue(Strings.substringIndicesBetween("[a]", 0, 3, "[", "]", Strings.DelimiterMatchMode.ALL_LEVELS, 0).isEmpty());
+        assertEquals("d", StrUtil.substringOrElse("abcd", 3, i -> 4, "z"));
+        assertEquals("z", StrUtil.substringOrElse("abcd", 3, i -> 2, "z"));
+    }
+
+    @Test
+    public void testMiscPartialBranches() {
+        assertEquals("a b", Strings.normalizeSpace("  a   b \u2003"));
+        assertEquals("a", Strings.replaceBetween("a", "[", "]", "x"));
+        assertNull(Strings.replaceBetween(null, "[", "]", "x"));
+        assertEquals("[x]", Strings.replaceBetween("[y]", "[", "]", "x"));
+        assertEquals("[y]", Strings.replaceBetween("[y]", "", "]", "x"));
+        assertEquals("[y]", Strings.replaceBetween("[y]", "[", "", "x"));
+        assertEquals("false", Strings.join(new boolean[] { false }, 0, 1, ",", "", ""));
+        assertEquals("[false]", Strings.join(new boolean[] { false }, 0, 1, ",", "[", "]"));
+        assertEquals("a", Strings.join(new char[] { 'a' }, 0, 1, ",", "", ""));
+        assertEquals("[a]", Strings.join(new char[] { 'a' }, 0, 1, ",", "[", "]"));
+        assertEquals("1", Strings.join(new byte[] { 1 }, 0, 1, ",", "", ""));
+        assertEquals("[1]", Strings.join(new byte[] { 1 }, 0, 1, ",", "[", "]"));
+        assertEquals("1", Strings.join(new short[] { 1 }, 0, 1, ",", "", ""));
+        assertEquals("[1]", Strings.join(new short[] { 1 }, 0, 1, ",", "[", "]"));
+        assertEquals("1", Strings.join(new long[] { 1 }, 0, 1, ",", "", ""));
+        assertEquals("[1]", Strings.join(new long[] { 1 }, 0, 1, ",", "[", "]"));
+        assertEquals("1.0", Strings.join(new float[] { 1 }, 0, 1, ",", "", ""));
+        assertEquals("[1.0]", Strings.join(new float[] { 1 }, 0, 1, ",", "[", "]"));
+        assertEquals("1.0", Strings.join(new double[] { 1 }, 0, 1, ",", "", ""));
+        assertEquals("[1.0]", Strings.join(new double[] { 1 }, 0, 1, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new byte[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new short[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new long[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new int[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new float[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[]", Strings.join(new double[] { 1 }, 0, 0, ",", "[", "]"));
+        assertEquals("[", Strings.join(new double[] { 1 }, 0, 0, ",", "[", ""));
+        assertEquals("", Strings.join(new double[] { 1 }, 0, 0, ",", "", ""));
+        assertEquals("[]", Strings.joinEntries(Collections.singletonMap("a", 1), 0, 0, ",", "=", "[", "]"));
+        assertEquals("[]", Strings.joinEntries(Collections.<String> emptyList(), ",", "=", "[", "]", false, Fn.identity(), Fn.identity()));
+        assertEquals("null", Strings.join(Arrays.asList((Object) null).iterator(), ","));
+        assertEquals(2, Strings.displayWidth("\u0007ab"));
+        assertEquals(2, Strings.displayWidth("a\u0085b"));
+        assertEquals(-1, StrUtil.lastIndexOfToken("a,b", "b", ",", -1));
+        assertEquals(-1, StrUtil.lastIndexOfToken("a,b", null, ",", 3));
+        assertEquals(-1, StrUtil.lastIndexOfToken(null, "b", ",", 3));
+    }
 }

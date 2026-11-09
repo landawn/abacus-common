@@ -194,8 +194,11 @@ public class StreamReview20260924bTest extends TestBase {
     // ============================================================== C-104: merge(Collection) / mergeIterators
 
     @Test
-    public void testC104_merge_20000Streams_noStackOverflow_allClosed() {
-        final int k = 20_000;
+    public void testC104_merge_5000Streams_onASmallStack_noStackOverflow_allClosed() throws InterruptedException {
+        onSmallStack(() -> c104MergeAllClosed(5_000));
+    }
+
+    private static void c104MergeAllClosed(final int k) {
         final AtomicInteger closed = new AtomicInteger();
         final List<Stream<Integer>> streams = new ArrayList<>(k);
 
@@ -233,8 +236,11 @@ public class StreamReview20260924bTest extends TestBase {
     }
 
     @Test
-    public void testC104_mergeIterators_and_parallelMergeSingleThread_20000Sources() {
-        final int k = 20_000;
+    public void testC104_mergeIterators_and_parallelMergeSingleThread_5000SourcesOnASmallStack() throws InterruptedException {
+        onSmallStack(() -> c104MergeIteratorsAndSingleThreadParallelMerge(5_000));
+    }
+
+    private static void c104MergeIteratorsAndSingleThreadParallelMerge(final int k) {
         final List<Iterator<Integer>> iterators = new ArrayList<>(k);
         final List<Stream<Integer>> streams = new ArrayList<>(k);
 
@@ -950,5 +956,32 @@ public class StreamReview20260924bTest extends TestBase {
 
         // an empty source never calls the wrapper
         assertEquals(List.of(), tumbling(shifting));
+    }
+
+    /**
+     * Runs {@code body} on a thread with a 256 KB stack. A merge that recursed once per source (the pre-fix shape)
+     * overflows that stack below 3,000 sources even when JIT-compiled, so 5,000 sources here is a stronger
+     * stack-safety check than 20,000 on the default stack, at about 1/16 of the time: the documented left fold
+     * costs O(elements x sources).
+     */
+    private static void onSmallStack(final Runnable body) throws InterruptedException {
+        final Throwable[] failure = new Throwable[1];
+        final Thread thread = new Thread(null, () -> {
+            try {
+                body.run();
+            } catch (final Throwable e) {
+                failure[0] = e;
+            }
+        }, "small-stack-merge", 256L * 1024);
+        thread.start();
+        thread.join();
+
+        if (failure[0] instanceof RuntimeException e) {
+            throw e;
+        } else if (failure[0] instanceof Error e) {
+            throw e;
+        } else if (failure[0] != null) {
+            throw new AssertionError(failure[0]);
+        }
     }
 }

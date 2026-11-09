@@ -361,4 +361,12 @@ public class DoubleIteratorTest extends TestBase {
         assertEquals(0, firstIndex[0]);
         assertThrows(IllegalArgumentException.class, () -> DoubleIterator.of(1.0).foreachIndexed(null));
     }
+
+    @Test
+    public void testDoubleIteratorLimitNextPastEnd() {
+        final DoubleIterator it = DoubleIterator.of(1d, 2d, 3d).limit(1);
+        assertEquals(1d, it.nextDouble(), 0d);
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextDouble);
+    }
 }

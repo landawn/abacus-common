@@ -1,5 +1,6 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -1392,4 +1393,28 @@ public class ArrayCharStreamTest extends TestBase {
         assertTrue(Arrays.equals(new char[] { 'z', '\u4e00', 'a', 'q' }, CharStream.of(data).distinct().toArray()));
     }
     // ---- perf review 2026-09-26 G087 end ----
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        final AtomicInteger closed = new AtomicInteger();
+        final java.util.List<StreamBase.LocalRunnable> handlers = new java.util.ArrayList<>();
+        handlers.add(StreamBase.LocalRunnable.wrap((Runnable) closed::incrementAndGet));
+        try (ArrayCharStream s = new ArrayCharStream(new char[] { 'a', 'b' }, handlers)) {
+            assertEquals(2, s.count());
+        }
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testFlatMapNullMappedStream() {
+        assertArrayEquals(new char[] { 'a', 'c' }, CharStream.of('a', 'b', 'c').flatMap(x -> x == 'b' ? null : CharStream.of(x)).toArray());
+    }
+
+    @Test
+    public void testSortedMinMaxKthLargest() {
+        final char[] sorted = { 'a', 'b', 'c' };
+        assertEquals('a', new ArrayCharStream(sorted, true, null).min().get());
+        assertEquals('c', new ArrayCharStream(sorted, true, null).max().get());
+        assertEquals('b', new ArrayCharStream(sorted, true, null).kthLargest(2).get());
+    }
 }

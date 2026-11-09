@@ -39,7 +39,7 @@ public class ASMUtilTest extends TestBase {
             {
                 BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, false);
 
-                Profiler.run(1, 100000, 3, "jdk", () -> {
+                Profiler.run(1, 10000, 3, "jdk", () -> {
 
                     for (PropInfo propInfo : beanInfo.propInfoList) {
                         propInfo.getPropValue(xbean);
@@ -50,7 +50,7 @@ public class ASMUtilTest extends TestBase {
             {
                 BeanInfo beanInfo = ParserUtil.getBeanInfo(XBean.class, true);
 
-                Profiler.run(1, 100000, 3, "asm", () -> {
+                Profiler.run(1, 10000, 3, "asm", () -> {
 
                     for (PropInfo propInfo : beanInfo.propInfoList) {
                         propInfo.getPropValue(xbean);

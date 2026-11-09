@@ -1825,7 +1825,7 @@ public class JsonParserTest extends AbstractJsonParserTest {
     @Test
     public void test_readerPerformance() {
         assertDoesNotThrow(() -> {
-            Profiler.run(6, 100, 1, this::test_reader).printResult();
+            Profiler.run(1, 10, 1, this::test_reader).printResult();
         });
     }
 

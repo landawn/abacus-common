@@ -176,4 +176,12 @@ public class MutableLongTest extends TestBase {
         assertEquals(String.valueOf(Long.MAX_VALUE), MutableLong.of(Long.MAX_VALUE).toString());
         assertEquals(String.valueOf(Long.MIN_VALUE), MutableLong.of(Long.MIN_VALUE).toString());
     }
+
+    @Test
+    public void testDefaultConstructorIsZero() {
+        final MutableLong value = new MutableLong();
+        assertEquals(0L, value.value());
+        value.setValue(5L);
+        assertEquals(5L, value.getValue());
+    }
 }

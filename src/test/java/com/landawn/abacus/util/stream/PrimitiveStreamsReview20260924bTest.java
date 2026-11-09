@@ -19,6 +19,7 @@ import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
@@ -1182,6 +1183,7 @@ public class PrimitiveStreamsReview20260924bTest extends TestBase {
     // ------------------------------------------------------------------------------------------------------------
 
     @Test
+    @Tag("slow-test")
     public void c103_intSummaryStatisticsWrapsWhileAverageIsExact() {
         final long n = (1L << 32) + 4;
         final IntSummaryStatistics stats = IntStream.repeat(Integer.MAX_VALUE, n).summaryStatistics();

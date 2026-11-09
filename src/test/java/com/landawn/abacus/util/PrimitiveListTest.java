@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -280,5 +282,25 @@ public class PrimitiveListTest extends TestBase {
         assertArrayEquals(expected, list.toArray());
         assertTrue(list.internalArray().length >= list.size());
         assertArrayEquals(expected, Arrays.copyOf(list.internalArray(), list.size()));
+    }
+
+    @Test
+    public void testCompactAfterRemovingNoIndices() {
+        assertEquals(3, PrimitiveList.compactAfterRemovingIndices(new int[] { 1, 2, 3 }, 3, new int[0]));
+    }
+
+    @Test
+    public void testCalNewCapacityCapsAtMaxArraySize() {
+        final IntList list = new IntList();
+        assertEquals(PrimitiveList.MAX_ARRAY_SIZE, list.calNewCapacity(10, 2_000_000_000));
+    }
+
+    @Test
+    public void testSupplierFactories() {
+        final IntList list = IntList.of(1, 2);
+        final List<String> l = list.<String> createListSupplier().apply(4);
+        assertTrue(l.isEmpty());
+        final Map<String, Integer> m = list.<String, Integer> createMapSupplier().apply(4);
+        assertTrue(m.isEmpty());
     }
 }

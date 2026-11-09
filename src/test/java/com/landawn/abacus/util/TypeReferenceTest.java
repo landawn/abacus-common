@@ -403,4 +403,59 @@ public class TypeReferenceTest extends TestBase {
         assertEquals("TypeReference constructed without concrete type information: T", e.getMessage());
     }
     // ---- deep review 2026-11-02b G083 end ----
+
+    static class Outer<T> {
+        class Inner {
+        }
+    }
+
+    static class SuperBound<T> extends TypeReference<Map<String, List<? super T>>> {
+    }
+
+    static class ExtendsBound<T> extends TypeReference<List<? extends T>> {
+    }
+
+    @SuppressWarnings("rawtypes")
+    static class OwnerVar<T> extends TypeReference<Outer<T>.Inner> {
+    }
+
+    @Test
+    public void testResolvedWildcardSuperBoundTypeName() {
+        final TypeReference<Map<String, List<? super Integer>>> ref = new SuperBound<Integer>() {
+        };
+        final java.lang.reflect.Type t = ref.javaType();
+        assertTrue(t instanceof ParameterizedType);
+        assertEquals("java.util.Map<java.lang.String, java.util.List<? super java.lang.Integer>>", t.getTypeName());
+        assertEquals(t.getTypeName(), t.toString());
+
+        final java.lang.reflect.Type wildcard = ((ParameterizedType) ((ParameterizedType) t).getActualTypeArguments()[1]).getActualTypeArguments()[0];
+        assertTrue(wildcard instanceof WildcardType);
+        assertEquals("? super java.lang.Integer", wildcard.toString());
+    }
+
+    @Test
+    public void testResolvedWildcardExtendsBoundTypeName() {
+        final TypeReference<List<? extends Number>> ref = new ExtendsBound<Number>() {
+        };
+        assertEquals("java.util.List<? extends java.lang.Number>", ref.javaType().getTypeName());
+
+        final TypeReference<List<? extends Object>> objRef = new ExtendsBound<Object>() {
+        };
+        assertEquals("java.util.List<?>", objRef.javaType().getTypeName());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testUnresolvedVariableInWildcardUpperBoundRejected() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new ExtendsBound() {
+        });
+        assertTrue(e.getMessage().contains("without concrete type information"));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testUnresolvedVariableInOwnerTypeRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new OwnerVar() {
+        });
+    }
 }

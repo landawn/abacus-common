@@ -1,6 +1,9 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -363,4 +366,78 @@ public class IntIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    static final class CloseableIntIterator extends IntIterator implements AutoCloseable {
+        private int next = 1;
+        int closed = 0;
+
+        @Override
+        public boolean hasNext() {
+            return next <= 2;
+        }
+
+        @Override
+        public int nextInt() {
+            return next++;
+        }
+
+        @Override
+        public void close() {
+            closed++;
+        }
+    }
+
+    static final class CloseableIterator implements Iterator<Integer>, AutoCloseable {
+        private final Iterator<Integer> it = Arrays.asList(1, 2).iterator();
+        int closed = 0;
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Integer next() {
+            return it.next();
+        }
+
+        @Override
+        public void close() {
+            closed++;
+        }
+    }
+
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(IntIteratorEx.empty().supportsFailureAtomicAdvance());
+    }
+
+    @Test
+    public void testOfPlainIteratorClosesSource() {
+        final CloseableIntIterator src = new CloseableIntIterator();
+        final IntIteratorEx iter = IntIteratorEx.of(src);
+        assertEquals(1, iter.nextInt());
+        iter.closeResource();
+        assertEquals(1, src.closed);
+    }
+
+    @Test
+    public void testFromObjIteratorExDelegates() {
+        final ObjIteratorEx<Integer> src = ObjIteratorEx.of(1, 2, 3);
+        final IntIteratorEx iter = IntIteratorEx.from(src);
+        assertEquals(src.supportsFailureAtomicAdvance(), iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        assertEquals(1, iter.nextInt());
+        iter.advance(1);
+        assertEquals(3, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testFromPlainIteratorClosesSource() {
+        final CloseableIterator src = new CloseableIterator();
+        final IntIteratorEx iter = IntIteratorEx.from(src);
+        assertEquals(1, iter.nextInt());
+        iter.closeResource();
+        assertEquals(1, src.closed);
+    }
 }

@@ -24,6 +24,11 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -478,7 +483,15 @@ public class PropertiesUtilTest extends TestBase {
             writer.write("key2=value2\n");
         }
 
-        Thread.sleep(3000);
+        // Poll the 1-second auto-refresh instead of sleeping a fixed 3 seconds.
+        final long deadline = System.currentTimeMillis() + 10_000;
+
+        while (!"newValue1".equals(props.get("key1")) && System.currentTimeMillis() < deadline) {
+            Thread.sleep(50);
+        }
+
+        assertEquals("newValue1", props.get("key1"));
+        assertEquals("value2", props.get("key2"));
     }
 
     @Test
@@ -2639,4 +2652,163 @@ public class PropertiesUtilTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02 G122b end ----
+
+    @TempDir
+    Path tempDir2;
+
+    public static class ListHolderProperties extends Properties<String, Object> {
+        public ListHolderProperties() {
+            super();
+            final List<String> list = new ArrayList<>();
+            list.add("old");
+            set("items", list);
+        }
+    }
+
+    public static class MapHolderProperties extends Properties<String, Object> {
+        public MapHolderProperties() {
+            super();
+            final Map<String, String> map = new HashMap<>();
+            map.put("old", "x");
+            set("items", map);
+        }
+    }
+
+    public static class NestedChild extends Properties<String, Object> {
+        public NestedChild() {
+            super();
+        }
+    }
+
+    public static class HolderWithNestedSetter extends Properties<String, Object> {
+        public NestedChild getChild() {
+            return (NestedChild) super.get("child");
+        }
+
+        public void setChild(final NestedChild child) {
+            super.put("child", child);
+        }
+    }
+
+    @Test
+    public void testConfigBeanAccessorsEqualsHashCodeToString() {
+        final PropertiesUtil.ConfigBean a = new PropertiesUtil.ConfigBean();
+        final Timestamp ts = new Timestamp(1000L);
+        final UnifiedStatus status = UnifiedStatus.values()[0];
+        a.setId(7L);
+        a.setName("n");
+        a.setContent("c");
+        a.setIncludedServers(List.of("s1"));
+        a.setExcludedServers(List.of("s2"));
+        a.setStatus(status);
+        a.setDescription("d");
+        a.setLastUpdateTime(ts);
+        a.setCreatedTime(ts);
+
+        assertEquals(7L, a.getId());
+        assertEquals("n", a.getName());
+        assertEquals("c", a.getContent());
+        assertEquals(List.of("s1"), a.getIncludedServers());
+        assertEquals(List.of("s2"), a.getExcludedServers());
+        assertSame(status, a.getStatus());
+        assertEquals("d", a.getDescription());
+        assertEquals(ts, a.getLastUpdateTime());
+        assertEquals(ts, a.getCreatedTime());
+
+        final PropertiesUtil.ConfigBean b = new PropertiesUtil.ConfigBean();
+        b.setId(7L);
+        b.setName("n");
+        b.setContent("c");
+        b.setIncludedServers(List.of("s1"));
+        b.setExcludedServers(List.of("s2"));
+        b.setStatus(status);
+        b.setDescription("d");
+        b.setLastUpdateTime(ts);
+        b.setCreatedTime(ts);
+
+        assertTrue(a.equals(a));
+        assertTrue(a.equals(b));
+        assertEquals(a.hashCode(), b.hashCode());
+        assertFalse(a.equals("x"));
+        b.setName("other");
+        assertFalse(a.equals(b));
+        assertTrue(a.toString().contains("id=7"));
+        assertTrue(a.toString().contains("name=n"));
+    }
+
+    @Test
+    public void testResourceEqualsAndBackoff() throws IOException {
+        final File f = Files.createFile(tempDir2.resolve("r.properties")).toFile();
+        final PropertiesUtil.Resource r1 = new PropertiesUtil.Resource(Properties.class, f, PropertiesUtil.ResourceType.PROPERTIES);
+        final PropertiesUtil.Resource r2 = new PropertiesUtil.Resource(Properties.class, f, PropertiesUtil.ResourceType.PROPERTIES);
+        final PropertiesUtil.Resource r3 = new PropertiesUtil.Resource(Properties.class, f, PropertiesUtil.ResourceType.XML);
+
+        assertTrue(r1.equals(r1));
+        assertTrue(r1.equals(r2));
+        assertEquals(r1.hashCode(), r2.hashCode());
+        assertFalse(r1.equals(r3));
+        assertFalse(r1.equals("str"));
+        assertTrue(r1.toString().startsWith("{file="));
+
+        assertEquals(0, r1.getNextRetryTime());
+        final long first = r1.recordRefreshFailure(10L, 8000L);
+        assertEquals(1000L, first);
+        assertEquals(10L, r1.getLastFailedModifiedTime());
+        assertTrue(r1.getNextRetryTime() > 0);
+        assertEquals(2000L, r1.recordRefreshFailure(10L, 8000L));
+        assertEquals(4000L, r1.recordRefreshFailure(10L, 8000L));
+        assertEquals(8000L, r1.recordRefreshFailure(10L, 8000L));
+        assertEquals(8000L, r1.recordRefreshFailure(10L, 8000L));
+        // different content resets
+        assertEquals(1000L, r1.recordRefreshFailure(20L, 8000L));
+        r1.recordRefreshSuccess();
+        assertEquals(0, r1.getNextRetryTime());
+        assertEquals(0, r1.getLastFailedModifiedTime());
+    }
+
+    @Test
+    public void testFindFileRelativeToRecursiveMatch() throws IOException {
+        final File source = Files.createFile(tempDir2.resolve("source.txt")).toFile();
+        final Path sub = Files.createDirectories(tempDir2.resolve("deep").resolve("sub"));
+        final File target = Files.createFile(sub.resolve("gapTarget_8312.cfg")).toFile();
+
+        final File found = PropertiesUtil.findFileRelativeTo(source, "gapTarget_8312.cfg");
+        assertNotNull(found);
+        assertEquals(target.getCanonicalFile(), found.getCanonicalFile());
+    }
+
+    @Test
+    public void testFindFileRelativeToAbsoluteMissing() throws IOException {
+        final File source = Files.createFile(tempDir2.resolve("source2.txt")).toFile();
+        final File missing = tempDir2.resolve("noSuchFile_gap_99231.cfg").toFile();
+        assertNull(PropertiesUtil.findFileRelativeTo(source, missing.getAbsolutePath()));
+    }
+
+    @Test
+    public void testLoadFromXmlReplacesPrepopulatedCollectionContents() {
+        final String xml = "<root><items type=\"List&lt;String&gt;\">[\"a\", \"b\"]</items></root>";
+        final ListHolderProperties props = PropertiesUtil.loadFromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)),
+                ListHolderProperties.class);
+        final Object items = props.get("items");
+        assertTrue(items instanceof List);
+        assertEquals(List.of("a", "b"), items);
+    }
+
+    @Test
+    public void testLoadFromXmlEmptyNestedPropertiesSetter() {
+        final String xml = "<root><child></child></root>";
+        final HolderWithNestedSetter props = PropertiesUtil.loadFromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)),
+                HolderWithNestedSetter.class);
+        assertNotNull(props.getChild());
+        assertTrue(props.getChild().isEmpty());
+    }
+
+    @Test
+    public void testLoadFromXmlReplacesPrepopulatedMapContents() {
+        final String xml = "<root><items type=\"Map&lt;String, String&gt;\">{\"k\": \"v\"}</items></root>";
+        final MapHolderProperties props = PropertiesUtil.loadFromXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)), MapHolderProperties.class);
+        final Object items = props.get("items");
+        assertTrue(items instanceof Map);
+        assertEquals(Map.of("k", "v"), items);
+    }
 }

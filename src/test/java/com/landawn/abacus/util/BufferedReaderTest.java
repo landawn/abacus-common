@@ -450,4 +450,81 @@ public class BufferedReaderTest extends AbstractTest {
         assertEquals("After", reader.readLine());
         assertNull(reader.readLine());
     }
+
+    @Test
+    public void testReadAfterCarriageReturnSkipsLineFeed() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\r\nb"));
+        assertEquals("a", br.readLine());
+        assertEquals('b', br.read());
+        assertEquals(-1, br.read());
+        assertEquals(-1, br.read());
+    }
+
+    @Test
+    public void testReadAfterCarriageReturnNotFollowedByLineFeed() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\rb"));
+        assertEquals("a", br.readLine());
+        assertEquals('b', br.read());
+    }
+
+    @Test
+    public void testReadArrayAfterCarriageReturn() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\r\nbc"));
+        assertEquals("a", br.readLine());
+        final char[] buf = new char[10];
+        assertEquals(2, br.read(buf, 0, 10));
+        assertEquals("bc", new String(buf, 0, 2));
+    }
+
+    @Test
+    public void testReadArrayAfterCarriageReturnAtEnd() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\r\n"));
+        assertEquals("a", br.readLine());
+        assertEquals(-1, br.read(new char[10], 0, 10));
+    }
+
+    @Test
+    public void testSkipVariants() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\r\nbcd"));
+        assertEquals("a", br.readLine());
+        assertEquals(1, br.skip(1));
+        assertEquals('c', br.read());
+
+        final BufferedReader br2 = new BufferedReader(new StringReader("xyz"));
+        assertEquals(3, br2.skip(10));
+        assertEquals(-1, br2.read());
+
+        final BufferedReader bs = new BufferedReader("ab");
+        assertEquals(2, bs.skip(5));
+        assertEquals(0, bs.skip(5));
+    }
+
+    @Test
+    public void testReadyAfterCarriageReturn() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("a\r\nb"));
+        assertEquals("a", br.readLine());
+        assertTrue(br.ready());
+        assertEquals('b', br.read());
+
+        final BufferedReader br2 = new BufferedReader(new StringReader("a\r"));
+        assertEquals("a", br2.readLine());
+        // the underlying StringReader reports ready even at its end
+        assertTrue(br2.ready());
+        assertEquals(-1, br2.read());
+    }
+
+    @Test
+    public void testFillKeepsUnreadCharacters() throws IOException {
+        final BufferedReader br = new BufferedReader(new StringReader("hello"));
+        assertEquals('h', br.read());
+        br.fill();
+        assertEquals("ello", br.readLine());
+    }
+
+    @Test
+    public void testDummyReaderUnsupported() {
+        final BufferedReader.DummyReader dummy = new BufferedReader.DummyReader();
+        assertThrows(UnsupportedOperationException.class, () -> dummy.read(new char[1], 0, 1));
+        assertThrows(UnsupportedOperationException.class, dummy::close);
+    }
 }

@@ -334,4 +334,20 @@ public class CalendarTypeTest extends TestBase {
             Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text.toCharArray(), 0, text.length()), text);
         }
     }
+
+    @Test
+    public void testCalendarAppendAndSerializeNull() throws Exception {
+        final Type<Calendar> type = Type.of(Calendar.class);
+        final StringBuilder sb = new StringBuilder();
+        type.appendTo(sb, null);
+        assertEquals("null", sb.toString());
+
+        final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(w, null, null);
+            assertEquals("null", w.toString());
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
 }

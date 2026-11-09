@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -297,4 +298,41 @@ public class ArrayTest extends ArrayTestSupport {
     }
 
     // ---- perf review 2026-09-26 G115 end ----
+
+    private static final int BIG = Integer.MAX_VALUE;
+
+    @Test
+    public void testRangeOverflow() {
+        assertThrows(IllegalArgumentException.class, () -> Array.range(Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
+    }
+
+    @Test
+    public void testRepeatOverflow() {
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new boolean[] { true, false }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new char[] { 'a', 'b' }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new short[] { 1, 2 }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new long[] { 1, 2 }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new float[] { 1, 2 }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new double[] { 1, 2 }, BIG));
+        assertThrows(IllegalArgumentException.class, () -> Array.repeat(new String[] { "a", "b" }, BIG, String.class));
+    }
+
+    @Test
+    public void testBoxUnboxNull3d() {
+        assertNull(Array.box((boolean[][][]) null));
+        assertNull(Array.box((char[][][]) null));
+        assertNull(Array.box((byte[][][]) null));
+        assertNull(Array.box((short[][][]) null));
+        assertNull(Array.box((long[][][]) null));
+        assertNull(Array.box((float[][][]) null));
+        assertNull(Array.box((double[][][]) null));
+
+        assertNull(Array.unbox((Boolean[][][]) null, false));
+        assertNull(Array.unbox((Character[][][]) null, 'x'));
+        assertNull(Array.unbox((Byte[][][]) null, (byte) 0));
+        assertNull(Array.unbox((Short[][][]) null, (short) 0));
+        assertNull(Array.unbox((Long[][][]) null, 0L));
+        assertNull(Array.unbox((Float[][][]) null, 0f));
+        assertNull(Array.unbox((Double[][][]) null, 0d));
+    }
 }

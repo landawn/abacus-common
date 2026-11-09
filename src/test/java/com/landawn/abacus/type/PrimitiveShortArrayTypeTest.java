@@ -285,4 +285,13 @@ public class PrimitiveShortArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\\\\u0031\"]"));
         assertEquals(IllegalArgumentException.class, assertThrows(IllegalArgumentException.class, () -> type.valueOf("[1,,2]")).getClass());
     }
+
+    @Test
+    public void testPrimitiveArrayTypesCollectionToArrayNull() {
+        assertNull(new PrimitiveShortArrayType().collectionToArray(null));
+        assertNull(new PrimitiveLongArrayType().collectionToArray(null));
+        assertNull(new PrimitiveIntArrayType().collectionToArray(null));
+        assertNull(new PrimitiveFloatArrayType().collectionToArray(null));
+        assertNull(new PrimitiveDoubleArrayType().collectionToArray(null));
+    }
 }

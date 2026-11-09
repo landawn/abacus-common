@@ -2,6 +2,8 @@ package com.landawn.abacus.util.stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -10,8 +12,10 @@ import java.util.IntSummaryStatistics;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
@@ -27,6 +31,7 @@ import com.landawn.abacus.util.IntList;
 import com.landawn.abacus.util.Joiner;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.MutableBoolean;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Percentage;
 import com.landawn.abacus.util.RateLimiter;
@@ -1110,4 +1115,101 @@ public class AbstractIntStreamTest extends TestBase {
         }
     }
     // ---- deep review 2026-11-02b G123 end ----
+
+    private static int[] sortedCopy(final int[] a) {
+        final int[] copy = a.clone();
+        N.sort(copy);
+        return copy;
+    }
+
+    @Test
+    public void testRateLimitedParallel() {
+        final int[] result = IntStream.of(1, 2, 3).parallel().rateLimited(RateLimiter.create(10000)).toArray();
+        assertArrayEquals(new int[] { 1, 2, 3 }, sortedCopy(result));
+    }
+
+    @Test
+    public void testDelayParallel() {
+        final int[] result = IntStream.of(1, 2).parallel().delay(java.time.Duration.ofMillis(1)).toArray();
+        assertArrayEquals(new int[] { 1, 2 }, sortedCopy(result));
+    }
+
+    @Test
+    public void testDebounceIteratorExhausted() {
+        final IntIterator iter = IntStream.of(1, 2).debounce(com.landawn.abacus.util.Duration.ofMillis(1)).iterator();
+        int last = -1;
+        while (iter.hasNext()) {
+            last = iter.nextInt();
+        }
+        assertEquals(2, last);
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+    }
+
+    @Test
+    public void testMapMultiFailedMapperCanBeRetried() {
+        final AtomicBoolean fail = new AtomicBoolean(true);
+        final IntIterator iter = IntStream.of(1, 2).mapMulti((x, consumer) -> {
+            consumer.accept(x * 10);
+            if (x == 1 && fail.getAndSet(false)) {
+                throw new IllegalStateException("boom");
+            }
+        }).iterator();
+
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertTrue(iter.hasNext());
+        assertEquals(20, iter.nextInt());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testMapMultiLargeExpansionReleasesBuffer() {
+        final long count = IntStream.of(1, 2).mapMulti((x, consumer) -> {
+            final int n = x == 1 ? 10241 : 1;
+            for (int i = 0; i < n; i++) {
+                consumer.accept(i);
+            }
+        }).count();
+        assertEquals(10242L, count);
+    }
+
+    @Test
+    public void testCycledIteratorStreamHasNextAfterEnd() {
+        final IntIterator iter = IntStream.of(IntIterator.of(1, 2)).cycled(2).iterator();
+        int n = 0;
+        while (iter.hasNext()) {
+            iter.nextInt();
+            n++;
+        }
+        assertEquals(4, n);
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testMergeWithParallel() {
+        final int[] result = IntStream.of(1, 3)
+                .parallel()
+                .mergeWith(IntStream.of(2), (a, b) -> a <= b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+                .toArray();
+        assertArrayEquals(new int[] { 1, 2, 3 }, sortedCopy(result));
+    }
+
+    @Test
+    public void testPercentilesParallelUnsorted() {
+        final Optional<Map<Percentage, Integer>> p = IntStream.of(IntIterator.of(3, 1, 2)).parallel().percentiles();
+        assertTrue(p.isPresent());
+        assertEquals(3, p.get().get(Percentage._99_9999));
+
+        final Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> sp = IntStream.of(IntIterator.of(3, 1, 2))
+                .parallel()
+                .summaryStatisticsAndPercentiles();
+        assertEquals(6L, sp.left().getSum());
+        assertTrue(sp.right().isPresent());
+    }
+
+    @Test
+    public void testSummaryStatisticsAndPercentilesEmptyUnsorted() {
+        final Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> sp = IntStream.of(IntIterator.of(new int[0])).summaryStatisticsAndPercentiles();
+        assertEquals(0L, sp.left().getCount());
+        assertFalse(sp.right().isPresent());
+    }
 }

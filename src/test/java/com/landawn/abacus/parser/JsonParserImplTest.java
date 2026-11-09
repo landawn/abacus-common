@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -46,6 +47,14 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RowDataset;
 import com.landawn.abacus.util.Seid;
 import com.landawn.abacus.util.Sheet;
+import com.landawn.abacus.util.Triple;
+import com.landawn.abacus.util.Tuple.Tuple3;
+import com.landawn.abacus.util.Tuple.Tuple4;
+import com.landawn.abacus.util.Tuple.Tuple5;
+import com.landawn.abacus.util.Tuple.Tuple6;
+import com.landawn.abacus.util.Tuple.Tuple7;
+import com.landawn.abacus.util.Tuple.Tuple8;
+import com.landawn.abacus.util.Tuple.Tuple9;
 import com.landawn.abacus.util.TypeReference;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -5507,4 +5516,607 @@ public class JsonParserImplTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02b G009 end ----
+
+    private final JsonParserImpl parser3 = new JsonParserImpl();
+
+    public static class GapBean {
+        private String a;
+        private int n;
+        private List<String> list;
+
+        public String getA() {
+            return a;
+        }
+
+        public void setA(final String a) {
+            this.a = a;
+        }
+
+        public int getN() {
+            return n;
+        }
+
+        public void setN(final int n) {
+            this.n = n;
+        }
+
+        public List<String> getList() {
+            return list;
+        }
+
+        public void setList(final List<String> list) {
+            this.list = list;
+        }
+    }
+
+    public static class Holder2 {
+        private GapBean inner;
+
+        public GapBean getInner() {
+            return inner;
+        }
+
+        public void setInner(final GapBean inner) {
+            this.inner = inner;
+        }
+    }
+
+    private void fails(final String json, final Class<?> cls) {
+        assertThrows(ParsingException.class, () -> parser3.deserialize(json, cls), json);
+    }
+
+    private void fails(final String json, final JsonDeserConfig config, final Class<?> cls) {
+        assertThrows(ParsingException.class, () -> parser3.deserialize(json, config, cls), json);
+    }
+
+    // ---------------------------------------------------------------- bean reader errors
+
+    @Test
+    public void testBeanStructuralErrors() {
+        fails("{\"a\" \"b\":1}", GapBean.class);
+        fails("{\"a\" x : \"1\"}", GapBean.class);
+        fails("{:\"1\"}", GapBean.class);
+        fails("{\"a\":\"1\":\"2\"}", GapBean.class);
+        fails("{\"a\":\"x\" y, \"n\":1}", GapBean.class);
+        fails("{{\"a\":1}}", GapBean.class);
+        fails("{\"a\":1 {}}", GapBean.class);
+        fails("{\"list\":[\"x\"] [\"y\"]}", GapBean.class);
+        fails("{\"list\" [\"x\"]}", GapBean.class);
+        fails("{\"a\":\"x\" y}", GapBean.class);
+        fails("{\"a\":\"x\"]", GapBean.class);
+        fails("{\"list\":[\"x\"] {}}", GapBean.class);
+    }
+
+    @Test
+    public void testBeanUnknownUnquotedProperty() {
+        final JsonDeserConfig config = JsonDeserConfig.create().setIgnoreUnmatchedProperty(false);
+        fails("{zzz:1}", config, GapBean.class);
+        fails("{\"zzz\":1}", config, GapBean.class);
+
+        final GapBean bean = parser3.deserialize("{a:x, n:3}", GapBean.class);
+        assertEquals("x", bean.getA());
+        assertEquals(3, bean.getN());
+    }
+
+    @Test
+    public void testBeanWhitespaceRootIsNull() {
+        assertNull(parser3.deserialize("   ", GapBean.class));
+    }
+
+    // ---------------------------------------------------------------- map reader errors
+
+    @Test
+    public void testMapStructuralErrors() {
+        fails("{\"a\" x:1}", Map.class);
+        fails("{\"a\":1:2}", Map.class);
+        fails("{,\"a\":1}", Map.class);
+        fails("{\"a\"{\"b\":1}:1}", Map.class);
+        fails("{\"a\"[1]:1}", Map.class);
+        fails("{\"a\":1]", Map.class);
+    }
+
+    @Test
+    public void testMapStructuralErrorsDuringValidate() {
+        assertThrows(ParsingException.class, () -> parser3.validate("{\"a\":1:2}"));
+        assertThrows(ParsingException.class, () -> parser3.validate("{\"a\":1]"));
+    }
+
+    // ---------------------------------------------------------------- array / collection errors
+
+    @Test
+    public void testArrayStructuralErrors() {
+        fails("[\"a\" \"b\"]", String[].class);
+        fails("[\"a\" x, \"b\"]", String[].class);
+        fails("[\"a\" {}]", Object[].class);
+        fails("[\"a\" []]", Object[].class);
+        fails("[\"a\" x]", String[].class);
+        fails("[1, 2", String[].class);
+        fails("[1, :]", String[].class);
+    }
+
+    @Test
+    public void testArrayIntoOutputStructuralErrors() {
+        final Object[] out = new Object[4];
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[\"a\" \"b\"]", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[\"a\" x, \"b\"]", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[\"a\" {}]", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[\"a\" []]", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[\"a\" x]", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[1, 2", out));
+        assertThrows(ParsingException.class, () -> parser3.parseInto("[1, :]", out));
+    }
+
+    @Test
+    public void testArrayIntoOutputNestedArray() {
+        final Object[] out = new Object[3];
+        parser3.parseInto("[[1, 2], {\"k\":\"v\"}, \"s\"]", out);
+        assertEquals(Arrays.asList(1, 2), out[0]);
+        assertEquals(N.asMap("k", "v"), out[1]);
+        assertEquals("s", out[2]);
+    }
+
+    @Test
+    public void testArrayIntoOutputNestedArrayIgnoreNullOrEmpty() {
+        final Object[] out = new Object[3];
+        parser3.parseInto("[[], [3], \"s\"]", JsonDeserConfig.create().setIgnoreNullOrEmpty(true), out);
+        assertEquals(Arrays.asList(3), out[0]);
+        assertEquals("s", out[1]);
+        assertNull(out[2]);
+    }
+
+    @Test
+    public void testCollectionStructuralErrors() {
+        fails("[\"a\" \"b\"]", List.class);
+        fails("[\"a\" x, \"b\"]", List.class);
+        fails("[\"a\" {}]", List.class);
+        fails("[\"a\" []]", List.class);
+        fails("[\"a\" x]", List.class);
+        fails("[1, 2", List.class);
+        fails("[1, :]", List.class);
+    }
+
+    @Test
+    public void testPrimitiveListCommaAfterQuotedText() {
+        assertThrows(ParsingException.class, () -> parser3.deserialize("[\"1\" x, 2]", com.landawn.abacus.util.IntList.class));
+    }
+
+    // ---------------------------------------------------------------- MapEntity / EntityId
+
+    @Test
+    public void testMapEntityErrors() {
+        fails("{\"E\" x: {}}", MapEntity.class);
+        fails("{: {}}", MapEntity.class);
+        fails("{\"E\": {}", MapEntity.class);
+        fails("{\"E\"\"F\": {}}", MapEntity.class);
+        assertNull(parser3.deserialize("  ", MapEntity.class));
+    }
+
+    @Test
+    public void testSeidErrors() {
+        fails("{\"E\" x: {}}", Seid.class);
+        fails("{: {}}", Seid.class);
+        fails("{\"E\": {}", Seid.class);
+        fails("{\"E\"\"F\": {}}", Seid.class);
+    }
+
+    // ---------------------------------------------------------------- Dataset
+
+    @Test
+    public void testRowDatasetErrors() {
+        fails("[,1]", Dataset.class);
+        fails("[{\"a\" x:1}]", Dataset.class);
+        fails("[{\"a\":1:2}]", Dataset.class);
+        fails("[{{\"a\":1}}]", Dataset.class);
+        fails("[{[1]}]", Dataset.class);
+        fails("[{\"a\":1}}", Dataset.class);
+        fails("[[1]]", Dataset.class);
+        fails("[{\"a\":1}", Dataset.class);
+        fails("[1]", Dataset.class);
+        assertNull(parser3.deserialize("  ", Dataset.class));
+    }
+
+    @Test
+    public void testRowDatasetIgnoredNestedValues() {
+        final JsonDeserConfig config = JsonDeserConfig.create().setIgnoredPropNames(Map.class, N.toSet("m", "l"));
+        final Dataset ds = parser3.deserialize("[{\"a\":1, \"m\":{\"x\":1}, \"l\":[1,2]}]", config, Dataset.class);
+        assertEquals(Arrays.asList("a"), ds.columnNames());
+        assertEquals(1, ds.size());
+    }
+
+    @Test
+    public void testColumnDatasetErrors() {
+        fails("{\"zzz\":\"v\"}", Dataset.class);
+        fails("{\"columnNames\":\"v\"}", Dataset.class);
+        fails("{\"columnNames\":[\"a\"], \"columns\":{\"a\"::[1]}}", Dataset.class);
+        fails("{\"columnNames\":[\"a\"], \"columns\":{,\"a\":[1]}}", Dataset.class);
+        fails("{\"columnNames\":[\"a\"], \"columns\":{\"a\":[1]}", Dataset.class);
+        fails("{\"columnNames\":[\"a\"], \"columns\":{\"a\":[1]}]", Dataset.class);
+    }
+
+    // ---------------------------------------------------------------- Sheet
+
+    @Test
+    public void testSheetUnquotedKeyTypes() {
+        final Sheet<?, ?, ?> sheet = parser3.deserialize(
+                "{\"rowKeyType\": String, \"columnKeyType\": String, \"rowKeySet\":[\"r\"], \"columnKeySet\":[\"c\"], \"columns\":{\"c\":[1]}}", Sheet.class);
+        assertEquals(1, sheet.rowCount());
+        assertEquals(1, sheet.columnCount());
+    }
+
+    @Test
+    public void testSheetUnquotedKeyTypesAtEnd() {
+        final Sheet<?, ?, ?> s1 = parser3.deserialize("{\"columnKeySet\":[], \"rowKeyType\": String}", Sheet.class);
+        assertEquals(0, s1.rowCount());
+        final Sheet<?, ?, ?> s2 = parser3.deserialize("{\"rowKeySet\":[], \"columnKeyType\": String}", Sheet.class);
+        assertEquals(0, s2.columnCount());
+    }
+
+    @Test
+    public void testSheetKeyTypeOrderErrors() {
+        fails("{\"rowKeySet\":[\"r\"], \"rowKeyType\": String, \"columnKeySet\":[]}", Sheet.class);
+        fails("{\"columnKeySet\":[\"c\"], \"columnKeyType\": String, \"rowKeySet\":[]}", Sheet.class);
+        fails("{\"rowKeySet\":[\"r\"], \"rowKeyType\": String}", Sheet.class);
+        fails("{\"columnKeySet\":[\"c\"], \"columnKeyType\": String}", Sheet.class);
+        fails("{\"rowKeySet\":[], \"zzz\": 1}", Sheet.class);
+        fails("{\"rowKeySet\":[], \"columnKeySet\": 1}", Sheet.class);
+        fails("{\"rowKeySet\":[], \"columnKeySet\":[]", Sheet.class);
+        fails("{\"rowKeySet\":[], \"columnKeySet\":[]]", Sheet.class);
+        fails("{\"rowKeySet\":[], \"columns\":{\"c\":[1]}}", Sheet.class);
+        fails("{\"columnKeySet\":[\"c\"], \"columns\":{\"c\"::[1]}}", Sheet.class);
+        fails("{\"columnKeySet\":[\"c\"], \"columns\":{,\"c\":[1]}}", Sheet.class);
+        fails("{\"columnKeySet\":[\"c\"], \"columns\":{\"c\":[1] x, \"d\":[2]}}", Sheet.class);
+    }
+
+    // ---------------------------------------------------------------- tuples
+
+    @Test
+    public void testTuplesInList() {
+        final List<Triple<Integer, String, Long>> triples = parser3.deserialize("[[1, \"a\", 2]]", Type.of("List<Triple<Integer, String, Long>>"));
+        assertEquals(Triple.of(1, "a", 2L), triples.get(0));
+
+        final List<Tuple3<Integer, Integer, Integer>> t3 = parser3.deserialize("[[1,2,3]]", Type.of("List<Tuple3<Integer, Integer, Integer>>"));
+        assertEquals(3, t3.get(0)._3);
+        final List<Tuple4<Integer, Integer, Integer, Integer>> t4 = parser3.deserialize("[[1,2,3,4]]",
+                Type.of("List<Tuple4<Integer, Integer, Integer, Integer>>"));
+        assertEquals(4, t4.get(0)._4);
+        final List<Tuple5<Integer, Integer, Integer, Integer, Integer>> t5 = parser3.deserialize("[[1,2,3,4,5]]",
+                Type.of("List<Tuple5<Integer, Integer, Integer, Integer, Integer>>"));
+        assertEquals(5, t5.get(0)._5);
+        final List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> t6 = parser3.deserialize("[[1,2,3,4,5,6]]",
+                Type.of("List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>"));
+        assertEquals(6, t6.get(0)._6);
+        final List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> t7 = parser3.deserialize("[[1,2,3,4,5,6,7]]",
+                Type.of("List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>>"));
+        assertEquals(7, t7.get(0)._7);
+        final List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> t8 = parser3.deserialize("[[1,2,3,4,5,6,7,8]]",
+                Type.of("List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>"));
+        assertEquals(8, t8.get(0)._8);
+        final List<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> t9 = parser3.deserialize("[[1,2,3,4,5,6,7,8,9]]",
+                Type.of("List<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>"));
+        assertEquals(9, t9.get(0)._9);
+    }
+
+    @Test
+    public void testTupleArityErrors() {
+        assertThrows(ParsingException.class, () -> parser3.deserialize("[[1, \"a\", 2, \"x\"]]", Type.of("List<Triple<Integer, String, Long>>")));
+        assertThrows(ParsingException.class, () -> parser3.deserialize("[[1, \"a\", 2, 3]]", Type.of("List<Triple<Integer, String, Long>>")));
+        assertThrows(ParsingException.class, () -> parser3.deserialize("[[1, \"a\" : 2]]", Type.of("List<Triple<Integer, String, Long>>")));
+    }
+
+    // ---------------------------------------------------------------- stream
+
+    @Test
+    public void testStreamWhitespaceReaderIsEmpty() {
+        try (Stream<Map<String, Object>> s = parser3.stream(new StringReader("   "), true, Type.of("Map<String, Object>"))) {
+            assertEquals(0, s.count());
+        }
+    }
+
+    @Test
+    public void testStreamStructuredElementMissingClosingBracket() {
+        assertThrows(ParsingException.class, () -> {
+            try (Stream<Map<String, Object>> s = parser3.stream("[{\"a\":1}", Type.of("Map<String, Object>"))) {
+                s.toList();
+            }
+        });
+    }
+
+    @Test
+    public void testStreamTrailingNullAfterStructured() {
+        try (Stream<Map<String, Object>> s = parser3.stream("[{\"a\":1},null]", Type.of("Map<String, Object>"))) {
+            final List<Map<String, Object>> list = s.toList();
+            assertEquals(2, list.size());
+            assertEquals(N.asMap("a", 1), list.get(0));
+            assertNull(list.get(1));
+        }
+    }
+
+    // ---------------------------------------------------------------- serialization
+
+    @Test
+    public void testSerializeUnbracketedCollectionRoot() {
+        final JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+        assertEquals("1, 2", parser3.serialize(Arrays.asList(1, 2), config));
+        assertEquals("s", parser3.serialize("s", config));
+    }
+
+    @Test
+    public void testSerializeUnbracketedCollectionRootToWriter() {
+        final JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+        final java.io.StringWriter sw = new java.io.StringWriter();
+        parser3.serialize(Arrays.asList(1, 2), config, sw);
+        assertEquals("1, 2", sw.toString());
+
+        final java.io.StringWriter sw2 = new java.io.StringWriter();
+        parser3.serialize(N.asMap("k", 1), config, sw2);
+        assertEquals("\"k\": 1", sw2.toString());
+    }
+
+    @Test
+    public void testSerializeCharArrayWithSingleQuote() {
+        final JsonSerConfig config = JsonSerConfig.create().setCharQuotation('\'');
+        assertEquals("['a', '\\'']", parser3.serialize(new char[] { 'a', '\'' }, config));
+    }
+
+    @Test
+    public void testSerializeBeanExclusionDefault() {
+        final GapBean bean = new GapBean();
+        bean.setA("x");
+        final JsonSerConfig config = JsonSerConfig.create().setExclusion(Exclusion.DEFAULT);
+        assertEquals("{\"a\": \"x\"}", parser3.serialize(bean, config));
+        bean.setN(5);
+        assertEquals("{\"a\": \"x\", \"n\": 5}", parser3.serialize(bean, config));
+    }
+
+    @Test
+    public void testSerializeBeanUnquotedNullProps() {
+        final GapBean bean = new GapBean();
+        final JsonSerConfig c1 = JsonSerConfig.create().setQuotePropName(false).setExclusion(Exclusion.NONE);
+        assertEquals("{a: null, n: 0, list: null}", parser3.serialize(bean, c1));
+        final JsonSerConfig c2 = JsonSerConfig.create().setQuotePropName(false).setExclusion(Exclusion.NONE).setWriteNullToEmpty(true);
+        assertEquals("{a: \"\", n: 0, list: []}", parser3.serialize(bean, c2));
+    }
+
+    @Test
+    public void testSerializeNestedBeanWrapRootPretty() {
+        final Holder2 h = new Holder2();
+        final GapBean bean = new GapBean();
+        bean.setA("x");
+        h.setInner(bean);
+        final List<Holder2> list = new ArrayList<>();
+        list.add(h);
+        final JsonSerConfig config = JsonSerConfig.create().setWrapRootValue(true).setPrettyFormat(true);
+        final String json = parser3.serialize(list, config);
+        assertTrue(json.contains("GapBean"), json);
+        assertTrue(json.contains("Holder"), json);
+    }
+
+    @Test
+    public void testSerializeSheetMixedKeyTypes() {
+        final Sheet<Object, Object, Object> sheet = Sheet.rows(N.asList((Object) "r", 1), N.asList((Object) "c", 2), new Object[][] { { 1, 2 }, { 3, 4 } });
+        final String json = parser3.serialize(sheet, JsonSerConfig.create().setWriteRowColumnKeyType(true));
+        assertTrue(json.contains("\"rowKeyType\": null"), json);
+        assertTrue(json.contains("\"columnKeyType\": null"), json);
+        assertFalse(json.isEmpty());
+    }
+
+    @Test
+    public void testDeserializeObjectRootFromReader() {
+        final Object map = parser3.deserialize(new StringReader("{\"a\":1}"), Object.class);
+        assertEquals(N.asMap("a", 1), map);
+        final Object list = parser3.deserialize(new StringReader("[1,2]"), Object.class);
+        assertEquals(Arrays.asList(1, 2), list);
+        final Map<String, Object> lm = new LinkedHashMap<>();
+        lm.put("a", 1);
+        assertEquals(lm, parser3.parse("{\"a\":1}", Object.class));
+    }
+
+    // ---------------------------------------------------------------- batch 2
+
+    public static class MapHolder {
+        private Map<String, Object> m;
+
+        public Map<String, Object> getM() {
+            return m;
+        }
+
+        public void setM(final Map<String, Object> m) {
+            this.m = m;
+        }
+    }
+
+    private static final class FailingOutputStream extends java.io.OutputStream {
+        @Override
+        public void write(final int b) throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+
+        @Override
+        public void flush() throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+    }
+
+    private static final class FailingWriter extends java.io.Writer {
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+
+        @Override
+        public void write(final String str) throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+
+        @Override
+        public void flush() throws java.io.IOException {
+            throw new java.io.IOException("boom");
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    @Test
+    public void testParseSerializableCollectionAndObjectRoots() {
+        final List<String> list = parser3.parse("[\"a\", \"b\"]", Type.of("List<String>"));
+        assertEquals(Arrays.asList("a", "b"), list);
+        assertEquals(Arrays.asList(1, 2), parser3.parse("[1, 2]", Object.class));
+    }
+
+    @Test
+    public void testValidateEmptyAndScalar() {
+        parser3.validate("");
+        assertThrows(ParsingException.class, () -> parser3.parse("\"x\"", Object.class));
+        parser3.validate("[1, {\"a\": [2]}]");
+        assertThrows(ParsingException.class, () -> parser3.validate("[1] 2"));
+    }
+
+    @Test
+    public void testRowDatasetMoreErrors() {
+        fails("[{\"a\":\"1\":2}]", Dataset.class);
+        fails("[{\"a\":1]", Dataset.class);
+        fails("[{,\"a\":1}]", Dataset.class);
+    }
+
+    @Test
+    public void testMapEntitySingleQuotedSecondName() {
+        fails("{'E' 'F': {}}", MapEntity.class);
+    }
+
+    @Test
+    public void testBeanSlotFedArray() {
+        assertThrows(RuntimeException.class, () -> parser3.deserialize("{\"inner\":[1]}", Holder2.class));
+    }
+
+    @Test
+    public void testStreamMissingClosingBracketAfterComma() {
+        assertThrows(ParsingException.class, () -> {
+            try (Stream<Map<String, Object>> s = parser3.stream("[{\"a\":1},", Type.of("Map<String, Object>"))) {
+                s.toList();
+            }
+        });
+        assertThrows(ParsingException.class, () -> {
+            try (Stream<Map<String, Object>> s = parser3.stream("[", Type.of("Map<String, Object>"))) {
+                s.toList();
+            }
+        });
+    }
+
+    @Test
+    public void testSheetWhitespaceIsNull() {
+        assertNull(parser3.deserialize("   ", Sheet.class));
+    }
+
+    @Test
+    public void testSerializeEnumAndArraysUnbracketed() {
+        final JsonSerConfig config = JsonSerConfig.create().setBracketRootValue(false);
+        assertEquals("\"SECONDS\"", parser3.serialize(java.util.concurrent.TimeUnit.SECONDS, config));
+        assertEquals("'a', '\\''", parser3.serialize(new char[] { 'a', '\'' }, JsonSerConfig.create().setBracketRootValue(false).setCharQuotation('\'')));
+        assertEquals("\"x\", \"y\"", parser3.serialize(new String[] { "x", "y" }, config));
+    }
+
+    @Test
+    public void testSerializeToFailingOutputs(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir) throws Exception {
+        final java.io.File blocker = dir.resolve("blocker.txt").toFile();
+        java.nio.file.Files.writeString(blocker.toPath(), "x");
+        // the parent "directory" is a regular file, so the output cannot be created
+        final java.io.File d = new java.io.File(blocker, "child.json");
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(null, null, new FailingOutputStream()));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(null, null, new FailingWriter()));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(null, null, d));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize("s", null, d));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(Arrays.asList(1), null, d));
+
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize("s", null, new FailingOutputStream()));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(Arrays.asList(1), null, new FailingOutputStream()));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize("s", null, new FailingWriter()));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> parser3.serialize(Arrays.asList(1), null, new FailingWriter()));
+    }
+
+    @Test
+    public void testStreamHasNextTwice() {
+        try (Stream<Map<String, Object>> s = parser3.stream("[{\"a\":1}]", Type.of("Map<String, Object>"))) {
+            final java.util.Iterator<Map<String, Object>> it = s.iterator();
+            assertTrue(it.hasNext());
+            assertTrue(it.hasNext());
+            assertEquals(N.asMap("a", 1), it.next());
+            assertFalse(it.hasNext());
+        }
+    }
+
+    @Test
+    public void testStreamFileWithObjectRootClosesReader(@org.junit.jupiter.api.io.TempDir final java.nio.file.Path dir) throws Exception {
+        final java.io.File f = dir.resolve("obj.json").toFile();
+        java.nio.file.Files.writeString(f.toPath(), "{\"a\":1}");
+        assertThrows(UnsupportedOperationException.class, () -> parser3.stream(f, null, Type.of("Map<String, Object>")));
+    }
+
+    @Test
+    public void testStreamReaderNumberFollowedByNonAsciiText() {
+        final List<?> list = parser3.deserialize(new StringReader("[1é, 2]"), List.class);
+        assertEquals(Arrays.asList("1é", 2), list);
+        assertThrows(ParsingException.class, () -> parser3.deserialize(new StringReader("[1x"), List.class));
+    }
+
+    @Test
+    public void testSubclassParserReadsScalarRoots() {
+        final JsonParserImpl sub = new JsonParserImpl() {
+        };
+        assertEquals("abc", sub.parse("abc", String.class));
+        assertEquals(Integer.valueOf(12), sub.deserialize("12", Integer.class));
+        assertEquals(Integer.valueOf(7), sub.deserialize(new StringReader("7"), Integer.class));
+        assertEquals("[1, 2]", sub.serialize(new int[] { 1, 2 }));
+        assertEquals("[1, 2]", sub.serialize(com.landawn.abacus.util.IntList.of(1, 2)));
+    }
+
+    @Test
+    public void testDeserializeRangeWithType() {
+        final JsonParser parser = ParserFactory.createJsonParser();
+        final String src = "xx[1,2,3]yy";
+        final List<Integer> r1 = parser.deserialize(src, 2, 9, Type.ofList(Integer.class));
+        assertEquals(List.of(1, 2, 3), r1);
+
+        final List<Integer> r2 = parser.deserialize(src, 2, 9, new JsonDeserConfig(), Type.ofList(Integer.class));
+        assertEquals(List.of(1, 2, 3), r2);
+    }
+
+    private static PrimitiveJsonBuffer buffer2(final Class<?> arrayClass) {
+        final Type<?> arrayType = Type.of(arrayClass);
+        final PrimitiveJsonBuffer b = PrimitiveJsonBuffer.create(arrayType, arrayType.elementType());
+        assertNotNull(b);
+        return b;
+    }
+
+    @Test
+    public void testCreateRejectsMismatches() {
+        assertNull(PrimitiveJsonBuffer.create(null, Type.of(int.class)));
+        assertNull(PrimitiveJsonBuffer.create(Type.of(int[].class), null));
+        assertNull(PrimitiveJsonBuffer.create(Type.of(int[].class), Type.of(long.class)));
+        assertNull(PrimitiveJsonBuffer.createList(Type.of(List.class)));
+    }
+
+    @Test
+    public void testGetForEveryPrimitive() {
+        final Object[][] cases = { { boolean[].class, true }, { char[].class, 'c' }, { byte[].class, (byte) 3 }, { short[].class, (short) 4 },
+                { int[].class, 5 }, { long[].class, 6L }, { float[].class, 7f }, { double[].class, 8d } };
+        for (final Object[] c : cases) {
+            final PrimitiveJsonBuffer b = buffer2((Class<?>) c[0]);
+            b.add(c[1]);
+            assertEquals(1, b.size());
+            assertEquals(c[1], b.get(0));
+            assertNotNull(b.array());
+            assertNotNull(b.primitiveList());
+        }
+        final PrimitiveJsonBuffer ints = buffer2(int[].class);
+        ints.add(1);
+        ints.add(2);
+        assertArrayEquals(new int[] { 1, 2 }, (int[]) ints.array());
+    }
 }

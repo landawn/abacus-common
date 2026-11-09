@@ -1,12 +1,16 @@
 package com.landawn.abacus.util.stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -392,4 +396,78 @@ public class FloatIteratorExTest extends TestBase {
         assertNotNull(iter);
     }
 
+    private static final class CloseableFloatIterator extends FloatIterator implements AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private int cursor = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cursor < 2;
+        }
+
+        @Override
+        public float nextFloat() {
+            return (float) (++cursor);
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    private static final class CloseableIterator implements Iterator<Float>, AutoCloseable {
+        final AtomicBoolean closed = new AtomicBoolean();
+        private final Iterator<Float> it = Arrays.asList((Float) (float) 1, (Float) (float) 2).iterator();
+
+        @Override
+        public boolean hasNext() {
+            return it.hasNext();
+        }
+
+        @Override
+        public Float next() {
+            return it.next();
+        }
+
+        @Override
+        public void close() {
+            closed.set(true);
+        }
+    }
+
+    @Test
+    public void testEmptySupportsFailureAtomicAdvance() {
+        assertTrue(FloatIteratorEx.EMPTY.supportsFailureAtomicAdvance());
+        assertFalse(FloatIteratorEx.EMPTY.hasNext());
+    }
+
+    @Test
+    public void testOfPlainIteratorClosesResource() {
+        final CloseableFloatIterator src = new CloseableFloatIterator();
+        final FloatIteratorEx iter = FloatIteratorEx.of(src);
+        assertEquals((float) 1, iter.nextFloat());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
+
+    @Test
+    public void testFromObjIteratorEx2() {
+        final ObjIteratorEx<Float> src = ObjIteratorEx.of((Float) (float) 1, (Float) (float) 2, (Float) (float) 3);
+        final FloatIteratorEx iter = FloatIteratorEx.from(src);
+        assertEquals(ObjIteratorEx.supportsFailureAtomicAdvance(src), iter.supportsFailureAtomicAdvance());
+        iter.advance(0);
+        assertEquals((float) 1, iter.nextFloat());
+        iter.advance(-1);
+        assertEquals((float) 2, iter.nextFloat());
+    }
+
+    @Test
+    public void testFromPlainIteratorClosesResource() {
+        final CloseableIterator src = new CloseableIterator();
+        final FloatIteratorEx iter = FloatIteratorEx.from(src);
+        assertEquals((float) 1, iter.nextFloat());
+        iter.closeResource();
+        assertTrue(src.closed.get());
+    }
 }

@@ -1,5 +1,6 @@
 package com.landawn.abacus.http;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -12,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.HttpURLConnection;
@@ -23,9 +25,13 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,10 +47,13 @@ import javax.net.ssl.SSLSocketFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 
 public class HttpClientTest extends TestBase {
 
@@ -1690,4 +1699,110 @@ public class HttpClientTest extends TestBase {
         }
     }
     // ---- deep review 2026-10-26 verify G120 end ----
+
+    @TempDir
+    Path tempDir;
+
+    private HttpServer server2;
+    private String baseUrl2;
+
+    @BeforeEach
+    public void startServer() throws IOException {
+        server2 = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server2.createContext("/json", ex -> respond(ex, "application/json", "{\"a\":1,\"b\":\"x\"}".getBytes(StandardCharsets.UTF_8)));
+        server2.createContext("/form", ex -> respond(ex, "application/x-www-form-urlencoded", "a=1&b=x".getBytes(StandardCharsets.UTF_8)));
+        server2.createContext("/text", ex -> respond(ex, "text/plain; charset=UTF-8", "hello".getBytes(StandardCharsets.UTF_8)));
+        server2.createContext("/echo", ex -> {
+            final byte[] body;
+            try (InputStream in = ex.getRequestBody()) {
+                body = in.readAllBytes();
+            }
+            final String encoding = ex.getRequestHeaders().getFirst("Content-Encoding");
+            if (encoding != null) {
+                ex.getResponseHeaders().add("Content-Encoding", encoding);
+            }
+            respond(ex, ex.getRequestHeaders().getFirst("Content-Type"), body);
+        });
+        server2.start();
+        baseUrl2 = "http://127.0.0.1:" + server2.getAddress().getPort();
+    }
+
+    @AfterEach
+    public void stopServer() {
+        if (server2 != null) {
+            server2.stop(0);
+        }
+    }
+
+    private static void respond(final HttpExchange ex, final String contentType, final byte[] body) throws IOException {
+        if (contentType != null) {
+            ex.getResponseHeaders().add("Content-Type", contentType);
+        }
+        ex.sendResponseHeaders(200, body.length == 0 ? -1 : body.length);
+        try (OutputStream os = ex.getResponseBody()) {
+            os.write(body);
+        }
+    }
+
+    @Test
+    public void testGetDeserializesJsonIntoMap() {
+        final HttpClient client = HttpClient.create(baseUrl2 + "/json");
+        final Map<?, ?> map = client.get(Map.class);
+        assertEquals(2, map.size());
+        assertEquals("x", map.get("b"));
+    }
+
+    @Test
+    public void testGetBytesAndFormDecoding() {
+        assertArrayEquals("hello".getBytes(StandardCharsets.UTF_8), HttpClient.create(baseUrl2 + "/text").get(byte[].class));
+
+        final Map<?, ?> form = HttpClient.create(baseUrl2 + "/form").get(Map.class);
+        assertEquals("1", String.valueOf(form.get("a")));
+        assertEquals("x", String.valueOf(form.get("b")));
+    }
+
+    @Test
+    public void testExecuteToOutputStreamAndWriter() {
+        final HttpClient client = HttpClient.create(baseUrl2 + "/text");
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        client.execute(HttpMethod.GET, null, HttpSettings.create(), bos);
+        assertEquals("hello", bos.toString(StandardCharsets.UTF_8));
+
+        final StringWriter sw = new StringWriter();
+        client.execute(HttpMethod.GET, null, HttpSettings.create(), sw);
+        assertEquals("hello", sw.toString());
+    }
+
+    @Test
+    public void testExecuteRequestBodyVariants() throws IOException {
+        final HttpClient client = HttpClient.create(baseUrl2 + "/echo");
+
+        final File out = tempDir.resolve("out.txt").toFile();
+        client.executeRequestBody(HttpMethod.POST, "abc", HttpSettings.create(), out);
+        assertEquals("abc", new String(Files.readAllBytes(out.toPath()), StandardCharsets.UTF_8));
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        client.executeRequestBody(HttpMethod.POST, "def", HttpSettings.create(), bos);
+        assertEquals("def", bos.toString(StandardCharsets.UTF_8));
+
+        final StringWriter sw = new StringWriter();
+        client.executeRequestBody(HttpMethod.PUT, "ghi", HttpSettings.create(), sw);
+        assertEquals("ghi", sw.toString());
+    }
+
+    @Test
+    public void testKryoRoundTrip() {
+        if (HttpUtil.kryoParser == null) {
+            return; // kryo not on the class path
+        }
+
+        final HttpClient client = HttpClient.create(baseUrl2 + "/echo");
+        final List<String> request = new ArrayList<>(Arrays.asList("a", "b"));
+        final Map<String, Object> wrapper = new LinkedHashMap<>();
+        wrapper.put("list", request);
+
+        final Object result = client.post(wrapper, HttpSettings.create().setContentFormat(ContentFormat.KRYO), LinkedHashMap.class);
+        assertEquals(wrapper, result);
+    }
 }

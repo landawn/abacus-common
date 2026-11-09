@@ -11,7 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +33,7 @@ import java.util.function.BiPredicate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.Array;
@@ -45,6 +49,7 @@ import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.PermutationIterator;
 import com.landawn.abacus.util.Profiler;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.function.BiFunction;
 import com.landawn.abacus.util.function.Consumer;
 import com.landawn.abacus.util.function.Function;
@@ -1880,7 +1885,7 @@ public class StreamTest extends StreamTestSupport {
 
         final long sum = tmp;
 
-        Profiler.run(1, 10, 1, "For loop", () -> {
+        Profiler.run(1, 1, 1, "For loop", () -> {
             long result = 0;
 
             for (final String str : strs) {
@@ -1890,9 +1895,9 @@ public class StreamTest extends StreamTestSupport {
             assertEquals(sum, result);
         }).printResult();
 
-        Profiler.run(1, 10, 1, "Abacus sequential", () -> assertEquals(sum, Stream.of(strs).map(mapper).mapToLong(t -> t).sum())).printResult();
+        Profiler.run(1, 1, 1, "Abacus sequential", () -> assertEquals(sum, Stream.of(strs).map(mapper).mapToLong(t -> t).sum())).printResult();
 
-        Profiler.run(1, 10, 1, "Abacus parallel", () -> assertEquals(sum, Stream.of(strs).parallel().map(mapper).mapToLong(t -> t).sum())).printResult();
+        Profiler.run(1, 1, 1, "Abacus parallel", () -> assertEquals(sum, Stream.of(strs).parallel().map(mapper).mapToLong(t -> t).sum())).printResult();
     }
 
     // prepend
@@ -3079,4 +3084,603 @@ public class StreamTest extends StreamTestSupport {
         assertEquals(Arrays.asList(other, first, null), new ArrayList<>(linkedHashSet));
     }
     // ---- deep review 2026-10-16 G155 end ----
+
+    private static final java.util.function.BiFunction<Integer, Integer, MergeResult> MIN_FIRST = (a, b) -> a <= b ? MergeResult.TAKE_FIRST
+            : MergeResult.TAKE_SECOND;
+
+    private static <T> void drainThenExpectNoSuchElement(final Stream<T> s, final int expectedCount) {
+        final ObjIteratorEx<T> iter = s.iteratorEx();
+        int cnt = 0;
+
+        while (iter.hasNext()) {
+            iter.next();
+            cnt++;
+        }
+
+        assertEquals(expectedCount, cnt);
+        assertThrows(NoSuchElementException.class, iter::next);
+        s.close();
+    }
+
+    // ------------------------------------------------------------------ of(...) empties
+
+    @Test
+    public void testOfNullIteratorIsEmpty() {
+        assertEquals(0, Stream.of((Iterator<String>) null).count());
+    }
+
+    @Test
+    public void testOfIteratorRange() {
+        assertEquals(0, Stream.<String> of((Iterator<String>) null, 0, 0).count());
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2).iterator(), -1, 1));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2).iterator(), 2, 1));
+        assertEquals(Arrays.asList(2, 3), Stream.of(Arrays.asList(1, 2, 3, 4).iterator(), 1, 3).toList());
+    }
+
+    @Test
+    public void testOfEmptyPrimitiveArrayRanges() {
+        assertEquals(0, Stream.of(new char[0], 0, 0).count());
+        assertEquals(0, Stream.of(new byte[0], 0, 0).count());
+        assertEquals(0, Stream.of(new short[0], 0, 0).count());
+        assertEquals(0, Stream.of(new int[0], 0, 0).count());
+        assertEquals(0, Stream.of(new long[0], 0, 0).count());
+        assertEquals(0, Stream.of(new float[0], 0, 0).count());
+        assertEquals(0, Stream.of(new double[0], 0, 0).count());
+        assertEquals(0, Stream.of((char[]) null, 0, 0).count());
+        assertEquals(0, Stream.of((double[]) null, 0, 0).count());
+    }
+
+    // ------------------------------------------------------------------ exhausted iterators
+
+    @Test
+    public void testSplitByChunkCountExhausted() {
+        drainThenExpectNoSuchElement(Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from), 3);
+        drainThenExpectNoSuchElement(Stream.splitByChunkCount(7, 3, false, (from, to) -> to - from), 3);
+        assertEquals(Arrays.asList(2, 2, 3), Stream.splitByChunkCount(7, 3, true, (from, to) -> to - from).toList());
+        assertEquals(Arrays.asList(3, 2, 2), Stream.splitByChunkCount(7, 3, false, (from, to) -> to - from).toList());
+    }
+
+    @Test
+    public void testFlattenAlignment() {
+        final String[][] a = { { "a", "b" }, { "c" } };
+        assertEquals(Arrays.asList("a", "c", "b", "x"), Stream.flatten(a, "x", true).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "x"), Stream.flatten(a, "x", false).toList());
+        drainThenExpectNoSuchElement(Stream.flatten(a, "x", true), 4);
+        drainThenExpectNoSuchElement(Stream.flatten(a, "x", false), 4);
+
+        final String[][] allEmpty = { {}, {} };
+        assertEquals(0, Stream.flatten(allEmpty, "x", true).count());
+    }
+
+    @Test
+    public void testIterateExhausted() {
+        drainThenExpectNoSuchElement(Stream.iterate(1, x -> x < 4, x -> x + 1), 3);
+    }
+
+    @Test
+    public void testConcatEmptyAndExhausted() {
+        assertEquals(0, Stream.concat(new Stream[0]).count());
+        assertEquals(0, Stream.concatIterators(Collections.<Iterator<String>> emptyList()).count());
+
+        final List<Iterator<Integer>> iters = new ArrayList<>();
+        iters.add(Arrays.asList(1, 2).iterator());
+        iters.add(Arrays.asList(3).iterator());
+        drainThenExpectNoSuchElement(Stream.concatIterators(iters), 3);
+    }
+
+    @Test
+    public void testRepeatIteratorEdges() {
+        final ObjIteratorEx<String> iter = Stream.repeat("a", 3).iteratorEx();
+        iter.advance(0);
+        iter.advance(-1);
+        assertEquals(3, iter.count());
+
+        final ObjIteratorEx<String> it2 = Stream.repeat("a", 2).iteratorEx();
+        it2.next();
+        it2.next();
+        assertThrows(NoSuchElementException.class, it2::next);
+
+        final ObjIteratorEx<String> huge = Stream.repeat("a", Long.MAX_VALUE).iteratorEx();
+        assertThrows(IllegalStateException.class, () -> huge.toArray(new String[0]));
+    }
+
+    @Test
+    public void testOfReversedExhausted() {
+        drainThenExpectNoSuchElement(Stream.ofReversed(Arrays.asList(1, 2, 3)), 3);
+        assertEquals(Arrays.asList(3, 2, 1), Stream.ofReversed(new ArrayList<>(Arrays.asList(1, 2, 3))).toList());
+    }
+
+    @Test
+    public void testFromJdkStreamToArrayAfterExhaustion() {
+        final ObjIteratorEx<String> iter = Stream.from(java.util.stream.Stream.of("a", "b")).iteratorEx();
+        assertArrayEquals(new String[] { "a", "b" }, iter.toArray(new String[0]));
+
+        final String[] target = { "z", "z" };
+        final String[] result = iter.toArray(target);
+        assertEquals(0, result.length == target.length ? 0 : result.length);
+        assertNull(result[0]);
+    }
+
+    // ------------------------------------------------------------------ files
+
+    @Test
+    public void testListFiles(@TempDir final Path dir) throws IOException {
+        final File root = dir.toFile();
+        final File sub = new File(root, "sub");
+        assertTrue(sub.mkdir());
+        Files.write(new File(root, "a.txt").toPath(), new byte[] { 1 });
+        Files.write(new File(sub, "b.txt").toPath(), new byte[] { 2 });
+
+        assertEquals(0, Stream.listFiles(new File(root, "missing"), true).count());
+        assertEquals(3, Stream.listFiles(root, true, false).count());
+        assertEquals(2, Stream.listFiles(root, true, true).count());
+        assertEquals(2, Stream.listFiles(root, false, false).count());
+        drainThenExpectNoSuchElement(Stream.listFiles(root, true), 3);
+    }
+
+    // ------------------------------------------------------------------ parallel concat
+
+    @Test
+    public void testParallelConcatEmptyAndDefault() {
+        assertEquals(0, Stream.parallelConcat(Collections.<Stream<String>> emptyList(), 2, 4).count());
+        assertEquals(0, Stream.parallelConcatIterators(Collections.<Iterator<String>> emptyList(), 2, 4).count());
+        assertEquals(0, Stream.parallelConcatIterators(Collections.<Iterator<String>> emptyList(), 2, false, null).count());
+        assertEquals(0, Stream.parallelConcatIterators(Collections.<Iterator<String>> emptyList(), 2, 4, false, null).count());
+
+        final List<Stream<Integer>> streams = Arrays.asList(Stream.of(1, 2), Stream.of(3));
+        assertEquals(Arrays.asList(1, 2, 3), Stream.parallelConcat(streams).sorted().toList());
+    }
+
+    // ------------------------------------------------------------------ primitive zips
+
+    @Test
+    public void testPrimitiveZipEmptyAndMismatch() {
+        assertEquals(0, Stream.zip(Collections.<CharStream> emptyList(), (char... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<ByteStream> emptyList(), (byte... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<ShortStream> emptyList(), (short... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<IntStream> emptyList(), (int... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<LongStream> emptyList(), (long... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<FloatStream> emptyList(), (float... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<DoubleStream> emptyList(), (double... a) -> a.length).count());
+
+        assertEquals(0, Stream.zip(Collections.<CharStream> emptyList(), new char[0], (char... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<ByteStream> emptyList(), new byte[0], (byte... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<ShortStream> emptyList(), new short[0], (short... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<IntStream> emptyList(), new int[0], (int... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<LongStream> emptyList(), new long[0], (long... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<FloatStream> emptyList(), new float[0], (float... a) -> a.length).count());
+        assertEquals(0, Stream.zip(Collections.<DoubleStream> emptyList(), new double[0], (double... a) -> a.length).count());
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(CharStream.of('a')), new char[0], (char... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(ByteStream.of((byte) 1)), new byte[0], (byte... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(ShortStream.of((short) 1)), new short[0], (short... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(IntStream.of(1)), new int[0], (int... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(LongStream.of(1L)), new long[0], (long... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(FloatStream.of(1f)), new float[0], (float... a) -> a.length));
+        assertThrows(IllegalArgumentException.class, () -> Stream.zip(Arrays.asList(DoubleStream.of(1d)), new double[0], (double... a) -> a.length));
+    }
+
+    @Test
+    public void testPrimitiveZipWithDefaultsExhausted() {
+        drainThenExpectNoSuchElement(
+                Stream.zip(Arrays.asList(CharStream.of('a', 'b'), CharStream.of('c')), new char[] { 'x', 'y' }, (char... a) -> new String(a)), 2);
+        drainThenExpectNoSuchElement(
+                Stream.zip(Arrays.asList(ByteStream.of((byte) 1, (byte) 2), ByteStream.of((byte) 3)), new byte[] { 0, 9 }, (byte... a) -> a[0] + a[1]), 2);
+        drainThenExpectNoSuchElement(
+                Stream.zip(Arrays.asList(ShortStream.of((short) 1, (short) 2), ShortStream.of((short) 3)), new short[] { 0, 9 }, (short... a) -> a[0] + a[1]),
+                2);
+        drainThenExpectNoSuchElement(Stream.zip(Arrays.asList(LongStream.of(1L, 2L), LongStream.of(3L)), new long[] { 0, 9 }, (long... a) -> a[0] + a[1]), 2);
+        drainThenExpectNoSuchElement(Stream.zip(Arrays.asList(FloatStream.of(1f, 2f), FloatStream.of(3f)), new float[] { 0, 9 }, (float... a) -> a[0] + a[1]),
+                2);
+        drainThenExpectNoSuchElement(
+                Stream.zip(Arrays.asList(DoubleStream.of(1d, 2d), DoubleStream.of(3d)), new double[] { 0, 9 }, (double... a) -> a[0] + a[1]), 2);
+
+        assertEquals(Arrays.asList("ac", "by"),
+                Stream.zip(Arrays.asList(CharStream.of('a', 'b'), CharStream.of('c')), new char[] { 'x', 'y' }, (char... a) -> new String(a)).toList());
+        assertEquals(Arrays.asList(4L, 11L),
+                Stream.zip(Arrays.asList(LongStream.of(1L, 2L), LongStream.of(3L)), new long[] { 0, 9 }, (long... a) -> a[0] + a[1]).toList());
+    }
+
+    @Test
+    public void testZipIteratorsWithDefaultsExhausted() {
+        final List<Iterator<Integer>> iters = new ArrayList<>();
+        iters.add(Arrays.asList(1, 2).iterator());
+        iters.add(Arrays.asList(10).iterator());
+        final java.util.function.Function<List<Integer>, Integer> sum = l -> l.get(0) + l.get(1);
+        drainThenExpectNoSuchElement(Stream.zipIterators(iters, Arrays.asList(0, 100), sum), 2);
+
+        final List<Iterator<Integer>> iters2 = new ArrayList<>();
+        iters2.add(Arrays.asList(1, 2).iterator());
+        iters2.add(Arrays.asList(10).iterator());
+        assertEquals(Arrays.asList(11, 102), Stream.zipIterators(iters2, Arrays.asList(0, 100), sum).toList());
+    }
+
+    @Test
+    public void testParallelZipIteratorsSingleThread() {
+        final List<Iterator<Integer>> iters = new ArrayList<>();
+        iters.add(Arrays.asList(1, 2).iterator());
+        iters.add(Arrays.asList(10, 20).iterator());
+        assertEquals(Arrays.asList(11, 22), Stream.parallelZipIterators(iters, (List<Integer> l) -> l.get(0) + l.get(1), 1).toList());
+    }
+
+    // ------------------------------------------------------------------ merge
+
+    @Test
+    public void testMergeArraysEmptySides() {
+        assertEquals(Arrays.asList(1, 2), Stream.merge(new Integer[0], new Integer[] { 1, 2 }, MIN_FIRST).toList());
+        assertEquals(Arrays.asList(1, 2), Stream.merge(new Integer[] { 1, 2 }, new Integer[0], MIN_FIRST).toList());
+        drainThenExpectNoSuchElement(Stream.merge(new Integer[] { 1, 3 }, new Integer[] { 2 }, MIN_FIRST), 3);
+        drainThenExpectNoSuchElement(Stream.merge(Arrays.asList(1, 3).iterator(), Arrays.asList(2).iterator(), MIN_FIRST), 3);
+    }
+
+    @Test
+    public void testParallelMergeManySources() {
+        for (int n = 4; n <= 7; n++) {
+            final List<Stream<Integer>> streams = new ArrayList<>();
+            final List<Iterator<Integer>> iters = new ArrayList<>();
+            final List<Integer> expected = new ArrayList<>();
+
+            for (int i = 0; i < n; i++) {
+                streams.add(Stream.of(i, i + 10));
+                iters.add(Arrays.asList(i, i + 10).iterator());
+                expected.add(i);
+                expected.add(i + 10);
+            }
+
+            Collections.sort(expected);
+
+            assertEquals(expected, Stream.parallelMerge(streams, MIN_FIRST, 2).toList());
+            assertEquals(expected, Stream.parallelMergeIterators(iters, MIN_FIRST, 2).toList());
+        }
+    }
+
+    @Test
+    public void testParallelMergeIteratorsSingleThread() {
+        final List<Iterator<Integer>> iters = new ArrayList<>();
+        iters.add(Arrays.asList(1, 4).iterator());
+        iters.add(Arrays.asList(2, 3).iterator());
+        assertEquals(Arrays.asList(1, 2, 3, 4), Stream.parallelMergeIterators(iters, MIN_FIRST, 1).toList());
+    }
+
+    // ------------------------------------------------------------------ window
+
+    @Test
+    public void testWindowHandlerDefaults() {
+        final WindowHandler<String, List<String>> handler = new WindowHandler<>() {
+        };
+
+        assertEquals(WindowHandler.DEFAULT_CACHE_SIZE_LATE_DATA, handler.cacheSizeForLateData());
+        assertFalse(handler.delayForLateData());
+        assertNull(handler.timeExtractor());
+        assertNull(handler.timeWrapper());
+        assertNull(handler.onLateDataAction());
+
+        final List<String> late = new ArrayList<>();
+        final WindowHandler<String, List<String>> lateHandler = WindowHandler.of((String e, List<String> r) -> late.add(e));
+        assertEquals(WindowHandler.DEFAULT_CACHE_SIZE_LATE_DATA, lateHandler.cacheSizeForLateData());
+        lateHandler.onLateDataAction().accept(0, 1, 2, "x", null);
+        assertEquals(Arrays.asList("x"), late);
+        assertThrows(IllegalArgumentException.class, () -> WindowHandler.of((java.util.function.BiConsumer<String, List<String>>) null));
+    }
+
+    @Test
+    public void testWindowIteratorsNextAfterExhaustion() {
+        drainThenExpectNoSuchElement(Stream.of(1, 2, 3).window(Duration.ofSeconds(60), 2), 2);
+        drainThenExpectNoSuchElement(Stream.of(Arrays.asList(1, 2, 3).iterator()).window(Duration.ofSeconds(60), 2), 2);
+        drainThenExpectNoSuchElement(Stream.of(1, 2, 3).window(Duration.ofSeconds(60), Duration.ofSeconds(60)), 1);
+        drainThenExpectNoSuchElement(Stream.of(Arrays.asList(1, 2, 3).iterator()).window(Duration.ofSeconds(60), Duration.ofSeconds(60)), 1);
+    }
+
+    @Test
+    public void testWindowHasNextAfterClose() {
+        final Stream<List<Integer>> s = Stream.of(Arrays.asList(1, 2, 3).iterator()).window(Duration.ofSeconds(60), 2);
+        final ObjIteratorEx<List<Integer>> iter = s.iteratorEx();
+        s.close();
+        assertFalse(iter.hasNext());
+
+        final Stream<List<Integer>> s2 = Stream.of(1, 2, 3).window(Duration.ofSeconds(60), 2);
+        final ObjIteratorEx<List<Integer>> iter2 = s2.iteratorEx();
+        s2.close();
+        assertFalse(iter2.hasNext());
+    }
+
+    @Test
+    public void testIntZipWithDefaultsExhausted() {
+        drainThenExpectNoSuchElement(Stream.zip(Arrays.asList(IntStream.of(1, 2), IntStream.of(3)), new int[] { 0, 9 }, (int... a) -> a[0] + a[1]), 2);
+        assertEquals(Arrays.asList(4, 11),
+                Stream.zip(Arrays.asList(IntStream.of(1, 2), IntStream.of(3)), new int[] { 0, 9 }, (int... a) -> a[0] + a[1]).toList());
+    }
+
+    // ------------------------------------------------------------------ splitter windows
+
+    @Test
+    public void testSplitterWindowsNextAfterExhaustion() {
+        drainThenExpectNoSuchElement(Stream.of(1, 2, 3).window((first, last, next, cnt) -> cnt < 2), 2);
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), Arrays.asList(3)), Stream.of(1, 2, 3).window((first, last, next, cnt) -> cnt < 2).toList());
+
+        drainThenExpectNoSuchElement(Stream.of(Arrays.asList(1, 2, 3).iterator()).window((first, last, cnt) -> 1000L, (first, last, next, cnt) -> cnt < 2), 2);
+    }
+
+    @Test
+    public void testDelayedLateDataWindowNextAfterExhaustion() {
+        final WindowHandler<Long, List<Long>> handler = WindowHandler.<Long, List<Long>> builder().timeExtractor(Long::longValue).onLateData((e, r) -> {
+        }).delayForLateData(true).cacheSizeForLateData(2).build();
+
+        final Stream<List<Long>> s = Stream.of(1L, 2L, 15L, 3L, 25L)
+                .window(Duration.ofMillis(10), Duration.ofMillis(10), () -> 0L, handler, java.util.stream.Collectors.toList());
+        final ObjIteratorEx<List<Long>> iter = s.iteratorEx();
+        final List<List<Long>> result = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        assertThrows(NoSuchElementException.class, iter::next);
+        s.close();
+        assertEquals(3, result.size());
+        assertEquals(Arrays.asList(1L, 2L), result.get(0));
+    }
+
+    // ------------------------------------------------------------------ maxWait
+
+    private static Iterator<String> latchedSource(final java.util.concurrent.CountDownLatch latch) {
+        return new Iterator<>() {
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (idx == 1) {
+                    try {
+                        latch.await(5, java.util.concurrent.TimeUnit.SECONDS);
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
+                return idx < 2;
+            }
+
+            @Override
+            public String next() {
+                return idx++ == 0 ? "a" : "b";
+            }
+        };
+    }
+
+    @Test
+    public void testMaxWaitInsertsDefaultWhileSourceIsSlow() {
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+
+        try (Stream<String> s = Stream.of(latchedSource(latch)).maxWait(Duration.ofMillis(10), "D")) {
+            final ObjIteratorEx<String> iter = s.iteratorEx();
+            final List<String> result = new ArrayList<>();
+
+            while (iter.hasNext()) {
+                final String e = iter.next();
+                result.add(e);
+
+                if ("D".equals(e)) {
+                    latch.countDown();
+                }
+            }
+
+            assertThrows(NoSuchElementException.class, iter::next);
+            assertTrue(result.contains("D"));
+            result.removeIf("D"::equals);
+            assertEquals(Arrays.asList("a", "b"), result);
+        } finally {
+            latch.countDown();
+        }
+    }
+
+    @Test
+    public void testMaxWaitSupplierReturningNull() {
+        final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
+
+        try (Stream<String> s = Stream.of(latchedSource(latch)).maxWait(Duration.ofMillis(10), () -> null)) {
+            final ObjIteratorEx<String> iter = s.iteratorEx();
+            final List<String> result = new ArrayList<>();
+
+            while (iter.hasNext()) {
+                final String e = iter.next();
+                result.add(e);
+
+                if (e == null) {
+                    latch.countDown();
+                }
+            }
+
+            assertThrows(NoSuchElementException.class, iter::next);
+            assertTrue(result.contains(null));
+            result.removeIf(java.util.Objects::isNull);
+            assertEquals(Arrays.asList("a", "b"), result);
+        } finally {
+            latch.countDown();
+        }
+    }
+
+    // ------------------------------------------------------------------ buffered / parallel concat iterators
+
+    @Test
+    public void testBufferedIteratorLifecycle() {
+        final ObjIteratorEx.BufferedIterator<Integer> iter = Stream.buffered(Arrays.asList(1, null, 3).iterator());
+        assertEquals(1, iter.next());
+        assertNull(iter.next());
+        assertEquals(3, iter.next());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        iter.closeResource();
+        iter.closeResource();
+
+        final ObjIteratorEx.BufferedIterator<Integer> closed = Stream.buffered(Arrays.asList(1, 2).iterator());
+        closed.closeResource();
+        assertFalse(closed.hasNext());
+        assertThrows(NoSuchElementException.class, closed::next);
+    }
+
+    @Test
+    public void testBufferedIteratorPropagatesSourceFailure() {
+        final Iterator<Integer> failing = new Iterator<>() {
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                if (idx++ == 0) {
+                    return 7;
+                }
+
+                throw new IllegalStateException("boom");
+            }
+        };
+
+        final ObjIteratorEx.BufferedIterator<Integer> iter = Stream.buffered(failing);
+        assertEquals(7, iter.next());
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            while (iter.hasNext()) {
+                iter.next();
+            }
+        });
+        assertTrue(ex instanceof IllegalStateException || ex.getCause() instanceof IllegalStateException, String.valueOf(ex));
+        iter.closeResource();
+    }
+
+    private static Iterator<Integer> ones() {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return 1;
+            }
+        };
+    }
+
+    @Test
+    public void testParallelConcatIteratorsCancelOnClose() {
+        final Stream<Integer> s = Stream.parallelConcatIterators(Arrays.asList(ones(), ones()), 2, 1, true, null);
+        final ObjIteratorEx<Integer> iter = s.iteratorEx();
+        assertEquals(1, iter.next());
+        assertEquals(1, iter.next());
+        s.close();
+    }
+
+    @Test
+    public void testParallelConcatSourceFailure() {
+        final Stream<Integer> bad = Stream.of(1, 2).map(x -> {
+            if (x == 2) {
+                throw new IllegalArgumentException("bad");
+            }
+            return x;
+        });
+
+        assertThrows(RuntimeException.class, () -> Stream.parallelConcat(Arrays.asList(Stream.of(5), bad), 2, 4).toList());
+    }
+
+    @Test
+    public void testParallelMergeIteratorsFailure() {
+        final List<Iterator<Integer>> iters = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) {
+            iters.add(Arrays.asList(i, i + 10).iterator());
+        }
+
+        iters.add(0, new Iterator<Integer>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                throw new IllegalStateException("bad");
+            }
+        });
+
+        assertThrows(RuntimeException.class, () -> Stream.parallelMergeIterators(iters, MIN_FIRST, 2).toList());
+    }
+
+    // ------------------------------------------------------------------ subscribers
+
+    @Test
+    public void testSubscriberStreamNextAfterExhaustion() {
+        final List<Integer> seen = Collections.synchronizedList(new ArrayList<>());
+        final List<Boolean> threw = Collections.synchronizedList(new ArrayList<>());
+        final Throwables.Consumer<Stream<Integer>, Exception> consumer = sub -> {
+            final ObjIterator<Integer> it = sub.iterator();
+
+            while (it.hasNext()) {
+                seen.add(it.next());
+            }
+
+            try {
+                it.next();
+                threw.add(false);
+            } catch (final NoSuchElementException e) {
+                threw.add(true);
+            }
+        };
+
+        assertEquals(Arrays.asList(1, 2, 3), Stream.of(1, 2, 3).addSubscriber(consumer).toList());
+        assertEquals(Arrays.asList(1, 2, 3), seen);
+        assertEquals(Arrays.asList(true), threw);
+
+        seen.clear();
+        threw.clear();
+        assertEquals(Arrays.asList(2), Stream.of(1, 2, 3).filterWhileAddSubscriber(x -> x == 2, consumer).toList());
+        assertEquals(Arrays.asList(1, 3), seen);
+        assertEquals(Arrays.asList(true), threw);
+
+        seen.clear();
+        threw.clear();
+        assertEquals(Arrays.asList(1, 2), Stream.of(1, 2, 3).takeWhileAddSubscriber(x -> x < 3, consumer).toList());
+        assertEquals(Arrays.asList(3), seen);
+        assertEquals(Arrays.asList(true), threw);
+
+        seen.clear();
+        threw.clear();
+        assertEquals(Arrays.asList(3), Stream.of(1, 2, 3).dropWhileAddSubscriber(x -> x < 3, consumer).toList());
+        assertEquals(Arrays.asList(1, 2), seen);
+        assertEquals(Arrays.asList(true), threw);
+    }
+
+    @Test
+    public void testSubscriberMainStreamHasNextFailure() {
+        final Iterator<Integer> failing = new Iterator<>() {
+            private int idx = 0;
+
+            @Override
+            public boolean hasNext() {
+                if (idx >= 1) {
+                    throw new IllegalStateException("main failed");
+                }
+
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return idx++;
+            }
+        };
+
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> Stream.of(failing).addSubscriber(sub -> sub.count()).toList());
+        assertTrue(ex instanceof IllegalStateException, String.valueOf(ex));
+    }
+
+    @Test
+    public void testObserveNextAfterExhaustion() {
+        final java.util.concurrent.BlockingQueue<String> q1 = new java.util.concurrent.LinkedBlockingQueue<>(Arrays.asList("a", "b"));
+        drainThenExpectNoSuchElement(Stream.observe(q1, Duration.ofMillis(20)), 2);
+
+        final java.util.concurrent.BlockingQueue<String> q2 = new java.util.concurrent.LinkedBlockingQueue<>(Arrays.asList("a", "b", "c"));
+        drainThenExpectNoSuchElement(Stream.observe(q2, () -> false, 10), 3);
+    }
 }

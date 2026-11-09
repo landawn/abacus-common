@@ -214,4 +214,13 @@ public class AbstractShortTypeTest extends TestBase {
         assertEquals(shortType.stringOf(large), sb.toString());
         assertEquals("4464", sb.toString());
     }
+
+    @Test
+    public void testShortSuffixRecoveryPaths() {
+        final Type<Short> type = Type.of(Short.class);
+        assertEquals((short) 12, type.valueOf("12L").shortValue());
+        assertEquals((short) 31, type.valueOf("0x1F").shortValue());
+        assertEquals((short) 31, type.valueOf("0x1FL").shortValue());
+        assertThrows(NumberFormatException.class, () -> type.valueOf("abc"));
+    }
 }

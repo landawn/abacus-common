@@ -5,15 +5,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Method;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -2404,4 +2410,161 @@ public class BeansTest extends BeansTestSupport {
 
     // ---- deep review 2026-10-27 G133 end ----
 
+    public static class PrimBean {
+        private char c;
+        private byte b;
+        private short s;
+        private float f;
+        private String name;
+
+        public char getC() {
+            return c;
+        }
+
+        public void setC(final char c) {
+            this.c = c;
+        }
+
+        public byte getB() {
+            return b;
+        }
+
+        public void setB(final byte b) {
+            this.b = b;
+        }
+
+        public short getS() {
+            return s;
+        }
+
+        public void setS(final short s) {
+            this.s = s;
+        }
+
+        public float getF() {
+            return f;
+        }
+
+        public void setF(final float f) {
+            this.f = f;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class RecordStyleBean {
+        private String title;
+
+        public String title() {
+            return title;
+        }
+
+        public void setTitle(final String title) {
+            this.title = title;
+        }
+
+        @Override
+        public String toString() {
+            return "RecordStyleBean";
+        }
+    }
+
+    public static class ThrowingGetterBean {
+        public String getBad() {
+            throw new IllegalStateException("bad getter");
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public static class MyEntry extends AbstractMap.SimpleEntry<String, String> {
+        public MyEntry() {
+            super("k", "v");
+        }
+    }
+
+    @Test
+    public void testCheckBeanClassMapEntryReason() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Beans.checkBeanClass(MyEntry.class));
+        assertTrue(e.getMessage().contains("Map.Entry"), e.getMessage());
+    }
+
+    @Test
+    public void testRegisterPropertyAccessorRejectsToString() throws Exception {
+        final Method m = RecordStyleBean.class.getMethod("toString");
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Beans.registerPropertyAccessor("x", m));
+        assertTrue(e.getMessage().contains("'toString' is never treated as a property accessor"), e.getMessage());
+    }
+
+    @Test
+    public void testGetPropNameByMethodFieldNamedAccessor() throws Exception {
+        assertEquals("title", Beans.getPropNameByMethod(RecordStyleBean.class.getMethod("title")));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testGetPropNamesCollectionThatIsSet() {
+        final Collection<String> exclude = new LinkedHashSet<>(Arrays.asList("c", "b", "s", "f"));
+        assertEquals(Arrays.asList("name"), Beans.getPropNames(PrimBean.class, exclude));
+    }
+
+    @Test
+    public void testSetPropValueByMethodPrimitiveConversions() throws Exception {
+        final PrimBean bean = new PrimBean();
+
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setC", char.class), 'z');
+        assertEquals('z', bean.getC());
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setC", char.class), "q");
+        assertEquals('q', bean.getC());
+
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setB", byte.class), (byte) 3);
+        assertEquals((byte) 3, bean.getB());
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setB", byte.class), "4");
+        assertEquals((byte) 4, bean.getB());
+
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setS", short.class), (byte) 5);
+        assertEquals((short) 5, bean.getS());
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setS", short.class), "6");
+        assertEquals((short) 6, bean.getS());
+
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setF", float.class), 7);
+        assertEquals(7f, bean.getF());
+        Beans.setPropValue(bean, PrimBean.class.getMethod("setF", float.class), "1.5");
+        assertEquals(1.5f, bean.getF());
+    }
+
+    @Test
+    public void testDeepAndFlatMapUnknownSelectedProperty() {
+        final PrimBean bean = new PrimBean();
+        final List<String> props = Arrays.asList("name", "noSuchProp");
+        assertThrows(IllegalArgumentException.class, () -> Beans.deepBeanToMap(bean, props, NamingPolicy.CAMEL_CASE, new HashMap<>()));
+        assertThrows(IllegalArgumentException.class, () -> Beans.beanToFlatMap(bean, props, NamingPolicy.CAMEL_CASE, new HashMap<>()));
+    }
+
+    @Test
+    public void testDeepCopyAsNullToNonBeanAndCopyNull() {
+        final ArrayList<?> list = Beans.deepCopyAs(null, ArrayList.class);
+        assertTrue(list.isEmpty());
+        assertNull(Beans.copy((PrimBean) null, (k, v) -> true));
+    }
+
+    @Test
+    public void testMergeNullSourceReturnsTarget() {
+        final PrimBean target = new PrimBean();
+        assertSame(target, Beans.mergeInto(null, target, true, (Set<String>) null));
+        final Map<String, Object> unused = new HashMap<>();
+        assertTrue(unused.isEmpty());
+    }
+
+    @Test
+    public void testGetPropValueByMethodGetterThrows() throws Exception {
+        final Method m = ThrowingGetterBean.class.getMethod("getBad");
+        final RuntimeException e = assertThrows(RuntimeException.class, () -> Beans.getPropValue(new ThrowingGetterBean(), m));
+        assertTrue(String.valueOf(e.getMessage()).contains("bad getter") || (e.getCause() != null && e.getCause().getMessage().contains("bad getter")));
+    }
 }

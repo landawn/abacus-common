@@ -1,5 +1,9 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -564,5 +568,86 @@ public class TypeAttrParserTest extends TestBase {
         final IllegalArgumentException noFallback = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> TypeAttrParser.newInstance(java.util.ArrayList.class, "ArrayList<X>"));
         Assertions.assertEquals("No constructor found with parameters: [class java.lang.String]. in class: java.util.ArrayList", noFallback.getMessage());
+    }
+
+    public static class TypeAndArrayArgs {
+        final String typeParameter;
+        final String[] parameters;
+        final Integer prefix;
+
+        public TypeAndArrayArgs(final String typeParameter, final String[] parameters) {
+            this(null, typeParameter, parameters);
+        }
+
+        public TypeAndArrayArgs(final Integer prefix, final String typeParameter, final String[] parameters) {
+            this.prefix = prefix;
+            this.typeParameter = typeParameter;
+            this.parameters = parameters;
+        }
+
+        public TypeAndArrayArgs(final Integer prefix, final String typeParameter) {
+            this(prefix, typeParameter, null);
+        }
+    }
+
+    @Test
+    public void testArrayAttributes() {
+        assertEquals("int[]", TypeAttrParser.parse("int[]").getClassName());
+        assertEquals("int[][]", TypeAttrParser.parse("int[] []").getClassName());
+        assertEquals("String[]", TypeAttrParser.parse(" String [] ").getClassName());
+    }
+
+    @Test
+    public void testQuotedGenericParameterWithDoubledQuote() {
+        final TypeAttrParser p = TypeAttrParser.parse("Foo<Bar(\"a\"\"b\")>");
+        assertEquals("Foo", p.getClassName());
+        assertEquals(1, p.getTypeParameters().length);
+        final TypeAttrParser q = TypeAttrParser.parse("Foo(\"a\"\"b\", \"c\\\"d\")");
+        assertEquals(2, q.getParameters().length);
+    }
+
+    @Test
+    public void testMalformedAttributes() {
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo<x(1)), y>"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo<String> x(1)"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("<A>.B"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("A<B>.C>"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("A<B>."));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo(a))"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo<\"a>"));
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.parse("Foo<a<b>"));
+    }
+
+    @Test
+    public void testQualifiedMemberWithDollar() {
+        final TypeAttrParser p = TypeAttrParser.parse("A<B>$C<D>");
+        assertEquals("A.C", p.getClassName());
+        assertArrayEquals(new String[] { "D" }, p.getTypeParameters());
+    }
+
+    @Test
+    public void testNewInstanceByClassName() {
+        final StringBuilder sb = TypeAttrParser.newInstance(null, "java.lang.StringBuilder(abc)");
+        assertEquals("abc", sb.toString());
+    }
+
+    @Test
+    public void testNewInstanceFallsBackToStringArrayWithTypeParameters() {
+        final TypeAndArrayArgs a = TypeAttrParser.newInstance(TypeAndArrayArgs.class, "TypeAndArrayArgs<T1>(x, y)");
+        assertEquals("T1", a.typeParameter);
+        assertArrayEquals(new String[] { "x", "y" }, a.parameters);
+
+        final TypeAndArrayArgs b = TypeAttrParser.newInstance(TypeAndArrayArgs.class, "TypeAndArrayArgs<T2>(x, y)", Integer.class, 7);
+        assertEquals(7, b.prefix);
+        assertEquals("T2", b.typeParameter);
+        assertArrayEquals(new String[] { "x", "y" }, b.parameters);
+
+        final TypeAndArrayArgs c = TypeAttrParser.newInstance(TypeAndArrayArgs.class, "TypeAndArrayArgs<T3>", Integer.class, 8);
+        assertEquals("T3", c.typeParameter);
+    }
+
+    @Test
+    public void testNewInstanceRejectsNonClassArgument() {
+        assertThrows(IllegalArgumentException.class, () -> TypeAttrParser.newInstance(TypeAndArrayArgs.class, "TypeAndArrayArgs<T>", "notAClass", 1));
     }
 }

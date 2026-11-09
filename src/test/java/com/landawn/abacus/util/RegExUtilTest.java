@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -2040,5 +2041,10 @@ public class RegExUtilTest extends AbstractTest {
         // control: the functional overloads quote the replacer's output, so neither can be raised there
         assertEquals("c$b", RegExUtil.replaceAll("ab", "a", match -> "c$"));
         assertEquals("$1b", RegExUtil.replaceAll("ab", "(a)", match -> "$1"));
+    }
+
+    @Test
+    public void testRegExUtilFindAllWithStringRegex() {
+        assertEquals(Arrays.asList("12", "345"), RegExUtil.findAll("a12b345", "\\d+"));
     }
 }

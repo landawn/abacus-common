@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
@@ -318,5 +320,132 @@ public class NumbersTest extends NumbersTestSupport {
             final long n = 3037000499L + 1 + (random.nextLong() >>> 30); // just above the SMALL/LARGE threshold
             assertEquals(BigInteger.valueOf(n).isProbablePrime(100), Numbers.isPrime(n), "n=" + n);
         }
+    }
+
+    @Test
+    public void testConvertNonFiniteFloatToBigDecimalOverflows() {
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.NaN, BigDecimal.class));
+        assertThrows(ArithmeticException.class, () -> Numbers.convert(Float.POSITIVE_INFINITY, BigDecimal.class));
+    }
+
+    @Test
+    public void testToPrimitiveWithDefaultForNull() {
+        assertEquals(5L, Numbers.toLong((Object) null, 5L));
+        assertEquals(1.5f, Numbers.toFloat((Object) null, 1.5f));
+        assertEquals(2.5d, Numbers.toDouble((Object) null, 2.5d));
+    }
+
+    @Test
+    public void testIsCreatableEdgeTokens() {
+        assertFalse(Numbers.isCreatable("1ef"));
+        assertFalse(Numbers.isCreatable("1e99999999999f"));
+        assertFalse(Numbers.isCreatable(".L"));
+        assertFalse(Numbers.isCreatable("."));
+        assertTrue(Numbers.isCreatable("1e05"));
+        assertEquals(100000.0d, Numbers.createNumber("1e05"));
+    }
+
+    @Test
+    public void testParseBigDecimalSignOnly() {
+        assertThrows(NumberFormatException.class, () -> Numbers.parseBigDecimal("+"));
+    }
+
+    @Test
+    public void testErrorMessagePreviewKeepsSurrogatePairs() {
+        final String emoji = "😀";
+        final String longInput = "x".repeat(63) + emoji + "yyyy";
+        final NumberFormatException ex = assertThrows(NumberFormatException.class, () -> Numbers.createNumber(longInput));
+        assertTrue(ex.getMessage().contains("x".repeat(63) + "...["), ex.getMessage());
+        assertFalse(ex.getMessage().contains("\uD83D..."), ex.getMessage());
+
+        final NumberFormatException ex2 = assertThrows(NumberFormatException.class, () -> Numbers.createNumber("\u0001" + emoji));
+        assertTrue(ex2.getMessage().contains("\\u0001" + emoji), ex2.getMessage());
+    }
+
+    @Test
+    public void testLog2CeilingAndLog10BigIntegerFloor() {
+        assertEquals(3, Numbers.log2(5L, RoundingMode.CEILING));
+        assertEquals(3, Numbers.log2(5L, RoundingMode.UP));
+
+        for (int k = 19; k <= 120; k++) {
+            final BigInteger x = BigInteger.TEN.pow(k).subtract(BigInteger.ONE);
+            assertEquals(k - 1, Numbers.log10(x, RoundingMode.FLOOR), "k=" + k);
+            assertEquals(k, Numbers.log10(BigInteger.TEN.pow(k), RoundingMode.FLOOR), "k=" + k);
+        }
+    }
+
+    @Test
+    public void testCeilingPowerOfTwoOverflow() {
+        assertThrows(ArithmeticException.class, () -> Numbers.ceilingPowerOfTwo((1 << 30) + 1));
+        assertEquals(1 << 30, Numbers.ceilingPowerOfTwo(1 << 30));
+    }
+
+    @Test
+    public void testSqrtLongRoundingCorrections() {
+        final long justBelow = (1L << 62) - 1;
+        assertEquals((1L << 31) - 1, Numbers.sqrt(justBelow, RoundingMode.FLOOR));
+        assertEquals(1L << 31, Numbers.sqrt(justBelow, RoundingMode.CEILING));
+        assertEquals(1L << 20, Numbers.sqrt(1L << 40, RoundingMode.CEILING));
+        assertEquals(1L << 20, Numbers.sqrt(1L << 40, RoundingMode.UP));
+    }
+
+    @Test
+    public void testSqrtBigIntegerCeilingOfPerfectSquare() {
+        assertEquals(BigInteger.ONE.shiftLeft(50), Numbers.sqrt(BigInteger.ONE.shiftLeft(100), RoundingMode.CEILING));
+        assertEquals(BigInteger.ONE.shiftLeft(50).add(BigInteger.ONE), Numbers.sqrt(BigInteger.ONE.shiftLeft(100).add(BigInteger.ONE), RoundingMode.CEILING));
+    }
+
+    @Test
+    public void testGcdWithMinValueAndZero() {
+        assertEquals(4, Numbers.gcd(4, Integer.MIN_VALUE));
+        assertEquals(5, Numbers.gcd(5, 0));
+        assertEquals(4L, Numbers.gcd(4L, Long.MIN_VALUE));
+        assertEquals(6L, Numbers.gcd(0L, 6L));
+        assertEquals(6L, Numbers.gcd(6L, 0L));
+    }
+
+    @Test
+    public void testLcmOverflowFromGcdFailure() {
+        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Integer.MIN_VALUE, Integer.MIN_VALUE));
+        assertThrows(ArithmeticException.class, () -> Numbers.lcm(Long.MIN_VALUE, Long.MIN_VALUE));
+    }
+
+    @Test
+    public void testSaturatedPowZeroExponent() {
+        assertEquals(1, Numbers.saturatedPow(3, 0));
+        assertEquals(1L, Numbers.saturatedPow(3L, 0));
+    }
+
+    @Test
+    public void testClampFloatRejectsNaNBounds() {
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(1f, Float.NaN, 2f));
+        assertThrows(IllegalArgumentException.class, () -> Numbers.clamp(1f, 0f, Float.NaN));
+    }
+
+    @Test
+    public void testFactorialToDoubleBeyondMax() {
+        assertEquals(Double.POSITIVE_INFINITY, Numbers.factorialToDouble(1000));
+    }
+
+    @Test
+    public void testRoundIntermediateIntegerAndHalfModes() {
+        assertEquals(2.0, Numbers.roundIntermediate(2.0, RoundingMode.UP));
+        assertEquals(2.0, Numbers.roundIntermediate(2.3, RoundingMode.HALF_UP));
+        assertEquals(3.0, Numbers.roundIntermediate(2.7, RoundingMode.HALF_DOWN));
+    }
+
+    @Test
+    public void testFuzzyCompareGreaterAndNaN() {
+        assertEquals(1, Numbers.fuzzyCompare(2f, 1f, 0.1f));
+        assertEquals(1, Numbers.fuzzyCompare(Float.NaN, 1f, 0.1f));
+        assertEquals(-1, Numbers.fuzzyCompare(1f, Float.NaN, 0.1f));
+        assertEquals(1, Numbers.fuzzyCompare(2.0, 1.0, 0.1));
+    }
+
+    @Test
+    public void testIsPrimeWhenWitnessBaseIsMultipleOfN() {
+        // 188533673 is a prime factor of the Miller-Rabin base 725270293939359937.
+        assertTrue(Numbers.isPrime(188533673L));
+        assertFalse(Numbers.isPrime(188533673L * 3));
     }
 }

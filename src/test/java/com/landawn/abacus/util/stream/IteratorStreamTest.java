@@ -3,6 +3,8 @@ package com.landawn.abacus.util.stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
@@ -23,12 +26,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.util.ByteIterator;
+import com.landawn.abacus.util.CharIterator;
+import com.landawn.abacus.util.DoubleIterator;
+import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.If;
 import com.landawn.abacus.util.IntFunctions;
+import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.Multimap;
 import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.ObjIterator;
+import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.u.Optional;
 
 public class IteratorStreamTest extends TestBase {
@@ -2287,4 +2297,160 @@ public class IteratorStreamTest extends TestBase {
     }
 
     // ---- perf review 2026-09-26 G099 end ----
+
+    @SafeVarargs
+    private static <T> Stream<T> it(final T... a) {
+        return new IteratorStream<>(Arrays.asList(a).iterator());
+    }
+
+    @SafeVarargs
+    private static <T> Stream<T> par(final T... a) {
+        return new ParallelIteratorStream<>(Arrays.asList(a).iterator(), false, null, 4, null, null, false, null);
+    }
+
+    @Test
+    public void testFlatMapArrayToPrimitivesParallel() {
+        final char[] c = par("ab", "c").flatMapArrayToChar(String::toCharArray).sorted().toArray();
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, c);
+
+        final byte[] b = par(1, 2).flatMapArrayToByte(x -> new byte[] { (byte) (int) x, (byte) (int) x }).sorted().toArray();
+        assertArrayEquals(new byte[] { 1, 1, 2, 2 }, b);
+
+        final short[] s = par(1, 2).flatMapArrayToShort(x -> new short[] { (short) (int) x }).sorted().toArray();
+        assertArrayEquals(new short[] { 1, 2 }, s);
+
+        final int[] i = par(1, 2).flatMapArrayToInt(x -> new int[] { x, x * 10 }).sorted().toArray();
+        assertArrayEquals(new int[] { 1, 2, 10, 20 }, i);
+
+        final long[] l = par(1, 2).flatMapArrayToLong(x -> new long[] { x }).sorted().toArray();
+        assertArrayEquals(new long[] { 1, 2 }, l);
+
+        final float[] f = par(1, 2).flatMapArrayToFloat(x -> new float[] { x }).sorted().toArray();
+        assertArrayEquals(new float[] { 1f, 2f }, f);
+
+        final double[] d = par(1, 2).flatMapArrayToDouble(x -> new double[] { x }).sorted().toArray();
+        assertArrayEquals(new double[] { 1d, 2d }, d);
+    }
+
+    @Test
+    public void testTopIteratorToArrayWithLargerArrayNullTerminates() {
+        final Integer[] dest = { 9, 9, 9, 9, 9 };
+        final Integer[] r = it(5, 1, 4, 2).top(2).iteratorEx().toArray(dest);
+        assertSame(dest, r);
+        assertEquals(2, new java.util.HashSet<>(Arrays.asList(r[0], r[1])).size());
+        assertTrue(Arrays.asList(r[0], r[1]).containsAll(Arrays.asList(4, 5)));
+        assertNull(r[2]);
+        assertEquals(9, r[3].intValue());
+    }
+
+    @Test
+    public void testForEachTripleSourceExhaustedDuringSkip() throws Exception {
+        final List<String> out = new ArrayList<>();
+        it(1, 2, 3, 4).forEachTriple(5, (a, b, c) -> out.add(a + "-" + b + "-" + c));
+        assertEquals(Arrays.asList("1-2-3"), out);
+    }
+
+    @Test
+    public void testMinOnSortedStreamReturnsFirst() {
+        final Comparator<Integer> cmp = Comparator.reverseOrder();
+        final Stream<Integer> s = new IteratorStream<>(Arrays.asList(3, 2, 1).iterator(), true, cmp, null);
+        assertEquals(3, s.min(cmp).get().intValue());
+    }
+
+    @Test
+    public void testAppendIfEmptyWithEmptyCollection() {
+        assertEquals(Arrays.asList(1, 2), it(1, 2).appendIfEmpty(Collections.<Integer> emptyList()).toList());
+    }
+
+    @Test
+    public void testAppendIfEmptySupplierAdvance() {
+        final ObjIteratorEx<Integer> iter = it(1, 2, 3).appendIfEmpty(() -> Stream.of(7, 8)).iteratorEx();
+        iter.advance(0);
+        iter.advance(2);
+        assertEquals(3, iter.next().intValue());
+        assertFalse(iter.hasNext());
+
+        final ObjIteratorEx<Integer> iter2 = IteratorStreamTest.<Integer> it().appendIfEmpty(() -> Stream.of(7, 8, 9)).iteratorEx();
+        iter2.advance(1);
+        assertEquals(8, iter2.next().intValue());
+    }
+
+    @Test
+    public void testIfEmptyAdvance() {
+        final AtomicInteger calls = new AtomicInteger();
+        final ObjIteratorEx<Integer> iter = it(1, 2, 3).ifEmpty(calls::incrementAndGet).iteratorEx();
+        iter.advance(-1);
+        iter.advance(2);
+        assertEquals(3, iter.next().intValue());
+        assertEquals(0, calls.get());
+
+        final ObjIteratorEx<Integer> iter2 = IteratorStreamTest.<Integer> it().ifEmpty(calls::incrementAndGet).iteratorEx();
+        iter2.advance(1);
+        assertFalse(iter2.hasNext());
+        assertEquals(1, calls.get());
+    }
+
+    @Test
+    public void testSplitWithCustomSupplierLargeChunkReleasesBuffer() {
+        final int n = (1 << 16) + 2;
+        final List<Integer> src = new ArrayList<>(n);
+
+        for (int i = 0; i < n; i++) {
+            src.add(i);
+        }
+
+        final List<LinkedList<Integer>> chunks = new IteratorStream<>(src.iterator()).split(n - 1, k -> new LinkedList<Integer>()).toList();
+        assertEquals(2, chunks.size());
+        assertEquals(n - 1, chunks.get(0).size());
+        assertEquals(1, chunks.get(1).size());
+        assertEquals(n - 1, chunks.get(1).getFirst().intValue());
+    }
+
+    @Test
+    public void testExhaustedIteratorsThrowNoSuchElement() {
+        final CharIterator ci = it("a").flatMapArrayToChar(String::toCharArray).iterator();
+        assertEquals('a', ci.nextChar());
+        assertThrows(NoSuchElementException.class, ci::nextChar);
+
+        final ByteIterator bi = it(1).flatMapArrayToByte(x -> new byte[] { 1 }).iterator();
+        assertEquals(1, bi.nextByte());
+        assertThrows(NoSuchElementException.class, bi::nextByte);
+
+        final ShortIterator si = it(1).flatMapArrayToShort(x -> new short[] { 1 }).iterator();
+        assertEquals(1, si.nextShort());
+        assertThrows(NoSuchElementException.class, si::nextShort);
+
+        final IntIterator ii = it(1).flatMapArrayToInt(x -> new int[] { 1 }).iterator();
+        assertEquals(1, ii.nextInt());
+        assertThrows(NoSuchElementException.class, ii::nextInt);
+
+        final LongIterator li = it(1).flatMapArrayToLong(x -> new long[] { 1 }).iterator();
+        assertEquals(1L, li.nextLong());
+        assertThrows(NoSuchElementException.class, li::nextLong);
+
+        final FloatIterator fi = it(1).flatMapArrayToFloat(x -> new float[] { 1 }).iterator();
+        assertEquals(1f, fi.nextFloat());
+        assertThrows(NoSuchElementException.class, fi::nextFloat);
+
+        final DoubleIterator di = it(1).flatMapArrayToDouble(x -> new double[] { 1 }).iterator();
+        assertEquals(1d, di.nextDouble());
+        assertThrows(NoSuchElementException.class, di::nextDouble);
+
+        final Iterator<ArrayList<Integer>> sp = it(1, 2).split(x -> x < 2, ArrayList::new).iterator();
+        assertEquals(Arrays.asList(1), sp.next());
+        assertEquals(Arrays.asList(2), sp.next());
+        assertThrows(NoSuchElementException.class, sp::next);
+
+        final Iterator<List<Integer>> sp2 = it(1).split(x -> true, Collectors.toList()).iterator();
+        assertEquals(Arrays.asList(1), sp2.next());
+        assertThrows(NoSuchElementException.class, sp2::next);
+    }
+
+    @Test
+    public void testAppendIfEmptyAndIfEmptyNextWithoutHasNext() {
+        assertEquals(1, it(1).appendIfEmpty(() -> Stream.of(7)).iteratorEx().next().intValue());
+        assertEquals(7, IteratorStreamTest.<Integer> it().appendIfEmpty(() -> Stream.of(7)).iteratorEx().next().intValue());
+        assertEquals(1, it(1).ifEmpty(() -> {
+        }).iteratorEx().next().intValue());
+    }
 }

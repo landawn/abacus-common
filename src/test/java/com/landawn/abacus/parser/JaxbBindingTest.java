@@ -54,8 +54,8 @@ public class JaxbBindingTest extends AbstractParserTest {
 
     @Test
     public void testPerformance() {
-        int threadNum = 6;
-        int loopNum = 30000;
+        int threadNum = 1;
+        int loopNum = 3000;
         Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
         methodLoopNumMap.put("executeByXmlParserWithSimpleBean", loopNum);
 

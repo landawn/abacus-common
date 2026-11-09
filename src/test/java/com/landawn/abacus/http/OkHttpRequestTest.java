@@ -9,21 +9,29 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +40,12 @@ import org.junit.jupiter.api.function.Executable;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.HttpResponseException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.N;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 
 import okhttp3.CacheControl;
 import okhttp3.Dispatcher;
@@ -1651,5 +1662,81 @@ public class OkHttpRequestTest extends TestBase {
         } finally {
             noContentServer.shutdown();
         }
+    }
+
+    private HttpServer server2;
+    private String base2;
+    private final Map<String, Object> kryoValue = new LinkedHashMap<>();
+
+    @BeforeEach
+    public void startServer() throws IOException {
+        kryoValue.put("list", new ArrayList<>(Arrays.asList("a", "b")));
+        server2 = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server2.createContext("/kryo", ex -> {
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            HttpUtil.kryoParser.serialize(kryoValue, bos);
+            respond(ex, 200, "application/kryo", null, bos.toByteArray());
+        });
+        server2.createContext("/badgzip", ex -> respond(ex, 500, "text/plain", "gzip", "not gzip at all".getBytes(StandardCharsets.UTF_8)));
+        server2.createContext("/echo", ex -> {
+            final byte[] body;
+            try (InputStream in = ex.getRequestBody()) {
+                body = in.readAllBytes();
+            }
+            respond(ex, 200, "text/plain; charset=UTF-8", null, body);
+        });
+        server2.start();
+        base2 = "http://127.0.0.1:" + server2.getAddress().getPort();
+    }
+
+    @AfterEach
+    public void stopServer() {
+        server2.stop(0);
+    }
+
+    private static void respond(final HttpExchange ex, final int code, final String contentType, final String encoding, final byte[] body) throws IOException {
+        ex.getResponseHeaders().add("Content-Type", contentType);
+        if (encoding != null) {
+            ex.getResponseHeaders().add("Content-Encoding", encoding);
+        }
+        ex.sendResponseHeaders(code, body.length == 0 ? -1 : body.length);
+        try (OutputStream os = ex.getResponseBody()) {
+            os.write(body);
+        }
+    }
+
+    @Test
+    public void testKryoResponse() {
+        if (HttpUtil.kryoParser == null) {
+            return;
+        }
+        final LinkedHashMap<?, ?> result = OkHttpRequest.url(base2 + "/kryo").get(LinkedHashMap.class);
+        assertEquals(kryoValue, result);
+    }
+
+    @Test
+    public void testErrorBodyDecodingFailureYieldsEmptyBody() {
+        final HttpResponseException ex = assertThrows(HttpResponseException.class, () -> OkHttpRequest.url(base2 + "/badgzip").get(String.class));
+        assertEquals(500, ex.statusCode());
+    }
+
+    @Test
+    public void testConnectionFailureIsUnchecked() throws IOException {
+        final int port;
+        try (ServerSocket socket = new ServerSocket(0, 1, java.net.InetAddress.getByName("127.0.0.1"))) {
+            port = socket.getLocalPort();
+        }
+        assertThrows(UncheckedIOException.class, () -> OkHttpRequest.url("http://127.0.0.1:" + port + "/none", 500, 500).get(String.class));
+    }
+
+    @Test
+    public void testCurlInterceptorUsesHeaderCharset() {
+        final AtomicReference<String> curl = new AtomicReference<>();
+        final String result = WebUtil.createCurlLoggingOkHttpRequest(base2 + "/echo", curl::set)
+                .header("Content-Type", "text/plain; charset=UTF-8")
+                .body("café".getBytes(StandardCharsets.UTF_8), MediaType.parse("text/plain"))
+                .post(String.class);
+        assertTrue(result.startsWith("caf"), result);
+        assertTrue(curl.get() != null && curl.get().contains("caf"), String.valueOf(curl.get()));
     }
 }

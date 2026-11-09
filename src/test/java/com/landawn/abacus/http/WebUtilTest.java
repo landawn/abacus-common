@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1865,4 +1866,28 @@ public class WebUtilTest extends TestBase {
         assertTrue(WebUtil.curlToOkHttpRequestCode("curl -A x -H 'User-Agent: h' -A y" + target).contains(".header(\"User-Agent\", \"h\")"));
     }
     // ---- deep review 2026-11-02 G004 end ----
+
+    @Test
+    public void testMissingHeaderValue() {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode("curl http://localhost/x -H"));
+        assertTrue(ex.getMessage().contains("Missing header"));
+    }
+
+    @Test
+    public void testDoubleQuotedLineContinuationsAndEscapes() {
+        final String curl = "curl \"http://localhost/a\\\nb\" -H \"X-A: v\\\r\nw\" -H \"X-B: p\\qr\"";
+        final String code = WebUtil.curlToHttpRequestCode(curl);
+        assertTrue(code.contains("http://localhost/ab"), code);
+        assertTrue(code.contains("vw"), code);
+        assertTrue(code.contains("p\\\\qr") || code.contains("p\\qr"), code);
+    }
+
+    @Test
+    public void testBuildCurlWithEmptyHeaderName() {
+        final Map<String, Object> headers = new LinkedHashMap<>();
+        headers.put("", "v");
+        final String curl = WebUtil.buildCurl(HttpMethod.GET, "http://localhost/x", headers, null, null, '\'');
+        assertTrue(curl.contains("http://localhost/x"), curl);
+        assertFalse(curl.contains("--data-raw"), curl);
+    }
 }

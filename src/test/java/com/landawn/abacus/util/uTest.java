@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -392,4 +394,60 @@ public class uTest extends uTestSupport {
         assertThrows(NoSuchElementException.class, () -> OptionalDouble.empty().getAsDouble());
     }
 
+    @Test
+    public void testOfNullableWithValues() {
+        assertSame(OptionalBoolean.TRUE, OptionalBoolean.ofNullable(Boolean.TRUE));
+        assertSame(OptionalBoolean.FALSE, OptionalBoolean.ofNullable(Boolean.FALSE));
+        assertEquals((byte) 3, OptionalByte.ofNullable((byte) 3).get());
+        assertEquals((short) 4, OptionalShort.ofNullable((short) 4).get());
+        assertEquals(5, OptionalInt.ofNullable(5).get());
+        assertEquals(6L, OptionalLong.ofNullable(6L).get());
+        assertEquals(7.5f, OptionalFloat.ofNullable(7.5f).get());
+        assertEquals(8.5d, OptionalDouble.ofNullable(8.5d).get());
+    }
+
+    @Test
+    public void testIfPresentOrElseWhenPresent() throws Exception {
+        final List<Object> seen = new ArrayList<>();
+        final Throwables.Runnable<RuntimeException> fail = () -> seen.add("empty");
+
+        OptionalChar.of('c').ifPresentOrElse(seen::add, fail);
+        OptionalByte.of((byte) 1).ifPresentOrElse(seen::add, fail);
+        OptionalShort.of((short) 2).ifPresentOrElse(seen::add, fail);
+        OptionalInt.of(3).ifPresentOrElse(seen::add, fail);
+        OptionalLong.of(4L).ifPresentOrElse(seen::add, fail);
+
+        assertEquals(List.of('c', (byte) 1, (short) 2, 3, 4L), seen);
+    }
+
+    @Test
+    public void testOrElseThrowWithSupplierWhenPresent() {
+        assertEquals('z', OptionalChar.of('z').orElseThrow(IllegalStateException::new));
+        assertEquals((byte) 9, OptionalByte.of((byte) 9).orElseThrow(IllegalStateException::new));
+        assertEquals((short) 8, OptionalShort.of((short) 8).orElseThrow(IllegalStateException::new));
+        assertEquals(1.25f, OptionalFloat.of(1.25f).orElseThrow(IllegalStateException::new));
+    }
+
+    @Test
+    public void testBoxedAndJdkOfEmpty() {
+        assertFalse(OptionalByte.empty().boxed().isPresent());
+        assertFalse(OptionalShort.empty().boxed().isPresent());
+        assertFalse(OptionalInt.empty().boxed().isPresent());
+        assertFalse(OptionalLong.empty().boxed().isPresent());
+        assertFalse(OptionalFloat.empty().boxed().isPresent());
+        assertFalse(OptionalDouble.empty().boxed().isPresent());
+        assertFalse(OptionalLong.empty().toJdkOptional().isPresent());
+        assertFalse(OptionalDouble.empty().toJdkOptional().isPresent());
+        assertEquals(java.util.OptionalLong.of(2L), OptionalLong.of(2L).toJdkOptional());
+    }
+
+    @Test
+    public void testNullableCollectionsIfNotNull() {
+        assertEquals(Collections.singleton("a"), Nullable.of("a").toSetIfNotNull());
+        assertTrue(Nullable.<String> of(null).toSetIfNotNull().isEmpty());
+        assertTrue(Nullable.<String> of(null).toImmutableListIfNotNull().isEmpty());
+        assertEquals(List.of("a"), Nullable.of("a").toImmutableListIfNotNull());
+        assertEquals(Collections.singleton("b"), Nullable.of("b").toImmutableSetIfNotNull());
+        assertTrue(Nullable.<String> of(null).toImmutableSetIfNotNull().isEmpty());
+    }
 }

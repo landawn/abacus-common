@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -333,4 +334,105 @@ public class DifferenceTest extends DifferenceTestSupport {
         assertTrue(extremes.onlyOnRight().isEmpty());
     }
 
+    public static class LeftBean {
+        private String value;
+        private String shared;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(final String value) {
+            this.value = value;
+        }
+
+        public String getShared() {
+            return shared;
+        }
+
+        public void setShared(final String shared) {
+            this.shared = shared;
+        }
+    }
+
+    public static class RightBean {
+        private String name;
+        private String shared;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public String getShared() {
+            return shared;
+        }
+
+        public void setShared(final String shared) {
+            this.shared = shared;
+        }
+    }
+
+    private static Map<String, Object> map(final Object... kv) {
+        final Map<String, Object> m = new LinkedHashMap<>();
+        for (int i = 0; i < kv.length; i += 2) {
+            m.put((String) kv[i], kv[i + 1]);
+        }
+        return m;
+    }
+
+    @Test
+    public void testMapListDifferenceWithSingleIdExtractor() {
+        final List<Map<String, Object>> a = Arrays.asList(map("id", 1, "v", "x"), map("id", 2, "v", "y"));
+        final List<Map<String, Object>> b = Arrays.asList(map("id", 1, "v", "z"), map("id", 3, "v", "w"));
+
+        final MapDifference<List<Map<String, Object>>, List<Map<String, Object>>, Map<Object, MapDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> diff = MapDifference
+                .of(a, b, Arrays.asList("v"), m -> m.get("id"));
+
+        assertEquals(1, diff.onlyOnLeft().size());
+        assertEquals(2, diff.onlyOnLeft().get(0).get("id"));
+        assertEquals(1, diff.onlyOnRight().size());
+        assertEquals(3, diff.onlyOnRight().get(0).get("id"));
+        assertEquals(Pair.of("x", "z"), diff.differentValues().get(1).differentValues().get("v"));
+
+        assertThrows(IllegalArgumentException.class, () -> MapDifference.of(a, b, Arrays.asList("v"), null));
+    }
+
+    @Test
+    public void testOfByPropsRejectsNonBeanRight() {
+        final LeftBean left = new LeftBean();
+        assertThrows(IllegalArgumentException.class, () -> BeanDifference.ofByProps(left, "not a bean", Arrays.asList("value"), (n, x, y) -> true));
+    }
+
+    @Test
+    public void testOfByPropsRightNull() {
+        final LeftBean left = new LeftBean();
+        left.setValue("v1");
+        final BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.ofByProps(left, null,
+                Arrays.asList("value", "missing"), (n, x, y) -> N.equals(x, y));
+
+        assertEquals(map("value", "v1"), diff.onlyOnLeft());
+        assertTrue(diff.onlyOnRight().isEmpty());
+    }
+
+    @Test
+    public void testOfByPropsAcrossDifferentClasses() {
+        final LeftBean left = new LeftBean();
+        left.setValue("v1");
+        left.setShared("s");
+        final RightBean right = new RightBean();
+        right.setName("n1");
+        right.setShared("s");
+
+        final BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff = BeanDifference.ofByProps(left, right,
+                Arrays.asList("value", "name", "shared"), (n, x, y) -> N.equals(x, y));
+
+        assertEquals(map("value", "v1"), diff.onlyOnLeft());
+        assertEquals(map("name", "n1"), diff.onlyOnRight());
+        assertEquals(map("shared", "s"), diff.common());
+        assertTrue(diff.differentValues().isEmpty());
+    }
 }

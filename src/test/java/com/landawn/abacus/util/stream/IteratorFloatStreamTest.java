@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -485,4 +486,87 @@ public class IteratorFloatStreamTest extends TestBase {
     }
 
     // ---- deep review 2026-11-02 G124 end ----
+
+    private static IteratorFloatStream it(final float... a) {
+        return new IteratorFloatStream(FloatIterator.of(a));
+    }
+
+    private static IteratorFloatStream sortedIt(final float... a) {
+        return new IteratorFloatStream(FloatIterator.of(a), true, null);
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new float[] { 2f, 2f }, it(1f, 2f, 3f).flatMap(x -> x == 2f ? FloatStream.of(x, x) : null).toArray());
+    }
+
+    @Test
+    public void testToSetAndToMultiset() {
+        final Set<Float> set = it(1f, 2f, 2f).toSet();
+        assertEquals(2, set.size());
+        assertTrue(set.contains(2f));
+
+        final Multiset<Float> ms = it(1f, 2f, 2f).toMultiset();
+        assertEquals(2, ms.count(2f));
+        assertEquals(1, ms.count(1f));
+    }
+
+    @Test
+    public void testMaxOnSortedIterator() {
+        assertEquals(3f, sortedIt(1f, 2f, 3f).max().get());
+    }
+
+    @Test
+    public void testFindLastOnEmpty() {
+        assertFalse(it().findLast(x -> true).isPresent());
+    }
+
+    @Test
+    public void testAsDoubleStreamAdvance() {
+        final DoubleIteratorEx iter = it(1f, 2f, 3f).asDoubleStream().iteratorEx();
+        iter.advance(2);
+        assertEquals(3d, iter.nextDouble());
+        assertFalse(iter.hasNext());
+    }
+
+    @Test
+    public void testAppendIfEmptyIteratorPaths() {
+        final FloatIteratorEx iter = it().appendIfEmpty(() -> FloatStream.of(7f, 8f, 9f)).iteratorEx();
+        assertEquals(7f, iter.nextFloat());
+        iter.advance(0);
+        iter.advance(1);
+        assertEquals(9f, iter.nextFloat());
+        assertFalse(iter.hasNext());
+
+        final FloatIteratorEx iter2 = it().appendIfEmpty(() -> FloatStream.of(7f, 8f, 9f)).iteratorEx();
+        iter2.advance(2);
+        assertEquals(9f, iter2.nextFloat());
+    }
+
+    @Test
+    public void testIfEmptyIteratorPaths() {
+        final int[] runs = { 0 };
+        final FloatIteratorEx iter = it(1f, 2f, 3f, 4f).ifEmpty(() -> runs[0]++).iteratorEx();
+        assertEquals(1f, iter.nextFloat());
+        iter.advance(0);
+        iter.advance(1);
+        assertEquals(3f, iter.nextFloat());
+
+        final FloatIteratorEx iter2 = it(1f, 2f, 3f).ifEmpty(() -> runs[0]++).iteratorEx();
+        iter2.advance(2);
+        assertEquals(3f, iter2.nextFloat());
+        assertFalse(iter2.hasNext());
+        assertEquals(0, runs[0]);
+
+        final FloatIteratorEx iter3 = it().ifEmpty(() -> runs[0]++).iteratorEx();
+        iter3.advance(1);
+        assertFalse(iter3.hasNext());
+        assertEquals(1, runs[0]);
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertTrue(it().isEmpty());
+        assertFalse(it(1f).isEmpty());
+    }
 }

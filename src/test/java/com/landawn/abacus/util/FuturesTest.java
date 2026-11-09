@@ -2783,4 +2783,16 @@ public class FuturesTest extends TestBase {
             return "INTERRUPTED";
         }
     }
+
+    @Test
+    public void testComposeTimedGetUsesDeadlineBoundedViews() throws Exception {
+        final CompletableFuture<Integer> f1 = CompletableFuture.completedFuture(1);
+        final CompletableFuture<Integer> f2 = CompletableFuture.completedFuture(2);
+
+        final ContinuableFuture<String> composed = Futures.compose(f1, f2,
+                (a, b) -> (a.get(1, TimeUnit.SECONDS) + b.get(1, TimeUnit.SECONDS)) + "|" + b.toString());
+
+        final String result = composed.get(5, TimeUnit.SECONDS);
+        assertEquals("3|" + f2.toString(), result);
+    }
 }

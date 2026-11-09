@@ -1164,4 +1164,40 @@ public class ParallelArrayCharStreamTest extends TestBase {
         assertTrue(thrown == failure || thrown.getCause() == failure, String.valueOf(thrown));
     }
     // ---- deep review 2026-11-02 G107 end ----
+
+    private static CharStream par(final SplitStrategy strategy, final char... a) {
+        return new ParallelArrayCharStream(a, 0, a.length, false, 4, strategy, null, false, null);
+    }
+
+    @Test
+    public void testDropWhileDropsEverything() {
+        final char[] a = new char[200];
+
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (char) ('a' + (i % 26));
+        }
+
+        assertEquals(0, par(null, a).dropWhile(c -> true).count());
+    }
+
+    @Test
+    public void testDropWhileKeepsTail() {
+        final char[] r = par(null, 'a', 'a', 'a', 'b', 'c', 'd').dropWhile(c -> c == 'a').sorted().toArray();
+        assertArrayEquals(new char[] { 'b', 'c', 'd' }, r);
+    }
+
+    @Test
+    public void testReduceArraySplitWithEmptySlice() {
+        assertEquals('e', par(SplitStrategy.ARRAY, 'a', 'b', 'c', 'd', 'e').reduce((x, y) -> x > y ? x : y).get());
+    }
+
+    @Test
+    public void testZipWithSequentialFallback() {
+        final char[] single = { 'a' };
+        assertArrayEquals(new char[] { 'b' },
+                new ParallelArrayCharStream(single, 0, 1, false, 4, null, null, false, null).zipWith(CharStream.of('b'), (x, y) -> x > y ? x : y).toArray());
+        assertArrayEquals(new char[] { 'c' },
+                new ParallelArrayCharStream(single, 0, 1, false, 4, null, null, false, null).zipWith(CharStream.of('b'), CharStream.of('c'), (x, y, z) -> z)
+                        .toArray());
+    }
 }

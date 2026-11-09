@@ -2,6 +2,7 @@ package com.landawn.abacus.type;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -27,6 +28,7 @@ import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.Objectory;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class MapEntryTypeTest extends TestBase {
 
     private MapEntryType<String, Integer> mapEntryType;
@@ -681,4 +683,21 @@ public class MapEntryTypeTest extends TestBase {
     }
 
     // ---- deep review 2026-10-27 verify G142 end ----
+
+    private static String serialize2(final Type type, final Object value) throws Exception {
+        final BufferedJsonWriter w = Objectory.createBufferedJsonWriter();
+        try {
+            type.serializeTo(w, value, null);
+            return w.toString();
+        } finally {
+            Objectory.recycle(w);
+        }
+    }
+
+    @Test
+    public void testMapEntryEmptyObjectAndNullKeySerialization() throws Exception {
+        final Type<Map.Entry<String, Integer>> type = Type.of("Map.Entry<String, Integer>");
+        assertNull(type.valueOf("{ }"));
+        assertEquals("{null:1}", serialize2(type, new AbstractMap.SimpleEntry<>(null, 1)));
+    }
 }

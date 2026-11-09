@@ -212,4 +212,11 @@ public class AbstractLongTypeTest extends TestBase {
         assertEquals(longType.stringOf(bi), sb.toString());
         assertEquals(String.valueOf(bi.longValue()), sb.toString());
     }
+
+    @Test
+    public void testLongSuffixRecoveryPaths() {
+        final Type<Long> type = Type.of(Long.class);
+        assertEquals(Long.MIN_VALUE, type.valueOf("-9223372036854775808F").longValue());
+        assertEquals(31L, type.valueOf("0x1FL").longValue());
+    }
 }

@@ -621,4 +621,20 @@ public class ExceptionUtilTest extends TestBase {
         UndeclaredThrowableException noCause = new UndeclaredThrowableException(null);
         assertSame(noCause, ExceptionUtil.toRuntimeException(noCause, false, false));
     }
+
+    @Test
+    public void testTryToGetOriginalCheckedExceptionStopsAtDepthLimit() {
+        final IOException root = new IOException("root");
+        Exception e = root;
+        final ExecutionException[] chain = new ExecutionException[101];
+        for (int i = 0; i < chain.length; i++) {
+            chain[i] = new ExecutionException(e);
+            e = chain[i];
+        }
+        // 100 wrapper levels are unwrapped; the innermost wrapper is returned once the depth budget is exhausted.
+        assertSame(chain[0], ExceptionUtil.tryToGetOriginalCheckedException(e));
+
+        // Within the budget the original checked exception is found.
+        assertSame(root, ExceptionUtil.tryToGetOriginalCheckedException(chain[5]));
+    }
 }

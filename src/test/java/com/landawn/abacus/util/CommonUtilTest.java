@@ -22,6 +22,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +34,20 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.type.Type;
+import com.landawn.abacus.util.u.Nullable;
+import com.landawn.abacus.util.u.Optional;
+import com.landawn.abacus.util.u.OptionalInt;
 
 public class CommonUtilTest extends CommonUtilTestSupport {
 
@@ -1318,4 +1327,592 @@ public class CommonUtilTest extends CommonUtilTestSupport {
 
     // ---- bug review 2026-09-30 G134 end ----
 
+    public static class BeanA {
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class BeanB {
+        private int id;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+    }
+
+    public static class BeanC {
+        private double weight;
+
+        public double getWeight() {
+            return weight;
+        }
+
+        public void setWeight(final double weight) {
+            this.weight = weight;
+        }
+    }
+
+    /** A non-Collection Iterable with a public descendingIterator(). */
+    public static class DescIterable implements Iterable<String> {
+        private final List<String> list;
+        private final boolean fail;
+
+        public DescIterable(final boolean fail, final String... values) {
+            this.list = Arrays.asList(values);
+            this.fail = fail;
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return list.iterator();
+        }
+
+        public Iterator<String> descendingIterator() {
+            if (fail) {
+                throw new IllegalStateException("boom");
+            }
+            final List<String> copy = new ArrayList<>(list);
+            Collections.reverse(copy);
+            return copy.iterator();
+        }
+    }
+
+    static final class SimpleDelayed implements Delayed {
+        private final long delay;
+
+        SimpleDelayed(final long delay) {
+            this.delay = delay;
+        }
+
+        @Override
+        public long getDelay(final TimeUnit unit) {
+            return delay;
+        }
+
+        @Override
+        public int compareTo(final Delayed o) {
+            return Long.compare(delay, o.getDelay(TimeUnit.NANOSECONDS));
+        }
+    }
+
+    @Test
+    public void testCheckArgNotEmptyThrows() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty("", "s"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new boolean[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new char[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new byte[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new short[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new int[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new long[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new float[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new double[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new String[0], "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new ArrayList<String>(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new ArrayList<String>().iterator(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new HashMap<String, String>(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new IntList(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(new Multiset<String>(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(N.newListMultimap(), "a"));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgNotEmpty(N.newEmptyDataset(), "a"));
+    }
+
+    @Test
+    public void testCheckValueNotNull2() {
+        final Map<String, Integer> m = new HashMap<>();
+        m.put("a", 1);
+        CommonUtil.checkValueNotNull(m, "m");
+        m.put("b", null);
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkValueNotNull(m, "m"));
+    }
+
+    @Test
+    public void testEqualsByCommonPropsNoCommon() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equalsByCommonProps(new BeanB(), new BeanC()));
+    }
+
+    @Test
+    public void testEqualsEverything() {
+        final Map<String, Integer> m1 = new HashMap<>();
+        m1.put("a", 1);
+        final Map<String, Integer> m2 = new HashMap<>(m1);
+        m2.put("b", 2);
+        assertFalse(CommonUtil.equalsEverything(m1, m2));
+
+        assertFalse(CommonUtil.equalsEverything(new Object[] { 1, 2 }, new Object[] { 1 }));
+        assertFalse(CommonUtil.equalsEverything(new Object[] { 1, 2 }, new Object[] { 1, 3 }));
+        assertTrue(CommonUtil.equalsEverything(new Object[] { 1, 2 }, new Object[] { 1, 2 }));
+
+        assertFalse(CommonUtil.equalsEverything(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 3).iterator()));
+        assertTrue(CommonUtil.equalsEverything(Arrays.asList(1, 2).iterator(), Arrays.asList(1, 2).iterator()));
+
+        assertFalse(CommonUtil.equalsEverything(new BeanA(), new BeanB()));
+    }
+
+    @Test
+    public void testHashCodeNullRanges() {
+        assertEquals(0, CommonUtil.hashCode((short[]) null, 0, 0));
+        assertEquals(0, CommonUtil.hashCode((long[]) null, 0, 0));
+        assertEquals(0, CommonUtil.hashCode((float[]) null, 0, 0));
+        assertEquals(0, CommonUtil.hashCode((double[]) null, 0, 0));
+    }
+
+    @Test
+    public void testToStringEmptyAndNull() {
+        assertEquals("[]", CommonUtil.toString(new char[0], 0, 0));
+        final StringBuilder sb = new StringBuilder();
+        CommonUtil.toString(sb, new char[0]);
+        assertEquals("[]", sb.toString());
+
+        assertEquals("[]", CommonUtil.toString(new short[0]));
+        assertEquals("null", CommonUtil.toString((short[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new short[0], 0, 0));
+        assertEquals("null", CommonUtil.toString((int[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new int[0], 0, 0));
+        assertEquals("[]", CommonUtil.toString(new long[0]));
+        assertEquals("null", CommonUtil.toString((long[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new long[0], 0, 0));
+        assertEquals("null", CommonUtil.toString((float[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new float[0], 0, 0));
+        assertEquals("null", CommonUtil.toString((double[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new double[0], 0, 0));
+        assertEquals("null", CommonUtil.toString((Object[]) null, 0, 0));
+        assertEquals("[]", CommonUtil.toString(new Object[0], 0, 0));
+
+        final StringBuilder sb2 = new StringBuilder();
+        CommonUtil.toString(sb2, (Object[]) null);
+        CommonUtil.toString(sb2, new Object[0]);
+        assertEquals("null[]", sb2.toString());
+
+        assertEquals("[]", CommonUtil.deepToString(new Object[0], 0, 0));
+    }
+
+    @Test
+    public void testNotEmptyIterableAndBlankChecks() {
+        assertTrue(CommonUtil.notEmpty((Iterable<?>) Arrays.asList(1)));
+        assertFalse(CommonUtil.notEmpty((Iterable<?>) new ArrayList<>()));
+        assertFalse(CommonUtil.anyBlank(new CharSequence[] { "a", "b", "c", "d" }));
+        assertFalse(CommonUtil.allEmpty(new CharSequence[] { "", "b", "c", "d" }));
+        assertFalse(CommonUtil.allBlank(new CharSequence[] { " ", "b", "c", "d" }));
+    }
+
+    @Test
+    public void testConvertCustomNumberToChar() {
+        assertEquals('A', (char) N.convert(MutableInt.of(65), char.class));
+        final LongAdder adder = new LongAdder();
+        adder.add(66);
+        assertEquals(Character.valueOf('B'), N.convert(adder, Character.class));
+    }
+
+    @Test
+    public void testCastIfAssignablePrimitive() {
+        assertEquals(Integer.valueOf(5), CommonUtil.castIfAssignable(5, int.class).get());
+        assertFalse(CommonUtil.castIfAssignable(null, int.class).isPresent());
+        assertFalse(CommonUtil.castIfAssignable("x", int.class).isPresent());
+    }
+
+    @Test
+    public void testNegateEmptyRange() {
+        final boolean[] a = { true, false };
+        CommonUtil.negate(a, 1, 1);
+        assertArrayEquals(new boolean[] { true, false }, a);
+    }
+
+    @Test
+    public void testUnmodifiableNulls() {
+        final SortedSet<String> ss = CommonUtil.unmodifiableSortedSet(null);
+        assertTrue(ss.isEmpty());
+        final NavigableSet<String> ns = CommonUtil.unmodifiableNavigableSet(null);
+        assertTrue(ns.isEmpty());
+        final Map<String, String> m = CommonUtil.unmodifiableMap(null);
+        assertTrue(m.isEmpty());
+        final SortedMap<String, String> sm = CommonUtil.unmodifiableSortedMap(null);
+        assertTrue(sm.isEmpty());
+        final NavigableMap<String, String> nm = CommonUtil.unmodifiableNavigableMap(null);
+        assertTrue(nm.isEmpty());
+    }
+
+    @Test
+    public void testDatasetHelpers() {
+        final Map<String, Object> props = new HashMap<>();
+        props.put("p", 1);
+        final Dataset empty = CommonUtil.newEmptyDataset(new ArrayList<>(), props);
+        assertEquals(0, empty.columnCount());
+        assertEquals(1, empty.getProperties().get("p"));
+
+        final List<Object> rows = new ArrayList<>();
+        rows.add(new int[] { 1, 2 });
+        rows.add(new int[] { 3, 4 });
+        final Dataset ds = CommonUtil.newDataset(Arrays.asList("a", "b"), rows, null);
+        assertEquals(2, ds.size());
+        assertEquals(Integer.valueOf(3), ds.moveToRow(1).get("a"));
+        assertEquals(Integer.valueOf(4), ds.moveToRow(1).get("b"));
+
+        assertEquals(0, CommonUtil.newDataset(new HashMap<String, List<Object>>()).size());
+
+        final Dataset d1 = CommonUtil.newDataset(Arrays.asList("a"), Arrays.asList(new Object[] { 1 }, new Object[] { 2 }), props);
+        final Dataset d2 = CommonUtil.newDataset(Arrays.asList("a"), Arrays.<Object> asList(new Object[] { 3 }));
+        final Dataset merged2 = CommonUtil.merge(Arrays.asList(d1, d2), true);
+        assertEquals(3, merged2.size());
+
+        final Dataset d3 = CommonUtil.newDataset(Arrays.asList("a"), Arrays.<Object> asList(new Object[] { 4 }));
+        final Dataset merged3 = CommonUtil.merge(Arrays.asList(d1, d2, d3), false);
+        assertEquals(4, merged3.size());
+        assertEquals(1, merged3.getProperties().get("p"));
+    }
+
+    @Test
+    public void testToArrayVariants() {
+        assertEquals(0, CommonUtil.toArray(new ArrayList<>(), 0, 0).length);
+        final List<String> list = Arrays.asList("a", "b");
+        final String[] arr = CommonUtil.toArray(list, 0, 2, new String[2]);
+        assertArrayEquals(new String[] { "a", "b" }, arr);
+        assertEquals(0, CommonUtil.toArray(new ArrayList<String>(), String[].class).length);
+        assertEquals(0, CommonUtil.toArray(new ArrayList<String>(), 0, 0, String[].class).length);
+        assertArrayEquals(new String[] { "a", "b" }, CommonUtil.toArray(list, 0, 2, String[].class));
+
+        final List<Integer> nums = Arrays.asList(1, 2);
+        assertEquals(0, CommonUtil.toByteArray(nums, 1, 1, (byte) 0).length);
+        assertEquals(0, CommonUtil.toShortArray(nums, 1, 1, (short) 0).length);
+        assertEquals(0, CommonUtil.toIntArray(nums, 1, 1, 0).length);
+        assertEquals(0, CommonUtil.toIntArray((boolean[]) null).length);
+        assertEquals(0, CommonUtil.toLongArray(nums, 1, 1, 0L).length);
+        assertEquals(0, CommonUtil.toFloatArray(nums, 1, 1, 0f).length);
+        assertEquals(0, CommonUtil.toDoubleArray(nums, 1, 1, 0d).length);
+    }
+
+    @Test
+    public void testToQueuesAndSets() {
+        assertTrue(CommonUtil.toLinkedHashSet().isEmpty());
+        final ArrayBlockingQueue<String> abq = CommonUtil.toArrayBlockingQueue();
+        assertTrue(abq.isEmpty());
+        assertEquals(1, abq.remainingCapacity());
+        assertTrue(CommonUtil.toLinkedBlockingQueue().isEmpty());
+        assertTrue(CommonUtil.toConcurrentLinkedQueue().isEmpty());
+        final DelayQueue<SimpleDelayed> dq = CommonUtil.toDelayQueue(new SimpleDelayed(-1), new SimpleDelayed(-2));
+        assertEquals(2, dq.size());
+        assertTrue(CommonUtil.toArrayDeque().isEmpty());
+        assertTrue(CommonUtil.toLinkedBlockingDeque().isEmpty());
+        assertTrue(CommonUtil.toConcurrentLinkedDeque().isEmpty());
+    }
+
+    @Test
+    public void testToCollectionVariants() {
+        final List<String> l0 = CommonUtil.toCollection(new String[0], ArrayList::new);
+        assertTrue(l0.isEmpty());
+        final String[] nine = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+        final List<String> l9 = CommonUtil.toCollection(nine, 0, 9, ArrayList::new);
+        assertEquals(Arrays.asList(nine), l9);
+
+        final Iterable<String> iterable = new DescIterable(false, "x", "y");
+        final List<String> fromIter = CommonUtil.toCollection(iterable, n -> new ArrayList<>());
+        assertEquals(Arrays.asList("x", "y"), fromIter);
+
+        final List<String> fromNullIter = CommonUtil.toCollection((Iterator<String>) null, ArrayList::new);
+        assertTrue(fromNullIter.isEmpty());
+
+        assertTrue(CommonUtil.toReversedList(new ArrayList<String>()).isEmpty());
+    }
+
+    @Test
+    public void testToMapEmpty() {
+        assertTrue(CommonUtil.toMap(new ArrayList<String>(), s -> s, s -> s).isEmpty());
+        final Map<String, String> m = CommonUtil.toMap(new ArrayList<String>(), s -> s, s -> s, n -> new LinkedHashMap<>());
+        assertTrue(m instanceof LinkedHashMap);
+        assertTrue(CommonUtil.toMap((Iterator<String>) null, s -> s, s -> s).isEmpty());
+        final Map<String, String> m2 = CommonUtil.toMap((Iterator<String>) null, s -> s, s -> s, TreeMap::new);
+        assertTrue(m2 instanceof TreeMap);
+    }
+
+    @Test
+    public void testCompareTuplesEarlyExit() {
+        assertEquals(-1, Integer.signum(CommonUtil.compare(1, 2, "a", "a", 1L, 1L)));
+        assertEquals(1, Integer.signum(CommonUtil.compare(1, 1, "b", "a", 1L, 1L, 1, 1)));
+        assertEquals(-1, Integer.signum(CommonUtil.compare(1, 1, "a", "a", 1L, 2L, 1, 1, 1, 1)));
+        assertEquals(-1, Integer.signum(CommonUtil.compare(1, 1, "a", "a", 1L, 1L, 1, 2, 1, 1, 1, 1)));
+        assertEquals(1, Integer.signum(CommonUtil.compare(1, 1, "a", "a", 1L, 1L, 1, 1, 3, 2, 1, 1, 1, 1)));
+    }
+
+    @Test
+    public void testCompareUnsignedEmpty() {
+        assertEquals(1, CommonUtil.compareUnsigned(new byte[] { 1 }, new byte[0]));
+        assertEquals(0, CommonUtil.compareUnsigned(new short[0], new short[0]));
+        assertEquals(-1, CommonUtil.compareUnsigned(new short[0], new short[] { 1 }));
+        assertEquals(1, CommonUtil.compareUnsigned(new short[] { 1 }, new short[0]));
+        assertEquals(0, CommonUtil.compareUnsigned(new int[0], (int[]) null));
+        assertEquals(-1, CommonUtil.compareUnsigned(new int[0], new int[] { 1 }));
+        assertEquals(1, CommonUtil.compareUnsigned(new int[] { 1 }, new int[0]));
+        assertEquals(0, CommonUtil.compareUnsigned(new long[0], new long[0]));
+        assertEquals(-1, CommonUtil.compareUnsigned(new long[0], new long[] { 1 }));
+        assertEquals(1, CommonUtil.compareUnsigned(new long[] { 1 }, new long[0]));
+
+        assertEquals(1, CommonUtil.compare(new String[] { "a" }, new String[0], Comparator.naturalOrder()));
+        assertEquals(0, CommonUtil.compare(new String[] { "a" }, 0, new String[] { "b" }, 0, 0, Comparator.naturalOrder()));
+    }
+
+    @Test
+    public void testRangeChecks() {
+        assertFalse(CommonUtil.gtAndLt(1, 1, 5));
+        assertFalse(CommonUtil.gtAndLt(1, 1, 5, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.geAndLt(0, 1, 5));
+        assertFalse(CommonUtil.geAndLt(0, 1, 5, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.geAndLe(0, 1, 5, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.gtAndLe(1, 1, 5));
+        assertTrue(CommonUtil.gtAndLe(3, 1, 5, Comparator.<Integer> naturalOrder()));
+        assertFalse(CommonUtil.gtAndLe(6, 1, 5, Comparator.<Integer> naturalOrder()));
+    }
+
+    @Test
+    public void testGetElementAndLastElement() {
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.getElement(Arrays.asList(1, 2).iterator(), 5));
+
+        assertFalse(CommonUtil.lastElement(new DescIterable(false)).isPresent());
+        assertEquals("b", CommonUtil.lastElement(new DescIterable(false, "a", "b")).get());
+        assertEquals("d", CommonUtil.lastOrDefaultIfEmpty(new DescIterable(false), "d"));
+        // descendingIterator() throws -> falls back to forward iteration
+        assertEquals("b", CommonUtil.lastElement(new DescIterable(true, "a", "b")).get());
+
+        assertFalse(CommonUtil.firstEntry(new HashMap<String, String>()).isPresent());
+    }
+
+    @Test
+    public void testFindLastVariants() {
+        assertFalse(CommonUtil.findLastNonNull(Arrays.asList("a", null), s -> s.equals("z")).isPresent());
+        assertFalse(CommonUtil.findLast(new ArrayList<String>(), s -> true).isPresent());
+        assertFalse(CommonUtil.findLastNonNull(new ArrayList<String>(), s -> true).isPresent());
+
+        final Collection<String> set = new HashSet<>(Arrays.asList("a", "b"));
+        assertEquals("a", CommonUtil.findLast(set, "a"::equals).get());
+        assertFalse(CommonUtil.findLast(set, "z"::equals).isPresent());
+
+        assertFalse(CommonUtil.findLast(new ArrayDeque<>(Arrays.asList(1, 2)), x -> x > 5).isPresent());
+        assertEquals(Integer.valueOf(2), CommonUtil.findLast(new ArrayDeque<>(Arrays.asList(1, 2)), x -> x > 0).get());
+        assertFalse(CommonUtil.findFirstNonNull(Arrays.asList("a", null), "z"::equals).isPresent());
+        assertFalse(CommonUtil.findFirstNonNull(Arrays.asList("a", null).iterator(), "z"::equals).isPresent());
+    }
+
+    @Test
+    public void testContainsSameElementsAndMismatch() {
+        assertFalse(CommonUtil.containsSameElements(new Object[] { 1 }, new Object[] { 1, 2 }));
+        assertFalse(CommonUtil.containsSameElements(Arrays.asList(1, 2), Arrays.asList(1, 3)));
+
+        assertEquals(0, CommonUtil.mismatch(new byte[] { 1 }, new byte[0]));
+        assertEquals(0, CommonUtil.mismatch(new short[] { 1 }, new short[0]));
+        assertEquals(0, CommonUtil.mismatch(new int[] { 1 }, new int[0]));
+        assertEquals(0, CommonUtil.mismatch(new long[] { 1 }, new long[0]));
+        assertEquals(0, CommonUtil.mismatch(new float[] { 1 }, new float[0]));
+        assertEquals(0, CommonUtil.mismatch(new double[] { 1 }, new double[0]));
+        assertEquals(-1, CommonUtil.mismatch(new String[] { "a" }, 0, new String[] { "b" }, 0, 0, (String x) -> x));
+
+        final Collection<Integer> a = Arrays.asList(1, 2, 3);
+        final Collection<Integer> b = new LinkedHashSet<>(Arrays.asList(9, 2, 4));
+        assertEquals(1, CommonUtil.mismatch(a, 1, b, 1, 2, x -> x));
+
+        assertEquals(0, CommonUtil.mismatch(Arrays.asList(1).iterator(), new ArrayList<Integer>().iterator(), x -> x));
+    }
+
+    @Test
+    public void testReverseShuffleNonListCollections() {
+        final ArrayBlockingQueue<Integer> q = new ArrayBlockingQueue<>(3) {
+            private static final long serialVersionUID = 1L;
+        };
+        q.addAll(Arrays.asList(1, 2, 3));
+        CommonUtil.reverse(q);
+        assertEquals(Arrays.asList(3, 2, 1), new ArrayList<>(q));
+
+        final List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+        CommonUtil.shuffle((Collection<Integer>) list, new Random(7));
+        assertEquals(5, list.size());
+        assertTrue(list.containsAll(Arrays.asList(1, 2, 3, 4, 5)));
+    }
+
+    @Test
+    public void testRotateObjectRange() {
+        final Object[] a = { 1, 2, 3, 4 };
+        CommonUtil.rotate(a, 0, 4, 4);
+        assertArrayEquals(new Object[] { 1, 2, 3, 4 }, a);
+        CommonUtil.rotate(a, 0, 4, -1);
+        assertArrayEquals(new Object[] { 2, 3, 4, 1 }, a);
+    }
+
+    @Test
+    public void testFillEmpty() {
+        CommonUtil.fill(new byte[0], (byte) 1);
+        final byte[] b = { 0, 0 };
+        CommonUtil.fill(b, 1, 1, (byte) 1);
+        assertArrayEquals(new byte[] { 0, 0 }, b);
+        CommonUtil.fill(new short[0], (short) 1);
+        CommonUtil.fill(new long[0], 1L);
+        CommonUtil.fill(new float[0], 1f);
+        final String[] s = { "a" };
+        CommonUtil.fill(s, 0, 0, "b");
+        assertArrayEquals(new String[] { "a" }, s);
+    }
+
+    @Test
+    public void testCopyOfRangeAndClone() {
+        final String[] r = CommonUtil.copyOfRange(new Object[] { "a", "b", "c" }, 0, 2, 1, String[].class);
+        assertArrayEquals(new String[] { "a", "b" }, r);
+        assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0));
+
+        assertNull(CommonUtil.clone((char[][]) null));
+        assertNull(CommonUtil.clone((byte[][]) null));
+        assertNull(CommonUtil.clone((short[][]) null));
+        assertNull(CommonUtil.clone((long[][]) null));
+        assertNull(CommonUtil.clone((float[][]) null));
+        assertNull(CommonUtil.clone((double[][]) null));
+        assertNull(CommonUtil.clone((boolean[][][]) null));
+        assertNull(CommonUtil.clone((char[][][]) null));
+        assertNull(CommonUtil.clone((byte[][][]) null));
+        assertNull(CommonUtil.clone((short[][][]) null));
+        assertNull(CommonUtil.clone((int[][][]) null));
+        assertNull(CommonUtil.clone((long[][][]) null));
+        assertNull(CommonUtil.clone((float[][][]) null));
+    }
+
+    @Test
+    public void testIsSorted() {
+        assertFalse(CommonUtil.isSorted(new boolean[] { false, true, false, true }, 0, 4));
+        assertTrue(CommonUtil.isSorted(new short[] { 3, 1 }, 0, 1));
+        assertTrue(CommonUtil.isSorted(new Integer[] { 3, 1 }, 0, 1));
+        assertFalse(CommonUtil.isSorted(new Integer[] { 1, 3, 2, 4 }, 0, 4));
+        assertTrue(CommonUtil.isSorted(new Integer[] { 1 }, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.isSorted(new Integer[] { 3, 1 }, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.isSorted(new Integer[] { 1, 3, 2, 4 }, Comparator.naturalOrder()));
+        assertTrue(CommonUtil.isSorted(new Integer[] { 3, 1 }, 0, 1, Comparator.naturalOrder()));
+        assertFalse(CommonUtil.isSorted(new Integer[] { 1, 3, 2, 4 }, 0, 4, Comparator.naturalOrder()));
+        assertTrue(CommonUtil.isSorted(Arrays.asList(1), Comparator.<Integer> naturalOrder()));
+        assertFalse(CommonUtil.isSorted(Arrays.asList(1, 3, 2), Comparator.<Integer> naturalOrder()));
+    }
+
+    @Test
+    public void testSortEarlyReturnsAndParallel() {
+        final String[] s = { "b", "a" };
+        CommonUtil.sort(s, 1, 1, Comparator.naturalOrder());
+        assertArrayEquals(new String[] { "b", "a" }, s);
+
+        CommonUtil.parallelSort(new char[0], 0, 0);
+        CommonUtil.parallelSort(new byte[0], 0, 0);
+        CommonUtil.parallelSort(new short[0], 0, 0);
+        CommonUtil.parallelSort(new int[0], 0, 0);
+        CommonUtil.parallelSort(new long[0], 0, 0);
+        CommonUtil.parallelSort(new float[0], 0, 0);
+        CommonUtil.parallelSort(new double[0], 0, 0);
+        CommonUtil.parallelSort(new String[0], 0, 0);
+        CommonUtil.parallelSort(new String[0], 0, 0, Comparator.naturalOrder());
+        CommonUtil.parallelSort(new ArrayList<String>(), Comparator.naturalOrder());
+
+        final int n = 3500;
+        final char[] c = new char[n];
+        final byte[] b = new byte[n];
+        final short[] sh = new short[n];
+        for (int i = 0; i < n; i++) {
+            c[i] = (char) (n - i);
+            b[i] = (byte) (n - i);
+            sh[i] = (short) (n - i);
+        }
+        CommonUtil.parallelSort(c, 0, n);
+        CommonUtil.parallelSort(b, 0, n);
+        CommonUtil.parallelSort(sh, 0, n);
+        assertTrue(CommonUtil.isSorted(c));
+        assertTrue(CommonUtil.isSorted(b));
+        assertTrue(CommonUtil.isSorted(sh));
+    }
+
+    @Test
+    public void testReverseSortShortRanges() {
+        final boolean[] bo = { false, true };
+        CommonUtil.reverseSort(bo, 0, 1);
+        assertArrayEquals(new boolean[] { false, true }, bo);
+        final char[] c = { 'a', 'b' };
+        CommonUtil.reverseSort(c, 0, 1);
+        assertArrayEquals(new char[] { 'a', 'b' }, c);
+        final byte[] b = { 1, 2 };
+        CommonUtil.reverseSort(b, 0, 1);
+        assertArrayEquals(new byte[] { 1, 2 }, b);
+        final short[] s = { 1, 2 };
+        CommonUtil.reverseSort(s, 0, 1);
+        assertArrayEquals(new short[] { 1, 2 }, s);
+        final int[] i = { 1, 2 };
+        CommonUtil.reverseSort(i, 0, 1);
+        assertArrayEquals(new int[] { 1, 2 }, i);
+        final long[] l = { 1, 2 };
+        CommonUtil.reverseSort(l, 0, 1);
+        assertArrayEquals(new long[] { 1, 2 }, l);
+        final float[] f = { 1, 2 };
+        CommonUtil.reverseSort(f, 0, 1);
+        assertArrayEquals(new float[] { 1, 2 }, f);
+        final double[] d = { 1, 2 };
+        CommonUtil.reverseSort(d, 0, 1);
+        assertArrayEquals(new double[] { 1, 2 }, d);
+        final Object[] o = { 1, 2 };
+        CommonUtil.reverseSort(o, 0, 1);
+        assertArrayEquals(new Object[] { 1, 2 }, o);
+        final List<Integer> list = new ArrayList<>(Arrays.asList(1, 2));
+        CommonUtil.reverseSort(list, 0, 1);
+        assertEquals(Arrays.asList(1, 2), list);
+    }
+
+    @Test
+    public void testSearchEmpty() {
+        assertEquals(-1, CommonUtil.binarySearch(new char[0], 0, 0, 'a'));
+        assertEquals(-1, CommonUtil.binarySearch(new byte[0], 0, 0, (byte) 1));
+        assertEquals(-1, CommonUtil.binarySearch(new float[0], 0, 0, 1f));
+        assertEquals(-1, CommonUtil.binarySearch(new double[0], 0, 0, 1d));
+        assertEquals(-1, CommonUtil.binarySearch(new ArrayList<String>(), 0, 0, "a", Comparator.naturalOrder()));
+        final List<String> list = new ArrayList<>(Arrays.asList("a", "b", "c", "d"));
+        assertEquals(2, CommonUtil.binarySearch(list, 1, 3, "c", Comparator.naturalOrder()));
+
+        assertEquals(-1, CommonUtil.indexOfSubList(null, Arrays.asList(1)));
+        assertEquals(-1, CommonUtil.indexOfSubList(new ArrayList<>(), Arrays.asList(1)));
+        assertEquals(-1, CommonUtil.lastIndexOfSubList(null, Arrays.asList(1)));
+        assertEquals(-1, CommonUtil.lastIndexOfSubList(new ArrayList<>(), Arrays.asList(1)));
+
+        assertEquals(-1, CommonUtil.lastIndexOf(new byte[0], (byte) 1));
+        assertEquals(-1, CommonUtil.lastIndexOf(new short[0], (short) 1));
+        assertEquals(-1, CommonUtil.lastIndexOf(new long[0], 1L));
+        assertEquals(-1, CommonUtil.lastIndexOf(new float[0], 1f));
+        assertEquals(-1, CommonUtil.lastIndexOf(new double[0], 1d));
+        assertEquals(-1, CommonUtil.lastIndexOf(new ArrayDeque<>(Arrays.asList(1, 2, 3)), 9, 5));
+        assertEquals(1, CommonUtil.lastIndexOf(new ArrayDeque<>(Arrays.asList(1, 2, 3)), 2, 5));
+    }
+
+    @Test
+    public void testFindIndexEmpty() {
+        assertFalse(CommonUtil.findFirstIndex(new String[] { "a" }, "z", (a, b) -> a.equals(b)).isPresent());
+        assertFalse(CommonUtil.findFirstIndex(new ArrayList<String>(), "z", (a, b) -> a.equals(b)).isPresent());
+        assertFalse(CommonUtil.findFirstIndex(Arrays.asList("a"), "z", (a, b) -> a.equals(b)).isPresent());
+        assertFalse(CommonUtil.findLastIndex(new String[0], "z", (a, b) -> a.equals(b)).isPresent());
+        assertFalse(CommonUtil.findLastIndex(new String[] { "a" }, "z", (a, b) -> a.equals(b)).isPresent());
+        final OptionalInt r = CommonUtil.findLastIndex(new ArrayList<String>(), s -> true);
+        assertFalse(r.isPresent());
+        assertFalse(CommonUtil.findLastIndex(new ArrayList<String>(), "z", (a, b) -> a.equals(b)).isPresent());
+    }
+
+    @Test
+    public void testOptionalTypesUsed() {
+        final Nullable<String> n = CommonUtil.findLast(Arrays.asList("x"), "x"::equals);
+        assertSame("x", n.get());
+        final Optional<String> o = CommonUtil.findFirstNonNull(Arrays.asList(null, "x"), s -> true);
+        assertEquals("x", o.get());
+    }
 }

@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -528,5 +530,34 @@ public class ObjectoryTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Objectory.createBufferedReader((String) null));
         assertThrows(IllegalArgumentException.class, () -> Objectory.createBufferedReader((java.io.InputStream) null));
         assertThrows(IllegalArgumentException.class, () -> Objectory.createBufferedReader((java.io.Reader) null));
+    }
+
+    @Test
+    public void testCreateBufferedJsonWriterWhenPoolEmpty() throws IOException {
+        final ByteArrayOutputStream os1 = new ByteArrayOutputStream();
+        final ByteArrayOutputStream os2 = new ByteArrayOutputStream();
+        // Holding both writers forces at least one to be freshly created rather than taken from the pool.
+        final BufferedJsonWriter w1 = Objectory.createBufferedJsonWriter(os1);
+        final BufferedJsonWriter w2 = Objectory.createBufferedJsonWriter(os2);
+        assertNotSame(w1, w2);
+        w1.write("a");
+        w2.write("b");
+        w1.flush();
+        w2.flush();
+        assertEquals("a", os1.toString("UTF-8"));
+        assertEquals("b", os2.toString("UTF-8"));
+        Objectory.recycle(w1);
+        Objectory.recycle(w2);
+    }
+
+    @Test
+    public void testCreateBufferedReaderFromStreamWhenPoolEmpty() throws IOException {
+        final java.io.BufferedReader r1 = Objectory.createBufferedReader(new ByteArrayInputStream("x".getBytes(StandardCharsets.UTF_8)));
+        final java.io.BufferedReader r2 = Objectory.createBufferedReader(new ByteArrayInputStream("y".getBytes(StandardCharsets.UTF_8)));
+        assertNotSame(r1, r2);
+        assertEquals("x", r1.readLine());
+        assertEquals("y", r2.readLine());
+        Objectory.recycle(r1);
+        Objectory.recycle(r2);
     }
 }

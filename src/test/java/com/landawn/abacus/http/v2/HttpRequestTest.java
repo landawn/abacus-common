@@ -3,7 +3,9 @@ package com.landawn.abacus.http.v2;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +31,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.net.http.HttpResponse.PushPromiseHandler;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
@@ -42,6 +45,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.http.HttpMethod;
@@ -1352,4 +1357,78 @@ public class HttpRequestTest extends HttpRequestTestSupport {
         assertEquals(Duration.ofSeconds(1), connectTimeoutOf(bounded).get());
     }
 
+    private static HttpServer server2;
+    private static String baseUrl;
+
+    @BeforeAll
+    public static void startServer() throws Exception {
+        server2 = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server2.createContext("/", exchange -> {
+            try (InputStream in = exchange.getRequestBody()) {
+                in.transferTo(OutputStream.nullOutputStream());
+            }
+            final String query = exchange.getRequestURI().getRawQuery();
+            final byte[] body = (exchange.getRequestMethod() + (query == null ? "" : " " + query)).getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(body);
+            }
+        });
+        server2.start();
+        baseUrl = "http://127.0.0.1:" + server2.getAddress().getPort() + "/x";
+    }
+
+    @AfterAll
+    public static void stopServer() {
+        if (server2 != null) {
+            server2.stop(0);
+        }
+    }
+
+    private static <T> PushPromiseHandler<T> noPush() {
+        return (initiatingRequest, pushPromiseRequest, acceptor) -> {
+        };
+    }
+
+    @Test
+    public void testAsyncWithPushPromiseHandlerAllMethods() throws Exception {
+        assertEquals("GET", HttpRequest.url(baseUrl).asyncGet(BodyHandlers.ofString(), noPush()).get(5, TimeUnit.SECONDS).body());
+        assertEquals("POST", HttpRequest.url(baseUrl).asyncPost(BodyHandlers.ofString(), noPush()).get(5, TimeUnit.SECONDS).body());
+        assertEquals("PUT", HttpRequest.url(baseUrl).asyncPut(BodyHandlers.ofString(), noPush()).get(5, TimeUnit.SECONDS).body());
+        assertEquals("PATCH", HttpRequest.url(baseUrl).asyncPatch(BodyHandlers.ofString(), noPush()).get(5, TimeUnit.SECONDS).body());
+        assertEquals("DELETE", HttpRequest.url(baseUrl).asyncDelete(BodyHandlers.ofString(), noPush()).get(5, TimeUnit.SECONDS).body());
+        assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(baseUrl).asyncGet(BodyHandlers.ofString(), null));
+    }
+
+    @Test
+    public void testUriWithQuery() {
+        assertEquals("GET a=1", HttpRequest.url(URI.create(baseUrl)).query("a=1").get().body());
+    }
+
+    @Test
+    public void testVoidResult() throws Exception {
+        assertNull(HttpRequest.url(baseUrl).get(Void.class));
+        assertNull(HttpRequest.url(baseUrl).asyncGet(Void.class).get(5, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testOwnedClientInputStreamResponseDelegates() throws Exception {
+        final HttpRequest request = new HttpRequest(baseUrl, null, null, HttpClient.newBuilder(), java.net.http.HttpRequest.newBuilder())
+                .closeHttpClientAfterExecution(true);
+        final HttpResponse<InputStream> response = request.get(BodyHandlers.ofInputStream());
+        assertEquals(200, response.statusCode());
+        assertFalse(response.sslSession().isPresent());
+        assertNotNull(response.version());
+
+        try (InputStream in = response.body()) {
+            assertFalse(in.markSupported());
+            in.mark(10);
+            assertThrows(java.io.IOException.class, in::reset);
+            assertEquals(1, in.skip(1));
+            final byte[] buf = new byte[2];
+            assertEquals(2, in.read(buf));
+            assertArrayEquals("ET".getBytes(StandardCharsets.UTF_8), buf);
+        }
+    }
 }

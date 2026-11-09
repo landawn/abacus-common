@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -25,6 +28,7 @@ import com.landawn.abacus.util.IndexedFloat;
 import com.landawn.abacus.util.MergeResult;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.RateLimiter;
+import com.landawn.abacus.util.stream.StreamBase.LocalRunnable;
 import com.landawn.abacus.util.u.OptionalFloat;
 
 /** FloatStream general contracts. */
@@ -3596,4 +3600,80 @@ public class FloatStreamTest extends FloatStreamTestSupport {
         return result;
     }
     // ---- re-review 2026-11-03 R04 end ----
+
+    @Test
+    public void testRepeatAdvanceNonPositive() {
+        final FloatIteratorEx iter = FloatStream.repeat(1.5f, 30).iteratorEx();
+        iter.advance(0);
+        iter.advance(-2);
+        assertEquals(30, iter.count());
+    }
+
+    @Test
+    public void testConcatEmpty() {
+        assertEquals(0, FloatStream.concat(new float[0][]).count());
+        assertEquals(0, FloatStream.concat(new FloatIterator[0]).count());
+        assertEquals(0, FloatStream.concat(new FloatStream[0]).count());
+        assertEquals(0, FloatStream.concat(Collections.<float[]> emptyList()).count());
+        assertEquals(0, FloatStream.concat(Collections.<FloatStream> emptySet()).count());
+        assertEquals(0, FloatStream.concatIterators(Collections.<FloatIterator> emptyList()).count());
+    }
+
+    @Test
+    public void testZipThreeArraysAllEmptyWithDefaults() {
+        assertEquals(0, FloatStream.zip(new float[0], new float[0], new float[0], 1f, 2f, 3f, (x, y, z) -> x + y + z).count());
+    }
+
+    @Test
+    public void testMergeIteratorsExhausted() {
+        final FloatIterator it = FloatStream.merge((FloatIterator) null, (FloatIterator) null, (x, y) -> MergeResult.TAKE_FIRST).iterator();
+        assertFalse(it.hasNext());
+        assertThrows(NoSuchElementException.class, it::nextFloat);
+    }
+
+    @Test
+    public void testRepeatHugeToArrayRejected() {
+        final FloatIteratorEx iter = FloatStream.repeat(1f, Long.MAX_VALUE).iteratorEx();
+        assertThrows(IllegalStateException.class, iter::toArray);
+    }
+
+    private static FloatStream sortedStream(final float... sortedValues) {
+        return new ArrayFloatStream(sortedValues, true, null);
+    }
+
+    @Test
+    public void testConstructorWithCloseHandlers() {
+        try (FloatStream s = new ArrayFloatStream(new float[] { 1f, 2f }, (Collection<LocalRunnable>) null)) {
+            assertArrayEquals(new float[] { 1f, 2f }, s.toArray());
+        }
+    }
+
+    @Test
+    public void testFlatMapWithNullMappedStream() {
+        assertArrayEquals(new float[] { 2f, 2f }, FloatStream.of(1f, 2f, 3f).flatMap(x -> x == 2f ? FloatStream.of(x, x) : null).toArray());
+    }
+
+    @Test
+    public void testParallelFlatMapArray() {
+        final float[] result = FloatStream.of(1f, 2f, 3f).parallel().flatMapArray(x -> new float[] { x, x * 10 }).sorted().toArray();
+        assertArrayEquals(new float[] { 1f, 2f, 3f, 10f, 20f, 30f }, result);
+    }
+
+    @Test
+    public void testTopZero() {
+        assertEquals(0, FloatStream.of(3f, 1f, 2f).top(0, Comparator.naturalOrder()).count());
+    }
+
+    @Test
+    public void testSortedShortcuts() {
+        assertEquals(1f, sortedStream(1f, 2f, 3f).min().get());
+        assertTrue(Float.isNaN(sortedStream(1f, 2f, Float.NaN).min().get()));
+        assertEquals(3f, sortedStream(1f, 2f, 3f).max().get());
+        assertEquals(2f, sortedStream(1f, 2f, 3f).kthLargest(2).get());
+    }
+
+    @Test
+    public void testCycledOneRound() {
+        assertArrayEquals(new float[] { 1f, 2f }, FloatStream.of(1f, 2f).cycled(1).toArray());
+    }
 }

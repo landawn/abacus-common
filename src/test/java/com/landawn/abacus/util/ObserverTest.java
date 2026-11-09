@@ -1,5 +1,9 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,11 +12,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -2087,5 +2093,123 @@ public class ObserverTest extends TestBase {
     public void testOfNullIteratorMessageNamesIterParameter() {
         final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Observer.of((Iterator<String>) null));
         Assertions.assertTrue(ex.getMessage().contains("'iterator'"), ex.getMessage());
+    }
+
+    private static final long WAIT_SECONDS = 5;
+
+    private static Iterator<Integer> failingIterator(final RuntimeException failure) {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                throw failure;
+            }
+        };
+    }
+
+    private static <T> Exception awaitError(final Observer<T> observer, final java.util.function.Consumer<? super T> action) throws InterruptedException {
+        final CountDownLatch done = new CountDownLatch(1);
+        final AtomicReference<Exception> error = new AtomicReference<>();
+        observer.observe(action, e -> {
+            error.set(e);
+            done.countDown();
+        }, done::countDown);
+        assertTrue(done.await(WAIT_SECONDS, TimeUnit.SECONDS));
+        return error.get();
+    }
+
+    @Test
+    public void testIteratorSourceFailureIsDeliveredToOnError() throws Exception {
+        final IllegalStateException boom = new IllegalStateException("boom");
+        assertSame(boom, awaitError(Observer.of(failingIterator(boom)), x -> {
+        }));
+    }
+
+    @Test
+    public void testThrottleLastForwardsSourceError() throws Exception {
+        final IllegalStateException boom = new IllegalStateException("boom");
+        assertSame(boom, awaitError(Observer.of(failingIterator(boom)).throttleLast(10, TimeUnit.SECONDS), x -> {
+        }));
+    }
+
+    @Test
+    public void testSlidingBufferForwardsSourceError() throws Exception {
+        final IllegalStateException boom = new IllegalStateException("boom");
+        assertSame(boom, awaitError(Observer.of(failingIterator(boom)).buffer(10, 10, TimeUnit.SECONDS), x -> {
+        }));
+    }
+
+    @Test
+    public void testThrottleLastEmitsPendingOnInterval() throws Exception {
+        final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        queue.offer("a");
+        final List<String> received = new CopyOnWriteArrayList<>();
+        final CountDownLatch gotItem = new CountDownLatch(1);
+        final CountDownLatch done = new CountDownLatch(1);
+
+        Observer.of(queue).throttleLast(20, TimeUnit.MILLISECONDS).observe(x -> {
+            received.add(x);
+            gotItem.countDown();
+        }, e -> done.countDown(), done::countDown);
+
+        assertTrue(gotItem.await(WAIT_SECONDS, TimeUnit.SECONDS));
+        Observer.complete(queue);
+        assertTrue(done.await(WAIT_SECONDS, TimeUnit.SECONDS));
+        assertEquals(Arrays.asList("a"), received);
+    }
+
+    @Test
+    public void testThrottleLastScheduledActionFailure() throws Exception {
+        final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        queue.offer("a");
+        final IllegalStateException boom = new IllegalStateException("action");
+        try {
+            assertSame(boom, awaitError(Observer.of(queue).throttleLast(20, TimeUnit.MILLISECONDS), x -> {
+                throw boom;
+            }));
+        } finally {
+            Observer.complete(queue);
+        }
+    }
+
+    @Test
+    public void testSlidingBufferScheduledWindowActionFailure() throws Exception {
+        final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<>();
+        queue.offer("a");
+        final IllegalStateException boom = new IllegalStateException("action");
+        try {
+            assertSame(boom, awaitError(Observer.of(queue).buffer(20, 20, TimeUnit.MILLISECONDS), x -> {
+                throw boom;
+            }));
+        } finally {
+            Observer.complete(queue);
+        }
+    }
+
+    @Test
+    public void testSlidingBufferCompletionFlushActionFailure() throws Exception {
+        final IllegalStateException boom = new IllegalStateException("action");
+        assertSame(boom, awaitError(Observer.of(Arrays.asList(1, 2)).buffer(10, 10, TimeUnit.SECONDS), x -> {
+            throw boom;
+        }));
+    }
+
+    @Test
+    public void testSlidingBufferCompletionFlushesPendingWindow() throws Exception {
+        final List<List<Integer>> received = new CopyOnWriteArrayList<>();
+        assertEquals(null, awaitError(Observer.of(Arrays.asList(1, 2)).buffer(10, 10, TimeUnit.SECONDS), received::add));
+        assertEquals(Arrays.asList(Arrays.asList(1, 2)), received);
+    }
+
+    @Test
+    public void testDebounceCompletionFlushActionFailure() throws Exception {
+        final IllegalStateException boom = new IllegalStateException("action");
+        assertSame(boom, awaitError(Observer.of(Arrays.asList(1, 2)).debounce(10, TimeUnit.SECONDS), x -> {
+            throw boom;
+        }));
     }
 }

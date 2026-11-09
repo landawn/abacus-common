@@ -145,4 +145,8 @@ public class ImmutableSetTypeTest extends TestBase {
         assertNull(type.valueOf("   "));
     }
 
+    @Test
+    public void testImmutableSetTypeIsParameterized() {
+        assertTrue(new ImmutableSetType("String").isParameterizedType());
+    }
 }

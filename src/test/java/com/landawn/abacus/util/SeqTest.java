@@ -8,8 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
@@ -1542,4 +1547,417 @@ public class SeqTest extends SeqTestSupport {
 
     // ---- deep review 2026-11-02b G073 end ----
 
+    @TempDir
+    Path tempDir2;
+
+    private static <X extends Exception> void drainThenExpectNoSuchElement(final Throwables.Iterator<?, X> iter) throws X {
+        while (iter.hasNext()) {
+            iter.next();
+        }
+
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    /** A sequence 1, 2, 3 whose second element fails with an IOException; counts close calls. */
+    private static Seq<Integer, Exception> failing(final AtomicInteger closeCount) {
+        return Seq.<Integer, Exception> of(1, 2, 3).map(x -> {
+            if (x == 2) {
+                throw new IOException("boom");
+            }
+            return x;
+        }).onClose(closeCount::incrementAndGet);
+    }
+
+    private static void assertFailsAndCloses(final Throwables.Consumer<Seq<Integer, Exception>, Exception> terminal) {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final IOException ex = assertThrows(IOException.class, () -> terminal.accept(failing(closeCount)));
+        assertEquals("boom", ex.getMessage());
+        assertEquals(1, closeCount.get());
+    }
+
+    @Test
+    public void testPrimitiveArraySkipUsesAtomicAdvance() throws Exception {
+        assertEquals(Arrays.asList('b', 'c'), Seq.<RuntimeException> of(new char[] { 'a', 'b', 'c' }).skip(1).toList());
+        assertEquals(Arrays.asList(3L), Seq.<RuntimeException> of(new long[] { 1L, 2L, 3L }).skip(2).toList());
+        assertEquals(Arrays.asList(2f, 3f), Seq.<RuntimeException> of(new float[] { 1f, 2f, 3f }).skip(1).toList());
+        assertEquals(Arrays.asList(3d), Seq.<RuntimeException> of(new double[] { 1d, 2d, 3d }).skip(2).toList());
+    }
+
+    @Test
+    public void testOfKeysAndValuesWithFilterOnEmptyMap() throws Exception {
+        final Map<String, Integer> empty = new HashMap<>();
+        assertEquals(0, Seq.<String, Integer, RuntimeException> ofKeys(empty, (k, v) -> true).count());
+        assertEquals(0, Seq.<String, Integer, RuntimeException> ofValues(empty, k -> true).count());
+    }
+
+    @Test
+    public void testOfReversedArrayAdvanceZeroAndListExhaustion() throws Exception {
+        final Throwables.Iterator<Integer, RuntimeException> iter = Seq.<Integer, RuntimeException> ofReversed(new Integer[] { 1, 2, 3 }).iteratorEx();
+        iter.advance(0);
+        assertEquals(3, iter.next());
+
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> ofReversed(Arrays.asList(1, 2)).iteratorEx());
+    }
+
+    @Test
+    public void testSplitByChunkCountAdvanceZero() throws Exception {
+        final Throwables.Iterator<String, RuntimeException> smallerFirst = Seq
+                .<String, RuntimeException> splitByChunkCount(5, 2, true, (from, to) -> from + "-" + to)
+                .iteratorEx();
+        smallerFirst.advance(0);
+        assertEquals("0-2", smallerFirst.next());
+
+        final Throwables.Iterator<String, RuntimeException> biggerFirst = Seq
+                .<String, RuntimeException> splitByChunkCount(5, 2, false, (from, to) -> from + "-" + to)
+                .iteratorEx();
+        biggerFirst.advance(0);
+        assertEquals("0-3", biggerFirst.next());
+    }
+
+    @Test
+    public void testListFilesAndLinesExhaustion() throws Exception {
+        final File dir = tempDir2.toFile();
+        final File file = new File(dir, "a.txt");
+        Files.write(file.toPath(), Arrays.asList("x", "y"), StandardCharsets.UTF_8);
+
+        try (Seq<File, IOException> files = Seq.listFiles(dir, false)) {
+            drainThenExpectNoSuchElement(files.iteratorEx());
+        }
+
+        try (Seq<String, IOException> lines = Seq.ofLines(file)) {
+            final Throwables.Iterator<String, IOException> iter = lines.iteratorEx();
+            assertEquals("x", iter.next());
+            assertEquals("y", iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testConcatWithNoInputs() throws Exception {
+        assertEquals(0, Seq.<Integer, RuntimeException> concat(new Integer[0][]).count());
+        assertEquals(0, Seq.<Integer, RuntimeException> concat(new Iterable[0]).count());
+        assertEquals(0, Seq.<Integer, RuntimeException> concat(new java.util.Iterator[0]).count());
+        assertEquals(0, Seq.<Integer, RuntimeException> concat(new Seq[0]).count());
+        assertEquals(0, Seq.<Integer, RuntimeException> concat(Collections.<Seq<Integer, RuntimeException>> emptyList()).count());
+    }
+
+    @Test
+    public void testZipIteratorsExhaustion() throws Exception {
+        final Integer[] a = { 1, 2 };
+        final Integer[] b = { 10 };
+        final Integer[] c = { 100, 200, 300 };
+
+        drainThenExpectNoSuchElement(Seq.<Integer, Integer, Integer, RuntimeException> zip(a, b, (x, y) -> x + y).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, Integer, Integer, Integer, RuntimeException> zip(a, b, c, (x, y, z) -> x + y + z).iteratorEx());
+
+        final Seq<Integer, RuntimeException> padded2 = Seq.<Integer, Integer, Integer, RuntimeException> zip(a, b, 0, 0, (x, y) -> x + y);
+        final Throwables.Iterator<Integer, RuntimeException> it2 = padded2.iteratorEx();
+        assertEquals(11, it2.next());
+        assertEquals(2, it2.next());
+        assertThrows(NoSuchElementException.class, it2::next);
+
+        final Seq<Integer, RuntimeException> padded3 = Seq.<Integer, Integer, Integer, Integer, RuntimeException> zip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z);
+        final Throwables.Iterator<Integer, RuntimeException> it3 = padded3.iteratorEx();
+        assertEquals(111, it3.next());
+        assertEquals(202, it3.next());
+        assertEquals(300, it3.next());
+        assertThrows(NoSuchElementException.class, it3::next);
+
+        drainThenExpectNoSuchElement(
+                Seq.<Integer, Integer, Integer, RuntimeException> zip(Arrays.asList(a).iterator(), Arrays.asList(b).iterator(), 0, 0, (x, y) -> x + y)
+                        .iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, Integer, Integer, Integer, RuntimeException> zip(Arrays.asList(a).iterator(), Arrays.asList(b).iterator(),
+                Arrays.asList(c).iterator(), 0, 0, 0, (x, y, z) -> x + y + z).iteratorEx());
+
+        final Seq<Integer, RuntimeException> seqZip2 = Seq.<Integer, Integer, Integer, RuntimeException> zip(Seq.<Integer, RuntimeException> of(a),
+                Seq.<Integer, RuntimeException> of(b), 0, 0, (x, y) -> x + y);
+        final Throwables.Iterator<Integer, RuntimeException> sz2 = seqZip2.iteratorEx();
+        assertEquals(11, sz2.next());
+        assertEquals(2, sz2.next());
+        assertThrows(NoSuchElementException.class, sz2::next);
+
+        final Seq<Integer, RuntimeException> seqZip3 = Seq.<Integer, Integer, Integer, Integer, RuntimeException> zip(Seq.<Integer, RuntimeException> of(a),
+                Seq.<Integer, RuntimeException> of(b), Seq.<Integer, RuntimeException> of(c), 0, 0, 0, (x, y, z) -> x + y + z);
+        drainThenExpectNoSuchElement(seqZip3.iteratorEx());
+    }
+
+    @Test
+    public void testMergeExhaustionAndSelectorRetry() throws Exception {
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> merge(new Integer[] { 1, 3 }, new Integer[] { 2 },
+                (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).iteratorEx());
+
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> merge(Seq.<Integer, RuntimeException> of(1, 3), Seq.<Integer, RuntimeException> of(2),
+                (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).iteratorEx());
+
+        final AtomicInteger calls = new AtomicInteger();
+        final Throwables.Iterator<Integer, RuntimeException> iter = Seq
+                .<Integer, RuntimeException> merge(Seq.<Integer, RuntimeException> of(1, 3), Seq.<Integer, RuntimeException> of(2, 4), (x, y) -> {
+                    if (calls.getAndIncrement() == 0) {
+                        throw new IllegalStateException("first");
+                    }
+                    return x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+                })
+                .iteratorEx();
+
+        assertThrows(IllegalStateException.class, iter::next);
+        final List<Integer> rest = new ArrayList<>();
+        while (iter.hasNext()) {
+            rest.add(iter.next());
+        }
+        assertEquals(Arrays.asList(1, 2, 3, 4), rest);
+    }
+
+    @Test
+    public void testIntermediateIteratorsExhaustion() throws Exception {
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2).flatmap(x -> Arrays.asList(x, x)).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2, 3).slidingMap(1, false, (x, y) -> x).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2, 3).slidingMap(1, false, (x, y, z) -> x).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2, 3, 4).split(x -> x % 2 == 0, ArrayList::new).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2, 3, 4).split(x -> x % 2 == 0, Collectors.toList()).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> empty().cycled().iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2).debounce(Duration.ofSeconds(10)).iteratorEx());
+        drainThenExpectNoSuchElement(Seq.<Integer, RuntimeException> of(1, 2).intersperse(0).iteratorEx());
+    }
+
+    @Test
+    public void testSplitAtRemainderExhaustion() throws Exception {
+        final Throwables.Iterator<Seq<Integer, RuntimeException>, RuntimeException> outer = Seq.<Integer, RuntimeException> of(1, 2, 3)
+                .splitAt(x -> x == 2)
+                .iteratorEx();
+        assertEquals(Arrays.asList(1), outer.next().toList());
+        final Throwables.Iterator<Integer, RuntimeException> remainder = outer.next().iteratorEx();
+        assertEquals(2, remainder.next());
+        assertEquals(3, remainder.next());
+        assertThrows(NoSuchElementException.class, remainder::next);
+    }
+
+    @Test
+    public void testIfEmptyLazyInitFromEachEntryPoint() throws Exception {
+        final AtomicInteger runs = new AtomicInteger();
+
+        final Throwables.Iterator<Integer, RuntimeException> byNext = Seq.<Integer, RuntimeException> of(1, 2).ifEmpty(runs::incrementAndGet).iteratorEx();
+        assertEquals(1, byNext.next());
+
+        final Throwables.Iterator<Integer, RuntimeException> byAdvance = Seq.<Integer, RuntimeException> of(1, 2, 3)
+                .ifEmpty(runs::incrementAndGet)
+                .iteratorEx();
+        byAdvance.advance(0);
+        byAdvance.advance(2);
+        assertEquals(3, byAdvance.next());
+
+        final Throwables.Iterator<Integer, RuntimeException> byCount = Seq.<Integer, RuntimeException> of(1, 2, 3).ifEmpty(runs::incrementAndGet).iteratorEx();
+        assertEquals(3, byCount.count());
+
+        assertEquals(0, runs.get());
+    }
+
+    @Test
+    public void testSplitCollectorAdvanceZeroAndSlidingAdvanceWithinQueue() throws Exception {
+        final Throwables.Iterator<List<Integer>, RuntimeException> chunks = Seq.<Integer, RuntimeException> of(1, 2, 3)
+                .split(2, Collectors.toList())
+                .iteratorEx();
+        chunks.advance(0);
+        assertEquals(Arrays.asList(1, 2), chunks.next());
+
+        final Throwables.Iterator<List<Integer>, RuntimeException> windows = Seq.<Integer, RuntimeException> of(1, 2, 3, 4, 5, 6)
+                .sliding(3, 1, Collectors.toList())
+                .iteratorEx();
+        assertEquals(Arrays.asList(1, 2, 3), windows.next());
+        windows.advance(0);
+        windows.advance(1);
+        assertEquals(Arrays.asList(3, 4, 5), windows.next());
+    }
+
+    @Test
+    public void testSkipAndLimitAdvanceOnNonAtomicSource() throws Exception {
+        final Throwables.Iterator<Integer, RuntimeException> skipped = Seq.<Integer, RuntimeException> of(Arrays.asList(1, 2, 3, 4, 5).iterator())
+                .skip(1)
+                .iteratorEx();
+        skipped.advance(0);
+        skipped.advance(2);
+        assertEquals(4, skipped.next());
+
+        final Throwables.Iterator<Integer, RuntimeException> limited = Seq.<Integer, RuntimeException> of(Arrays.asList(1, 2, 3, 4, 5).iterator())
+                .limit(3)
+                .iteratorEx();
+        limited.advance(1);
+        assertEquals(2, limited.next());
+    }
+
+    @Test
+    public void testTopComparatorFailureClosesSource() {
+        final AtomicInteger closed = new AtomicInteger();
+        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(3, 1, 2).onClose(closed::incrementAndGet);
+        final Comparator<Integer> bad = (x, y) -> {
+            throw new IllegalStateException("cmp");
+        };
+        assertThrows(IllegalStateException.class, () -> seq.top(1, bad).toList());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testTerminalForEachFamilyClosesOnFailure() {
+        assertFailsAndCloses(s -> s.foreach(x -> {
+        }));
+        assertFailsAndCloses(s -> s.forEach(x -> {
+        }, () -> {
+        }));
+        assertFailsAndCloses(s -> s.forEach(x -> Arrays.asList(x), (x, u) -> {
+        }));
+        assertFailsAndCloses(s -> s.forEach(x -> Arrays.asList(x), u -> Arrays.asList(u), (x, u, v) -> {
+        }));
+        assertFailsAndCloses(s -> s.forEachIndexed((i, x) -> {
+        }));
+        assertFailsAndCloses(s -> s.forEachUntil((x, flag) -> {
+        }));
+        assertFailsAndCloses(s -> s.forEachUntil(MutableBoolean.of(false), x -> {
+        }));
+        assertFailsAndCloses(s -> s.forEachPair(1, (x, y) -> {
+        }));
+        assertFailsAndCloses(s -> s.forEachTriple(1, (x, y, z) -> {
+        }));
+    }
+
+    @Test
+    public void testForEachPairBreaksWhenGapExhaustsSource() throws Exception {
+        final List<String> pairs = new ArrayList<>();
+        Seq.<Integer, RuntimeException> of(1, 2, 3).forEachPair(3, (x, y) -> pairs.add(x + ":" + y));
+        assertEquals(Arrays.asList("1:2"), pairs);
+    }
+
+    @Test
+    public void testMatchShortCircuits() throws Exception {
+        assertFalse(Seq.<Integer, RuntimeException> of(1, 2, 3).allMatch(x -> x < 2));
+        assertFalse(Seq.<Integer, RuntimeException> of(1, 2, 3).noneMatch(x -> x == 2));
+    }
+
+    @Test
+    public void testTerminalQueriesCloseOnFailure() {
+        assertFailsAndCloses(s -> s.hasMatchCountBetween(0, 5, x -> true));
+        assertFailsAndCloses(s -> s.containsAll(9, 8));
+        assertFailsAndCloses(s -> s.containsAll(Arrays.asList(9, 8)));
+        assertFailsAndCloses(s -> s.containsAny(9, 8));
+        assertFailsAndCloses(s -> s.containsAny(Arrays.asList(9, 8)));
+        assertFailsAndCloses(s -> s.containsNone(9, 8));
+        assertFailsAndCloses(s -> s.containsNone(Arrays.asList(9, 8)));
+        assertFailsAndCloses(Seq::containsDuplicates);
+        assertFailsAndCloses(s -> s.kthLargest(1, Comparator.naturalOrder()));
+        assertFailsAndCloses(Seq::percentiles);
+        assertFailsAndCloses(s -> s.percentiles(Comparator.naturalOrder()));
+        assertFailsAndCloses(Seq::last);
+        assertFailsAndCloses(s -> s.elementAt(2));
+        assertFailsAndCloses(Seq::toSet);
+        assertFailsAndCloses(s -> s.sumInt(x -> x));
+        assertFailsAndCloses(s -> s.sumLong(x -> x));
+        assertFailsAndCloses(s -> s.sumDouble(x -> x));
+        assertFailsAndCloses(s -> s.averageInt(x -> x));
+        assertFailsAndCloses(s -> s.averageLong(x -> x));
+        assertFailsAndCloses(s -> s.averageDouble(x -> x));
+        assertFailsAndCloses(s -> s.collect(Collectors.toList()));
+        assertFailsAndCloses(s -> s.joinTo(Joiner.with(",")));
+    }
+
+    @Test
+    public void testAveragesOfEmpty() throws Exception {
+        assertFalse(Seq.<Integer, RuntimeException> empty().averageLong(x -> x).isPresent());
+        assertFalse(Seq.<Integer, RuntimeException> empty().averageDouble(x -> x).isPresent());
+    }
+
+    @Test
+    public void testPercentilesOfAlreadySortedSeq() throws Exception {
+        final Map<Percentage, Integer> p = Seq.<Integer, RuntimeException> of(3, 1, 2).sorted().percentiles().get();
+        assertEquals(1, p.get(Percentage._0_0001));
+        assertEquals(3, p.get(Percentage._99_9999));
+    }
+
+    @Test
+    public void testPrintlnTruncatesLongSequence() throws Exception {
+        final PrintStream original = System.out;
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(bos, true, "UTF-8"));
+        try {
+            Seq.<RuntimeException> range(0, 1100).println();
+        } finally {
+            System.setOut(original);
+        }
+        final String out = bos.toString("UTF-8").trim();
+        assertTrue(out.startsWith("[0, 1, 2"));
+        assertTrue(out.endsWith("998, 999, ...]"), out.substring(out.length() - 30));
+    }
+
+    @Test
+    public void testTransformViaStreamSkipAndCount() throws Exception {
+        assertEquals(Arrays.asList(6, 8, 10),
+                Seq.<Integer, RuntimeException> of(1, 2, 3, 4, 5).transformViaStream(s -> s.map(x -> x * 2), false).skip(2).toList());
+        assertEquals(5, Seq.<Integer, RuntimeException> of(1, 2, 3, 4, 5).transformViaStream(s -> s.map(x -> x * 2), false).count());
+
+        final Throwables.Iterator<Integer, RuntimeException> iter = Seq.<Integer, RuntimeException> of(1, 2, 3, 4, 5)
+                .transformViaStream(s -> s.map(x -> x * 2), false)
+                .iteratorEx();
+        iter.advance(0);
+        assertEquals(2, iter.next());
+        iter.advance(1);
+        assertEquals(6, iter.next());
+        assertEquals(2, iter.count());
+    }
+
+    @Test
+    public void testBufferedFailureAndExhaustion() throws Exception {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final List<Integer> seen = new ArrayList<>();
+        assertThrows(IOException.class, () -> failing(closeCount).buffered().forEach(seen::add));
+        assertEquals(Arrays.asList(1), seen);
+
+        try (Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2).buffered()) {
+            drainThenExpectNoSuchElement(seq.iteratorEx());
+        }
+
+        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2, 3).buffered();
+        final Throwables.Iterator<Integer, RuntimeException> iter = seq.iteratorEx();
+        assertEquals(1, iter.next());
+        seq.close();
+        assertFalse(iter.hasNext());
+        iter.closeResource();
+    }
+
+    @Test
+    public void testKthLargestOnSortedSeqUsesWindow() throws Exception {
+        final Nullable<Integer> second = Seq.<Integer, RuntimeException> of(5, 1, 4).sorted().kthLargest(2, Comparators.naturalOrder());
+        assertEquals(4, second.get());
+        assertArrayEquals(new Object[] { 1, 4, 5 }, Seq.<Integer, RuntimeException> of(5, 1, 4).sorted().toArray());
+    }
+
+    @Test
+    public void testListFilesRecursiveExhaustion() throws Exception {
+        final File dir = tempDir2.toFile();
+        final File sub = new File(dir, "sub");
+        assertTrue(sub.mkdir());
+        Files.write(new File(sub, "b.txt").toPath(), Arrays.asList("z"), StandardCharsets.UTF_8);
+
+        try (Seq<File, IOException> files = Seq.listFiles(dir, true)) {
+            final Throwables.Iterator<File, IOException> iter = files.iteratorEx();
+            assertEquals("sub", iter.next().getName());
+            assertEquals("b.txt", iter.next().getName());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    @Test
+    public void testTransformViaStreamPropagatesFailuresFromSkipAndCount() throws Exception {
+        final AtomicInteger closeCount = new AtomicInteger();
+        assertThrows(IOException.class, () -> failing(closeCount).transformViaStream(s -> s.map(x -> x), false).count());
+
+        final Throwables.Iterator<Integer, Exception> iter = failing(new AtomicInteger()).transformViaStream(s -> s.map(x -> x), false).iteratorEx();
+        assertEquals(1, iter.next());
+        assertThrows(IOException.class, () -> iter.advance(1));
+
+        final Throwables.Iterator<Integer, Exception> iter2 = failing(new AtomicInteger()).transformViaStream(s -> s.map(x -> x), false).iteratorEx();
+        assertEquals(1, iter2.next());
+        assertThrows(IOException.class, iter2::count);
+
+        assertThrows(IOException.class, () -> failing(new AtomicInteger()).transformViaStream(s -> s.skip(2), false).toList());
+    }
 }

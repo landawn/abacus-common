@@ -1907,4 +1907,16 @@ public class IntListTest extends IntListTestSupport {
     }
 
     // ---- perf review 2026-09-26 G115 end ----
+
+    @Test
+    public void testSymmetricDifferenceFromEmptyList() {
+        final IntList empty = new IntList();
+        assertArrayEquals(new int[] { 3, 4 }, empty.symmetricDifference(new int[] { 3, 4 }).toArray());
+    }
+
+    @Test
+    public void testEqualsSelf() {
+        final IntList list = IntList.of(1, 2);
+        assertTrue(list.equals(list));
+    }
 }

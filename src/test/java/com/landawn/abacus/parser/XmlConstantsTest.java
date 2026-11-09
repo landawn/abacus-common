@@ -479,4 +479,12 @@ public class XmlConstantsTest extends TestBase {
         assertEquals("</soap:Fault>", XmlConstants.SOAP_FAULT_ELE_END);
     }
 
+    @Test
+    public void testProtectedConstructorViaSubclass() {
+        final XmlConstants c = new XmlConstants() {
+        };
+        assertNotNull(c);
+        assertEquals("isNull", XmlConstants.IS_NULL);
+        assertEquals(-128, XmlConstants.NULL_END_ELEMENT);
+    }
 }

@@ -3,6 +3,7 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -310,5 +311,14 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
 
         assertEquals(Long.MAX_VALUE, stats.getCount());
         assertEquals(new BigInteger("60"), stats.getSum());
+    }
+
+    @Test
+    public void testInvalidStates() {
+        assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(-1, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(0, null, BigInteger.ONE, null));
+        assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(0, null, null, BigInteger.ONE));
+        assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(1, BigInteger.ONE, null, BigInteger.ONE));
+        assertThrows(IllegalArgumentException.class, () -> new BigIntegerSummaryStatistics(2, BigInteger.TEN, BigInteger.ONE, BigInteger.TEN));
     }
 }

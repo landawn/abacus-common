@@ -15,6 +15,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.type.Type;
+
 public class MapsTest extends MapsTestSupport {
 
     // containsEntry
@@ -186,5 +188,52 @@ public class MapsTest extends MapsTestSupport {
         assertTrue(Maps.values(null).isEmpty());
         assertTrue(Maps.values(new HashMap<>()).isEmpty());
         assertNotNull(Maps.values(null));
+    }
+
+    @Test
+    public void testNewOrderingMapNull() {
+        final Map<?, ?> m = Maps.newOrderingMap(null);
+        assertTrue(m instanceof HashMap);
+        assertTrue(m.isEmpty());
+    }
+
+    @Test
+    public void testGetByPathThroughEmptyIntermediateMap() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("a", new HashMap<String, Object>());
+        assertNull(Maps.getByPath(map, "a.b.c"));
+        assertFalse(Maps.getByPathIfExists(map, "a.b.c").isPresent());
+    }
+
+    @Test
+    public void testGetOrDefaultIfAbsentEmptyMap() {
+        assertEquals("d", Maps.getOrDefaultIfAbsent(new HashMap<String, String>(), "k", "d"));
+    }
+
+    @Test
+    public void testGetAsTypeMissingKey() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("x", 1);
+        assertFalse(Maps.getAs(map, "missing", Type.<Integer> of(Integer.class)).isPresent());
+        assertEquals(Integer.valueOf(1), Maps.getAs(map, "x", Type.<Integer> of(Integer.class)).get());
+    }
+
+    @Test
+    public void testInvertBiMapUsesBiMapResult() {
+        final BiMap<String, Integer> bimap = new BiMap<>();
+        bimap.put("a", 1);
+        bimap.put("b", 2);
+        final Map<Integer, String> inverted = Maps.invert(bimap, (x, y) -> x + y);
+        assertTrue(inverted instanceof BiMap);
+        assertEquals("a", inverted.get(1));
+        assertEquals("b", inverted.get(2));
+    }
+
+    @Test
+    public void testFlattenAndUnflattenRejectNullKeys() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put(null, 1);
+        assertThrows(IllegalArgumentException.class, () -> Maps.flatten(map));
+        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(map, ".", n -> new LinkedHashMap<>()));
     }
 }

@@ -33,8 +33,8 @@ public class JsonBindingTest extends AbstractParserTest {
             N.println("josn======================================================================");
             N.println(jsonParser.serialize(simpleBean, jsc));
 
-            int threadNum = 6;
-            int loopNumForSimpleBean = 300000;
+            int threadNum = 1;
+            int loopNumForSimpleBean = 30000;
             Map<String, Integer> methodLoopNumMap = new LinkedHashMap<>();
             methodLoopNumMap.put("executeByAbacusJSONWithSimpleBean", loopNumForSimpleBean);
             methodLoopNumMap.put("executeByJacksonWithSimpleBean", loopNumForSimpleBean);

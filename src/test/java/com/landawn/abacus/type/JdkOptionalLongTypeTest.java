@@ -315,4 +315,13 @@ public class JdkOptionalLongTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(NumberFormatException.class, () -> optionalLongType.valueOf(" "));
         assertEquals(Long.MAX_VALUE, optionalLongType.valueOf("9223372036854775807").getAsLong());
     }
+
+    @Test
+    public void testJdkOptionalLongCompare() {
+        final Type<OptionalLong> type = TypeFactory.getType(OptionalLong.class);
+        assertEquals(0, type.compare(null, null));
+        assertEquals(-1, type.compare(null, OptionalLong.of(1)));
+        assertEquals(1, type.compare(OptionalLong.of(1), null));
+        assertEquals(1, type.compare(OptionalLong.of(1), OptionalLong.empty()));
+    }
 }
