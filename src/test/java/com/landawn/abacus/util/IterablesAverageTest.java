@@ -429,7 +429,8 @@ public class IterablesAverageTest extends IterablesTestSupport {
         doubles.add(1.0e100);
         doubles.add(1.0);
         doubles.add(-1.0e100);
-        assertEquals(0.0 / 3.0, Iterables.averageDouble(doubles, d -> d).get(), 1e-15);
+        // Compensated summation keeps the 1.0 that arrives after the larger 1.0e100.
+        assertEquals(1.0 / 3.0, Iterables.averageDouble(doubles, d -> d).get(), 1e-15);
 
         doubles = new ArrayList<>();
         doubles.add(1.0e10);

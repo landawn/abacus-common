@@ -86,8 +86,10 @@ public class AggregationTest extends TestBase {
         combinedAggregate.combine(1, Double.MAX_VALUE);
         Assertions.assertEquals(Double.MAX_VALUE, combinedAggregate.average().orElseThrow());
 
+        // Finite values cannot change an infinite total, even though MAX + MAX overflowed toward +Infinity.
         direct.add(Double.NEGATIVE_INFINITY);
-        Assertions.assertTrue(Double.isNaN(direct.average().orElseThrow()));
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, direct.average().orElseThrow());
+        Assertions.assertEquals(Double.NEGATIVE_INFINITY, direct.sum());
     }
 
     @Test

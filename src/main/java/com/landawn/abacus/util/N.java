@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19082,10 +19083,14 @@ public final class N extends CommonUtil {
      * Returns 0.0d if the array is {@code null} or empty.
      * Uses Kahan summation algorithm for improved numerical accuracy.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
-     * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * <p>Once an element or the running total reaches {@code 2^960} in magnitude, well before the {@code double} range
+     * can be exceeded, the elements are re-scanned and the total of the finite values is computed exactly and rounded
+     * once, so huge values that cancel cannot hide smaller ones, and the result is infinite only when the true total is
+     * outside the {@code double} range (or an input is infinite or {@code NaN}):
+     * {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19113,10 +19118,14 @@ public final class N extends CommonUtil {
      * Returns 0.0d if the array is {@code null} or empty.
      * Uses Kahan summation algorithm for improved numerical accuracy.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
-     * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * <p>Once an element or the running total reaches {@code 2^960} in magnitude, well before the {@code double} range
+     * can be exceeded, the elements are re-scanned and the total of the finite values is computed exactly and rounded
+     * once, so huge values that cancel cannot hide smaller ones, and the result is infinite only when the true total is
+     * outside the {@code double} range (or an input is infinite or {@code NaN}):
+     * {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19140,36 +19149,94 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        final OverflowSafeDoubleSum summation = new OverflowSafeDoubleSum();
+        final double result = compensatedSum(a, fromIndex, toIndex);
 
-        for (int i = fromIndex; i < toIndex; i++) {
-            summation.add(a[i]);
+        if (Double.isFinite(result)) {
+            return result;
         }
 
-        return summation.sum();
+        // The elements are still at hand, so decide a non-finite compensated total exactly instead of trusting a
+        // running state that may already have dropped low-order terms.
+        final double nonFiniteTotal = nonFiniteTotal(a, fromIndex, toIndex);
+
+        return Double.isFinite(nonFiniteTotal) ? exactSum(a, fromIndex, toIndex).doubleValue() : nonFiniteTotal;
+    }
+
+    // Covers the exact decimal expansion of any binary64 value plus the quotient digits needed for a correctly
+    // rounded mean; the same precision as KahanSummation's overflow-safe average.
+    private static final MathContext EXACT_DOUBLE_AVERAGE_CONTEXT = new MathContext(1200, RoundingMode.HALF_EVEN);
+
+    // Exponent field of a binary64 value, and that field's value for KahanSummation.EXACT_TOTAL_THRESHOLD (2^960, biased
+    // exponent 0x7BF): a raw exponent field at or above it means a magnitude of at least 2^960, or infinity or NaN.
+    private static final long DOUBLE_EXPONENT_MASK = 0x7FF0000000000000L;
+    private static final long EXACT_TOTAL_THRESHOLD_EXPONENT = Double.doubleToRawLongBits(KahanSummation.EXACT_TOTAL_THRESHOLD) & DOUBLE_EXPONENT_MASK;
+
+    /**
+     * Compensated (Kahan-Babuska / Neumaier) summation over {@code a[fromIndex, toIndex)} with the same operations, in
+     * the same order, as {@code KahanSummation.add}, without allocating an accumulator. A finite result is therefore
+     * the same value {@code KahanSummation} reports. Keep the two loops in step.
+     *
+     * <p>Returns {@code NaN} as soon as an element or the running total reaches
+     * {@code KahanSummation.EXACT_TOTAL_THRESHOLD} ({@code 2^960}) in magnitude, which is exactly when
+     * {@code KahanSummation} starts its exact total. Callers then re-scan the elements exactly, so a total near or beyond
+     * the overflow threshold is rounded once, and small elements next to huge ones are kept even when the huge ones
+     * later cancel: {@code (MAX, 2^969, 2^969, 1, -MAX, -2^969, -2^969)} totals {@code 1}, not {@code 0}.</p>
+     */
+    private static double compensatedSum(final double[] a, final int fromIndex, final int toIndex) {
+        double sum = 0d;
+        double correction = 0d;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            final double value = a[i];
+            final double next = sum + value;
+
+            if (Math.abs(sum) >= Math.abs(value)) {
+                correction -= (sum - next) + value;
+            } else {
+                correction -= (value - next) + sum;
+            }
+
+            sum = next;
+
+            // Hand the range to the exact re-scan once an element or the running total reaches 2^960 (see
+            // KahanSummation.EXACT_TOTAL_THRESHOLD). Below it sum - correction cannot overflow: each step adds at most
+            // ulp(2^960) / 2 = 2^907 to |correction|. Comparing raw exponent fields keeps the common path to integer
+            // operations; an infinite or NaN element or total also exits here, toward the re-scan that decides it.
+            if ((Double.doubleToRawLongBits(value) & DOUBLE_EXPONENT_MASK) >= EXACT_TOTAL_THRESHOLD_EXPONENT
+                    || (Double.doubleToRawLongBits(sum) & DOUBLE_EXPONENT_MASK) >= EXACT_TOTAL_THRESHOLD_EXPONENT) {
+                return Double.NaN;
+            }
+        }
+
+        return sum - correction;
     }
 
     /**
-     * Kahan summation for the {@code double} {@code sum}/{@code sumDouble} family, plus the overflow-safe total that
-     * {@link KahanSummation#average()} already uses: once the running sum of <i>finite</i> values leaves the
-     * {@code double} range, the remaining values are also accumulated exactly (a {@code BigDecimal} seeded with the
-     * sum and correction so far, without intermediate binary64 rounding), and {@link #sum()} returns that total rounded once. So {@code sum(1e308, 1e308, -1e308,
-     * -1e308, 5)} is {@code 5.0}, not {@code Infinity}; the result is infinite only when the true total is outside the
-     * {@code double} range, or when an input is itself infinite or {@code NaN} (IEEE 754 propagation).
-     *
-     * <p>Package-private so that the {@link Iterables#sumDouble(Iterable, ToDoubleFunction)} twin
-     * uses the same accumulator and returns the same total.</p>
+     * Returns the IEEE 754 total of the non-finite elements of {@code a[fromIndex, toIndex)}, or {@code 0d} if every
+     * element is finite. Finite elements cannot change an infinite or {@code NaN} total, so when this is non-finite it
+     * is the whole range's total: {@code (MAX_VALUE, MAX_VALUE, -Infinity)} gives {@code -Infinity}, not {@code NaN}.
      */
-    static final class OverflowSafeDoubleSum {
-        private final KahanSummation kahan = new KahanSummation();
+    private static double nonFiniteTotal(final double[] a, final int fromIndex, final int toIndex) {
+        double total = 0d;
 
-        void add(final double value) {
-            kahan.add(value);
+        for (int i = fromIndex; i < toIndex; i++) {
+            if (!Double.isFinite(a[i])) {
+                total += a[i];
+            }
         }
 
-        double sum() {
-            return kahan.sumWithFiniteOverflow();
+        return total;
+    }
+
+    /** Exact total of the finite elements {@code a[fromIndex, toIndex)}, without any intermediate binary64 rounding. */
+    private static BigDecimal exactSum(final double[] a, final int fromIndex, final int toIndex) {
+        BigDecimal exact = BigDecimal.ZERO;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            exact = exact.add(new BigDecimal(a[i])); // NOSONAR - the exact binary64 value is required here.
         }
+
+        return exact;
     }
 
     /**
@@ -19594,8 +19661,11 @@ public final class N extends CommonUtil {
      * Returns the average of all elements in the specified double array or varargs.
      * Returns 0.0d if the array is {@code null} or empty.
      * Uses Kahan summation algorithm for improved numerical accuracy.
-     * If a sum of finite values overflows, an overflow-safe fallback ensures that a representable average is not
-     * reported as infinity. NaN and infinity otherwise follow IEEE 754 arithmetic.
+     * Once an element or the running total reaches {@code 2^960} in magnitude, well before the {@code double} range can be
+     * exceeded, the elements are re-scanned and their exact total is divided before rounding, so a representable average
+     * is never reported as infinity. If an element is infinite or NaN, the result is decided by those elements alone, because
+     * finite values cannot change an infinite or NaN total: {@code N.average(Double.MAX_VALUE, Double.MAX_VALUE,
+     * Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19627,8 +19697,11 @@ public final class N extends CommonUtil {
      * Returns the average of elements within the specified range of the double array.
      * Returns 0.0d if the array is {@code null} or empty.
      * Uses Kahan summation algorithm for improved numerical accuracy.
-     * If a sum of finite values overflows, an overflow-safe fallback ensures that a representable average is not
-     * reported as infinity. NaN and infinity otherwise follow IEEE 754 arithmetic.
+     * Once an element or the running total reaches {@code 2^960} in magnitude, well before the {@code double} range can be
+     * exceeded, the elements are re-scanned and their exact total is divided before rounding, so a representable average
+     * is never reported as infinity. If an element is infinite or NaN, the result is decided by those elements alone, because
+     * finite values cannot change an infinite or NaN total: {@code N.average(Double.MAX_VALUE, Double.MAX_VALUE,
+     * Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19652,13 +19725,22 @@ public final class N extends CommonUtil {
             return 0d;
         }
 
-        final KahanSummation summation = new KahanSummation();
+        final int count = toIndex - fromIndex;
+        final double sum = compensatedSum(a, fromIndex, toIndex);
 
-        for (int i = fromIndex; i < toIndex; i++) {
-            summation.add(a[i]);
+        if (Double.isFinite(sum)) {
+            return sum / count;
         }
 
-        return summation.average().orElseZero();
+        final double nonFiniteTotal = nonFiniteTotal(a, fromIndex, toIndex);
+
+        if (!Double.isFinite(nonFiniteTotal)) {
+            return nonFiniteTotal / count;
+        }
+
+        // Only the sum of finite values overflowed: divide the exact total before narrowing, so a representable
+        // mean survives even when the total itself exceeds the double range.
+        return exactSum(a, fromIndex, toIndex).divide(BigDecimal.valueOf(count), EXACT_DOUBLE_AVERAGE_CONTEXT).doubleValue();
     }
 
     /**
@@ -20343,10 +20425,12 @@ public final class N extends CommonUtil {
      * {@link #sumToDouble(float...)} and {@link #average(float...)} widen each {@code float} exactly
      * ({@code 0.6000000163912773} for the same values).</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20375,10 +20459,12 @@ public final class N extends CommonUtil {
      * {@link #sumToDouble(float...)} and {@link #average(float...)} widen each {@code float} exactly
      * ({@code 0.6000000163912773} for the same values).</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20404,10 +20490,12 @@ public final class N extends CommonUtil {
      * Sums all elements in the given array using the provided function to convert each element to a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20437,10 +20525,12 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input array using the provided function to convert each element to a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20469,7 +20559,7 @@ public final class N extends CommonUtil {
             return 0D;
         }
 
-        final OverflowSafeDoubleSum summation = new OverflowSafeDoubleSum();
+        final KahanSummation summation = new KahanSummation();
 
         for (int i = fromIndex; i < toIndex; i++) {
             summation.add(function.applyAsDouble(a[i]));
@@ -20489,10 +20579,12 @@ public final class N extends CommonUtil {
      * {@link #sumToDouble(float...)} and {@link #average(float...)} widen each {@code float} exactly
      * ({@code 0.6000000163912773} for the same values).</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20517,10 +20609,12 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input collection using the provided function to convert each element to a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20549,7 +20643,7 @@ public final class N extends CommonUtil {
             return 0D;
         }
 
-        final OverflowSafeDoubleSum summation = new OverflowSafeDoubleSum();
+        final KahanSummation summation = new KahanSummation();
 
         if (c instanceof List && c instanceof RandomAccess) {
             final List<T> list = (List<T>) c;
@@ -20588,10 +20682,12 @@ public final class N extends CommonUtil {
      * {@link #sumToDouble(float...)} and {@link #average(float...)} widen each {@code float} exactly
      * ({@code 0.6000000163912773} for the same values).</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20612,10 +20708,12 @@ public final class N extends CommonUtil {
      * Sums all elements in the given iterable using the provided function to convert each element to a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code N.sum(1e308, 1e308, -1e308, -1e308, 5)} is {@code 5.0}, not
-     * {@code Infinity}, consistent with {@link #average(double...)}.</p>
+     * {@code Infinity}, consistent with {@link #average(double...)}. If an input is infinite or {@code NaN}, the
+     * result is decided by those inputs alone, because finite values cannot change an infinite or {@code NaN} total:
+     * {@code N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY)} is {@code -Infinity}, not {@code NaN}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20640,7 +20738,7 @@ public final class N extends CommonUtil {
         }
 
         final Iterator<? extends T> iter = c.iterator();
-        final OverflowSafeDoubleSum summation = new OverflowSafeDoubleSum();
+        final KahanSummation summation = new KahanSummation();
 
         while (iter.hasNext()) {
             summation.add(function.applyAsDouble(iter.next()));
@@ -21502,7 +21600,8 @@ public final class N extends CommonUtil {
      * throws an {@code IllegalArgumentException} on empty input rather than returning {@code 0d}).</p>
      *
      * <p>Finite inputs use compensated summation with an overflow-safe mean fallback, so a representable average is
-     * not reported as infinity merely because the intermediate sum overflowed. Non-finite values follow IEEE 754 arithmetic.</p>
+     * not reported as infinity merely because the intermediate sum overflowed. If an input is infinite or {@code NaN}, the
+     * non-finite inputs alone decide the result.</p>
      *
      * @param <T> the type of the elements in the array, which must extend Number.
      * @param a the array of numbers to calculate the average.
@@ -21550,7 +21649,8 @@ public final class N extends CommonUtil {
 
     /**
      * Calculates the average of the elements in the given array using the provided function to convert each element to a double.
-     * Finite extracted values use compensated summation with an overflow-safe mean fallback; non-finite values follow IEEE 754 arithmetic.
+     * Finite extracted values use compensated summation with an overflow-safe mean fallback; if an extracted value is infinite or {@code NaN},
+     * the non-finite values alone decide the result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21706,7 +21806,8 @@ public final class N extends CommonUtil {
 
     /**
      * Calculates the average of the elements in the given iterable using the provided function to convert each element to a double.
-     * Finite extracted values use compensated summation with an overflow-safe mean fallback; non-finite values follow IEEE 754 arithmetic.
+     * Finite extracted values use compensated summation with an overflow-safe mean fallback; if an extracted value is infinite or {@code NaN},
+     * the non-finite values alone decide the result.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

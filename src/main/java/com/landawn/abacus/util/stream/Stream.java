@@ -9681,6 +9681,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Sums the double values extracted from the elements in this stream using the provided function.
      * This is a terminal operation.
      *
+     * <p>The sum is computed with {@link com.landawn.abacus.util.KahanSummation#sum() KahanSummation.sum()}: it is overflow-safe, so
+     * {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE)} sums to {@code MAX_VALUE}, and if a value is infinite or {@code NaN} the
+     * non-finite values alone decide the result, so {@code (MAX_VALUE, MAX_VALUE, -Infinity)} sums to {@code -Infinity}.</p>
+     *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9762,6 +9766,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Calculates the average of the double values extracted from the elements in this stream using the provided function.
      * This is a terminal operation.
+     *
+     * <p>The average is computed with {@link com.landawn.abacus.util.KahanSummation#average() KahanSummation.average()}: it is overflow-safe, so
+     * {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE, -MAX_VALUE)} averages to {@code 0.0}, and if a value is infinite or
+     * {@code NaN} the non-finite values alone decide the result.</p>
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      *

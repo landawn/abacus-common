@@ -970,6 +970,7 @@ public class CollectorsTest extends CollectorsTestSupport {
     @Test
     public void testFloatingPointCollectorsRetainEncounterOrderRequirements() {
         assertFalse(Collectors.summingDouble((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
+        assertFalse(Collectors.averagingDouble((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
         assertFalse(Collectors.averagingDoubleOrEmpty((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
         assertFalse(Collectors.averagingDoubleOrElseThrow((Integer value) -> value.doubleValue()).characteristics().contains(Characteristics.UNORDERED));
         assertFalse(Collectors.summarizingFloat((Integer value) -> value.floatValue()).characteristics().contains(Characteristics.UNORDERED));
@@ -983,6 +984,25 @@ public class CollectorsTest extends CollectorsTestSupport {
 
         // Exact integer statistics remain genuinely order-insensitive.
         assertTrue(Collectors.summarizingInt((Integer value) -> value).characteristics().contains(Characteristics.UNORDERED));
+    }
+
+    @Test
+    public void testAveragingDoubleIsOverflowSafeLikeItsVariants() {
+        final List<Double> values = Arrays.asList(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+        assertEquals(0.0, values.stream().collect(Collectors.averagingDouble(d -> d)));
+        assertEquals(0.0, values.stream().collect(Collectors.averagingDoubleOrElseThrow(d -> d)));
+        assertEquals(0.0, values.stream().collect(Collectors.averagingDoubleOrEmpty(d -> d)).getAsDouble());
+        assertEquals(0.0, Stream.of(values).collect(Collectors.averagingDouble(d -> d)));
+        assertEquals(0.0, Stream.of(values).parallel(2).collect(Collectors.averagingDouble(d -> d)));
+        // The JDK collector overflows for the same input.
+        assertEquals(Double.POSITIVE_INFINITY, values.stream().collect(java.util.stream.Collectors.averagingDouble(d -> d)));
+
+        assertEquals(0.0, Stream.<Double> empty().collect(Collectors.averagingDouble(d -> d)));
+        assertEquals(Double.NEGATIVE_INFINITY,
+                Stream.of(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY).collect(Collectors.averagingDouble(d -> d)));
+        assertTrue(Double.isNaN(Stream.of(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY).collect(Collectors.averagingDouble(d -> d))));
+        assertTrue(Double.isNaN(Stream.of(1.0, Double.NaN).collect(Collectors.averagingDouble(d -> d))));
+        assertEquals(0.5, Stream.of(1.0, 1e100, 1.0, -1e100).collect(Collectors.averagingDouble(d -> d)));
     }
 
     @Test

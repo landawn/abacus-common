@@ -715,18 +715,154 @@ class CorePerformanceMemoryFixesTest extends TestBase {
     }
 
     @Test
-    void sharedDoubleSumStateKeepsOverflowCancellationAndSimpleFiniteFallback() {
+    void sharedDoubleSumStateKeepsOverflowCancellationAndRoundsCompensationOverflowExactly() {
         assertEquals(5d, N.sum(1e308, 1e308, -1e308, -1e308, 5d));
         assertEquals(Double.MAX_VALUE, N.sum(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE));
         final double step = Math.scalb(1d, 969);
-        assertEquals(Double.MAX_VALUE, N.sum(Double.MAX_VALUE, step, step));
-        assertEquals(-Double.MAX_VALUE, N.sum(-Double.MAX_VALUE, -step, -step));
+        // Only the compensated total overflows here; the exact total MAX_VALUE + 2^970 is exactly the binary64
+        // overflow threshold, which rounds (half-even) to Infinity.
+        assertEquals(Double.POSITIVE_INFINITY, N.sum(Double.MAX_VALUE, step, step));
+        assertEquals(Double.NEGATIVE_INFINITY, N.sum(-Double.MAX_VALUE, -step, -step));
+        // ... and later cancellation recovers the exact finite total rather than the rounded simple sum (0.0).
+        assertEquals(Math.scalb(1d, 970), N.sum(Double.MAX_VALUE, step, step, -Double.MAX_VALUE));
+        assertEquals(Math.scalb(1d, 970), N.sumDouble(Arrays.asList(Double.MAX_VALUE, step, step, -Double.MAX_VALUE), Double::doubleValue));
         assertEquals(step, N.sum(Double.MAX_VALUE, step, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE));
         assertEquals(Double.POSITIVE_INFINITY, N.sum(Double.POSITIVE_INFINITY, 1d));
         assertTrue(Double.isNaN(N.sum(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)));
         assertTrue(Double.isNaN(N.sum(Double.NaN, 1d)));
         assertEquals(Double.doubleToRawLongBits(0d), Double.doubleToRawLongBits(N.sum(-0d, -0d)));
-        assertEquals(Double.POSITIVE_INFINITY, KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE).sum());
-        assertTrue(Double.isNaN(KahanSummation.of(Double.MAX_VALUE, step, step).sum()), "public Kahan sum retains its existing IEEE result");
+        // The public KahanSummation.sum() is overflow-aware the same way.
+        assertEquals(Double.MAX_VALUE, KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE).sum());
+        assertEquals(Double.POSITIVE_INFINITY, KahanSummation.of(Double.MAX_VALUE, step, step).sum());
+        assertEquals(Double.POSITIVE_INFINITY, KahanSummation.of(step, Double.MAX_VALUE, step).sum());
+    }
+
+    @Test
+    void sharedDoubleSumStateLetsNonFiniteInputsAloneDecideTheTotal() {
+        // Finite values cannot change an infinite total, even if their running sum overflows toward the opposite sign.
+        assertEquals(Double.NEGATIVE_INFINITY, N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY));
+        assertEquals(Double.POSITIVE_INFINITY, N.sum(-Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY));
+        assertEquals(Double.NEGATIVE_INFINITY, N.sum(Double.NEGATIVE_INFINITY, Double.MAX_VALUE, Double.MAX_VALUE));
+        assertEquals(Double.NEGATIVE_INFINITY, N.sumDouble(Arrays.asList(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY), Double::doubleValue));
+        assertEquals(Double.NEGATIVE_INFINITY, N.average(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY));
+        assertEquals(Double.POSITIVE_INFINITY, N.average(-Double.MAX_VALUE, -Double.MAX_VALUE, Double.POSITIVE_INFINITY));
+        // Opposite infinities and NaN still give NaN.
+        assertTrue(Double.isNaN(N.sum(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY)));
+        assertTrue(Double.isNaN(N.average(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.NaN)));
+        // The public KahanSummation.sum() follows the same rule.
+        assertEquals(Double.NEGATIVE_INFINITY, KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY).sum());
+    }
+
+    @Test
+    void primitiveDoubleArraySumAndAverageRescanExactlyAfterOverflow() {
+        final double max = Double.MAX_VALUE;
+        final double p = Math.scalb(1d, 969);
+
+        // The compensated prefix drops -p when MAX_VALUE arrives; a streaming fallback seeded from it returns 2p.
+        final double[] droppedPrefix = { -p, max, p, p, -max };
+        assertEquals(p, N.sum(droppedPrefix));
+        assertEquals(p / 5, N.average(droppedPrefix));
+
+        // Just below the overflow threshold MAX_VALUE + 2^970: correctly rounded to MAX_VALUE, not Infinity.
+        final double[] belowThreshold = { -1.638404066881367E15, max, -331.27845422344325, -300522.8854230656, 7.684587004988652E-22, p, -2.8658709999477205E9,
+                p };
+        assertEquals(max, N.sum(belowThreshold));
+
+        // Overflow followed by cancellation down to small values.
+        final double[] cancelled = { -48967.7633422953, 0.5, -48.642802418243726, max, 1e308, -1e308, -max, 4.279576266694509E-6 };
+        assertEquals(exactSum(cancelled, 0, cancelled.length), N.sum(cancelled));
+        assertEquals(exactAverage(cancelled, 0, cancelled.length), N.average(cancelled));
+
+        // Range overloads re-scan only their range.
+        final double[] padded = { Double.NaN, -p, max, p, p, -max, Double.NEGATIVE_INFINITY };
+        assertEquals(p, N.sum(padded, 1, 6));
+        assertEquals(p / 5, N.average(padded, 1, 6));
+        assertEquals(Double.NEGATIVE_INFINITY, N.sum(padded, 1, 7));
+        assertEquals(Double.NEGATIVE_INFINITY, N.average(padded, 1, 7));
+
+        // Seeded random check against the exact result over inputs whose running sums overflow.
+        final double[] pool = { 0d, 1d, -1d, 0.5, max, -max, p, -p, Math.scalb(1d, 1022), -Math.scalb(1d, 1022), 1e16, -1e16, 1e308, -1e308, Double.MIN_VALUE };
+        final Random random = new Random(7);
+        int overflowing = 0;
+        int cancelledBack = 0;
+
+        for (int iteration = 0; iteration < 20000; iteration++) {
+            final double[] values = new double[3 + random.nextInt(7)];
+
+            for (int i = 0; i < values.length; i++) {
+                values[i] = random.nextInt(3) != 0 ? pool[random.nextInt(pool.length)] : (random.nextDouble() - 0.5) * Math.pow(10, random.nextInt(40) - 10);
+            }
+
+            // Decided independently of the code under test: KahanSummation.sum() is finite again when later values cancel
+            // the overflow, and those inputs must be checked too.
+            if (!compensatedTotalEverOverflows(values)) {
+                continue;
+            }
+
+            overflowing++;
+            final String input = Arrays.toString(values);
+            final double exact = exactSum(values, 0, values.length);
+
+            if (Double.isFinite(exact) && Math.abs(exact) < 1e300) {
+                cancelledBack++;
+            }
+
+            assertEquals(Double.doubleToLongBits(exact), Double.doubleToLongBits(N.sum(values)), input);
+            assertEquals(Double.doubleToLongBits(exactAverage(values, 0, values.length)), Double.doubleToLongBits(N.average(values)), input);
+
+            // The streaming twins share one accumulator, so they agree with each other (not necessarily with the re-scan).
+            final List<Double> list = new ArrayList<>(values.length);
+            for (final double value : values) {
+                list.add(value);
+            }
+            assertEquals(Double.doubleToLongBits(KahanSummation.of(values).sum()), Double.doubleToLongBits(N.sumDouble(list, Double::doubleValue)), input);
+        }
+
+        assertTrue(overflowing > 1000, "too few overflowing samples: " + overflowing);
+        assertTrue(cancelledBack >= 20, "too few samples that cancel back into range: " + cancelledBack);
+    }
+
+    /** Whether the Neumaier running state's compensated total sum - correction leaves the double range at any step. */
+    private static boolean compensatedTotalEverOverflows(final double[] values) {
+        double sum = 0d;
+        double correction = 0d;
+
+        for (final double value : values) {
+            final double next = sum + value;
+
+            if (Math.abs(sum) >= Math.abs(value)) {
+                correction -= (sum - next) + value;
+            } else {
+                correction -= (value - next) + sum;
+            }
+
+            sum = next;
+
+            if (!Double.isFinite(sum - correction)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static double exactSum(final double[] a, final int fromIndex, final int toIndex) {
+        java.math.BigDecimal sum = java.math.BigDecimal.ZERO;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum = sum.add(new java.math.BigDecimal(a[i]));
+        }
+
+        return sum.doubleValue();
+    }
+
+    private static double exactAverage(final double[] a, final int fromIndex, final int toIndex) {
+        java.math.BigDecimal sum = java.math.BigDecimal.ZERO;
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            sum = sum.add(new java.math.BigDecimal(a[i]));
+        }
+
+        return sum.divide(java.math.BigDecimal.valueOf(toIndex - fromIndex), new java.math.MathContext(1200, java.math.RoundingMode.HALF_EVEN)).doubleValue();
     }
 }

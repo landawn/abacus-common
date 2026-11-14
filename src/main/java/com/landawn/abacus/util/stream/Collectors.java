@@ -745,6 +745,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
+    private static final Function<KahanSummation, Double> AveragingDouble_Finisher = a -> a.average().orElseZero();
+
     private static final Function<KahanSummation, OptionalDouble> AveragingDouble_Finisher_op = KahanSummation::average;
 
     private static final Function<KahanSummation, Double> AveragingDouble_Finisher_orElseThrow = a -> {
@@ -6429,12 +6431,17 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * If no elements are present in the stream, the result is 0.0. The average is computed
      * and returned as a double-precision floating-point value.</p>
      *
-     * <p>This method delegates to the standard Java {@link java.util.stream.Collectors#averagingDouble(ToDoubleFunction)}
-     * implementation for compatibility with the Java Stream API. Like that implementation, it can return an
-     * infinite result when the running sum of finite values overflows, even if the true mean is finite: averaging
-     * {@code Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE} gives {@code Infinity}, not
-     * {@code 0.0}. {@link #averagingDoubleOrEmpty(ToDoubleFunction)} and
-     * {@link #averagingDoubleOrElseThrow(ToDoubleFunction)} return the finite mean for such input.</p>
+     * <p>The values are added with {@link KahanSummation}, like {@link #averagingDoubleOrEmpty(ToDoubleFunction)} and
+     * {@link #averagingDoubleOrElseThrow(ToDoubleFunction)}, so the mean is overflow-safe: averaging
+     * {@code Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE} gives {@code 0.0}. Non-finite
+     * inputs alone decide a non-finite result: any {@code NaN}, or both infinities, gives {@code NaN}; otherwise an
+     * infinite input gives that infinity. Results can therefore differ from
+     * {@link java.util.stream.Collectors#averagingDouble(ToDoubleFunction)}, which returns {@code Infinity} for the input
+     * above, and, because the compensation differs, in the last bits of ordinary results.</p>
+     *
+     * <p>Floating-point addition remains order-sensitive even with compensated summation,
+     * so the returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
+     * characteristic.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6471,7 +6478,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     public static <T> Collector<T, ?, Double> averagingDouble(final ToDoubleFunction<? super T> mapper) throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
-        return java.util.stream.Collectors.averagingDouble(mapper);
+        final BiConsumer<KahanSummation, T> accumulator = (a, t) -> a.add(mapper.applyAsDouble(t));
+
+        return create(AveragingDouble_Supplier, accumulator, AveragingDouble_Combiner, AveragingDouble_Finisher, CH_NOID);
     }
 
     /**
@@ -11281,8 +11290,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *
          * <p>The computation is performed in encounter order. Floating-point addition remains
          * order-sensitive even with compensated summation, so the returned collector does not
-         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Special
-         * floating-point values (NaN and infinity) follow IEEE 754 arithmetic.</p>
+         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Each sum is
+         * overflow-safe and lets non-finite values alone decide a non-finite total, as
+         * {@link KahanSummation#sum()} does: {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE)} sums to
+         * {@code MAX_VALUE}, and {@code (MAX_VALUE, MAX_VALUE, -Infinity)} to {@code -Infinity}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -11324,8 +11335,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          *
          * <p>The computation is performed in encounter order. Floating-point addition remains
          * order-sensitive even with compensated summation, so the returned collector does not
-         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Special
-         * floating-point values (NaN and infinity) follow IEEE 754 arithmetic.</p>
+         * have the {@link Characteristics#UNORDERED UNORDERED} characteristic. Each sum is
+         * overflow-safe and lets non-finite values alone decide a non-finite total, as
+         * {@link KahanSummation#sum()} does: {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE)} sums to
+         * {@code MAX_VALUE}, and {@code (MAX_VALUE, MAX_VALUE, -Infinity)} to {@code -Infinity}.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

@@ -353,25 +353,37 @@ public class PrimitiveStreamsBReview20260924Test extends TestBase {
         assertEquals(1.0000000000000002E16, DoubleStream.of(1e16, 1.0, 1.0).sum(), 0.0);
         assertEquals(1.0000000000000002E16, DoubleStream.of(1e16, 1.0, 1.0).summaryStatistics().getSum(), 0.0);
         assertEquals(1.0E16, DoubleStream.of(1e16, 1.0, 1.0).reduce(0.0, Double::sum), 0.0);
-        assertEquals(0.0, DoubleStream.of(1.0, 1e100, 1.0, -1e100).sum(), 0.0);
+        // Compensated (Kahan-Babuska) summation keeps a small value that arrives before a larger one.
+        assertEquals(2.0, DoubleStream.of(1.0, 1e100, 1.0, -1e100).sum(), 0.0);
+        assertEquals(0.5, DoubleStream.of(1.0, 1e100, 1.0, -1e100).average().get(), 0.0);
+        // summaryStatistics() is the JDK's classic Kahan summation, which loses the leading 1.0.
+        assertEquals(0.0, DoubleStream.of(1.0, 1e100, 1.0, -1e100).summaryStatistics().getSum(), 0.0);
+        assertEquals(0.0, java.util.stream.DoubleStream.of(1.0, 1e100, 1.0, -1e100).sum(), 0.0);
 
         assertEquals(Double.POSITIVE_INFINITY, DoubleStream.of(MAX, MAX).sum(), 0.0);
         assertEquals(OptionalDouble.of(MAX), DoubleStream.of(MAX, MAX).average());
         assertEquals(Double.POSITIVE_INFINITY, DoubleStream.of(MAX, MAX).summaryStatistics().getAverage(), 0.0);
 
-        assertEquals(Double.POSITIVE_INFINITY, DoubleStream.of(MAX, MAX, -MAX, -MAX).sum(), 0.0);
+        // sum() is overflow-safe like average(): later cancellation is not lost, in any order.
+        assertEquals(0.0, DoubleStream.of(MAX, MAX, -MAX, -MAX).sum(), 0.0);
         assertEquals(OptionalDouble.of(0.0), DoubleStream.of(MAX, MAX, -MAX, -MAX).average());
-        assertEquals(Double.POSITIVE_INFINITY, DoubleStream.of(MAX, MAX, -MAX).sum(), 0.0);
+        assertEquals(MAX, DoubleStream.of(MAX, MAX, -MAX).sum(), 0.0);
         assertEquals(MAX, DoubleStream.of(MAX, -MAX, MAX).sum(), 0.0);
+        assertEquals(Double.POSITIVE_INFINITY, DoubleStream.of(MAX, MAX, -MAX).summaryStatistics().getSum(), 0.0);
     }
 
     @Test
     public void testC043_doubleAverageNonFiniteOrderDependence_docLock() {
-        assertTrue(Double.isNaN(DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).average().get()));
-        assertTrue(Double.isNaN(DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).map(x -> x).average().get()));
+        // Non-finite elements alone decide the result, so it no longer depends on encounter order.
+        assertEquals(OptionalDouble.of(Double.NEGATIVE_INFINITY), DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).average());
+        assertEquals(OptionalDouble.of(Double.NEGATIVE_INFINITY), DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).map(x -> x).average());
         assertEquals(OptionalDouble.of(Double.NEGATIVE_INFINITY), DoubleStream.of(Double.NEGATIVE_INFINITY, MAX, MAX).average());
-        assertEquals(java.util.stream.DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).average().getAsDouble(),
-                DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).average().get(), 0.0);
+        assertEquals(Double.NEGATIVE_INFINITY, DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).sum(), 0.0);
+        // The JDK evaluates left to right and gives NaN for the first order.
+        assertTrue(Double.isNaN(java.util.stream.DoubleStream.of(MAX, MAX, Double.NEGATIVE_INFINITY).average().getAsDouble()));
+        // Opposite infinities and NaN still give NaN.
+        assertTrue(Double.isNaN(DoubleStream.of(Double.POSITIVE_INFINITY, MAX, Double.NEGATIVE_INFINITY).average().get()));
+        assertTrue(Double.isNaN(DoubleStream.of(MAX, Double.NaN, MAX).sum()));
     }
 
     @Test

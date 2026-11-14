@@ -16695,6 +16695,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * The function is applied to each element to extract a double value, and these values are summed
      * using compensated (Kahan) summation to reduce accumulated rounding error.
      *
+     * <p>The sum is computed with {@link KahanSummation#sum()}: it is overflow-safe, so
+     * {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE)} sums to {@code MAX_VALUE}, and if a value is infinite or {@code NaN} the
+     * non-finite values alone decide the result, so {@code (MAX_VALUE, MAX_VALUE, -Infinity)} sums to {@code -Infinity}.</p>
+     *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -16854,6 +16858,10 @@ public final class Seq<T, E extends Exception> implements AutoCloseable {
      * using the provided function. The function is applied to each element to extract a double value,
      * and the average of these values is calculated using compensated (Kahan) summation to reduce
      * accumulated rounding error.
+     *
+     * <p>The average is computed with {@link KahanSummation#average()}: it is overflow-safe, so
+     * {@code (MAX_VALUE, MAX_VALUE, -MAX_VALUE, -MAX_VALUE)} averages to {@code 0.0}, and if a value is infinite or
+     * {@code NaN} the non-finite values alone decide the result.</p>
      *
      * <p>This is a terminal operation. This sequence will be automatically closed after this operation completes, whether normally or exceptionally.</p>
      *

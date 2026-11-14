@@ -2631,14 +2631,16 @@ public final class Iterables {
      * <p>Summation is compensated (Kahan), so the result can differ in the last bits from a naive left-to-right
      * {@code +=} over the same values. This uses the same compensated accumulator as {@link N#sumDouble(Iterable)}, and
      * {@code averageDouble} compensates the same way; rounding means multiplying that average by the count need not
-     * reproduce this sum. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
-     * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY} yields {@code NaN}. Signed zero is the
+     * reproduce this sum. If a value is {@code NaN} or infinite, the non-finite values alone decide the result, because
+     * finite values cannot change an infinite or {@code NaN} total: a {@code NaN}, or a mix of
+     * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY}, yields {@code NaN}, and
+     * {@code (MAX_VALUE, MAX_VALUE, -Infinity)} yields {@code -Infinity} in any order. Signed zero is the
      * one IEEE 754 case the accumulator does not carry through: it starts from {@code +0.0} and {@code 0.0 + -0.0}
      * is {@code +0.0}, so a sum of nothing but {@code -0.0} returns {@code +0.0} rather than {@code -0.0}. That
      * matches {@link N#sumDouble(Iterable)} and {@link java.util.stream.DoubleStream#sum()}.</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code Iterables.sumDouble(Arrays.asList(1e308, 1e308, -1e308, -1e308, 5.0))}
      * is {@code OptionalDouble[5.0]}, not {@code Infinity} - the same accumulator, and the same total, as
      * {@link N#sumDouble(Iterable)}.</p>
@@ -2665,14 +2667,16 @@ public final class Iterables {
      * <p>Summation is compensated (Kahan), so the result can differ in the last bits from a naive left-to-right
      * {@code +=} over the same values. This uses the same compensated accumulator as {@link N#sumDouble(Iterable)}, and
      * {@code averageDouble} compensates the same way; rounding means multiplying that average by the count need not
-     * reproduce this sum. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
-     * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY} yields {@code NaN}. Signed zero is the
+     * reproduce this sum. If a value is {@code NaN} or infinite, the non-finite values alone decide the result, because
+     * finite values cannot change an infinite or {@code NaN} total: a {@code NaN}, or a mix of
+     * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY}, yields {@code NaN}, and
+     * {@code (MAX_VALUE, MAX_VALUE, -Infinity)} yields {@code -Infinity} in any order. Signed zero is the
      * one IEEE 754 case the accumulator does not carry through: it starts from {@code +0.0} and {@code 0.0 + -0.0}
      * is {@code +0.0}, so a sum of nothing but {@code -0.0} returns {@code +0.0} rather than {@code -0.0}. That
      * matches {@link N#sumDouble(Iterable)} and {@link java.util.stream.DoubleStream#sum()}.</p>
      *
-     * <p>If the running sum of finite values overflows, the remaining values are accumulated exactly and the total is
-     * rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
+     * <p>Once a value or the running sum reaches {@code 2^960} in magnitude, well before it can overflow, the remaining
+     * values are accumulated exactly and the total is rounded once, so the result is infinite only when the true total is outside the {@code double} range (or an
      * input is infinite or {@code NaN}): {@code Iterables.sumDouble(Arrays.asList(1e308, 1e308, -1e308, -1e308, 5.0), Double::doubleValue)}
      * is {@code OptionalDouble[5.0]}, not {@code Infinity} - the same accumulator, and the same total, as
      * {@link N#sumDouble(Iterable, ToDoubleFunction)}.</p>
@@ -2701,12 +2705,10 @@ public final class Iterables {
             return OptionalDouble.empty();
         }
 
-        // N's overflow-safe Kahan accumulator - the one N.sumDouble uses - so the two twins return
-        // the same total, including when the running sum overflows but the true total fits: the plain
-        // KahanSummation.sum() used here before returned Infinity for [1e308, 1e308, -1e308, -1e308, 5] while N.sumDouble
-        // returned 5.0. This class's averageDouble (KahanSummation.average()) is overflow-safe the same way.
-        // (sum == average * count is NOT promised: see the javadoc.)
-        final N.OverflowSafeDoubleSum summation = new N.OverflowSafeDoubleSum();
+        // The same accumulator N.sumDouble uses, so the two twins return the same total. KahanSummation.sum() is
+        // overflow-safe: [1e308, 1e308, -1e308, -1e308, 5] sums to 5.0, not Infinity, and this class's averageDouble
+        // (KahanSummation.average()) is overflow-safe the same way. (sum == average * count is NOT promised: see the javadoc.)
+        final KahanSummation summation = new KahanSummation();
 
         do {
             summation.add(function.applyAsDouble(iter.next()));
@@ -3075,7 +3077,7 @@ public final class Iterables {
 
     /**
      * Returns the average of the specified {@code double} values as an {@code OptionalDouble}.
-     * Summation is compensated (Kahan) for accuracy. If a sum of finite values would overflow, an overflow-safe fallback still reports a representable average rather than infinity; a {@code NaN} or infinite element otherwise propagates per IEEE 754.
+     * Summation is compensated (Kahan) for accuracy. If a sum of finite values would overflow, an overflow-safe fallback still reports a representable average rather than infinity; if any element is {@code NaN} or infinite, the non-finite elements alone decide the result.
      * If the array is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p><b>Usage Examples:</b></p>

@@ -92,21 +92,23 @@ import com.landawn.abacus.util.function.TriFunction;
  * semantics: any {@code NaN} element propagates to the result as {@code NaN}
  * (because {@link #min()}/{@link #max()} use {@link Math#min(double, double)}/{@link Math#max(double, double)}).
  *
- * <p>{@link #sum()}, {@link #average()} and {@link #summaryStatistics()} all use compensated (Kahan)
- * summation, as the JDK does, so none of them is a plain left-to-right {@code reduce(0.0, Double::sum)}:
+ * <p>{@link #sum()}, {@link #average()} and {@link #summaryStatistics()} all use compensated summation, as the
+ * JDK does, so none of them is a plain left-to-right {@code reduce(0.0, Double::sum)}:
  * {@code DoubleStream.of(1e16, 1.0, 1.0).sum()} is {@code 1.0000000000000002E16}, while the plain reduction
- * gives {@code 1.0E16}. Classic Kahan compensation still loses a small term that is added while the
- * running sum is much larger in magnitude: {@code DoubleStream.of(1.0, 1e100, 1.0, -1e100).sum()} is
- * {@code 0.0} (the JDK gives the same), not {@code 2.0}.
+ * gives {@code 1.0E16}. {@link #sum()} and {@link #average()} use Neumaier's variant (Kahan-Babuska), which also
+ * keeps a small term added before a larger one: {@code DoubleStream.of(1.0, 1e100, 1.0, -1e100).sum()} is
+ * {@code 2.0}, where classic Kahan summation, and so the JDK and {@code summaryStatistics().getSum()}, give
+ * {@code 0.0}.
  *
- * <p>&#9888;&#65039; {@link #average()} additionally computes an overflow-safe mean, so it deliberately does
- * <b>not</b> follow IEEE 754 on finite overflow. For {@code DoubleStream.of(Double.MAX_VALUE, Double.MAX_VALUE)},
- * {@code sum()} is {@code +Infinity} but {@code average()} is {@code Double.MAX_VALUE}; the JDK returns
- * {@code Infinity} for both. {@code summaryStatistics()} returns a JDK {@link DoubleSummaryStatistics}, whose
- * {@code getAverage()} has no such fallback, so {@code summaryStatistics().getAverage()} and {@code average()}
- * can differ for the same stream. {@code sum()} has no overflow-safe fallback either: once the running sum of
- * finite values overflows it stays infinite, even if later values cancel the excess
- * ({@code DoubleStream.of(MAX, MAX, -MAX, -MAX).sum()} is {@code Infinity} while {@code average()} is {@code 0.0}).
+ * <p>&#9888;&#65039; {@link #sum()} and {@link #average()} are overflow-safe, so they deliberately do <b>not</b>
+ * follow IEEE 754 left-to-right evaluation on finite overflow. For
+ * {@code DoubleStream.of(Double.MAX_VALUE, Double.MAX_VALUE)}, {@code sum()} is {@code +Infinity} (the true total is
+ * out of range) but {@code average()} is {@code Double.MAX_VALUE}; the JDK returns {@code Infinity} for both. Later
+ * cancellation is not lost: {@code DoubleStream.of(MAX, MAX, -MAX, -MAX).sum()} is {@code 0.0}, as is
+ * {@code average()}. If an element is infinite or {@code NaN}, the non-finite elements alone decide the result, so
+ * {@code (MAX, MAX, -Infinity)} gives {@code -Infinity} in any order. {@code summaryStatistics()} returns a JDK
+ * {@link DoubleSummaryStatistics}, whose {@code getSum()} and {@code getAverage()} have none of this, so they can
+ * differ from {@code sum()} and {@code average()} for the same stream.
  * Ordering operations (such as {@link #sorted()}, {@link #kthLargest(int)}, and {@link #top(int)}) instead use
  * {@link Double#compare(double, double)}, which treats {@code NaN} as greater than any
  * other value (including positive infinity) and considers {@code -0.0} less than {@code +0.0}.
@@ -2733,15 +2735,16 @@ public abstract class DoubleStream
      * <p>This is a terminal operation.
      *
      * <p>If any element is {@code NaN}, the result is {@code NaN}. If the stream is empty,
-     * {@code 0.0} is returned. The sum is computed using compensated (Kahan) summation for improved
+     * {@code 0.0} is returned. The sum is computed using compensated (Kahan-Babuska) summation for improved
      * numerical accuracy, so it can differ from {@code reduce(0.0, Double::sum)} in the last bits.
      *
-     * <p>There is no overflow-safe fallback (unlike {@link #average()}): once the running sum of finite
-     * values overflows, the result stays infinite even if later values cancel the excess, so the result can
-     * depend on encounter order. {@code DoubleStream.of(MAX, MAX, -MAX).sum()} is {@code Infinity}, whereas
-     * {@code DoubleStream.of(MAX, -MAX, MAX).sum()} is {@code Double.MAX_VALUE} ({@code MAX} being
-     * {@link Double#MAX_VALUE}). With non-finite elements the result follows IEEE 754 left-to-right
-     * evaluation, as in the JDK.
+     * <p>Like {@link #average()}, the sum is overflow-safe: once a value or the running sum reaches {@code 2^960} in
+     * magnitude, well before it can overflow, the values are also accumulated exactly and the total is rounded once, so the result is infinite only when the
+     * total is outside the {@code double} range. {@code DoubleStream.of(MAX, MAX, -MAX).sum()} and
+     * {@code DoubleStream.of(MAX, -MAX, MAX).sum()} are both {@code Double.MAX_VALUE} ({@code MAX} being
+     * {@link Double#MAX_VALUE}); the JDK returns {@code Infinity} for the first. If an element is infinite or
+     * {@code NaN}, the non-finite elements alone decide the result, so {@code (MAX, MAX, -Infinity)} gives
+     * {@code -Infinity} in any order, where the JDK gives {@code NaN}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2778,13 +2781,15 @@ public abstract class DoubleStream
      * {@code OptionalDouble}. If the stream is empty, an empty {@code OptionalDouble} is returned.
      *
      * <p>The mean is computed with compensated (Kahan) summation. Unlike the JDK, it is overflow-safe when every
-     * element is finite: if the running sum overflows, a higher-precision total is used instead, so
+     * element is finite: once a value or the running sum reaches {@code 2^960} in magnitude, an exact total is used
+     * instead, so
      * {@code DoubleStream.of(MAX, MAX).average()} is {@code Double.MAX_VALUE} (the JDK returns {@code Infinity})
      * and {@code DoubleStream.of(MAX, MAX, -MAX, -MAX).average()} is {@code 0.0} ({@code MAX} being
-     * {@link Double#MAX_VALUE}). When non-finite elements are present, the result follows IEEE 754 left-to-right
-     * evaluation, exactly as in the JDK, so it can depend on encounter order if a finite overflow and an infinity
-     * of the opposite sign both occur: {@code (MAX, MAX, -Infinity)} gives {@code NaN}, while
-     * {@code (-Infinity, MAX, MAX)} gives {@code -Infinity}.
+     * {@link Double#MAX_VALUE}). When non-finite elements are present, the non-finite elements alone decide the
+     * result, because finite values cannot change an infinite or {@code NaN} total, so it does not depend on
+     * encounter order: {@code (MAX, MAX, -Infinity)} and {@code (-Infinity, MAX, MAX)} both give
+     * {@code -Infinity} (the JDK gives {@code NaN} for the first), while {@code (Infinity, -Infinity)} gives
+     * {@code NaN}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2817,7 +2822,8 @@ public abstract class DoubleStream
      *
      * <p>This is a terminal operation.
      *
-     * <p>The result is a JDK {@link DoubleSummaryStatistics}: its sum is compensated like {@link #sum()}, but its
+     * <p>The result is a JDK {@link DoubleSummaryStatistics}: its sum is compensated, but with the JDK's own
+     * algorithm and without the overflow-safe and non-finite handling of {@link #sum()}, and its
      * {@code getAverage()} is {@code getSum() / getCount()} without {@link #average()}'s overflow-safe fallback, so
      * for {@code DoubleStream.of(Double.MAX_VALUE, Double.MAX_VALUE)} it returns {@code Infinity} while
      * {@code average()} returns {@code Double.MAX_VALUE}.

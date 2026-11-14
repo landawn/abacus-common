@@ -22,11 +22,27 @@ import java.util.Locale;
 import com.landawn.abacus.util.u.OptionalDouble;
 
 /**
- * Implementation of Kahan summation algorithm for improved numerical precision.
+ * Implementation of compensated (Kahan) summation for improved numerical precision.
  * <p>
- * The Kahan summation algorithm is a compensated summation technique that significantly
- * reduces the numerical error in the total obtained by adding a sequence of finite-precision
- * floating-point numbers, compared to the obvious approach.
+ * Compensated summation significantly reduces the numerical error in the total obtained by adding
+ * a sequence of finite-precision floating-point numbers, compared to the obvious approach. This
+ * class uses Neumaier's variant (the Kahan-Babuska algorithm), which captures the rounding error
+ * of every addition exactly, including an addition whose operand is larger in magnitude than the
+ * running sum, where classic Kahan summation loses the smaller term.
+ * <p>
+ * Results are overflow-aware. Once any finite value, or the running total, reaches {@code 2^960} in
+ * magnitude, well before the {@code double} range can be exceeded, the values are also accumulated
+ * exactly from then on, and the total is rounded once, so
+ * {@code KahanSummation.of(1e308, 1e308, -1e308, -1e308, 5).sum()} is {@code 5.0}. If any value is
+ * infinite or {@code NaN}, the non-finite values alone decide the result, because finite values
+ * cannot change an infinite or {@code NaN} total: {@code (MAX_VALUE, MAX_VALUE, -Infinity)} gives
+ * {@code -Infinity} in any order, while {@code (Infinity, -Infinity)} gives {@code NaN}.
+ * <p>
+ * The exact accumulation uses {@code BigDecimal} arithmetic and is roughly a hundred times slower per value
+ * than the compensated {@code double} path, but it runs only when a value or the running total reaches
+ * {@code 2^960} (about {@code 9.75e288}). Real data essentially never does, apart from a
+ * {@code Double.MAX_VALUE} sentinel (used as "infinity" or "not set") leaking into a sum; if it does,
+ * the result is still correct, just slower. Ordinary sums pay only a magnitude check per value.
  * <p>
  * This is particularly useful when summing many numbers where intermediate results may
  * lose precision due to floating-point arithmetic limitations.
@@ -50,8 +66,16 @@ public final class KahanSummation { // NOSONAR
 
     // This precision covers the exact decimal expansion of a binary64 value plus the extra
     // quotient bits from any positive long count, including rounding decisions at subnormal ties.
-    // The context is used only after the ordinary finite summation has overflowed.
+    // The context is used only once the exact total has started (see EXACT_TOTAL_THRESHOLD).
     private static final MathContext OVERFLOW_AVERAGE_CONTEXT = new MathContext(1200, RoundingMode.HALF_EVEN);
+
+    // The exact total starts once any finite value, or the running total, reaches this magnitude. Below it the double
+    // state cannot overflow: each step's rounding error is at most ulp(2^960) / 2 = 2^907, so even 2^63 steps keep
+    // |correction| below 2^970. Only inputs this large can overflow, or drop a small term that later cancellation of
+    // huge values exposes, so starting the exact total here, well before the overflow threshold, keeps every term from
+    // that point on and rounds the total once. N.sum(double[]) and N.average(double[]) re-scan exactly at the same
+    // point; keep the two in step. Ordinary data never gets this large and pays only for the comparison.
+    static final double EXACT_TOTAL_THRESHOLD = 0x1p960;
 
     /**
      * Constructs a new KahanSummation with initial values of zero.
@@ -76,13 +100,20 @@ public final class KahanSummation { // NOSONAR
 
     private double simpleSum;
 
-    // Activated only after a finite simple sum overflows. The compensated prefix and all
-    // subsequent finite additions are retained at higher precision, so later cancellation
-    // does not amplify rounding performed by a single-double running mean.
+    // Activated once a finite value or the running total reaches EXACT_TOTAL_THRESHOLD (2^960), well before the total
+    // can overflow. The compensated prefix and all subsequent finite additions are then retained exactly, so a total
+    // near or beyond the overflow threshold is rounded once, and later cancellation of huge values cannot expose terms
+    // that the double state dropped.
     private BigDecimal overflowSafeSum;
 
     // False after a non-finite value, or an aggregate with unknown finite provenance, is seen.
     private boolean finiteValuesOnly = true;
+
+    // IEEE 754 total of the non-finite values (and non-finite combined aggregates) seen so far: 0.0 until the
+    // first one, then +/-Infinity or NaN for good. Finite values cannot change an infinite or NaN total, so
+    // sum() and average() use this alone once it is non-finite. That keeps a finite prefix which overflows
+    // toward the opposite sign from turning a single infinity into NaN: (MAX, MAX, -Infinity) -> -Infinity.
+    private double nonFiniteSum;
 
     /**
      * Creates a new KahanSummation instance initialized with the provided values.
@@ -111,9 +142,9 @@ public final class KahanSummation { // NOSONAR
     }
 
     /**
-     * Adds a single value to the summation using the Kahan algorithm.
+     * Adds a single value to the summation using compensated (Kahan-Babuska) summation.
      * <p>
-     * The algorithm maintains a running compensation (correction) for lost low-order bits.
+     * The algorithm maintains a running compensation (correction) for the low-order bits that each addition loses.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -130,26 +161,24 @@ public final class KahanSummation { // NOSONAR
     public void add(final double value) throws ArithmeticException {
         final long previousCount = count;
         final double previousSimpleSum = simpleSum;
+        final double previousSum = sum;
+        final double previousCorrection = correction;
         count = Math.addExact(count, 1L);
         simpleSum += value;
+        compensatedAdd(value);
 
-        if (finiteValuesOnly) {
-            if (overflowSafeSum == null) {
-                if (!Double.isFinite(simpleSum)) {
-                    if (Double.isFinite(value)) {
-                        activateOverflowSafeSum(previousCount, previousSimpleSum, exactBigDecimal(value));
-                    } else {
-                        invalidateOverflowSafeSum();
-                    }
+        if (!Double.isFinite(value)) {
+            nonFiniteSum += value;
+            invalidateOverflowSafeSum();
+        } else if (finiteValuesOnly) {
+            if (overflowSafeSum != null) {
+                if (value != 0d) { // An exact zero (either sign) cannot change the exact total: skip the BigDecimal work.
+                    overflowSafeSum = overflowSafeSum.add(exactBigDecimal(value));
                 }
-            } else if (Double.isFinite(value)) {
-                overflowSafeSum = overflowSafeSum.add(exactBigDecimal(value));
-            } else {
-                invalidateOverflowSafeSum();
+            } else if (exactTotalNeeded(value)) {
+                activateOverflowSafeSum(previousCount, previousSum, previousCorrection, previousSimpleSum, exactBigDecimal(value));
             }
         }
-
-        kahanSum(value);
     }
 
     /**
@@ -179,7 +208,7 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Combines this summation with a pre-computed count and sum.
-     * The provided {@code sumA} is incorporated via the Kahan algorithm to maintain precision.
+     * The provided {@code sumA} is incorporated via compensated summation to maintain precision.
      * This method is useful when merging externally computed partial sums.
      *
      * <p><b>Usage Examples:</b></p>
@@ -201,27 +230,33 @@ public final class KahanSummation { // NOSONAR
 
         final long previousCount = count;
         final double previousSimpleSum = simpleSum;
+        final double previousSum = sum;
+        final double previousCorrection = correction;
         count = Math.addExact(count, countA);
         simpleSum += sumA;
+        compensatedAdd(sumA);
 
-        if (finiteValuesOnly) {
-            if (countA > 0 && Double.isFinite(sumA)) {
-                // Exact decimal state is needed only once the ordinary finite sum overflows.
+        if (!Double.isFinite(sumA)) {
+            // A non-finite aggregate sum may have come from finite values that
+            // overflowed, but combine(count, sum) does not retain enough
+            // information to reconstruct them, so it is treated like a non-finite value.
+            nonFiniteSum += sumA;
+            invalidateOverflowSafeSum();
+        } else if (finiteValuesOnly) {
+            if (countA > 0) {
+                // Exact decimal state is needed only once a value or the running total reaches EXACT_TOTAL_THRESHOLD.
                 if (overflowSafeSum != null) {
-                    overflowSafeSum = overflowSafeSum.add(exactBigDecimal(sumA));
-                } else if (!Double.isFinite(simpleSum)) {
-                    activateOverflowSafeSum(previousCount, previousSimpleSum, exactBigDecimal(sumA));
+                    if (sumA != 0d) { // As in add(double): a zero aggregate cannot change the exact total.
+                        overflowSafeSum = overflowSafeSum.add(exactBigDecimal(sumA));
+                    }
+                } else if (exactTotalNeeded(sumA)) {
+                    activateOverflowSafeSum(previousCount, previousSum, previousCorrection, previousSimpleSum, exactBigDecimal(sumA));
                 }
-            } else if (countA > 0 || sumA != 0d) {
-                // A non-finite aggregate sum may have come from finite values that
-                // overflowed, but combine(count, sum) does not retain enough
-                // information to reconstruct their average. Likewise, a non-zero
-                // sum representing zero observations has no meaningful average.
+            } else if (sumA != 0d) {
+                // A non-zero sum representing zero observations has no meaningful average.
                 invalidateOverflowSafeSum();
             }
         }
-
-        kahanSum(sumA);
     }
 
     /**
@@ -247,18 +282,31 @@ public final class KahanSummation { // NOSONAR
         N.checkArgNotNull(other, cs.other);
 
         // Snapshot all source fields before mutating this instance. This is required when
-        // other == this because kahanSum changes both sum and correction.
+        // other == this because compensatedAdd changes both sum and correction.
         final long otherCount = other.count;
         final double otherSimpleSum = other.simpleSum;
         final double otherSum = other.sum;
         final double otherCorrection = other.correction;
         final BigDecimal otherOverflowSafeSum = other.overflowSafeSum;
         final boolean otherFiniteValuesOnly = other.finiteValuesOnly;
+        final double otherNonFiniteSum = other.nonFiniteSum;
         final long previousCount = count;
         final double previousSimpleSum = simpleSum;
+        final double previousSum = sum;
+        final double previousCorrection = correction;
 
         count = Math.addExact(count, otherCount);
         simpleSum += otherSimpleSum;
+
+        compensatedAdd(otherSum);
+        // Subtract the compensation bits: the running invariant is
+        // (true sum) ~= sum - correction, so the other's correction must be
+        // incorporated with a negated sign (see JDK-8214761 for the identical
+        // fix in java.util.DoubleSummaryStatistics).
+        compensatedAdd(-otherCorrection);
+
+        // 0.0 unless the other summation has seen a non-finite value.
+        nonFiniteSum += otherNonFiniteSum;
 
         if (finiteValuesOnly) {
             if (otherCount > 0 && otherFiniteValuesOnly) {
@@ -267,22 +315,15 @@ public final class KahanSummation { // NOSONAR
                     final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
                             : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
                     overflowSafeSum = overflowSafeSum.add(otherAggregate);
-                } else if (otherOverflowSafeSum != null || !Double.isFinite(simpleSum)) {
+                } else if (otherOverflowSafeSum != null || exactTotalNeeded(otherSum)) {
                     final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
                             : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
-                    activateOverflowSafeSum(previousCount, previousSimpleSum, otherAggregate);
+                    activateOverflowSafeSum(previousCount, previousSum, previousCorrection, previousSimpleSum, otherAggregate);
                 }
             } else if (otherCount > 0 || otherSimpleSum != 0d) {
                 invalidateOverflowSafeSum();
             }
         }
-
-        kahanSum(otherSum);
-        // Subtract the compensation bits: the running invariant is
-        // (true sum) ~= sum - correction, so the other's correction must be
-        // incorporated with a negated sign (see JDK-8214761 for the identical
-        // fix in java.util.DoubleSummaryStatistics).
-        kahanSum(-otherCorrection);
     }
 
     /**
@@ -304,19 +345,30 @@ public final class KahanSummation { // NOSONAR
 
     /**
      * Returns the compensated sum of all added values.
-     * <p>
-     * If the result is NaN and the simple sum is infinite, returns the simple sum instead.
-     * This handles edge cases where the compensation might produce NaN.
      *
-     * <p>Unlike {@link #average()}, this method has no overflow-safe fallback: once the running sum of
-     * finite values overflows, the result stays infinite even if later values cancel the excess, so it can
-     * depend on the order in which the values were added. For example,
+     * <p>If the running total of finite values overflows, the higher-precision overflow-safe total is
+     * rounded once instead, so the result is infinite only when the total is outside the {@code double}
+     * range, and later cancellation is not lost:
      * {@code KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE).sum()} returns
-     * {@code Infinity}, whereas the same values added in the order {@code (MAX, -MAX, MAX)} give
-     * {@code Double.MAX_VALUE}. If only the compensated total overflows while the plain running sum stays
-     * finite, the result is {@code NaN} even though every value is finite:
-     * {@code KahanSummation.of(Double.MAX_VALUE, 0x1p969, 0x1p969).sum()} returns {@code NaN}, as
-     * {@link java.util.DoubleSummaryStatistics#getSum()} does for the same values.</p>
+     * {@code Double.MAX_VALUE}, the same as the order {@code (MAX, -MAX, MAX)}, and
+     * {@code KahanSummation.of(Double.MAX_VALUE, 0x1p969, 0x1p969).sum()} returns {@code Infinity}, the
+     * correctly rounded value of {@code MAX_VALUE + 2^970}. ({@link java.util.DoubleSummaryStatistics#getSum()}
+     * returns {@code Infinity} and {@code NaN} for these two inputs.) The overflow-safe total keeps deciding the
+     * result after later values bring the running total back into range, so
+     * {@code KahanSummation.of(Double.MAX_VALUE, 0x1p969, 0x1p969, 1, -Double.MAX_VALUE, -0x1p969, -0x1p969).sum()}
+     * returns {@code 1.0}. If any added value is infinite or
+     * {@code NaN}, the non-finite values alone decide the result:
+     * {@code KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY).sum()} returns
+     * {@code -Infinity} rather than the {@code NaN} that sequential addition produces.</p>
+     *
+     * <p>The exact total starts once any value, or the running total, reaches {@code 2^960} in magnitude,
+     * well before the overflow threshold, so the total of every input that comes near overflowing is
+     * correctly rounded, including small values next to huge ones that later cancel:
+     * {@code (1e-300, MAX_VALUE, -3.9e-7, -2^969, 3.0, 2^1023, 2^969, -MAX_VALUE, -2^1023)} returns
+     * {@code 3.0 - 3.9e-7}. Values added before that point count as far as the compensated summation
+     * retained them, which matters only for extreme cancellation among values below {@code 2^960}. A sum built
+     * through {@link #combine(long, double)} from a non-finite {@code sumA} treats that value as an
+     * infinite input, because the finite values behind it are unknown.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -330,30 +382,25 @@ public final class KahanSummation { // NOSONAR
      * @return the sum with Kahan error compensation applied
      */
     public double sum() {
-        // The running invariant is (true sum) ~= sum - correction, because
-        // kahanSum stores correction = (t - sum) - y, i.e. the negated lost
-        // low-order bits (see JDK-8214761 for the identical fix in
-        // java.util.DoubleSummaryStatistics.getSum()).
-        final double tmp = sum - correction;
-
-        if (Double.isNaN(tmp) && Double.isInfinite(simpleSum)) {
-            return simpleSum;
-        } else {
-            return tmp;
+        if (!Double.isFinite(nonFiniteSum)) {
+            // Finite values cannot change an infinite or NaN total: (MAX, MAX, -Infinity) -> -Infinity, not NaN.
+            return nonFiniteSum;
         }
-    }
 
-    /** The finite-overflow-aware result used by N's sum family; the public sum retains its IEEE behavior. */
-    double sumWithFiniteOverflow() {
-        final double result = sum();
+        if (overflowSafeSum != null) {
+            // Once started (a value or the running total reached EXACT_TOTAL_THRESHOLD), this is the authoritative total,
+            // whatever the binary64 state shows: the double correction may have dropped terms that later cancellation
+            // exposes, so (MAX, 2^969, 2^969, 1, -MAX, -2^969, -2^969) is 1, not 0, and a total near the overflow
+            // threshold is rounded once: MAX_VALUE followed by two 2^969 values is MAX_VALUE + 2^970, so Infinity.
+            return overflowSafeSum.doubleValue();
+        }
+
+        final double result = compensatedTotal();
 
         if (Double.isFinite(result) || !finiteValuesOnly) {
             return result;
-        } else if (overflowSafeSum != null) {
-            return overflowSafeSum.doubleValue();
         } else {
-            // Compensation can overflow even when ordinary additions stay finite, for example
-            // MAX_VALUE followed by two 2^969 values. No exact overflow state exists in that case.
+            // Defensive only: any non-finite total of finite values activates overflowSafeSum.
             return Double.isFinite(simpleSum) ? simpleSum : result;
         }
     }
@@ -369,8 +416,13 @@ public final class KahanSummation { // NOSONAR
      * }</pre>
      *
      * <p>If all recorded values are finite but their intermediate sum overflows, this method uses its
-     * higher-precision overflow-safe total instead of returning a spurious infinity. If any recorded value
-     * is non-finite, standard IEEE 754 propagation applies.</p>
+     * higher-precision overflow-safe total instead of returning a spurious infinity, and keeps using it after
+     * later values bring the running total back into range; {@link #sum()} describes when that total starts.
+     * If any recorded value
+     * is non-finite, the result is decided by the non-finite values alone, because finite values cannot change
+     * an infinite or {@code NaN} total: {@code KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE,
+     * Double.NEGATIVE_INFINITY).average()} is {@code -Infinity} rather than the {@code NaN} that sequential
+     * addition produces, while {@code (Infinity, -Infinity)} still gives {@code NaN}.</p>
      *
      * @return an {@link OptionalDouble} containing the average, or an empty {@link OptionalDouble} if no values have been added
      * @see #sum()
@@ -381,14 +433,20 @@ public final class KahanSummation { // NOSONAR
             return OptionalDouble.empty();
         }
 
-        final double result = sum();
+        if (!Double.isFinite(nonFiniteSum)) {
+            return OptionalDouble.of(nonFiniteSum / count);
+        }
+
+        if (overflowSafeSum != null) {
+            // Authoritative once started, whatever the binary64 state shows (see sum()).
+            return OptionalDouble.of(overflowSafeAverage());
+        }
+
+        final double result = compensatedTotal();
 
         if (!Double.isFinite(result)) {
-            if (overflowSafeSum != null) {
-                return OptionalDouble.of(overflowSafeAverage());
-            } else if (finiteValuesOnly && Double.isFinite(simpleSum)) {
-                // A compensated result can cross the finite boundary while the
-                // simple sum remains finite. It is still a safe fallback mean.
+            if (finiteValuesOnly && Double.isFinite(simpleSum)) {
+                // Defensive only: any non-finite total of finite values activates overflowSafeSum.
                 return OptionalDouble.of(simpleSum / count);
             }
         }
@@ -414,27 +472,62 @@ public final class KahanSummation { // NOSONAR
         return String.format(Locale.ROOT, "{count=%d, sum=%f, average=%f}", count(), sum(), average().orElseZero());
     }
 
-    // https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+    // https://en.wikipedia.org/wiki/Kahan_summation_algorithm#Further_enhancements
 
     /**
-     * Core Kahan summation algorithm implementation.
+     * Core compensated summation step (Neumaier's variant of Kahan summation).
      *
-     * <p>This method updates the running {@code sum} and {@code correction} fields
-     * using the classic compensated summation technique to reduce floating-point error.</p>
+     * <p>This method updates the running {@code sum} and {@code correction} fields. The rounding error of
+     * {@code sum + value} is recovered exactly whichever operand is larger in magnitude, so a small value
+     * added before a large one is not lost, as it is in classic Kahan summation:
+     * {@code (2^969, MAX_VALUE, 2^969)} keeps both {@code 2^969} terms. The invariant is
+     * {@code (true sum) ~= sum - correction}, so the error is subtracted from {@code correction}.
+     * {@link N} repeats this loop for arrays and must stay in step with it.</p>
      *
-     * @param value the value to add using Kahan summation
+     * @param value the value to add
      */
-    private void kahanSum(final double value) {
-        final double y = value - correction;
-        final double t = sum + y;
+    private void compensatedAdd(final double value) {
+        final double t = sum + value;
 
-        correction = (t - sum) - y;
+        if (Math.abs(sum) >= Math.abs(value)) {
+            correction -= (sum - t) + value;
+        } else {
+            correction -= (value - t) + sum;
+        }
+
         sum = t;
     }
 
-    /** Activates the higher-precision fallback only after a finite aggregate crosses the representable range. */
-    private void activateOverflowSafeSum(final long previousCount, final double previousSimpleSum, final BigDecimal addedSum) {
-        overflowSafeSum = previousCount == 0 ? addedSum : exactCompensatedSum(sum, correction, previousSimpleSum).add(addedSum);
+    /**
+     * The compensated total {@code sum - correction} in binary64, without the overflow-safe or non-finite handling.
+     * If that is {@code NaN} while the simple sum is infinite, the simple sum is returned instead.
+     */
+    private double compensatedTotal() {
+        final double tmp = sum - correction;
+
+        return Double.isNaN(tmp) && Double.isInfinite(simpleSum) ? simpleSum : tmp;
+    }
+
+    /**
+     * Whether the exact total should start with the finite {@code added} value or aggregate, which has already been
+     * applied to the running state: it or the running total has reached {@link #EXACT_TOTAL_THRESHOLD}.
+     *
+     * <p>No overflow check is needed: this runs after every finite step, and while every value and running total
+     * stays below 2^960, each step's rounding error is at most about 2^908, so {@code simpleSum} and
+     * {@code sum - correction} stay far below the overflow threshold. This runs on every {@code add}, so it is kept
+     * to two comparisons.</p>
+     */
+    private boolean exactTotalNeeded(final double added) {
+        return Math.abs(added) >= EXACT_TOTAL_THRESHOLD || Math.abs(sum) >= EXACT_TOTAL_THRESHOLD;
+    }
+
+    /**
+     * Starts the exact total when a finite value or aggregate, or the running total, reaches {@link #EXACT_TOTAL_THRESHOLD}.
+     * The previous* arguments are this summation's state before that addition.
+     */
+    private void activateOverflowSafeSum(final long previousCount, final double previousSum, final double previousCorrection, final double previousSimpleSum,
+            final BigDecimal addedSum) {
+        overflowSafeSum = previousCount == 0 ? addedSum : exactCompensatedSum(previousSum, previousCorrection, previousSimpleSum).add(addedSum);
     }
 
     private void invalidateOverflowSafeSum() {

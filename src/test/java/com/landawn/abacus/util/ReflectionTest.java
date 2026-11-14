@@ -702,7 +702,18 @@ public class ReflectionTest extends TestBase {
      */
     @Test
     public void reviewFixes20260911_anUnloadableReflectAsmClassDisablesTheFastPathInsteadOfKillingReflection() throws Exception {
-        final java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("abacus-reflectasm-probe");
+        assertUnavailableReflectAsmProbe(System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
+    }
+
+    @Test
+    public void testReflectAsmProbeWithoutTestOutputOnChildClasspath() throws Exception {
+        // Reproduce a runner whose child classpath omits the test classes: only the staged probe and main classes
+        // are available, with neither this JUnit test nor its TestBase on the child classpath.
+        assertUnavailableReflectAsmProbe(codeSourceOf(Reflection.class));
+    }
+
+    private static void assertUnavailableReflectAsmProbe(final String runtimeClasspath) throws Exception {
+        final java.nio.file.Path dir = java.nio.file.Files.createTempDirectory("abacus reflectasm probe ");
 
         try {
             final java.nio.file.Path pkg = dir.resolve("com/esotericsoftware/reflectasm");
@@ -711,16 +722,33 @@ public class ReflectionTest extends TestBase {
             // Deliberately not a class file: loading it raises ClassFormatError, a LinkageError.
             java.nio.file.Files.write(pkg.resolve("ConstructorAccess.class"), "not a class file".getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
-            final String classpath = dir + java.io.File.pathSeparator + codeSourceOf(Reflection.class) + java.io.File.pathSeparator
-                    + codeSourceOf(ReflectionTest.class) + java.io.File.pathSeparator + System.getProperty("java.class.path");
+            // IDE and suite runners can load tests outside java.class.path. Stage the standalone probe from the
+            // actual class-loader resources instead of assuming the enclosing test's code source contains it.
+            copyProbeClass(dir, ReflectAsmProbe.class);
+            copyProbeClass(dir, ReflectAsmProbe.Target.class);
+            final String classpath = dir + java.io.File.pathSeparator + codeSourceOf(Reflection.class) + java.io.File.pathSeparator + runtimeClasspath;
+            final java.nio.file.Path argsFile = dir.resolve("probe.args");
+            java.nio.file.Files.writeString(argsFile,
+                    "-cp\n\"" + classpath.replace("\\", "\\\\").replace("\"", "\\\"") + "\"\n" + ReflectAsmProbe.class.getName() + "\n",
+                    java.nio.charset.StandardCharsets.UTF_8);
+            final java.nio.file.Path outputFile = dir.resolve("probe.log");
+            final Process process = new ProcessBuilder(java.nio.file.Paths.get(System.getProperty("java.home"), "bin", "java").toString(), "@" + argsFile)
+                    .redirectErrorStream(true)
+                    .redirectOutput(outputFile.toFile())
+                    .start();
 
-            final Process process = new ProcessBuilder(java.nio.file.Paths.get(System.getProperty("java.home"), "bin", "java").toString(), "-cp", classpath,
-                    ReflectAsmProbe.class.getName()).redirectErrorStream(true).start();
-
-            final String output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-            assertTrue(process.waitFor(2, java.util.concurrent.TimeUnit.MINUTES), "the probe JVM must finish");
-
-            assertTrue(output.contains(ReflectAsmProbe.EXPECTED), "the probe JVM must report " + ReflectAsmProbe.EXPECTED + " but said:\n" + output);
+            try {
+                // Redirect output before waiting: readAllBytes on a pipe would block before the timeout was checked.
+                assertTrue(process.waitFor(2, java.util.concurrent.TimeUnit.MINUTES), "the probe JVM must finish");
+                final String output = java.nio.file.Files.readString(outputFile, java.nio.charset.StandardCharsets.UTF_8);
+                assertEquals(0, process.exitValue(), "the probe JVM failed:\n" + output);
+                assertTrue(output.contains(ReflectAsmProbe.EXPECTED), "the probe JVM must report " + ReflectAsmProbe.EXPECTED + " but said:\n" + output);
+            } finally {
+                if (process.isAlive()) {
+                    process.destroyForcibly();
+                    process.waitFor(10, java.util.concurrent.TimeUnit.SECONDS);
+                }
+            }
         } finally {
             try (java.util.stream.Stream<java.nio.file.Path> walk = java.nio.file.Files.walk(dir)) {
                 walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> p.toFile().delete());
@@ -732,21 +760,13 @@ public class ReflectionTest extends TestBase {
         return new java.io.File(cls.getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
     }
 
-    /**
-     * Child-JVM entry point for
-     * {@link #reviewFixes20260911_anUnloadableReflectAsmClassDisablesTheFastPathInsteadOfKillingReflection()}.
-     * Deliberately a nested class with no JUnit involvement, so the child loads nothing but {@code Reflection}
-     * and its own fixture.
-     */
-    public static final class ReflectAsmProbe {
-        static final String EXPECTED = "PROBE available=false get=default newInstance=ok";
-
-        public static void main(final String[] args) {
-            final String got = Reflection.on(new TestClass()).get("publicField");
-            final Object created = Reflection.on(TestClass.class).newInstance().instance();
-
-            System.out.println(
-                    "PROBE available=" + Reflection.isReflectASMAvailable + " get=" + got + " newInstance=" + (created instanceof TestClass ? "ok" : "FAILED"));
+    private static void copyProbeClass(final java.nio.file.Path dir, final Class<?> cls) throws java.io.IOException {
+        final String resource = cls.getName().replace('.', '/') + ".class";
+        final java.nio.file.Path target = dir.resolve(resource);
+        java.nio.file.Files.createDirectories(target.getParent());
+        try (java.io.InputStream bytes = cls.getResourceAsStream("/" + resource)) {
+            assertNotNull(bytes, "missing probe class resource: " + resource);
+            java.nio.file.Files.copy(bytes, target);
         }
     }
 

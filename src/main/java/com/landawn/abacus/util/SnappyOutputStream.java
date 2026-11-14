@@ -43,6 +43,7 @@ public final class SnappyOutputStream extends OutputStream {
 
     private final org.xerial.snappy.SnappyOutputStream out;
     private final OutputStream underlying;
+    private boolean closed;
 
     /**
      * Creates a new SnappyOutputStream that compresses data written to the specified output stream.
@@ -62,7 +63,7 @@ public final class SnappyOutputStream extends OutputStream {
     public SnappyOutputStream(final OutputStream os) throws IllegalArgumentException {
         N.checkArgNotNull(os, cs.os);
         underlying = os;
-        out = new org.xerial.snappy.SnappyOutputStream(os);
+        out = new org.xerial.snappy.SnappyOutputStream(leaveOpen(os));
     }
 
     /**
@@ -93,7 +94,29 @@ public final class SnappyOutputStream extends OutputStream {
         }
 
         underlying = os;
-        out = new org.xerial.snappy.SnappyOutputStream(os, bufferSize);
+        out = new org.xerial.snappy.SnappyOutputStream(leaveOpen(os), bufferSize);
+    }
+
+    private static OutputStream leaveOpen(final OutputStream os) {
+        // Xerial closes its target in a finally block, which can replace a failed final write with a close failure.
+        // Let it finish and release its buffers, but own the target's close here so the first failure is preserved.
+        return new java.io.FilterOutputStream(os) {
+            @Override
+            public void write(final byte[] b, final int off, final int len) throws IOException {
+                out.write(b, off, len); // Keep bulk writes; FilterOutputStream's default writes one byte at a time.
+            }
+
+            @Override
+            public void close() {
+                // The enclosing SnappyOutputStream closes the target exactly once.
+            }
+        };
+    }
+
+    private void assertNotClosed() throws IOException {
+        if (closed) {
+            throw new IOException("Stream is closed");
+        }
     }
 
     /**
@@ -113,6 +136,7 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void write(final int b) throws IOException {
+        assertNotClosed();
         out.write(b);
     }
 
@@ -133,6 +157,7 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void write(final byte[] b) throws NullPointerException, IOException {
+        assertNotClosed();
         out.write(b);
     }
 
@@ -167,6 +192,7 @@ public final class SnappyOutputStream extends OutputStream {
             throw new IndexOutOfBoundsException("off=" + off + ", len=" + length + ", b.length=" + b.length);
         }
 
+        assertNotClosed();
         out.write(b, off, length);
     }
 
@@ -188,6 +214,7 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void flush() throws IOException {
+        assertNotClosed();
         out.flush();
     }
 
@@ -199,7 +226,8 @@ public final class SnappyOutputStream extends OutputStream {
      * <p>Once closed, this stream cannot be used for further write operations.
      * Calling write methods after close() results in an IOException.
      *
-     * <p>This method is idempotent: multiple calls to {@code close()} have no additional effect.
+     * <p>This method is idempotent: multiple calls to {@code close()} have no additional effect, even if the first
+     * close fails. The underlying stream is closed once, and further writes and flushes are rejected.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -219,6 +247,12 @@ public final class SnappyOutputStream extends OutputStream {
      */
     @Override
     public void close() throws IOException {
+        if (closed) {
+            return;
+        }
+
+        closed = true;
+
         try {
             out.close();
         } catch (final IOException e) {
@@ -228,6 +262,8 @@ public final class SnappyOutputStream extends OutputStream {
             closeUnderlyingAfterFailure(e);
             throw e;
         }
+
+        underlying.close();
     }
 
     private void closeUnderlyingAfterFailure(final Throwable primary) {
